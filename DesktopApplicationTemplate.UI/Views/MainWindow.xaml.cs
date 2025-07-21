@@ -12,6 +12,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
+using DesktopApplicationTemplate.UI.ViewModels;
+
 namespace DesktopApplicationTemplate.UI.Views
 {
     /// <summary>
@@ -19,9 +21,23 @@ namespace DesktopApplicationTemplate.UI.Views
     /// </summary>
     public partial class MainView : Window
     {
-        public MainView()
+        private readonly MainViewModel _viewModel;
+
+        public MainView(MainViewModel viewModel)
         {
             InitializeComponent();
+            _viewModel = viewModel;
+            DataContext = _viewModel;
+        }
+
+        private void AddService_Click(object sender, RoutedEventArgs e)
+        {
+            _viewModel.AddServiceCommand.Execute(null);
+        }
+
+        private void RemoveService_Click(object sender, RoutedEventArgs e)
+        {
+            _viewModel.RemoveServiceCommand.Execute(null);
         }
     }
 }
