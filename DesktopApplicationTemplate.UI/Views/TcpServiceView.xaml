@@ -1,8 +1,10 @@
-﻿<Window x:Class="DesktopApplicationTemplate.Views.TcpServiceView"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Chappie Desktop Application" Height="650" Width="960"
-        WindowStartupLocation="CenterScreen">
+﻿<Page x:Class="DesktopApplicationTemplate.UI.Views.TcpServiceView"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d"
+      Title="Chappie Desktop Application">
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -57,4 +59,4 @@
             </StackPanel>
         </Grid>
     </Grid>
-</Window>
+</Page>
