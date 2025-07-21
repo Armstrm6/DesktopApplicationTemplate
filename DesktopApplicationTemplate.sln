@@ -11,9 +11,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DesktopApplication.Installe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DesktopApplicationTemplate.Tests", "DesktopApplicationTemplate.Tests\DesktopApplicationTemplate.Tests.csproj", "{382DA104-8B6A-490C-96E8-5C12A7A58E85}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DesktopApplicationTemplate.Tests", "DesktopApplicationTemplate.Tests\DesktopApplicationTemplate.Tests.csproj", "{382DA104-8B6A-490C-96E8-5C12A7A58E85}"
-EndProject
-Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
