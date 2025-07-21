@@ -23,5 +23,23 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             InitializeComponent();
         }
+
+        private void AddService_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is ViewModels.MainViewModel vm &&
+                vm.AddServiceCommand.CanExecute(null))
+            {
+                vm.AddServiceCommand.Execute(null);
+            }
+        }
+
+        private void RemoveService_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is ViewModels.MainViewModel vm &&
+                vm.RemoveServiceCommand.CanExecute(null))
+            {
+                vm.RemoveServiceCommand.Execute(null);
+            }
+        }
     }
 }
