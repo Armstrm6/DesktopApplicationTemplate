@@ -30,9 +30,9 @@ namespace DesktopApplicationTemplate
 
         private void ConfigureServices(IConfiguration configuration, IServiceCollection services)
         {
-            services.AddSingleton<Views.MainWindow>();
+            services.AddSingleton<Views.MainView>();
             services.AddSingleton<Services.IStartupService, Services.StartupService>();
-            services.AddSingleton<ViewModels.MainWindowViewModel>();
+            services.AddSingleton<ViewModels.MainViewModel>();
             services.AddSingleton<ViewModels.TcpServiceViewModel>();
             services.AddSingleton<Helpers.DependencyChecker>();
 
@@ -47,7 +47,7 @@ namespace DesktopApplicationTemplate
             var startupService = AppHost.Services.GetRequiredService<Services.IStartupService>();
             await startupService.RunStartupChecksAsync();
 
-            var mainWindow = AppHost.Services.GetRequiredService<Views.MainWindow>();
+            var mainWindow = AppHost.Services.GetRequiredService<Views.MainView>();
             mainWindow.Show();
 
             base.OnStartup(e);
