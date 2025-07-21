@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.IO;
 using System.Windows;
+using DesktopApplicationTemplate.UI.ViewModels;
 
 namespace DesktopApplicationTemplate
 {
@@ -32,8 +33,8 @@ namespace DesktopApplicationTemplate
         {
             services.AddSingleton<Views.MainView>();
             services.AddSingleton<Services.IStartupService, Services.StartupService>();
-            services.AddSingleton<ViewModels.MainViewModel>();
-            services.AddSingleton<ViewModels.TcpServiceViewModel>();
+            services.AddSingleton<MainViewModel>();
+            services.AddSingleton<TcpServiceViewModel>();
             services.AddSingleton<Helpers.DependencyChecker>();
 
             // Load strongly typed settings

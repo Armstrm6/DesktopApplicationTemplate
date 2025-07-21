@@ -1,9 +1,9 @@
 ﻿using System.Windows;
-using DesktopApplicationTemplate.ViewModels;
+using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.Services;
 using System.Windows.Controls;
 
-namespace DesktopApplicationTemplate.Views
+namespace DesktopApplicationTemplate.UI.Views
 {
     public partial class TcpServiceView : Page
     {
