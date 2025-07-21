@@ -12,7 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace DektopApplication.Installer.Views
+namespace DesktopApplication.Installer.Views
 {
     /// <summary>
     /// Interaction logic for ProgressWindow.xaml
