@@ -32,16 +32,6 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private void AddService_Click(object sender, RoutedEventArgs e)
         {
-            _viewModel.AddServiceCommand.Execute(null);
-        }
-
-        private void RemoveService_Click(object sender, RoutedEventArgs e)
-        {
-            _viewModel.RemoveServiceCommand.Execute(null);
-        }
-
-        private void AddService_Click(object sender, RoutedEventArgs e)
-        {
             if (DataContext is ViewModels.MainViewModel vm &&
                 vm.AddServiceCommand.CanExecute(null))
             {

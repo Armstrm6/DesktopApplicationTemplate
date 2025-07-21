@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using System.IO;
 using System.Windows;
 using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI.Views;
 
 namespace DesktopApplicationTemplate
 {
@@ -31,7 +32,7 @@ namespace DesktopApplicationTemplate
 
         private void ConfigureServices(IConfiguration configuration, IServiceCollection services)
         {
-            services.AddSingleton<Views.MainView>();
+            services.AddSingleton<MainView>();
             services.AddSingleton<Services.IStartupService, Services.StartupService>();
             services.AddSingleton<MainViewModel>();
             services.AddSingleton<TcpServiceViewModel>();
@@ -48,7 +49,7 @@ namespace DesktopApplicationTemplate
             var startupService = AppHost.Services.GetRequiredService<Services.IStartupService>();
             await startupService.RunStartupChecksAsync();
 
-            var mainWindow = AppHost.Services.GetRequiredService<Views.MainView>();
+            var mainWindow = AppHost.Services.GetRequiredService<MainView>();
             mainWindow.Show();
 
             base.OnStartup(e);
