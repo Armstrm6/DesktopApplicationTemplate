@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DektopApplication.Installer.ViewModels
+namespace DesktopApplication.Installer.ViewModels
 {
     internal class ProgressWindowViewModel
     {

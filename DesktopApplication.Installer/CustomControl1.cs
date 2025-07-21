@@ -9,7 +9,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace DektopApplication.Installer
+namespace DesktopApplication.Installer
 {
     /// <summary>
     /// Follow steps 1a or 1b and then 2 to use this custom control in a XAML file.
@@ -18,14 +18,14 @@ namespace DektopApplication.Installer
     /// Add this XmlNamespace attribute to the root element of the markup file where it is 
     /// to be used:
     ///
-    ///     xmlns:MyNamespace="clr-namespace:DektopApplication.Installer"
+    ///     xmlns:MyNamespace="clr-namespace:DesktopApplication.Installer"
     ///
     ///
     /// Step 1b) Using this custom control in a XAML file that exists in a different project.
     /// Add this XmlNamespace attribute to the root element of the markup file where it is 
     /// to be used:
     ///
-    ///     xmlns:MyNamespace="clr-namespace:DektopApplication.Installer;assembly=DektopApplication.Installer"
+    ///     xmlns:MyNamespace="clr-namespace:DesktopApplication.Installer;assembly=DesktopApplication.Installer"
     ///
     /// You will also need to add a project reference from the project where the XAML file lives
     /// to this project and Rebuild to avoid compilation errors:
