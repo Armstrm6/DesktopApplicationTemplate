@@ -22,7 +22,7 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private void AddService_Click(object sender, RoutedEventArgs e)
         {
-            var window = new CreateServiceWindow();
+            var window = App.AppHost.Services.GetRequiredService<CreateServiceWindow>();
             if (window.ShowDialog() == true)
             {
                 var newService = new ServiceViewModel
