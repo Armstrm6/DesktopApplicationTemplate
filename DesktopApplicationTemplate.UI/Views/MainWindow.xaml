@@ -28,13 +28,21 @@
             </StackPanel>
 
             <TextBlock Text="Services" FontWeight="Bold" Margin="0,10"/>
-            <ListBox ItemsSource="{Binding Services}" SelectedItem="{Binding SelectedService}">
+            <ListBox ItemsSource="{Binding Services}"
+         SelectedItem="{Binding SelectedService}"
+         BorderThickness="0">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <DockPanel Margin="5">
-                            <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" />
-                            <ToggleButton IsChecked="{Binding IsActive, Mode=TwoWay}" 
-                              Width="40" Height="20" 
+                        <DockPanel Margin="5" VerticalAlignment="Center">
+
+                            <!-- Service name -->
+                            <TextBlock Text="{Binding DisplayName}" 
+                           VerticalAlignment="Center" 
+                           FontWeight="Bold" />
+
+                            <!-- Toggle switch aligned to the right -->
+                            <ToggleButton IsChecked="{Binding IsActive, Mode=TwoWay}"
+                              Style="{StaticResource ToggleSwitchStyle}"
                               Margin="10,0,0,0"
                               HorizontalAlignment="Right"
                               VerticalAlignment="Center"/>
@@ -48,12 +56,12 @@
         <StackPanel Grid.Column="1" Margin="10">
             <TextBlock Text="{Binding SelectedService.DisplayName}" FontWeight="Bold" FontSize="14"/>
             <TextBlock Text="Associated Steps:" FontStyle="Italic" Margin="0,10"/>
-            <ListBox ItemsSource="{Binding SelectedService.Logs}" />
             <TextBlock Text="Services Created:" />
             <TextBlock Text="{Binding ServicesCreated}" />
 
             <TextBlock Text="Current Active Services:" />
             <TextBlock Text="{Binding CurrentActiveServices}" />
+            <ListBox ItemsSource="{Binding SelectedService.Logs}" />
             <TextBox Text="{Binding SelectedService.Logs, Converter={StaticResource LogListToStringConverter}}" 
          IsReadOnly="True"
          AcceptsReturn="True"

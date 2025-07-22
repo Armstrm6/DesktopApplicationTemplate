@@ -20,7 +20,19 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public bool IsActive
         {
             get => _isActive;
-            set { _isActive = value; OnPropertyChanged(); }
+            set
+            {
+                if (_isActive != value)
+                {
+                    _isActive = value;
+                    OnPropertyChanged();
+
+                    if (_isActive)
+                        Logs.Add("[Service Activated]");
+                    else
+                        Logs.Add("[Service Deactivated]");
+                }
+            }
         }
 
         public ObservableCollection<string> Logs { get; set; } = new();
