@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows.Input;
+using System.Threading.Tasks;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -48,6 +49,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         private async Task SendRequestAsync()
         {
+            if (string.IsNullOrWhiteSpace(Url))
+            {
+                ResponseBody = "URL is required";
+                return;
+            }
+
             using HttpClient client = new();
             try
             {
@@ -68,6 +75,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             catch (HttpRequestException ex)
             {
                 ResponseBody = $"Error: {ex.Message}";
+            }
+            catch (System.Exception ex)
+            {
+                ResponseBody = $"Unexpected error: {ex.Message}";
             }
         }
 

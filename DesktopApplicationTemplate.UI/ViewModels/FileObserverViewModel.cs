@@ -15,14 +15,61 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             set { _selectedObserver = value; OnPropertyChanged(); LoadObserverData(); }
         }
 
-        public string FilePath { get; set; }
-        public string Contents { get; set; }
-        public string ImageNames { get; set; }
-        public bool SendAllImages { get; set; }
-        public bool SendFirstXEnabled { get; set; }
-        public string SendXCount { get; set; } = "10";
-        public bool SendTcpCommandEnabled { get; set; }
-        public string TcpCommand { get; set; }
+        private string _filePath = string.Empty;
+        public string FilePath
+        {
+            get => _filePath;
+            set { _filePath = value; OnPropertyChanged(); }
+        }
+
+        private string _contents = string.Empty;
+        public string Contents
+        {
+            get => _contents;
+            set { _contents = value; OnPropertyChanged(); }
+        }
+
+        private string _imageNames = string.Empty;
+        public string ImageNames
+        {
+            get => _imageNames;
+            set { _imageNames = value; OnPropertyChanged(); }
+        }
+
+        private bool _sendAllImages;
+        public bool SendAllImages
+        {
+            get => _sendAllImages;
+            set { _sendAllImages = value; OnPropertyChanged(); }
+        }
+
+        private bool _sendFirstXEnabled;
+        public bool SendFirstXEnabled
+        {
+            get => _sendFirstXEnabled;
+            set { _sendFirstXEnabled = value; OnPropertyChanged(); }
+        }
+
+        private string _sendXCount = "10";
+        public string SendXCount
+        {
+            get => _sendXCount;
+            set { _sendXCount = value; OnPropertyChanged(); }
+        }
+
+        private bool _sendTcpCommandEnabled;
+        public bool SendTcpCommandEnabled
+        {
+            get => _sendTcpCommandEnabled;
+            set { _sendTcpCommandEnabled = value; OnPropertyChanged(); }
+        }
+
+        private string _tcpCommand = string.Empty;
+        public string TcpCommand
+        {
+            get => _tcpCommand;
+            set { _tcpCommand = value; OnPropertyChanged(); }
+        }
 
         public ICommand AddObserverCommand { get; }
         public ICommand RemoveObserverCommand { get; }
@@ -55,13 +102,18 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         private void AddObserver()
         {
-            Observers.Add(new FileObserver { Name = $"Observer{Observers.Count + 1}" });
+            var observer = new FileObserver { Name = $"Observer{Observers.Count + 1}" };
+            Observers.Add(observer);
+            SelectedObserver = observer;
         }
 
         private void RemoveObserver()
         {
             if (SelectedObserver != null)
+            {
                 Observers.Remove(SelectedObserver);
+                SelectedObserver = null;
+            }
         }
 
         private void BrowseFilePath()
@@ -70,7 +122,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             if (dialog.ShowDialog() == true)
             {
                 FilePath = dialog.FileName;
-                OnPropertyChanged(nameof(FilePath));
             }
         }
 
