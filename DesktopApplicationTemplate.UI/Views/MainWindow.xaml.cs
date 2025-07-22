@@ -1,6 +1,8 @@
 ﻿using DesktopApplicationTemplate.UI.ViewModels;
 using System.Windows;
 using DesktopApplicationTemplate.UI.Views;
+using DesktopApplicationTemplate;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
@@ -29,7 +31,29 @@ namespace DesktopApplicationTemplate.UI.Views
                     IsActive = false
                 };
 
-                Services.Add(newService);
+                _viewModel.Services.Add(newService);
+                _viewModel.SelectedService = newService;
+
+                System.Windows.Controls.Page? page = window.CreatedServiceType switch
+                {
+                    "TCP" => new TcpServiceView(App.AppHost.Services.GetRequiredService<TcpServiceViewModel>(), App.AppHost.Services.GetRequiredService<Services.IStartupService>()),
+                    "HTTP" => App.AppHost.Services.GetRequiredService<HttpServiceView>(),
+                    "File Observer" => App.AppHost.Services.GetRequiredService<FileObserverView>(),
+                    "HID" => new HidViews(),
+                    _ => null
+                };
+
+                if (page != null)
+                {
+                    var navWindow = new Window
+                    {
+                        Title = newService.DisplayName,
+                        Content = page,
+                        Width = 800,
+                        Height = 450
+                    };
+                    navWindow.Show();
+                }
             }
         }
 
