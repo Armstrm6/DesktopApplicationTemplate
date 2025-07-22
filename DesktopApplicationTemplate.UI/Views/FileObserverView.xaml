@@ -6,9 +6,6 @@
       xmlns:vm="clr-namespace:DesktopApplicationTemplate.UI.ViewModels"
       mc:Ignorable="d">
 
-    <Page.DataContext>
-        <vm:FileObserverViewModel />
-    </Page.DataContext>
 
     <Grid Margin="20">
         <Grid.ColumnDefinitions>

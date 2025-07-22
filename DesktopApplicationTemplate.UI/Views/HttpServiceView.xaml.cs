@@ -20,9 +20,13 @@ namespace DesktopApplicationTemplate.UI.Views
     /// </summary>
     public partial class HttpServiceView : Page
     {
-        public HttpServiceView()
+        private readonly ViewModels.HttpServiceViewModel _viewModel;
+
+        public HttpServiceView(ViewModels.HttpServiceViewModel viewModel)
         {
             InitializeComponent();
+            _viewModel = viewModel;
+            DataContext = _viewModel;
         }
     }
 }
