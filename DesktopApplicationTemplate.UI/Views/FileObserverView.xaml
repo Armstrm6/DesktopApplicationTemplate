@@ -6,7 +6,6 @@
       xmlns:vm="clr-namespace:DesktopApplicationTemplate.UI.ViewModels"
       mc:Ignorable="d">
 
-
     <Grid Margin="20">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200"/>

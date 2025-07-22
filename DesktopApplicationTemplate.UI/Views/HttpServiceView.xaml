@@ -1,4 +1,6 @@
-﻿<Page x:Class="DesktopApplicationTemplate.UI.Views.HttpServiceView" xmlns:vm="clr-namespace:DesktopApplicationTemplate.UI.ViewModels"
+﻿<Page x:Class="DesktopApplicationTemplate.UI.Views.HttpServiceView" 
+      xmlns:vm="clr-namespace:DesktopApplicationTemplate.UI.ViewModels"
+      xmlns:Key="clr-namespace:DesktopApplicationTemplate.UI.Views"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:local="clr-namespace:DesktopApplicationTemplate.UI.Views"

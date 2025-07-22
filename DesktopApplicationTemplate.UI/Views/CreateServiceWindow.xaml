@@ -3,17 +3,18 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:vm="clr-namespace:DesktopApplicationTemplate.UI.ViewModels"
+        xmlns:local="DesktopApplicationTemplate.UI.Helpers"
         mc:Ignorable="d"
         Title="Create New Service"
         SizeToContent="WidthAndHeight"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize">
 
-    <Window.DataContext>
-        <vm:CreateServiceViewModel />
-    </Window.DataContext>
-
+    
+    <Window.Resources>
+        <ObjectDataProvider x:Key="Test" ObjectType="{x:Type local:StringNullOrEmptyToVisibilityConverter}" />
+    </Window.Resources>
+    
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -24,7 +25,9 @@
         <TextBlock Text="Create New Service" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
 
         <StackPanel Grid.Row="1" Margin="0,20,0,10">
-            <TextBox Width="250" Height="30" Text="{Binding ServiceName}" Margin="0,0,0,10" PlaceholderText="Service Name"/>
+            <Grid Width="400" Margin="10 0">
+                <TextBlock Text="Enter Name" Visibility="{Binding Text, ElementName=NameTextBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+            </Grid>
 
             <ComboBox Width="250"
                       ItemsSource="{Binding ServiceTypes}"

@@ -1,4 +1,4 @@
-﻿using DesktopApplicationTemplate.Helpers;
+﻿using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.Models;
 using Microsoft.Extensions.Configuration;
 using System;

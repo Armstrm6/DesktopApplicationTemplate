@@ -1,16 +1,20 @@
 ﻿using System.Windows;
 using DesktopApplicationTemplate.UI.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
     public partial class CreateServiceWindow : Window
     {
+        private readonly CreateServiceViewModel _viewModel;
         public string CreatedServiceName { get; private set; }
         public string CreatedServiceType { get; private set; }
 
-        public CreateServiceWindow()
+        public CreateServiceWindow(CreateServiceViewModel viewModel)
         {
             InitializeComponent();
+            _viewModel = viewModel;
+            DataContext = _viewModel;
         }
 
         private void Create_Click(object sender, RoutedEventArgs e)

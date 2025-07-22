@@ -5,6 +5,8 @@ using System.IO;
 using System.Windows;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Views;
+using DesktopApplicationTemplate.UI.Helpers;
+
 
 namespace DesktopApplicationTemplate
 {
@@ -36,7 +38,7 @@ namespace DesktopApplicationTemplate
             services.AddSingleton<Services.IStartupService, Services.StartupService>();
             services.AddSingleton<MainViewModel>();
             services.AddSingleton<TcpServiceViewModel>();
-            services.AddSingleton<Helpers.DependencyChecker>();
+            services.AddSingleton<DependencyChecker>();
             services.AddSingleton<HttpServiceView>();
             services.AddSingleton<HttpServiceViewModel>();
             services.AddSingleton<FileObserverView>();
