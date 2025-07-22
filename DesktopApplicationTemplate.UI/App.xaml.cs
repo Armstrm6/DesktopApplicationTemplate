@@ -41,6 +41,8 @@ namespace DesktopApplicationTemplate
             services.AddSingleton<HttpServiceViewModel>();
             services.AddSingleton<FileObserverView>();
             services.AddSingleton<FileObserverViewModel>();
+            services.AddTransient<CreateServiceWindow>();
+            services.AddTransient<CreateServiceViewModel>();
 
 
             // Load strongly typed settings

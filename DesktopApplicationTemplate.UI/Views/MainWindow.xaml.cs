@@ -1,18 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using DesktopApplicationTemplate.UI.ViewModels;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-
-using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI.Views;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
@@ -32,10 +20,16 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private void AddService_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is ViewModels.MainViewModel vm &&
-                vm.AddServiceCommand.CanExecute(null))
+            var window = new CreateServiceWindow();
+            if (window.ShowDialog() == true)
             {
-                vm.AddServiceCommand.Execute(null);
+                var newService = new ServiceViewModel
+                {
+                    DisplayName = $"{window.CreatedServiceType} - {window.CreatedServiceName}",
+                    IsActive = false
+                };
+
+                Services.Add(newService);
             }
         }
 
