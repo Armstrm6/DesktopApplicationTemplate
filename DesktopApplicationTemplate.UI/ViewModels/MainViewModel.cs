@@ -1,4 +1,6 @@
-﻿using System;
+﻿using DesktopApplicationTemplate.UI.Views;
+using DesktopApplicationTemplate.UI.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -10,26 +12,38 @@ using System.Windows.Input;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
-    public class ServiceViewModel
+    public class ServiceViewModel : INotifyPropertyChanged
     {
         public string DisplayName { get; set; }
+
+        private bool _isActive;
+        public bool IsActive
+        {
+            get => _isActive;
+            set { _isActive = value; OnPropertyChanged(); }
+        }
+
         public ObservableCollection<string> Logs { get; set; } = new();
-        public bool IsActive { get; set; }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void OnPropertyChanged([CallerMemberName] string name = null) =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
+
 
     public class MainViewModel : INotifyPropertyChanged
     {
         public ObservableCollection<ServiceViewModel> Services { get; set; } = new();
-
         private ServiceViewModel _selectedService;
         public ServiceViewModel SelectedService
         {
             get => _selectedService;
             set { _selectedService = value; OnPropertyChanged(); }
         }
-
         public ICommand AddServiceCommand { get; }
         public ICommand RemoveServiceCommand { get; }
+        public int ServicesCreated => Services.Count;
+        public int CurrentActiveServices => Services.Count(s => s.IsActive);
 
         public MainViewModel()
         {
@@ -39,15 +53,29 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         private void AddService()
         {
-            // Show selection dialog: HID / TCP / File / HTTPS
-            var newService = new ServiceViewModel { DisplayName = "TCP/IP - New Service" };
-            Services.Add(newService);
+            var vm = new CreateServiceViewModel();
+            var popup = new CreateServiceWindow(vm); // Replace with DI if needed
+            if (popup.ShowDialog() == true)
+            {
+                var newService = new ServiceViewModel
+                {
+                    DisplayName = $"{popup.CreatedServiceType} - {popup.CreatedServiceName}",
+                    IsActive = false
+                };
+                Services.Add(newService);
+                OnPropertyChanged(nameof(ServicesCreated));
+                OnPropertyChanged(nameof(CurrentActiveServices));
+            }
         }
 
         private void RemoveSelectedService()
         {
             if (SelectedService != null)
+            {
                 Services.Remove(SelectedService);
+                OnPropertyChanged(nameof(ServicesCreated));
+                OnPropertyChanged(nameof(CurrentActiveServices));
+            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
