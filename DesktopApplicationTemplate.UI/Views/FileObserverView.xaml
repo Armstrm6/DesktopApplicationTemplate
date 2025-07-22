@@ -1,0 +1,64 @@
+﻿<Page x:Class="DesktopApplicationTemplate.UI.Views.FileObserverView"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:vm="clr-namespace:DesktopApplicationTemplate.UI.ViewModels"
+      mc:Ignorable="d">
+
+    <Page.DataContext>
+        <vm:FileObserverViewModel />
+    </Page.DataContext>
+
+    <Grid Margin="20">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Observer List Panel -->
+        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+            <TextBlock Text="File Observers" FontWeight="Bold" Margin="0 0 0 10"/>
+            <ListBox ItemsSource="{Binding Observers}"
+                     SelectedItem="{Binding SelectedObserver}"
+                     DisplayMemberPath="Name"
+                     Height="250"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+                <Button Content="+" Width="30" Command="{Binding AddObserverCommand}" />
+                <Button Content="-" Width="30" Command="{Binding RemoveObserverCommand}" Margin="5,0,0,0"/>
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Main Panel -->
+        <StackPanel Grid.Column="1" Margin="10 0 0 0">
+            <TextBlock Text="Chappie FTP File Observer" FontSize="16" FontWeight="Bold" TextAlignment="Center"/>
+
+            <!-- File Path -->
+            <StackPanel Orientation="Horizontal" Margin="0 20 0 0">
+                <TextBox Width="400" Text="{Binding FilePath}" />
+                <Button Content="Browse" Width="75" Margin="5,0,0,0" Command="{Binding BrowseCommand}" />
+            </StackPanel>
+
+            <!-- Contents Preview -->
+            <TextBlock Text="Contents:" Margin="0,10,0,5"/>
+            <TextBox Height="80" Text="{Binding Contents}" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+
+            <!-- Options -->
+            <StackPanel Orientation="Vertical" Margin="0,10,0,0">
+                <CheckBox Content="Send All Images" IsChecked="{Binding SendAllImages}" />
+                <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                    <CheckBox Content="Send first {x} Images" IsChecked="{Binding SendFirstXEnabled}" />
+                    <TextBox Width="50" Margin="10,0,0,0" Text="{Binding SendXCount}" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                    <CheckBox Content="Send Images TCP command" IsChecked="{Binding SendTcpCommandEnabled}" />
+                    <TextBox Width="150" Margin="10,0,0,0" Text="{Binding TcpCommand}" />
+                </StackPanel>
+            </StackPanel>
+
+            <!-- New Image Names -->
+            <TextBlock Text="New Image Names {Indexed}" Margin="0,15,0,5"/>
+            <TextBox Height="80" Text="{Binding ImageNames}" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+        </StackPanel>
+    </Grid>
+</Page>

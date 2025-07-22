@@ -37,6 +37,11 @@ namespace DesktopApplicationTemplate
             services.AddSingleton<MainViewModel>();
             services.AddSingleton<TcpServiceViewModel>();
             services.AddSingleton<Helpers.DependencyChecker>();
+            services.AddSingleton<HttpServiceView>();
+            services.AddSingleton<HttpServiceViewModel>();
+            services.AddSingleton<FileObserverView>();
+            services.AddSingleton<FileObserverViewModel>();
+
 
             // Load strongly typed settings
             services.Configure<Models.AppSettings>(configuration.GetSection("AppSettings"));

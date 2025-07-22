@@ -1,0 +1,39 @@
+﻿<Page x:Class="DesktopApplicationTemplate.Views.HttpServiceView"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:local="clr-namespace:DesktopApplicationTemplate.Views"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal" Margin="0 0 0 10">
+            <ComboBox Width="100" ItemsSource="{Binding Methods}" SelectedItem="{Binding SelectedMethod}" />
+            <Grid Width="400" Margin="10 0">
+                <TextBox Text="{Binding Url, UpdateSourceTrigger=PropertyChanged}" Name="UrlTextBox"/>
+                <TextBlock Text="Enter URL"
+               IsHitTestVisible="False"
+               Foreground="Gray"
+               VerticalAlignment="Center"
+               Margin="5,0,0,0"
+               Visibility="{Binding Text, ElementName=UrlTextBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+            </Grid>
+            <Button Content="Send" Width="100" Command="{Binding SendCommand}" />
+        </StackPanel>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBox Grid.Column="0" Text="{Binding RequestBody}" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" />
+            <TextBox Grid.Column="1" Text="{Binding ResponseBody}" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" IsReadOnly="True"/>
+        </Grid>
+    </Grid>
+</Page>
