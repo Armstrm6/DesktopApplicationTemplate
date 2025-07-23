@@ -9,12 +9,21 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
+    public class LogEntry
+    {
+        public string Message { get; set; } = string.Empty;
+        public Brush Color { get; set; } = Brushes.Black;
+    }
+
     public class ServiceViewModel : INotifyPropertyChanged
     {
         public string DisplayName { get; set; }
+        public Page? Page { get; set; }
 
         private bool _isActive;
         public bool IsActive
@@ -28,14 +37,20 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     OnPropertyChanged();
 
                     if (_isActive)
-                        Logs.Add("[Service Activated]");
+                        AddLog("[Service Activated]", Brushes.Green);
                     else
-                        Logs.Add("[Service Deactivated]");
+                        AddLog("[Service Deactivated]", Brushes.Red);
                 }
             }
         }
 
-        public ObservableCollection<string> Logs { get; set; } = new();
+        public ObservableCollection<LogEntry> Logs { get; set; } = new();
+        public void AddLog(string message, Brush? color = null)
+        {
+            string ts = DateTime.Now.ToString("MM.dd.yyyy - HH:mm:ss:ff");
+            Logs.Insert(0, new LogEntry { Message = $"{ts} {message}", Color = color ?? Brushes.Black });
+        }
+
 
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string name = null) =>

@@ -19,6 +19,7 @@
 
     <ItemGroup>
       <Folder Include="Themes\" />
+  <Resource Include="Resources/*" />
     </ItemGroup>
 
 </Project>
