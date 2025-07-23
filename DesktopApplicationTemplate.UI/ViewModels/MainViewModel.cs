@@ -1,3 +1,4 @@
+using DesktopApplicationTemplate.Models;
 ﻿using DesktopApplicationTemplate.UI.Views;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -11,11 +12,6 @@ using DesktopApplicationTemplate.UI.Services;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
-    public class LogEntry
-    {
-        public string Message { get; set; } = string.Empty;
-        public WpfBrush Color { get; set; } = WpfBrushes.Black;
-    }
 
     public class ServiceViewModel : ViewModelBase
     {

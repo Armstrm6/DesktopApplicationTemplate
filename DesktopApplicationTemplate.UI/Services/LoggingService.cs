@@ -8,6 +8,7 @@ using System.Windows.Documents;
 using WpfBrush = System.Windows.Media.Brush;
 using WpfBrushes = System.Windows.Media.Brushes;
 using System.Windows.Threading;
+using DesktopApplicationTemplate.Models;
 
 namespace DesktopApplicationTemplate.UI.Services
 {
@@ -16,6 +17,10 @@ namespace DesktopApplicationTemplate.UI.Services
         private readonly WpfRichTextBox _outputBox;
         private readonly Dispatcher _dispatcher;
         private readonly string _logFilePath;
+
+        public LogLevel MinimumLevel { get; set; } = LogLevel.Debug;
+
+        public event Action<LogEntry>? LogAdded;
 
         public LoggingService(WpfRichTextBox outputBox, Dispatcher dispatcher, string logFilePath = "app.log")
         {
@@ -26,7 +31,11 @@ namespace DesktopApplicationTemplate.UI.Services
 
         public void Log(string message, LogLevel level)
         {
+            if (level < MinimumLevel)
+                return;
+
             string formatted = $"[{DateTime.Now:HH:mm:ss}] [{level}] {message}";
+
             _dispatcher.Invoke(() =>
             {
                 WpfBrush color = level switch
@@ -41,6 +50,8 @@ namespace DesktopApplicationTemplate.UI.Services
                 var paragraph = new Paragraph(new Run(formatted) { Foreground = color });
                 _outputBox.Document.Blocks.Add(paragraph);
                 _outputBox.ScrollToEnd();
+
+                LogAdded?.Invoke(new LogEntry { Message = formatted, Color = color });
             });
             try
             {

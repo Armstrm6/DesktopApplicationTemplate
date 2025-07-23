@@ -74,7 +74,16 @@
             </StackPanel>
         </Grid>
 
-        <RichTextBox x:Name="LogBox" Grid.Row="3" Height="120" IsReadOnly="True" VerticalScrollBarVisibility="Auto" Margin="0,10,0,0" />
+        <StackPanel Grid.Row="3" Margin="0,10,0,0">
+            <TextBlock Text="Logs" FontWeight="Bold"/>
+            <ComboBox x:Name="LogLevelBox" Width="120" Margin="0,0,0,5" SelectedIndex="0" SelectionChanged="LogLevelBox_SelectionChanged">
+                <ComboBoxItem Content="All"/>
+                <ComboBoxItem Content="Debug"/>
+                <ComboBoxItem Content="Warning"/>
+                <ComboBoxItem Content="Error"/>
+            </ComboBox>
+            <RichTextBox x:Name="LogBox" Height="120" IsReadOnly="True" VerticalScrollBarVisibility="Auto" />
+        </StackPanel>
 
         <StackPanel Grid.Row="4" HorizontalAlignment="Right" Margin="0,10,0,0">
             <Button Content="Save Configuration" Command="{Binding SaveCommand}" Width="150"/>
