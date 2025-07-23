@@ -7,10 +7,16 @@
       mc:Ignorable="d">
 
     <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
+
+        <Image Source="Resources/Desktop-Icon.png" Width="300" Height="60" Grid.ColumnSpan="2" Margin="0,0,0,10"/>
 
         <!-- Observer List Panel -->
         <StackPanel Grid.Column="0" Margin="0,0,10,0">

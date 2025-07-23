@@ -9,12 +9,15 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Windows.Controls;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
     public class ServiceViewModel : INotifyPropertyChanged
     {
         public string DisplayName { get; set; }
+
+        public Page? ServicePage { get; set; }
 
         private bool _isActive;
         public bool IsActive
@@ -26,16 +29,21 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 {
                     _isActive = value;
                     OnPropertyChanged();
-
                     if (_isActive)
-                        Logs.Add("[Service Activated]");
+                        AddLog("[Service Activated]");
                     else
-                        Logs.Add("[Service Deactivated]");
+                        AddLog("[Service Deactivated]");
                 }
             }
         }
 
         public ObservableCollection<string> Logs { get; set; } = new();
+
+        public void AddLog(string message)
+        {
+            var timestamp = DateTime.Now.ToString("MM.dd.yyyy - HH:mm:ss.fffffff");
+            Logs.Insert(0, $"{timestamp} {message}");
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string name = null) =>
@@ -54,6 +62,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         }
         public ICommand AddServiceCommand { get; }
         public ICommand RemoveServiceCommand { get; }
+        public event Action<ServiceViewModel>? EditRequested;
         public int ServicesCreated => Services.Count;
         public int CurrentActiveServices => Services.Count(s => s.IsActive);
 
@@ -65,19 +74,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         private void AddService()
         {
-            var vm = new CreateServiceViewModel();
-            var popup = new CreateServiceWindow(vm); // Replace with DI if needed
-            if (popup.ShowDialog() == true)
-            {
-                var newService = new ServiceViewModel
-                {
-                    DisplayName = $"{popup.CreatedServiceType} - {popup.CreatedServiceName}",
-                    IsActive = false
-                };
-                Services.Add(newService);
-                OnPropertyChanged(nameof(ServicesCreated));
-                OnPropertyChanged(nameof(CurrentActiveServices));
-            }
+            // Not used when using MainView UI navigation
         }
 
         private void RemoveSelectedService()
@@ -87,6 +84,15 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 Services.Remove(SelectedService);
                 OnPropertyChanged(nameof(ServicesCreated));
                 OnPropertyChanged(nameof(CurrentActiveServices));
+            }
+        }
+
+        public void EditSelectedService()
+        {
+            if (SelectedService != null)
+            {
+                SelectedService.IsActive = false;
+                EditRequested?.Invoke(SelectedService);
             }
         }
 
