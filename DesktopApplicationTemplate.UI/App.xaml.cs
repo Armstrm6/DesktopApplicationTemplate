@@ -10,7 +10,7 @@ using DesktopApplicationTemplate.Services;
 using DesktopApplicationTemplate.UI.Services;
 
 
-namespace DesktopApplicationTemplate
+namespace DesktopApplicationTemplate.UI
 {
     public partial class App : System.Windows.Application
     {

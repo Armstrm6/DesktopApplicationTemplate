@@ -10,7 +10,7 @@
     </PropertyGroup>
 	
 	<PropertyGroup>
-		<StartupObject>DesktopApplicationTemplate.App</StartupObject>
+                <StartupObject>DesktopApplicationTemplate.UI.App</StartupObject>
 	</PropertyGroup>
 
   <ItemGroup>
