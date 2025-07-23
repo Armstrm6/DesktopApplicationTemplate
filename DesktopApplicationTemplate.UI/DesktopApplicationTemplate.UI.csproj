@@ -17,9 +17,16 @@
       <PackageReference Include="Microsoft.Extensions.Logging.EventLog" Version="9.0.7" />
     </ItemGroup>
 
-    <ItemGroup>
+  <ItemGroup>
       <Folder Include="Themes\" />
   <Resource Include="Resources/*" />
-    </ItemGroup>
+    <Page Include="Views/ScriptEditorWindow.xaml" />
+    <Compile Include="Views/ScriptEditorWindow.xaml.cs" />
+    <Compile Include="Services/ServicePersistence.cs" />
+    <Compile Include="Models/UserSettings.cs" />
+    <Compile Include="ViewModels/SettingsViewModel.cs" />
+    <Page Include="Views/SettingsPage.xaml" />
+    <Compile Include="Views/SettingsPage.xaml.cs" />
+  </ItemGroup>
 
 </Project>

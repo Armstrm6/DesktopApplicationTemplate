@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.Services;
+using DesktopApplicationTemplate.UI.Views;
 using System.Windows.Controls;
 
 namespace DesktopApplicationTemplate.UI.Views
@@ -25,6 +26,15 @@ namespace DesktopApplicationTemplate.UI.Views
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             _startupService.RunStartupChecksAsync();
+        }
+
+        private void OpenEditor_Click(object sender, RoutedEventArgs e)
+        {
+            var editor = new ScriptEditorWindow(_viewModel.ScriptContent);
+            if (editor.ShowDialog() == true)
+            {
+                _viewModel.ScriptContent = editor.ScriptText;
+            }
         }
     }
 }
