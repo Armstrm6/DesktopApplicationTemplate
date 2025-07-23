@@ -10,7 +10,7 @@ using DesktopApplicationTemplate.UI.Services;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
-    public class HttpServiceViewModel : INotifyPropertyChanged
+    public class HttpServiceViewModel : ViewModelBase
     {
         public ObservableCollection<string> Methods { get; } = new() { "GET", "POST", "PUT", "DELETE" };
 
@@ -137,8 +137,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
         }
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-        private void OnPropertyChanged([CallerMemberName] string name = null) =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        // OnPropertyChanged is inherited from ViewModelBase
     }
 }

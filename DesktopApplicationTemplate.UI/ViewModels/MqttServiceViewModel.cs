@@ -6,7 +6,7 @@ using DesktopApplicationTemplate.UI.Services;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
-    public class MqttServiceViewModel : INotifyPropertyChanged
+    public class MqttServiceViewModel : ViewModelBase
     {
         private string _host = string.Empty;
         public string Host { get => _host; set { _host = value; OnPropertyChanged(); } }
@@ -70,7 +70,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         private void Save() => System.Windows.MessageBox.Show("Configuration saved.");
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-        private void OnPropertyChanged([CallerMemberName] string? name = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        // OnPropertyChanged provided by ViewModelBase
     }
 }

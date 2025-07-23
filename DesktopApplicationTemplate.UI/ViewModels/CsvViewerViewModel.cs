@@ -1,7 +1,5 @@
 using System;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Windows.Input;
 
@@ -20,7 +18,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public ObservableCollection<CsvColumnConfig> Columns { get; set; } = new();
     }
 
-    public class CsvViewerViewModel : INotifyPropertyChanged
+    public class CsvViewerViewModel : ViewModelBase
     {
         private const string ConfigPath = "csv_config.json";
 
@@ -58,8 +56,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             System.IO.File.WriteAllText(ConfigPath, json);
         }
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-        private void OnPropertyChanged([CallerMemberName] string name = null)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        // Uses OnPropertyChanged from ViewModelBase
     }
 }

@@ -12,7 +12,7 @@ using DesktopApplicationTemplate.UI.Services;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
-    public class TcpServiceViewModel : INotifyPropertyChanged
+    public class TcpServiceViewModel : ViewModelBase
     {
         private string _statusMessage = string.Empty;
         private bool _isServerRunning;
@@ -163,11 +163,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             System.Windows.MessageBox.Show("Configuration saved.", "Save", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
+        // OnPropertyChanged inherited from ViewModelBase
     }
 }
