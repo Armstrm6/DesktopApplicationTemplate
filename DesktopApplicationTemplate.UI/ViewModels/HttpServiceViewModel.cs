@@ -21,7 +21,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public ObservableCollection<HeaderItem> Headers { get; } = new();
 
-        private HeaderItem _selectedHeader;
+        private HeaderItem _selectedHeader = new HeaderItem();
         public HeaderItem SelectedHeader
         {
             get => _selectedHeader;
@@ -38,21 +38,21 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             set { _selectedMethod = value; OnPropertyChanged(); }
         }
 
-        private string _url;
+        private string _url = string.Empty;
         public string Url
         {
             get => _url;
             set { _url = value; OnPropertyChanged(); }
         }
 
-        private string _requestBody;
+        private string _requestBody = string.Empty;
         public string RequestBody
         {
             get => _requestBody;
             set { _requestBody = value; OnPropertyChanged(); }
         }
 
-        private string _responseBody;
+        private string _responseBody = string.Empty;
         public string ResponseBody
         {
             get => _responseBody;
@@ -124,7 +124,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string name = null) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }

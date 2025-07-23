@@ -9,10 +9,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels
     public class FileObserverViewModel : INotifyPropertyChanged
     {
         public ObservableCollection<FileObserver> Observers { get; } = new();
-        private FileObserver _selectedObserver;
+        private FileObserver? _selectedObserver;
         public FileObserver SelectedObserver
         {
-            get => _selectedObserver;
+            get => _selectedObserver!;
             set { _selectedObserver = value; OnPropertyChanged(); LoadObserverData(); }
         }
 
@@ -133,7 +133,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             MessageBox.Show("Configuration saved.", "Save", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string name = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }

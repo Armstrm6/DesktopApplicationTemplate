@@ -8,13 +8,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using DesktopApplicationTemplate.Services;
+using DesktopApplicationTemplate.UI.Services;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
     public class TcpServiceViewModel : INotifyPropertyChanged
     {
-        private string _statusMessage;
+        private string _statusMessage = string.Empty;
         private bool _isServerRunning;
 
         private string _computerIp = string.Empty;

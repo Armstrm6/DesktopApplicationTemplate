@@ -11,21 +11,21 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             "HID", "TCP", "HTTP", "File Observer", "Heartbeat", "CSV Creator"
         };
 
-        private string _serviceName;
+        private string _serviceName = string.Empty;
         public string ServiceName
         {
             get => _serviceName;
             set { _serviceName = value; OnPropertyChanged(); }
         }
 
-        private string _selectedServiceType;
+        private string _selectedServiceType = string.Empty;
         public string SelectedServiceType
         {
             get => _selectedServiceType;
             set { _selectedServiceType = value; OnPropertyChanged(); }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string name = null) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }

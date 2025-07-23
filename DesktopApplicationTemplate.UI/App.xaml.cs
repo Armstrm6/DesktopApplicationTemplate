@@ -35,7 +35,7 @@ namespace DesktopApplicationTemplate
         private void ConfigureServices(IConfiguration configuration, IServiceCollection services)
         {
             services.AddSingleton<MainView>();
-            services.AddSingleton<Services.IStartupService, Services.StartupService>();
+            services.AddSingleton<UI.Services.IStartupService, UI.Services.StartupService>();
             services.AddSingleton<MainViewModel>();
             services.AddSingleton<TcpServiceViewModel>();
             services.AddSingleton<DependencyChecker>();
@@ -46,11 +46,13 @@ namespace DesktopApplicationTemplate
             services.AddSingleton<HeartbeatView>();
             services.AddSingleton<HeartbeatViewModel>();
             services.AddSingleton<CsvViewerViewModel>();
-            services.AddSingleton<Services.CsvService>();
+            services.AddSingleton<UI.Services.CsvService>();
+            services.AddSingleton<SettingsViewModel>();
             services.AddTransient<CsvViewerWindow>();
             services.AddTransient<CreateServiceWindow>();
             services.AddTransient<CreateServicePage>();
             services.AddTransient<CreateServiceViewModel>();
+            services.AddTransient<SettingsPage>();
 
 
             // Load strongly typed settings
@@ -61,7 +63,7 @@ namespace DesktopApplicationTemplate
         {
             await AppHost.StartAsync();
 
-            var startupService = AppHost.Services.GetRequiredService<Services.IStartupService>();
+            var startupService = AppHost.Services.GetRequiredService<UI.Services.IStartupService>();
             await startupService.RunStartupChecksAsync();
 
             var mainWindow = AppHost.Services.GetRequiredService<MainView>();

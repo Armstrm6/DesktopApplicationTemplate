@@ -1,4 +1,4 @@
-using DesktopApplicationTemplate.Services;
+using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.Models;
 using Microsoft.Extensions.Configuration;
 using Xunit;

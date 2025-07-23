@@ -1,7 +1,7 @@
 using DesktopApplicationTemplate.UI.ViewModels;
 using System.Text;
 
-namespace DesktopApplicationTemplate.Services
+namespace DesktopApplicationTemplate.UI.Services
 {
     public class CsvService
     {
