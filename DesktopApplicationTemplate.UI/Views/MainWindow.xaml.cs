@@ -136,6 +136,15 @@ namespace DesktopApplicationTemplate.UI.Views
             window.ShowDialog();
         }
 
+        private void OpenFilter_Click(object sender, RoutedEventArgs e)
+        {
+            var window = new FilterWindow { DataContext = _viewModel.Filters };
+            if (window.ShowDialog() == true)
+            {
+                // filters already applied via PropertyChanged event
+            }
+        }
+
         private void EditServiceMenu_Click(object sender, RoutedEventArgs e)
         {
             if ((sender as MenuItem)?.DataContext is ServiceViewModel svc && svc.ServicePage != null)
@@ -151,8 +160,18 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             if ((sender as MenuItem)?.DataContext is ServiceViewModel svc)
             {
+                var index = _viewModel.Services.IndexOf(svc);
                 svc.LogAdded -= _viewModel.OnServiceLogAdded;
                 _viewModel.Services.Remove(svc);
+                if (_viewModel.Services.Count > 0)
+                {
+                    if (index >= _viewModel.Services.Count) index = _viewModel.Services.Count - 1;
+                    _viewModel.SelectedService = _viewModel.Services[index];
+                }
+                else
+                {
+                    _viewModel.SelectedService = null;
+                }
                 _viewModel.SaveServices();
             }
         }
