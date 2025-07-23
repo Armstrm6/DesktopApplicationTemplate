@@ -52,3 +52,9 @@ Use `dotnet test` to run the xUnit tests:
 ```bash
 dotnet test DesktopApplicationTemplate.Tests/DesktopApplicationTemplate.Tests.csproj
 ```
+
+## Installer notes
+
+The installer copies all runtime dependencies based on the generated `.deps.json`
+file of the build output. New library references are automatically detected and
+no manual configuration is required.
