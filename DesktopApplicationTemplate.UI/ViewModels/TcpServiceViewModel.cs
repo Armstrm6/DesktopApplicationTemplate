@@ -131,12 +131,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         {
             var result = ScriptContent.Replace("message", TestMessage);
             Logger?.Log($"Script output: {result}", LogLevel.Debug);
-            MessageBox.Show(result, "Test Result");
+            System.Windows.MessageBox.Show(result, "Test Result");
         }
 
         private void Save()
         {
-            MessageBox.Show("Configuration saved.", "Save", MessageBoxButton.OK, MessageBoxImage.Information);
+            System.Windows.MessageBox.Show("Configuration saved.", "Save", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

@@ -6,11 +6,13 @@ using System.Windows;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI.Helpers;
+using DesktopApplicationTemplate.Services;
+using DesktopApplicationTemplate.UI.Services;
 
 
 namespace DesktopApplicationTemplate
 {
-    public partial class App : Application
+    public partial class App : System.Windows.Application
     {
         public static IHost AppHost { get; private set; }
 
@@ -35,7 +37,7 @@ namespace DesktopApplicationTemplate
         private void ConfigureServices(IConfiguration configuration, IServiceCollection services)
         {
             services.AddSingleton<MainView>();
-            services.AddSingleton<UI.Services.IStartupService, UI.Services.StartupService>();
+            services.AddSingleton<IStartupService, StartupService>();
             services.AddSingleton<MainViewModel>();
             services.AddSingleton<TcpServiceViewModel>();
             services.AddSingleton<DependencyChecker>();
@@ -46,7 +48,7 @@ namespace DesktopApplicationTemplate
             services.AddSingleton<HeartbeatView>();
             services.AddSingleton<HeartbeatViewModel>();
             services.AddSingleton<CsvViewerViewModel>();
-            services.AddSingleton<UI.Services.CsvService>();
+            services.AddSingleton<CsvService>();
             services.AddSingleton<SettingsViewModel>();
             services.AddTransient<CsvViewerWindow>();
             services.AddTransient<CreateServiceWindow>();
@@ -63,7 +65,7 @@ namespace DesktopApplicationTemplate
         {
             await AppHost.StartAsync();
 
-            var startupService = AppHost.Services.GetRequiredService<UI.Services.IStartupService>();
+            var startupService = AppHost.Services.GetRequiredService<IStartupService>();
             await startupService.RunStartupChecksAsync();
 
             var mainWindow = AppHost.Services.GetRequiredService<MainView>();
