@@ -1,10 +1,8 @@
 ﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
-    public class CreateServiceViewModel : INotifyPropertyChanged
+    public class CreateServiceViewModel : ViewModelBase
     {
         public ObservableCollection<string> ServiceTypes { get; } = new()
         {
@@ -26,8 +24,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             set { _selectedServiceType = value; OnPropertyChanged(); }
         }
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-        private void OnPropertyChanged([CallerMemberName] string name = null) =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        // OnPropertyChanged provided by ViewModelBase
     }
 }

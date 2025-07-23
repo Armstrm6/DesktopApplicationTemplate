@@ -6,7 +6,7 @@ using DesktopApplicationTemplate.Models;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
-    public class SettingsViewModel : INotifyPropertyChanged
+    public class SettingsViewModel : ViewModelBase
     {
         private static readonly string FilePath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "userSettings.json");
         private bool _darkTheme;
@@ -51,10 +51,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             _dirty = false;
         }
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-        private void OnPropertyChanged([CallerMemberName] string? name = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-        }
+        // OnPropertyChanged provided by ViewModelBase
     }
 }
