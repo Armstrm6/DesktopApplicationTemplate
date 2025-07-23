@@ -26,7 +26,7 @@ namespace DesktopApplicationTemplate.UI.Services
         public async Task RunStartupChecksAsync()
         {
             _logger?.Log($"Environment: {_appSettings.Environment}", LogLevel.Debug);
-            await Task.Run(() => DependencyChecker.CheckAll());
+            await Task.Run(() => DependencyChecker.CheckAll(_logger));
 
             if (_appSettings.AutoStart)
             {
