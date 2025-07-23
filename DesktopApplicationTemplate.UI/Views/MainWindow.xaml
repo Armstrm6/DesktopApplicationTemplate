@@ -64,6 +64,7 @@
             <Frame x:Name="ContentFrame" Height="200" NavigationUIVisibility="Hidden" />
             <TextBlock Text="{Binding SelectedService.DisplayName}" FontWeight="Bold" FontSize="14"/>
             <Button Content="Edit Connection" Click="EditService_Click" Visibility="{Binding SelectedService, Converter={StaticResource NullToVisibilityConverter}}" Margin="0,5" Width="120"/>
+            <Button Content="CSV Viewer" Click="OpenCsvViewer_Click" Margin="0,5" Width="100"/>
             <TextBlock Text="Services Created:" />
             <TextBlock Text="{Binding ServicesCreated}" />
             <TextBlock Text="Current Active Services:" />

@@ -43,6 +43,10 @@ namespace DesktopApplicationTemplate
             services.AddSingleton<HttpServiceViewModel>();
             services.AddSingleton<FileObserverView>();
             services.AddSingleton<FileObserverViewModel>();
+            services.AddSingleton<CsvViewerViewModel>();
+            services.AddSingleton<Services.CsvService>();
+            services.AddTransient<CsvViewerWindow>();
+            services.AddTransient<CreateServiceWindow>();
             services.AddTransient<CreateServicePage>();
             services.AddTransient<CreateServiceViewModel>();
 
