@@ -5,7 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Documents;
-using System.Windows.Media;
+using WpfBrush = System.Windows.Media.Brush;
+using WpfBrushes = System.Windows.Media.Brushes;
 using System.Windows.Threading;
 
 namespace DesktopApplicationTemplate.Services
@@ -26,12 +27,12 @@ namespace DesktopApplicationTemplate.Services
             string formatted = $"[{DateTime.Now:HH:mm:ss}] [{level}] {message}";
             _dispatcher.Invoke(() =>
             {
-                Brush color = level switch
+                WpfBrush color = level switch
                 {
-                    LogLevel.Debug => Brushes.Black,
-                    LogLevel.Warning => Brushes.Orange,
-                    LogLevel.Error => Brushes.Red,
-                    _ => Brushes.Black
+                    LogLevel.Debug => WpfBrushes.Black,
+                    LogLevel.Warning => WpfBrushes.Orange,
+                    LogLevel.Error => WpfBrushes.Red,
+                    _ => WpfBrushes.Black
                 };
 
                 var paragraph = new Paragraph(new Run(formatted) { Foreground = color });

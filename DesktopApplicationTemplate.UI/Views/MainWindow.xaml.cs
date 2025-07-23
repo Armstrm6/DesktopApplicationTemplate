@@ -9,6 +9,7 @@ using FormsColor = System.Drawing.Color;
 using MediaColor = System.Windows.Media.Color;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
+using WpfColor = System.Windows.Media.Color;
 using System.Windows.Media;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Views;
