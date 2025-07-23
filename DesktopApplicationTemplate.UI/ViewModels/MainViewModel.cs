@@ -59,7 +59,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public void AddLog(string message)
         {
             var timestamp = DateTime.Now.ToString("MM.dd.yyyy - HH:mm:ss.fffffff");
-            Logs.Insert(0, $"{timestamp} {message}");
+            Logs.Insert(0, new LogEntry
+            {
+                Message = $"{timestamp} {message}",
+                Color = Brushes.Black
+            });
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
