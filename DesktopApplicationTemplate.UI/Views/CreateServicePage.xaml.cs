@@ -1,16 +1,17 @@
-﻿using System.Windows;
+using System.Windows;
+using System.Windows.Controls;
 using DesktopApplicationTemplate.UI.ViewModels;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
-    public partial class CreateServiceWindow : Window
+    public partial class CreateServicePage : Page
     {
         private readonly CreateServiceViewModel _viewModel;
         public string CreatedServiceName { get; private set; }
         public string CreatedServiceType { get; private set; }
+        public event Action<string,string>? ServiceCreated;
 
-        public CreateServiceWindow(CreateServiceViewModel viewModel)
+        public CreateServicePage(CreateServiceViewModel viewModel)
         {
             InitializeComponent();
             _viewModel = viewModel;
@@ -29,14 +30,12 @@ namespace DesktopApplicationTemplate.UI.Views
                 return;
             }
 
-            DialogResult = true;
-            Close();
+            ServiceCreated?.Invoke(CreatedServiceName, CreatedServiceType);
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
-            DialogResult = false;
-            Close();
+            // cancellation can be handled by parent frame
         }
     }
 }
