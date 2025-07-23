@@ -32,7 +32,7 @@ namespace DesktopApplicationTemplate.UI.Services
                     LogLevel.Debug => WpfBrushes.Black,
                     LogLevel.Warning => WpfBrushes.Orange,
                     LogLevel.Error => WpfBrushes.Red,
-                    LogLevel.Critical => WpfBrushes.Purple,
+                    LogLevel.Critical => WpfBrushes.DarkRed,
                     _ => WpfBrushes.Black
                 };
 
