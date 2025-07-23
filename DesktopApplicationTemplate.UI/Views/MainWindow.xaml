@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:DesktopApplicationTemplate.UI.Views"
         xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
         mc:Ignorable="d"
-        Title="MainView" Height="600" Width="1000">
+        Title="MainView" Height="Auto" Width="Auto">
 
     <Window.Resources>
         <helpers:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />

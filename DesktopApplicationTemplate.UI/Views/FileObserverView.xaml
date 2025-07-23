@@ -4,8 +4,11 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:vm="clr-namespace:DesktopApplicationTemplate.UI.ViewModels"
+      xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
       mc:Ignorable="d">
-
+    <Page.Resources>
+        <helpers:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter" />
+    </Page.Resources>
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

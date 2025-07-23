@@ -5,7 +5,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
       mc:Ignorable="d"
-      Title="Chappie Desktop Application">
+      Title="Chappie Desktop Application" d:DesignWidth="682.857">
     <Page.Resources>
         <helpers:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter" />
         <helpers:LogListToStringConverter x:Key="LogListToStringConverter" />
