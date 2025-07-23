@@ -1,0 +1,6 @@
+<Window x:Class="DesktopApplicationTemplate.UI.Views.CreateServiceWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Create Service" Height="300" Width="450">
+    <Frame x:Name="ContentFrame" NavigationUIVisibility="Hidden" />
+</Window>

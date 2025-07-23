@@ -10,6 +10,7 @@ namespace DesktopApplicationTemplate.UI.Views
         public string CreatedServiceName { get; private set; }
         public string CreatedServiceType { get; private set; }
         public event Action<string,string>? ServiceCreated;
+        public event Action? Cancelled;
 
         public CreateServicePage(CreateServiceViewModel viewModel)
         {
@@ -35,7 +36,7 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
-            // cancellation can be handled by parent frame
+            Cancelled?.Invoke();
         }
     }
 }
