@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Controls;
+using WpfRichTextBox = System.Windows.Controls.RichTextBox;
 using System.Windows.Documents;
 using WpfBrush = System.Windows.Media.Brush;
 using WpfBrushes = System.Windows.Media.Brushes;
@@ -13,10 +13,10 @@ namespace DesktopApplicationTemplate.UI.Services
 {
     public class LoggingService : ILoggingService
     {
-        private readonly RichTextBox _outputBox;
+        private readonly WpfRichTextBox _outputBox;
         private readonly Dispatcher _dispatcher;
 
-        public LoggingService(RichTextBox outputBox, Dispatcher dispatcher)
+        public LoggingService(WpfRichTextBox outputBox, Dispatcher dispatcher)
         {
             _outputBox = outputBox;
             _dispatcher = dispatcher;
