@@ -1,5 +1,6 @@
 ﻿using DesktopApplicationTemplate.UI.ViewModels;
 using System.Windows;
+using System.Windows.Controls;
 using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate;
 using Microsoft.Extensions.DependencyInjection;
@@ -57,6 +58,13 @@ namespace DesktopApplicationTemplate.UI.Views
             if (service.ServicePage != null)
             {
                 ContentFrame.Content = service.ServicePage;
+
+                if (page != null)
+                {
+                    newService.Page = page;
+                    ContentFrame.Navigate(page);
+                }
+                }
             }
         }
 
@@ -68,5 +76,22 @@ namespace DesktopApplicationTemplate.UI.Views
                 vm.RemoveServiceCommand.Execute(null);
             }
         }
+        private void EditService_Click(object sender, RoutedEventArgs e)
+        {
+            if (_viewModel.SelectedService?.Page != null)
+            {
+                _viewModel.SelectedService.IsActive = false;
+                ContentFrame.Navigate(_viewModel.SelectedService.Page);
+            }
+        }
+
+        private void ServiceList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_viewModel.SelectedService?.Page != null)
+            {
+                ContentFrame.Navigate(_viewModel.SelectedService.Page);
+            }
+        }
+
     }
 }

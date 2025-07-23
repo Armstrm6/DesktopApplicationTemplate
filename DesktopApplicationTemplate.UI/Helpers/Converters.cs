@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
@@ -17,10 +18,10 @@ namespace DesktopApplicationTemplate.UI.Helpers
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            // Not supported — one-way binding only
             throw new NotImplementedException();
         }
     }
+
     public class StringNullOrEmptyToVisibilityConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
