@@ -16,6 +16,13 @@ dotnet restore
 dotnet build DesktopApplicationTemplate.sln
 ```
 
+You can also execute `setup.sh` to restore dependencies, build the solution and
+run the unit tests in a single step:
+
+```bash
+./setup.sh
+```
+
 To build a specific project:
 
 ```bash
