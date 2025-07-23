@@ -14,19 +14,40 @@
             <ColumnDefinition Width="3*"/>
         </Grid.ColumnDefinitions>
         <StackPanel Grid.Column="0" Margin="10">
-            <TextBox Text="{Binding Host}" x:Name="HostBox" Margin="0,0,0,5"/>
-            <TextBlock Text="Host" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0"
-                       Visibility="{Binding Text, ElementName=HostBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
-            <TextBox Text="{Binding Port}" Margin="0,0,0,5"/>
-            <TextBox Text="{Binding Username}" x:Name="UserBox" Margin="0,0,0,5"/>
-            <TextBlock Text="Username" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0"
-                       Visibility="{Binding Text, ElementName=UserBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+            <Grid Margin="0,0,0,5">
+                <TextBox Text="{Binding Host}" x:Name="HostBox"/>
+                <TextBlock Text="Host" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0"
+                           VerticalAlignment="Center"
+                           Visibility="{Binding Text, ElementName=HostBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+            </Grid>
+            <Grid Margin="0,0,0,5">
+                <TextBox Text="{Binding Port}" x:Name="PortBox"/>
+                <TextBlock Text="Port" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0"
+                           VerticalAlignment="Center"
+                           Visibility="{Binding Text, ElementName=PortBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+            </Grid>
+            <Grid Margin="0,0,0,5">
+                <TextBox Text="{Binding Username}" x:Name="UserBox"/>
+                <TextBlock Text="Username" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0"
+                           VerticalAlignment="Center"
+                           Visibility="{Binding Text, ElementName=UserBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+            </Grid>
             <PasswordBox PasswordChar="*" helpers:PasswordBoxAssistant.BindPassword="True" helpers:PasswordBoxAssistant.BoundPassword="{Binding Password}" Margin="0,0,0,5"/>
             <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
-                <TextBox Text="{Binding LocalPath}" Width="180"/>
+                <Grid Width="180">
+                    <TextBox Text="{Binding LocalPath}" x:Name="LocalPathBox"/>
+                    <TextBlock Text="Local Path" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0"
+                               VerticalAlignment="Center"
+                               Visibility="{Binding Text, ElementName=LocalPathBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+                </Grid>
                 <Button Content="Browse" Command="{Binding BrowseCommand}" Margin="5,0,0,0"/>
             </StackPanel>
-            <TextBox Text="{Binding RemotePath}" Margin="0,0,0,5"/>
+            <Grid Margin="0,0,0,5">
+                <TextBox Text="{Binding RemotePath}" x:Name="RemotePathBox"/>
+                <TextBlock Text="Remote Path" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0"
+                           VerticalAlignment="Center"
+                           Visibility="{Binding Text, ElementName=RemotePathBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+            </Grid>
             <Button Content="Send" Command="{Binding TransferCommand}" Width="100"/>
         </StackPanel>
         <StackPanel Grid.Column="1" Margin="10">
