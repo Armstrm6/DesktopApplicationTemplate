@@ -8,7 +8,12 @@ namespace DesktopApplicationTemplate.UI.Services
         private readonly FtpClient _client;
         public FtpService(string host, int port, string user, string pass)
         {
-            _client = new FtpClient(host, port, new System.Net.NetworkCredential(user, pass));
+            var credentials = new System.Net.NetworkCredential(user, pass);
+            _client = new FtpClient(host, credentials)
+            {
+                Port = port
+            };
+
         }
 
         public async Task UploadAsync(string localPath, string remotePath)
