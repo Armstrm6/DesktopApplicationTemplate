@@ -21,23 +21,22 @@ namespace DesktopApplicationTemplate.UI.Views
             InitializeComponent();
             _viewModel = viewModel;
             DataContext = _viewModel;
+            _viewModel.EditRequested += OnEditRequested;
+            ContentFrame.Content = new HomePage { DataContext = _viewModel };
         }
 
         private void AddService_Click(object sender, RoutedEventArgs e)
         {
-            var window = App.AppHost.Services.GetRequiredService<CreateServiceWindow>();
-            if (window.ShowDialog() == true)
+            var page = App.AppHost.Services.GetRequiredService<CreateServicePage>();
+            page.ServiceCreated += (name, type) =>
             {
                 var newService = new ServiceViewModel
                 {
-                    DisplayName = $"{window.CreatedServiceType} - {window.CreatedServiceName}",
+                    DisplayName = $"{type} - {name}",
                     IsActive = false
                 };
 
-                _viewModel.Services.Add(newService);
-                _viewModel.SelectedService = newService;
-
-                System.Windows.Controls.Page? page = window.CreatedServiceType switch
+                newService.ServicePage = type switch
                 {
                     "TCP" => new TcpServiceView(App.AppHost.Services.GetRequiredService<TcpServiceViewModel>(), App.AppHost.Services.GetRequiredService<Services.IStartupService>()),
                     "HTTP" => App.AppHost.Services.GetRequiredService<HttpServiceView>(),
@@ -45,6 +44,22 @@ namespace DesktopApplicationTemplate.UI.Views
                     "HID" => new HidViews(),
                     _ => null
                 };
+
+                _viewModel.Services.Add(newService);
+                _viewModel.SelectedService = newService;
+
+                if (newService.ServicePage != null)
+                    ContentFrame.Content = newService.ServicePage;
+            };
+
+            ContentFrame.Content = page;
+        }
+
+        private void OnEditRequested(ServiceViewModel service)
+        {
+            if (service.ServicePage != null)
+            {
+                ContentFrame.Content = service.ServicePage;
 
                 if (page != null)
                 {

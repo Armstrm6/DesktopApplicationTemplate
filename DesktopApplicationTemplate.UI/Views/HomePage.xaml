@@ -1,0 +1,23 @@
+<Page x:Class="DesktopApplicationTemplate.UI.Views.HomePage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
+      mc:Ignorable="d">
+    <Page.Resources>
+        <helpers:LogListToStringConverter x:Key="LogListToStringConverter" />
+        <helpers:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+    </Page.Resources>
+    <StackPanel Margin="10">
+        <TextBlock Text="{Binding SelectedService.DisplayName}" FontWeight="Bold" FontSize="14"/>
+        <TextBlock Text="Associated Steps:" FontStyle="Italic" Margin="0,10"/>
+        <TextBlock Text="Services Created:" />
+        <TextBlock Text="{Binding ServicesCreated}" />
+        <TextBlock Text="Current Active Services:" />
+        <TextBlock Text="{Binding CurrentActiveServices}" />
+        <Button Content="Edit Service" Width="100" Margin="0,10,0,0" Visibility="{Binding SelectedService, Converter={StaticResource NullToVisibilityConverter}}" Click="EditService_Click"/>
+        <TextBox Text="{Binding SelectedService.Logs, Converter={StaticResource LogListToStringConverter}}"
+                 IsReadOnly="True" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+    </StackPanel>
+</Page>

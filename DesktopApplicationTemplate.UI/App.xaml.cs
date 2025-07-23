@@ -47,6 +47,7 @@ namespace DesktopApplicationTemplate
             services.AddSingleton<Services.CsvService>();
             services.AddTransient<CsvViewerWindow>();
             services.AddTransient<CreateServiceWindow>();
+            services.AddTransient<CreateServicePage>();
             services.AddTransient<CreateServiceViewModel>();
 
 
