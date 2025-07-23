@@ -72,6 +72,8 @@ namespace DesktopApplicationTemplate
 
         protected override async void OnExit(ExitEventArgs e)
         {
+            var vm = AppHost.Services.GetRequiredService<MainViewModel>();
+            vm.SaveServices();
             await AppHost.StopAsync();
             AppHost.Dispose();
             base.OnExit(e);

@@ -1,5 +1,5 @@
 ﻿using DesktopApplicationTemplate.UI.Views;
-using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -115,6 +115,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         {
             AddServiceCommand = new RelayCommand(AddService);
             RemoveServiceCommand = new RelayCommand(RemoveSelectedService, () => SelectedService != null);
+            LoadServices();
         }
 
         private void AddService()
@@ -146,6 +147,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 OnPropertyChanged(nameof(ServicesCreated));
                 OnPropertyChanged(nameof(CurrentActiveServices));
                 OnPropertyChanged(nameof(DisplayLogs));
+                SaveServices();
             }
         }
 
@@ -158,13 +160,34 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
         }
 
-        private void OnServiceLogAdded(ServiceViewModel svc, LogEntry entry)
+        public void SaveServices()
         {
-            if (svc.IsActive)
+            ServicePersistence.Save(Services);
+        }
+
+        private void LoadServices()
+        {
+            var existing = ServicePersistence.Load();
+            foreach (var info in existing)
             {
-                AllLogs.Insert(0, entry);
-                OnPropertyChanged(nameof(DisplayLogs));
+                var svc = new ServiceViewModel
+                {
+                    DisplayName = info.DisplayName,
+                    ServiceType = info.ServiceType,
+                    IsActive = info.IsActive
+                };
+                svc.SetColorsByType();
+                svc.LogAdded += OnServiceLogAdded;
+                Services.Add(svc);
             }
+            OnPropertyChanged(nameof(ServicesCreated));
+            OnPropertyChanged(nameof(CurrentActiveServices));
+        }
+
+        public void OnServiceLogAdded(ServiceViewModel svc, LogEntry entry)
+        {
+            AllLogs.Insert(0, entry);
+            OnPropertyChanged(nameof(DisplayLogs));
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

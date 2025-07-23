@@ -5,6 +5,10 @@ using DesktopApplicationTemplate.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using Microsoft.VisualBasic;
 using Microsoft.Extensions.DependencyInjection;
+using System.Linq;
+using System.Windows.Media;
+using DesktopApplicationTemplate.Models;
+using DesktopApplicationTemplate.UI.Views;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
@@ -44,6 +48,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 };
 
                 newService.SetColorsByType();
+                newService.LogAdded += _viewModel.OnServiceLogAdded;
 
                 newService.ServicePage = type switch
                 {
@@ -66,6 +71,7 @@ namespace DesktopApplicationTemplate.UI.Views
                     editor.ShowDialog();
                     ContentFrame.Content = new HomePage { DataContext = _viewModel };
                 }
+                _viewModel.SaveServices();
             }
         }
 
@@ -141,7 +147,9 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             if ((sender as MenuItem)?.DataContext is ServiceViewModel svc)
             {
+                svc.LogAdded -= _viewModel.OnServiceLogAdded;
                 _viewModel.Services.Remove(svc);
+                _viewModel.SaveServices();
             }
         }
 
@@ -153,6 +161,26 @@ namespace DesktopApplicationTemplate.UI.Views
                 if (!string.IsNullOrWhiteSpace(input))
                 {
                     svc.DisplayName = input;
+                    _viewModel.SaveServices();
+                }
+            }
+        }
+
+        private void ChangeColorMenu_Click(object sender, RoutedEventArgs e)
+        {
+            if ((sender as MenuItem)?.DataContext is ServiceViewModel svc)
+            {
+                var dlg = new System.Windows.Forms.ColorDialog();
+                if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    var color = Color.FromArgb(dlg.Color.A, dlg.Color.R, dlg.Color.G, dlg.Color.B);
+                    var brush = new SolidColorBrush(color);
+                    foreach (var s in _viewModel.Services.Where(s => s.ServiceType == svc.ServiceType))
+                    {
+                        s.BackgroundColor = brush;
+                        s.BorderColor = brush;
+                    }
+                    _viewModel.SaveServices();
                 }
             }
         }
@@ -176,6 +204,12 @@ namespace DesktopApplicationTemplate.UI.Views
                 _viewModel.SelectedService = null;
                 ContentFrame.Content = new HomePage { DataContext = _viewModel };
             }
+        }
+
+        private void OpenSettings_Click(object sender, RoutedEventArgs e)
+        {
+            var page = new SettingsPage(App.AppHost.Services.GetRequiredService<SettingsViewModel>());
+            ContentFrame.Content = page;
         }
 
     }
