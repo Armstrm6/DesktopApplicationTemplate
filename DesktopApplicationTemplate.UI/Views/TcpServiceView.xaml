@@ -3,8 +3,13 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
       mc:Ignorable="d"
       Title="Chappie Desktop Application">
+    <Page.Resources>
+        <helpers:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter" />
+        <helpers:LogListToStringConverter x:Key="LogListToStringConverter" />
+    </Page.Resources>
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -34,18 +39,47 @@
 
             <!-- LEFT SIDE -->
             <StackPanel Grid.Column="0" Margin="10">
-                <TextBox Text="Computer IP" Margin="0,0,0,5"/>
-                <TextBox Text="Listening Port" Margin="0,0,0,5"/>
-                <TextBox Text="Server IP" Margin="0,0,0,5"/>
-                <TextBox Text="Server Gateway" Margin="0,0,0,5"/>
-                <TextBox Text="Server Port" Margin="0,0,0,10"/>
-                <Button Content="Start/Stop Server" Height="30" Margin="0,0,0,10"/>
+                <Grid Margin="0,0,0,5">
+                    <TextBox Text="{Binding ComputerIp, UpdateSourceTrigger=PropertyChanged}" x:Name="ComputerIpBox"/>
+                    <TextBlock Text="Computer IP" IsHitTestVisible="False" Foreground="Gray" VerticalAlignment="Center"
+                               Margin="5,0,0,0"
+                               Visibility="{Binding Text, ElementName=ComputerIpBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+                </Grid>
+                <Grid Margin="0,0,0,5">
+                    <TextBox Text="{Binding ListeningPort, UpdateSourceTrigger=PropertyChanged}" x:Name="ListenPortBox"/>
+                    <TextBlock Text="Listening Port" IsHitTestVisible="False" Foreground="Gray" VerticalAlignment="Center"
+                               Margin="5,0,0,0"
+                               Visibility="{Binding Text, ElementName=ListenPortBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+                </Grid>
+                <Grid Margin="0,0,0,5">
+                    <TextBox Text="{Binding ServerIp, UpdateSourceTrigger=PropertyChanged}" x:Name="ServerIpBox"/>
+                    <TextBlock Text="Server IP" IsHitTestVisible="False" Foreground="Gray" VerticalAlignment="Center"
+                               Margin="5,0,0,0"
+                               Visibility="{Binding Text, ElementName=ServerIpBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+                </Grid>
+                <Grid Margin="0,0,0,5">
+                    <TextBox Text="{Binding ServerGateway, UpdateSourceTrigger=PropertyChanged}" x:Name="ServerGatewayBox"/>
+                    <TextBlock Text="Server Gateway" IsHitTestVisible="False" Foreground="Gray" VerticalAlignment="Center"
+                               Margin="5,0,0,0"
+                               Visibility="{Binding Text, ElementName=ServerGatewayBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+                </Grid>
+                <Grid Margin="0,0,0,10">
+                    <TextBox Text="{Binding ServerPort, UpdateSourceTrigger=PropertyChanged}" x:Name="ServerPortBox"/>
+                    <TextBlock Text="Server Port" IsHitTestVisible="False" Foreground="Gray" VerticalAlignment="Center"
+                               Margin="5,0,0,0"
+                               Visibility="{Binding Text, ElementName=ServerPortBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+                </Grid>
+                <Button Content="Start/Stop Server" Height="30" Margin="0,0,0,10" Command="{Binding ToggleServerCommand}"/>
 
-                <TextBlock Text="Python Script" FontWeight="Bold" Margin="0,10,0,5"/>
-                <DockPanel>
-                    <TextBox Height="150" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" Width="200"/>
-                    <Button Content="Test Script" Margin="10,0,0,0"/>
-                </DockPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,10,0,5" VerticalAlignment="Center">
+                    <TextBlock Text="Script Language:" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                    <ComboBox Width="100" ItemsSource="{Binding ScriptLanguages}" SelectedItem="{Binding SelectedLanguage}"/>
+                </StackPanel>
+                <TextBlock Text="Script" FontWeight="Bold" Margin="0,0,0,5"/>
+                <TextBox Height="160" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" Text="{Binding ScriptContent}"/>
+                <TextBlock Text="Test Message" FontWeight="Bold" Margin="0,5,0,0"/>
+                <TextBox Text="{Binding TestMessage}" Margin="0,0,0,5"/>
+                <Button Content="Test Script" Margin="0,0,0,5" Command="{Binding TestScriptCommand}"/>
             </StackPanel>
 
             <!-- RIGHT SIDE -->
@@ -57,10 +91,9 @@
                         <ComboBoxItem Content="Warning"/>
                         <ComboBoxItem Content="Error"/>
                     </ComboBox>
-                    <Button Content="Update Log"/>
                 </DockPanel>
 
-                <TextBox Height="400" VerticalScrollBarVisibility="Auto" AcceptsReturn="True" Text="LOGGER" />
+                <RichTextBox x:Name="LogBox" Height="350" IsReadOnly="True" VerticalScrollBarVisibility="Auto" />
             </StackPanel>
         </Grid>
 

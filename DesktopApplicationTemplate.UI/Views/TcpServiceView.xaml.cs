@@ -17,6 +17,7 @@ namespace DesktopApplicationTemplate.UI.Views
             _startupService = startupService;
 
             DataContext = _viewModel;
+            _viewModel.Logger = new LoggingService(LogBox, Dispatcher);
 
             Loaded += MainWindow_Loaded;
         }

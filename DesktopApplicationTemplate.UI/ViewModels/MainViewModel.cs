@@ -49,21 +49,27 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         }
 
         public ObservableCollection<LogEntry> Logs { get; set; } = new();
+
+        public event Action<ServiceViewModel, LogEntry>? LogAdded;
         public void AddLog(string message, Brush? color = null)
         {
             string ts = DateTime.Now.ToString("MM.dd.yyyy - HH:mm:ss:ff");
-            Logs.Insert(0, new LogEntry { Message = $"{ts} {message}", Color = color ?? Brushes.Black });
+            var entry = new LogEntry { Message = $"{ts} {message}", Color = color ?? Brushes.Black };
+            Logs.Insert(0, entry);
+            LogAdded?.Invoke(this, entry);
         }
 
 
         public void AddLog(string message)
         {
             var timestamp = DateTime.Now.ToString("MM.dd.yyyy - HH:mm:ss.fffffff");
-            Logs.Insert(0, new LogEntry
+            var entry = new LogEntry
             {
                 Message = $"{timestamp} {message}",
                 Color = Brushes.Black
-            });
+            };
+            Logs.Insert(0, entry);
+            LogAdded?.Invoke(this, entry);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -90,17 +96,20 @@ namespace DesktopApplicationTemplate.UI.ViewModels
     public class MainViewModel : INotifyPropertyChanged
     {
         public ObservableCollection<ServiceViewModel> Services { get; set; } = new();
+        public ObservableCollection<LogEntry> AllLogs { get; } = new();
         private ServiceViewModel _selectedService;
         public ServiceViewModel SelectedService
         {
             get => _selectedService;
-            set { _selectedService = value; OnPropertyChanged(); }
+            set { _selectedService = value; OnPropertyChanged(); OnPropertyChanged(nameof(DisplayLogs)); }
         }
         public ICommand AddServiceCommand { get; }
         public ICommand RemoveServiceCommand { get; }
         public event Action<ServiceViewModel>? EditRequested;
         public int ServicesCreated => Services.Count;
         public int CurrentActiveServices => Services.Count(s => s.IsActive);
+
+        public IEnumerable<LogEntry> DisplayLogs => SelectedService?.Logs ?? AllLogs;
 
         public MainViewModel()
         {
@@ -121,6 +130,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     IsActive = false
                 };
                 newService.SetColorsByType();
+                newService.LogAdded += OnServiceLogAdded;
                 Services.Add(newService);
                 OnPropertyChanged(nameof(ServicesCreated));
                 OnPropertyChanged(nameof(CurrentActiveServices));
@@ -131,9 +141,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         {
             if (SelectedService != null)
             {
+                SelectedService.LogAdded -= OnServiceLogAdded;
                 Services.Remove(SelectedService);
                 OnPropertyChanged(nameof(ServicesCreated));
                 OnPropertyChanged(nameof(CurrentActiveServices));
+                OnPropertyChanged(nameof(DisplayLogs));
             }
         }
 
@@ -143,6 +155,15 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             {
                 SelectedService.IsActive = false;
                 EditRequested?.Invoke(SelectedService);
+            }
+        }
+
+        private void OnServiceLogAdded(ServiceViewModel svc, LogEntry entry)
+        {
+            if (svc.IsActive)
+            {
+                AllLogs.Insert(0, entry);
+                OnPropertyChanged(nameof(DisplayLogs));
             }
         }
 
