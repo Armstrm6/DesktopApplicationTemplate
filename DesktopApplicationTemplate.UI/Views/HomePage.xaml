@@ -17,7 +17,7 @@
         <TextBlock Text="Current Active Services:" />
         <TextBlock Text="{Binding CurrentActiveServices}" />
         <Button Content="Edit Service" Width="100" Margin="0,10,0,0" Visibility="{Binding SelectedService, Converter={StaticResource NullToVisibilityConverter}}" Click="EditService_Click"/>
-        <TextBox Text="{Binding SelectedService.Logs, Converter={StaticResource LogListToStringConverter}}"
+        <TextBox Text="{Binding DisplayLogs, Converter={StaticResource LogListToStringConverter}}"
                  IsReadOnly="True" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
     </StackPanel>
 </Page>
