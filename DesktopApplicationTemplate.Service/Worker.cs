@@ -33,17 +33,30 @@ namespace DesktopApplicationTemplate.Service
             {
                 while (!stoppingToken.IsCancellationRequested)
                 {
-                    _logger.LogDebug("Sending heartbeat message: {message}", HeartbeatMessage);
-                    await Task.Delay(TimeSpan.FromSeconds(IntervalSeconds), stoppingToken);
+                    try
+                    {
+                        _logger.LogDebug("Sending heartbeat message: {message}", HeartbeatMessage);
+                        await Task.Delay(TimeSpan.FromSeconds(IntervalSeconds), stoppingToken);
+                    }
+                    catch (TaskCanceledException) when (stoppingToken.IsCancellationRequested)
+                    {
+                        // expected when service is stopping
+                        _logger.LogWarning("Heartbeat task cancelled");
+                        break;
+                    }
+                    catch (TaskCanceledException)
+                    {
+                        _logger.LogWarning("Delay task cancelled unexpectedly");
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error during heartbeat loop");
+                    }
                 }
-            }
-            catch (TaskCanceledException)
-            {
-                _logger.LogWarning("Heartbeat task cancelled");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unhandled exception in Worker");
+                _logger.LogCritical(ex, "Unhandled exception in Worker");
             }
             finally
             {

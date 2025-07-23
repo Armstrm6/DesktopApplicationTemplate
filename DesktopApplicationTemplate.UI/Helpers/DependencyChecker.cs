@@ -4,34 +4,33 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DesktopApplicationTemplate.UI.Services;
 
 namespace DesktopApplicationTemplate.UI.Helpers
 {
     public class DependencyChecker
     {
-        public static void CheckAll()
+        public static void CheckAll(ILoggingService? logger = null)
         {
-            Console.WriteLine("[DependencyChecker] Running startup checks...");
+            logger?.Log("[DependencyChecker] Running startup checks...", LogLevel.Debug);
 
-            CheckDotNetRuntime();
-            CheckRequiredFiles();
+            CheckDotNetRuntime(logger);
+            CheckRequiredFiles(logger);
         }
 
-        private static void CheckDotNetRuntime()
+        private static void CheckDotNetRuntime(ILoggingService? logger)
         {
             var version = Environment.Version;
-            Console.WriteLine($"[DependencyChecker] .NET Version: {version}");
+            logger?.Log($"[DependencyChecker] .NET Version: {version}", LogLevel.Debug);
 
-            // You could check minimum version requirement here
             if (version.Major < 8)
             {
-                Console.WriteLine("[DependencyChecker] WARNING: .NET 8 or higher is required.");
+                logger?.Log("[DependencyChecker] .NET 8 or higher is required.", LogLevel.Warning);
             }
         }
 
-        private static void CheckRequiredFiles()
+        private static void CheckRequiredFiles(ILoggingService? logger)
         {
-
             var basePath = AppContext.BaseDirectory;
             var requiredFiles = new[] {
                     "Resources/mascot-body.png",
@@ -43,11 +42,11 @@ namespace DesktopApplicationTemplate.UI.Helpers
             {
                 if (!File.Exists(file))
                 {
-                    Console.WriteLine($"[DependencyChecker] MISSING FILE: {file}");
+                    logger?.Log($"[DependencyChecker] MISSING FILE: {file}", LogLevel.Warning);
                 }
                 else
                 {
-                    Console.WriteLine($"[DependencyChecker] OK: {file}");
+                    logger?.Log($"[DependencyChecker] OK: {file}", LogLevel.Debug);
                 }
             }
         }
