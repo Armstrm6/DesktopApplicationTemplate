@@ -1,4 +1,5 @@
 using FluentFTP;
+using FluentFTP.Client.BaseClient; // Required for async methods
 using System.Threading.Tasks;
 
 namespace DesktopApplicationTemplate.UI.Services
@@ -18,9 +19,9 @@ namespace DesktopApplicationTemplate.UI.Services
 
         public async Task UploadAsync(string localPath, string remotePath)
         {
-            await _client.ConnectAsync();
-            await _client.UploadFileAsync(localPath, remotePath, FtpRemoteExists.Overwrite);
-            await _client.DisconnectAsync();
+            _client.Connect();
+            _client.UploadFile(localPath, remotePath, FtpRemoteExists.Overwrite);
+            _client.Disconnect();
         }
     }
 }
