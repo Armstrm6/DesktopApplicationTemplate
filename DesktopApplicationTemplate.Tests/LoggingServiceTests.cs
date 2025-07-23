@@ -5,6 +5,7 @@ using System.Windows.Threading;
 using System.IO;
 using Xunit;
 using System.Text.RegularExpressions;
+using System;
 
 namespace DesktopApplicationTemplate.Tests
 {
@@ -17,6 +18,10 @@ namespace DesktopApplicationTemplate.Tests
         [InlineData(LogLevel.Critical)]
         public void Log_AddsFormattedMessageToRichTextBox(LogLevel level)
         {
+            if (!OperatingSystem.IsWindows())
+            {
+                return;
+            }
             var box = new RichTextBox();
             var service = new LoggingService(box, Dispatcher.CurrentDispatcher);
 
@@ -31,6 +36,10 @@ namespace DesktopApplicationTemplate.Tests
         [Fact]
         public void Log_WritesMessageToFile()
         {
+            if (!OperatingSystem.IsWindows())
+            {
+                return;
+            }
             var path = Path.GetTempFileName();
             try
             {
