@@ -6,12 +6,13 @@ namespace DesktopApplicationTemplate.UI.Services
 {
     public class MqttService
     {
-        private IMqttClient _client;
-        private readonly MqttFactory _factory = new MqttFactory();
+        private readonly IMqttClient _client;
 
         public MqttService()
         {
-            _client = _factory.CreateMqttClient();
+            // MqttFactory is provided by MQTTnet and is used to create clients
+            var factory = new MqttFactory();
+            _client = factory.CreateMqttClient();
         }
 
         public async Task ConnectAsync(string host, int port, string clientId, string? user, string? pass)
