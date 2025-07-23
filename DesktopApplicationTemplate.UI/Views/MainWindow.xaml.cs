@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using DesktopApplicationTemplate.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using Microsoft.VisualBasic;
+using System.Windows.Forms;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
 using System.Windows.Media;

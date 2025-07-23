@@ -51,8 +51,8 @@ namespace DesktopApplication.Installer.ViewModels
             using var writer = new StreamWriter(logFile, append: false);
             try
             {
-                await RunStep(writer, 10, "Creating directories...", async () => await Task.Delay(500));
-                await RunStep(writer, 30, "Copying files...", async () => await Task.Delay(500));
+                await RunStep(writer, 10, "Creating directories...", async () => await Task.Run(() => Directory.CreateDirectory(_installPath)));
+                await RunStep(writer, 30, "Copying files...", async () => await Task.Run(CopyApplicationFiles));
                 await RunStep(writer, 60, "Installing dependencies...", async () => await Task.Delay(500));
                 if (_firewall)
                     await RunStep(writer, 80, "Configuring firewall...", async () => await Task.Delay(500));
@@ -84,6 +84,36 @@ namespace DesktopApplication.Installer.ViewModels
             writer.WriteLine(message);
             writer.Flush();
             LogText += message + Environment.NewLine;
+        }
+
+        private void CopyApplicationFiles()
+        {
+            var sourceDir = AppContext.BaseDirectory;
+            foreach (var file in Directory.GetFiles(sourceDir))
+            {
+                var dest = Path.Combine(_installPath, Path.GetFileName(file));
+                File.Copy(file, dest, overwrite: true);
+            }
+            foreach (var dir in Directory.GetDirectories(sourceDir))
+            {
+                var destDir = Path.Combine(_installPath, Path.GetFileName(dir));
+                CopyDirectory(dir, destDir);
+            }
+        }
+
+        private void CopyDirectory(string source, string dest)
+        {
+            Directory.CreateDirectory(dest);
+            foreach (var file in Directory.GetFiles(source))
+            {
+                var destFile = Path.Combine(dest, Path.GetFileName(file));
+                File.Copy(file, destFile, overwrite: true);
+            }
+            foreach (var dir in Directory.GetDirectories(source))
+            {
+                var destSub = Path.Combine(dest, Path.GetFileName(dir));
+                CopyDirectory(dir, destSub);
+            }
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
