@@ -12,7 +12,7 @@
         <helpers:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
     </Window.Resources>
 
-    <Border BorderBrush="LimeGreen" BorderThickness="3" CornerRadius="10">
+    <Border BorderBrush="LimeGreen" BorderThickness="3" CornerRadius="15">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -96,6 +96,7 @@
 
         <Button Content="⚙" Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10" Click="OpenSettings_Click"/>
 
+    </Grid>
     </Grid>
     </Border>
 </Window>
