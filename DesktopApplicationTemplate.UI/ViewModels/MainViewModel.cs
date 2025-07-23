@@ -73,7 +73,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             LogAdded?.Invoke(this, entry);
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string name = null) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
@@ -98,10 +98,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels
     {
         public ObservableCollection<ServiceViewModel> Services { get; set; } = new();
         public ObservableCollection<LogEntry> AllLogs { get; } = new();
-        private ServiceViewModel _selectedService;
+        private ServiceViewModel? _selectedService;
         public ServiceViewModel SelectedService
         {
-            get => _selectedService;
+            get => _selectedService!;
             set { _selectedService = value; OnPropertyChanged(); OnPropertyChanged(nameof(DisplayLogs)); }
         }
         public ICommand AddServiceCommand { get; }
@@ -191,7 +191,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             OnPropertyChanged(nameof(DisplayLogs));
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string name = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }

@@ -9,7 +9,7 @@ using WpfBrush = System.Windows.Media.Brush;
 using WpfBrushes = System.Windows.Media.Brushes;
 using System.Windows.Threading;
 
-namespace DesktopApplicationTemplate.Services
+namespace DesktopApplicationTemplate.UI.Services
 {
     public class LoggingService : ILoggingService
     {

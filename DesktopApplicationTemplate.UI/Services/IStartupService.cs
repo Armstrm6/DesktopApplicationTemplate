@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DesktopApplicationTemplate.Services
+namespace DesktopApplicationTemplate.UI.Services
 {
     public interface IStartupService
     {
