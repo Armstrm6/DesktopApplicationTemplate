@@ -1,27 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using DesktopApplication.Installer.ViewModels;
 
 namespace DesktopApplication.Installer.Views
 {
-    /// <summary>
-    /// Interaction logic for ProgressWindow.xaml
-    /// </summary>
     public partial class ProgressWindow : Window
     {
         public ProgressWindow()
         {
             InitializeComponent();
+            DataContextChanged += OnDataContextChanged;
+        }
+
+        private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.OldValue is ProgressWindowViewModel oldVm)
+                oldVm.PropertyChanged -= OnVmPropertyChanged;
+            if (e.NewValue is ProgressWindowViewModel newVm)
+                newVm.PropertyChanged += OnVmPropertyChanged;
+        }
+
+        private void OnVmPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ProgressWindowViewModel.LogText))
+            {
+                LogScrollViewer.ScrollToEnd();
+            }
         }
     }
 }
