@@ -52,11 +52,14 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     if (_isActive)
                         AddLog("[Service Activated]", WpfBrushes.Green);
                     else
-                        AddLog("[Service Deactivated]", WpfBrushes.Red);                }
+                        AddLog("[Service Deactivated]", WpfBrushes.Red);
+                    ActiveChanged?.Invoke(_isActive);
+                }
             }
         }
 
         public ObservableCollection<LogEntry> Logs { get; set; } = new();
+        public event Action<bool>? ActiveChanged;
 
         public event Action<ServiceViewModel, LogEntry>? LogAdded;
         public void AddLog(string message, WpfBrush? color = null)
@@ -93,6 +96,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 "File Observer" => (WpfBrushes.LightSalmon, WpfBrushes.DarkSalmon),
                 "HID" => (WpfBrushes.LightYellow, WpfBrushes.Goldenrod),
                 "Heartbeat" => (WpfBrushes.LightPink, WpfBrushes.DeepPink),
+                "SCP" => (WpfBrushes.LightCyan, WpfBrushes.CadetBlue),
+                "MQTT" => (WpfBrushes.LightGoldenrodYellow, WpfBrushes.Goldenrod),
+                "FTP" => (WpfBrushes.LightSteelBlue, WpfBrushes.SteelBlue),
                 _ => (WpfBrushes.LightGray, WpfBrushes.Gray)
             };
             OnPropertyChanged(nameof(BackgroundColor));

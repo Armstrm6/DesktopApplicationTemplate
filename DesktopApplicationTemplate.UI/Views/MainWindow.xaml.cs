@@ -63,11 +63,24 @@ namespace DesktopApplicationTemplate.UI.Views
                     "File Observer" => App.AppHost.Services.GetRequiredService<FileObserverView>(),
                     "HID" => new HidViews(),
                     "Heartbeat" => new HeartbeatView(App.AppHost.Services.GetRequiredService<HeartbeatViewModel>()),
+                    "SCP" => new SCPServiceView(App.AppHost.Services.GetRequiredService<ScpServiceViewModel>()),
+                    "MQTT" => new MQTTServiceView(App.AppHost.Services.GetRequiredService<MqttServiceViewModel>()),
+                    "FTP" => new FTPServiceView(App.AppHost.Services.GetRequiredService<FtpServiceViewModel>()),
                     _ => null
                 };
 
                 _viewModel.Services.Add(newService);
                 _viewModel.SelectedService = newService;
+
+                if (type == "MQTT" && newService.ServicePage is MQTTServiceView mqttView)
+                {
+                    var vm = (MqttServiceViewModel)mqttView.DataContext!;
+                    newService.ActiveChanged += async active =>
+                    {
+                        if (active)
+                            await vm.ConnectAsync();
+                    };
+                }
 
                 if (newService.ServicePage != null)
                 {

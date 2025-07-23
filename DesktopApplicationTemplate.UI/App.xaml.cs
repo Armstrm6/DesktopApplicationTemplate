@@ -46,6 +46,12 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<FileObserverViewModel>();
             services.AddSingleton<HeartbeatView>();
             services.AddSingleton<HeartbeatViewModel>();
+            services.AddSingleton<SCPServiceView>();
+            services.AddSingleton<ScpServiceViewModel>();
+            services.AddSingleton<MQTTServiceView>();
+            services.AddSingleton<MqttServiceViewModel>();
+            services.AddSingleton<FTPServiceView>();
+            services.AddSingleton<FtpServiceViewModel>();
             services.AddSingleton<CsvViewerViewModel>();
             services.AddSingleton<CsvService>();
             services.AddSingleton<SettingsViewModel>();
