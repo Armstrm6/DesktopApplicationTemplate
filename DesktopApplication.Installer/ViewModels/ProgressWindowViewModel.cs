@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -86,29 +87,41 @@ namespace DesktopApplication.Installer.ViewModels
             LogText += message + Environment.NewLine;
         }
 
-        private static readonly string[] AdditionalAssemblies =
-        {
-            "Renci.SshNet.dll",
-            "MQTTnet.dll",
-            "FluentFTP.dll"
-        };
-
         private void CopyApplicationFiles()
         {
             var sourceDir = AppContext.BaseDirectory;
+
             foreach (var file in Directory.GetFiles(sourceDir))
             {
                 var dest = Path.Combine(_installPath, Path.GetFileName(file));
                 File.Copy(file, dest, overwrite: true);
             }
 
-            foreach (var name in AdditionalAssemblies)
+            var depsJson = Directory.GetFiles(sourceDir, "*.deps.json").FirstOrDefault();
+            if (depsJson is not null)
             {
-                var file = Directory.EnumerateFiles(sourceDir, name, SearchOption.AllDirectories).FirstOrDefault();
-                if (file is not null)
+                using var doc = JsonDocument.Parse(File.ReadAllText(depsJson));
+                if (doc.RootElement.TryGetProperty("targets", out var targets))
                 {
-                    var dest = Path.Combine(_installPath, Path.GetFileName(file));
-                    File.Copy(file, dest, overwrite: true);
+                    foreach (var framework in targets.EnumerateObject())
+                    {
+                        foreach (var library in framework.Value.EnumerateObject())
+                        {
+                            if (library.Value.TryGetProperty("runtime", out var runtime))
+                            {
+                                foreach (var runtimeFile in runtime.EnumerateObject())
+                                {
+                                    var relative = runtimeFile.Name.Replace('/', Path.DirectorySeparatorChar);
+                                    var file = Path.Combine(sourceDir, relative);
+                                    if (File.Exists(file))
+                                    {
+                                        var dest = Path.Combine(_installPath, Path.GetFileName(file));
+                                        File.Copy(file, dest, overwrite: true);
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
