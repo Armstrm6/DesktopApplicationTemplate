@@ -40,7 +40,7 @@ namespace DesktopApplication.Installer
     ///     <MyNamespace:CustomControl1/>
     ///
     /// </summary>
-    public class CustomControl1 : Control
+    public class CustomControl1 : System.Windows.Controls.Control
     {
         static CustomControl1()
         {
