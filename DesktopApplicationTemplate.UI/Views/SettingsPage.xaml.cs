@@ -7,6 +7,9 @@ namespace DesktopApplicationTemplate.UI.Views
     public partial class SettingsPage : Page
     {
         private readonly SettingsViewModel _viewModel;
+        public SettingsPage() : this(new SettingsViewModel())
+        {
+        }
         public SettingsPage(SettingsViewModel vm)
         {
             InitializeComponent();

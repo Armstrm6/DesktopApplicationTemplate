@@ -7,6 +7,7 @@ using Microsoft.VisualBasic;
 using System.Windows.Forms;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
+using WpfColor = System.Windows.Media.Color;
 using System.Windows.Media;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Views;
@@ -174,7 +175,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 var dlg = new System.Windows.Forms.ColorDialog();
                 if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
-                    var color = Color.FromArgb(dlg.Color.A, dlg.Color.R, dlg.Color.G, dlg.Color.B);
+                    var color = WpfColor.FromArgb(dlg.Color.A, dlg.Color.R, dlg.Color.G, dlg.Color.B);
                     var brush = new SolidColorBrush(color);
                     foreach (var s in _viewModel.Services.Where(s => s.ServiceType == svc.ServiceType))
                     {

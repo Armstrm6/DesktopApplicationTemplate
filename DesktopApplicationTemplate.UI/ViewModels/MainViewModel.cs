@@ -10,14 +10,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Controls;
-using System.Windows.Media;
+using WpfBrush = System.Windows.Media.Brush;
+using WpfBrushes = System.Windows.Media.Brushes;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
     public class LogEntry
     {
         public string Message { get; set; } = string.Empty;
-        public Brush Color { get; set; } = Brushes.Black;
+        public WpfBrush Color { get; set; } = WpfBrushes.Black;
     }
 
     public class ServiceViewModel : INotifyPropertyChanged
@@ -26,8 +27,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public string ServiceType { get; set; } = string.Empty;
         public Page? Page { get; set; }
 
-        public Brush BackgroundColor { get; set; } = Brushes.LightGray;
-        public Brush BorderColor { get; set; } = Brushes.Gray;
+        public WpfBrush BackgroundColor { get; set; } = WpfBrushes.LightGray;
+        public WpfBrush BorderColor { get; set; } = WpfBrushes.Gray;
         public Page? ServicePage { get; set; }
  
 
@@ -42,19 +43,19 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     _isActive = value;
                     OnPropertyChanged();
                     if (_isActive)
-                        AddLog("[Service Activated]", Brushes.Green);
+                        AddLog("[Service Activated]", WpfBrushes.Green);
                     else
-                        AddLog("[Service Deactivated]", Brushes.Red);                }
+                        AddLog("[Service Deactivated]", WpfBrushes.Red);                }
             }
         }
 
         public ObservableCollection<LogEntry> Logs { get; set; } = new();
 
         public event Action<ServiceViewModel, LogEntry>? LogAdded;
-        public void AddLog(string message, Brush? color = null)
+        public void AddLog(string message, WpfBrush? color = null)
         {
             string ts = DateTime.Now.ToString("MM.dd.yyyy - HH:mm:ss:ff");
-            var entry = new LogEntry { Message = $"{ts} {message}", Color = color ?? Brushes.Black };
+            var entry = new LogEntry { Message = $"{ts} {message}", Color = color ?? WpfBrushes.Black };
             Logs.Insert(0, entry);
             LogAdded?.Invoke(this, entry);
         }
@@ -66,7 +67,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             var entry = new LogEntry
             {
                 Message = $"{timestamp} {message}",
-                Color = Brushes.Black
+                Color = WpfBrushes.Black
             };
             Logs.Insert(0, entry);
             LogAdded?.Invoke(this, entry);
@@ -80,12 +81,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         {
             (BackgroundColor, BorderColor) = ServiceType switch
             {
-                "TCP" => (Brushes.LightBlue, Brushes.DarkBlue),
-                "HTTP" => (Brushes.LightGreen, Brushes.DarkGreen),
-                "File Observer" => (Brushes.LightSalmon, Brushes.DarkSalmon),
-                "HID" => (Brushes.LightYellow, Brushes.Goldenrod),
-                "Heartbeat" => (Brushes.LightPink, Brushes.DeepPink),
-                _ => (Brushes.LightGray, Brushes.Gray)
+                "TCP" => (WpfBrushes.LightBlue, WpfBrushes.DarkBlue),
+                "HTTP" => (WpfBrushes.LightGreen, WpfBrushes.DarkGreen),
+                "File Observer" => (WpfBrushes.LightSalmon, WpfBrushes.DarkSalmon),
+                "HID" => (WpfBrushes.LightYellow, WpfBrushes.Goldenrod),
+                "Heartbeat" => (WpfBrushes.LightPink, WpfBrushes.DeepPink),
+                _ => (WpfBrushes.LightGray, WpfBrushes.Gray)
             };
             OnPropertyChanged(nameof(BackgroundColor));
             OnPropertyChanged(nameof(BorderColor));
