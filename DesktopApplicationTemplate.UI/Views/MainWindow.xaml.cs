@@ -32,9 +32,12 @@ namespace DesktopApplicationTemplate.UI.Views
             {
                 var newService = new ServiceViewModel
                 {
+                    DisplayName = $"{window.CreatedServiceType} - {window.CreatedServiceName}",
+                    ServiceType = window.CreatedServiceType,
                     DisplayName = $"{type} - {name}",
                     IsActive = false
                 };
+                newService.SetColorsByType();
 
                 newService.ServicePage = type switch
                 {
@@ -42,6 +45,7 @@ namespace DesktopApplicationTemplate.UI.Views
                     "HTTP" => App.AppHost.Services.GetRequiredService<HttpServiceView>(),
                     "File Observer" => App.AppHost.Services.GetRequiredService<FileObserverView>(),
                     "HID" => new HidViews(),
+                    "Heartbeat" => new HeartbeatView(App.AppHost.Services.GetRequiredService<HeartbeatViewModel>()),
                     _ => null
                 };
 
