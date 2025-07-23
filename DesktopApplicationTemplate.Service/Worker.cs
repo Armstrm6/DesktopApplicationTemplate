@@ -27,14 +27,28 @@ namespace DesktopApplicationTemplate.Service
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _logger.LogInformation("Service starting at: {time}", DateTimeOffset.Now);
+            _logger.LogDebug("Heartbeat interval set to {interval}s with message '{message}'", IntervalSeconds, HeartbeatMessage);
 
-            while (!stoppingToken.IsCancellationRequested)
+            try
             {
-                _logger.LogInformation("Heartbeat: {message}", HeartbeatMessage);
-                await Task.Delay(TimeSpan.FromSeconds(IntervalSeconds), stoppingToken);
+                while (!stoppingToken.IsCancellationRequested)
+                {
+                    _logger.LogDebug("Sending heartbeat message: {message}", HeartbeatMessage);
+                    await Task.Delay(TimeSpan.FromSeconds(IntervalSeconds), stoppingToken);
+                }
             }
-
-            _logger.LogInformation("Service stopping at: {time}", DateTimeOffset.Now);
+            catch (TaskCanceledException)
+            {
+                _logger.LogWarning("Heartbeat task cancelled");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unhandled exception in Worker");
+            }
+            finally
+            {
+                _logger.LogInformation("Service stopping at: {time}", DateTimeOffset.Now);
+            }
         }
     }
 }

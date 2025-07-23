@@ -13,26 +13,30 @@ namespace DesktopApplicationTemplate.UI.Services
     {
         private readonly IConfiguration _configuration;
         private readonly AppSettings _appSettings;
+        private readonly ILoggingService? _logger;
 
-        public StartupService(IConfiguration configuration)
+        public StartupService(IConfiguration configuration, ILoggingService? logger = null)
         {
             _configuration = configuration;
             _appSettings = _configuration.GetSection("AppSettings").Get<AppSettings>() ?? new AppSettings();
+            _logger = logger;
         }
 
 
         public async Task RunStartupChecksAsync()
         {
-            Console.WriteLine($"[Startup] Environment: {_appSettings.Environment}");
+            _logger?.Log($"Environment: {_appSettings.Environment}", LogLevel.Debug);
             await Task.Run(() => DependencyChecker.CheckAll());
 
             if (_appSettings.AutoStart)
             {
                 AutoStartHelper.EnableAutoStart();
+                _logger?.Log("Auto-start enabled", LogLevel.Debug);
             }
             else
             {
                 AutoStartHelper.DisableAutoStart();
+                _logger?.Log("Auto-start disabled", LogLevel.Debug);
             }
         }
 

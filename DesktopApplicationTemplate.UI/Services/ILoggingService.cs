@@ -15,6 +15,7 @@ namespace DesktopApplicationTemplate.UI.Services
     {
         Debug,
         Warning,
-        Error
+        Error,
+        Critical
     }
 }
