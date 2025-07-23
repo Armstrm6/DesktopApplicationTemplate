@@ -5,6 +5,7 @@ using DesktopApplicationTemplate.UI.Views;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MQTTnet;
 using System.IO;
 using System.Windows;
 
@@ -48,6 +49,7 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<HeartbeatViewModel>();
             services.AddSingleton<SCPServiceView>();
             services.AddSingleton<ScpServiceViewModel>();
+            services.AddSingleton<MqttService>();
             services.AddSingleton<MQTTServiceView>();
             services.AddSingleton<MqttServiceViewModel>();
             services.AddSingleton<FTPServiceView>();

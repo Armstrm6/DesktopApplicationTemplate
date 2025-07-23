@@ -89,7 +89,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             System.Windows.MessageBox.Show("Configuration saved.", "Save", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
-        private async Task SendRequestAsync()
+        public async Task SendRequestAsync()
         {
             if (string.IsNullOrWhiteSpace(Url))
             {
