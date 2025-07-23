@@ -29,8 +29,10 @@ namespace DesktopApplicationTemplate.UI.Views
                 var newService = new ServiceViewModel
                 {
                     DisplayName = $"{window.CreatedServiceType} - {window.CreatedServiceName}",
+                    ServiceType = window.CreatedServiceType,
                     IsActive = false
                 };
+                newService.SetColorsByType();
 
                 _viewModel.Services.Add(newService);
                 _viewModel.SelectedService = newService;
@@ -41,6 +43,7 @@ namespace DesktopApplicationTemplate.UI.Views
                     "HTTP" => App.AppHost.Services.GetRequiredService<HttpServiceView>(),
                     "File Observer" => App.AppHost.Services.GetRequiredService<FileObserverView>(),
                     "HID" => new HidViews(),
+                    "Heartbeat" => new HeartbeatView(App.AppHost.Services.GetRequiredService<HeartbeatViewModel>()),
                     _ => null
                 };
 

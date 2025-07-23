@@ -43,6 +43,8 @@ namespace DesktopApplicationTemplate
             services.AddSingleton<HttpServiceViewModel>();
             services.AddSingleton<FileObserverView>();
             services.AddSingleton<FileObserverViewModel>();
+            services.AddSingleton<HeartbeatView>();
+            services.AddSingleton<HeartbeatViewModel>();
             services.AddTransient<CreateServiceWindow>();
             services.AddTransient<CreateServiceViewModel>();
 

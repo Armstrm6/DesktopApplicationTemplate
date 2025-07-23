@@ -23,7 +23,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
     public class ServiceViewModel : INotifyPropertyChanged
     {
         public string DisplayName { get; set; }
+        public string ServiceType { get; set; } = string.Empty;
         public Page? Page { get; set; }
+
+        public Brush BackgroundColor { get; set; } = Brushes.LightGray;
+        public Brush BorderColor { get; set; } = Brushes.Gray;
 
         private bool _isActive;
         public bool IsActive
@@ -55,6 +59,21 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string name = null) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
+        public void SetColorsByType()
+        {
+            (BackgroundColor, BorderColor) = ServiceType switch
+            {
+                "TCP" => (Brushes.LightBlue, Brushes.DarkBlue),
+                "HTTP" => (Brushes.LightGreen, Brushes.DarkGreen),
+                "File Observer" => (Brushes.LightSalmon, Brushes.DarkSalmon),
+                "HID" => (Brushes.LightYellow, Brushes.Goldenrod),
+                "Heartbeat" => (Brushes.LightPink, Brushes.DeepPink),
+                _ => (Brushes.LightGray, Brushes.Gray)
+            };
+            OnPropertyChanged(nameof(BackgroundColor));
+            OnPropertyChanged(nameof(BorderColor));
+        }
     }
 
 
@@ -87,8 +106,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 var newService = new ServiceViewModel
                 {
                     DisplayName = $"{popup.CreatedServiceType} - {popup.CreatedServiceName}",
+                    ServiceType = popup.CreatedServiceType,
                     IsActive = false
                 };
+                newService.SetColorsByType();
                 Services.Add(newService);
                 OnPropertyChanged(nameof(ServicesCreated));
                 OnPropertyChanged(nameof(CurrentActiveServices));
