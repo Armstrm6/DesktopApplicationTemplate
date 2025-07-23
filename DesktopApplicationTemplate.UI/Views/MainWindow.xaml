@@ -87,7 +87,7 @@
             <TextBlock Text="{Binding ServicesCreated}" />
             <TextBlock Text="Current Active Services:" />
             <TextBlock Text="{Binding CurrentActiveServices}" />
-            <ListBox ItemsSource="{Binding SelectedService.Logs}" Height="150">
+            <ListBox ItemsSource="{Binding DisplayLogs}" Height="150">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding Message}" Foreground="{Binding Color}"/>

@@ -34,6 +34,29 @@ namespace DesktopApplicationTemplate.UI.Views
             MouseDown += MainView_MouseDown;
         }
 
+        private Page? GetOrCreateServicePage(ServiceViewModel svc)
+        {
+            if (svc.ServicePage != null)
+                return svc.ServicePage;
+
+            svc.ServicePage = svc.ServiceType switch
+            {
+                "TCP" => new TcpServiceView(
+                    App.AppHost.Services.GetRequiredService<TcpServiceViewModel>(),
+                    App.AppHost.Services.GetRequiredService<IStartupService>()),
+                "HTTP" => App.AppHost.Services.GetRequiredService<HttpServiceView>(),
+                "File Observer" => App.AppHost.Services.GetRequiredService<FileObserverView>(),
+                "HID" => new HidViews(),
+                "Heartbeat" => new HeartbeatView(App.AppHost.Services.GetRequiredService<HeartbeatViewModel>()),
+                "SCP" => new SCPServiceView(App.AppHost.Services.GetRequiredService<ScpServiceViewModel>()),
+                "MQTT" => new MQTTServiceView(App.AppHost.Services.GetRequiredService<MqttServiceViewModel>()),
+                "FTP" => new FTPServiceView(App.AppHost.Services.GetRequiredService<FtpServiceViewModel>()),
+                _ => null
+            };
+
+            return svc.ServicePage;
+        }
+
         private void AddService_Click(object sender, RoutedEventArgs e)
         {
             // Open the service creation workflow in its own window
@@ -54,20 +77,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 newService.SetColorsByType();
                 newService.LogAdded += _viewModel.OnServiceLogAdded;
 
-                newService.ServicePage = type switch
-                {
-                    "TCP" => new TcpServiceView(
-                        App.AppHost.Services.GetRequiredService<TcpServiceViewModel>(),
-                        App.AppHost.Services.GetRequiredService<IStartupService>()),
-                    "HTTP" => App.AppHost.Services.GetRequiredService<HttpServiceView>(),
-                    "File Observer" => App.AppHost.Services.GetRequiredService<FileObserverView>(),
-                    "HID" => new HidViews(),
-                    "Heartbeat" => new HeartbeatView(App.AppHost.Services.GetRequiredService<HeartbeatViewModel>()),
-                    "SCP" => new SCPServiceView(App.AppHost.Services.GetRequiredService<ScpServiceViewModel>()),
-                    "MQTT" => new MQTTServiceView(App.AppHost.Services.GetRequiredService<MqttServiceViewModel>()),
-                    "FTP" => new FTPServiceView(App.AppHost.Services.GetRequiredService<FtpServiceViewModel>()),
-                    _ => null
-                };
+                GetOrCreateServicePage(newService);
 
                 _viewModel.Services.Add(newService);
                 _viewModel.SelectedService = newService;
@@ -94,9 +104,10 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private void OnEditRequested(ServiceViewModel service)
         {
-            if (service.ServicePage != null)
+            var page = GetOrCreateServicePage(service);
+            if (page != null)
             {
-                var editor = new ServiceEditorWindow(service.ServicePage);
+                var editor = new ServiceEditorWindow(page);
                 editor.ShowDialog();
                 ContentFrame.Content = new HomePage { DataContext = _viewModel };
             }
@@ -112,10 +123,14 @@ namespace DesktopApplicationTemplate.UI.Views
         }
         private void EditService_Click(object sender, RoutedEventArgs e)
         {
-            if (_viewModel.SelectedService?.ServicePage != null)
+            if (_viewModel.SelectedService == null)
+                return;
+
+            var page = GetOrCreateServicePage(_viewModel.SelectedService);
+            if (page != null)
             {
                 _viewModel.SelectedService.IsActive = false;
-                var editor = new ServiceEditorWindow(_viewModel.SelectedService.ServicePage);
+                var editor = new ServiceEditorWindow(page);
                 editor.ShowDialog();
                 ContentFrame.Content = new HomePage { DataContext = _viewModel };
             }
@@ -132,12 +147,16 @@ namespace DesktopApplicationTemplate.UI.Views
             if (e.ClickCount != 2)
                 return;
 
-            if ((sender as Border)?.DataContext is ServiceViewModel svc && svc.ServicePage != null)
+            if ((sender as Border)?.DataContext is ServiceViewModel svc)
             {
-                svc.IsActive = false;
-                var editor = new ServiceEditorWindow(svc.ServicePage);
-                editor.ShowDialog();
-                ContentFrame.Content = new HomePage { DataContext = _viewModel };
+                var page = GetOrCreateServicePage(svc);
+                if (page != null)
+                {
+                    svc.IsActive = false;
+                    var editor = new ServiceEditorWindow(page);
+                    editor.ShowDialog();
+                    ContentFrame.Content = new HomePage { DataContext = _viewModel };
+                }
             }
         }
 
@@ -160,12 +179,16 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private void EditServiceMenu_Click(object sender, RoutedEventArgs e)
         {
-            if ((sender as MenuItem)?.DataContext is ServiceViewModel svc && svc.ServicePage != null)
+            if ((sender as MenuItem)?.DataContext is ServiceViewModel svc)
             {
-                svc.IsActive = false;
-                var editor = new ServiceEditorWindow(svc.ServicePage);
-                editor.ShowDialog();
-                ContentFrame.Content = new HomePage { DataContext = _viewModel };
+                var page = GetOrCreateServicePage(svc);
+                if (page != null)
+                {
+                    svc.IsActive = false;
+                    var editor = new ServiceEditorWindow(page);
+                    editor.ShowDialog();
+                    ContentFrame.Content = new HomePage { DataContext = _viewModel };
+                }
             }
         }
 
