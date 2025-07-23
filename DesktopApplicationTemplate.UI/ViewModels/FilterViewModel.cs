@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
-    public class FilterViewModel : INotifyPropertyChanged
+    public class FilterViewModel : ViewModelBase
     {
         private string _nameFilter = string.Empty;
         public string NameFilter
@@ -26,8 +26,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             set { _statusFilter = value; OnPropertyChanged(); }
         }
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-        private void OnPropertyChanged([CallerMemberName] string name = null)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        // OnPropertyChanged from ViewModelBase
     }
 }

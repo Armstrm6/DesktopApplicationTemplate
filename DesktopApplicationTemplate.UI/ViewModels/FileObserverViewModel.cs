@@ -6,7 +6,7 @@ using System.Windows;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
-    public class FileObserverViewModel : INotifyPropertyChanged
+    public class FileObserverViewModel : ViewModelBase
     {
         public ObservableCollection<FileObserver> Observers { get; } = new();
         private FileObserver? _selectedObserver;
@@ -133,9 +133,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             System.Windows.MessageBox.Show("Configuration saved.", "Save", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-        private void OnPropertyChanged([CallerMemberName] string name = null)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        // OnPropertyChanged inherited from ViewModelBase
     }
 
     public class FileObserver
