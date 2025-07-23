@@ -9,10 +9,28 @@ namespace DesktopApplicationTemplate.UI.ViewModels
     public class MqttServiceViewModel : ViewModelBase
     {
         private string _host = string.Empty;
-        public string Host { get => _host; set { _host = value; OnPropertyChanged(); } }
+        public string Host
+        {
+            get => _host;
+            set
+            {
+                if (System.Net.IPAddress.TryParse(value, out _) || string.IsNullOrWhiteSpace(value))
+                    _host = value;
+                OnPropertyChanged();
+            }
+        }
 
         private string _port = "1883";
-        public string Port { get => _port; set { _port = value; OnPropertyChanged(); } }
+        public string Port
+        {
+            get => _port;
+            set
+            {
+                if (int.TryParse(value, out _))
+                    _port = value;
+                OnPropertyChanged();
+            }
+        }
 
         private string _clientId = "client1";
         public string ClientId { get => _clientId; set { _clientId = value; OnPropertyChanged(); } }

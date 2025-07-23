@@ -6,5 +6,6 @@ namespace DesktopApplicationTemplate.Models
         public bool AutoCheckUpdates { get; set; }
         public bool RunUIOnStartup { get; set; }
         public bool RunServicesOnStartup { get; set; }
+        public bool LogTcpMessages { get; set; } = true;
     }
 }

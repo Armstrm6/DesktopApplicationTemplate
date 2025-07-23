@@ -22,13 +22,37 @@ namespace DesktopApplicationTemplate.UI.Views
     public partial class HttpServiceView : Page
     {
         private readonly ViewModels.HttpServiceViewModel _viewModel;
+        private readonly LoggingService _logger;
 
         public HttpServiceView(ViewModels.HttpServiceViewModel viewModel)
         {
             InitializeComponent();
             _viewModel = viewModel;
             DataContext = _viewModel;
-            _viewModel.Logger = new LoggingService(LogBox, Dispatcher);
+            _logger = new LoggingService(LogBox, Dispatcher);
+            _viewModel.Logger = _logger;
+        }
+
+        private void LogLevelBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (LogLevelBox.SelectedItem is ComboBoxItem item)
+            {
+                switch (item.Content?.ToString())
+                {
+                    case "Warning":
+                        _logger.MinimumLevel = LogLevel.Warning;
+                        break;
+                    case "Error":
+                        _logger.MinimumLevel = LogLevel.Error;
+                        break;
+                    case "Debug":
+                        _logger.MinimumLevel = LogLevel.Debug;
+                        break;
+                    default:
+                        _logger.MinimumLevel = LogLevel.Debug;
+                        break;
+                }
+            }
         }
     }
 }

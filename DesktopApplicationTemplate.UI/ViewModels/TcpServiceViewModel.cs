@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -34,31 +35,56 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public string ComputerIp
         {
             get => _computerIp;
-            set { _computerIp = value; OnPropertyChanged(); }
+            set
+            {
+                if (System.Net.IPAddress.TryParse(value, out _) || string.IsNullOrWhiteSpace(value))
+                    _computerIp = value;
+                OnPropertyChanged();
+            }
         }
 
         public string ListeningPort
         {
             get => _listeningPort;
-            set { _listeningPort = value; OnPropertyChanged(); }
+            set
+            {
+                if (int.TryParse(value, out _))
+                    _listeningPort = value;
+                OnPropertyChanged();
+            }
         }
 
         public string ServerIp
         {
             get => _serverIp;
-            set { _serverIp = value; OnPropertyChanged(); }
+            set
+            {
+                if (System.Net.IPAddress.TryParse(value, out _) || string.IsNullOrWhiteSpace(value))
+                    _serverIp = value;
+                OnPropertyChanged();
+            }
         }
 
         public string ServerGateway
         {
             get => _serverGateway;
-            set { _serverGateway = value; OnPropertyChanged(); }
+            set
+            {
+                if (System.Net.IPAddress.TryParse(value, out _) || string.IsNullOrWhiteSpace(value))
+                    _serverGateway = value;
+                OnPropertyChanged();
+            }
         }
 
         public string ServerPort
         {
             get => _serverPort;
-            set { _serverPort = value; OnPropertyChanged(); }
+            set
+            {
+                if (int.TryParse(value, out _))
+                    _serverPort = value;
+                OnPropertyChanged();
+            }
         }
 
         public string ScriptContent
@@ -82,7 +108,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 OnPropertyChanged();
                 if (!string.IsNullOrWhiteSpace(value))
                 {
-                    Logger?.Log($"Received test message: {value}", LogLevel.Debug);
+                    if (SettingsViewModel.TcpLoggingEnabled)
+                        Logger?.Log($"Received test message: {value}", LogLevel.Debug);
                 }
             }
         }
@@ -131,30 +158,46 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         private void ToggleServer()
         {
-            Logger?.Log("Toggling server state", LogLevel.Debug);
+            if (SettingsViewModel.TcpLoggingEnabled)
+                Logger?.Log("Toggling server state", LogLevel.Debug);
             IsServerRunning = !IsServerRunning;
             if (IsServerRunning)
-                Logger?.Log($"Server started on {ComputerIp}:{ListeningPort}", LogLevel.Debug);
+                if (SettingsViewModel.TcpLoggingEnabled)
+                    Logger?.Log($"Server started on {ComputerIp}:{ListeningPort}", LogLevel.Debug);
             else
-                Logger?.Log("Server stopped", LogLevel.Debug);
+                if (SettingsViewModel.TcpLoggingEnabled)
+                    Logger?.Log("Server stopped", LogLevel.Debug);
         }
 
         private void TestScript()
         {
             if (string.IsNullOrWhiteSpace(TestMessage))
             {
-                Logger?.Log("TestScript called with empty message", LogLevel.Warning);
+                if (SettingsViewModel.TcpLoggingEnabled)
+                    Logger?.Log("TestScript called with empty message", LogLevel.Warning);
             }
-            Logger?.Log($"Executing script using {SelectedLanguage}", LogLevel.Debug);
+            if (SettingsViewModel.TcpLoggingEnabled)
+                Logger?.Log($"Executing script using {SelectedLanguage}", LogLevel.Debug);
             try
             {
-                var result = ScriptContent.Replace("message", TestMessage);
-                Logger?.Log($"Script output: {result}", LogLevel.Debug);
-                System.Windows.MessageBox.Show(result, "Test Result");
+                if (SelectedLanguage == "C#")
+                {
+                    var script = ScriptContent + $"\nProcess(\"{TestMessage}\");";
+                    var result = CSharpScript.EvaluateAsync<string>(script).Result;
+                    if (SettingsViewModel.TcpLoggingEnabled)
+                        Logger?.Log($"Script output: {result}", LogLevel.Debug);
+                    System.Windows.MessageBox.Show(result, "Test Result");
+                }
+                else
+                {
+                    if (SettingsViewModel.TcpLoggingEnabled)
+                        Logger?.Log("Python execution not supported", LogLevel.Warning);
+                }
             }
             catch (System.Exception ex)
             {
-                Logger?.Log($"Script execution error: {ex.Message}", LogLevel.Error);
+                if (SettingsViewModel.TcpLoggingEnabled)
+                    Logger?.Log($"Script execution error: {ex.Message}", LogLevel.Error);
             }
         }
 

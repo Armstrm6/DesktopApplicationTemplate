@@ -43,12 +43,11 @@
                 <TextBlock Text="Services" FontWeight="Bold" />
                 <Button Content="🔍" Width="20" Margin="5,0,0,0" Click="OpenFilter_Click"/>
             </StackPanel>
-            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
-                <ListBox ItemsSource="{Binding FilteredServices}"
-                         SelectedItem="{Binding SelectedService}"
-                         BorderThickness="0"
-                         HorizontalContentAlignment="Stretch"
-                         SelectionChanged="ServiceList_SelectionChanged">
+            <ListBox Grid.Row="2" ItemsSource="{Binding FilteredServices}"
+                     SelectedItem="{Binding SelectedService}"
+                     BorderThickness="0"
+                     HorizontalContentAlignment="Stretch"
+                     SelectionChanged="ServiceList_SelectionChanged">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <Border CornerRadius="8"
@@ -80,8 +79,7 @@
                             </Border>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
-                </ListBox>
-            </ScrollViewer>
+            </ListBox>
         </Grid>
 
         <!-- Right Panel -->

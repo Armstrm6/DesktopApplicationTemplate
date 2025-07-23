@@ -8,10 +8,28 @@ namespace DesktopApplicationTemplate.UI.ViewModels
     public class FtpServiceViewModel : ViewModelBase
     {
         private string _host = string.Empty;
-        public string Host { get => _host; set { _host = value; OnPropertyChanged(); } }
+        public string Host
+        {
+            get => _host;
+            set
+            {
+                if (System.Net.IPAddress.TryParse(value, out _) || string.IsNullOrWhiteSpace(value))
+                    _host = value;
+                OnPropertyChanged();
+            }
+        }
 
         private string _port = "21";
-        public string Port { get => _port; set { _port = value; OnPropertyChanged(); } }
+        public string Port
+        {
+            get => _port;
+            set
+            {
+                if (int.TryParse(value, out _))
+                    _port = value;
+                OnPropertyChanged();
+            }
+        }
 
         private string _username = string.Empty;
         public string Username { get => _username; set { _username = value; OnPropertyChanged(); } }
