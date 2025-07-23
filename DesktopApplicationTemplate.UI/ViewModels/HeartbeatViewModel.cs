@@ -5,7 +5,7 @@ using System.Windows;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
-    public class HeartbeatViewModel : INotifyPropertyChanged
+    public class HeartbeatViewModel : ViewModelBase
     {
         private string _baseMessage = "HEARTBEAT";
         public string BaseMessage
@@ -63,8 +63,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             System.Windows.MessageBox.Show("Configuration saved.", "Save", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-        private void OnPropertyChanged([CallerMemberName] string? name = null)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        // OnPropertyChanged from ViewModelBase
     }
 }

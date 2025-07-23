@@ -17,7 +17,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public WpfBrush Color { get; set; } = WpfBrushes.Black;
     }
 
-    public class ServiceViewModel : INotifyPropertyChanged
+    public class ServiceViewModel : ViewModelBase
     {
         public string DisplayName { get; set; }
         public string ServiceType { get; set; } = string.Empty;
@@ -62,30 +62,14 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public event Action<bool>? ActiveChanged;
 
         public event Action<ServiceViewModel, LogEntry>? LogAdded;
+
         public void AddLog(string message, WpfBrush? color = null)
         {
-            string ts = DateTime.Now.ToString("MM.dd.yyyy - HH:mm:ss:ff");
+            var ts = DateTime.Now.ToString("MM.dd.yyyy - HH:mm:ss.fffffff");
             var entry = new LogEntry { Message = $"{ts} {message}", Color = color ?? WpfBrushes.Black };
             Logs.Insert(0, entry);
             LogAdded?.Invoke(this, entry);
         }
-
-
-        public void AddLog(string message)
-        {
-            var timestamp = DateTime.Now.ToString("MM.dd.yyyy - HH:mm:ss.fffffff");
-            var entry = new LogEntry
-            {
-                Message = $"{timestamp} {message}",
-                Color = WpfBrushes.Black
-            };
-            Logs.Insert(0, entry);
-            LogAdded?.Invoke(this, entry);
-        }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-        private void OnPropertyChanged([CallerMemberName] string name = null) =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
         public void SetColorsByType()
         {
@@ -107,7 +91,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
     }
 
 
-    public class MainViewModel : INotifyPropertyChanged
+    public class MainViewModel : ViewModelBase
     {
         public ObservableCollection<ServiceViewModel> Services { get; set; } = new();
         public ICollectionView FilteredServices { get; }
@@ -243,9 +227,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             OnPropertyChanged(nameof(DisplayLogs));
         }
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-        private void OnPropertyChanged([CallerMemberName] string name = null)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        // OnPropertyChanged inherited from ViewModelBase
     }
 
 }
