@@ -13,6 +13,7 @@ namespace DesktopApplicationTemplate.UI.Services
             {
                 Port = port
             };
+
         }
 
         public async Task UploadAsync(string localPath, string remotePath)
