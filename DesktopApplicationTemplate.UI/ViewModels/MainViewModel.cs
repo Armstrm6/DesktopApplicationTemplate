@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Data;
 using WpfBrush = System.Windows.Media.Brush;
 using WpfBrushes = System.Windows.Media.Brushes;
 using DesktopApplicationTemplate.UI.Services;
@@ -22,8 +23,19 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public string ServiceType { get; set; } = string.Empty;
         public Page? Page { get; set; }
 
-        public WpfBrush BackgroundColor { get; set; } = WpfBrushes.LightGray;
-        public WpfBrush BorderColor { get; set; } = WpfBrushes.Gray;
+        private WpfBrush _backgroundColor = WpfBrushes.LightGray;
+        public WpfBrush BackgroundColor
+        {
+            get => _backgroundColor;
+            set { _backgroundColor = value; OnPropertyChanged(); }
+        }
+
+        private WpfBrush _borderColor = WpfBrushes.Gray;
+        public WpfBrush BorderColor
+        {
+            get => _borderColor;
+            set { _borderColor = value; OnPropertyChanged(); }
+        }
         public Page? ServicePage { get; set; }
  
 
@@ -92,6 +104,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
     public class MainViewModel : INotifyPropertyChanged
     {
         public ObservableCollection<ServiceViewModel> Services { get; set; } = new();
+        public ICollectionView FilteredServices { get; }
+        public FilterViewModel Filters { get; } = new();
         public ObservableCollection<LogEntry> AllLogs { get; } = new();
         private ServiceViewModel? _selectedService;
         public ServiceViewModel SelectedService
@@ -111,7 +125,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         {
             AddServiceCommand = new RelayCommand(AddService);
             RemoveServiceCommand = new RelayCommand(RemoveSelectedService, () => SelectedService != null);
+            FilteredServices = CollectionViewSource.GetDefaultView(Services);
+            Filters.PropertyChanged += (_, __) => ApplyFilters();
             LoadServices();
+            ApplyFilters();
         }
 
         private void AddService()
@@ -138,8 +155,18 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         {
             if (SelectedService != null)
             {
+                var index = Services.IndexOf(SelectedService);
                 SelectedService.LogAdded -= OnServiceLogAdded;
                 Services.Remove(SelectedService);
+                if (Services.Count > 0)
+                {
+                    if (index >= Services.Count) index = Services.Count - 1;
+                    SelectedService = Services[index];
+                }
+                else
+                {
+                    SelectedService = null!;
+                }
                 OnPropertyChanged(nameof(ServicesCreated));
                 OnPropertyChanged(nameof(CurrentActiveServices));
                 OnPropertyChanged(nameof(DisplayLogs));
@@ -178,6 +205,30 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
             OnPropertyChanged(nameof(ServicesCreated));
             OnPropertyChanged(nameof(CurrentActiveServices));
+        }
+
+        private void ApplyFilters()
+        {
+            FilteredServices.Filter = obj =>
+            {
+                if (obj is not ServiceViewModel svc)
+                    return false;
+
+                if (!string.IsNullOrWhiteSpace(Filters.NameFilter) &&
+                    !svc.DisplayName.Contains(Filters.NameFilter, StringComparison.OrdinalIgnoreCase))
+                    return false;
+
+                if (Filters.TypeFilter != "All" && svc.ServiceType != Filters.TypeFilter)
+                    return false;
+
+                if (Filters.StatusFilter == "Active" && !svc.IsActive)
+                    return false;
+                if (Filters.StatusFilter == "Inactive" && svc.IsActive)
+                    return false;
+
+                return true;
+            };
+            FilteredServices.Refresh();
         }
 
         public void OnServiceLogAdded(ServiceViewModel svc, LogEntry entry)
