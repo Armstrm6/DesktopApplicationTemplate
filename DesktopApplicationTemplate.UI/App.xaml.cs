@@ -8,9 +8,9 @@ using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI.Helpers;
 
 
-namespace DesktopApplicationTemplate
+namespace DesktopApplicationTemplate.UI
 {
-    public partial class App : Application
+    public partial class App : System.Windows.Application
     {
         public static IHost AppHost { get; private set; }
 
