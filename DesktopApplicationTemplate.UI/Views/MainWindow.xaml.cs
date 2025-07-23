@@ -2,8 +2,10 @@
 using System.Windows;
 using System.Windows.Controls;
 using DesktopApplicationTemplate.UI.Views;
+using DesktopApplicationTemplate.Services;
 using DesktopApplicationTemplate;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
@@ -19,25 +21,25 @@ namespace DesktopApplicationTemplate.UI.Views
             InitializeComponent();
             _viewModel = viewModel;
             DataContext = _viewModel;
+            _viewModel.EditRequested += OnEditRequested;
+            ContentFrame.Content = new HomePage { DataContext = _viewModel };
         }
 
         private void AddService_Click(object sender, RoutedEventArgs e)
         {
-            var window = App.AppHost.Services.GetRequiredService<CreateServiceWindow>();
-            if (window.ShowDialog() == true)
+            var page = App.AppHost.Services.GetRequiredService<CreateServicePage>();
+            page.ServiceCreated += (name, type) =>
             {
                 var newService = new ServiceViewModel
                 {
                     DisplayName = $"{window.CreatedServiceType} - {window.CreatedServiceName}",
                     ServiceType = window.CreatedServiceType,
+                    DisplayName = $"{type} - {name}",
                     IsActive = false
                 };
                 newService.SetColorsByType();
 
-                _viewModel.Services.Add(newService);
-                _viewModel.SelectedService = newService;
-
-                System.Windows.Controls.Page? page = window.CreatedServiceType switch
+                newService.ServicePage = type switch
                 {
                     "TCP" => new TcpServiceView(App.AppHost.Services.GetRequiredService<TcpServiceViewModel>(), App.AppHost.Services.GetRequiredService<Services.IStartupService>()),
                     "HTTP" => App.AppHost.Services.GetRequiredService<HttpServiceView>(),
@@ -46,6 +48,22 @@ namespace DesktopApplicationTemplate.UI.Views
                     "Heartbeat" => new HeartbeatView(App.AppHost.Services.GetRequiredService<HeartbeatViewModel>()),
                     _ => null
                 };
+
+                _viewModel.Services.Add(newService);
+                _viewModel.SelectedService = newService;
+
+                if (newService.ServicePage != null)
+                    ContentFrame.Content = newService.ServicePage;
+            };
+
+            ContentFrame.Content = page;
+        }
+
+        private void OnEditRequested(ServiceViewModel service)
+        {
+            if (service.ServicePage != null)
+            {
+                ContentFrame.Content = service.ServicePage;
 
                 if (page != null)
                 {
@@ -79,6 +97,14 @@ namespace DesktopApplicationTemplate.UI.Views
             {
                 ContentFrame.Navigate(_viewModel.SelectedService.Page);
             }
+        }
+
+        private void OpenCsvViewer_Click(object sender, RoutedEventArgs e)
+        {
+            var vm = App.AppHost.Services.GetRequiredService<CsvViewerViewModel>();
+            var window = new CsvViewerWindow(vm);
+            vm.RequestClose += () => window.Close();
+            window.ShowDialog();
         }
 
     }
