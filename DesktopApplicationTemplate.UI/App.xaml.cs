@@ -1,13 +1,12 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using DesktopApplicationTemplate.UI.Helpers;
+using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI.Views;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.IO;
 using System.Windows;
-using DesktopApplicationTemplate.UI.ViewModels;
-using DesktopApplicationTemplate.UI.Views;
-using DesktopApplicationTemplate.UI.Helpers;
-using DesktopApplicationTemplate.Services;
-using DesktopApplicationTemplate.UI.Services;
 
 
 namespace DesktopApplicationTemplate.UI

@@ -27,7 +27,7 @@ namespace DesktopApplicationTemplate.UI.Views
 
             if (string.IsNullOrWhiteSpace(CreatedServiceName) || string.IsNullOrWhiteSpace(CreatedServiceType))
             {
-                MessageBox.Show("Please enter a name and select a type.", "Missing Info", MessageBoxButton.OK, MessageBoxImage.Warning);
+                System.Windows.MessageBox.Show("Please enter a name and select a type.", "Missing Info", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 

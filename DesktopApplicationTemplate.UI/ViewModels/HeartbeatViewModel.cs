@@ -60,7 +60,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         private void Save()
         {
-            MessageBox.Show("Configuration saved.", "Save", MessageBoxButton.OK, MessageBoxImage.Information);
+            System.Windows.MessageBox.Show("Configuration saved.", "Save", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

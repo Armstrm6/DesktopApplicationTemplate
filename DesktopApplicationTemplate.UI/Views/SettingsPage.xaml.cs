@@ -37,7 +37,7 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             if (_viewModel.HasUnsavedChanges)
             {
-                var res = MessageBox.Show("Save changes?", "Settings", MessageBoxButton.YesNoCancel);
+                var res = System.Windows.MessageBox.Show("Save changes?", "Settings", MessageBoxButton.YesNoCancel);
                 if (res == MessageBoxResult.Cancel)
                     return;
                 if (res == MessageBoxResult.Yes)
