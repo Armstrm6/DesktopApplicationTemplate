@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using DesktopApplicationTemplate.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
+using Microsoft.VisualBasic;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DesktopApplicationTemplate.UI.Views
@@ -21,6 +22,8 @@ namespace DesktopApplicationTemplate.UI.Views
             DataContext = _viewModel;
             _viewModel.EditRequested += OnEditRequested;
             ContentFrame.Content = new HomePage { DataContext = _viewModel };
+            KeyDown += MainView_KeyDown;
+            MouseDown += MainView_MouseDown;
         }
 
         private void AddService_Click(object sender, RoutedEventArgs e)
@@ -59,7 +62,9 @@ namespace DesktopApplicationTemplate.UI.Views
 
                 if (newService.ServicePage != null)
                 {
-                    ContentFrame.Content = newService.ServicePage;
+                    var editor = new ServiceEditorWindow(newService.ServicePage);
+                    editor.ShowDialog();
+                    ContentFrame.Content = new HomePage { DataContext = _viewModel };
                 }
             }
         }
@@ -68,7 +73,9 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             if (service.ServicePage != null)
             {
-                ContentFrame.Content = service.ServicePage;
+                var editor = new ServiceEditorWindow(service.ServicePage);
+                editor.ShowDialog();
+                ContentFrame.Content = new HomePage { DataContext = _viewModel };
             }
         }
 
@@ -82,19 +89,18 @@ namespace DesktopApplicationTemplate.UI.Views
         }
         private void EditService_Click(object sender, RoutedEventArgs e)
         {
-            if (_viewModel.SelectedService?.Page != null)
+            if (_viewModel.SelectedService?.ServicePage != null)
             {
                 _viewModel.SelectedService.IsActive = false;
-                ContentFrame.Navigate(_viewModel.SelectedService.Page);
+                var editor = new ServiceEditorWindow(_viewModel.SelectedService.ServicePage);
+                editor.ShowDialog();
+                ContentFrame.Content = new HomePage { DataContext = _viewModel };
             }
         }
 
         private void ServiceList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (_viewModel.SelectedService?.Page != null)
-            {
-                ContentFrame.Navigate(_viewModel.SelectedService.Page);
-            }
+            ContentFrame.Content = new HomePage { DataContext = _viewModel };
         }
 
         private void OpenCsvViewer_Click(object sender, RoutedEventArgs e)
@@ -103,6 +109,58 @@ namespace DesktopApplicationTemplate.UI.Views
             var window = new CsvViewerWindow(vm);
             vm.RequestClose += () => window.Close();
             window.ShowDialog();
+        }
+
+        private void EditServiceMenu_Click(object sender, RoutedEventArgs e)
+        {
+            if ((sender as MenuItem)?.DataContext is ServiceViewModel svc && svc.ServicePage != null)
+            {
+                svc.IsActive = false;
+                var editor = new ServiceEditorWindow(svc.ServicePage);
+                editor.ShowDialog();
+                ContentFrame.Content = new HomePage { DataContext = _viewModel };
+            }
+        }
+
+        private void DeleteServiceMenu_Click(object sender, RoutedEventArgs e)
+        {
+            if ((sender as MenuItem)?.DataContext is ServiceViewModel svc)
+            {
+                _viewModel.Services.Remove(svc);
+            }
+        }
+
+        private void RenameServiceMenu_Click(object sender, RoutedEventArgs e)
+        {
+            if ((sender as MenuItem)?.DataContext is ServiceViewModel svc)
+            {
+                string input = Interaction.InputBox("Enter new service name:", "Rename Service", svc.DisplayName);
+                if (!string.IsNullOrWhiteSpace(input))
+                {
+                    svc.DisplayName = input;
+                }
+            }
+        }
+
+        private void MainView_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Escape)
+            {
+                _viewModel.SelectedService = null;
+                ContentFrame.Content = new HomePage { DataContext = _viewModel };
+            }
+        }
+
+        private void MainView_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            var element = e.OriginalSource as DependencyObject;
+            if (_viewModel.SelectedService != null &&
+                Helpers.VisualTreeHelperExtensions.FindParent<ListBoxItem>(element) == null &&
+                Helpers.VisualTreeHelperExtensions.FindParent<Frame>(element) == null)
+            {
+                _viewModel.SelectedService = null;
+                ContentFrame.Content = new HomePage { DataContext = _viewModel };
+            }
         }
 
     }

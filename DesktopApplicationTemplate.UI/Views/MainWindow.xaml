@@ -37,14 +37,23 @@
             <ListBox ItemsSource="{Binding Services}"
                      SelectedItem="{Binding SelectedService}"
                      BorderThickness="0"
+                     HorizontalContentAlignment="Stretch"
                      SelectionChanged="ServiceList_SelectionChanged">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <Border CornerRadius="8"
                                 BorderBrush="{Binding BorderColor}"
                                 Background="{Binding BackgroundColor}"
-                                BorderThickness="2" Padding="5" Margin="2">
+                                BorderThickness="2" Padding="5" Margin="2"
+                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                             <Border CornerRadius="8" BorderBrush="Gray" BorderThickness="1" Padding="5" Margin="2">
+                                <Border.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="Edit Service" Click="EditServiceMenu_Click" />
+                                        <MenuItem Header="Rename Service" Click="RenameServiceMenu_Click" />
+                                        <MenuItem Header="Delete Service" Click="DeleteServiceMenu_Click" />
+                                    </ContextMenu>
+                                </Border.ContextMenu>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
