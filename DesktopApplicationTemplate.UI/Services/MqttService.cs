@@ -1,5 +1,4 @@
 using MQTTnet;
-using MQTTnet.Client;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -7,7 +6,7 @@ namespace DesktopApplicationTemplate.UI.Services
 {
     public class MqttService
     {
-        private readonly IMqttClient _client;
+        private IMqttClient _client;
         private readonly MqttFactory _factory = new MqttFactory();
 
         public MqttService()
