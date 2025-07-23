@@ -1,12 +1,25 @@
-﻿<Window x:Class="DesktopApplication.Installer.Views.InstallerWindow"
+<Window x:Class="DesktopApplication.Installer.Views.InstallerWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DesktopApplication.Installer.Views"
         mc:Ignorable="d"
-        Title="InstallerWindow" Height="450" Width="800">
-    <Grid>
-        
+        Title="Application Installer" Height="300" Width="500"
+        WindowStartupLocation="CenterScreen">
+    <Grid Margin="10" RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Text="Install Location:" Grid.Row="0" VerticalAlignment="Center" />
+        <TextBox Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding InstallPath, UpdateSourceTrigger=PropertyChanged}"/>
+        <Button Grid.Row="0" Grid.Column="1" Content="Browse..." Padding="10,2" Margin="5,0,0,0" Command="{Binding BrowseCommand}" />
+
+        <CheckBox Grid.Row="2" Content="Allow firewall access" IsChecked="{Binding AddFirewallRule}" />
+        <CheckBox Grid.Row="3" Content="Run on startup" IsChecked="{Binding RunOnStartup}" />
+
+        <Button Grid.Row="4" Grid.ColumnSpan="2" Content="Install" Padding="10" HorizontalAlignment="Right" Width="100" Command="{Binding InstallCommand}" />
     </Grid>
 </Window>
