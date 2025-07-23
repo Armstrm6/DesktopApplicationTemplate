@@ -105,6 +105,10 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private void ServiceItem_DoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
+            // Ensure the handler only executes on a true double click
+            if (e.ClickCount != 2)
+                return;
+
             if ((sender as Border)?.DataContext is ServiceViewModel svc && svc.ServicePage != null)
             {
                 svc.IsActive = false;
