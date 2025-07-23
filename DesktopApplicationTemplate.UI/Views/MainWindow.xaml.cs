@@ -25,15 +25,21 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private void AddService_Click(object sender, RoutedEventArgs e)
         {
-            var page = App.AppHost.Services.GetRequiredService<CreateServicePage>();
-            page.ServiceCreated += (name, type) =>
+            // Open the service creation workflow in its own window
+            var window = App.AppHost.Services.GetRequiredService<CreateServiceWindow>();
+
+            if (window.ShowDialog() == true)
             {
+                var name = window.CreatedServiceName;
+                var type = window.CreatedServiceType;
+
                 var newService = new ServiceViewModel
                 {
                     DisplayName = $"{type} - {name}",
                     ServiceType = type,
                     IsActive = false
                 };
+
                 newService.SetColorsByType();
 
                 newService.ServicePage = type switch
@@ -55,9 +61,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 {
                     ContentFrame.Content = newService.ServicePage;
                 }
-            };
-
-            ContentFrame.Content = page;
+            }
         }
 
         private void OnEditRequested(ServiceViewModel service)
