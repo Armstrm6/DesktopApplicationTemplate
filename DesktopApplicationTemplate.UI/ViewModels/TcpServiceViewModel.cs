@@ -124,14 +124,28 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private void ToggleServer()
         {
             IsServerRunning = !IsServerRunning;
-            Logger?.Log(IsServerRunning ? "Server Started" : "Server Stopped", LogLevel.Debug);
+            if (IsServerRunning)
+                Logger?.Log($"Server started on {ComputerIp}:{ListeningPort}", LogLevel.Debug);
+            else
+                Logger?.Log("Server stopped", LogLevel.Debug);
         }
 
         private void TestScript()
         {
-            var result = ScriptContent.Replace("message", TestMessage);
-            Logger?.Log($"Script output: {result}", LogLevel.Debug);
-            System.Windows.MessageBox.Show(result, "Test Result");
+            if (string.IsNullOrWhiteSpace(TestMessage))
+            {
+                Logger?.Log("TestScript called with empty message", LogLevel.Warning);
+            }
+            try
+            {
+                var result = ScriptContent.Replace("message", TestMessage);
+                Logger?.Log($"Script output: {result}", LogLevel.Debug);
+                System.Windows.MessageBox.Show(result, "Test Result");
+            }
+            catch (System.Exception ex)
+            {
+                Logger?.Log($"Script execution error: {ex.Message}", LogLevel.Error);
+            }
         }
 
         private void Save()

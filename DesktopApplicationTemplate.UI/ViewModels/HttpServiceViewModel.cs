@@ -6,6 +6,7 @@ using System.Text;
 using System.Windows.Input;
 using System.Threading.Tasks;
 using System.Windows;
+using DesktopApplicationTemplate.UI.Services;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -69,6 +70,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public ICommand SendCommand { get; }
         public ICommand SaveCommand { get; }
 
+        public ILoggingService? Logger { get; set; }
+
         public HttpServiceViewModel()
         {
             SendCommand = new RelayCommand(async () => await SendRequestAsync());
@@ -91,6 +94,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             if (string.IsNullOrWhiteSpace(Url))
             {
                 ResponseBody = "URL is required";
+                Logger?.Log("SendRequestAsync called with empty URL", LogLevel.Warning);
                 return;
             }
 
@@ -98,6 +102,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             try
             {
                 using var request = new HttpRequestMessage(new HttpMethod(SelectedMethod), Url);
+                Logger?.Log($"Sending {SelectedMethod} request to {Url}", LogLevel.Debug);
 
                 foreach (var h in Headers)
                 {
@@ -113,14 +118,17 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 HttpResponseMessage response = await client.SendAsync(request);
                 StatusCode = (int)response.StatusCode;
                 ResponseBody = await response.Content.ReadAsStringAsync();
+                Logger?.Log($"Received response with status {StatusCode}", LogLevel.Debug);
             }
             catch (HttpRequestException ex)
             {
                 ResponseBody = $"Error: {ex.Message}";
+                Logger?.Log($"HTTP error: {ex.Message}", LogLevel.Error);
             }
             catch (System.Exception ex)
             {
                 ResponseBody = $"Unexpected error: {ex.Message}";
+                Logger?.Log($"Critical error: {ex.Message}", LogLevel.Critical);
             }
         }
 

@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using DesktopApplicationTemplate.UI.Services;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
@@ -27,6 +28,7 @@ namespace DesktopApplicationTemplate.UI.Views
             InitializeComponent();
             _viewModel = viewModel;
             DataContext = _viewModel;
+            _viewModel.Logger = new LoggingService(LogBox, Dispatcher);
         }
     }
 }
