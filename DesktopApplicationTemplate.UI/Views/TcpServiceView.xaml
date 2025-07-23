@@ -87,7 +87,7 @@
             <StackPanel Grid.Column="1" Margin="10">
                 <TextBlock Text="Chappie Log" FontWeight="Bold" FontSize="14"/>
                 <DockPanel Margin="0,5,0,5">
-                    <ComboBox Width="150" Margin="0,0,10,0" SelectedIndex="0">
+                    <ComboBox x:Name="LogLevelBox" Width="150" Margin="0,0,10,0" SelectedIndex="0" SelectionChanged="LogLevelBox_SelectionChanged">
                         <ComboBoxItem Content="All"/>
                         <ComboBoxItem Content="Debug"/>
                         <ComboBoxItem Content="Warning"/>
