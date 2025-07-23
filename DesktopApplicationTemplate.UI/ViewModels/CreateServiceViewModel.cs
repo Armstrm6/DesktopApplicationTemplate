@@ -8,7 +8,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
     {
         public ObservableCollection<string> ServiceTypes { get; } = new()
         {
-            "HID", "TCP", "HTTP", "File Observer", "Heartbeat", "CSV Creator"
+            "HID", "TCP", "HTTP", "File Observer", "Heartbeat", "CSV Creator",
+            "SCP", "MQTT", "FTP"
         };
 
         private string _serviceName = string.Empty;
