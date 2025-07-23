@@ -9,7 +9,7 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Image Source="Resources/Desktop-Icon.png" Width="100" HorizontalAlignment="Left" Margin="0,0,0,10"/>
+        <Image Source="pack://application:,,,/Resources/Desktop-Icon.png" Width="100" HorizontalAlignment="Left" Margin="0,0,0,10"/>
         <StackPanel Margin="0,50,0,0">
             <TextBlock Text="Heartbeat Message" FontWeight="Bold" Margin="0,0,0,5"/>
             <TextBox Text="{Binding BaseMessage}" Width="300"/>
