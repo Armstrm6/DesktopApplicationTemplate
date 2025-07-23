@@ -15,11 +15,13 @@ namespace DesktopApplicationTemplate.UI.Services
     {
         private readonly WpfRichTextBox _outputBox;
         private readonly Dispatcher _dispatcher;
+        private readonly string _logFilePath;
 
-        public LoggingService(WpfRichTextBox outputBox, Dispatcher dispatcher)
+        public LoggingService(WpfRichTextBox outputBox, Dispatcher dispatcher, string logFilePath = "app.log")
         {
             _outputBox = outputBox;
             _dispatcher = dispatcher;
+            _logFilePath = logFilePath;
         }
 
         public void Log(string message, LogLevel level)
@@ -40,6 +42,14 @@ namespace DesktopApplicationTemplate.UI.Services
                 _outputBox.Document.Blocks.Add(paragraph);
                 _outputBox.ScrollToEnd();
             });
+            try
+            {
+                System.IO.File.AppendAllText(_logFilePath, formatted + Environment.NewLine);
+            }
+            catch
+            {
+                // ignore logging errors
+            }
         }
     }
 }

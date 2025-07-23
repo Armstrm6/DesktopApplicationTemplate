@@ -127,14 +127,21 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             var popup = new CreateServiceWindow(vm); // Replace with DI if needed
             if (popup.ShowDialog() == true)
             {
+                string name = popup.CreatedServiceName;
+                if (string.IsNullOrWhiteSpace(name))
+                {
+                    int index = Services.Count(s => s.ServiceType == popup.CreatedServiceType) + 1;
+                    name = $"{popup.CreatedServiceType}{index}";
+                }
                 var newService = new ServiceViewModel
                 {
-                    DisplayName = $"{popup.CreatedServiceType} - {popup.CreatedServiceName}",
+                    DisplayName = $"{popup.CreatedServiceType} - {name}",
                     ServiceType = popup.CreatedServiceType,
                     IsActive = false
                 };
                 newService.SetColorsByType();
                 newService.LogAdded += OnServiceLogAdded;
+                newService.AddLog("Service created", WpfBrushes.Blue);
                 Services.Add(newService);
                 OnPropertyChanged(nameof(ServicesCreated));
                 OnPropertyChanged(nameof(CurrentActiveServices));
