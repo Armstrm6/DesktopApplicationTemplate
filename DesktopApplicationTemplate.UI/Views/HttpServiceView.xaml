@@ -57,9 +57,19 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <TextBox Grid.Column="0" Text="{Binding RequestBody}" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" />
+            <Grid Grid.Column="0">
+                <TextBox Text="{Binding RequestBody}" x:Name="RequestBodyBox" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" />
+                <TextBlock Text="Request Body" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0"
+                           VerticalAlignment="Center"
+                           Visibility="{Binding Text, ElementName=RequestBodyBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+            </Grid>
             <StackPanel Grid.Column="1">
-                <TextBox Text="{Binding ResponseBody}" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" IsReadOnly="True" Height="120"/>
+                <Grid>
+                    <TextBox Text="{Binding ResponseBody}" x:Name="ResponseBodyBox" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" IsReadOnly="True" Height="120"/>
+                    <TextBlock Text="Response Body" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0"
+                               VerticalAlignment="Center"
+                               Visibility="{Binding Text, ElementName=ResponseBodyBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+                </Grid>
                 <TextBlock Text="Status: {Binding StatusCode}" Margin="0,5,0,0"/>
             </StackPanel>
         </Grid>
