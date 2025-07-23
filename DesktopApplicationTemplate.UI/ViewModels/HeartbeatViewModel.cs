@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
+using System.Windows;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -35,10 +36,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         }
 
         public ICommand BuildCommand { get; }
+        public ICommand SaveCommand { get; }
 
         public HeartbeatViewModel()
         {
             BuildCommand = new RelayCommand(BuildMessage);
+            SaveCommand = new RelayCommand(Save);
         }
 
         private void BuildMessage()
@@ -53,6 +56,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 msg += " | STATUS";
             }
             FinalMessage = msg;
+        }
+
+        private void Save()
+        {
+            MessageBox.Show("Configuration saved.", "Save", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

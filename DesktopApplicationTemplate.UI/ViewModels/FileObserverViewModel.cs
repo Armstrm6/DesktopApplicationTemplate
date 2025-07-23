@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
+using System.Windows;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -74,12 +75,14 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public ICommand AddObserverCommand { get; }
         public ICommand RemoveObserverCommand { get; }
         public ICommand BrowseCommand { get; }
+        public ICommand SaveCommand { get; }
 
         public FileObserverViewModel()
         {
             AddObserverCommand = new RelayCommand(AddObserver);
             RemoveObserverCommand = new RelayCommand(RemoveObserver);
             BrowseCommand = new RelayCommand(BrowseFilePath);
+            SaveCommand = new RelayCommand(Save);
 
             Observers.Add(new FileObserver { Name = "Observer1" });
         }
@@ -123,6 +126,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             {
                 FilePath = dialog.FileName;
             }
+        }
+
+        private void Save()
+        {
+            MessageBox.Show("Configuration saved.", "Save", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

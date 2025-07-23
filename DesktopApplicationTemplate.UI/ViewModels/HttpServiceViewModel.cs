@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows.Input;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -66,6 +67,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         }
 
         public ICommand SendCommand { get; }
+        public ICommand SaveCommand { get; }
 
         public HttpServiceViewModel()
         {
@@ -76,6 +78,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 if (SelectedHeader != null)
                     Headers.Remove(SelectedHeader);
             });
+            SaveCommand = new RelayCommand(Save);
+        }
+
+        private void Save()
+        {
+            MessageBox.Show("Configuration saved.", "Save", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private async Task SendRequestAsync()

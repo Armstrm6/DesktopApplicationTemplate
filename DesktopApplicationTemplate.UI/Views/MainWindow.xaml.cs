@@ -103,6 +103,17 @@ namespace DesktopApplicationTemplate.UI.Views
             ContentFrame.Content = new HomePage { DataContext = _viewModel };
         }
 
+        private void ServiceItem_DoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if ((sender as Border)?.DataContext is ServiceViewModel svc && svc.ServicePage != null)
+            {
+                svc.IsActive = false;
+                var editor = new ServiceEditorWindow(svc.ServicePage);
+                editor.ShowDialog();
+                ContentFrame.Content = new HomePage { DataContext = _viewModel };
+            }
+        }
+
         private void OpenCsvViewer_Click(object sender, RoutedEventArgs e)
         {
             var vm = App.AppHost.Services.GetRequiredService<CsvViewerViewModel>();

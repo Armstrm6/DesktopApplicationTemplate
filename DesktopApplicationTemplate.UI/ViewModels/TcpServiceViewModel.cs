@@ -5,6 +5,8 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Input;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -33,10 +35,18 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
         }
 
+        public ICommand SaveCommand { get; }
+
         public TcpServiceViewModel()
         {
             StatusMessage = "Chappie is initializing...";
             IsServerRunning = false;
+            SaveCommand = new RelayCommand(Save);
+        }
+
+        private void Save()
+        {
+            MessageBox.Show("Configuration saved.", "Save", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
