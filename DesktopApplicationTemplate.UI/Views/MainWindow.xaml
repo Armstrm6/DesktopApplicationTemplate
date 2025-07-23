@@ -44,18 +44,18 @@
                                 BorderBrush="{Binding BorderColor}"
                                 Background="{Binding BackgroundColor}"
                                 BorderThickness="2" Padding="5" Margin="2">
+                            <Border CornerRadius="8" BorderBrush="Gray" BorderThickness="1" Padding="5" Margin="2">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
 
-                        <Border CornerRadius="8" BorderBrush="Gray" BorderThickness="1" Padding="5" Margin="2">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-
-                                <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" FontWeight="Bold"/>
-                                <ToggleButton Grid.Column="1" IsChecked="{Binding IsActive, Mode=TwoWay}"
-                                              Style="{StaticResource ToggleSwitchStyle}"/>
-                            </Grid>
+                                    <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" FontWeight="Bold"/>
+                                    <ToggleButton Grid.Column="1" IsChecked="{Binding IsActive, Mode=TwoWay}"
+                                                  Style="{StaticResource ToggleSwitchStyle}"/>
+                                </Grid>
+                            </Border>
                         </Border>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
