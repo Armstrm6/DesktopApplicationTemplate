@@ -1,0 +1,36 @@
+<Window x:Class="DesktopApplicationTemplate.UI.Views.CsvViewerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DesktopApplicationTemplate.UI.Views"
+        mc:Ignorable="d"
+        Title="CSV Viewer" Height="350" Width="600">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal" Margin="0 0 0 10">
+            <TextBlock Text="File Name Pattern:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+            <TextBox Width="300" Text="{Binding Configuration.FileNamePattern}"/>
+        </StackPanel>
+
+        <DataGrid Grid.Row="1" ItemsSource="{Binding Configuration.Columns}" AutoGenerateColumns="False" SelectedItem="{Binding SelectedColumn}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
+                <DataGridTextColumn Header="Service" Binding="{Binding Service}" Width="*"/>
+                <DataGridTextColumn Header="Script" Binding="{Binding Script}" Width="*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button Content="Add Column" Command="{Binding AddColumnCommand}" Width="90"/>
+            <Button Content="Remove" Command="{Binding RemoveColumnCommand}" Width="70" Margin="5,0,0,0"/>
+            <Button Content="Save" Command="{Binding SaveCommand}" Width="60" Margin="5,0,0,0"/>
+            <Button Content="Close" Command="{Binding CloseCommand}" Width="60" Margin="5,0,0,0"/>
+        </StackPanel>
+    </Grid>
+</Window>

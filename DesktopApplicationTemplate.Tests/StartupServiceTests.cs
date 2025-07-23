@@ -18,7 +18,7 @@ namespace DesktopApplicationTemplate.Tests
                 {"AppSettings:ServerPort", "1234"},
                 {"AppSettings:LogLevel", "Information"},
                 {"AppSettings:AutoStart", "false"},
-                {"AppSettings:DefaultPythonScriptPath", "/path/script.py"}
+                {"AppSettings:DefaultCSharpScriptPath", "/path/script.cs"}
             };
 
             IConfiguration configuration = new ConfigurationBuilder()
@@ -34,7 +34,7 @@ namespace DesktopApplicationTemplate.Tests
             Assert.Equal(1234, settings.ServerPort);
             Assert.Equal("Information", settings.LogLevel);
             Assert.False(settings.AutoStart);
-            Assert.Equal("/path/script.py", settings.DefaultPythonScriptPath);
+            Assert.Equal("/path/script.cs", settings.DefaultCSharpScriptPath);
         }
     }
 }

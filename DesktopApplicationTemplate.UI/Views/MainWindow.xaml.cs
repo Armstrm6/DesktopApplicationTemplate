@@ -2,8 +2,10 @@
 using System.Windows;
 using System.Windows.Controls;
 using DesktopApplicationTemplate.UI.Views;
+using DesktopApplicationTemplate.Services;
 using DesktopApplicationTemplate;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
@@ -76,6 +78,14 @@ namespace DesktopApplicationTemplate.UI.Views
             {
                 ContentFrame.Navigate(_viewModel.SelectedService.Page);
             }
+        }
+
+        private void OpenCsvViewer_Click(object sender, RoutedEventArgs e)
+        {
+            var vm = App.AppHost.Services.GetRequiredService<CsvViewerViewModel>();
+            var window = new CsvViewerWindow(vm);
+            vm.RequestClose += () => window.Close();
+            window.ShowDialog();
         }
 
     }

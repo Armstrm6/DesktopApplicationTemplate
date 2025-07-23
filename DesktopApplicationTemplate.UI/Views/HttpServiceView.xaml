@@ -18,6 +18,7 @@
 
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
@@ -35,14 +36,28 @@
             <Button Content="Send" Width="100" Command="{Binding SendCommand}" />
         </StackPanel>
 
-        <Grid Grid.Row="1">
+        <DataGrid Grid.Row="1" ItemsSource="{Binding Headers}" AutoGenerateColumns="False" SelectedItem="{Binding SelectedHeader}" Margin="0 0 0 10" Height="100">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Key" Binding="{Binding Key}" Width="*"/>
+                <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <StackPanel Orientation="Horizontal" Grid.Row="1" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,110,0,0">
+            <Button Content="Add" Width="50" Command="{Binding AddHeaderCommand}" />
+            <Button Content="Remove" Width="60" Margin="5,0,0,0" Command="{Binding RemoveHeaderCommand}" />
+        </StackPanel>
+
+        <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
             <TextBox Grid.Column="0" Text="{Binding RequestBody}" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" />
-            <TextBox Grid.Column="1" Text="{Binding ResponseBody}" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" IsReadOnly="True"/>
+            <StackPanel Grid.Column="1">
+                <TextBox Text="{Binding ResponseBody}" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" IsReadOnly="True" Height="120"/>
+                <TextBlock Text="Status: {Binding StatusCode}" Margin="0,5,0,0"/>
+            </StackPanel>
         </Grid>
     </Grid>
 </Page>

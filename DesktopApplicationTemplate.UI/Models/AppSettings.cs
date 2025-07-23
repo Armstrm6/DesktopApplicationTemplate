@@ -13,7 +13,7 @@ namespace DesktopApplicationTemplate.Models
         public int ServerPort { get; set; } = 9000;
         public string LogLevel { get; set; } = "Debug";
         public bool AutoStart { get; set; } = true;
-        public string DefaultPythonScriptPath { get; set; } = string.Empty;
+        public string DefaultCSharpScriptPath { get; set; } = string.Empty;
 
         // Add more settings as needed
     }

@@ -12,6 +12,24 @@ namespace DesktopApplicationTemplate.UI.ViewModels
     {
         public ObservableCollection<string> Methods { get; } = new() { "GET", "POST", "PUT", "DELETE" };
 
+        public class HeaderItem
+        {
+            public string Key { get; set; } = string.Empty;
+            public string Value { get; set; } = string.Empty;
+        }
+
+        public ObservableCollection<HeaderItem> Headers { get; } = new();
+
+        private HeaderItem _selectedHeader;
+        public HeaderItem SelectedHeader
+        {
+            get => _selectedHeader;
+            set { _selectedHeader = value; OnPropertyChanged(); }
+        }
+
+        public ICommand AddHeaderCommand { get; }
+        public ICommand RemoveHeaderCommand { get; }
+
         private string _selectedMethod = "GET";
         public string SelectedMethod
         {
@@ -40,11 +58,24 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             set { _responseBody = value; OnPropertyChanged(); }
         }
 
+        private int _statusCode;
+        public int StatusCode
+        {
+            get => _statusCode;
+            set { _statusCode = value; OnPropertyChanged(); }
+        }
+
         public ICommand SendCommand { get; }
 
         public HttpServiceViewModel()
         {
             SendCommand = new RelayCommand(async () => await SendRequestAsync());
+            AddHeaderCommand = new RelayCommand(() => Headers.Add(new HeaderItem()));
+            RemoveHeaderCommand = new RelayCommand(() =>
+            {
+                if (SelectedHeader != null)
+                    Headers.Remove(SelectedHeader);
+            });
         }
 
         private async Task SendRequestAsync()
@@ -58,19 +89,22 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             using HttpClient client = new();
             try
             {
-                HttpResponseMessage response = SelectedMethod switch
-                {
-                    "GET" => await client.GetAsync(Url),
-                    "POST" => await client.PostAsync(Url, new StringContent(RequestBody, Encoding.UTF8, "application/json")),
-                    "PUT" => await client.PutAsync(Url, new StringContent(RequestBody, Encoding.UTF8, "application/json")),
-                    "DELETE" => await client.DeleteAsync(Url),
-                    _ => null
-                };
+                using var request = new HttpRequestMessage(new HttpMethod(SelectedMethod), Url);
 
-                if (response != null)
-                    ResponseBody = await response.Content.ReadAsStringAsync();
-                else
-                    ResponseBody = "Invalid Method";
+                foreach (var h in Headers)
+                {
+                    if (!string.IsNullOrWhiteSpace(h.Key))
+                        request.Headers.TryAddWithoutValidation(h.Key, h.Value);
+                }
+
+                if (SelectedMethod != "GET" && SelectedMethod != "DELETE")
+                {
+                    request.Content = new StringContent(RequestBody ?? string.Empty, Encoding.UTF8, "application/json");
+                }
+
+                HttpResponseMessage response = await client.SendAsync(request);
+                StatusCode = (int)response.StatusCode;
+                ResponseBody = await response.Content.ReadAsStringAsync();
             }
             catch (HttpRequestException ex)
             {
