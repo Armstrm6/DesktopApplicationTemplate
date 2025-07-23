@@ -46,7 +46,7 @@
                                 Background="{Binding BackgroundColor}"
                                 BorderThickness="2" Padding="5" Margin="2"
                                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                                MouseDoubleClick="ServiceItem_DoubleClick">
+                                MouseLeftButtonDown="ServiceItem_DoubleClick">
                             <Border CornerRadius="8" BorderBrush="Gray" BorderThickness="1" Padding="5" Margin="2">
                                 <Border.ContextMenu>
                                     <ContextMenu>
