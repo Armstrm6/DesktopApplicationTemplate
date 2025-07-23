@@ -109,16 +109,21 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     if (!string.IsNullOrWhiteSpace(h.Key))
                         request.Headers.TryAddWithoutValidation(h.Key, h.Value);
                 }
+                var headerSummary = string.Join(", ", Headers.Where(h => !string.IsNullOrWhiteSpace(h.Key)).Select(h => $"{h.Key}:{h.Value}"));
+                if (!string.IsNullOrWhiteSpace(headerSummary))
+                    Logger?.Log($"Headers: {headerSummary}", LogLevel.Debug);
 
                 if (SelectedMethod != "GET" && SelectedMethod != "DELETE")
                 {
                     request.Content = new StringContent(RequestBody ?? string.Empty, Encoding.UTF8, "application/json");
+                    Logger?.Log($"Request Body: {RequestBody}", LogLevel.Debug);
                 }
 
                 HttpResponseMessage response = await client.SendAsync(request);
                 StatusCode = (int)response.StatusCode;
                 ResponseBody = await response.Content.ReadAsStringAsync();
                 Logger?.Log($"Received response with status {StatusCode}", LogLevel.Debug);
+                Logger?.Log($"Response Body: {ResponseBody}", LogLevel.Debug);
             }
             catch (HttpRequestException ex)
             {

@@ -76,7 +76,15 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public string TestMessage
         {
             get => _testMessage;
-            set { _testMessage = value; OnPropertyChanged(); }
+            set
+            {
+                _testMessage = value;
+                OnPropertyChanged();
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    Logger?.Log($"Received test message: {value}", LogLevel.Debug);
+                }
+            }
         }
 
         public ICommand ToggleServerCommand { get; }
@@ -123,6 +131,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         private void ToggleServer()
         {
+            Logger?.Log("Toggling server state", LogLevel.Debug);
             IsServerRunning = !IsServerRunning;
             if (IsServerRunning)
                 Logger?.Log($"Server started on {ComputerIp}:{ListeningPort}", LogLevel.Debug);
@@ -136,6 +145,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             {
                 Logger?.Log("TestScript called with empty message", LogLevel.Warning);
             }
+            Logger?.Log($"Executing script using {SelectedLanguage}", LogLevel.Debug);
             try
             {
                 var result = ScriptContent.Replace("message", TestMessage);
