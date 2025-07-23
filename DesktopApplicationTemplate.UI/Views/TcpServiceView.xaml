@@ -6,6 +6,8 @@
       mc:Ignorable="d"
       Title="Chappie Desktop Application">
     <Grid Margin="10">
+        <Image Source="Resources/Desktop-Icon.png" Width="100" HorizontalAlignment="Left" Margin="0,0,0,10"/>
+
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <!-- Title -->
