@@ -1,11 +1,9 @@
-﻿using DesktopApplicationTemplate.UI.ViewModels;
+﻿using System;
 using System.Windows;
 using System.Windows.Controls;
-using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.Services;
-using DesktopApplicationTemplate;
+using DesktopApplicationTemplate.UI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
@@ -32,16 +30,17 @@ namespace DesktopApplicationTemplate.UI.Views
             {
                 var newService = new ServiceViewModel
                 {
-                    DisplayName = $"{window.CreatedServiceType} - {window.CreatedServiceName}",
-                    ServiceType = window.CreatedServiceType,
                     DisplayName = $"{type} - {name}",
+                    ServiceType = type,
                     IsActive = false
                 };
                 newService.SetColorsByType();
 
                 newService.ServicePage = type switch
                 {
-                    "TCP" => new TcpServiceView(App.AppHost.Services.GetRequiredService<TcpServiceViewModel>(), App.AppHost.Services.GetRequiredService<Services.IStartupService>()),
+                    "TCP" => new TcpServiceView(
+                        App.AppHost.Services.GetRequiredService<TcpServiceViewModel>(),
+                        App.AppHost.Services.GetRequiredService<IStartupService>()),
                     "HTTP" => App.AppHost.Services.GetRequiredService<HttpServiceView>(),
                     "File Observer" => App.AppHost.Services.GetRequiredService<FileObserverView>(),
                     "HID" => new HidViews(),
@@ -53,7 +52,9 @@ namespace DesktopApplicationTemplate.UI.Views
                 _viewModel.SelectedService = newService;
 
                 if (newService.ServicePage != null)
+                {
                     ContentFrame.Content = newService.ServicePage;
+                }
             };
 
             ContentFrame.Content = page;
@@ -64,13 +65,6 @@ namespace DesktopApplicationTemplate.UI.Views
             if (service.ServicePage != null)
             {
                 ContentFrame.Content = service.ServicePage;
-
-                if (page != null)
-                {
-                    newService.Page = page;
-                    ContentFrame.Navigate(page);
-                }
-                }
             }
         }
 
