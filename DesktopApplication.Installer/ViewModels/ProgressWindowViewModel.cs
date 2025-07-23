@@ -86,6 +86,13 @@ namespace DesktopApplication.Installer.ViewModels
             LogText += message + Environment.NewLine;
         }
 
+        private static readonly string[] AdditionalAssemblies =
+        {
+            "Renci.SshNet.dll",
+            "MQTTnet.dll",
+            "FluentFTP.dll"
+        };
+
         private void CopyApplicationFiles()
         {
             var sourceDir = AppContext.BaseDirectory;
@@ -94,6 +101,17 @@ namespace DesktopApplication.Installer.ViewModels
                 var dest = Path.Combine(_installPath, Path.GetFileName(file));
                 File.Copy(file, dest, overwrite: true);
             }
+
+            foreach (var name in AdditionalAssemblies)
+            {
+                var file = Directory.EnumerateFiles(sourceDir, name, SearchOption.AllDirectories).FirstOrDefault();
+                if (file is not null)
+                {
+                    var dest = Path.Combine(_installPath, Path.GetFileName(file));
+                    File.Copy(file, dest, overwrite: true);
+                }
+            }
+
             foreach (var dir in Directory.GetDirectories(sourceDir))
             {
                 var destDir = Path.Combine(_installPath, Path.GetFileName(dir));
