@@ -21,6 +21,7 @@ namespace DesktopApplicationTemplate.UI.Views
             DataContext = _viewModel;
             _logger = new LoggingService(LogBox, Dispatcher);
             _viewModel.Logger = _logger;
+            SaveConfirmationHelper.Logger = _logger;
 
             Loaded += MainWindow_Loaded;
         }

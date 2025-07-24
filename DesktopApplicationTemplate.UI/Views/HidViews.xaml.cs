@@ -20,9 +20,13 @@ namespace DesktopApplicationTemplate.UI.Views
     /// </summary>
     public partial class HidViews : Page
     {
-        public HidViews()
+        private readonly ViewModels.HidViewModel _viewModel;
+
+        public HidViews(ViewModels.HidViewModel viewModel)
         {
             InitializeComponent();
+            _viewModel = viewModel;
+            DataContext = viewModel;
         }
     }
 }

@@ -131,8 +131,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 string name = popup.CreatedServiceName;
                 if (string.IsNullOrWhiteSpace(name))
                 {
-                    int index = Services.Count(s => s.ServiceType == popup.CreatedServiceType) + 1;
-                    name = $"{popup.CreatedServiceType}{index}";
+                    name = GenerateServiceName(popup.CreatedServiceType);
                 }
                 var newService = new ServiceViewModel
                 {
@@ -144,12 +143,28 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 newService.SetColorsByType();
                 newService.LogAdded += OnServiceLogAdded;
                 newService.ActiveChanged += OnServiceActiveChanged;
+                newService.AddLog($"Default name '{name}' assigned", WpfBrushes.Gray);
                 newService.AddLog("Service created", WpfBrushes.Blue);
                 _csvService.EnsureColumnsForService(newService.DisplayName);
                 Services.Add(newService);
                 OnPropertyChanged(nameof(ServicesCreated));
                 OnPropertyChanged(nameof(CurrentActiveServices));
             }
+        }
+
+        internal string GenerateServiceName(string serviceType)
+        {
+            int index = 1;
+            foreach (var svc in Services.Where(s => s.ServiceType == serviceType))
+            {
+                var namePart = svc.DisplayName.Split(" - ").Last();
+                if (namePart.StartsWith(serviceType) &&
+                    int.TryParse(namePart.Substring(serviceType.Length), out int n) && n >= index)
+                {
+                    index = n + 1;
+                }
+            }
+            return $"{serviceType}{index}";
         }
 
         private void RemoveSelectedService()
