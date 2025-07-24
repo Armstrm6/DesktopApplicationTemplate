@@ -1,5 +1,5 @@
 using DesktopApplicationTemplate.UI.Services;
-using System.Windows.Controls;
+using WpfControls = System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Threading;
 using System.IO;
@@ -28,7 +28,7 @@ namespace DesktopApplicationTemplate.Tests
             {
                 try
                 {
-                    var box = new RichTextBox();
+                    var box = new WpfControls.RichTextBox();
                     var service = new LoggingService(box, Dispatcher.CurrentDispatcher);
 
                     service.Log("test", level);
@@ -65,7 +65,7 @@ namespace DesktopApplicationTemplate.Tests
             {
                 try
                 {
-                    var box = new RichTextBox();
+                    var box = new WpfControls.RichTextBox();
                     var service = new LoggingService(box, Dispatcher.CurrentDispatcher, path);
                     service.Log("file-test", LogLevel.Debug);
                     var content = File.ReadAllText(path);

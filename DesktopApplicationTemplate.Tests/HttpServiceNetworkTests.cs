@@ -4,6 +4,10 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using System.Net.Http;
+using Moq;
+using Moq.Protected;
+using System.Linq;
 
 namespace DesktopApplicationTemplate.Tests;
 
@@ -38,6 +42,32 @@ public class HttpServiceNetworkTests
 
         Assert.Equal(200, vm.StatusCode);
         Assert.Equal("ok", vm.ResponseBody);
+
+        ConsoleTestLogger.LogPass();
+    }
+
+    [Fact]
+    public async Task SendRequest_SendsCorrectData()
+    {
+        var handlerMock = new Mock<HttpMessageHandler>();
+        HttpRequestMessage? captured = null;
+        handlerMock.Protected()
+            .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+            .Callback<HttpRequestMessage, CancellationToken>((req, _) => captured = req)
+            .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent("ok")
+            });
+
+        var vm = new HttpServiceViewModel { Url = "http://localhost/", SelectedMethod = "POST", RequestBody = "data", MessageHandler = handlerMock.Object };
+        vm.Headers.Add(new HttpServiceViewModel.HeaderItem { Key = "X-Test", Value = "1" });
+
+        await vm.SendRequestAsync();
+
+        Assert.NotNull(captured);
+        Assert.Equal(HttpMethod.Post, captured!.Method);
+        Assert.Equal("1", captured.Headers.GetValues("X-Test").Single());
+        Assert.Equal("data", await captured.Content!.ReadAsStringAsync());
 
         ConsoleTestLogger.LogPass();
     }
