@@ -18,6 +18,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public string DisplayName { get; set; }
         public string ServiceType { get; set; } = string.Empty;
         public Page? Page { get; set; }
+        public int Order { get; set; }
 
         private WpfBrush _backgroundColor = WpfBrushes.LightGray;
         public WpfBrush BackgroundColor
@@ -136,7 +137,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 {
                     DisplayName = $"{popup.CreatedServiceType} - {name}",
                     ServiceType = popup.CreatedServiceType,
-                    IsActive = false
+                    IsActive = false,
+                    Order = Services.Count
                 };
                 newService.SetColorsByType();
                 newService.LogAdded += OnServiceLogAdded;
@@ -183,19 +185,25 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public void SaveServices()
         {
+            // Update order prior to saving
+            for (int i = 0; i < Services.Count; i++)
+            {
+                Services[i].Order = i;
+            }
             ServicePersistence.Save(Services);
         }
 
         private void LoadServices()
         {
             var existing = ServicePersistence.Load();
-            foreach (var info in existing)
+            foreach (var info in existing.OrderBy(i => i.Order))
             {
                 var svc = new ServiceViewModel
                 {
                     DisplayName = info.DisplayName,
                     ServiceType = info.ServiceType,
-                    IsActive = info.IsActive
+                    IsActive = info.IsActive,
+                    Order = info.Order
                 };
                 svc.SetColorsByType();
                 svc.LogAdded += OnServiceLogAdded;
