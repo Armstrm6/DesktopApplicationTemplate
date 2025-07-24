@@ -3,22 +3,21 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-
 namespace DesktopApplicationTemplate.UI.Services
 {
     public class FtpService : IFtpService
     {
-        private readonly AsyncFtpClient _client;
+        private readonly IFtpClientWrapper _client;
         private readonly ILoggingService? _logger;
 
         public FtpService(string host, int port, string user, string pass, ILoggingService? logger = null)
         {
             var credentials = new System.Net.NetworkCredential(user, pass);
-            _client = new AsyncFtpClient(host, credentials, port);
+            _client = new AsyncFtpClientAdapter(new AsyncFtpClient(host, credentials, port));
             _logger = logger;
         }
 
-        public FtpService(AsyncFtpClient client, ILoggingService? logger = null)
+        public FtpService(IFtpClientWrapper client, ILoggingService? logger = null)
         {
             _client = client;
             _logger = logger;

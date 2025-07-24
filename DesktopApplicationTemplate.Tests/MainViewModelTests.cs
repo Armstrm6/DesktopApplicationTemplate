@@ -11,14 +11,14 @@ namespace DesktopApplicationTemplate.Tests
         {
             var csv = new CsvService(new CsvViewerViewModel());
             var vm = new MainViewModel(csv);
-            vm.Services.Add(new MainViewModel.Services
+            vm.Services.Add(new ServiceViewModel
             {
                 DisplayName = "HTTP - HTTP1",
                 ServiceType = "HTTP",
                 IsActive = false,
                 Order = 0
             });
-            vm.Services.Add(new MainViewModel.ServiceViewModel
+            vm.Services.Add(new ServiceViewModel
             {
                 DisplayName = "HTTP - HTTP3",
                 ServiceType = "HTTP",
