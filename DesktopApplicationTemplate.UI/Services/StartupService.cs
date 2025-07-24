@@ -1,6 +1,7 @@
 ﻿using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.Models;
 using Microsoft.Extensions.Configuration;
+using DesktopApplicationTemplate.Core.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;

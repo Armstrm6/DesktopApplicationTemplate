@@ -1,7 +1,8 @@
 <Window x:Class="DesktopApplicationTemplate.UI.Views.SaveConfirmationWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Save" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
+        Title="Save" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        Style="{StaticResource BubblyWindowStyle}">
     <StackPanel Margin="20">
         <TextBlock Text="Configuration saved." Margin="0,0,0,10"/>
         <CheckBox x:Name="DontShowAgainCheckBox" Content="Don't show this pop-up again." Margin="0,0,0,10"/>

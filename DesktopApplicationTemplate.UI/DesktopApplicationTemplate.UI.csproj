@@ -22,6 +22,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.10.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.7" />
     <PackageReference Include="Xceed.Wpf.Toolkit" Version="4.7.0" />
+    <ProjectReference Include="..\DesktopApplicationTemplate.Core\DesktopApplicationTemplate.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

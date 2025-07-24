@@ -5,7 +5,8 @@
         AllowsTransparency="True"
         Background="Transparent"
         SizeToContent="WidthAndHeight"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        Style="{StaticResource BubblyWindowStyle}">
     <Border Background="#FFFAFAFA" Padding="20" CornerRadius="10" BorderBrush="#DDDDDD" BorderThickness="1">
         <StackPanel>
             <TextBlock Text="Welcome!" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10"/>

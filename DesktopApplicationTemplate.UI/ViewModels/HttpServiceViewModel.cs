@@ -5,7 +5,7 @@ using System.Text;
 using System.Windows.Input;
 using System.Threading.Tasks;
 using System.Windows;
-using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Helpers;
 
 namespace DesktopApplicationTemplate.UI.ViewModels

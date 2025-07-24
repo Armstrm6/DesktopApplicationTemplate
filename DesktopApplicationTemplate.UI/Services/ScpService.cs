@@ -1,5 +1,6 @@
 using Renci.SshNet;
 using System.Threading.Tasks;
+using DesktopApplicationTemplate.Core.Services;
 
 namespace DesktopApplicationTemplate.UI.Services
 {

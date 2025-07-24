@@ -1,6 +1,7 @@
 <Window x:Class="DesktopApplicationTemplate.UI.Views.ServiceEditorWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Service Editor" SizeToContent="WidthAndHeight">
+        Title="Service Editor" SizeToContent="WidthAndHeight"
+        Style="{StaticResource BubblyWindowStyle}">
     <Frame x:Name="EditorFrame" NavigationUIVisibility="Hidden" />
 </Window>

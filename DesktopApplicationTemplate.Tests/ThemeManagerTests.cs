@@ -1,4 +1,4 @@
-using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Core.Services;
 using System.Threading;
 using System.Windows;
 using Xunit;

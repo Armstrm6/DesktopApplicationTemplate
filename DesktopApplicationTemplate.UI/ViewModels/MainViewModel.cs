@@ -9,7 +9,7 @@ using System.Windows.Input;
 using System.Windows.Data;
 using WpfBrush = System.Windows.Media.Brush;
 using WpfBrushes = System.Windows.Media.Brushes;
-using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Core.Services;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {

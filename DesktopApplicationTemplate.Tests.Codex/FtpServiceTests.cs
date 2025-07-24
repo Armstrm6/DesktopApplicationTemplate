@@ -1,4 +1,4 @@
-using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Core.Services;
 using FluentFTP;
 using FluentFTP.Client.BaseClient;
 using Moq;
@@ -24,6 +24,30 @@ namespace DesktopApplicationTemplate.Tests
             client.Verify(c => c.ConnectAsync(It.IsAny<CancellationToken>()), Times.Once);
             client.Verify(c => c.UploadFileAsync("local","remote", FtpRemoteExists.Overwrite, It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
             client.Verify(c => c.DisconnectAsync(It.IsAny<CancellationToken>()), Times.Once);
+
+            ConsoleTestLogger.LogPass();
+        }
+
+        [Fact]
+        public void Constructor_WithLogger_LogsCreation()
+        {
+            var logger = new Mock<ILoggingService>();
+            _ = new FtpService("host", 21, "u", "p", logger.Object);
+
+            logger.Verify(l => l.Log("FtpService created for host:21", LogLevel.Debug), Times.Once);
+
+            ConsoleTestLogger.LogPass();
+        }
+
+        [Fact]
+        public void Constructor_WithClientAndLogger_LogsCreation()
+        {
+            var client = new Mock<FtpClient>("host", new NetworkCredential("u","p"));
+            var logger = new Mock<ILoggingService>();
+
+            _ = new FtpService(client.Object, logger.Object);
+
+            logger.Verify(l => l.Log("FtpService created for host:21", LogLevel.Debug), Times.Once);
 
             ConsoleTestLogger.LogPass();
         }

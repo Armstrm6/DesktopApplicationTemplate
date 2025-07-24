@@ -1,4 +1,5 @@
 using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.Core.Services;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;

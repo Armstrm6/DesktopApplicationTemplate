@@ -9,6 +9,7 @@ using WpfBrush = System.Windows.Media.Brush;
 using WpfBrushes = System.Windows.Media.Brushes;
 using System.Windows.Threading;
 using DesktopApplicationTemplate.Models;
+using DesktopApplicationTemplate.Core.Services;
 
 namespace DesktopApplicationTemplate.UI.Services
 {

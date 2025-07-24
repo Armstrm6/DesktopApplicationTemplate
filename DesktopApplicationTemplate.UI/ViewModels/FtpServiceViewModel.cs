@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
-using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Helpers;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
@@ -82,16 +82,21 @@ public class FtpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel
 
         private void Browse()
         {
+            Logger?.Log("Browsing for file", LogLevel.Debug);
             var path = _fileDialog.OpenFile();
             if (path != null)
+            {
                 LocalPath = path;
+                Logger?.Log($"File selected: {path}", LogLevel.Debug);
+            }
         }
 
         internal async Task TransferAsync()
         {
             if (string.IsNullOrWhiteSpace(LocalPath) || string.IsNullOrWhiteSpace(RemotePath))
                 return;
-            var svc = Service ?? (IFtpService)new FtpService(Host, int.Parse(Port), Username, Password);
+            Logger?.Log("Starting FTP upload", LogLevel.Debug);
+            var svc = Service ?? (IFtpService)new FtpService(Host, int.Parse(Port), Username, Password, Logger);
             await svc.UploadAsync(LocalPath, RemotePath);
             Logger?.Log("FTP upload complete", LogLevel.Debug);
         }

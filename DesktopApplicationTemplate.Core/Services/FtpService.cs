@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 
-namespace DesktopApplicationTemplate.UI.Services
+namespace DesktopApplicationTemplate.Core.Services
 {
     public class FtpService : IFtpService
     {
@@ -20,12 +20,14 @@ namespace DesktopApplicationTemplate.UI.Services
                 Port = port
             };
             _logger = logger;
+            _logger?.Log($"FtpService created for {host}:{port}", LogLevel.Debug);
         }
 
         public FtpService(FtpClient client, ILoggingService? logger = null)
         {
             _client = client;
             _logger = logger;
+            _logger?.Log($"FtpService created for {client.Host}:{client.Port}", LogLevel.Debug);
         }
 
         public async Task UploadAsync(string localPath, string remotePath)
