@@ -16,7 +16,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
     public class ServiceViewModel : ViewModelBase
     {
-        public string DisplayName { get; set; }
+        public string DisplayName { get; set; } = string.Empty;
         public string ServiceType { get; set; } = string.Empty;
         public Page? Page { get; set; }
         public int Order { get; set; }
@@ -96,9 +96,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public FilterViewModel Filters { get; } = new();
         public ObservableCollection<LogEntry> AllLogs { get; } = new();
         private ServiceViewModel? _selectedService;
-        public ServiceViewModel SelectedService
+        public ServiceViewModel? SelectedService
         {
-            get => _selectedService!;
+            get => _selectedService;
             set { _selectedService = value; OnPropertyChanged(); OnPropertyChanged(nameof(DisplayLogs)); }
         }
         public ICommand AddServiceCommand { get; }
@@ -190,7 +190,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 }
                 else
                 {
-                    SelectedService = null!;
+                    SelectedService = null;
                 }
                 OnPropertyChanged(nameof(ServicesCreated));
                 OnPropertyChanged(nameof(CurrentActiveServices));

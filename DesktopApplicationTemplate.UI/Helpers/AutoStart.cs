@@ -16,7 +16,7 @@ namespace DesktopApplicationTemplate.UI.Helpers
         public static void EnableAutoStart()
         {
             using RegistryKey key = Registry.CurrentUser.OpenSubKey(RegistryKeyPath, true)
-                                     ?? Registry.CurrentUser.CreateSubKey(RegistryKeyPath);
+                                     ?? Registry.CurrentUser.CreateSubKey(RegistryKeyPath)!;
 
             string exePath = Process.GetCurrentProcess().MainModule?.FileName ?? string.Empty;
             if (!string.IsNullOrWhiteSpace(exePath))

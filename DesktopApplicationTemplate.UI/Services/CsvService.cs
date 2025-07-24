@@ -56,6 +56,7 @@ namespace DesktopApplicationTemplate.UI.Services
             string fileName = BuildFileName();
             var line = string.Join(',', values.Select(v => v ?? string.Empty));
             File.AppendAllText(fileName, line + System.Environment.NewLine, Encoding.UTF8);
+            _logger?.Log($"Appended row to {fileName}", LogLevel.Debug);
         }
 
         private void EnsureHeader()
@@ -67,11 +68,9 @@ namespace DesktopApplicationTemplate.UI.Services
             {
                 var header = string.Join(',', _viewModel.Configuration.Columns.Select(c => c.Name));
                 File.AppendAllText(fileName, header + System.Environment.NewLine, Encoding.UTF8);
+                _logger?.Log($"Wrote CSV header to {fileName}", LogLevel.Debug);
             }
             _headerWritten = true;
-            var line = string.Join(",", values);
-            System.IO.File.AppendAllText(fileName, line + System.Environment.NewLine, Encoding.UTF8);
-            _logger?.Log($"Appended row to {fileName}", LogLevel.Debug);
         }
 
         private string BuildFileName()

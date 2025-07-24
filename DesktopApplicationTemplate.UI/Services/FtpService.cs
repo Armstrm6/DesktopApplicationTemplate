@@ -29,10 +29,10 @@ namespace DesktopApplicationTemplate.UI.Services
         public async Task UploadAsync(string localPath, string remotePath)
         {
             _logger?.Log($"Connecting to FTP {_client.Host}:{_client.Port}", LogLevel.Debug);
-            _client.Connect();
+            await _client.ConnectAsync();
             _logger?.Log($"Uploading {localPath} -> {remotePath}", LogLevel.Debug);
-            _client.UploadFile(localPath, remotePath, FtpRemoteExists.Overwrite);
-            _client.Disconnect();
+            await _client.UploadFileAsync(localPath, remotePath, FtpRemoteExists.Overwrite);
+            await _client.DisconnectAsync();
             _logger?.Log("Upload finished", LogLevel.Debug);
         }
     }
