@@ -58,7 +58,11 @@ namespace DesktopApplicationTemplate.UI.Views
             {
                 if (svc.ServicePage.DataContext is ILoggingViewModel vm && vm.Logger is LoggingService logger)
                 {
-                    logger.LogAdded += entry => svc.AddLog(entry.Message, entry.Color);
+                    var logger = vm.Logger as LoggingService;
+                    if (logger != null)
+                    {
+                        logger.LogAdded += entry => svc.AddLog(entry.Message, entry.Color);
+                    }
                 }
             }
 
