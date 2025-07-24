@@ -50,7 +50,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
         }
 
-        private void Save()
+        public void Save()
         {
             var json = JsonSerializer.Serialize(Configuration, new JsonSerializerOptions { WriteIndented = true });
             System.IO.File.WriteAllText(ConfigPath, json);
