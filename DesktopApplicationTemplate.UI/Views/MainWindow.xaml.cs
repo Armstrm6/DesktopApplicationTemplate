@@ -57,9 +57,13 @@ namespace DesktopApplicationTemplate.UI.Views
             if (svc.ServicePage != null)
             {
                 var vm = svc.ServicePage.DataContext as dynamic;
-                if (vm != null && vm.Logger is LoggingService logger)
+                if (vm != null)
                 {
-                    logger.LogAdded += entry => svc.AddLog(entry.Message, entry.Color);
+                    var logger = vm.Logger as LoggingService;
+                    if (logger != null)
+                    {
+                        logger.LogAdded += entry => svc.AddLog(entry.Message, entry.Color);
+                    }
                 }
             }
 
