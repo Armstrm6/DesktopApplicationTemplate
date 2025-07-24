@@ -3,7 +3,18 @@
 set -e
 
 dotnet restore
-dotnet workload install windowsdesktop
+
+if [ -z "$SKIP_WORKLOAD" ]; then
+    echo "Checking for windowsdesktop workload..."
+    if ! dotnet workload list | grep -q windowsdesktop; then
+        echo "Installing windowsdesktop workload..."
+        dotnet workload install windowsdesktop
+    else
+        echo "windowsdesktop workload already installed."
+    fi
+else
+    echo "SKIP_WORKLOAD set - skipping windowsdesktop workload installation." 
+fi
 dotnet build DesktopApplicationTemplate.sln
 dotnet test DesktopApplicationTemplate.Tests/DesktopApplicationTemplate.Tests.csproj
 
