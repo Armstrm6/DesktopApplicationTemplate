@@ -10,7 +10,7 @@ using DesktopApplicationTemplate.UI.Services;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
-    public class HttpServiceViewModel : ViewModelBase
+public class HttpServiceViewModel : ViewModelBase, ILoggingViewModel
     {
         public ObservableCollection<string> Methods { get; } = new() { "GET", "POST", "PUT", "DELETE" };
 

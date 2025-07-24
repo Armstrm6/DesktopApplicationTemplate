@@ -13,7 +13,7 @@ using DesktopApplicationTemplate.UI.Services;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
-    public class TcpServiceViewModel : ViewModelBase
+public class TcpServiceViewModel : ViewModelBase, ILoggingViewModel
     {
         private string _statusMessage = string.Empty;
         private bool _isServerRunning;
