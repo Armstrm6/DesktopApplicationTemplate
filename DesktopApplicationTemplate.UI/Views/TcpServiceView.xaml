@@ -40,31 +40,31 @@
             <!-- LEFT SIDE -->
             <StackPanel Grid.Column="0" Margin="10">
                 <Grid Margin="0,0,0,5">
-                    <TextBox Text="{Binding ComputerIp, UpdateSourceTrigger=PropertyChanged}" x:Name="ComputerIpBox"/>
+                    <TextBox Text="{Binding ComputerIp, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" x:Name="ComputerIpBox"/>
                     <TextBlock Text="Computer IP" IsHitTestVisible="False" Foreground="Gray" VerticalAlignment="Center"
                                Margin="5,0,0,0"
                                Visibility="{Binding Text, ElementName=ComputerIpBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
                 </Grid>
                 <Grid Margin="0,0,0,5">
-                    <TextBox Text="{Binding ListeningPort, UpdateSourceTrigger=PropertyChanged}" x:Name="ListenPortBox"/>
+                    <TextBox Text="{Binding ListeningPort, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" x:Name="ListenPortBox"/>
                     <TextBlock Text="Listening Port" IsHitTestVisible="False" Foreground="Gray" VerticalAlignment="Center"
                                Margin="5,0,0,0"
                                Visibility="{Binding Text, ElementName=ListenPortBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
                 </Grid>
                 <Grid Margin="0,0,0,5">
-                    <TextBox Text="{Binding ServerIp, UpdateSourceTrigger=PropertyChanged}" x:Name="ServerIpBox"/>
+                    <TextBox Text="{Binding ServerIp, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" x:Name="ServerIpBox"/>
                     <TextBlock Text="Server IP" IsHitTestVisible="False" Foreground="Gray" VerticalAlignment="Center"
                                Margin="5,0,0,0"
                                Visibility="{Binding Text, ElementName=ServerIpBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
                 </Grid>
                 <Grid Margin="0,0,0,5">
-                    <TextBox Text="{Binding ServerGateway, UpdateSourceTrigger=PropertyChanged}" x:Name="ServerGatewayBox"/>
+                    <TextBox Text="{Binding ServerGateway, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" x:Name="ServerGatewayBox"/>
                     <TextBlock Text="Server Gateway" IsHitTestVisible="False" Foreground="Gray" VerticalAlignment="Center"
                                Margin="5,0,0,0"
                                Visibility="{Binding Text, ElementName=ServerGatewayBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
                 </Grid>
                 <Grid Margin="0,0,0,10">
-                    <TextBox Text="{Binding ServerPort, UpdateSourceTrigger=PropertyChanged}" x:Name="ServerPortBox"/>
+                    <TextBox Text="{Binding ServerPort, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" x:Name="ServerPortBox"/>
                     <TextBlock Text="Server Port" IsHitTestVisible="False" Foreground="Gray" VerticalAlignment="Center"
                                Margin="5,0,0,0"
                                Visibility="{Binding Text, ElementName=ServerPortBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>

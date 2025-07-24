@@ -15,13 +15,13 @@
         </Grid.ColumnDefinitions>
         <StackPanel Grid.Column="0" Margin="10">
             <Grid Margin="0,0,0,5">
-                <TextBox Text="{Binding Host}" x:Name="HostBox"/>
+                <TextBox Text="{Binding Host, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" x:Name="HostBox"/>
                 <TextBlock Text="Host" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0"
                            VerticalAlignment="Center"
                            Visibility="{Binding Text, ElementName=HostBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
             </Grid>
             <Grid Margin="0,0,0,5">
-                <TextBox Text="{Binding Port}" x:Name="PortBox"/>
+                <TextBox Text="{Binding Port, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" x:Name="PortBox"/>
                 <TextBlock Text="Port" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0"
                            VerticalAlignment="Center"
                            Visibility="{Binding Text, ElementName=PortBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>

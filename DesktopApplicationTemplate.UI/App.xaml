@@ -18,6 +18,27 @@
                     </Setter.Value>
                 </Setter>
             </Style>
+            <!-- Global style for text boxes including validation visuals -->
+            <Style TargetType="TextBox">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="TextBox">
+                            <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="5" Background="{TemplateBinding Background}">
+                                <ScrollViewer x:Name="PART_ContentHost"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="BorderBrush" Value="LightGray"/>
+                <Setter Property="Background" Value="White"/>
+                <Style.Triggers>
+                    <Trigger Property="Validation.HasError" Value="True">
+                        <Setter Property="Background" Value="#FFEBEB"/>
+                        <Setter Property="BorderBrush" Value="DarkRed"/>
+                        <Setter Property="BorderThickness" Value="2"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

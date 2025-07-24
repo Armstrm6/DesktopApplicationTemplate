@@ -123,7 +123,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         private void AddService()
         {
-            var vm = new CreateServiceViewModel();
+            var existing = Services.Select(s => s.DisplayName.Split(" - ").Last());
+            var vm = new CreateServiceViewModel(existing);
             var popup = new CreateServiceWindow(vm); // Replace with DI if needed
             if (popup.ShowDialog() == true)
             {

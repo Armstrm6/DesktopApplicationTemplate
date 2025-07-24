@@ -16,7 +16,7 @@
         <StackPanel Margin="0,50,0,0">
             <TextBlock Text="Heartbeat Message" FontWeight="Bold" Margin="0,0,0,5"/>
             <Grid Width="300">
-                <TextBox Text="{Binding BaseMessage}" x:Name="BaseMessageBox"/>
+                <TextBox Text="{Binding BaseMessage, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" x:Name="BaseMessageBox"/>
                 <TextBlock Text="Base message" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0"
                            VerticalAlignment="Center"
                            Visibility="{Binding Text, ElementName=BaseMessageBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
