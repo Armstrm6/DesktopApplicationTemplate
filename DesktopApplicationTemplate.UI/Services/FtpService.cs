@@ -1,5 +1,4 @@
 using FluentFTP;
-using FluentFTP.Client.BaseClient; // Required for async methods
 using System;
 using System.Threading;
 using System.Threading.Tasks;
