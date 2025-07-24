@@ -39,6 +39,8 @@ Launch the UI from the command line:
 dotnet run --project DesktopApplicationTemplate.UI/DesktopApplicationTemplate.UI.csproj
 ```
 
+The UI supports both light and dark themes. Open **Settings** within the application to toggle the theme and click **Save** to apply it immediately.
+
 Run the background service (useful for development):
 
 ```bash

@@ -77,6 +77,7 @@ namespace DesktopApplicationTemplate.UI
 
             var settings = AppHost.Services.GetRequiredService<SettingsViewModel>();
             settings.Load();
+            Services.ThemeManager.ApplyTheme(settings.DarkTheme);
 
             SplashWindow? splash = null;
             if (settings.FirstRun)
