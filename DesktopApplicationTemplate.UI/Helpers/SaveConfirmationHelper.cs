@@ -19,20 +19,30 @@ namespace DesktopApplicationTemplate.UI.Helpers
             set => SettingsViewModel.SaveConfirmationSuppressed = value;
         }
 
+        public static event Action? SaveConfirmed;
+
         public static void Show()
         {
             if (SaveConfirmationSuppressed)
+            {
+                SaveConfirmed?.Invoke();
                 return;
+            }
 
             var window = new SaveConfirmationWindow
             {
                 Owner = System.Windows.Application.Current.MainWindow
             };
-            if (window.ShowDialog() == true && window.DontShowAgain)
+            if (window.ShowDialog() == true)
             {
-                SaveConfirmationSuppressed = true;
-                var settingsVm = App.AppHost.Services.GetRequiredService<SettingsViewModel>();
-                settingsVm.Save();
+                if (window.DontShowAgain)
+                {
+                    SaveConfirmationSuppressed = true;
+                    var settingsVm = App.AppHost.Services.GetRequiredService<SettingsViewModel>();
+                    settingsVm.Save();
+                }
+
+                SaveConfirmed?.Invoke();
             }
         }
     }

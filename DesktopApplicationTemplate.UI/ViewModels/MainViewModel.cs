@@ -140,6 +140,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 };
                 newService.SetColorsByType();
                 newService.LogAdded += OnServiceLogAdded;
+                newService.ActiveChanged += OnServiceActiveChanged;
                 newService.AddLog("Service created", WpfBrushes.Blue);
                 Services.Add(newService);
                 OnPropertyChanged(nameof(ServicesCreated));
@@ -153,6 +154,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             {
                 var index = Services.IndexOf(SelectedService);
                 SelectedService.LogAdded -= OnServiceLogAdded;
+                SelectedService.ActiveChanged -= OnServiceActiveChanged;
                 Services.Remove(SelectedService);
                 if (Services.Count > 0)
                 {
@@ -197,6 +199,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 };
                 svc.SetColorsByType();
                 svc.LogAdded += OnServiceLogAdded;
+                svc.ActiveChanged += OnServiceActiveChanged;
                 Services.Add(svc);
             }
             OnPropertyChanged(nameof(ServicesCreated));
@@ -242,6 +245,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 }
             }
             OnPropertyChanged(nameof(DisplayLogs));
+        }
+
+        internal void OnServiceActiveChanged(bool _)
+        {
+            OnPropertyChanged(nameof(CurrentActiveServices));
         }
 
         // OnPropertyChanged inherited from ViewModelBase
