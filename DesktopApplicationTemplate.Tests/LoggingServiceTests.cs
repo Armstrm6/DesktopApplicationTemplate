@@ -22,15 +22,31 @@ namespace DesktopApplicationTemplate.Tests
             {
                 return;
             }
-            var box = new RichTextBox();
-            var service = new LoggingService(box, Dispatcher.CurrentDispatcher);
 
-            service.Log("test", level);
+            Exception? ex = null;
+            var thread = new Thread(() =>
+            {
+                try
+                {
+                    var box = new RichTextBox();
+                    var service = new LoggingService(box, Dispatcher.CurrentDispatcher);
 
-            string text = new TextRange(box.Document.ContentStart, box.Document.ContentEnd).Text.Trim();
-            Assert.Contains("test", text);
-            Assert.Contains($"[{level}]", text);
-            Assert.Matches(@"\[\d{2}:\d{2}:\d{2}\]", text);
+                    service.Log("test", level);
+
+                    string text = new TextRange(box.Document.ContentStart, box.Document.ContentEnd).Text.Trim();
+                    Assert.Contains("test", text);
+                    Assert.Contains($"[{level}]", text);
+                    Assert.Matches(@"\[\d{2}:\d{2}:\d{2}\]", text);
+                }
+                catch (Exception e)
+                {
+                    ex = e;
+                }
+            });
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.Start();
+            thread.Join();
+            if (ex != null) throw ex;
 
             ConsoleTestLogger.LogPass();
         }
@@ -42,20 +58,36 @@ namespace DesktopApplicationTemplate.Tests
             {
                 return;
             }
+
+            Exception? ex = null;
             var path = Path.GetTempFileName();
-            try
+            var thread = new Thread(() =>
             {
-                var box = new RichTextBox();
-                var service = new LoggingService(box, Dispatcher.CurrentDispatcher, path);
-                service.Log("file-test", LogLevel.Debug);
-                var content = File.ReadAllText(path);
-                Assert.Contains("file-test", content);
-            }
-            finally
+                try
+                {
+                    var box = new RichTextBox();
+                    var service = new LoggingService(box, Dispatcher.CurrentDispatcher, path);
+                    service.Log("file-test", LogLevel.Debug);
+                    var content = File.ReadAllText(path);
+                    Assert.Contains("file-test", content);
+                }
+                catch (Exception e)
+                {
+                    ex = e;
+                }
+            });
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.Start();
+            thread.Join();
+            try
             {
                 if (File.Exists(path))
                     File.Delete(path);
             }
+            catch
+            {
+            }
+            if (ex != null) throw ex;
 
             ConsoleTestLogger.LogPass();
         }
