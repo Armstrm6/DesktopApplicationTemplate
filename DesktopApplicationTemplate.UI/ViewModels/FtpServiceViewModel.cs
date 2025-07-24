@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.UI.Helpers;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -72,7 +73,7 @@ public class FtpServiceViewModel : ViewModelBase, ILoggingViewModel
             Logger?.Log("FTP upload complete", LogLevel.Debug);
         }
 
-        private void Save() => System.Windows.MessageBox.Show("Configuration saved.");
+        private void Save() => SaveConfirmationHelper.Show();
 
         // OnPropertyChanged provided by ViewModelBase
     }

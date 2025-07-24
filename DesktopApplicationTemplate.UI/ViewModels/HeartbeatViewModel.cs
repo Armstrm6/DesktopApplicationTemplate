@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using System.Windows;
+using DesktopApplicationTemplate.UI.Helpers;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -58,10 +59,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             FinalMessage = msg;
         }
 
-        private void Save()
-        {
-            System.Windows.MessageBox.Show("Configuration saved.", "Save", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
+        private void Save() => SaveConfirmationHelper.Show();
 
         // OnPropertyChanged from ViewModelBase
     }

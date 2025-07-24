@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using System.Windows;
 using System.Windows.Input;
+using DesktopApplicationTemplate.UI.Helpers;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -18,9 +19,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             SaveCommand = new RelayCommand(Save);
         }
 
-        private void Save()
-        {
-            System.Windows.MessageBox.Show("Configuration saved.", "Save", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
+        private void Save() => SaveConfirmationHelper.Show();
     }
 }

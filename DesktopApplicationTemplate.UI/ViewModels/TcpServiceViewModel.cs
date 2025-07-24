@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.UI.Helpers;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -201,10 +202,7 @@ public class TcpServiceViewModel : ViewModelBase, ILoggingViewModel
             }
         }
 
-        private void Save()
-        {
-            System.Windows.MessageBox.Show("Configuration saved.", "Save", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
+        private void Save() => SaveConfirmationHelper.Show();
 
         // OnPropertyChanged inherited from ViewModelBase
     }
