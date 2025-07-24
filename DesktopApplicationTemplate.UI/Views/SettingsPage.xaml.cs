@@ -21,6 +21,7 @@ namespace DesktopApplicationTemplate.UI.Views
         private void Save_Click(object sender, RoutedEventArgs e)
         {
             _viewModel.Save();
+            Services.ThemeManager.ApplyTheme(_viewModel.DarkTheme);
         }
 
         private void Back_Click(object sender, RoutedEventArgs e)
@@ -41,7 +42,10 @@ namespace DesktopApplicationTemplate.UI.Views
                 if (res == MessageBoxResult.Cancel)
                     return;
                 if (res == MessageBoxResult.Yes)
+                {
                     _viewModel.Save();
+                    Services.ThemeManager.ApplyTheme(_viewModel.DarkTheme);
+                }
             }
             if (Parent is Frame frame)
                 frame.Content = new HomePage { DataContext = App.AppHost.Services.GetService(typeof(MainViewModel)) };
