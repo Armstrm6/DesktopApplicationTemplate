@@ -6,7 +6,7 @@ namespace DesktopApplicationTemplate.UI.Services
     {
         public string? OpenFile()
         {
-            var dialog = new OpenFileDialog();
+            var dialog = new Microsoft.Win32.OpenFileDialog();
             return dialog.ShowDialog() == true ? dialog.FileName : null;
         }
     }

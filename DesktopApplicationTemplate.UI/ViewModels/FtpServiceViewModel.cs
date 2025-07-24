@@ -76,7 +76,7 @@ public class FtpServiceViewModel : ViewModelBase, ILoggingViewModel
         {
             if (string.IsNullOrWhiteSpace(LocalPath) || string.IsNullOrWhiteSpace(RemotePath))
                 return;
-            var svc = Service ?? new FtpService(Host, int.Parse(Port), Username, Password);
+            var svc = Service ?? (IFtpService)new FtpService(Host, int.Parse(Port), Username, Password);
             await svc.UploadAsync(LocalPath, RemotePath);
             Logger?.Log("FTP upload complete", LogLevel.Debug);
         }
