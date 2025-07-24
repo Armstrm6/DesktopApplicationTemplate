@@ -16,7 +16,6 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DesktopApplicationTemplate.UI\DesktopApplicationTemplate.UI.csproj" />
     <ProjectReference Include="..\DesktopApplicationTemplate.Service\DesktopApplicationTemplate.Service.csproj" />
     <ProjectReference Include="..\DesktopApplication.Installer\DesktopApplication.Installer.csproj" />
   </ItemGroup>
