@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <Folder Include="Themes\" />
+    <Resource Include="Themes/BubblyWindow.xaml" />
     <Resource Include="Resources/*" />
   </ItemGroup>
 
