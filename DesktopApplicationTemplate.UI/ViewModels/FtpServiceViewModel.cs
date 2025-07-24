@@ -5,7 +5,7 @@ using DesktopApplicationTemplate.UI.Services;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
-    public class FtpServiceViewModel : ViewModelBase
+public class FtpServiceViewModel : ViewModelBase, ILoggingViewModel
     {
         private string _host = string.Empty;
         public string Host

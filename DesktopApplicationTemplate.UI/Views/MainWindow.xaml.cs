@@ -56,8 +56,7 @@ namespace DesktopApplicationTemplate.UI.Views
 
             if (svc.ServicePage != null)
             {
-                var vm = svc.ServicePage.DataContext as dynamic;
-                if (vm != null)
+                if (svc.ServicePage.DataContext is ILoggingViewModel vm && vm.Logger is LoggingService logger)
                 {
                     var logger = vm.Logger as LoggingService;
                     if (logger != null)
