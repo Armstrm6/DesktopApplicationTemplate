@@ -20,7 +20,13 @@ namespace DesktopApplicationTemplate.UI.Views
         private void FileObserverView_Loaded(object sender, RoutedEventArgs e)
         {
             // Optional: logic on load (e.g., preload a directory, start watch service, etc.)
-            // _viewModel.Initialize(); 
+            // _viewModel.Initialize();
+        }
+
+        private void Help_Click(object sender, RoutedEventArgs e)
+        {
+            var help = new AsciiHelpWindow();
+            help.ShowDialog();
         }
     }
 }

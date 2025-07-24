@@ -80,7 +80,10 @@
                 <Button Content="Open Editor" Margin="0,5,0,5" Click="OpenEditor_Click" Width="100"/>
                 <TextBlock Text="Test Message" FontWeight="Bold" Margin="0,5,0,0"/>
                 <TextBox Text="{Binding TestMessage}" Margin="0,0,0,5"/>
-                <Button Content="Test Script" Margin="0,0,0,5" Command="{Binding TestScriptCommand}"/>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                    <Button Content="Test Script" Command="{Binding TestScriptCommand}"/>
+                    <Button Content="Help" Width="80" Margin="5,0,0,0" Click="Help_Click"/>
+                </StackPanel>
             </StackPanel>
 
             <!-- RIGHT SIDE -->

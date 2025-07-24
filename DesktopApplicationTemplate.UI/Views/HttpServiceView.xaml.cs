@@ -33,6 +33,12 @@ namespace DesktopApplicationTemplate.UI.Views
             _viewModel.Logger = _logger;
         }
 
+        private void Help_Click(object sender, RoutedEventArgs e)
+        {
+            var help = new AsciiHelpWindow();
+            help.ShowDialog();
+        }
+
         private void LogLevelBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (_logger == null)

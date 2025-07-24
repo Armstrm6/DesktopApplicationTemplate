@@ -38,6 +38,7 @@
                Visibility="{Binding Text, ElementName=UrlTextBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
             </Grid>
             <Button Content="Send" Width="100" Command="{Binding SendCommand}" />
+            <Button Content="Help" Width="80" Margin="5,0,0,0" Click="Help_Click"/>
         </StackPanel>
 
         <DataGrid Grid.Row="1" ItemsSource="{Binding Headers}" AutoGenerateColumns="False" SelectedItem="{Binding SelectedHeader}" Margin="0 0 0 10" Height="100" MaxWidth="300">

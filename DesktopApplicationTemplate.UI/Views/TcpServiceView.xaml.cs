@@ -63,5 +63,11 @@ namespace DesktopApplicationTemplate.UI.Views
                 }
             }
         }
+
+        private void Help_Click(object sender, RoutedEventArgs e)
+        {
+            var help = new AsciiHelpWindow();
+            help.ShowDialog();
+        }
     }
 }
