@@ -7,6 +7,7 @@ namespace DesktopApplicationTemplate.UI.Helpers
 {
     public static class SaveConfirmationHelper
     {
+        public static ILoggingService? Logger { get; set; }
         /// <summary>
         /// Gets or sets a value indicating whether the save confirmation dialog
         /// should be suppressed. This simply forwards to
@@ -23,9 +24,12 @@ namespace DesktopApplicationTemplate.UI.Helpers
 
         public static void Show()
         {
+            Logger?.Log("Displaying save confirmation", LogLevel.Debug);
             if (SaveConfirmationSuppressed)
             {
+                Logger?.Log("Confirmation suppressed", LogLevel.Debug);
                 SaveConfirmed?.Invoke();
+                Logger?.Log("Save confirmed via suppression", LogLevel.Debug);
                 return;
             }
 
@@ -43,6 +47,7 @@ namespace DesktopApplicationTemplate.UI.Helpers
                 }
 
                 SaveConfirmed?.Invoke();
+                Logger?.Log("Save confirmed via dialog", LogLevel.Debug);
             }
         }
     }

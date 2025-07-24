@@ -46,7 +46,7 @@ namespace DesktopApplicationTemplate.UI.Views
                     App.AppHost.Services.GetRequiredService<IStartupService>()),
                 "HTTP" => App.AppHost.Services.GetRequiredService<HttpServiceView>(),
                 "File Observer" => App.AppHost.Services.GetRequiredService<FileObserverView>(),
-                "HID" => new HidViews(),
+                "HID" => App.AppHost.Services.GetRequiredService<HidViews>(),
                 "Heartbeat" => new HeartbeatView(App.AppHost.Services.GetRequiredService<HeartbeatViewModel>()),
                 "SCP" => new SCPServiceView(App.AppHost.Services.GetRequiredService<ScpServiceViewModel>()),
                 "MQTT" => new MQTTServiceView(App.AppHost.Services.GetRequiredService<MqttServiceViewModel>()),
