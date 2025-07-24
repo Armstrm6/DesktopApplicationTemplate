@@ -41,7 +41,7 @@
             <StackPanel Grid.Column="0" Margin="10">
                 <Grid Margin="0,0,0,5">
                     <TextBox Text="{Binding ComputerIp, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" x:Name="ComputerIpBox"/>
-                    <TextBlock Text="Computer IP" IsHitTestVisible="False" Foreground="Gray" VerticalAlignment="Center"
+                    <TextBlock Text="Computer IP (e.g. 192.168.1.50)" IsHitTestVisible="False" Foreground="Gray" VerticalAlignment="Center"
                                Margin="5,0,0,0"
                                Visibility="{Binding Text, ElementName=ComputerIpBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
                 </Grid>
@@ -51,15 +51,17 @@
                                Margin="5,0,0,0"
                                Visibility="{Binding Text, ElementName=ListenPortBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
                 </Grid>
+                <CheckBox Content="UDP" IsChecked="{Binding IsUdp}" Margin="0,0,0,5"/>
+                <ComboBox ItemsSource="{Binding Modes}" SelectedItem="{Binding SelectedMode}" Width="120" Margin="0,0,0,5"/>
                 <Grid Margin="0,0,0,5">
-                    <TextBox Text="{Binding ServerIp, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" x:Name="ServerIpBox"/>
-                    <TextBlock Text="Server IP" IsHitTestVisible="False" Foreground="Gray" VerticalAlignment="Center"
+                    <TextBox Text="{Binding ServerIp, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" x:Name="ServerIpBox" IsEnabled="{Binding ServerIpEnabled}"/>
+                    <TextBlock Text="Server IP (e.g. 192.168.1.200)" IsHitTestVisible="False" Foreground="Gray" VerticalAlignment="Center"
                                Margin="5,0,0,0"
                                Visibility="{Binding Text, ElementName=ServerIpBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
                 </Grid>
                 <Grid Margin="0,0,0,5">
                     <TextBox Text="{Binding ServerGateway, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" x:Name="ServerGatewayBox"/>
-                    <TextBlock Text="Server Gateway" IsHitTestVisible="False" Foreground="Gray" VerticalAlignment="Center"
+                    <TextBlock Text="Gateway (e.g. 192.168.1.1)" IsHitTestVisible="False" Foreground="Gray" VerticalAlignment="Center"
                                Margin="5,0,0,0"
                                Visibility="{Binding Text, ElementName=ServerGatewayBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
                 </Grid>

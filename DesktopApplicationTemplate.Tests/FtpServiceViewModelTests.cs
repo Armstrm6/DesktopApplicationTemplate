@@ -63,5 +63,16 @@ namespace DesktopApplicationTemplate.Tests
 
             ConsoleTestLogger.LogPass();
         }
+
+        [Fact]
+        public void PartialHost_WithTrailingDot_DoesNotError()
+        {
+            var vm = new FtpServiceViewModel();
+            vm.Host = "192.168.";
+
+            Assert.False(vm.HasErrors);
+
+            ConsoleTestLogger.LogPass();
+        }
     }
 }

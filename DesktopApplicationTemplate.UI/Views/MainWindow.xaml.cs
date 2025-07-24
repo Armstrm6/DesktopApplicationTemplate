@@ -60,7 +60,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 {
                     if (vm.Logger != null)
                     {
-                        logger.LogAdded += entry => svc.AddLog(entry.Message, entry.Color);
+                        logger.LogAdded += entry => svc.AddLog(entry.Message, entry.Color, entry.Level);
                     }
                 }
             }
@@ -356,6 +356,20 @@ namespace DesktopApplicationTemplate.UI.Views
             {
                 _viewModel.Services.Move(oldIndex, newIndex);
                 _viewModel.SaveServices();
+            }
+        }
+
+        private void GlobalLogLevelBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (GlobalLogLevelBox.SelectedItem is ComboBoxItem item)
+            {
+                _viewModel.LogLevelFilter = item.Content?.ToString() switch
+                {
+                    "Warning" => LogLevel.Warning,
+                    "Error" => LogLevel.Error,
+                    "Debug" => LogLevel.Debug,
+                    _ => LogLevel.Debug
+                };
             }
         }
 

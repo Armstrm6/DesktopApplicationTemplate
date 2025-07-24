@@ -24,6 +24,43 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel
         private string _serverGateway = string.Empty;
         private string _serverPort = string.Empty;
 
+        private bool _isUdp;
+        private bool _serverIpEnabled = true;
+        private string _selectedMode = "Listening";
+
+        public bool IsUdp
+        {
+            get => _isUdp;
+            set
+            {
+                _isUdp = value;
+                if (_isUdp)
+                {
+                    ServerIp = "0.0.0.0";
+                    ServerIpEnabled = false;
+                }
+                else
+                {
+                    ServerIpEnabled = true;
+                }
+                OnPropertyChanged();
+            }
+        }
+
+        public bool ServerIpEnabled
+        {
+            get => _serverIpEnabled;
+            set { _serverIpEnabled = value; OnPropertyChanged(); }
+        }
+
+        public ObservableCollection<string> Modes { get; } = new() { "Listening", "Sending" };
+
+        public string SelectedMode
+        {
+            get => _selectedMode;
+            set { _selectedMode = value; OnPropertyChanged(); }
+        }
+
         private string _scriptContent = string.Empty;
         private string _selectedLanguage = "Python";
         private string _testMessage = string.Empty;
@@ -38,7 +75,7 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel
             set
             {
                 _computerIp = value;
-                if (!string.IsNullOrWhiteSpace(value) && !System.Net.IPAddress.TryParse(value, out _))
+                if (!InputValidators.IsValidPartialIp(value))
                 {
                     AddError(nameof(ComputerIp), "Invalid IP address");
                     Logger?.Log("Invalid computer IP entered", LogLevel.Warning);
@@ -76,7 +113,7 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel
             set
             {
                 _serverIp = value;
-                if (!string.IsNullOrWhiteSpace(value) && !System.Net.IPAddress.TryParse(value, out _))
+                if (!InputValidators.IsValidPartialIp(value))
                 {
                     AddError(nameof(ServerIp), "Invalid IP address");
                     Logger?.Log("Invalid server IP entered", LogLevel.Warning);
@@ -95,7 +132,7 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel
             set
             {
                 _serverGateway = value;
-                if (!string.IsNullOrWhiteSpace(value) && !System.Net.IPAddress.TryParse(value, out _))
+                if (!InputValidators.IsValidPartialIp(value))
                 {
                     AddError(nameof(ServerGateway), "Invalid IP address");
                     Logger?.Log("Invalid server gateway entered", LogLevel.Warning);

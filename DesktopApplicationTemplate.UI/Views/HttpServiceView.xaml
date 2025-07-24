@@ -35,7 +35,7 @@
             <ComboBox Width="100" ItemsSource="{Binding Methods}" SelectedItem="{Binding SelectedMethod}" />
             <Grid Width="400" Margin="10 0">
                 <TextBox Text="{Binding Url, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" Name="UrlTextBox"/>
-                <TextBlock Text="Enter URL"
+                <TextBlock Text="http://127.0.0.1/api"
                IsHitTestVisible="False"
                Foreground="Gray"
                VerticalAlignment="Center"

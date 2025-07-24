@@ -16,7 +16,7 @@
         <StackPanel Grid.Column="0" Margin="10">
             <Grid Margin="0,0,0,5">
                 <TextBox Text="{Binding Host, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" x:Name="HostBox"/>
-                <TextBlock Text="Host" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0"
+                <TextBlock Text="Host (e.g. 192.168.1.20)" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0"
                            VerticalAlignment="Center"
                            Visibility="{Binding Text, ElementName=HostBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
             </Grid>
