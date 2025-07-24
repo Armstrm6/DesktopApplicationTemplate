@@ -46,10 +46,19 @@ public class HttpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel
             set
             {
                 _url = value;
-                if (!string.IsNullOrWhiteSpace(value) && !Uri.TryCreate(value, UriKind.Absolute, out _))
+                if (!string.IsNullOrWhiteSpace(value))
                 {
-                    AddError(nameof(Url), "Invalid URL");
-                    Logger?.Log("Invalid HTTP URL entered", LogLevel.Warning);
+                    if (Uri.TryCreate(value, UriKind.Absolute, out var uri) &&
+                        (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps))
+                    {
+                        ClearErrors(nameof(Url));
+                        Logger?.Log("Valid HTTP URL set", LogLevel.Debug);
+                    }
+                    else
+                    {
+                        AddError(nameof(Url), "Invalid URL");
+                        Logger?.Log("Invalid HTTP URL entered", LogLevel.Warning);
+                    }
                 }
                 else
                 {
