@@ -318,5 +318,46 @@ namespace DesktopApplicationTemplate.UI.Views
             ContentFrame.Content = page;
         }
 
+        private Point _dragStart;
+        private void ServiceItem_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            _dragStart = e.GetPosition(null);
+        }
+
+        private void ServiceItem_PreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (e.LeftButton != System.Windows.Input.MouseButtonState.Pressed)
+                return;
+
+            var position = e.GetPosition(null);
+            if (Math.Abs(position.X - _dragStart.X) > SystemParameters.MinimumHorizontalDragDistance ||
+                Math.Abs(position.Y - _dragStart.Y) > SystemParameters.MinimumVerticalDragDistance)
+            {
+                if (sender is Border border && border.DataContext is ServiceViewModel svc)
+                {
+                    DragDrop.DoDragDrop(border, svc, DragDropEffects.Move);
+                }
+            }
+        }
+
+        private void ServiceItem_Drop(object sender, DragEventArgs e)
+        {
+            if (!e.Data.GetDataPresent(typeof(ServiceViewModel)))
+                return;
+
+            var source = (ServiceViewModel)e.Data.GetData(typeof(ServiceViewModel))!;
+            var target = (sender as Border)?.DataContext as ServiceViewModel;
+            if (source == null || target == null || source == target)
+                return;
+
+            int oldIndex = _viewModel.Services.IndexOf(source);
+            int newIndex = _viewModel.Services.IndexOf(target);
+            if (oldIndex != newIndex)
+            {
+                _viewModel.Services.Move(oldIndex, newIndex);
+                _viewModel.SaveServices();
+            }
+        }
+
     }
 }

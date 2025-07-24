@@ -13,6 +13,7 @@ namespace DesktopApplicationTemplate.UI.Services
         public static void Save(IEnumerable<ServiceViewModel> services)
         {
             var data = new List<ServiceInfo>();
+            var index = 0;
             foreach (var s in services)
             {
                 data.Add(new ServiceInfo
@@ -20,7 +21,8 @@ namespace DesktopApplicationTemplate.UI.Services
                     DisplayName = s.DisplayName,
                     ServiceType = s.ServiceType,
                     IsActive = s.IsActive,
-                    Created = DateTime.Now
+                    Created = DateTime.Now,
+                    Order = index++
                 });
             }
             File.WriteAllText(FilePath, JsonSerializer.Serialize(data));
@@ -48,5 +50,6 @@ namespace DesktopApplicationTemplate.UI.Services
         public string ServiceType { get; set; } = string.Empty;
         public bool IsActive { get; set; }
         public DateTime Created { get; set; }
+        public int Order { get; set; }
     }
 }

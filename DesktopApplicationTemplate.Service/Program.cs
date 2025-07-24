@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System.Linq;
+using System;
 
 namespace DesktopApplicationTemplate.Service
 {
@@ -11,12 +13,19 @@ namespace DesktopApplicationTemplate.Service
             CreateHostBuilder(args).Build().Run();
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .UseWindowsService() // Enables Windows Service behavior
-                .ConfigureServices((hostContext, services) =>
-                {
-                    services.AddHostedService<Worker>(); // register the background service
-                });
+        public static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            bool runAsService = !args.Contains("--console");
+            var builder = Host.CreateDefaultBuilder(args);
+            if (runAsService && OperatingSystem.IsWindows())
+            {
+                builder = builder.UseWindowsService(); // Enables Windows Service behavior
+            }
+
+            return builder.ConfigureServices((hostContext, services) =>
+            {
+                services.AddHostedService<Worker>(); // register the background service
+            });
+        }
     }
 }

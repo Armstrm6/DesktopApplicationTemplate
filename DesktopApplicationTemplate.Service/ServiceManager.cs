@@ -16,6 +16,7 @@ namespace DesktopApplicationTemplate.Service
         public string ServiceType { get; set; } = string.Empty;
         public bool IsActive { get; set; }
         public DateTime Created { get; set; }
+        public int Order { get; set; }
     }
 
     public class ServiceManager : IDisposable
