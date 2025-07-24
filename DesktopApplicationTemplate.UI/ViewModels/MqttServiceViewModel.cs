@@ -6,7 +6,7 @@ using DesktopApplicationTemplate.UI.Services;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
-    public class MqttServiceViewModel : ViewModelBase
+public class MqttServiceViewModel : ViewModelBase, ILoggingViewModel
     {
         private string _host = string.Empty;
         public string Host
