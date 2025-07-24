@@ -9,7 +9,7 @@
                 <ControlTemplate TargetType="ToggleButton">
                     <Grid>
                         <Border x:Name="SwitchBorder"
-                                Background="LightCoral"
+                                Background="LightSkyBlue"
                                 CornerRadius="10"
                                 BorderBrush="DarkGray"
                                 BorderThickness="1">
@@ -23,7 +23,7 @@
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="SwitchBorder" Property="Background" Value="LightGreen"/>
+                            <Setter TargetName="SwitchBorder" Property="Background" Value="MediumSeaGreen"/>
                             <Setter TargetName="SwitchKnob" Property="HorizontalAlignment" Value="Right"/>
                         </Trigger>
                         <Trigger Property="IsChecked" Value="False">

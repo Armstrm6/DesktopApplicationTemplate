@@ -1,6 +1,7 @@
 using DesktopApplicationTemplate.Service;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using Xunit;
 
@@ -22,7 +23,8 @@ namespace DesktopApplicationTemplate.Tests
                 .Build();
 
             var logger = NullLogger<Worker>.Instance;
-            var worker = new Worker(logger, configuration);
+            var factory = NullLoggerFactory.Instance;
+            var worker = new Worker(logger, factory, configuration);
 
             Assert.Equal("TEST", worker.HeartbeatMessage);
             Assert.Equal(10, worker.IntervalSeconds);
