@@ -14,10 +14,7 @@ namespace DesktopApplicationTemplate.UI.Services
         public FtpService(string host, int port, string user, string pass, ILoggingService? logger = null)
         {
             var credentials = new System.Net.NetworkCredential(user, pass);
-            _client = new AsyncFtpClient(host, credentials)
-            {
-                Port = port
-            };
+            _client = new AsyncFtpClient(host, credentials, port, new FtpConfig());
             _logger = logger;
         }
 

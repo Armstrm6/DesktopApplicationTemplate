@@ -12,9 +12,9 @@ namespace DesktopApplicationTemplate.Tests
         [Fact]
         public async Task UploadAsync_InvokesClientOperations()
         {
-            var client = new Mock<AsyncFtpClient>("host", new NetworkCredential("u","p"));
+            var client = new Mock<AsyncFtpClient>("host", new NetworkCredential("u","p"), 21, new FtpConfig());
             client.Setup(c => c.Connect(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
-            client.Setup(c => c.UploadFile("local","remote", FtpRemoteExists.Overwrite, It.IsAny<bool>(), It.IsAny<FtpVerify>(), It.IsAny<IProgress<FtpProgress>?>(), It.IsAny<CancellationToken>()))
+            client.Setup(c => c.UploadFile("local","remote", FtpRemoteExists.Overwrite, It.IsAny<bool>(), It.IsAny<FtpVerify>(), It.IsAny<IProgress<FtpProgress>>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(FtpStatus.Success));
 
             client.Setup(c => c.Disconnect(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
@@ -23,7 +23,7 @@ namespace DesktopApplicationTemplate.Tests
             await service.UploadAsync("local","remote");
 
             client.Verify(c => c.Connect(It.IsAny<CancellationToken>()), Times.Once);
-            client.Verify(c => c.UploadFile("local","remote", FtpRemoteExists.Overwrite, It.IsAny<bool>(), It.IsAny<FtpVerify>(), It.IsAny<IProgress<FtpProgress>?>(), It.IsAny<CancellationToken>()), Times.Once);
+            client.Verify(c => c.UploadFile("local","remote", FtpRemoteExists.Overwrite, It.IsAny<bool>(), It.IsAny<FtpVerify>(), It.IsAny<IProgress<FtpProgress>>(), It.IsAny<CancellationToken>()), Times.Once);
 
             client.Verify(c => c.Disconnect(It.IsAny<CancellationToken>()), Times.Once);
 
