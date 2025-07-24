@@ -12,6 +12,7 @@
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.7" />
     <PackageReference Include="Microsoft.Extensions.Logging.EventLog" Version="9.0.7" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.7" />
+    <PackageReference Include="FluentFTP" Version="53.0.1" />
   </ItemGroup>
 
 </Project>
