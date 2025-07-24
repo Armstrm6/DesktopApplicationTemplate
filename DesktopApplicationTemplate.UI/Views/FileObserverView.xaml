@@ -81,6 +81,7 @@
                                    VerticalAlignment="Center"
                                    Visibility="{Binding Text, ElementName=TcpCommandBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
                     </Grid>
+                    <Button Content="Help" Width="60" Margin="5,0,0,0" Click="Help_Click"/>
                 </StackPanel>
             </StackPanel>
 

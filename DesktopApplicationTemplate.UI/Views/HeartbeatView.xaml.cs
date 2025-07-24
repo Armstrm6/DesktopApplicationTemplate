@@ -10,5 +10,11 @@ namespace DesktopApplicationTemplate.UI.Views
             InitializeComponent();
             DataContext = vm;
         }
+
+        private void Help_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            var help = new AsciiHelpWindow();
+            help.ShowDialog();
+        }
     }
 }

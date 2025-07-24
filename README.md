@@ -58,3 +58,40 @@ dotnet test DesktopApplicationTemplate.Tests/DesktopApplicationTemplate.Tests.cs
 The installer copies all runtime dependencies based on the generated `.deps.json`
 file of the build output. New library references are automatically detected and
 no manual configuration is required.
+
+## Services overview
+
+The UI exposes several built in service types. A brief description of each is shown below.
+
+- **HID** – configure HID devices and save their settings.
+- **TCP** – run a lightweight TCP server and test message processing scripts.
+- **HTTP** – send HTTP requests with editable headers and body fields.
+- **File Observer** – watch folders and optionally send TCP commands when new files are detected.
+- **Heartbeat** – build simple heartbeat messages with optional `PING` and `STATUS` tokens.
+- **CSV Creator** – generate CSV files from values produced by other services.
+- **SCP / FTP / MQTT** – provide basic clients for those protocols.
+
+Each service has an editor page where the parameters and test messages can be modified.  A **Help** button is available on these pages to display common ASCII commands (ACK, NAK, ENQ, ETX) which can be inserted when building protocol messages.
+
+## Testing services locally
+
+After building the solution, run the UI project and navigate to the desired service page. Most services expose a test action (for example, "Send" on the HTTP page or "Test Script" on the TCP page) that can be executed locally. Logs for each service are displayed next to the editor fields.
+
+The background service can also be run from the command line:
+
+```bash
+dotnet run --project DesktopApplicationTemplate.Service/DesktopApplicationTemplate.Service.csproj
+```
+
+This launches the hosted service which periodically emits a heartbeat message using the settings from `appsettings.json`.
+
+## CSV editor example
+
+Use the menu option **CSV Viewer** to open the CSV configuration window. Columns can be added and associated with a service and an optional script. When another service produces a value, call `CsvService.AppendRow` with the values and a CSV file will be written using the filename pattern from the editor. For example:
+
+```csharp
+// gather data from services
+csvService.AppendRow(new [] { tcpValue, httpStatus });
+```
+
+This appends a new row to `output_{index}.csv` with the TCP and HTTP values.

@@ -23,7 +23,10 @@
             </Grid>
             <CheckBox Content="Include PING" IsChecked="{Binding IncludePing}" Margin="0,5,0,0"/>
             <CheckBox Content="Include STATUS" IsChecked="{Binding IncludeStatus}" Margin="0,5,0,0"/>
-            <Button Content="Build" Command="{Binding BuildCommand}" Width="100" Margin="0,10,0,0"/>
+            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                <Button Content="Build" Command="{Binding BuildCommand}" Width="100"/>
+                <Button Content="Help" Width="80" Margin="5,0,0,0" Click="Help_Click"/>
+            </StackPanel>
             <TextBlock Text="Final Message:" Margin="0,10,0,0"/>
             <TextBox Text="{Binding FinalMessage}" IsReadOnly="True" Width="300"/>
         </StackPanel>
