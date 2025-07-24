@@ -7,6 +7,7 @@ using System.Windows.Input;
 using System.Threading.Tasks;
 using System.Windows;
 using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.UI.Helpers;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -84,10 +85,7 @@ public class HttpServiceViewModel : ViewModelBase, ILoggingViewModel
             SaveCommand = new RelayCommand(Save);
         }
 
-        private void Save()
-        {
-            System.Windows.MessageBox.Show("Configuration saved.", "Save", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
+        private void Save() => SaveConfirmationHelper.Show();
 
         public async Task SendRequestAsync()
         {
