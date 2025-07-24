@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
-using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Helpers;
 
 namespace DesktopApplicationTemplate.UI.ViewModels

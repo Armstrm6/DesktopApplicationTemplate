@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 using DesktopApplicationTemplate.UI.ViewModels;
-using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI.Helpers;
 using System.Windows.Controls;

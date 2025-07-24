@@ -1,4 +1,4 @@
-using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Core.Services;
 using Moq;
 using Renci.SshNet;
 using System.Threading.Tasks;

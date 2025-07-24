@@ -1,4 +1,4 @@
-using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Core.Services;
 using WpfControls = System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Threading;

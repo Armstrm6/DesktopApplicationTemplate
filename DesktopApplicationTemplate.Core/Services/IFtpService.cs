@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace DesktopApplicationTemplate.UI.Services
+namespace DesktopApplicationTemplate.Core.Services
 {
     public interface IFtpService
     {

@@ -1,4 +1,4 @@
-using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Core.Services;
 using FluentFTP;
 using FluentFTP.Client.BaseClient;
 using Moq;

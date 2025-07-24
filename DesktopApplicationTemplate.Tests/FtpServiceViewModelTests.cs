@@ -2,7 +2,7 @@ using DesktopApplicationTemplate.UI.ViewModels;
 using Xunit;
 using System;
 using Moq;
-using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Core.Services;
 
 namespace DesktopApplicationTemplate.Tests
 {

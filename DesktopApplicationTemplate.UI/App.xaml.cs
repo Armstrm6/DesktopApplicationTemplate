@@ -1,5 +1,5 @@
 ﻿using DesktopApplicationTemplate.UI.Helpers;
-using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Views;
 using Microsoft.Extensions.Configuration;
