@@ -33,10 +33,10 @@ namespace DesktopApplicationTemplate.UI.Services
             _logger?.Log($"Connecting to FTP {_client.Host}:{_client.Port}", LogLevel.Debug);
             try
             {
-                await _client.ConnectAsync(CancellationToken.None);
+                _client.Connect();
                 _logger?.Log($"Uploading {localPath} -> {remotePath}", LogLevel.Debug);
-                await _client.UploadFileAsync(localPath, remotePath, FtpRemoteExists.Overwrite, true, CancellationToken.None);
-                await _client.DisconnectAsync(CancellationToken.None);
+                _client.UploadFile(localPath, remotePath, FtpRemoteExists.Overwrite, true);
+                _client.Disconnect();
                 _logger?.Log("Upload finished", LogLevel.Debug);
             }
             catch (Exception ex)
