@@ -14,6 +14,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private bool _runUIOnStartup;
         private bool _runServicesOnStartup;
         private bool _logTcpMessages = true;
+        private bool _firstRun = true;
         private bool _dirty;
 
         public static bool TcpLoggingEnabled { get; private set; } = true;
@@ -23,6 +24,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public bool RunUIOnStartup { get => _runUIOnStartup; set { _runUIOnStartup = value; _dirty = true; OnPropertyChanged(); } }
         public bool RunServicesOnStartup { get => _runServicesOnStartup; set { _runServicesOnStartup = value; _dirty = true; OnPropertyChanged(); } }
         public bool LogTcpMessages { get => _logTcpMessages; set { _logTcpMessages = value; _dirty = true; OnPropertyChanged(); } }
+        public bool FirstRun { get => _firstRun; set { _firstRun = value; _dirty = true; OnPropertyChanged(); } }
         public bool HasUnsavedChanges => _dirty;
 
         public void Load()
@@ -40,6 +42,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 _runUIOnStartup = obj.RunUIOnStartup;
                 _runServicesOnStartup = obj.RunServicesOnStartup;
                 _logTcpMessages = obj.LogTcpMessages;
+                _firstRun = obj.FirstRun;
                 TcpLoggingEnabled = obj.LogTcpMessages;
             }
         }
@@ -52,7 +55,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 AutoCheckUpdates = _autoCheckUpdates,
                 RunUIOnStartup = _runUIOnStartup,
                 RunServicesOnStartup = _runServicesOnStartup,
-                LogTcpMessages = _logTcpMessages
+                LogTcpMessages = _logTcpMessages,
+                FirstRun = _firstRun
             };
             File.WriteAllText(FilePath, JsonSerializer.Serialize(data));
             TcpLoggingEnabled = _logTcpMessages;

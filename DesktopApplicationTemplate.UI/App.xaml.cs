@@ -57,6 +57,7 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<CsvViewerViewModel>();
             services.AddSingleton<CsvService>();
             services.AddSingleton<SettingsViewModel>();
+            services.AddTransient<SplashWindow>();
             services.AddTransient<CsvViewerWindow>();
             services.AddTransient<CreateServiceWindow>();
             services.AddTransient<CreateServicePage>();
@@ -72,8 +73,25 @@ namespace DesktopApplicationTemplate.UI
         {
             await AppHost.StartAsync();
 
+            var settings = AppHost.Services.GetRequiredService<SettingsViewModel>();
+            settings.Load();
+
+            SplashWindow? splash = null;
+            if (settings.FirstRun)
+            {
+                splash = AppHost.Services.GetRequiredService<SplashWindow>();
+                splash.Show();
+            }
+
             var startupService = AppHost.Services.GetRequiredService<IStartupService>();
             await startupService.RunStartupChecksAsync();
+
+            splash?.Close();
+            if (splash != null)
+            {
+                settings.FirstRun = false;
+                settings.Save();
+            }
 
             var mainWindow = AppHost.Services.GetRequiredService<MainView>();
             mainWindow.Show();
