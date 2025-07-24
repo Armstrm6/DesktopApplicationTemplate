@@ -5,6 +5,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Themes/ToggleSwitch.xaml" />
+                <ResourceDictionary Source="Themes/BubblyWindow.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <!-- Global style for log boxes -->
             <Style TargetType="RichTextBox">
