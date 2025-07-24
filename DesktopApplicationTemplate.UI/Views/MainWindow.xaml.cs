@@ -87,6 +87,7 @@ namespace DesktopApplicationTemplate.UI.Views
 
                 newService.SetColorsByType();
                 newService.LogAdded += _viewModel.OnServiceLogAdded;
+                newService.ActiveChanged += _viewModel.OnServiceActiveChanged;
 
                 GetOrCreateServicePage(newService);
 
@@ -103,7 +104,14 @@ namespace DesktopApplicationTemplate.UI.Views
                     };
                 }
 
-                if (newService.ServicePage != null)
+                if (type == "CSV Creator")
+                {
+                    var csvVm = App.AppHost.Services.GetRequiredService<CsvViewerViewModel>();
+                    var csvWindow = new CsvViewerWindow(csvVm);
+                    csvVm.RequestClose += () => csvWindow.Close();
+                    csvWindow.ShowDialog();
+                }
+                else if (newService.ServicePage != null)
                 {
                     var editor = new ServiceEditorWindow(newService.ServicePage);
                     editor.ShowDialog();
@@ -137,13 +145,23 @@ namespace DesktopApplicationTemplate.UI.Views
             if (_viewModel.SelectedService == null)
                 return;
 
-            var page = GetOrCreateServicePage(_viewModel.SelectedService);
-            if (page != null)
+            if (_viewModel.SelectedService.ServiceType == "CSV Creator")
             {
-                _viewModel.SelectedService.IsActive = false;
-                var editor = new ServiceEditorWindow(page);
-                editor.ShowDialog();
-                ContentFrame.Content = new HomePage { DataContext = _viewModel };
+                var vm = App.AppHost.Services.GetRequiredService<CsvViewerViewModel>();
+                var window = new CsvViewerWindow(vm);
+                vm.RequestClose += () => window.Close();
+                window.ShowDialog();
+            }
+            else
+            {
+                var page = GetOrCreateServicePage(_viewModel.SelectedService);
+                if (page != null)
+                {
+                    _viewModel.SelectedService.IsActive = false;
+                    var editor = new ServiceEditorWindow(page);
+                    editor.ShowDialog();
+                    ContentFrame.Content = new HomePage { DataContext = _viewModel };
+                }
             }
         }
 
@@ -160,6 +178,15 @@ namespace DesktopApplicationTemplate.UI.Views
 
             if ((sender as Border)?.DataContext is ServiceViewModel svc)
             {
+                if (svc.ServiceType == "CSV Creator")
+                {
+                    var vm = App.AppHost.Services.GetRequiredService<CsvViewerViewModel>();
+                    var window = new CsvViewerWindow(vm);
+                    vm.RequestClose += () => window.Close();
+                    window.ShowDialog();
+                    return;
+                }
+
                 var page = GetOrCreateServicePage(svc);
                 if (page != null)
                 {
@@ -192,6 +219,15 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             if ((sender as MenuItem)?.DataContext is ServiceViewModel svc)
             {
+                if (svc.ServiceType == "CSV Creator")
+                {
+                    var vm = App.AppHost.Services.GetRequiredService<CsvViewerViewModel>();
+                    var window = new CsvViewerWindow(vm);
+                    vm.RequestClose += () => window.Close();
+                    window.ShowDialog();
+                    return;
+                }
+
                 var page = GetOrCreateServicePage(svc);
                 if (page != null)
                 {

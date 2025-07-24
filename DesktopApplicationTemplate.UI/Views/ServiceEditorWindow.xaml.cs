@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using DesktopApplicationTemplate.UI.Helpers;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
@@ -9,6 +10,13 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             InitializeComponent();
             EditorFrame.Content = servicePage;
+            SaveConfirmationHelper.SaveConfirmed += OnSaveConfirmed;
+            Closed += (s, e) => SaveConfirmationHelper.SaveConfirmed -= OnSaveConfirmed;
+        }
+
+        private void OnSaveConfirmed()
+        {
+            Close();
         }
     }
 }

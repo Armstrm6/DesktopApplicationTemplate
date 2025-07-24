@@ -8,16 +8,25 @@
       d:DesignHeight="450" d:DesignWidth="800"
       Title="HidViews">
 
-    <Grid>
+    <Grid Margin="20">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
+
         <Image Source="pack://application:,,,/Resources/Desktop-Icon.png" Width="100" HorizontalAlignment="Left" Margin="0,0,0,10"/>
 
-        <StackPanel Grid.Row="1" HorizontalAlignment="Right" Margin="0,10,0,0">
-            <Button Content="Save Configuration" Command="{Binding SaveCommand}" Width="150"/>
+        <StackPanel Grid.Row="1" Margin="0,40,0,0">
+            <TextBlock Text="HID Message" FontWeight="Bold" Margin="0,0,0,5"/>
+            <TextBox Text="{Binding MessageTemplate}" Height="80" AcceptsReturn="True" x:Name="TemplateBox"/>
+            <TextBlock Text="Final Message" FontWeight="Bold" Margin="0,10,0,5"/>
+            <TextBox Text="{Binding FinalMessage}" IsReadOnly="True" Height="80"/>
+            <Button Content="Build" Command="{Binding BuildCommand}" Width="100" Margin="0,10,0,0" HorizontalAlignment="Left"/>
         </StackPanel>
 
+        <StackPanel Grid.Row="2" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button Content="Save Configuration" Command="{Binding SaveCommand}" Width="150"/>
+        </StackPanel>
     </Grid>
 </Page>
