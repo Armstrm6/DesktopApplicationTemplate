@@ -73,6 +73,11 @@ public class HttpServiceViewModel : ViewModelBase, ILoggingViewModel
 
         public ILoggingService? Logger { get; set; }
 
+        /// <summary>
+        /// Optional handler used for testing to intercept HTTP requests.
+        /// </summary>
+        public HttpMessageHandler? MessageHandler { get; set; }
+
         public HttpServiceViewModel()
         {
             SendCommand = new RelayCommand(async () => await SendRequestAsync());
@@ -96,7 +101,7 @@ public class HttpServiceViewModel : ViewModelBase, ILoggingViewModel
                 return;
             }
 
-            using HttpClient client = new();
+            using HttpClient client = MessageHandler != null ? new HttpClient(MessageHandler) : new HttpClient();
             try
             {
                 using var request = new HttpRequestMessage(new HttpMethod(SelectedMethod), Url);

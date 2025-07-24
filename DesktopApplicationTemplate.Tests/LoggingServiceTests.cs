@@ -1,5 +1,5 @@
 using DesktopApplicationTemplate.UI.Services;
-using System.Windows.Controls;
+using WpfControls = System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Threading;
 using System.IO;

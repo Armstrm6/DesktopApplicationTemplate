@@ -50,6 +50,11 @@ public class FtpServiceViewModel : ViewModelBase, ILoggingViewModel
 
         public ILoggingService? Logger { get; set; }
 
+        /// <summary>
+        /// Optional service used for testing to avoid real network operations.
+        /// </summary>
+        public IFtpService? Service { get; set; }
+
         public FtpServiceViewModel()
         {
             BrowseCommand = new RelayCommand(Browse);
@@ -64,11 +69,11 @@ public class FtpServiceViewModel : ViewModelBase, ILoggingViewModel
                 LocalPath = dialog.FileName;
         }
 
-        private async Task TransferAsync()
+        internal async Task TransferAsync()
         {
             if (string.IsNullOrWhiteSpace(LocalPath) || string.IsNullOrWhiteSpace(RemotePath))
                 return;
-            var svc = new FtpService(Host, int.Parse(Port), Username, Password);
+            var svc = Service ?? new FtpService(Host, int.Parse(Port), Username, Password);
             await svc.UploadAsync(LocalPath, RemotePath);
             Logger?.Log("FTP upload complete", LogLevel.Debug);
         }
