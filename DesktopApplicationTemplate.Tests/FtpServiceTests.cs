@@ -1,5 +1,6 @@
 using DesktopApplicationTemplate.UI.Services;
 using FluentFTP;
+using FluentFTP.Client.BaseClient;
 using Moq;
 using System.Net;
 using System.Threading;

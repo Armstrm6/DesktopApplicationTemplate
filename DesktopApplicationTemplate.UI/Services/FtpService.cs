@@ -20,7 +20,7 @@ namespace DesktopApplicationTemplate.UI.Services
             _logger = logger;
         }
 
-        internal FtpService(FtpClient client, ILoggingService? logger = null)
+        public FtpService(FtpClient client, ILoggingService? logger = null)
         {
             _client = client;
             _logger = logger;
