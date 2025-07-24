@@ -14,7 +14,10 @@ namespace DesktopApplicationTemplate.UI.Services
         public FtpService(string host, int port, string user, string pass, ILoggingService? logger = null)
         {
             var credentials = new System.Net.NetworkCredential(user, pass);
-            _client = new AsyncFtpClient(host, port, credentials);
+            _client = new AsyncFtpClient(host, credentials)
+            {
+                Port = port
+            };
             _logger = logger;
         }
 
@@ -31,7 +34,7 @@ namespace DesktopApplicationTemplate.UI.Services
             {
                 await _client.Connect(token);
                 _logger?.Log($"Uploading {localPath} -> {remotePath}", LogLevel.Debug);
-                await _client.UploadFile(localPath, remotePath, FtpRemoteExists.Overwrite, true, FtpVerify.None, token);
+                await _client.UploadFile(localPath, remotePath, FtpRemoteExists.Overwrite, true, FtpVerify.None, null, token);
                 await _client.Disconnect(token);
                 _logger?.Log("Upload finished", LogLevel.Debug);
             }

@@ -5,6 +5,6 @@ namespace DesktopApplicationTemplate.UI.Services
 {
     public interface IFtpService
     {
-        Task UploadAsync(string localPath, string remotePath, CancellationToken token = default);
+        Task UploadAsync(string localPath, string remotePath, System.Threading.CancellationToken token = default);
     }
 }
