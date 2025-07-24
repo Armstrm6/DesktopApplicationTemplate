@@ -107,8 +107,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public IEnumerable<LogEntry> DisplayLogs => SelectedService?.Logs ?? AllLogs;
 
-        public MainViewModel()
+        private readonly CsvService _csvService;
+
+        public MainViewModel(CsvService csvService)
         {
+            _csvService = csvService;
             AddServiceCommand = new RelayCommand(AddService);
             RemoveServiceCommand = new RelayCommand(RemoveSelectedService, () => SelectedService != null);
             FilteredServices = CollectionViewSource.GetDefaultView(Services);
@@ -227,6 +230,17 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public void OnServiceLogAdded(ServiceViewModel svc, LogEntry entry)
         {
             AllLogs.Insert(0, entry);
+            if (svc.ServiceType != "CSV Creator" && Services.Any(s => s.ServiceType == "CSV Creator"))
+            {
+                try
+                {
+                    _csvService.AppendRow(new[] { entry.Message });
+                }
+                catch
+                {
+                    // ignore CSV errors during logging
+                }
+            }
             OnPropertyChanged(nameof(DisplayLogs));
         }
 

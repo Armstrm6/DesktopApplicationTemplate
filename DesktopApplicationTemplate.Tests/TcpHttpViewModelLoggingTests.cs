@@ -18,6 +18,8 @@ namespace DesktopApplicationTemplate.Tests
             vm.ToggleServerCommand.Execute(null);
 
             Assert.Single(logger.Entries);
+
+            ConsoleTestLogger.LogPass();
         }
 
         [Fact]
@@ -31,6 +33,8 @@ namespace DesktopApplicationTemplate.Tests
 
             Assert.Single(logger.Entries);
             Assert.Equal(LogLevel.Warning, logger.Entries[0].Level);
+
+            ConsoleTestLogger.LogPass();
         }
     }
 }

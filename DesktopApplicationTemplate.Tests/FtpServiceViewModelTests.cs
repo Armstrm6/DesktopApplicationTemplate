@@ -16,6 +16,8 @@ namespace DesktopApplicationTemplate.Tests
             var vm = new FtpServiceViewModel();
             vm.BrowseCommand.Execute(null);
             Assert.True(true); // command executed without exception
+
+            ConsoleTestLogger.LogPass();
         }
     }
 }

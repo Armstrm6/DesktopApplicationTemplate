@@ -26,6 +26,8 @@ namespace DesktopApplicationTemplate.Tests
 
             Assert.Equal("TEST", worker.HeartbeatMessage);
             Assert.Equal(10, worker.IntervalSeconds);
+
+            ConsoleTestLogger.LogPass();
         }
     }
 }

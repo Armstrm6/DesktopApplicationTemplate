@@ -10,6 +10,8 @@ namespace DesktopApplicationTemplate.Tests
         {
             var vm = new ScpServiceViewModel();
             Assert.Equal("22", vm.Port);
+
+            ConsoleTestLogger.LogPass();
         }
     }
 }
