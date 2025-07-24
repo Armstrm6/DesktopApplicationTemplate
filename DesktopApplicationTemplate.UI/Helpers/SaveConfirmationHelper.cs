@@ -7,9 +7,21 @@ namespace DesktopApplicationTemplate.UI.Helpers
 {
     public static class SaveConfirmationHelper
     {
+        /// <summary>
+        /// Gets or sets a value indicating whether the save confirmation dialog
+        /// should be suppressed. This simply forwards to
+        /// <see cref="SettingsViewModel.SaveConfirmationSuppressed"/> so callers
+        /// do not need to depend on <see cref="SettingsViewModel"/> directly.
+        /// </summary>
+        public static bool SaveConfirmationSuppressed
+        {
+            get => SettingsViewModel.SaveConfirmationSuppressed;
+            set => SettingsViewModel.SaveConfirmationSuppressed = value;
+        }
+
         public static void Show()
         {
-            if (SettingsViewModel.SaveConfirmationSuppressed)
+            if (SaveConfirmationSuppressed)
                 return;
 
             var window = new SaveConfirmationWindow
@@ -18,7 +30,7 @@ namespace DesktopApplicationTemplate.UI.Helpers
             };
             if (window.ShowDialog() == true && window.DontShowAgain)
             {
-                SettingsViewModel.SaveConfirmationSuppressed = true;
+                SaveConfirmationSuppressed = true;
                 var settingsVm = App.AppHost.Services.GetRequiredService<SettingsViewModel>();
                 settingsVm.Save();
             }
