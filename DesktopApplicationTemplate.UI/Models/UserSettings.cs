@@ -7,5 +7,6 @@ namespace DesktopApplicationTemplate.Models
         public bool RunUIOnStartup { get; set; }
         public bool RunServicesOnStartup { get; set; }
         public bool LogTcpMessages { get; set; } = true;
+        public bool FirstRun { get; set; } = true;
     }
 }
