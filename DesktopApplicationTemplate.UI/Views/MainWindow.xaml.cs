@@ -4,12 +4,9 @@ using System.Windows.Controls;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using Microsoft.VisualBasic;
-using System.Windows.Forms;
-using FormsColor = System.Drawing.Color;
-using MediaColor = System.Windows.Media.Color;
 using Microsoft.Extensions.DependencyInjection;
+using DesktopApplicationTemplate.UI.Helpers;
 using System.Linq;
-using WpfColor = System.Windows.Media.Color;
 using System.Windows.Media;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Views;
@@ -276,10 +273,10 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             if ((sender as MenuItem)?.DataContext is ServiceViewModel svc)
             {
-                var dlg = new System.Windows.Forms.ColorDialog();
-                if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                var dlg = new ColorPickerWindow { Owner = this };
+                if (dlg.ShowDialog() == true)
                 {
-                    var color = MediaColor.FromArgb(dlg.Color.A, dlg.Color.R, dlg.Color.G, dlg.Color.B);
+                    var color = dlg.SelectedColor;
                     var brush = new SolidColorBrush(color);
                     foreach (var s in _viewModel.Services.Where(s => s.ServiceType == svc.ServiceType))
                     {

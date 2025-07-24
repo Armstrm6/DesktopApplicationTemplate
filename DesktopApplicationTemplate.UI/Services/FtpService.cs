@@ -1,5 +1,7 @@
 using FluentFTP;
 using FluentFTP.Client.BaseClient; // Required for async methods
+using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 
@@ -29,11 +31,19 @@ namespace DesktopApplicationTemplate.UI.Services
         public async Task UploadAsync(string localPath, string remotePath)
         {
             _logger?.Log($"Connecting to FTP {_client.Host}:{_client.Port}", LogLevel.Debug);
-            await _client.ConnectAsync();
-            _logger?.Log($"Uploading {localPath} -> {remotePath}", LogLevel.Debug);
-            await _client.UploadFileAsync(localPath, remotePath, FtpRemoteExists.Overwrite);
-            await _client.DisconnectAsync();
-            _logger?.Log("Upload finished", LogLevel.Debug);
+            try
+            {
+                await _client.ConnectAsync(CancellationToken.None);
+                _logger?.Log($"Uploading {localPath} -> {remotePath}", LogLevel.Debug);
+                await _client.UploadFileAsync(localPath, remotePath, FtpRemoteExists.Overwrite, true, CancellationToken.None);
+                await _client.DisconnectAsync(CancellationToken.None);
+                _logger?.Log("Upload finished", LogLevel.Debug);
+            }
+            catch (Exception ex)
+            {
+                _logger?.Log($"FTP upload failed: {ex.Message}", LogLevel.Error);
+                throw;
+            }
         }
     }
 }

@@ -26,9 +26,9 @@ namespace DesktopApplicationTemplate.UI.Services
                 var dict = new ResourceDictionary { Source = new Uri(themeFile, UriKind.Relative) };
                 if (_current != null)
                 {
-                    Application.Current.Resources.MergedDictionaries.Remove(_current);
+                    System.Windows.Application.Current.Resources.MergedDictionaries.Remove(_current);
                 }
-                Application.Current.Resources.MergedDictionaries.Add(dict);
+                System.Windows.Application.Current.Resources.MergedDictionaries.Add(dict);
                 _current = dict;
                 log?.LogInformation("Theme applied successfully: {Theme}", themeFile);
             }
