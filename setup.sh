@@ -3,6 +3,7 @@
 set -e
 
 dotnet restore
+dotnet workload install windowsdesktop
 dotnet build DesktopApplicationTemplate.sln
 dotnet test DesktopApplicationTemplate.Tests/DesktopApplicationTemplate.Tests.csproj
 

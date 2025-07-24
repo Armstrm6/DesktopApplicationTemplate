@@ -12,6 +12,8 @@ namespace DesktopApplicationTemplate.Tests
             vm.NewTopic = "test/topic";
             vm.AddTopicCommand.Execute(null);
             Assert.Contains("test/topic", vm.Topics);
+
+            ConsoleTestLogger.LogPass();
         }
     }
 }

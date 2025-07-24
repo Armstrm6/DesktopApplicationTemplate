@@ -35,6 +35,8 @@ namespace DesktopApplicationTemplate.Tests
             Assert.Equal("Information", settings.LogLevel);
             Assert.False(settings.AutoStart);
             Assert.Equal("/path/script.cs", settings.DefaultCSharpScriptPath);
+
+            ConsoleTestLogger.LogPass();
         }
     }
 }

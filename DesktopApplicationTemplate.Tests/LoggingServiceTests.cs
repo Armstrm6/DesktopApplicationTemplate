@@ -31,6 +31,8 @@ namespace DesktopApplicationTemplate.Tests
             Assert.Contains("test", text);
             Assert.Contains($"[{level}]", text);
             Assert.Matches(@"\[\d{2}:\d{2}:\d{2}\]", text);
+
+            ConsoleTestLogger.LogPass();
         }
 
         [Fact]
@@ -55,5 +57,7 @@ namespace DesktopApplicationTemplate.Tests
                     File.Delete(path);
             }
         }
+
+        ConsoleTestLogger.LogPass();
     }
 }

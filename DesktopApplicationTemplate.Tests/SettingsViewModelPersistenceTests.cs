@@ -33,6 +33,8 @@ namespace DesktopApplicationTemplate.Tests
                 SettingsViewModel.SaveConfirmationSuppressed = suppressOrig;
                 Directory.Delete(tempDir, true);
             }
+
+            ConsoleTestLogger.LogPass();
         }
     }
 }

@@ -95,3 +95,25 @@ csvService.AppendRow(new [] { tcpValue, httpStatus });
 ```
 
 This appends a new row to `output_{index}.csv` with the TCP and HTTP values.
+
+## C# message scripts
+
+The **TCP** service can execute small C# scripts for transforming incoming
+messages. Create a folder named `Scripts` in the UI project and place your
+script files there. A script should expose a `string Process(string message)`
+method which receives the incoming message and returns the response. Configure
+`AppSettings:DefaultCSharpScriptPath` in the appropriate `appsettings` file to
+point at your script. When the TCP editor is opened with language set to `C#`,
+the script template will be loaded automatically.
+
+## Running startup scripts
+
+To restore dependencies, build the solution and run the unit tests from a shell
+environment use:
+
+```bash
+chmod +x setup.sh
+./setup.sh
+```
+
+This is helpful on CI hosts or when preparing a fresh development machine.
