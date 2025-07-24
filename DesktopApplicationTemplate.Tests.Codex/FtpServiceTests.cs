@@ -1,7 +1,6 @@
 using DesktopApplicationTemplate.UI.Services;
 using FluentFTP;
 using Moq;
-using System.Net;
 using System.Threading;
 using Xunit;
 
@@ -12,11 +11,12 @@ namespace DesktopApplicationTemplate.Tests
         [Fact]
         public async Task UploadAsync_InvokesClientOperations()
         {
-            var client = new Mock<AsyncFtpClient>("host", new NetworkCredential("u","p"));
+            var client = new Mock<FluentFTP.IAsyncFtpClient>();
+            client.SetupGet(c => c.Host).Returns("host");
+            client.SetupGet(c => c.Port).Returns(21);
             client.Setup(c => c.Connect(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
-            client.Setup(c => c.UploadFile("local","remote", FtpRemoteExists.Overwrite, It.IsAny<bool>(), It.IsAny<FtpVerify>(), It.IsAny<IProgress<FtpProgress>?>(), It.IsAny<CancellationToken>()))
+            client.Setup(c => c.UploadFile("local","remote", FtpRemoteExists.Overwrite, true, FtpVerify.None, null, It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(FtpStatus.Success));
-
             client.Setup(c => c.Disconnect(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
             var service = new FtpService(client.Object);

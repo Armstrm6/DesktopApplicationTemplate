@@ -23,6 +23,9 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.7" />
     <PackageReference Include="Xceed.Wpf.Toolkit" Version="4.7.0" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DesktopApplicationTemplate.Service\DesktopApplicationTemplate.Service.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Themes\" />
