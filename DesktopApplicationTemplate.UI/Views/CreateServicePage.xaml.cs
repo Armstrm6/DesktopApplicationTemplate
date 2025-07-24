@@ -7,8 +7,8 @@ namespace DesktopApplicationTemplate.UI.Views
     public partial class CreateServicePage : Page
     {
         private readonly CreateServiceViewModel _viewModel;
-        public string CreatedServiceName { get; private set; }
-        public string CreatedServiceType { get; private set; }
+        public string CreatedServiceName { get; private set; } = string.Empty;
+        public string CreatedServiceType { get; private set; } = string.Empty;
         public event Action<string,string>? ServiceCreated;
         public event Action? Cancelled;
 

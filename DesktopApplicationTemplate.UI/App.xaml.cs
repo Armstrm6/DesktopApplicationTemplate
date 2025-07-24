@@ -14,7 +14,7 @@ namespace DesktopApplicationTemplate.UI
 {
     public partial class App : System.Windows.Application
     {
-        public static IHost AppHost { get; private set; }
+        public static IHost AppHost { get; private set; } = null!;
 
         public App()
         {

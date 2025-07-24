@@ -11,9 +11,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
     {
         public ObservableCollection<FileObserver> Observers { get; } = new();
         private FileObserver? _selectedObserver;
-        public FileObserver SelectedObserver
+        public FileObserver? SelectedObserver
         {
-            get => _selectedObserver!;
+            get => _selectedObserver;
             set { _selectedObserver = value; OnPropertyChanged(); LoadObserverData(); }
         }
 
@@ -136,14 +136,14 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
     public class FileObserver
     {
-        public string Name { get; set; }
-        public string FilePath { get; set; }
-        public string Contents { get; set; }
-        public string ImageNames { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string FilePath { get; set; } = string.Empty;
+        public string Contents { get; set; } = string.Empty;
+        public string ImageNames { get; set; } = string.Empty;
         public bool SendAll { get; set; }
         public bool SendFirstX { get; set; }
         public int XCount { get; set; } = 10;
         public bool SendTcp { get; set; }
-        public string TcpString { get; set; }
+        public string TcpString { get; set; } = string.Empty;
     }
 }

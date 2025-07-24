@@ -34,6 +34,10 @@ namespace DesktopApplicationTemplate.Tests
             var lines = File.ReadAllLines(path);
             Assert.Equal("Svc,Svc Sent", lines[0]);
             Assert.Equal("hello world,", lines[1]);
+            ConsoleTestLogger.LogPass();
+        }
+
+        [Fact]
         public void AppendRow_CreatesIncrementingFiles()
         {
             var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
