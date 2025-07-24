@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
+
 namespace DesktopApplicationTemplate.UI.Services
 {
     public class CsvService
@@ -68,6 +69,9 @@ namespace DesktopApplicationTemplate.UI.Services
                 File.AppendAllText(fileName, header + System.Environment.NewLine, Encoding.UTF8);
             }
             _headerWritten = true;
+            var line = string.Join(",", values);
+            System.IO.File.AppendAllText(fileName, line + System.Environment.NewLine, Encoding.UTF8);
+            _logger?.Log($"Appended row to {fileName}", LogLevel.Debug);
         }
 
         private string BuildFileName()
