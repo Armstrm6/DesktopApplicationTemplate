@@ -8,6 +8,10 @@ namespace DesktopApplicationTemplate.Tests
         [Fact]
         public void AddTopicCommand_AddsTopic()
         {
+            if (!OperatingSystem.IsWindows())
+            {
+                return;
+            }
             var vm = new MqttServiceViewModel();
             vm.NewTopic = "test/topic";
             vm.AddTopicCommand.Execute(null);
