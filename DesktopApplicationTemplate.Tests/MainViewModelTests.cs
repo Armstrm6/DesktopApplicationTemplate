@@ -11,7 +11,7 @@ namespace DesktopApplicationTemplate.Tests
         {
             var csv = new CsvService(new CsvViewerViewModel());
             var vm = new MainViewModel(csv);
-            vm.Services.Add(new MainViewModel.ServiceViewModel
+            vm.Services.Add(new MainViewModel.Services
             {
                 DisplayName = "HTTP - HTTP1",
                 ServiceType = "HTTP",
