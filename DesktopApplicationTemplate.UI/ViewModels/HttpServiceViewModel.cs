@@ -104,8 +104,8 @@ public class HttpServiceViewModel : ViewModelBase, ILoggingViewModel
             using HttpClient client = MessageHandler != null ? new HttpClient(MessageHandler) : new HttpClient();
             try
             {
-                using var request = new HttpRequestMessage(new HttpMethod(SelectedMethod), Url);
-                Logger?.Log($"Sending {SelectedMethod} request to {Url}", LogLevel.Debug);
+                Logger?.Log($"Preparing {SelectedMethod} request to {Url}", LogLevel.Debug);
+                var request = new HttpRequestMessage(new HttpMethod(SelectedMethod), Url);
 
                 foreach (var h in Headers)
                 {
