@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using System.Windows;
@@ -6,13 +5,25 @@ using DesktopApplicationTemplate.UI.Helpers;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
-    public class HeartbeatViewModel : ViewModelBase
+    public class HeartbeatViewModel : ValidatableViewModelBase
     {
         private string _baseMessage = "HEARTBEAT";
         public string BaseMessage
         {
             get => _baseMessage;
-            set { _baseMessage = value; OnPropertyChanged(); }
+            set
+            {
+                _baseMessage = value;
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    AddError(nameof(BaseMessage), "Message cannot be empty");
+                }
+                else
+                {
+                    ClearErrors(nameof(BaseMessage));
+                }
+                OnPropertyChanged();
+            }
         }
 
         private bool _includePing;

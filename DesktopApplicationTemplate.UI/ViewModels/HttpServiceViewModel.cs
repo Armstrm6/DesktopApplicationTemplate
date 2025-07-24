@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -11,7 +10,7 @@ using DesktopApplicationTemplate.UI.Helpers;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
-public class HttpServiceViewModel : ViewModelBase, ILoggingViewModel
+public class HttpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel
     {
         public ObservableCollection<string> Methods { get; } = new() { "GET", "POST", "PUT", "DELETE" };
 
@@ -44,7 +43,20 @@ public class HttpServiceViewModel : ViewModelBase, ILoggingViewModel
         public string Url
         {
             get => _url;
-            set { _url = value; OnPropertyChanged(); }
+            set
+            {
+                _url = value;
+                if (!string.IsNullOrWhiteSpace(value) && !Uri.TryCreate(value, UriKind.Absolute, out _))
+                {
+                    AddError(nameof(Url), "Invalid URL");
+                    Logger?.Log("Invalid HTTP URL entered", LogLevel.Warning);
+                }
+                else
+                {
+                    ClearErrors(nameof(Url));
+                }
+                OnPropertyChanged();
+            }
         }
 
         private string _requestBody = string.Empty;

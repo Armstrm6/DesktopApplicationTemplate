@@ -37,5 +37,18 @@ namespace DesktopApplicationTemplate.Tests
 
             ConsoleTestLogger.LogPass();
         }
+
+        [Fact]
+        public void HttpService_SetInvalidUrl_AddsError()
+        {
+            var logger = new TestLogger();
+            var vm = new HttpServiceViewModel { Logger = logger };
+            vm.Url = "htp://bad";
+
+            Assert.True(vm.HasErrors);
+            Assert.Contains(logger.Entries, e => e.Message.Contains("Invalid HTTP URL"));
+
+            ConsoleTestLogger.LogPass();
+        }
     }
 }

@@ -2,7 +2,6 @@
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -14,7 +13,7 @@ using DesktopApplicationTemplate.UI.Helpers;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
-public class TcpServiceViewModel : ViewModelBase, ILoggingViewModel
+public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel
     {
         private string _statusMessage = string.Empty;
         private bool _isServerRunning;
@@ -38,8 +37,16 @@ public class TcpServiceViewModel : ViewModelBase, ILoggingViewModel
             get => _computerIp;
             set
             {
-                if (System.Net.IPAddress.TryParse(value, out _) || string.IsNullOrWhiteSpace(value))
-                    _computerIp = value;
+                _computerIp = value;
+                if (!string.IsNullOrWhiteSpace(value) && !System.Net.IPAddress.TryParse(value, out _))
+                {
+                    AddError(nameof(ComputerIp), "Invalid IP address");
+                    Logger?.Log("Invalid computer IP entered", LogLevel.Warning);
+                }
+                else
+                {
+                    ClearErrors(nameof(ComputerIp));
+                }
                 OnPropertyChanged();
             }
         }
@@ -49,8 +56,16 @@ public class TcpServiceViewModel : ViewModelBase, ILoggingViewModel
             get => _listeningPort;
             set
             {
-                if (int.TryParse(value, out _))
-                    _listeningPort = value;
+                _listeningPort = value;
+                if (!int.TryParse(value, out _))
+                {
+                    AddError(nameof(ListeningPort), "Port must be numeric");
+                    Logger?.Log("Invalid listening port entered", LogLevel.Warning);
+                }
+                else
+                {
+                    ClearErrors(nameof(ListeningPort));
+                }
                 OnPropertyChanged();
             }
         }
@@ -60,8 +75,16 @@ public class TcpServiceViewModel : ViewModelBase, ILoggingViewModel
             get => _serverIp;
             set
             {
-                if (System.Net.IPAddress.TryParse(value, out _) || string.IsNullOrWhiteSpace(value))
-                    _serverIp = value;
+                _serverIp = value;
+                if (!string.IsNullOrWhiteSpace(value) && !System.Net.IPAddress.TryParse(value, out _))
+                {
+                    AddError(nameof(ServerIp), "Invalid IP address");
+                    Logger?.Log("Invalid server IP entered", LogLevel.Warning);
+                }
+                else
+                {
+                    ClearErrors(nameof(ServerIp));
+                }
                 OnPropertyChanged();
             }
         }
@@ -71,8 +94,16 @@ public class TcpServiceViewModel : ViewModelBase, ILoggingViewModel
             get => _serverGateway;
             set
             {
-                if (System.Net.IPAddress.TryParse(value, out _) || string.IsNullOrWhiteSpace(value))
-                    _serverGateway = value;
+                _serverGateway = value;
+                if (!string.IsNullOrWhiteSpace(value) && !System.Net.IPAddress.TryParse(value, out _))
+                {
+                    AddError(nameof(ServerGateway), "Invalid IP address");
+                    Logger?.Log("Invalid server gateway entered", LogLevel.Warning);
+                }
+                else
+                {
+                    ClearErrors(nameof(ServerGateway));
+                }
                 OnPropertyChanged();
             }
         }
@@ -82,8 +113,16 @@ public class TcpServiceViewModel : ViewModelBase, ILoggingViewModel
             get => _serverPort;
             set
             {
-                if (int.TryParse(value, out _))
-                    _serverPort = value;
+                _serverPort = value;
+                if (!int.TryParse(value, out _))
+                {
+                    AddError(nameof(ServerPort), "Port must be numeric");
+                    Logger?.Log("Invalid server port entered", LogLevel.Warning);
+                }
+                else
+                {
+                    ClearErrors(nameof(ServerPort));
+                }
                 OnPropertyChanged();
             }
         }

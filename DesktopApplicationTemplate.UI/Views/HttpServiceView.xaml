@@ -29,7 +29,7 @@
         <StackPanel Orientation="Horizontal" Margin="0 0 0 10">
             <ComboBox Width="100" ItemsSource="{Binding Methods}" SelectedItem="{Binding SelectedMethod}" />
             <Grid Width="400" Margin="10 0">
-                <TextBox Text="{Binding Url, UpdateSourceTrigger=PropertyChanged}" Name="UrlTextBox"/>
+                <TextBox Text="{Binding Url, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" Name="UrlTextBox"/>
                 <TextBlock Text="Enter URL"
                IsHitTestVisible="False"
                Foreground="Gray"

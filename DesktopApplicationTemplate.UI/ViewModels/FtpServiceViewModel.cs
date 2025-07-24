@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using DesktopApplicationTemplate.UI.Services;
@@ -6,7 +5,7 @@ using DesktopApplicationTemplate.UI.Helpers;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
-public class FtpServiceViewModel : ViewModelBase, ILoggingViewModel
+public class FtpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel
     {
         private string _host = string.Empty;
         public string Host
@@ -14,8 +13,16 @@ public class FtpServiceViewModel : ViewModelBase, ILoggingViewModel
             get => _host;
             set
             {
-                if (System.Net.IPAddress.TryParse(value, out _) || string.IsNullOrWhiteSpace(value))
-                    _host = value;
+                _host = value;
+                if (!string.IsNullOrWhiteSpace(value) && !System.Net.IPAddress.TryParse(value, out _))
+                {
+                    AddError(nameof(Host), "Invalid host or IP address");
+                    Logger?.Log("Invalid FTP host entered", LogLevel.Warning);
+                }
+                else
+                {
+                    ClearErrors(nameof(Host));
+                }
                 OnPropertyChanged();
             }
         }
@@ -26,8 +33,16 @@ public class FtpServiceViewModel : ViewModelBase, ILoggingViewModel
             get => _port;
             set
             {
-                if (int.TryParse(value, out _))
-                    _port = value;
+                _port = value;
+                if (!int.TryParse(value, out _))
+                {
+                    AddError(nameof(Port), "Port must be numeric");
+                    Logger?.Log("Invalid FTP port entered", LogLevel.Warning);
+                }
+                else
+                {
+                    ClearErrors(nameof(Port));
+                }
                 OnPropertyChanged();
             }
         }
