@@ -55,8 +55,11 @@ public class FtpServiceViewModel : ViewModelBase, ILoggingViewModel
         /// </summary>
         public IFtpService? Service { get; set; }
 
-        public FtpServiceViewModel()
+        private readonly IFileDialogService _fileDialog;
+
+        public FtpServiceViewModel(IFileDialogService? fileDialog = null)
         {
+            _fileDialog = fileDialog ?? new FileDialogService();
             BrowseCommand = new RelayCommand(Browse);
             TransferCommand = new RelayCommand(async () => await TransferAsync());
             SaveCommand = new RelayCommand(Save);
@@ -64,9 +67,9 @@ public class FtpServiceViewModel : ViewModelBase, ILoggingViewModel
 
         private void Browse()
         {
-            var dialog = new Microsoft.Win32.OpenFileDialog();
-            if (dialog.ShowDialog() == true)
-                LocalPath = dialog.FileName;
+            var path = _fileDialog.OpenFile();
+            if (path != null)
+                LocalPath = path;
         }
 
         internal async Task TransferAsync()

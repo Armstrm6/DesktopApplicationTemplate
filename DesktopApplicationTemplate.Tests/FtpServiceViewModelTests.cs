@@ -8,16 +8,17 @@ namespace DesktopApplicationTemplate.Tests
 {
     public class FtpServiceViewModelTests
     {
+        private class StubFileDialogService : IFileDialogService
+        {
+            public string? OpenFile() => "stub.txt";
+        }
+
         [Fact]
         public void BrowseCommand_InitialPathEmpty_DoesNotThrow()
         {
-            if (!OperatingSystem.IsWindows())
-            {
-                return;
-            }
-            var vm = new FtpServiceViewModel();
+            var vm = new FtpServiceViewModel(new StubFileDialogService());
             vm.BrowseCommand.Execute(null);
-            Assert.True(true); // command executed without exception
+            Assert.Equal("stub.txt", vm.LocalPath);
 
             ConsoleTestLogger.LogPass();
         }
