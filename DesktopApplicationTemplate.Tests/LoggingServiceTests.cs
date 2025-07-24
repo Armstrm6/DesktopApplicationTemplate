@@ -28,7 +28,7 @@ namespace DesktopApplicationTemplate.Tests
             {
                 try
                 {
-                    var box = new RichTextBox();
+                    var box = new System.Windows.Controls.RichTextBox();
                     var service = new LoggingService(box, Dispatcher.CurrentDispatcher);
 
                     service.Log("test", level);
@@ -65,7 +65,7 @@ namespace DesktopApplicationTemplate.Tests
             {
                 try
                 {
-                    var box = new RichTextBox();
+                    var box = new System.Windows.Controls.RichTextBox();
                     var service = new LoggingService(box, Dispatcher.CurrentDispatcher, path);
                     service.Log("file-test", LogLevel.Debug);
                     var content = File.ReadAllText(path);
