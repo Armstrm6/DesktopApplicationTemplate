@@ -4,8 +4,13 @@ This repository contains a basic WPF UI application, a Windows Service and unit 
 
 ## Prerequisites
 
-- .NET 8 SDK
+- [.NET 8 SDK](https://dotnet.microsoft.com/download) (8.0.0)
 - Windows OS is required to run the WPF UI and service projects.
+
+This repository includes a `global.json` file that pins the required
+SDK version. If multiple SDKs are installed, the `dotnet` CLI will use
+version `8.0.0` as specified in this file. Running commands from the
+repository root will automatically respect this setting.
 
 ## Build the solution
 
@@ -15,6 +20,11 @@ Restore NuGet packages and build all projects:
 dotnet restore
 dotnet build DesktopApplicationTemplate.sln
 ```
+
+The `dotnet` commands will use the SDK version defined in
+`global.json` (`8.0.0`). If you have multiple versions installed,
+there is no need to switch manually when working inside this
+repository.
 
 You can also execute `setup.sh` to restore dependencies, build the solution and
 run the unit tests in a single step:
