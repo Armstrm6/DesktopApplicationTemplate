@@ -10,7 +10,7 @@ namespace DesktopApplicationTemplate.UI.Services
     {
         private static readonly string FilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "services.json");
 
-        public static void Save(IEnumerable<ServiceViewModel> services)
+        public static void Save(IEnumerable<ServiceViewModel> services, ILoggingService? logger = null)
         {
             var data = new List<ServiceInfo>();
             var index = 0;
@@ -26,19 +26,26 @@ namespace DesktopApplicationTemplate.UI.Services
                 });
             }
             File.WriteAllText(FilePath, JsonSerializer.Serialize(data));
+            logger?.Log($"Saved {data.Count} services to {FilePath}", LogLevel.Debug);
         }
 
-        public static List<ServiceInfo> Load()
+        public static List<ServiceInfo> Load(ILoggingService? logger = null)
         {
             if (!File.Exists(FilePath))
+            {
+                logger?.Log("Services file not found", LogLevel.Warning);
                 return new List<ServiceInfo>();
+            }
             var json = File.ReadAllText(FilePath);
             try
             {
-                return JsonSerializer.Deserialize<List<ServiceInfo>>(json) ?? new List<ServiceInfo>();
+                var result = JsonSerializer.Deserialize<List<ServiceInfo>>(json) ?? new List<ServiceInfo>();
+                logger?.Log($"Loaded {result.Count} services", LogLevel.Debug);
+                return result;
             }
             catch
             {
+                logger?.Log("Failed to parse services file", LogLevel.Error);
                 return new List<ServiceInfo>();
             }
         }
