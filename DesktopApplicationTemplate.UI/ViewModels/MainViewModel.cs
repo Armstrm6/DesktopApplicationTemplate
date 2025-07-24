@@ -145,6 +145,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 newService.LogAdded += OnServiceLogAdded;
                 newService.ActiveChanged += OnServiceActiveChanged;
                 newService.AddLog("Service created", WpfBrushes.Blue);
+                _csvService.EnsureColumnsForService(newService.DisplayName);
                 Services.Add(newService);
                 OnPropertyChanged(nameof(ServicesCreated));
                 OnPropertyChanged(nameof(CurrentActiveServices));
@@ -246,7 +247,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             {
                 try
                 {
-                    _csvService.AppendRow(new[] { entry.Message });
+                    _csvService.RecordLog(svc.DisplayName, entry.Message);
                 }
                 catch
                 {

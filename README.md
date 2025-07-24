@@ -87,7 +87,7 @@ This launches the hosted service which periodically emits a heartbeat message us
 
 ## CSV editor example
 
-Use the menu option **CSV Viewer** to open the CSV configuration window. Columns can be added and associated with a service and an optional script. When another service produces a value, call `CsvService.AppendRow` with the values and a CSV file will be written using the filename pattern from the editor. For example:
+Use the menu option **CSV Viewer** to open the CSV configuration window. Columns can be added and associated with a service and an optional script. When another service produces a value, call `CsvService.RecordLog` or `CsvService.AppendRow` with the values and a CSV file will be written using the filename pattern from the editor. For example:
 
 ```csharp
 // gather data from services
