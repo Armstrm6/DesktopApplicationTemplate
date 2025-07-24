@@ -318,7 +318,7 @@ namespace DesktopApplicationTemplate.UI.Views
             ContentFrame.Content = page;
         }
 
-        private Point _dragStart;
+        private System.Windows.Point _dragStart;
         private void ServiceItem_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             _dragStart = e.GetPosition(null);
@@ -335,12 +335,12 @@ namespace DesktopApplicationTemplate.UI.Views
             {
                 if (sender is Border border && border.DataContext is ServiceViewModel svc)
                 {
-                    DragDrop.DoDragDrop(border, svc, DragDropEffects.Move);
+                    DragDrop.DoDragDrop(border, svc, System.Windows.DragDropEffects.Move);
                 }
             }
         }
 
-        private void ServiceItem_Drop(object sender, DragEventArgs e)
+        private void ServiceItem_Drop(object sender, System.Windows.DragEventArgs e)
         {
             if (!e.Data.GetDataPresent(typeof(ServiceViewModel)))
                 return;
