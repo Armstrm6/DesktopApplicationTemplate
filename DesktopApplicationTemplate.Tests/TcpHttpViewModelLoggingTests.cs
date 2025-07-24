@@ -17,7 +17,8 @@ namespace DesktopApplicationTemplate.Tests
 
             vm.ToggleServerCommand.Execute(null);
 
-            Assert.Single(logger.Entries);
+            Assert.Equal(2, logger.Entries.Count);
+            Assert.Equal("Toggling server state", logger.Entries[0].Message);
 
             ConsoleTestLogger.LogPass();
         }
