@@ -119,3 +119,7 @@ chmod +x setup.sh
 ```
 
 This is helpful on CI hosts or when preparing a fresh development machine.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
