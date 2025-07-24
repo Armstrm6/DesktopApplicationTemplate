@@ -12,7 +12,10 @@ namespace DesktopApplicationTemplate.UI.Helpers
             if (SettingsViewModel.SaveConfirmationSuppressed)
                 return;
 
-            var window = new SaveConfirmationWindow { Owner = Application.Current.MainWindow };
+            var window = new SaveConfirmationWindow
+            {
+                Owner = System.Windows.Application.Current.MainWindow
+            };
             if (window.ShowDialog() == true && window.DontShowAgain)
             {
                 SettingsViewModel.SaveConfirmationSuppressed = true;
