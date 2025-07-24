@@ -56,7 +56,8 @@ namespace DesktopApplicationTemplate.UI.Views
 
             if (svc.ServicePage != null)
             {
-                if (svc.ServicePage.DataContext is dynamic vm && vm.Logger is LoggingService logger)
+                var vm = svc.ServicePage.DataContext as dynamic;
+                if (vm != null && vm.Logger is LoggingService logger)
                 {
                     logger.LogAdded += entry => svc.AddLog(entry.Message, entry.Color);
                 }
