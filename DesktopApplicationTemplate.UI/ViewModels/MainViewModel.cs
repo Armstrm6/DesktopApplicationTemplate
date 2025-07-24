@@ -3,6 +3,7 @@ using DesktopApplicationTemplate.Models;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Linq;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Data;
@@ -60,10 +61,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public event Action<ServiceViewModel, LogEntry>? LogAdded;
 
-        public void AddLog(string message, WpfBrush? color = null)
+        public void AddLog(string message, WpfBrush? color = null, LogLevel level = LogLevel.Debug)
         {
             var ts = DateTime.Now.ToString("MM.dd.yyyy - HH:mm:ss.fffffff");
-            var entry = new LogEntry { Message = $"{ts} {message}", Color = color ?? WpfBrushes.Black };
+            var entry = new LogEntry { Message = $"{ts} {message}", Color = color ?? WpfBrushes.Black, Level = level };
             Logs.Insert(0, entry);
             LogAdded?.Invoke(this, entry);
         }
@@ -106,7 +107,14 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public int ServicesCreated => Services.Count;
         public int CurrentActiveServices => Services.Count(s => s.IsActive);
 
-        public IEnumerable<LogEntry> DisplayLogs => SelectedService?.Logs ?? AllLogs;
+        private LogLevel _logLevelFilter = LogLevel.Debug;
+        public LogLevel LogLevelFilter
+        {
+            get => _logLevelFilter;
+            set { _logLevelFilter = value; OnPropertyChanged(); OnPropertyChanged(nameof(DisplayLogs)); }
+        }
+
+        public IEnumerable<LogEntry> DisplayLogs => (SelectedService?.Logs ?? AllLogs).Where(l => l.Level >= LogLevelFilter);
 
         private readonly CsvService _csvService;
 

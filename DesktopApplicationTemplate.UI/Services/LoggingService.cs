@@ -17,8 +17,18 @@ namespace DesktopApplicationTemplate.UI.Services
         private readonly WpfRichTextBox _outputBox;
         private readonly Dispatcher _dispatcher;
         private readonly string _logFilePath;
+        private readonly List<LogEntry> _entries = new();
 
-        public LogLevel MinimumLevel { get; set; } = LogLevel.Debug;
+        private LogLevel _minimumLevel = LogLevel.Debug;
+        public LogLevel MinimumLevel
+        {
+            get => _minimumLevel;
+            set
+            {
+                _minimumLevel = value;
+                UpdateLogDisplay();
+            }
+        }
 
         public event Action<LogEntry>? LogAdded;
 
@@ -31,36 +41,56 @@ namespace DesktopApplicationTemplate.UI.Services
 
         public void Log(string message, LogLevel level)
         {
-            if (level < MinimumLevel)
-                return;
+            var entry = new LogEntry { Message = $"[{DateTime.Now:HH:mm:ss}] [{level}] {message}",
+                                        Color = LevelToColor(level),
+                                        Level = level };
 
-            string formatted = $"[{DateTime.Now:HH:mm:ss}] [{level}] {message}";
+            _entries.Add(entry);
 
-            _dispatcher.Invoke(() =>
+            if (level >= MinimumLevel)
             {
-                WpfBrush color = level switch
+                _dispatcher.Invoke(() =>
                 {
-                    LogLevel.Debug => WpfBrushes.Black,
-                    LogLevel.Warning => WpfBrushes.Orange,
-                    LogLevel.Error => WpfBrushes.Red,
-                    LogLevel.Critical => WpfBrushes.DarkRed,
-                    _ => WpfBrushes.Black
-                };
+                    var paragraph = new Paragraph(new Run(entry.Message) { Foreground = entry.Color });
+                    _outputBox.Document.Blocks.Add(paragraph);
+                    _outputBox.ScrollToEnd();
+                });
+            }
 
-                var paragraph = new Paragraph(new Run(formatted) { Foreground = color });
-                _outputBox.Document.Blocks.Add(paragraph);
-                _outputBox.ScrollToEnd();
+            LogAdded?.Invoke(entry);
 
-                LogAdded?.Invoke(new LogEntry { Message = formatted, Color = color });
-            });
             try
             {
-                System.IO.File.AppendAllText(_logFilePath, formatted + Environment.NewLine);
+                System.IO.File.AppendAllText(_logFilePath, entry.Message + Environment.NewLine);
             }
             catch
             {
                 // ignore logging errors
             }
+
+        }
+
+        private static WpfBrush LevelToColor(LogLevel level) => level switch
+        {
+            LogLevel.Debug => WpfBrushes.Black,
+            LogLevel.Warning => WpfBrushes.Orange,
+            LogLevel.Error => WpfBrushes.Red,
+            LogLevel.Critical => WpfBrushes.DarkRed,
+            _ => WpfBrushes.Black
+        };
+
+        private void UpdateLogDisplay()
+        {
+            _dispatcher.Invoke(() =>
+            {
+                _outputBox.Document.Blocks.Clear();
+                foreach (var e in _entries.Where(e => e.Level >= MinimumLevel))
+                {
+                    var paragraph = new Paragraph(new Run(e.Message) { Foreground = e.Color });
+                    _outputBox.Document.Blocks.Add(paragraph);
+                }
+                _outputBox.ScrollToEnd();
+            });
         }
     }
 }

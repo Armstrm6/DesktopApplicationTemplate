@@ -15,7 +15,7 @@ public class MqttServiceViewModel : ViewModelBase, ILoggingViewModel
             get => _host;
             set
             {
-                if (System.Net.IPAddress.TryParse(value, out _) || string.IsNullOrWhiteSpace(value))
+                if (InputValidators.IsValidPartialIp(value))
                     _host = value;
                 OnPropertyChanged();
             }

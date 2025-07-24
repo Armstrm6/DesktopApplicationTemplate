@@ -91,5 +91,40 @@ namespace DesktopApplicationTemplate.Tests
 
             ConsoleTestLogger.LogPass();
         }
+
+        [Fact]
+        public void MinimumLevel_Change_FiltersExistingLogs()
+        {
+            if (!OperatingSystem.IsWindows())
+            {
+                return;
+            }
+
+            Exception? ex = null;
+            var thread = new Thread(() =>
+            {
+                try
+                {
+                    var box = new System.Windows.Controls.RichTextBox();
+                    var service = new LoggingService(box, Dispatcher.CurrentDispatcher);
+                    service.Log("debug", LogLevel.Debug);
+                    service.Log("error", LogLevel.Error);
+                    service.MinimumLevel = LogLevel.Error;
+                    string text = new TextRange(box.Document.ContentStart, box.Document.ContentEnd).Text;
+                    Assert.DoesNotContain("debug", text);
+                    Assert.Contains("error", text);
+                }
+                catch (Exception e)
+                {
+                    ex = e;
+                }
+            });
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.Start();
+            thread.Join();
+            if (ex != null) throw ex;
+
+            ConsoleTestLogger.LogPass();
+        }
     }
 }

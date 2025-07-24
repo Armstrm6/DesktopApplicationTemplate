@@ -17,7 +17,7 @@
         <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
             <Grid Width="140">
                 <TextBox Text="{Binding Host}" x:Name="HostBox"/>
-                <TextBlock Text="Host" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0"
+                <TextBlock Text="Host (e.g. broker.example.com)" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0"
                            VerticalAlignment="Center"
                            Visibility="{Binding Text, ElementName=HostBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
             </Grid>
