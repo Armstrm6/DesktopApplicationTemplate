@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net8.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
@@ -15,10 +15,11 @@
     <PackageReference Include="xunit" Version="2.5.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
   </ItemGroup>
-    <ItemGroup>
-	    <ProjectReference Include="..\DesktopApplicationTemplate.Core\DesktopApplicationTemplate.Core.csproj" />
-	    <ProjectReference Include="..\DesktopApplicationTemplate.Services\DesktopApplicationTemplate.Services.csproj" />
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DesktopApplicationTemplate.UI\DesktopApplicationTemplate.UI.csproj" />
+    <ProjectReference Include="..\DesktopApplicationTemplate.Service\DesktopApplicationTemplate.Service.csproj" />
+    <ProjectReference Include="..\DesktopApplication.Installer\DesktopApplication.Installer.csproj" />
+  </ItemGroup>
 
 	<ItemGroup>
     <Using Include="Xunit" />
