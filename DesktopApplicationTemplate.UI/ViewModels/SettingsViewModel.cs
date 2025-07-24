@@ -8,7 +8,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 {
     public class SettingsViewModel : ViewModelBase
     {
-        private static readonly string FilePath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "userSettings.json");
+        internal static string FilePath { get; set; } =
+            Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "userSettings.json");
         private bool _darkTheme;
         private bool _autoCheckUpdates;
         private bool _runUIOnStartup;
