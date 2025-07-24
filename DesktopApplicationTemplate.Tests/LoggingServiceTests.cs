@@ -56,8 +56,8 @@ namespace DesktopApplicationTemplate.Tests
                 if (File.Exists(path))
                     File.Delete(path);
             }
-        }
 
-        ConsoleTestLogger.LogPass();
+            ConsoleTestLogger.LogPass();
+        }
     }
 }
