@@ -52,8 +52,10 @@
             <ListBox x:Name="ServiceList" Grid.Row="2" ItemsSource="{Binding FilteredServices}"
                      SelectedItem="{Binding SelectedService}"
                      BorderThickness="0"
+                     MaxHeight="350"
                      HorizontalContentAlignment="Stretch"
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto"
                      SelectionChanged="ServiceList_SelectionChanged">
                     <ListBox.ItemTemplate>
                         <DataTemplate>

@@ -11,6 +11,7 @@ using System.Linq;
 using System.Windows.Media;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Views;
+using System.Windows.Input;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
@@ -33,6 +34,14 @@ namespace DesktopApplicationTemplate.UI.Views
             ContentFrame.Content = new HomePage { DataContext = _viewModel };
             KeyDown += MainView_KeyDown;
             MouseDown += MainView_MouseDown;
+            CommandBindings.Add(new CommandBinding(SystemCommands.CloseWindowCommand, CloseCommand_Executed));
+            Closing += (_, _) => _logger?.LogInformation("MainView closing");
+        }
+
+        private void CloseCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            _logger?.LogInformation("Close command invoked");
+            Close();
         }
 
         private Page? GetOrCreateServicePage(ServiceViewModel svc)
@@ -71,6 +80,7 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private void AddService_Click(object sender, RoutedEventArgs e)
         {
+            _logger?.LogDebug("AddService button clicked");
             // Open the service creation workflow in its own window
             var window = App.AppHost.Services.GetRequiredService<CreateServiceWindow>();
 
@@ -121,32 +131,39 @@ namespace DesktopApplicationTemplate.UI.Views
                     ContentFrame.Content = new HomePage { DataContext = _viewModel };
                 }
                 _viewModel.SaveServices();
+                _logger?.LogDebug("AddService workflow completed");
             }
         }
 
         private void OnEditRequested(ServiceViewModel service)
         {
+            _logger?.LogDebug("Edit requested for {Name}", service.DisplayName);
             var page = GetOrCreateServicePage(service);
             if (page != null)
             {
                 var editor = new ServiceEditorWindow(page);
                 editor.ShowDialog();
                 ContentFrame.Content = new HomePage { DataContext = _viewModel };
+                _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
             }
         }
 
         private void RemoveService_Click(object sender, RoutedEventArgs e)
         {
+            _logger?.LogDebug("RemoveService button clicked");
             if (DataContext is ViewModels.MainViewModel vm &&
                 vm.RemoveServiceCommand.CanExecute(null))
             {
                 vm.RemoveServiceCommand.Execute(null);
+                _logger?.LogDebug("RemoveService command executed");
             }
         }
         private void EditService_Click(object sender, RoutedEventArgs e)
         {
             if (_viewModel.SelectedService == null)
                 return;
+
+            _logger?.LogDebug("EditService button clicked for {Name}", _viewModel.SelectedService.DisplayName);
 
             if (_viewModel.SelectedService.ServiceType == "CSV Creator")
             {
@@ -164,12 +181,14 @@ namespace DesktopApplicationTemplate.UI.Views
                     var editor = new ServiceEditorWindow(page);
                     editor.ShowDialog();
                     ContentFrame.Content = new HomePage { DataContext = _viewModel };
+                    _logger?.LogDebug("EditService workflow completed for {Name}", _viewModel.SelectedService.DisplayName);
                 }
             }
         }
 
         private void ServiceList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            _logger?.LogDebug("Service selection changed");
             ContentFrame.Content = new HomePage { DataContext = _viewModel };
         }
 
