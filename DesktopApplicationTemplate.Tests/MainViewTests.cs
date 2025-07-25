@@ -28,7 +28,7 @@ namespace DesktopApplicationTemplate.Tests
                     new DesktopApplicationTemplate.UI.App();
                     var vm = new MainViewModel(new CsvService(new CsvViewerViewModel()));
                     var view = new MainView(vm);
-                    var list = view.FindName("ServiceList") as ListBox;
+                    var list = view.FindName("ServiceList") as System.Windows.Controls.ListBox;
                     Assert.Equal(350, list?.MaxHeight);
                 }
                 catch (Exception e) { ex = e; }

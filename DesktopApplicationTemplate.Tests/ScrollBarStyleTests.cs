@@ -23,10 +23,10 @@ namespace DesktopApplicationTemplate.Tests
                 try
                 {
                     var dict = new ResourceDictionary { Source = new Uri("Themes/LightTheme.xaml", UriKind.Relative) };
-                    Assert.True(dict.Contains(typeof(ScrollBar)));
-                    var style = (Style)dict[typeof(ScrollBar)];
-                    var width = style.Setters.OfType<Setter>().FirstOrDefault(s => s.Property == ScrollBar.WidthProperty)?.Value;
-                    var height = style.Setters.OfType<Setter>().FirstOrDefault(s => s.Property == ScrollBar.HeightProperty)?.Value;
+                    Assert.True(dict.Contains(typeof(System.Windows.Controls.Primitives.ScrollBar)));
+                    var style = (Style)dict[typeof(System.Windows.Controls.Primitives.ScrollBar)];
+                    var width = style.Setters.OfType<Setter>().FirstOrDefault(s => s.Property == System.Windows.Controls.Primitives.ScrollBar.WidthProperty)?.Value;
+                    var height = style.Setters.OfType<Setter>().FirstOrDefault(s => s.Property == System.Windows.Controls.Primitives.ScrollBar.HeightProperty)?.Value;
                     Assert.Equal(8.0, (double)(width ?? 0));
                     Assert.Equal(8.0, (double)(height ?? 0));
                 }
