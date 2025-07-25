@@ -59,10 +59,12 @@ dotnet run --project DesktopApplicationTemplate.Service/DesktopApplicationTempla
 
 ## Execute unit tests
 
-Use `dotnet test` to run the xUnit tests:
+Use `dotnet test` to run the xUnit tests. The repository includes a
+`tests.runsettings` file that ensures the entire test suite runs even
+when some tests fail:
 
 ```bash
-dotnet test DesktopApplicationTemplate.Tests/DesktopApplicationTemplate.Tests.csproj
+dotnet test DesktopApplicationTemplate.Tests/DesktopApplicationTemplate.Tests.csproj --settings tests.runsettings
 ```
 
 ## Installer notes

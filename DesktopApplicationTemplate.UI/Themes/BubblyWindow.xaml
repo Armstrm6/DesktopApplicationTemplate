@@ -1,7 +1,14 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Style TargetType="Window" x:Key="BubblyWindowStyle">
-        <Setter Property="Background" Value="#F0F8FF" />
+        <Setter Property="Background">
+            <Setter.Value>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStop Color="#F8FBFF" Offset="0" />
+                    <GradientStop Color="#E0F2FF" Offset="1" />
+                </LinearGradientBrush>
+            </Setter.Value>
+        </Setter>
         <Setter Property="BorderBrush" Value="#ADD8E6" />
         <Setter Property="BorderThickness" Value="2" />
         <Setter Property="AllowsTransparency" Value="True" />
@@ -13,6 +20,9 @@
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
                             CornerRadius="10" Padding="5">
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="15" ShadowDepth="0" Opacity="0.3" />
+                        </Border.Effect>
                         <Grid>
                             <DockPanel LastChildFill="True">
                                 <Border DockPanel.Dock="Top" Background="#ADD8E6" Height="30" CornerRadius="8,8,0,0">
