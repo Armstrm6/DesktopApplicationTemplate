@@ -22,8 +22,8 @@ namespace DesktopApplicationTemplate.UI.Views
 
         public MainView(MainViewModel viewModel)
         {
-            InitializeComponent();
             _viewModel = viewModel;
+            InitializeComponent();
             DataContext = _viewModel;
             _viewModel.EditRequested += OnEditRequested;
             ContentFrame.Content = new HomePage { DataContext = _viewModel };
@@ -358,15 +358,21 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private void GlobalLogLevelBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (_viewModel == null)
+                return;
+
             if (GlobalLogLevelBox.SelectedItem is ComboBoxItem item)
             {
-                _viewModel.LogLevelFilter = item.Content?.ToString() switch
+                var level = item.Content?.ToString() switch
                 {
                     "Warning" => LogLevel.Warning,
                     "Error" => LogLevel.Error,
                     "Debug" => LogLevel.Debug,
                     _ => LogLevel.Debug
                 };
+
+                _viewModel.LogLevelFilter = level;
+                _viewModel.AddGlobalLog($"Global log filter set to {level}", level);
             }
         }
 

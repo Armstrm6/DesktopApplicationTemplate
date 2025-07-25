@@ -285,6 +285,18 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             OnPropertyChanged(nameof(CurrentActiveServices));
         }
 
+        public void AddGlobalLog(string message, LogLevel level = LogLevel.Debug)
+        {
+            var entry = new LogEntry
+            {
+                Message = $"{DateTime.Now:MM.dd.yyyy - HH:mm:ss.fffffff} {message}",
+                Color = WpfBrushes.DarkGray,
+                Level = level
+            };
+            AllLogs.Insert(0, entry);
+            OnPropertyChanged(nameof(DisplayLogs));
+        }
+
         // OnPropertyChanged inherited from ViewModelBase
     }
 
