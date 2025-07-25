@@ -1,7 +1,11 @@
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Services;
 using System.Threading.Tasks;
+using System.Net.Http;
+using Moq;
+using Moq.Protected;
 using Xunit;
+using System.Threading;
 
 namespace DesktopApplicationTemplate.Tests
 {
@@ -45,12 +49,12 @@ namespace DesktopApplicationTemplate.Tests
         public async Task HttpService_SendRequest_LogsLifecycle()
         {
             var logger = new TestLogger();
-            var handler = new Moq.Mock<System.Net.Http.HttpMessageHandler>();
+            var handler = new Mock<HttpMessageHandler>();
             handler.Protected()
-                .Setup<System.Threading.Tasks.Task<System.Net.Http.HttpResponseMessage>>("SendAsync", Moq.ItExpr.IsAny<System.Net.Http.HttpRequestMessage>(), Moq.ItExpr.IsAny<System.Threading.CancellationToken>())
-                .ReturnsAsync(new System.Net.Http.HttpResponseMessage(System.Net.HttpStatusCode.OK)
+                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage(System.Net.HttpStatusCode.OK)
                 {
-                    Content = new System.Net.Http.StringContent("ok")
+                    Content = new StringContent("ok")
                 });
 
             var vm = new HttpServiceViewModel { Logger = logger, MessageHandler = handler.Object, Url = "http://localhost/" };
