@@ -1,6 +1,11 @@
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
+using MQTTnet.Client;
+using Moq;
 using Xunit;
+using System.Threading;
+using System;
+using MQTTnet.Packets;
 
 namespace DesktopApplicationTemplate.Tests
 {
@@ -27,9 +32,11 @@ namespace DesktopApplicationTemplate.Tests
         public async Task ConnectAsync_LogsLifecycle()
         {
             var logger = new TestLogger();
-            var client = new Moq.Mock<MQTTnet.Client.IMqttClient>();
-            client.Setup(c => c.ConnectAsync(Moq.It.IsAny<MQTTnet.Client.Options.MqttClientOptions>())).Returns(System.Threading.Tasks.Task.CompletedTask);
-            client.Setup(c => c.SubscribeAsync(Moq.It.IsAny<string>())).Returns(System.Threading.Tasks.Task.CompletedTask);
+            var client = new Mock<IMqttClient>();
+            client.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new MqttClientConnectResult());
+            client.Setup(c => c.SubscribeAsync(It.IsAny<MqttClientSubscribeOptions>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new MqttClientSubscribeResult(0, Array.Empty<MqttClientSubscribeResultItem>(), string.Empty, Array.Empty<MqttUserProperty>()));
             var service = new MqttService(client.Object, logger);
             var vm = new MqttServiceViewModel(service, logger) { Host = "localhost", Port = "1883", ClientId = "c" };
 

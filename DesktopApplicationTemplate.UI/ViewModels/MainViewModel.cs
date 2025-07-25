@@ -229,7 +229,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         private void LoadServices()
         {
-            var existing = ServicePersistence.Load();
+            var existing = ServicePersistence.Load(_logger);
             foreach (var info in existing.OrderBy(i => i.Order))
             {
                 var svc = new ServiceViewModel
@@ -242,7 +242,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 svc.SetColorsByType();
                 svc.LogAdded += OnServiceLogAdded;
                 svc.ActiveChanged += OnServiceActiveChanged;
+                _csvService.EnsureColumnsForService(svc.DisplayName);
                 Services.Add(svc);
+                _logger?.Log($"Loaded service {svc.DisplayName}", LogLevel.Debug);
             }
             OnPropertyChanged(nameof(ServicesCreated));
             OnPropertyChanged(nameof(CurrentActiveServices));
