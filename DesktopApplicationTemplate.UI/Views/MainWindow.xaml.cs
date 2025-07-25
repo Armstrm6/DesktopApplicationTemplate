@@ -5,6 +5,7 @@ using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using Microsoft.VisualBasic;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using DesktopApplicationTemplate.UI.Helpers;
 using System.Linq;
 using System.Windows.Media;
@@ -19,11 +20,14 @@ namespace DesktopApplicationTemplate.UI.Views
     public partial class MainView : Window
     {
         private readonly MainViewModel _viewModel;
+        private readonly ILogger<MainView>? _logger;
 
         public MainView(MainViewModel viewModel)
         {
             InitializeComponent();
             _viewModel = viewModel;
+            var factory = App.AppHost.Services.GetService(typeof(ILoggerFactory)) as ILoggerFactory;
+            _logger = factory?.CreateLogger<MainView>();
             DataContext = _viewModel;
             _viewModel.EditRequested += OnEditRequested;
             ContentFrame.Content = new HomePage { DataContext = _viewModel };
@@ -358,15 +362,23 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private void GlobalLogLevelBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (GlobalLogLevelBox.SelectedItem is ComboBoxItem item)
+            if (_viewModel == null)
             {
-                _viewModel.LogLevelFilter = item.Content?.ToString() switch
+                _logger?.LogWarning("Log level changed before view model initialization");
+                return;
+            }
+
+            if (GlobalLogLevelBox.SelectedItem is ComboBoxItem item && item.Content != null)
+            {
+                _viewModel.LogLevelFilter = item.Content.ToString() switch
                 {
                     "Warning" => LogLevel.Warning,
                     "Error" => LogLevel.Error,
                     "Debug" => LogLevel.Debug,
                     _ => LogLevel.Debug
                 };
+
+                _logger?.LogInformation("Global log level set to {Level}", _viewModel.LogLevelFilter);
             }
         }
 
