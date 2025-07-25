@@ -6,7 +6,9 @@
         xmlns:local="clr-namespace:DesktopApplicationTemplate.UI.Views"
         xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
         mc:Ignorable="d"
-        Title="CSV Viewer" SizeToContent="WidthAndHeight">
+        Title="CSV Viewer" Width="650" Height="450"
+        WindowStartupLocation="CenterOwner"
+        Style="{DynamicResource BubblyWindowStyle}">
     <Window.Resources>
         <helpers:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter" />
     </Window.Resources>
