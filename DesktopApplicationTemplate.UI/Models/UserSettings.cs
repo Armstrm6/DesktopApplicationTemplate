@@ -9,5 +9,6 @@ namespace DesktopApplicationTemplate.Models
         public bool LogTcpMessages { get; set; } = true;
         public bool FirstRun { get; set; } = true;
         public bool SuppressSaveConfirmation { get; set; }
+        public bool SuppressCloseConfirmation { get; set; }
     }
 }

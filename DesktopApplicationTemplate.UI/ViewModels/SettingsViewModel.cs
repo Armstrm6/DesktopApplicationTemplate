@@ -17,6 +17,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private bool _logTcpMessages = true;
         private bool _firstRun = true;
         private static bool _suppressSaveConfirmation;
+        private static bool _suppressCloseConfirmation;
         private bool _dirty;
 
         public static bool TcpLoggingEnabled { get; private set; } = true;
@@ -24,6 +25,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         {
             get => _suppressSaveConfirmation;
             internal set => _suppressSaveConfirmation = value;
+        }
+
+        public static bool CloseConfirmationSuppressed
+        {
+            get => _suppressCloseConfirmation;
+            internal set => _suppressCloseConfirmation = value;
         }
 
         public bool DarkTheme { get => _darkTheme; set { _darkTheme = value; _dirty = true; OnPropertyChanged(); } }
@@ -52,6 +59,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 _firstRun = obj.FirstRun;
                 TcpLoggingEnabled = obj.LogTcpMessages;
                 SaveConfirmationSuppressed = obj.SuppressSaveConfirmation;
+                CloseConfirmationSuppressed = obj.SuppressCloseConfirmation;
             }
         }
 
@@ -65,7 +73,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 RunServicesOnStartup = _runServicesOnStartup,
                 LogTcpMessages = _logTcpMessages,
                 FirstRun = _firstRun,
-                SuppressSaveConfirmation = SaveConfirmationSuppressed
+                SuppressSaveConfirmation = SaveConfirmationSuppressed,
+                SuppressCloseConfirmation = CloseConfirmationSuppressed
             };
             File.WriteAllText(FilePath, JsonSerializer.Serialize(data));
             TcpLoggingEnabled = _logTcpMessages;
