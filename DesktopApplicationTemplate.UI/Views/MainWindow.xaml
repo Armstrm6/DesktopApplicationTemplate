@@ -49,10 +49,11 @@
                 <TextBlock Text="Services" FontWeight="Bold" />
                 <Button Content="🔍" Width="20" Margin="5,0,0,0" Click="OpenFilter_Click"/>
             </StackPanel>
-            <ListBox Grid.Row="2" ItemsSource="{Binding FilteredServices}"
+            <ListBox x:Name="ServiceList" Grid.Row="2" ItemsSource="{Binding FilteredServices}"
                      SelectedItem="{Binding SelectedService}"
                      BorderThickness="0"
                      HorizontalContentAlignment="Stretch"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                      SelectionChanged="ServiceList_SelectionChanged">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
