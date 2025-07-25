@@ -6,8 +6,9 @@
         xmlns:local="clr-namespace:DesktopApplicationTemplate.UI.Views"
         xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
         mc:Ignorable="d"
-        Title="MainView" SizeToContent="WidthAndHeight"
-        Style="{DynamicResource BubblyWindowStyle}">
+        Title="MainView" Width="900" Height="700" ResizeMode="CanResizeWithGrip"
+        Style="{DynamicResource BubblyWindowStyle}"
+        MouseLeftButtonDown="Window_MouseLeftButtonDown">
 
     <Window.Resources>
         <ResourceDictionary>
@@ -122,6 +123,8 @@
         </StackPanel>
 
         <Button Content="⚙" Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10" Click="OpenSettings_Click"/>
+
+        <ResizeGrip HorizontalAlignment="Right" VerticalAlignment="Bottom" />
 
     </Grid>
     </Grid>
