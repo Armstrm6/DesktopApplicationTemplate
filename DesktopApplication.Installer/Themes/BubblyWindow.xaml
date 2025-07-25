@@ -1,5 +1,6 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:shell="clr-namespace:System.Windows;assembly=PresentationFramework">
     <Style TargetType="Window" x:Key="BubblyWindowStyle">
         <Setter Property="Background">
             <Setter.Value>
@@ -32,7 +33,10 @@
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="{TemplateBinding Title}" VerticalAlignment="Center" Margin="10,0" FontWeight="Bold" />
-                                        <Button Grid.Column="1" Content="X" Width="30" Height="30" Command="Close" Background="Transparent" BorderThickness="0" />
+                                        <Button Grid.Column="1" Content="X" Width="30" Height="30"
+                                                Command="{x:Static shell:SystemCommands.CloseWindowCommand}"
+                                                CommandTarget="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                                                Background="Transparent" BorderThickness="0" />
                                     </Grid>
                                 </Border>
                                 <ContentPresenter />

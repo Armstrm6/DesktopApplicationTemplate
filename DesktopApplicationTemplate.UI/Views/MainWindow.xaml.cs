@@ -93,7 +93,9 @@ namespace DesktopApplicationTemplate.UI.Views
                 GetOrCreateServicePage(newService);
 
                 _viewModel.Services.Add(newService);
+                _logger?.LogInformation("Service {Name} added", newService.DisplayName);
                 _viewModel.SelectedService = newService;
+                ServiceList.ScrollIntoView(newService);
 
                 if (type == "MQTT" && newService.ServicePage is MQTTServiceView mqttView)
                 {
