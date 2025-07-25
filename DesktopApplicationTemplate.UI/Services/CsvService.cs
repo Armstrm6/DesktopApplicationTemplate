@@ -36,6 +36,23 @@ namespace DesktopApplicationTemplate.UI.Services
             _viewModel.Save();
         }
 
+        public void RemoveColumnsForService(string serviceName)
+        {
+            var sent = $"{serviceName} Sent";
+            var toRemove = _viewModel.Configuration.Columns
+                .Where(c => c.Name == serviceName || c.Name == sent)
+                .ToList();
+            foreach (var col in toRemove)
+            {
+                _viewModel.Configuration.Columns.Remove(col);
+                _logger?.Log($"Removed CSV column {col.Name}", LogLevel.Debug);
+            }
+            if (toRemove.Count > 0)
+            {
+                _viewModel.Save();
+            }
+        }
+
         public void RecordLog(string serviceName, string message)
         {
             EnsureColumnsForService(serviceName);

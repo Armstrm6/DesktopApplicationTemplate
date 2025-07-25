@@ -1,6 +1,10 @@
 <Window x:Class="DesktopApplicationTemplate.UI.Views.ServiceEditorWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Service Editor" SizeToContent="WidthAndHeight">
-    <Frame x:Name="EditorFrame" NavigationUIVisibility="Hidden" />
+        Title="Service Editor" Width="800" Height="600"
+        WindowStartupLocation="CenterOwner"
+        Style="{DynamicResource BubblyWindowStyle}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+        <Frame x:Name="EditorFrame" NavigationUIVisibility="Hidden" />
+    </ScrollViewer>
 </Window>

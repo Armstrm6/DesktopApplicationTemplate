@@ -22,6 +22,21 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
+        public void RemoveColumnsForService_RemovesColumns()
+        {
+            var vm = new CsvViewerViewModel();
+            var svc = new CsvService(vm);
+
+            svc.EnsureColumnsForService("Svc");
+            svc.RemoveColumnsForService("Svc");
+
+            Assert.DoesNotContain(vm.Configuration.Columns, c => c.Name == "Svc");
+            Assert.DoesNotContain(vm.Configuration.Columns, c => c.Name == "Svc Sent");
+
+            ConsoleTestLogger.LogPass();
+        }
+
+        [Fact]
         public void RecordLog_WritesCsvRow()
         {
             var vm = new CsvViewerViewModel();

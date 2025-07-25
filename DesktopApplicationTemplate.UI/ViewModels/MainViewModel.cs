@@ -180,6 +180,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             if (SelectedService != null)
             {
                 var index = Services.IndexOf(SelectedService);
+                SelectedService.AddLog("Service removed", WpfBrushes.Red);
+                _csvService.RemoveColumnsForService(SelectedService.DisplayName);
                 SelectedService.LogAdded -= OnServiceLogAdded;
                 SelectedService.ActiveChanged -= OnServiceActiveChanged;
                 Services.Remove(SelectedService);
