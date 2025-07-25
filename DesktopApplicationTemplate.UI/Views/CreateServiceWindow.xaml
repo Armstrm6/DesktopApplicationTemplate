@@ -4,6 +4,13 @@
         Title="Create Service" Width="500" Height="400"
         WindowStartupLocation="CenterOwner"
         Style="{DynamicResource BubblyWindowStyle}">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/BubblyWindow.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
         <Frame x:Name="ContentFrame" NavigationUIVisibility="Hidden" />
     </ScrollViewer>

@@ -122,6 +122,8 @@ public class HttpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel
                 return;
             }
 
+            Logger?.Log("Starting HTTP request", LogLevel.Debug);
+
             using HttpClient client = MessageHandler != null ? new HttpClient(MessageHandler) : new HttpClient();
             try
             {
@@ -148,6 +150,7 @@ public class HttpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel
                 ResponseBody = await response.Content.ReadAsStringAsync();
                 Logger?.Log($"Received response with status {StatusCode}", LogLevel.Debug);
                 Logger?.Log($"Response Body: {ResponseBody}", LogLevel.Debug);
+                Logger?.Log("HTTP request completed", LogLevel.Debug);
             }
             catch (HttpRequestException ex)
             {
@@ -158,6 +161,10 @@ public class HttpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel
             {
                 ResponseBody = $"Unexpected error: {ex.Message}";
                 Logger?.Log($"Critical error: {ex.Message}", LogLevel.Critical);
+            }
+            finally
+            {
+                Logger?.Log("SendRequestAsync finished", LogLevel.Debug);
             }
         }
 

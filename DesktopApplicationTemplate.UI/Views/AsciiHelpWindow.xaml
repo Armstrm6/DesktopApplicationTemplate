@@ -1,7 +1,15 @@
 <Window x:Class="DesktopApplicationTemplate.UI.Views.AsciiHelpWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="ASCII Help" SizeToContent="WidthAndHeight">
+        Title="ASCII Help" SizeToContent="WidthAndHeight"
+        Style="{DynamicResource BubblyWindowStyle}">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/BubblyWindow.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
     <Grid Margin="10">
         <TextBlock TextWrapping="Wrap" Width="300">
             <Run Text="Common ASCII commands:"/>

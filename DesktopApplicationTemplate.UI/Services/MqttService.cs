@@ -25,6 +25,7 @@ namespace DesktopApplicationTemplate.UI.Services
 
         public async Task ConnectAsync(string host, int port, string clientId, string? user, string? pass)
         {
+            _logger?.Log("MqttService connect start", LogLevel.Debug);
             var options = new MqttClientOptionsBuilder()
                 .WithTcpServer(host, port)
                 .WithClientId(clientId);
@@ -35,6 +36,7 @@ namespace DesktopApplicationTemplate.UI.Services
             _logger?.Log($"Connecting to MQTT {host}:{port}", LogLevel.Debug);
             await _client.ConnectAsync(options.Build());
             _logger?.Log("MQTT connected", LogLevel.Debug);
+            _logger?.Log("MqttService connect finished", LogLevel.Debug);
         }
 
         public async Task SubscribeAsync(IEnumerable<string> topics)
@@ -48,6 +50,7 @@ namespace DesktopApplicationTemplate.UI.Services
 
         public async Task PublishAsync(string topic, string message)
         {
+            _logger?.Log("MqttService publish start", LogLevel.Debug);
             _logger?.Log($"Publishing to {topic}", LogLevel.Debug);
             var msg = new MqttApplicationMessageBuilder()
                 .WithTopic(topic)
@@ -55,6 +58,7 @@ namespace DesktopApplicationTemplate.UI.Services
                 .Build();
             await _client.PublishAsync(msg);
             _logger?.Log("Publish complete", LogLevel.Debug);
+            _logger?.Log("MqttService publish finished", LogLevel.Debug);
         }
     }
 }

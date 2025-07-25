@@ -1,8 +1,10 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -110,28 +112,14 @@ namespace DesktopApplication.Installer.ViewModels
             var depsJson = Directory.GetFiles(sourceDir, "*.deps.json").FirstOrDefault();
             if (depsJson is not null)
             {
-                using var doc = JsonDocument.Parse(File.ReadAllText(depsJson));
-                if (doc.RootElement.TryGetProperty("targets", out var targets))
+                foreach (var relative in GetRuntimeDependencies(depsJson))
                 {
-                    foreach (var framework in targets.EnumerateObject())
-                    {
-                        foreach (var library in framework.Value.EnumerateObject())
-                        {
-                            if (library.Value.TryGetProperty("runtime", out var runtime))
-                            {
-                                foreach (var runtimeFile in runtime.EnumerateObject())
-                                {
-                                    var relative = runtimeFile.Name.Replace('/', Path.DirectorySeparatorChar);
-                                    var file = Path.Combine(sourceDir, relative);
-                                    if (File.Exists(file))
-                                    {
-                                        var dest = Path.Combine(_installPath, Path.GetFileName(file));
-                                        File.Copy(file, dest, overwrite: true);
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    var file = Path.Combine(sourceDir, relative);
+                    if (!File.Exists(file))
+                        continue;
+                    var dest = Path.Combine(_installPath, Path.GetFileName(file));
+                    File.Copy(file, dest, overwrite: true);
+                    _logger?.Log($"Copied runtime dependency {file} -> {dest}", LogLevel.Debug);
                 }
             }
 
@@ -158,6 +146,36 @@ namespace DesktopApplication.Installer.ViewModels
                 _logger?.Log($"Descending into {dir}", LogLevel.Debug);
                 CopyDirectory(dir, destSub);
             }
+        }
+
+        internal static IEnumerable<string> GetRuntimeDependencies(string depsJsonPath)
+            => ParseRuntimeDependencies(File.ReadAllText(depsJsonPath));
+
+        internal static IEnumerable<string> ParseRuntimeDependencies(string depsJsonContent)
+        {
+            var files = new HashSet<string>();
+            using var doc = JsonDocument.Parse(depsJsonContent);
+            if (doc.RootElement.TryGetProperty("targets", out var targets))
+            {
+                foreach (var framework in targets.EnumerateObject())
+                {
+                    foreach (var library in framework.Value.EnumerateObject())
+                    {
+                        if (library.Value.TryGetProperty("runtime", out var runtime))
+                        {
+                            foreach (var runtimeFile in runtime.EnumerateObject())
+                                files.Add(runtimeFile.Name);
+                        }
+                        if (library.Value.TryGetProperty("runtimeTargets", out var runtimeTargets))
+                        {
+                            foreach (var runtimeFile in runtimeTargets.EnumerateObject())
+                                files.Add(runtimeFile.Name);
+                        }
+                    }
+                }
+            }
+
+            return files.Select(f => f.Replace('/', Path.DirectorySeparatorChar));
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

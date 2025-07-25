@@ -30,13 +30,16 @@ namespace DesktopApplicationTemplate.Tests
         public async Task TransferAsync_UsesProvidedService()
         {
             var mock = new Mock<IFtpService>();
-            var vm = new FtpServiceViewModel { Service = mock.Object };
+            var logger = new TestLogger();
+            var vm = new FtpServiceViewModel { Service = mock.Object, Logger = logger };
             vm.LocalPath = "local";
             vm.RemotePath = "remote";
 
             await vm.TransferAsync();
 
             mock.Verify(s => s.UploadAsync("local", "remote", It.IsAny<CancellationToken>()), Times.Once);
+            Assert.Contains(logger.Entries, e => e.Message == "Starting FTP transfer");
+            Assert.Contains(logger.Entries, e => e.Message == "Finished FTP transfer");
 
             ConsoleTestLogger.LogPass();
         }

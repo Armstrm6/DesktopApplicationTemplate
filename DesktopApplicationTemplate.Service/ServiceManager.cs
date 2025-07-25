@@ -74,6 +74,7 @@ namespace DesktopApplicationTemplate.Service
             var cts = new CancellationTokenSource();
             _running[info.DisplayName] = cts;
             _ = Task.Run(() => RunServiceLoop(info, cts.Token));
+            _logger.LogInformation("Started service: {name}", info.DisplayName);
         }
 
         private void StopService(string name)
@@ -83,6 +84,7 @@ namespace DesktopApplicationTemplate.Service
                 _logger.LogInformation("Stopping service: {name}", name);
                 cts.Cancel();
                 _running.Remove(name);
+                _logger.LogInformation("Stopped service: {name}", name);
             }
         }
 

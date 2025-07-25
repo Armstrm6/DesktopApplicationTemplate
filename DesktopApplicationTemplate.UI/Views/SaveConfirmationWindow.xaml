@@ -3,6 +3,13 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Save" Width="250" Height="180" WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
         Style="{DynamicResource BubblyWindowStyle}">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/BubblyWindow.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
     <StackPanel Margin="20">
         <TextBlock Text="Configuration saved." Margin="0,0,0,10"/>
         <CheckBox x:Name="DontShowAgainCheckBox" Content="Don't show this pop-up again." Margin="0,0,0,10"/>
