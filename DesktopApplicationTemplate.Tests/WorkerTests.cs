@@ -10,6 +10,7 @@ namespace DesktopApplicationTemplate.Tests
     public class WorkerTests
     {
         [Fact]
+        [TestCategory("CodexSafe")]
         public void Constructor_LoadsHeartbeatSettings()
         {
             var settings = new Dictionary<string, string?>

@@ -9,6 +9,7 @@ namespace DesktopApplicationTemplate.Tests
     public class CsvServiceTests
     {
         [Fact]
+        [TestCategory("CodexSafe")]
         public void EnsureColumnsForService_AddsColumns()
         {
             var vm = new CsvViewerViewModel();
@@ -22,6 +23,7 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
+        [TestCategory("CodexSafe")]
         public void RemoveColumnsForService_RemovesColumns()
         {
             var vm = new CsvViewerViewModel();
@@ -37,6 +39,7 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
+        [TestCategory("CodexSafe")]
         public void RecordLog_WritesCsvRow()
         {
             var vm = new CsvViewerViewModel();
@@ -53,6 +56,7 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
+        [TestCategory("CodexSafe")]
         public void AppendRow_CreatesIncrementingFiles()
         {
             var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());

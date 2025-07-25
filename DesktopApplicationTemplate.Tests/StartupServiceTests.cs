@@ -9,6 +9,7 @@ namespace DesktopApplicationTemplate.Tests
     public class StartupServiceTests
     {
         [Fact]
+        [TestCategory("CodexSafe")]
         public void GetSettings_ReturnsExpectedValues()
         {
             var inMemorySettings = new Dictionary<string, string?>

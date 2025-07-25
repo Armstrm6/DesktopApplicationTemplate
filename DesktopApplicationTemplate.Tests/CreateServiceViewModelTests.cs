@@ -6,6 +6,7 @@ namespace DesktopApplicationTemplate.Tests
     public class CreateServiceViewModelTests
     {
         [Fact]
+        [TestCategory("CodexSafe")]
         public void SelectedServiceType_GeneratesDefaultName()
         {
             var existing = new[] { "Heartbeat1" };

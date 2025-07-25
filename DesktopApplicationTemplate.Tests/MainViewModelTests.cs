@@ -7,6 +7,7 @@ namespace DesktopApplicationTemplate.Tests
     public class MainViewModelTests
     {
         [Fact]
+        [TestCategory("CodexSafe")]
         public void GenerateServiceName_IncrementsBasedOnExisting()
         {
             var csv = new CsvService(new CsvViewerViewModel());

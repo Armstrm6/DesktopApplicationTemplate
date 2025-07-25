@@ -8,6 +8,7 @@ namespace DesktopApplicationTemplate.Tests
     public class ThemeManagerTests
     {
         [Fact]
+        [TestCategory("WindowsOnly")]
         public void ApplyTheme_LoadsResourceDictionary()
         {
             if (!OperatingSystem.IsWindows())

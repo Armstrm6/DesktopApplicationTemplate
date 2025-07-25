@@ -9,6 +9,7 @@ namespace DesktopApplicationTemplate.Tests
     public class ScpServiceTests
     {
         [Fact]
+        [TestCategory("CodexSafe")]
         public async Task UploadAsync_InvokesClientOperations()
         {
             var client = new Mock<ScpClient>("host", 22, "u", "p");

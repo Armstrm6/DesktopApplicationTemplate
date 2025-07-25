@@ -13,6 +13,7 @@ namespace DesktopApplicationTemplate.Tests
     public class MqttServiceTests
     {
         [Fact]
+        [TestCategory("CodexSafe")]
         public async Task ConnectAndPublish_CallsClient()
         {
             var client = new Mock<IMqttClient>();

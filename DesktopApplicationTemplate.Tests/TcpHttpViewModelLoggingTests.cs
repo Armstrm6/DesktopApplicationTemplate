@@ -8,6 +8,7 @@ namespace DesktopApplicationTemplate.Tests
     public class TcpHttpViewModelLoggingTests
     {
         [Fact]
+        [TestCategory("CodexSafe")]
         public void TcpService_ToggleServer_LogsMessage()
         {
             var logger = new TestLogger();
@@ -24,6 +25,7 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
+        [TestCategory("CodexSafe")]
         public async Task HttpService_InvalidUrl_LogsWarning()
         {
             var logger = new TestLogger();
@@ -39,6 +41,7 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
+        [TestCategory("CodexSafe")]
         public void HttpService_SetInvalidUrl_AddsError()
         {
             var logger = new TestLogger();

@@ -9,6 +9,7 @@ namespace DesktopApplicationTemplate.Tests
     public class FtpServiceTests
     {
         [Fact]
+        [TestCategory("CodexSafe")]
         public async Task UploadAsync_InvokesClientOperations()
         {
             var client = new Mock<FluentFTP.IAsyncFtpClient>();
