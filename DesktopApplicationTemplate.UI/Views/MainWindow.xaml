@@ -6,10 +6,16 @@
         xmlns:local="clr-namespace:DesktopApplicationTemplate.UI.Views"
         xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
         mc:Ignorable="d"
-        Title="MainView" SizeToContent="WidthAndHeight">
+        Title="MainView" SizeToContent="WidthAndHeight"
+        Style="{DynamicResource BubblyWindowStyle}">
 
     <Window.Resources>
-        <helpers:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/BubblyWindow.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <helpers:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+        </ResourceDictionary>
     </Window.Resources>
 
     <Border BorderBrush="LimeGreen" BorderThickness="3" CornerRadius="15">

@@ -5,6 +5,13 @@
         WindowStartupLocation="CenterOwner"
         Title="Pick a Color" Height="300" Width="300"
         Style="{DynamicResource BubblyWindowStyle}">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/BubblyWindow.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
     <Grid>
         <toolkit:ColorCanvas x:Name="ColorCanvas"/>
         <Button Content="OK" Width="80" HorizontalAlignment="Right" VerticalAlignment="Bottom"
