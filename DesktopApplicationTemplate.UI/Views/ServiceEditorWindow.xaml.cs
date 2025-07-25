@@ -12,7 +12,7 @@ namespace DesktopApplicationTemplate.UI.Views
             EditorFrame.Content = servicePage;
             SaveConfirmationHelper.SaveConfirmed += OnSaveConfirmed;
             Closed += (s, e) => SaveConfirmationHelper.SaveConfirmed -= OnSaveConfirmed;
-            CommandBindings.Add(new CommandBinding(SystemCommands.CloseWindowCommand, (_, __) => Close()));
+            CommandBindings.Add(new System.Windows.Input.CommandBinding(SystemCommands.CloseWindowCommand, (_, __) => Close()));
             Closing += ServiceEditorWindow_Closing;
         }
 

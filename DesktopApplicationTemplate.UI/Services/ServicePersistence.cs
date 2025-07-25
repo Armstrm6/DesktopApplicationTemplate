@@ -8,7 +8,7 @@ namespace DesktopApplicationTemplate.UI.Services
 {
     public static class ServicePersistence
     {
-        internal static string FilePath { get; set; } = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "services.json");
+        public static string FilePath { get; set; } = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "services.json");
 
         public static void Save(IEnumerable<ServiceViewModel> services, ILoggingService? logger = null)
         {
