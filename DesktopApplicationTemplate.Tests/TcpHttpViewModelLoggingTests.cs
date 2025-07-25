@@ -42,6 +42,30 @@ namespace DesktopApplicationTemplate.Tests
 
         [Fact]
         [TestCategory("CodexSafe")]
+        public async Task HttpService_SendRequest_LogsLifecycle()
+        {
+            var logger = new TestLogger();
+            var handler = new Moq.Mock<System.Net.Http.HttpMessageHandler>();
+            handler.Protected()
+                .Setup<System.Threading.Tasks.Task<System.Net.Http.HttpResponseMessage>>("SendAsync", Moq.ItExpr.IsAny<System.Net.Http.HttpRequestMessage>(), Moq.ItExpr.IsAny<System.Threading.CancellationToken>())
+                .ReturnsAsync(new System.Net.Http.HttpResponseMessage(System.Net.HttpStatusCode.OK)
+                {
+                    Content = new System.Net.Http.StringContent("ok")
+                });
+
+            var vm = new HttpServiceViewModel { Logger = logger, MessageHandler = handler.Object, Url = "http://localhost/" };
+
+            await vm.SendRequestAsync();
+
+            Assert.Contains(logger.Entries, e => e.Message == "Starting HTTP request");
+            Assert.Contains(logger.Entries, e => e.Message == "HTTP request completed");
+            Assert.Contains(logger.Entries, e => e.Message == "SendRequestAsync finished");
+
+            ConsoleTestLogger.LogPass();
+        }
+
+        [Fact]
+        [TestCategory("CodexSafe")]
         public void HttpService_SetInvalidUrl_AddsError()
         {
             var logger = new TestLogger();

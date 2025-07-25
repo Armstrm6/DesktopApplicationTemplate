@@ -117,10 +117,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public IEnumerable<LogEntry> DisplayLogs => (SelectedService?.Logs ?? AllLogs).Where(l => l.Level >= LogLevelFilter);
 
         private readonly CsvService _csvService;
+        private readonly ILoggingService? _logger;
 
-        public MainViewModel(CsvService csvService)
+        public MainViewModel(CsvService csvService, ILoggingService? logger = null)
         {
             _csvService = csvService;
+            _logger = logger;
             AddServiceCommand = new RelayCommand(AddService);
             RemoveServiceCommand = new RelayCommand(RemoveSelectedService, () => SelectedService != null);
             FilteredServices = CollectionViewSource.GetDefaultView(Services);
@@ -131,6 +133,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         private void AddService()
         {
+            _logger?.Log("AddService invoked", LogLevel.Debug);
             var existing = Services.Select(s => s.DisplayName.Split(" - ").Last());
             var vm = new CreateServiceViewModel(existing);
             var popup = new CreateServiceWindow(vm); // Replace with DI if needed
@@ -157,7 +160,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 Services.Add(newService);
                 OnPropertyChanged(nameof(ServicesCreated));
                 OnPropertyChanged(nameof(CurrentActiveServices));
+                _logger?.Log($"Service {newService.DisplayName} created", LogLevel.Debug);
             }
+            _logger?.Log("AddService completed", LogLevel.Debug);
         }
 
         internal string GenerateServiceName(string serviceType)
@@ -179,6 +184,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         {
             if (SelectedService != null)
             {
+                _logger?.Log($"Removing service {SelectedService.DisplayName}", LogLevel.Debug);
                 var index = Services.IndexOf(SelectedService);
                 SelectedService.AddLog("Service removed", WpfBrushes.Red);
                 _csvService.RemoveColumnsForService(SelectedService.DisplayName);
@@ -198,6 +204,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 OnPropertyChanged(nameof(CurrentActiveServices));
                 OnPropertyChanged(nameof(DisplayLogs));
                 SaveServices();
+                _logger?.Log("Service removed", LogLevel.Debug);
             }
         }
 
