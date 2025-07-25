@@ -4,6 +4,13 @@
         Title="Service Editor" Width="800" Height="600"
         WindowStartupLocation="CenterOwner"
         Style="{DynamicResource BubblyWindowStyle}">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/BubblyWindow.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
         <Frame x:Name="EditorFrame" NavigationUIVisibility="Hidden" />
     </ScrollViewer>

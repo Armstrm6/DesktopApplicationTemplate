@@ -10,7 +10,12 @@
         WindowStartupLocation="CenterOwner"
         Style="{DynamicResource BubblyWindowStyle}">
     <Window.Resources>
-        <helpers:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter" />
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/BubblyWindow.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <helpers:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter" />
+        </ResourceDictionary>
     </Window.Resources>
     <Grid Margin="10">
         <Grid.RowDefinitions>
