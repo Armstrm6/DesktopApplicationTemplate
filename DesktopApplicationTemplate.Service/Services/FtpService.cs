@@ -26,6 +26,7 @@ namespace DesktopApplicationTemplate.UI.Services
 
         public async Task UploadAsync(string localPath, string remotePath, CancellationToken token = default)
         {
+            _logger?.Log($"Starting FTP upload {localPath} -> {remotePath}", LogLevel.Debug);
             _logger?.Log($"Connecting to FTP {_client.Host}:{_client.Port}", LogLevel.Debug);
             try
             {
@@ -34,6 +35,7 @@ namespace DesktopApplicationTemplate.UI.Services
                 await _client.UploadFile(localPath, remotePath, FtpRemoteExists.Overwrite, true, FtpVerify.None, null, token);
                 await _client.Disconnect(token);
                 _logger?.Log("Upload finished", LogLevel.Debug);
+                _logger?.Log("FTP upload completed", LogLevel.Debug);
             }
             catch (Exception ex)
             {

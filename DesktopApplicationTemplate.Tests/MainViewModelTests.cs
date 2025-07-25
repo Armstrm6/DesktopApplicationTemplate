@@ -32,5 +32,24 @@ namespace DesktopApplicationTemplate.Tests
             Assert.Equal("HTTP4", next);
             ConsoleTestLogger.LogPass();
         }
+
+        [Fact]
+        [TestCategory("CodexSafe")]
+        public void RemoveServiceCommand_LogsLifecycle()
+        {
+            var logger = new TestLogger();
+            var csv = new CsvService(new CsvViewerViewModel());
+            var vm = new MainViewModel(csv, logger);
+            var service = new ServiceViewModel { DisplayName = "HTTP - HTTP1", ServiceType = "HTTP" };
+            vm.Services.Add(service);
+            vm.SelectedService = service;
+
+            vm.RemoveServiceCommand.Execute(null);
+
+            Assert.Contains(logger.Entries, e => e.Message.Contains("Removing service"));
+            Assert.Contains(logger.Entries, e => e.Message.Contains("Service removed"));
+
+            ConsoleTestLogger.LogPass();
+        }
     }
 }

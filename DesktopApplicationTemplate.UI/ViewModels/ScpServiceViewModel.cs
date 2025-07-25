@@ -68,9 +68,11 @@ public class ScpServiceViewModel : ViewModelBase, ILoggingViewModel
         {
             if (string.IsNullOrWhiteSpace(LocalPath) || string.IsNullOrWhiteSpace(RemotePath))
                 return;
-            var svc = new ScpService(Host, int.Parse(Port), Username, Password);
+            Logger?.Log("SCP transfer start", LogLevel.Debug);
+            var svc = new ScpService(Host, int.Parse(Port), Username, Password, Logger);
             await svc.UploadAsync(LocalPath, RemotePath);
             Logger?.Log("File transferred", LogLevel.Debug);
+            Logger?.Log("SCP transfer finished", LogLevel.Debug);
         }
 
         private void Save() => SaveConfirmationHelper.Show();

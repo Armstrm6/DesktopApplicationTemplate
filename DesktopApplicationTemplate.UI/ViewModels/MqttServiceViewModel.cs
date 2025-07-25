@@ -61,10 +61,12 @@ public class MqttServiceViewModel : ViewModelBase, ILoggingViewModel
 
         public ILoggingService? Logger { get; set; }
 
-        private readonly MqttService _service = new();
+        private readonly MqttService _service;
 
-        public MqttServiceViewModel()
+        public MqttServiceViewModel(MqttService? service = null, ILoggingService? logger = null)
         {
+            Logger = logger;
+            _service = service ?? new MqttService(logger);
             AddTopicCommand = new RelayCommand(() => { if(!string.IsNullOrWhiteSpace(NewTopic)){Topics.Add(NewTopic); NewTopic = string.Empty;} });
             RemoveTopicCommand = new RelayCommand(() => { if(Topics.Contains(NewTopic)) Topics.Remove(NewTopic); });
             ConnectCommand = new RelayCommand(async () => await ConnectAsync());
@@ -74,17 +76,21 @@ public class MqttServiceViewModel : ViewModelBase, ILoggingViewModel
 
         public async Task ConnectAsync()
         {
+            Logger?.Log("MQTT connect start", LogLevel.Debug);
             await _service.ConnectAsync(Host, int.Parse(Port), ClientId, Username, Password);
             await _service.SubscribeAsync(Topics);
             Logger?.Log("MQTT connected", LogLevel.Debug);
+            Logger?.Log("MQTT connect finished", LogLevel.Debug);
         }
 
         public async Task PublishAsync()
         {
             if(string.IsNullOrWhiteSpace(PublishTopic) || string.IsNullOrWhiteSpace(PublishMessage))
                 return;
+            Logger?.Log("MQTT publish start", LogLevel.Debug);
             await _service.PublishAsync(PublishTopic, PublishMessage);
             Logger?.Log($"Published to {PublishTopic}", LogLevel.Debug);
+            Logger?.Log("MQTT publish finished", LogLevel.Debug);
         }
 
         private void Save() => SaveConfirmationHelper.Show();
