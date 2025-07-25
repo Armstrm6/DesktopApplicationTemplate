@@ -17,7 +17,7 @@ namespace DesktopApplicationTemplate.UI.Services
         /// <param name="useDark">True to apply the dark theme.</param>
         public static void ApplyTheme(bool useDark)
         {
-            var logger = App.AppHost.Services.GetService(typeof(ILoggerFactory)) as ILoggerFactory;
+            var logger = App.AppHost?.Services.GetService(typeof(ILoggerFactory)) as ILoggerFactory;
             var log = logger?.CreateLogger("ThemeManager");
             try
             {

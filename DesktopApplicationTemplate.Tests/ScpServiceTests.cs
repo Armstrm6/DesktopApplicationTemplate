@@ -12,7 +12,8 @@ namespace DesktopApplicationTemplate.Tests
         [TestCategory("CodexSafe")]
         public async Task UploadAsync_InvokesClientOperations()
         {
-            var client = new Mock<ScpClient>("host", 22, "u", "p");
+            var client = new Mock<IScpClient>();
+            client.Setup(c => c.ConnectionInfo).Returns(new ConnectionInfo("host", 22, "u", new PasswordAuthenticationMethod("u", "p")));
             client.Setup(c => c.Connect());
             client.Setup(c => c.Upload(It.IsAny<System.IO.Stream>(), "remote"));
             client.Setup(c => c.Disconnect());
