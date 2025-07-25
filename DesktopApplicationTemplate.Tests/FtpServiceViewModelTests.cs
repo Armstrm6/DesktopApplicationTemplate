@@ -3,6 +3,7 @@ using Xunit;
 using System;
 using Moq;
 using DesktopApplicationTemplate.UI.Services;
+using System.Threading;
 
 namespace DesktopApplicationTemplate.Tests
 {
@@ -33,7 +34,7 @@ namespace DesktopApplicationTemplate.Tests
 
             await vm.TransferAsync();
 
-            mock.Verify(s => s.UploadAsync("local", "remote"), Times.Once);
+            mock.Verify(s => s.UploadAsync("local", "remote", It.IsAny<CancellationToken>()), Times.Once);
 
             ConsoleTestLogger.LogPass();
         }
