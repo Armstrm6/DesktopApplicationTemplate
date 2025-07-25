@@ -10,6 +10,7 @@ namespace DesktopApplicationTemplate.Tests
     {
         [Fact]
         [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
         public async Task UploadAsync_InvokesClientOperations()
         {
             var client = new Mock<IScpClient>();

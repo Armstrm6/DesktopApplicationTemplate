@@ -11,6 +11,7 @@ namespace DesktopApplicationTemplate.Tests
     {
         [Fact]
         [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
         public void Constructor_LoadsHeartbeatSettings()
         {
             var settings = new Dictionary<string, string?>

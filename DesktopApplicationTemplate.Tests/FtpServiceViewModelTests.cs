@@ -16,6 +16,7 @@ namespace DesktopApplicationTemplate.Tests
 
         [Fact]
         [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
         public void BrowseCommand_InitialPathEmpty_DoesNotThrow()
         {
             var vm = new FtpServiceViewModel(new StubFileDialogService());
@@ -27,25 +28,27 @@ namespace DesktopApplicationTemplate.Tests
 
         [Fact]
         [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
         public async Task TransferAsync_UsesProvidedService()
         {
             var mock = new Mock<IFtpService>();
-            var logger = new TestLogger();
-            var vm = new FtpServiceViewModel { Service = mock.Object, Logger = logger };
+            var logger = new Mock<ILoggingService>();
+            var vm = new FtpServiceViewModel { Service = mock.Object, Logger = logger.Object };
             vm.LocalPath = "local";
             vm.RemotePath = "remote";
 
             await vm.TransferAsync();
 
             mock.Verify(s => s.UploadAsync("local", "remote", It.IsAny<CancellationToken>()), Times.Once);
-            Assert.Contains(logger.Entries, e => e.Message == "Starting FTP transfer");
-            Assert.Contains(logger.Entries, e => e.Message == "Finished FTP transfer");
+            logger.Verify(l => l.Log("Starting FTP transfer", LogLevel.Debug), Times.Once);
+            logger.Verify(l => l.Log("Finished FTP transfer", LogLevel.Debug), Times.Once);
 
             ConsoleTestLogger.LogPass();
         }
 
         [Fact]
         [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
         public void SettingInvalidHost_AddsError()
         {
             var logger = new Mock<ILoggingService>();
@@ -60,6 +63,7 @@ namespace DesktopApplicationTemplate.Tests
 
         [Fact]
         [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
         public void SettingInvalidPort_AddsError()
         {
             var logger = new Mock<ILoggingService>();
@@ -74,6 +78,7 @@ namespace DesktopApplicationTemplate.Tests
 
         [Fact]
         [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
         public void PartialHost_WithTrailingDot_DoesNotError()
         {
             var vm = new FtpServiceViewModel();

@@ -9,6 +9,7 @@ public class DepsJsonParsingTests
 {
     [Fact]
     [TestCategory("CodexSafe")]
+    [TestCategory("WindowsSafe")]
     public void ParseRuntimeDependencies_ParsesRuntimeAndTargets()
     {
         var json = """

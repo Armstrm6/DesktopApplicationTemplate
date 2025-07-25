@@ -10,6 +10,7 @@ namespace DesktopApplicationTemplate.Tests
     {
         [Fact]
         [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
         public void GetSettings_ReturnsExpectedValues()
         {
             var inMemorySettings = new Dictionary<string, string?>

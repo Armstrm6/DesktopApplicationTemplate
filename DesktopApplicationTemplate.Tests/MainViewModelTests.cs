@@ -1,5 +1,6 @@
-using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.UI.ViewModels;
+using Moq;
 using Xunit;
 
 namespace DesktopApplicationTemplate.Tests
@@ -8,6 +9,7 @@ namespace DesktopApplicationTemplate.Tests
     {
         [Fact]
         [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
         public void GenerateServiceName_IncrementsBasedOnExisting()
         {
             var csv = new CsvService(new CsvViewerViewModel());
@@ -35,19 +37,20 @@ namespace DesktopApplicationTemplate.Tests
 
         [Fact]
         [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
         public void RemoveServiceCommand_LogsLifecycle()
         {
-            var logger = new TestLogger();
+            var logger = new Mock<ILoggingService>();
             var csv = new CsvService(new CsvViewerViewModel());
-            var vm = new MainViewModel(csv, logger);
+            var vm = new MainViewModel(csv, logger.Object);
             var service = new ServiceViewModel { DisplayName = "HTTP - HTTP1", ServiceType = "HTTP" };
             vm.Services.Add(service);
             vm.SelectedService = service;
 
             vm.RemoveServiceCommand.Execute(null);
 
-            Assert.Contains(logger.Entries, e => e.Message.Contains("Removing service"));
-            Assert.Contains(logger.Entries, e => e.Message.Contains("Service removed"));
+            logger.Verify(l => l.Log(It.Is<string>(m => m.Contains("Removing service")), It.IsAny<LogLevel>()), Times.Once);
+            logger.Verify(l => l.Log(It.Is<string>(m => m.Contains("Service removed")), It.IsAny<LogLevel>()), Times.Once);
 
             ConsoleTestLogger.LogPass();
         }

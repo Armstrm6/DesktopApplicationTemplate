@@ -7,6 +7,7 @@ namespace DesktopApplicationTemplate.Tests
     {
         [Fact]
         [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
         public void SelectedServiceType_GeneratesDefaultName()
         {
             var existing = new[] { "Heartbeat1" };
