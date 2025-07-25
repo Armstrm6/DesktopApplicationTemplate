@@ -9,6 +9,7 @@ public class InstallerWindowViewModelTests
 {
     [Fact]
     [TestCategory("CodexSafe")]
+    [TestCategory("WindowsSafe")]
     public void InstallCommand_LogsAndRaisesEvent()
     {
         var logger = new Mock<ILoggingService>();

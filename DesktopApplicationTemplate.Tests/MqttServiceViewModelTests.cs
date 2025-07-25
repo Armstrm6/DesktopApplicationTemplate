@@ -12,7 +12,7 @@ namespace DesktopApplicationTemplate.Tests
     public class MqttServiceViewModelTests
     {
         [Fact]
-        [TestCategory("WindowsOnly")]
+        [TestCategory("WindowsSafe")]
         public void AddTopicCommand_AddsTopic()
         {
             if (!OperatingSystem.IsWindows())
@@ -29,21 +29,22 @@ namespace DesktopApplicationTemplate.Tests
 
         [Fact]
         [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
         public async Task ConnectAsync_LogsLifecycle()
         {
-            var logger = new TestLogger();
+            var logger = new Mock<ILoggingService>();
             var client = new Mock<IMqttClient>();
             client.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new MqttClientConnectResult());
             client.Setup(c => c.SubscribeAsync(It.IsAny<MqttClientSubscribeOptions>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new MqttClientSubscribeResult(0, Array.Empty<MqttClientSubscribeResultItem>(), string.Empty, Array.Empty<MqttUserProperty>()));
-            var service = new MqttService(client.Object, logger);
-            var vm = new MqttServiceViewModel(service, logger) { Host = "localhost", Port = "1883", ClientId = "c" };
+            var service = new MqttService(client.Object, logger.Object);
+            var vm = new MqttServiceViewModel(service, logger.Object) { Host = "localhost", Port = "1883", ClientId = "c" };
 
             await vm.ConnectAsync();
 
-            Assert.Contains(logger.Entries, e => e.Message == "MQTT connect start");
-            Assert.Contains(logger.Entries, e => e.Message == "MQTT connect finished");
+            logger.Verify(l => l.Log("MQTT connect start", LogLevel.Debug), Times.Once);
+            logger.Verify(l => l.Log("MQTT connect finished", LogLevel.Debug), Times.Once);
 
             ConsoleTestLogger.LogPass();
         }

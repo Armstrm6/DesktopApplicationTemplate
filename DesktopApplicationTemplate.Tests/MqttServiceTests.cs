@@ -14,6 +14,7 @@ namespace DesktopApplicationTemplate.Tests
     {
         [Fact]
         [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
         public async Task ConnectAndPublish_CallsClient()
         {
             var client = new Mock<IMqttClient>();

@@ -12,7 +12,7 @@ namespace DesktopApplicationTemplate.Tests
     public class LoggingServiceTests
     {
         [Theory]
-        [TestCategory("WindowsOnly")]
+        [TestCategory("WindowsSafe")]
         [InlineData(LogLevel.Debug)]
         [InlineData(LogLevel.Warning)]
         [InlineData(LogLevel.Error)]
@@ -53,7 +53,7 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("WindowsOnly")]
+        [TestCategory("WindowsSafe")]
         public void Log_WritesMessageToFile()
         {
             if (!OperatingSystem.IsWindows())
@@ -95,7 +95,7 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("WindowsOnly")]
+        [TestCategory("WindowsSafe")]
         public void MinimumLevel_Change_FiltersExistingLogs()
         {
             if (!OperatingSystem.IsWindows())

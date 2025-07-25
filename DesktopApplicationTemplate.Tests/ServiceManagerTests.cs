@@ -12,6 +12,7 @@ namespace DesktopApplicationTemplate.Tests
     {
         [Fact]
         [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
         public void Sync_StartsAndStopsServicesBasedOnFile()
         {
             var tempFile = Path.GetTempFileName();

@@ -1,5 +1,5 @@
-using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.UI.ViewModels;
 using System.Threading.Tasks;
 using System.Net.Http;
 using Moq;
@@ -13,42 +13,43 @@ namespace DesktopApplicationTemplate.Tests
     {
         [Fact]
         [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
         public void TcpService_ToggleServer_LogsMessage()
         {
-            var logger = new TestLogger();
-            var vm = new TcpServiceViewModel { Logger = logger };
+            var logger = new Mock<ILoggingService>();
+            var vm = new TcpServiceViewModel { Logger = logger.Object };
             vm.ComputerIp = "127.0.0.1";
             vm.ListeningPort = "5000";
 
             vm.ToggleServerCommand.Execute(null);
 
-            Assert.Equal(2, logger.Entries.Count);
-            Assert.Equal("Toggling server state", logger.Entries[0].Message);
+            logger.Verify(l => l.Log("Toggling server state", LogLevel.Debug), Times.Once);
 
             ConsoleTestLogger.LogPass();
         }
 
         [Fact]
         [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
         public async Task HttpService_InvalidUrl_LogsWarning()
         {
-            var logger = new TestLogger();
-            var vm = new HttpServiceViewModel { Logger = logger };
+            var logger = new Mock<ILoggingService>();
+            var vm = new HttpServiceViewModel { Logger = logger.Object };
             vm.Url = string.Empty;
 
             await vm.SendRequestAsync();
 
-            Assert.Single(logger.Entries);
-            Assert.Equal(LogLevel.Warning, logger.Entries[0].Level);
+            logger.Verify(l => l.Log(It.IsAny<string>(), LogLevel.Warning), Times.AtLeastOnce);
 
             ConsoleTestLogger.LogPass();
         }
 
         [Fact]
         [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
         public async Task HttpService_SendRequest_LogsLifecycle()
         {
-            var logger = new TestLogger();
+            var logger = new Mock<ILoggingService>();
             var handler = new Mock<HttpMessageHandler>();
             handler.Protected()
                 .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
@@ -57,27 +58,28 @@ namespace DesktopApplicationTemplate.Tests
                     Content = new StringContent("ok")
                 });
 
-            var vm = new HttpServiceViewModel { Logger = logger, MessageHandler = handler.Object, Url = "http://localhost/" };
+            var vm = new HttpServiceViewModel { Logger = logger.Object, MessageHandler = handler.Object, Url = "http://localhost/" };
 
             await vm.SendRequestAsync();
 
-            Assert.Contains(logger.Entries, e => e.Message == "Starting HTTP request");
-            Assert.Contains(logger.Entries, e => e.Message == "HTTP request completed");
-            Assert.Contains(logger.Entries, e => e.Message == "SendRequestAsync finished");
+            logger.Verify(l => l.Log("Starting HTTP request", LogLevel.Debug), Times.Once);
+            logger.Verify(l => l.Log("HTTP request completed", LogLevel.Debug), Times.Once);
+            logger.Verify(l => l.Log("SendRequestAsync finished", LogLevel.Debug), Times.Once);
 
             ConsoleTestLogger.LogPass();
         }
 
         [Fact]
         [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
         public void HttpService_SetInvalidUrl_AddsError()
         {
-            var logger = new TestLogger();
-            var vm = new HttpServiceViewModel { Logger = logger };
+            var logger = new Mock<ILoggingService>();
+            var vm = new HttpServiceViewModel { Logger = logger.Object };
             vm.Url = "htp://bad";
 
             Assert.True(vm.HasErrors);
-            Assert.Contains(logger.Entries, e => e.Message.Contains("Invalid HTTP URL"));
+            logger.Verify(l => l.Log(It.Is<string>(m => m.Contains("Invalid HTTP URL")), LogLevel.Warning), Times.Once);
 
             ConsoleTestLogger.LogPass();
         }

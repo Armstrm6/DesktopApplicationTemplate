@@ -10,6 +10,7 @@ namespace DesktopApplicationTemplate.Tests
     {
         [Fact]
         [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
         public async Task UploadAsync_InvokesClientOperations()
         {
             var client = new Mock<FluentFTP.IAsyncFtpClient>();
@@ -33,6 +34,7 @@ namespace DesktopApplicationTemplate.Tests
 
         [Fact]
         [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
         public async Task UploadAsync_LogsStartAndFinish()
         {
             var client = new Mock<FluentFTP.IAsyncFtpClient>();
@@ -42,12 +44,12 @@ namespace DesktopApplicationTemplate.Tests
             client.Setup(c => c.UploadFile(It.IsAny<string>(), It.IsAny<string>(), FtpRemoteExists.Overwrite, It.IsAny<bool>(), It.IsAny<FtpVerify>(), It.IsAny<IProgress<FtpProgress>?>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(FtpStatus.Success));
             client.Setup(c => c.Disconnect(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
-            var logger = new TestLogger();
-            var service = new FtpService(client.Object, logger);
+            var logger = new Mock<ILoggingService>();
+            var service = new FtpService(client.Object, logger.Object);
             await service.UploadAsync("local", "remote");
 
-            Assert.Contains(logger.Entries, e => e.Message.Contains("Starting FTP upload"));
-            Assert.Contains(logger.Entries, e => e.Message.Contains("FTP upload completed"));
+            logger.Verify(l => l.Log(It.Is<string>(m => m.Contains("Starting FTP upload")), LogLevel.Debug), Times.Once);
+            logger.Verify(l => l.Log(It.Is<string>(m => m.Contains("FTP upload completed")), LogLevel.Debug), Times.Once);
 
             ConsoleTestLogger.LogPass();
         }
