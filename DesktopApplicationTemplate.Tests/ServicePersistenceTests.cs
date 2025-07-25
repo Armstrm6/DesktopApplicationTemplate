@@ -10,6 +10,7 @@ namespace DesktopApplicationTemplate.Tests
     public class ServicePersistenceTests
     {
         [Fact]
+        [TestCategory("CodexSafe")]
         public void SaveAndLoad_RoundTripsServices()
         {
             var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());

@@ -6,6 +6,7 @@ namespace DesktopApplicationTemplate.Tests
     public class MqttServiceViewModelTests
     {
         [Fact]
+        [TestCategory("WindowsOnly")]
         public void AddTopicCommand_AddsTopic()
         {
             if (!OperatingSystem.IsWindows())

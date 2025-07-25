@@ -7,6 +7,7 @@ namespace DesktopApplicationTemplate.Tests
     public class SettingsViewModelPersistenceTests
     {
         [Fact]
+        [TestCategory("CodexSafe")]
         public void SaveAndLoad_PersistsFirstRunAndSuppression()
         {
             var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());

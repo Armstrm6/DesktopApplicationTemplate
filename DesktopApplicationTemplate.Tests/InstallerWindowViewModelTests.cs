@@ -8,6 +8,7 @@ namespace DesktopApplicationTemplate.Tests;
 public class InstallerWindowViewModelTests
 {
     [Fact]
+    [TestCategory("CodexSafe")]
     public void InstallCommand_LogsAndRaisesEvent()
     {
         var logger = new Mock<ILoggingService>();

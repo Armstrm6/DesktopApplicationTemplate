@@ -15,6 +15,7 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
+        [TestCategory("CodexSafe")]
         public void BrowseCommand_InitialPathEmpty_DoesNotThrow()
         {
             var vm = new FtpServiceViewModel(new StubFileDialogService());
@@ -25,6 +26,7 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
+        [TestCategory("CodexSafe")]
         public async Task TransferAsync_UsesProvidedService()
         {
             var mock = new Mock<IFtpService>();
@@ -40,6 +42,7 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
+        [TestCategory("CodexSafe")]
         public void SettingInvalidHost_AddsError()
         {
             var logger = new Mock<ILoggingService>();
@@ -53,6 +56,7 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
+        [TestCategory("CodexSafe")]
         public void SettingInvalidPort_AddsError()
         {
             var logger = new Mock<ILoggingService>();
@@ -66,6 +70,7 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
+        [TestCategory("CodexSafe")]
         public void PartialHost_WithTrailingDot_DoesNotError()
         {
             var vm = new FtpServiceViewModel();

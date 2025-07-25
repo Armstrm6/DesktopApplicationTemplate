@@ -14,6 +14,7 @@ namespace DesktopApplicationTemplate.Tests;
 public class HttpServiceNetworkTests
 {
     [Fact]
+    [TestCategory("CodexSafe")]
     public async Task SendRequest_ReceivesLocalResponse()
     {
         var portPicker = new TcpListener(IPAddress.Loopback, 0);
@@ -47,6 +48,7 @@ public class HttpServiceNetworkTests
     }
 
     [Fact]
+    [TestCategory("CodexSafe")]
     public async Task SendRequest_SendsCorrectData()
     {
         var handlerMock = new Mock<HttpMessageHandler>();
