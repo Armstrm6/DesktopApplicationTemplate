@@ -1,3 +1,4 @@
+using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using Xunit;
 
