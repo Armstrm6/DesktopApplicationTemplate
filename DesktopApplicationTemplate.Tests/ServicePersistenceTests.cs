@@ -15,9 +15,8 @@ namespace DesktopApplicationTemplate.Tests
         {
             var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             Directory.CreateDirectory(tempDir);
-            var original = typeof(ServicePersistence).GetField("FilePath", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
-            string? oldPath = (string?)original!.GetValue(null);
-            original.SetValue(null, Path.Combine(tempDir, "services.json"));
+            string oldPath = ServicePersistence.FilePath;
+            ServicePersistence.FilePath = Path.Combine(tempDir, "services.json");
             try
             {
                 var services = new List<ServiceViewModel>
@@ -33,7 +32,7 @@ namespace DesktopApplicationTemplate.Tests
             }
             finally
             {
-                original.SetValue(null, oldPath);
+                ServicePersistence.FilePath = oldPath;
                 Directory.Delete(tempDir, true);
             }
 

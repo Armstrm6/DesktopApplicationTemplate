@@ -5,16 +5,16 @@ namespace DesktopApplicationTemplate.UI.Services
 {
     public class ScpService
     {
-        private readonly ScpClient _client;
+        private readonly IScpClient _client;
         private readonly ILoggingService? _logger;
 
         public ScpService(string host, int port, string user, string password, ILoggingService? logger = null)
         {
-            _client = new ScpClient(host, port, user, password);
+            _client = new ScpClientWrapper(new ScpClient(host, port, user, password));
             _logger = logger;
         }
 
-        internal ScpService(ScpClient client, ILoggingService? logger = null)
+        internal ScpService(IScpClient client, ILoggingService? logger = null)
         {
             _client = client;
             _logger = logger;
