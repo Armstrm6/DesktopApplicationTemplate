@@ -38,6 +38,15 @@ namespace DesktopApplicationTemplate.UI.Views
             Closing += (_, _) => _logger?.LogInformation("MainView closing");
         }
 
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ButtonState == MouseButtonState.Pressed)
+            {
+                _logger?.LogDebug("Window drag initiated");
+                DragMove();
+            }
+        }
+
         private void CloseCommand_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             _logger?.LogInformation("Close command invoked");

@@ -12,11 +12,23 @@ namespace DesktopApplicationTemplate.UI.Views
             EditorFrame.Content = servicePage;
             SaveConfirmationHelper.SaveConfirmed += OnSaveConfirmed;
             Closed += (s, e) => SaveConfirmationHelper.SaveConfirmed -= OnSaveConfirmed;
+            CommandBindings.Add(new CommandBinding(SystemCommands.CloseWindowCommand, (_, __) => Close()));
+            Closing += ServiceEditorWindow_Closing;
         }
 
         private void OnSaveConfirmed()
         {
             Close();
+        }
+
+        private void ServiceEditorWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
+        {
+            CloseConfirmationHelper.Logger?.Log("Service editor closing", Services.LogLevel.Debug);
+            if (!CloseConfirmationHelper.Show())
+            {
+                e.Cancel = true;
+                CloseConfirmationHelper.Logger?.Log("Close canceled", Services.LogLevel.Debug);
+            }
         }
     }
 }
