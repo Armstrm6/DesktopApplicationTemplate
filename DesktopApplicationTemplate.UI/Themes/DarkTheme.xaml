@@ -19,6 +19,13 @@
         </Setter>
         <Setter Property="Background" Value="#333333"/>
         <Setter Property="Foreground" Value="White"/>
+</Style>
+
+    <!-- Global style for scroll bars -->
+    <Style TargetType="ScrollBar">
+        <Setter Property="Width" Value="8"/>
+        <Setter Property="Height" Value="8"/>
+        <Setter Property="Background" Value="#555"/>
     </Style>
 
     <!-- Global style for text boxes including validation visuals -->

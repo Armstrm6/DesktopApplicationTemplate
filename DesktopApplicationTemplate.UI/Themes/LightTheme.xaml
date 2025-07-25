@@ -17,6 +17,13 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+</Style>
+
+    <!-- Global style for scroll bars -->
+    <Style TargetType="ScrollBar">
+        <Setter Property="Width" Value="8"/>
+        <Setter Property="Height" Value="8"/>
+        <Setter Property="Background" Value="#EEE"/>
     </Style>
 
     <!-- Global style for text boxes including validation visuals -->
