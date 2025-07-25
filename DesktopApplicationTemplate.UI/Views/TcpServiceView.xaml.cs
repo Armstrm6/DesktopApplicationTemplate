@@ -23,6 +23,7 @@ namespace DesktopApplicationTemplate.UI.Views
             _logger = new LoggingService(LogBox, Dispatcher);
             _viewModel.Logger = _logger;
             SaveConfirmationHelper.Logger = _logger;
+            CloseEditorConfirmationHelper.Logger = _logger;
 
             Loaded += MainWindow_Loaded;
         }

@@ -15,12 +15,14 @@ namespace DesktopApplicationTemplate.Tests
             Directory.CreateDirectory(tempDir);
             var original = SettingsViewModel.FilePath;
             var suppressOrig = SettingsViewModel.SaveConfirmationSuppressed;
+            var closeSuppressOrig = SettingsViewModel.CloseEditorConfirmationSuppressed;
             SettingsViewModel.FilePath = Path.Combine(tempDir, "userSettings.json");
             try
             {
                 var vm = new SettingsViewModel();
                 vm.FirstRun = false;
                 SettingsViewModel.SaveConfirmationSuppressed = true;
+                SettingsViewModel.CloseEditorConfirmationSuppressed = true;
                 vm.Save();
 
                 var vm2 = new SettingsViewModel { FirstRun = true };
@@ -28,11 +30,13 @@ namespace DesktopApplicationTemplate.Tests
 
                 Assert.False(vm2.FirstRun);
                 Assert.True(SettingsViewModel.SaveConfirmationSuppressed);
+                Assert.True(SettingsViewModel.CloseEditorConfirmationSuppressed);
             }
             finally
             {
                 SettingsViewModel.FilePath = original;
                 SettingsViewModel.SaveConfirmationSuppressed = suppressOrig;
+                SettingsViewModel.CloseEditorConfirmationSuppressed = closeSuppressOrig;
                 Directory.Delete(tempDir, true);
             }
 

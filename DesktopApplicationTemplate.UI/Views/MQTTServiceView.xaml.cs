@@ -17,6 +17,7 @@ namespace DesktopApplicationTemplate.UI.Views
             _logger = new LoggingService(LogBox, Dispatcher);
             _viewModel.Logger = _logger;
             SaveConfirmationHelper.Logger = _logger;
+            CloseEditorConfirmationHelper.Logger = _logger;
         }
 
         private void Help_Click(object sender, System.Windows.RoutedEventArgs e)

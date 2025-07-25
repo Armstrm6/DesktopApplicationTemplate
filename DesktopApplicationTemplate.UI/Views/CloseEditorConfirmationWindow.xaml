@@ -1,0 +1,21 @@
+<Window x:Class="DesktopApplicationTemplate.UI.Views.CloseEditorConfirmationWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Discard Changes?" Width="300" Height="180" WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize" Style="{DynamicResource BubblyWindowStyle}">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/BubblyWindow.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    <StackPanel Margin="20">
+        <TextBlock Text="Configuration will not be saved. Leave this page?" TextWrapping="Wrap" Margin="0,0,0,10"/>
+        <CheckBox x:Name="DontShowAgainCheckBox" Content="Don't show this prompt again." Margin="0,0,0,10"/>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Yes" Width="80" Margin="0,0,5,0" Click="Yes_Click"/>
+            <Button Content="No" Width="80" Click="No_Click"/>
+        </StackPanel>
+    </StackPanel>
+</Window>
