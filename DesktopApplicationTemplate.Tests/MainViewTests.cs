@@ -28,9 +28,11 @@ namespace DesktopApplicationTemplate.Tests
                 {
                     if (System.Windows.Application.Current == null)
                         new DesktopApplicationTemplate.UI.App();
-                    var configPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), System.Guid.NewGuid().ToString()+".json");
+                    var configPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), System.Guid.NewGuid().ToString() + ".json");
 
-                    var vm = new MainViewModel(new CsvService(new CsvViewerViewModel(configPath)));
+                    var servicesPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "services.json");
+                    Directory.CreateDirectory(Path.GetDirectoryName(servicesPath)!);
+                    var vm = new MainViewModel(new CsvService(new CsvViewerViewModel(configPath)), null, servicesPath);
                     var view = new MainView(vm);
                     var list = view.FindName("ServiceList") as System.Windows.Controls.ListBox;
                     Assert.Equal(350, list?.MaxHeight);
@@ -38,7 +40,8 @@ namespace DesktopApplicationTemplate.Tests
                 catch (Exception e) { ex = e; }
                 finally
                 {
-                    System.Windows.Application.Current?.Shutdown();
+                    if (System.Windows.Application.Current != null)
+                        System.Windows.Application.Current.Dispatcher.Invoke(() => System.Windows.Application.Current.Shutdown());
                 }
             });
             thread.SetApartmentState(ApartmentState.STA);
@@ -62,8 +65,10 @@ namespace DesktopApplicationTemplate.Tests
                 {
                     if (System.Windows.Application.Current == null)
                         new DesktopApplicationTemplate.UI.App();
-                    var configPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), System.Guid.NewGuid().ToString()+".json");
-                    var vm = new MainViewModel(new CsvService(new CsvViewerViewModel(configPath)));
+                    var configPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), System.Guid.NewGuid().ToString() + ".json");
+                    var servicesPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "services.json");
+                    Directory.CreateDirectory(Path.GetDirectoryName(servicesPath)!);
+                    var vm = new MainViewModel(new CsvService(new CsvViewerViewModel(configPath)), null, servicesPath);
                     var view = new MainView(vm);
                     bool bound = view.CommandBindings.OfType<CommandBinding>()
                                         .Any(b => b.Command == SystemCommands.CloseWindowCommand);
@@ -72,7 +77,8 @@ namespace DesktopApplicationTemplate.Tests
                 catch (Exception e) { ex = e; }
                 finally
                 {
-                    System.Windows.Application.Current?.Shutdown();
+                    if (System.Windows.Application.Current != null)
+                        System.Windows.Application.Current.Dispatcher.Invoke(() => System.Windows.Application.Current.Shutdown());
                 }
             });
             thread.SetApartmentState(ApartmentState.STA);

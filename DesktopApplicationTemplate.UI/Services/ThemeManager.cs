@@ -23,10 +23,12 @@ namespace DesktopApplicationTemplate.UI.Services
             {
                 log?.LogInformation("Applying {Theme} theme", useDark ? "dark" : "light");
                 var themeFile = useDark ? "Themes/DarkTheme.xaml" : "Themes/LightTheme.xaml";
-                var dict = new ResourceDictionary { Source = new Uri(themeFile, UriKind.Relative) };
+                var uri = new Uri($"pack://application:,,,/DesktopApplicationTemplate.UI;component/{themeFile}", UriKind.Absolute);
+                var dict = new ResourceDictionary { Source = uri };
                 if (_current != null)
                 {
                     System.Windows.Application.Current.Resources.MergedDictionaries.Remove(_current);
+                    log?.LogDebug("Removed previous theme dictionary");
                 }
                 System.Windows.Application.Current.Resources.MergedDictionaries.Add(dict);
                 _current = dict;

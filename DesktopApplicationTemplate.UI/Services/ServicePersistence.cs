@@ -25,7 +25,12 @@ namespace DesktopApplicationTemplate.UI.Services
                     Order = index++
                 });
             }
-            File.WriteAllText(FilePath, JsonSerializer.Serialize(data));
+
+            var json = JsonSerializer.Serialize(data);
+            logger?.Log($"Persisting services to {FilePath}", LogLevel.Debug);
+            using var fs = new FileStream(FilePath, FileMode.Create, FileAccess.Write, FileShare.None);
+            using var sw = new StreamWriter(fs);
+            sw.Write(json);
             logger?.Log($"Saved {data.Count} services to {FilePath}", LogLevel.Debug);
         }
 

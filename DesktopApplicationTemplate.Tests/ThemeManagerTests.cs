@@ -35,7 +35,8 @@ namespace DesktopApplicationTemplate.Tests
                 finally
                 {
                     // ensure application instance is cleaned up on the same thread it was created
-                    System.Windows.Application.Current?.Shutdown();
+                    if (System.Windows.Application.Current != null)
+                        System.Windows.Application.Current.Dispatcher.Invoke(() => System.Windows.Application.Current.Shutdown());
                 }
             });
             thread.SetApartmentState(ApartmentState.STA);

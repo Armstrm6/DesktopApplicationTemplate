@@ -1,5 +1,5 @@
 using DesktopApplicationTemplate.Models;
-﻿using DesktopApplicationTemplate.UI.Views;
+using DesktopApplicationTemplate.UI.Views;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -35,7 +35,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             set { _borderColor = value; OnPropertyChanged(); }
         }
         public Page? ServicePage { get; set; }
- 
+
 
         private bool _isActive;
         public bool IsActive
@@ -119,10 +119,15 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private readonly CsvService _csvService;
         private readonly ILoggingService? _logger;
 
-        public MainViewModel(CsvService csvService, ILoggingService? logger = null)
+        public MainViewModel(CsvService csvService, ILoggingService? logger = null, string? servicesFilePath = null)
         {
             _csvService = csvService;
             _logger = logger;
+            if (!string.IsNullOrWhiteSpace(servicesFilePath))
+            {
+                ServicePersistence.FilePath = servicesFilePath!;
+                _logger?.Log($"Using service persistence path {ServicePersistence.FilePath}", LogLevel.Debug);
+            }
             AddServiceCommand = new RelayCommand(AddService);
             RemoveServiceCommand = new RelayCommand(RemoveSelectedService, () => SelectedService != null);
             FilteredServices = CollectionViewSource.GetDefaultView(Services);
