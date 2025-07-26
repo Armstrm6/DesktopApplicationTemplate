@@ -11,9 +11,22 @@ namespace DesktopApplicationTemplate.Tests
         [Fact]
         [TestCategory("CodexSafe")]
         [TestCategory("WindowsSafe")]
+        public void Constructor_IgnoresInvalidConfig()
+        {
+            var path = Path.GetTempFileName();
+            File.WriteAllText(path, "not json");
+            var ex = Record.Exception(() => new CsvViewerViewModel(path));
+            File.Delete(path);
+            Assert.Null(ex);
+            ConsoleTestLogger.LogPass();
+        }
+        [Fact]
+        [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
         public void EnsureColumnsForService_AddsColumns()
         {
-            var vm = new CsvViewerViewModel();
+            var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var vm = new CsvViewerViewModel(configPath);
             var svc = new CsvService(vm);
 
             svc.EnsureColumnsForService("TestSvc");
@@ -28,7 +41,8 @@ namespace DesktopApplicationTemplate.Tests
         [TestCategory("WindowsSafe")]
         public void RemoveColumnsForService_RemovesColumns()
         {
-            var vm = new CsvViewerViewModel();
+            var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var vm = new CsvViewerViewModel(configPath);
             var svc = new CsvService(vm);
 
             svc.EnsureColumnsForService("Svc");
@@ -45,7 +59,8 @@ namespace DesktopApplicationTemplate.Tests
         [TestCategory("WindowsSafe")]
         public void RecordLog_WritesCsvRow()
         {
-            var vm = new CsvViewerViewModel();
+            var configPath2 = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var vm = new CsvViewerViewModel(configPath2);
             string path = Path.GetTempFileName();
             vm.Configuration.FileNamePattern = path;
             var svc = new CsvService(vm);
@@ -67,7 +82,8 @@ namespace DesktopApplicationTemplate.Tests
             Directory.CreateDirectory(tempDir);
             try
             {
-                var vm = new CsvViewerViewModel();
+                var configPath3 = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+                var vm = new CsvViewerViewModel(configPath3);
                 vm.Configuration.FileNamePattern = Path.Combine(tempDir, "output_{index}.csv");
                 var service = new CsvService(vm);
 

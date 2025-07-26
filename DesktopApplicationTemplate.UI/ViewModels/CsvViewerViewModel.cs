@@ -20,7 +20,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
     public class CsvViewerViewModel : ViewModelBase
     {
-        private const string ConfigPath = "csv_config.json";
+        private readonly string _configPath;
+        private readonly DesktopApplicationTemplate.UI.Services.ILoggingService? _logger;
 
         public CsvConfiguration Configuration { get; private set; } = new();
         public CsvColumnConfig? SelectedColumn { get; set; }
@@ -32,8 +33,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public event Action? RequestClose;
 
-        public CsvViewerViewModel()
+        public CsvViewerViewModel(string? configPath = null, DesktopApplicationTemplate.UI.Services.ILoggingService? logger = null)
         {
+            _configPath = configPath ?? "csv_config.json";
+            _logger = logger;
             Load();
             AddColumnCommand = new RelayCommand(() => Configuration.Columns.Add(new CsvColumnConfig()));
             RemoveColumnCommand = new RelayCommand(() => { if (SelectedColumn != null) Configuration.Columns.Remove(SelectedColumn); });
@@ -43,17 +46,30 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         private void Load()
         {
-            if (System.IO.File.Exists(ConfigPath))
+            if (System.IO.File.Exists(_configPath))
             {
-                var json = System.IO.File.ReadAllText(ConfigPath);
-                Configuration = JsonSerializer.Deserialize<CsvConfiguration>(json) ?? new CsvConfiguration();
+                try
+                {
+                    var json = System.IO.File.ReadAllText(_configPath);
+                    if (!string.IsNullOrWhiteSpace(json))
+                        Configuration = JsonSerializer.Deserialize<CsvConfiguration>(json) ?? new CsvConfiguration();
+                }
+                catch (Exception ex)
+                {
+                    _logger?.Log($"Failed to load CSV config: {ex.Message}", DesktopApplicationTemplate.UI.Services.LogLevel.Error);
+                }
+            }
+            else
+            {
+                _logger?.Log($"CSV config {_configPath} not found, using defaults", DesktopApplicationTemplate.UI.Services.LogLevel.Debug);
             }
         }
 
         public void Save()
         {
             var json = JsonSerializer.Serialize(Configuration, new JsonSerializerOptions { WriteIndented = true });
-            System.IO.File.WriteAllText(ConfigPath, json);
+            System.IO.File.WriteAllText(_configPath, json);
+            _logger?.Log($"CSV configuration saved to {_configPath}", DesktopApplicationTemplate.UI.Services.LogLevel.Debug);
         }
 
         // Uses OnPropertyChanged from ViewModelBase
