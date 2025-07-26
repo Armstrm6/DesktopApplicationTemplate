@@ -39,7 +39,7 @@ namespace DesktopApplicationTemplate.Tests
             client.Setup(c => c.SubscribeAsync(It.IsAny<MqttClientSubscribeOptions>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new MqttClientSubscribeResult(0, Array.Empty<MqttClientSubscribeResultItem>(), string.Empty, Array.Empty<MqttUserProperty>()));
             var service = new MqttService(client.Object, logger.Object);
-            var vm = new MqttServiceViewModel(service, logger.Object) { Host = "localhost", Port = "1883", ClientId = "c" };
+            var vm = new MqttServiceViewModel(service, logger.Object) { Host = "127.0.0.1", Port = "1883", ClientId = "c" };
 
             await vm.ConnectAsync();
 
