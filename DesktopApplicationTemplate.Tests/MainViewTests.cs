@@ -26,7 +26,7 @@ namespace DesktopApplicationTemplate.Tests
                 try
                 {
                     new DesktopApplicationTemplate.UI.App();
-                    var vm = new MainViewModel(new CsvService(new CsvViewerViewModel()));
+                    var vm = new MainViewModel(new CsvService(new CsvViewerViewModel(Path.GetTempFileName())));
                     var view = new MainView(vm);
                     var list = view.FindName("ServiceList") as System.Windows.Controls.ListBox;
                     Assert.Equal(350, list?.MaxHeight);
@@ -53,7 +53,7 @@ namespace DesktopApplicationTemplate.Tests
                 try
                 {
                     new DesktopApplicationTemplate.UI.App();
-                    var vm = new MainViewModel(new CsvService(new CsvViewerViewModel()));
+                    var vm = new MainViewModel(new CsvService(new CsvViewerViewModel(Path.GetTempFileName())));
                     var view = new MainView(vm);
                     bool bound = view.CommandBindings.OfType<CommandBinding>()
                                         .Any(b => b.Command == SystemCommands.CloseWindowCommand);

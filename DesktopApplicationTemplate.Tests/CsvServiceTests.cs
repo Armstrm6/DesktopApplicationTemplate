@@ -13,7 +13,7 @@ namespace DesktopApplicationTemplate.Tests
         [TestCategory("WindowsSafe")]
         public void EnsureColumnsForService_AddsColumns()
         {
-            var vm = new CsvViewerViewModel();
+            var vm = new CsvViewerViewModel(Path.GetTempFileName());
             var svc = new CsvService(vm);
 
             svc.EnsureColumnsForService("TestSvc");
@@ -28,7 +28,7 @@ namespace DesktopApplicationTemplate.Tests
         [TestCategory("WindowsSafe")]
         public void RemoveColumnsForService_RemovesColumns()
         {
-            var vm = new CsvViewerViewModel();
+            var vm = new CsvViewerViewModel(Path.GetTempFileName());
             var svc = new CsvService(vm);
 
             svc.EnsureColumnsForService("Svc");
@@ -45,7 +45,7 @@ namespace DesktopApplicationTemplate.Tests
         [TestCategory("WindowsSafe")]
         public void RecordLog_WritesCsvRow()
         {
-            var vm = new CsvViewerViewModel();
+            var vm = new CsvViewerViewModel(Path.GetTempFileName());
             string path = Path.GetTempFileName();
             vm.Configuration.FileNamePattern = path;
             var svc = new CsvService(vm);
@@ -67,7 +67,7 @@ namespace DesktopApplicationTemplate.Tests
             Directory.CreateDirectory(tempDir);
             try
             {
-                var vm = new CsvViewerViewModel();
+                var vm = new CsvViewerViewModel(Path.GetTempFileName());
                 vm.Configuration.FileNamePattern = Path.Combine(tempDir, "output_{index}.csv");
                 var service = new CsvService(vm);
 
