@@ -25,11 +25,14 @@ namespace DesktopApplicationTemplate.Tests
             {
                 try
                 {
-                    new DesktopApplicationTemplate.UI.App();
-                    var vm = new MainViewModel(new CsvService(new CsvViewerViewModel(Path.GetTempFileName())));
+                    var app = System.Windows.Application.Current ?? new DesktopApplicationTemplate.UI.App();
+                    bool created = System.Windows.Application.Current == null;
+                    var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+                    var vm = new MainViewModel(new CsvService(new CsvViewerViewModel(configPath)));
                     var view = new MainView(vm);
                     var list = view.FindName("ServiceList") as System.Windows.Controls.ListBox;
                     Assert.Equal(350, list?.MaxHeight);
+                    if (created) app.Shutdown();
                 }
                 catch (Exception e) { ex = e; }
             });
@@ -52,12 +55,15 @@ namespace DesktopApplicationTemplate.Tests
             {
                 try
                 {
-                    new DesktopApplicationTemplate.UI.App();
-                    var vm = new MainViewModel(new CsvService(new CsvViewerViewModel(Path.GetTempFileName())));
+                    var app = System.Windows.Application.Current ?? new DesktopApplicationTemplate.UI.App();
+                    bool created = System.Windows.Application.Current == null;
+                    var configPath2 = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+                    var vm = new MainViewModel(new CsvService(new CsvViewerViewModel(configPath2)));
                     var view = new MainView(vm);
                     bool bound = view.CommandBindings.OfType<CommandBinding>()
                                         .Any(b => b.Command == SystemCommands.CloseWindowCommand);
                     Assert.True(bound);
+                    if (created) app.Shutdown();
                 }
                 catch (Exception e) { ex = e; }
             });

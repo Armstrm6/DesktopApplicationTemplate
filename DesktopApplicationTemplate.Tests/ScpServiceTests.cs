@@ -2,6 +2,7 @@ using DesktopApplicationTemplate.UI.Services;
 using Moq;
 using Renci.SshNet;
 using System.Threading.Tasks;
+using System.IO;
 using Xunit;
 
 namespace DesktopApplicationTemplate.Tests
@@ -20,7 +21,10 @@ namespace DesktopApplicationTemplate.Tests
             client.Setup(c => c.Disconnect());
 
             var service = new ScpService(client.Object);
-            await service.UploadAsync("local", "remote");
+            var localFile = Path.GetTempFileName();
+            await File.WriteAllTextAsync(localFile, "data");
+            await service.UploadAsync(localFile, "remote");
+            File.Delete(localFile);
 
             client.Verify(c => c.Connect(), Times.Once);
             client.Verify(c => c.Upload(It.IsAny<System.IO.Stream>(), "remote"), Times.Once);
