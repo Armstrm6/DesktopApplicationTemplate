@@ -36,11 +36,14 @@ namespace DesktopApplicationTemplate.Tests
                     Assert.Equal(350, list?.MaxHeight);
                 }
                 catch (Exception e) { ex = e; }
+                finally
+                {
+                    System.Windows.Application.Current?.Shutdown();
+                }
             });
             thread.SetApartmentState(ApartmentState.STA);
             thread.Start();
             thread.Join();
-            System.Windows.Application.Current?.Shutdown();
             if (ex != null) throw ex;
             ConsoleTestLogger.LogPass();
         }
@@ -67,6 +70,10 @@ namespace DesktopApplicationTemplate.Tests
                     Assert.True(bound);
                 }
                 catch (Exception e) { ex = e; }
+                finally
+                {
+                    System.Windows.Application.Current?.Shutdown();
+                }
             });
             thread.SetApartmentState(ApartmentState.STA);
             thread.Start();
