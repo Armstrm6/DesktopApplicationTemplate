@@ -13,7 +13,8 @@ namespace DesktopApplicationTemplate.Tests
         [TestCategory("WindowsSafe")]
         public void EnsureColumnsForService_AddsColumns()
         {
-            var vm = new CsvViewerViewModel();
+            var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()+".json");
+            var vm = new CsvViewerViewModel(configPath);
             var svc = new CsvService(vm);
 
             svc.EnsureColumnsForService("TestSvc");
@@ -28,7 +29,8 @@ namespace DesktopApplicationTemplate.Tests
         [TestCategory("WindowsSafe")]
         public void RemoveColumnsForService_RemovesColumns()
         {
-            var vm = new CsvViewerViewModel();
+            var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()+".json");
+            var vm = new CsvViewerViewModel(configPath);
             var svc = new CsvService(vm);
 
             svc.EnsureColumnsForService("Svc");
@@ -45,8 +47,9 @@ namespace DesktopApplicationTemplate.Tests
         [TestCategory("WindowsSafe")]
         public void RecordLog_WritesCsvRow()
         {
-            var vm = new CsvViewerViewModel();
-            string path = Path.GetTempFileName();
+            var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()+".json");
+            var vm = new CsvViewerViewModel(configPath);
+            string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()+".csv");
             vm.Configuration.FileNamePattern = path;
             var svc = new CsvService(vm);
 
@@ -67,7 +70,8 @@ namespace DesktopApplicationTemplate.Tests
             Directory.CreateDirectory(tempDir);
             try
             {
-                var vm = new CsvViewerViewModel();
+                var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()+".json");
+                var vm = new CsvViewerViewModel(configPath);
                 vm.Configuration.FileNamePattern = Path.Combine(tempDir, "output_{index}.csv");
                 var service = new CsvService(vm);
 

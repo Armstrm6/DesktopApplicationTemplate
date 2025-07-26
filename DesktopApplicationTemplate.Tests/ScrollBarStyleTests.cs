@@ -22,7 +22,7 @@ namespace DesktopApplicationTemplate.Tests
             {
                 try
                 {
-                    var dict = new ResourceDictionary { Source = new Uri("Themes/LightTheme.xaml", UriKind.Relative) };
+                    var dict = new ResourceDictionary { Source = new Uri("pack://application:,,,/DesktopApplicationTemplate.UI;component/Themes/LightTheme.xaml") };
                     Assert.True(dict.Contains(typeof(System.Windows.Controls.Primitives.ScrollBar)));
                     var style = (Style)dict[typeof(System.Windows.Controls.Primitives.ScrollBar)];
                     var width = style.Setters.OfType<Setter>().FirstOrDefault(s => s.Property == System.Windows.Controls.Primitives.ScrollBar.WidthProperty)?.Value;

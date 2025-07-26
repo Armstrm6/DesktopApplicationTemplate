@@ -20,7 +20,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
     public class CsvViewerViewModel : ViewModelBase
     {
-        private const string ConfigPath = "csv_config.json";
+        private readonly string _configPath;
 
         public CsvConfiguration Configuration { get; private set; } = new();
         public CsvColumnConfig? SelectedColumn { get; set; }
@@ -32,8 +32,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public event Action? RequestClose;
 
-        public CsvViewerViewModel()
+        public CsvViewerViewModel(string? configPath = null)
         {
+            _configPath = configPath ?? "csv_config.json";
             Load();
             AddColumnCommand = new RelayCommand(() => Configuration.Columns.Add(new CsvColumnConfig()));
             RemoveColumnCommand = new RelayCommand(() => { if (SelectedColumn != null) Configuration.Columns.Remove(SelectedColumn); });
@@ -43,9 +44,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         private void Load()
         {
-            if (System.IO.File.Exists(ConfigPath))
+            if (System.IO.File.Exists(_configPath))
             {
-                var json = System.IO.File.ReadAllText(ConfigPath);
+                var json = System.IO.File.ReadAllText(_configPath);
                 Configuration = JsonSerializer.Deserialize<CsvConfiguration>(json) ?? new CsvConfiguration();
             }
         }
@@ -53,7 +54,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public void Save()
         {
             var json = JsonSerializer.Serialize(Configuration, new JsonSerializerOptions { WriteIndented = true });
-            System.IO.File.WriteAllText(ConfigPath, json);
+            System.IO.File.WriteAllText(_configPath, json);
         }
 
         // Uses OnPropertyChanged from ViewModelBase

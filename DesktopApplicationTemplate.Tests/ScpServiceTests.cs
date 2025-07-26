@@ -20,7 +20,16 @@ namespace DesktopApplicationTemplate.Tests
             client.Setup(c => c.Disconnect());
 
             var service = new ScpService(client.Object);
-            await service.UploadAsync("local", "remote");
+            var tempFile = System.IO.Path.GetTempFileName();
+            try
+            {
+                System.IO.File.WriteAllText(tempFile, "data");
+                await service.UploadAsync(tempFile, "remote");
+            }
+            finally
+            {
+                System.IO.File.Delete(tempFile);
+            }
 
             client.Verify(c => c.Connect(), Times.Once);
             client.Verify(c => c.Upload(It.IsAny<System.IO.Stream>(), "remote"), Times.Once);
