@@ -34,7 +34,6 @@ namespace DesktopApplicationTemplate.Tests
                     var view = new MainView(vm);
                     var list = view.FindName("ServiceList") as System.Windows.Controls.ListBox;
                     Assert.Equal(350, list?.MaxHeight);
-                    if (created) app.Shutdown();
                 }
                 catch (Exception e) { ex = e; }
             });
@@ -66,7 +65,6 @@ namespace DesktopApplicationTemplate.Tests
                     bool bound = view.CommandBindings.OfType<CommandBinding>()
                                         .Any(b => b.Command == SystemCommands.CloseWindowCommand);
                     Assert.True(bound);
-                    if (created) app.Shutdown();
                 }
                 catch (Exception e) { ex = e; }
             });
