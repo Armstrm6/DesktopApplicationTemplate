@@ -22,7 +22,7 @@ namespace DesktopApplicationTemplate.Tests
                 try
                 {
                     var app = System.Windows.Application.Current ?? new System.Windows.Application();
-                    bool created = System.Windows.Application.Current == null;
+
                     ThemeManager.ApplyTheme(true);
                     Assert.Contains(app.Resources.MergedDictionaries, d => d.Source?.OriginalString?.Contains("DarkTheme.xaml") == true);
                     ThemeManager.ApplyTheme(false);

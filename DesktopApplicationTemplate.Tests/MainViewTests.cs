@@ -26,9 +26,10 @@ namespace DesktopApplicationTemplate.Tests
             {
                 try
                 {
-                    var app = System.Windows.Application.Current ?? new DesktopApplicationTemplate.UI.App();
-                    bool created = System.Windows.Application.Current == null;
-                    var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+                    if (System.Windows.Application.Current == null)
+                        new DesktopApplicationTemplate.UI.App();
+                    var configPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), System.Guid.NewGuid().ToString()+".json");
+
                     var vm = new MainViewModel(new CsvService(new CsvViewerViewModel(configPath)));
                     var view = new MainView(vm);
                     var list = view.FindName("ServiceList") as System.Windows.Controls.ListBox;
@@ -40,6 +41,7 @@ namespace DesktopApplicationTemplate.Tests
             thread.SetApartmentState(ApartmentState.STA);
             thread.Start();
             thread.Join();
+            System.Windows.Application.Current?.Shutdown();
             if (ex != null) throw ex;
             ConsoleTestLogger.LogPass();
         }
@@ -56,10 +58,10 @@ namespace DesktopApplicationTemplate.Tests
             {
                 try
                 {
-                    var app = System.Windows.Application.Current ?? new DesktopApplicationTemplate.UI.App();
-                    bool created = System.Windows.Application.Current == null;
-                    var configPath2 = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-                    var vm = new MainViewModel(new CsvService(new CsvViewerViewModel(configPath2)));
+                    if (System.Windows.Application.Current == null)
+                        new DesktopApplicationTemplate.UI.App();
+                    var configPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), System.Guid.NewGuid().ToString()+".json");
+                    var vm = new MainViewModel(new CsvService(new CsvViewerViewModel(configPath)));
                     var view = new MainView(vm);
                     bool bound = view.CommandBindings.OfType<CommandBinding>()
                                         .Any(b => b.Command == SystemCommands.CloseWindowCommand);
