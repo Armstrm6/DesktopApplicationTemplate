@@ -13,7 +13,8 @@ namespace DesktopApplicationTemplate.Tests
         [TestCategory("WindowsSafe")]
         public void GenerateServiceName_IncrementsBasedOnExisting()
         {
-            var csv = new CsvService(new CsvViewerViewModel(Path.GetTempFileName()));
+            var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var csv = new CsvService(new CsvViewerViewModel(configPath));
             var vm = new MainViewModel(csv);
             vm.Services.Add(new ServiceViewModel
             {
@@ -42,7 +43,8 @@ namespace DesktopApplicationTemplate.Tests
         public void RemoveServiceCommand_LogsLifecycle()
         {
             var logger = new Mock<ILoggingService>();
-            var csv = new CsvService(new CsvViewerViewModel(Path.GetTempFileName()));
+            var configPath2 = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var csv = new CsvService(new CsvViewerViewModel(configPath2));
             var vm = new MainViewModel(csv, logger.Object);
             var service = new ServiceViewModel { DisplayName = "HTTP - HTTP1", ServiceType = "HTTP" };
             vm.Services.Add(service);
