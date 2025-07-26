@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Xunit;
+using System.IO;
 
 namespace DesktopApplicationTemplate.Tests
 {

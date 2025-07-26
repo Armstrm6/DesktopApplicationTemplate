@@ -1,6 +1,7 @@
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using Moq;
+using System.IO;
 using Xunit;
 
 namespace DesktopApplicationTemplate.Tests
