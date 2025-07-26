@@ -2,6 +2,7 @@ using DesktopApplicationTemplate.UI.Services;
 using Moq;
 using Renci.SshNet;
 using System.Threading.Tasks;
+using System.IO;
 using Xunit;
 
 namespace DesktopApplicationTemplate.Tests

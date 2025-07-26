@@ -22,11 +22,12 @@ namespace DesktopApplicationTemplate.Tests
                 try
                 {
                     var app = System.Windows.Application.Current ?? new System.Windows.Application();
+
                     ThemeManager.ApplyTheme(true);
                     Assert.Contains(app.Resources.MergedDictionaries, d => d.Source?.OriginalString?.Contains("DarkTheme.xaml") == true);
                     ThemeManager.ApplyTheme(false);
                     Assert.Contains(app.Resources.MergedDictionaries, d => d.Source?.OriginalString?.Contains("LightTheme.xaml") == true);
-                    app.Shutdown();
+                    if (created) app.Shutdown();
                 }
                 catch (Exception e)
                 {

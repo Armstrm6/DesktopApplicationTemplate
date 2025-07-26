@@ -72,6 +72,7 @@ namespace DesktopApplicationTemplate.Tests
             {
                 var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()+".json");
                 var vm = new CsvViewerViewModel(configPath);
+
                 vm.Configuration.FileNamePattern = Path.Combine(tempDir, "output_{index}.csv");
                 var service = new CsvService(vm);
 

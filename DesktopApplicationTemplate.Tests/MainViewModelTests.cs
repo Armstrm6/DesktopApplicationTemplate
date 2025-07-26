@@ -1,6 +1,7 @@
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using Moq;
+using System.IO;
 using Xunit;
 
 namespace DesktopApplicationTemplate.Tests
@@ -44,6 +45,7 @@ namespace DesktopApplicationTemplate.Tests
             var logger = new Mock<ILoggingService>();
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()+".json");
             var csv = new CsvService(new CsvViewerViewModel(configPath));
+
             var vm = new MainViewModel(csv, logger.Object);
             var service = new ServiceViewModel { DisplayName = "HTTP - HTTP1", ServiceType = "HTTP" };
             vm.Services.Add(service);

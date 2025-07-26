@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Xunit;
+using System.IO;
 
 namespace DesktopApplicationTemplate.Tests
 {
@@ -28,10 +29,12 @@ namespace DesktopApplicationTemplate.Tests
                     if (System.Windows.Application.Current == null)
                         new DesktopApplicationTemplate.UI.App();
                     var configPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), System.Guid.NewGuid().ToString()+".json");
+
                     var vm = new MainViewModel(new CsvService(new CsvViewerViewModel(configPath)));
                     var view = new MainView(vm);
                     var list = view.FindName("ServiceList") as System.Windows.Controls.ListBox;
                     Assert.Equal(350, list?.MaxHeight);
+                    if (created) app.Shutdown();
                 }
                 catch (Exception e) { ex = e; }
             });
@@ -63,6 +66,7 @@ namespace DesktopApplicationTemplate.Tests
                     bool bound = view.CommandBindings.OfType<CommandBinding>()
                                         .Any(b => b.Command == SystemCommands.CloseWindowCommand);
                     Assert.True(bound);
+                    if (created) app.Shutdown();
                 }
                 catch (Exception e) { ex = e; }
             });
