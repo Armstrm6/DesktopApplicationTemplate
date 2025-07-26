@@ -40,8 +40,7 @@ namespace DesktopApplicationTemplate.Tests
                 catch (Exception e) { ex = e; }
                 finally
                 {
-                    if (System.Windows.Application.Current != null)
-                        System.Windows.Application.Current.Dispatcher.Invoke(() => System.Windows.Application.Current.Shutdown());
+                    System.Windows.Application.Current?.Shutdown();
                 }
             });
             thread.SetApartmentState(ApartmentState.STA);
@@ -77,8 +76,7 @@ namespace DesktopApplicationTemplate.Tests
                 catch (Exception e) { ex = e; }
                 finally
                 {
-                    if (System.Windows.Application.Current != null)
-                        System.Windows.Application.Current.Dispatcher.Invoke(() => System.Windows.Application.Current.Shutdown());
+                    System.Windows.Application.Current?.Shutdown();
                 }
             });
             thread.SetApartmentState(ApartmentState.STA);
