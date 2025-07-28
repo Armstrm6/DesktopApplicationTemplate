@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WpfRichTextBox = System.Windows.Controls.RichTextBox;
 using System.Windows.Documents;
 using WpfBrush = System.Windows.Media.Brush;
@@ -14,10 +12,10 @@ namespace DesktopApplicationTemplate.UI.Services
 {
     public class LoggingService : ILoggingService
     {
-        private readonly WpfRichTextBox _outputBox;
+        private readonly WpfRichTextBox _outputRichTextBox;
         private readonly Dispatcher _dispatcher;
         private readonly string _logFilePath;
-        private readonly List<LogEntry> _entries = new();
+        private readonly List<LogEntry> _logEntries = new();
 
         private LogLevel _minimumLevel = LogLevel.Debug;
         public LogLevel MinimumLevel
@@ -26,15 +24,16 @@ namespace DesktopApplicationTemplate.UI.Services
             set
             {
                 _minimumLevel = value;
+                Log($"Minimum level changed to {value}", LogLevel.Debug);
                 UpdateLogDisplay();
             }
         }
 
         public event Action<LogEntry>? LogAdded;
 
-        public LoggingService(WpfRichTextBox outputBox, Dispatcher dispatcher, string logFilePath = "app.log")
+        public LoggingService(WpfRichTextBox outputRichTextBox, Dispatcher dispatcher, string logFilePath = "app.log")
         {
-            _outputBox = outputBox;
+            _outputRichTextBox = outputRichTextBox;
             _dispatcher = dispatcher;
             _logFilePath = logFilePath;
         }
@@ -45,15 +44,15 @@ namespace DesktopApplicationTemplate.UI.Services
                                         Color = LevelToColor(level),
                                         Level = level };
 
-            _entries.Add(entry);
+            _logEntries.Add(entry);
 
             if (level >= MinimumLevel)
             {
                 _dispatcher.Invoke(() =>
                 {
                     var paragraph = new Paragraph(new Run(entry.Message) { Foreground = entry.Color });
-                    _outputBox.Document.Blocks.Add(paragraph);
-                    _outputBox.ScrollToEnd();
+                    _outputRichTextBox.Document.Blocks.Add(paragraph);
+                    _outputRichTextBox.ScrollToEnd();
                 });
             }
 
@@ -83,13 +82,13 @@ namespace DesktopApplicationTemplate.UI.Services
         {
             _dispatcher.Invoke(() =>
             {
-                _outputBox.Document.Blocks.Clear();
-                foreach (var e in _entries.Where(e => e.Level >= MinimumLevel))
+                _outputRichTextBox.Document.Blocks.Clear();
+                foreach (var e in _logEntries.Where(e => e.Level >= MinimumLevel))
                 {
                     var paragraph = new Paragraph(new Run(e.Message) { Foreground = e.Color });
-                    _outputBox.Document.Blocks.Add(paragraph);
+                    _outputRichTextBox.Document.Blocks.Add(paragraph);
                 }
-                _outputBox.ScrollToEnd();
+                _outputRichTextBox.ScrollToEnd();
             });
         }
     }
