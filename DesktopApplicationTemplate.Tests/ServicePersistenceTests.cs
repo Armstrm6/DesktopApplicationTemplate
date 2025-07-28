@@ -25,11 +25,14 @@ namespace DesktopApplicationTemplate.Tests
                     new ServiceViewModel{DisplayName="A", ServiceType="Heartbeat", IsActive=true, Order=0},
                     new ServiceViewModel{DisplayName="B", ServiceType="TCP", IsActive=false, Order=1}
                 };
+                services[0].AssociatedServices.Add("B");
+                services[1].AssociatedServices.Add("A");
 
                 ServicePersistence.Save(services);
                 var loaded = ServicePersistence.Load();
                 Assert.Equal(2, loaded.Count);
                 Assert.Equal("A", loaded[0].DisplayName);
+                Assert.Contains("B", loaded[0].AssociatedServices);
             }
             finally
             {

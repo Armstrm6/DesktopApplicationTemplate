@@ -110,6 +110,13 @@ csvService.AppendRow(new [] { tcpValue, httpStatus });
 
 This appends a new row to `output_{index}.csv` with the TCP and HTTP values.
 
+## Referencing other service messages
+
+Any log entry can reference another service's message using the format
+`SERVICETYPE.ServiceName.Message`. When such a log is added, both services will
+link to each other under **Associated Services** and the referenced message will
+appear in the target service's log.
+
 ## C# message scripts
 
 The **TCP** service can execute small C# scripts for transforming incoming

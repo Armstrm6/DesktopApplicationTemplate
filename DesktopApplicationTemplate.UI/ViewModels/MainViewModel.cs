@@ -1,12 +1,14 @@
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Views;
 using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Linq;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Data;
+using System.Text.RegularExpressions;
 using WpfBrush = System.Windows.Media.Brush;
 using WpfBrushes = System.Windows.Media.Brushes;
 using DesktopApplicationTemplate.UI.Services;
@@ -36,6 +38,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         }
         public Page? ServicePage { get; set; }
 
+        public ObservableCollection<string> AssociatedServices { get; } = new();
+
+        public static Func<string, string, ServiceViewModel?>? ResolveService { get; set; }
+
 
         private bool _isActive;
         public bool IsActive
@@ -61,12 +67,36 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public event Action<ServiceViewModel, LogEntry>? LogAdded;
 
-        public void AddLog(string message, WpfBrush? color = null, LogLevel level = LogLevel.Debug)
+        public void AddLog(string message, WpfBrush? color = null, LogLevel level = LogLevel.Debug, bool checkReference = true)
         {
             var ts = DateTime.Now.ToString("MM.dd.yyyy - HH:mm:ss.fffffff");
             var entry = new LogEntry { Message = $"{ts} {message}", Color = color ?? WpfBrushes.Black, Level = level };
             Logs.Insert(0, entry);
             LogAdded?.Invoke(this, entry);
+            if (checkReference)
+            {
+                HandleReference(message, color ?? WpfBrushes.Black, level);
+            }
+        }
+
+        private void HandleReference(string message, WpfBrush color, LogLevel level)
+        {
+            var m = Regex.Match(message, @"^([^.]+)\.([^.]+)\.(.+)$");
+            if (m.Success && ResolveService != null)
+            {
+                var type = m.Groups[1].Value;
+                var name = m.Groups[2].Value;
+                var msg = m.Groups[3].Value;
+                var target = ResolveService(type, name);
+                if (target != null && target != this)
+                {
+                    if (!AssociatedServices.Contains(target.DisplayName))
+                        AssociatedServices.Add(target.DisplayName);
+                    if (!target.AssociatedServices.Contains(DisplayName))
+                        target.AssociatedServices.Add(DisplayName);
+                    target.AddLog(msg, color, level, false);
+                }
+            }
         }
 
         public void SetColorsByType()
@@ -123,6 +153,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         {
             _csvService = csvService;
             _logger = logger;
+            ServiceViewModel.ResolveService = (type, name) =>
+                Services.FirstOrDefault(s =>
+                    s.ServiceType.Equals(type, StringComparison.OrdinalIgnoreCase) &&
+                    s.DisplayName.Split(" - ").Last().Equals(name, StringComparison.OrdinalIgnoreCase));
             if (!string.IsNullOrWhiteSpace(servicesFilePath))
             {
                 ServicePersistence.FilePath = servicesFilePath!;
@@ -244,6 +278,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     IsActive = info.IsActive,
                     Order = info.Order
                 };
+                foreach (var a in info.AssociatedServices ?? new List<string>())
+                    svc.AssociatedServices.Add(a);
                 svc.SetColorsByType();
                 svc.LogAdded += OnServiceLogAdded;
                 svc.ActiveChanged += OnServiceActiveChanged;
