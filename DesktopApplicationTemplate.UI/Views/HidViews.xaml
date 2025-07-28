@@ -17,11 +17,25 @@
 
         <Image Source="pack://application:,,,/Resources/Desktop-Icon.png" Width="100" HorizontalAlignment="Left" Margin="0,0,0,10"/>
 
-        <StackPanel Grid.Row="1" Margin="0,40,0,0">
+        <StackPanel Grid.Row="1" Margin="0,40,0,0" Width="400">
             <TextBlock Text="HID Message" FontWeight="Bold" Margin="0,0,0,5"/>
             <TextBox Text="{Binding MessageTemplate}" Height="80" AcceptsReturn="True" x:Name="TemplateBox"/>
+            <TextBlock Text="Format Template" FontWeight="Bold" Margin="0,10,0,5"/>
+            <TextBox Text="{Binding FormatTemplate}" Height="25"/>
             <TextBlock Text="Final Message" FontWeight="Bold" Margin="0,10,0,5"/>
             <TextBox Text="{Binding FinalMessage}" IsReadOnly="True" Height="80"/>
+            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                <TextBlock Text="USB:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <ComboBox Width="80" ItemsSource="{Binding UsbProtocols}" SelectedItem="{Binding SelectedUsbProtocol}"/>
+                <TextBlock Text="Debounce (ms):" VerticalAlignment="Center" Margin="10,0,5,0"/>
+                <TextBox Width="60" Text="{Binding DebounceTimeMs}"/>
+                <TextBlock Text="Key Down (ms):" VerticalAlignment="Center" Margin="10,0,5,0"/>
+                <TextBox Width="60" Text="{Binding KeyDownTimeMs}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                <TextBlock Text="Forward To:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <ComboBox Width="200" ItemsSource="{Binding AvailableServices}" SelectedItem="{Binding AttachedService}"/>
+            </StackPanel>
             <Button Content="Build" Command="{Binding BuildCommand}" Width="100" Margin="0,10,0,0" HorizontalAlignment="Left"/>
         </StackPanel>
 
