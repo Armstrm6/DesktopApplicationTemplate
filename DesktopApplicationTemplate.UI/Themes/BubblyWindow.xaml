@@ -12,6 +12,7 @@
         </Setter>
         <Setter Property="BorderBrush" Value="#ADD8E6" />
         <Setter Property="BorderThickness" Value="2" />
+        <Setter Property="CornerRadius" Value="10" />
         <Setter Property="AllowsTransparency" Value="True" />
         <Setter Property="WindowStyle" Value="None" />
         <Setter Property="Template">
@@ -20,7 +21,8 @@
                     <Border Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="10" Padding="5">
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            Padding="5">
                         <Border.Effect>
                             <DropShadowEffect BlurRadius="15" ShadowDepth="0" Opacity="0.3" />
                         </Border.Effect>
@@ -31,9 +33,14 @@
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition />
                                             <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="{TemplateBinding Title}" VerticalAlignment="Center" Margin="10,0" FontWeight="Bold" />
-                                        <Button Grid.Column="1" Content="X" Width="30" Height="30"
+                                        <Button Grid.Column="1" Content="_" Width="30" Height="30"
+                                                Command="{x:Static shell:SystemCommands.MinimizeWindowCommand}"
+                                                CommandTarget="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                                                Background="Transparent" BorderThickness="0" />
+                                        <Button Grid.Column="2" Content="X" Width="30" Height="30"
                                                 Command="{x:Static shell:SystemCommands.CloseWindowCommand}"
                                                 CommandTarget="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
                                                 Background="Transparent" BorderThickness="0" />

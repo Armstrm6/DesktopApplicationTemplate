@@ -35,6 +35,7 @@ namespace DesktopApplicationTemplate.UI.Views
             KeyDown += MainView_KeyDown;
             MouseDown += MainView_MouseDown;
             CommandBindings.Add(new CommandBinding(SystemCommands.CloseWindowCommand, CloseCommand_Executed));
+            CommandBindings.Add(new CommandBinding(SystemCommands.MinimizeWindowCommand, MinimizeCommand_Executed));
             Closing += (_, _) => _logger?.LogInformation("MainView closing");
         }
 
@@ -51,6 +52,12 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             _logger?.LogInformation("Close command invoked");
             Close();
+        }
+
+        private void MinimizeCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            _logger?.LogInformation("Minimize command invoked");
+            SystemCommands.MinimizeWindow(this);
         }
 
         private Page? GetOrCreateServicePage(ServiceViewModel svc)
