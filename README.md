@@ -77,7 +77,7 @@ no manual configuration is required.
 
 The UI exposes several built in service types. A brief description of each is shown below.
 
-- **HID** – configure HID devices and save their settings.
+- **HID** – configure HID devices, forward output to another service, set debounce and key down times, select USB protocol (2.0/3.0) and apply custom formatting.
 - **TCP** – run a lightweight TCP server and test message processing scripts.
 - **HTTP** – send HTTP requests with editable headers and body fields.
 - **File Observer** – watch folders and optionally send TCP commands when new files are detected.
