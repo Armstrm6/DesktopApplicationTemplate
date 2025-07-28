@@ -10,7 +10,7 @@ namespace DesktopApplicationTemplate.UI.Views
             InitializeComponent();
         }
 
-        public System.Windows.Media.Color SelectedColor => (System.Windows.Media.Color)ColorCanvas.SelectedColor;
+        public System.Windows.Media.Color ChosenColor => (System.Windows.Media.Color)ColorCanvas.SelectedColor;
 
         private void Ok_Click(object sender, RoutedEventArgs e)
         {

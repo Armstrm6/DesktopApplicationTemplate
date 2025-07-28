@@ -310,7 +310,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 var dlg = new ColorPickerWindow { Owner = this };
                 if (dlg.ShowDialog() == true)
                 {
-                    var color = dlg.SelectedColor;
+                    var color = dlg.ChosenColor;
                     var brush = new SolidColorBrush(color);
                     foreach (var s in _viewModel.Services.Where(s => s.ServiceType == svc.ServiceType))
                     {
