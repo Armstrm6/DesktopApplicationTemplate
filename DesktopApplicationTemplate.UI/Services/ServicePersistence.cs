@@ -22,7 +22,8 @@ namespace DesktopApplicationTemplate.UI.Services
                     ServiceType = s.ServiceType,
                     IsActive = s.IsActive,
                     Created = DateTime.Now,
-                    Order = index++
+                    Order = index++,
+                    AssociatedServices = new List<string>(s.AssociatedServices)
                 });
             }
 
@@ -63,5 +64,6 @@ namespace DesktopApplicationTemplate.UI.Services
         public bool IsActive { get; set; }
         public DateTime Created { get; set; }
         public int Order { get; set; }
+        public List<string> AssociatedServices { get; set; } = new();
     }
 }
