@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Services;
@@ -53,6 +54,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             set { _formatTemplate = value; OnPropertyChanged(); }
         }
 
+        private readonly IHidService? _hidService;
         public ILoggingService? Logger { get; set; }
 
         private string _finalMessage = string.Empty;
@@ -65,13 +67,17 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public ICommand BuildCommand { get; }
         public ICommand SaveCommand { get; }
 
-        public HidViewModel()
+        public HidViewModel() : this(null, null) { }
+
+        public HidViewModel(IHidService? hidService, ILoggingService? logger = null)
         {
-            BuildCommand = new RelayCommand(BuildMessage);
+            _hidService = hidService;
+            Logger = logger;
+            BuildCommand = new AsyncRelayCommand(BuildMessageAsync);
             SaveCommand = new RelayCommand(Save);
         }
 
-        private void BuildMessage()
+        private async Task BuildMessageAsync()
         {
             Logger?.Log("Building HID message", LogLevel.Debug);
             FinalMessage = string.Format(FormatTemplate ?? "{0}", MessageTemplate);
@@ -80,6 +86,13 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             {
                 Logger?.Log($"Forwarding message to {AttachedService}", LogLevel.Debug);
                 MessageForwarder.Forward(AttachedService, FinalMessage);
+            }
+
+            if (_hidService != null)
+            {
+                var debounce = int.TryParse(DebounceTimeMs, out var d) ? d : 0;
+                var keyDown = int.TryParse(KeyDownTimeMs, out var k) ? k : 0;
+                await _hidService.SendAsync(FinalMessage, debounce, keyDown).ConfigureAwait(false);
             }
         }
 

@@ -51,6 +51,9 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<ScpServiceViewModel>();
             services.AddSingleton<HidViewModel>();
             services.AddSingleton<HidViews>();
+            services.AddSingleton<IDelayService, DelayService>();
+            services.AddSingleton<IHidDevice, HidDevice>();
+            services.AddSingleton<IHidService, HidService>();
             services.AddSingleton<MqttService>();
             services.AddSingleton<MQTTServiceView>();
             services.AddSingleton<MqttServiceViewModel>();
