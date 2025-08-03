@@ -23,6 +23,20 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public Page? Page { get; set; }
         public int Order { get; set; }
 
+        private string _listeningAddress = string.Empty;
+        public string ListeningAddress
+        {
+            get => _listeningAddress;
+            set { _listeningAddress = value; OnPropertyChanged(); }
+        }
+
+        private string _port = string.Empty;
+        public string Port
+        {
+            get => _port;
+            set { _port = value; OnPropertyChanged(); }
+        }
+
         private WpfBrush _backgroundColor = WpfBrushes.LightGray;
         public WpfBrush BackgroundColor
         {
@@ -276,7 +290,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     DisplayName = info.DisplayName,
                     ServiceType = info.ServiceType,
                     IsActive = info.IsActive,
-                    Order = info.Order
+                    Order = info.Order,
+                    ListeningAddress = info.ListeningAddress ?? string.Empty,
+                    Port = info.Port ?? string.Empty
                 };
                 foreach (var a in info.AssociatedServices ?? new List<string>())
                     svc.AssociatedServices.Add(a);

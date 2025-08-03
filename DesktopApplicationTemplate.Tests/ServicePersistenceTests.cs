@@ -22,8 +22,8 @@ namespace DesktopApplicationTemplate.Tests
             {
                 var services = new List<ServiceViewModel>
                 {
-                    new ServiceViewModel{DisplayName="A", ServiceType="Heartbeat", IsActive=true, Order=0},
-                    new ServiceViewModel{DisplayName="B", ServiceType="TCP", IsActive=false, Order=1}
+                    new ServiceViewModel{DisplayName="A", ServiceType="Heartbeat", IsActive=true, Order=0, ListeningAddress="localhost", Port="1000"},
+                    new ServiceViewModel{DisplayName="B", ServiceType="TCP", IsActive=false, Order=1, ListeningAddress="0.0.0.0", Port="2000"}
                 };
                 services[0].AssociatedServices.Add("B");
                 services[1].AssociatedServices.Add("A");
@@ -33,6 +33,8 @@ namespace DesktopApplicationTemplate.Tests
                 Assert.Equal(2, loaded.Count);
                 Assert.Equal("A", loaded[0].DisplayName);
                 Assert.Contains("B", loaded[0].AssociatedServices);
+                Assert.Equal("localhost", loaded[0].ListeningAddress);
+                Assert.Equal("1000", loaded[0].Port);
             }
             finally
             {

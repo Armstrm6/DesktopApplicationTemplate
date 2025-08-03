@@ -23,7 +23,9 @@ namespace DesktopApplicationTemplate.UI.Services
                     IsActive = s.IsActive,
                     Created = DateTime.Now,
                     Order = index++,
-                    AssociatedServices = new List<string>(s.AssociatedServices)
+                    AssociatedServices = new List<string>(s.AssociatedServices),
+                    ListeningAddress = s.ListeningAddress,
+                    Port = s.Port
                 });
             }
 
@@ -65,5 +67,7 @@ namespace DesktopApplicationTemplate.UI.Services
         public DateTime Created { get; set; }
         public int Order { get; set; }
         public List<string> AssociatedServices { get; set; } = new();
+        public string? ListeningAddress { get; set; }
+        public string? Port { get; set; }
     }
 }

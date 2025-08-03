@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Services;
@@ -55,6 +56,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public ILoggingService? Logger { get; set; }
 
+        private readonly IHidService _hidService;
+
         private string _finalMessage = string.Empty;
         public string FinalMessage
         {
@@ -65,21 +68,61 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public ICommand BuildCommand { get; }
         public ICommand SaveCommand { get; }
 
-        public HidViewModel()
+        private bool _isLoggingHidData;
+        public bool IsLoggingHidData
         {
-            BuildCommand = new RelayCommand(BuildMessage);
+            get => _isLoggingHidData;
+            set { _isLoggingHidData = value; OnPropertyChanged(); Logger?.Log($"Logging HID data set to {value}", LogLevel.Debug); }
+        }
+
+        private string _vbaLogContent = string.Empty;
+        public string VbaLogContent
+        {
+            get => _vbaLogContent;
+            set { _vbaLogContent = value; OnPropertyChanged(); }
+        }
+
+        public HidViewModel(IHidService? hidService = null, ILoggingService? logger = null)
+        {
+            Logger = logger;
+            _hidService = hidService ?? new HidService(logger: logger);
+            BuildCommand = new AsyncRelayCommand(BuildMessageAsync);
             SaveCommand = new RelayCommand(Save);
         }
 
-        private void BuildMessage()
+        private async Task BuildMessageAsync()
         {
             Logger?.Log("Building HID message", LogLevel.Debug);
-            FinalMessage = string.Format(FormatTemplate ?? "{0}", MessageTemplate);
-            Logger?.Log($"Final HID message: {FinalMessage}", LogLevel.Debug);
-            if (!string.IsNullOrWhiteSpace(AttachedService))
+            if (IsLoggingHidData)
             {
-                Logger?.Log($"Forwarding message to {AttachedService}", LogLevel.Debug);
-                MessageForwarder.Forward(AttachedService, FinalMessage);
+                FinalMessage = VbaLogContent;
+                Logger?.Log($"Final HID log message: {FinalMessage}", LogLevel.Debug);
+                if (!string.IsNullOrWhiteSpace(AttachedService))
+                {
+                    Logger?.Log($"Forwarding message to {AttachedService}", LogLevel.Debug);
+                    MessageForwarder.Forward(AttachedService, FinalMessage);
+                }
+                if (!string.IsNullOrWhiteSpace(FinalMessage))
+                    Logger?.Log($"Logging HID data: {FinalMessage}", LogLevel.Information);
+            }
+            else
+            {
+                FinalMessage = string.Format(FormatTemplate ?? "{0}", MessageTemplate);
+                Logger?.Log($"Final HID message: {FinalMessage}", LogLevel.Debug);
+                if (!string.IsNullOrWhiteSpace(AttachedService))
+                {
+                    Logger?.Log($"Forwarding message to {AttachedService}", LogLevel.Debug);
+                    MessageForwarder.Forward(AttachedService, FinalMessage);
+                }
+
+                if (!string.IsNullOrWhiteSpace(FinalMessage))
+                {
+                    int.TryParse(KeyDownTimeMs, out var keyDown);
+                    int.TryParse(DebounceTimeMs, out var debounce);
+                    Logger?.Log("Sending HID message", LogLevel.Debug);
+                    await _hidService.SendAsync(FinalMessage, keyDown, debounce).ConfigureAwait(false);
+                    Logger?.Log("HID message sent", LogLevel.Debug);
+                }
             }
         }
 

@@ -49,6 +49,8 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<HeartbeatViewModel>();
             services.AddSingleton<SCPServiceView>();
             services.AddSingleton<ScpServiceViewModel>();
+            services.AddSingleton<IHidDevice, KeyboardHidDevice>();
+            services.AddSingleton<IHidService, HidService>();
             services.AddSingleton<HidViewModel>();
             services.AddSingleton<HidViews>();
             services.AddSingleton<MqttService>();
