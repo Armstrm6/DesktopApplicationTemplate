@@ -4,6 +4,7 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         Title="Filter Services" Width="900" Height="700"
         WindowStartupLocation="CenterOwner"
+        AllowsTransparency="True"
         Style="{DynamicResource BubblyWindowStyle}">
     <Window.Resources>
         <ResourceDictionary>
