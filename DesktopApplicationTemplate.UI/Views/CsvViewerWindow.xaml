@@ -8,6 +8,7 @@
         mc:Ignorable="d"
         Title="CSV Viewer" Width="900" Height="700"
         WindowStartupLocation="CenterOwner"
+        AllowsTransparency="True"
         Style="{DynamicResource BubblyWindowStyle}">
     <Window.Resources>
         <ResourceDictionary>

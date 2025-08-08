@@ -4,6 +4,7 @@
         xmlns:toolkit="http://schemas.xceed.com/wpf/xaml/toolkit"
         WindowStartupLocation="CenterOwner"
         Title="Pick a Color" Width="900" Height="700"
+        AllowsTransparency="True"
         Style="{DynamicResource BubblyWindowStyle}">
     <Window.Resources>
         <ResourceDictionary>
