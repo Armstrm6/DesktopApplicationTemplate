@@ -12,7 +12,6 @@
         </Setter>
         <Setter Property="BorderBrush" Value="#ADD8E6" />
         <Setter Property="BorderThickness" Value="2" />
-        <Setter Property="CornerRadius" Value="10" />
         <Setter Property="AllowsTransparency" Value="True" />
         <Setter Property="WindowStyle" Value="None" />
         <Setter Property="Template">
@@ -21,7 +20,7 @@
                     <Border Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="{TemplateBinding CornerRadius}"
+                            CornerRadius="10"
                             Padding="5">
                         <Border.Effect>
                             <DropShadowEffect BlurRadius="15" ShadowDepth="0" Opacity="0.3" />
