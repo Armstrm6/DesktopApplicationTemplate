@@ -17,25 +17,52 @@
         </ResourceDictionary>
     </Window.Resources>
     <Grid Margin="10">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" />
-        </Grid.ColumnDefinitions>
+        <Grid x:Name="InstallGrid">
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Visibility" Value="Visible" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsInstalled}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
 
-        <TextBlock Text="Install Location:" Grid.Row="0" VerticalAlignment="Center" />
-        <TextBox Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding InstallPath, UpdateSourceTrigger=PropertyChanged}"/>
-        <Button Grid.Row="0" Grid.Column="1" Content="Browse..." Padding="10,2" Margin="5,0,0,0" Command="{Binding BrowseCommand}" />
+            <TextBlock Text="Install Location:" Grid.Row="0" VerticalAlignment="Center" />
+            <TextBox Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding InstallPath, UpdateSourceTrigger=PropertyChanged}"/>
+            <Button Grid.Row="0" Grid.Column="1" Content="Browse..." Padding="10,2" Margin="5,0,0,0" Command="{Binding BrowseCommand}" />
 
-        <CheckBox Grid.Row="2" Content="Allow firewall access" IsChecked="{Binding AddFirewallRule}" />
-        <CheckBox Grid.Row="3" Content="Run on startup" IsChecked="{Binding RunOnStartup}" />
+            <CheckBox Grid.Row="2" Content="Allow firewall access" IsChecked="{Binding AddFirewallRule}" />
+            <CheckBox Grid.Row="3" Content="Run on startup" IsChecked="{Binding RunOnStartup}" />
 
-        <Button Grid.Row="4" Grid.ColumnSpan="2" Content="Install" Padding="10" HorizontalAlignment="Right" Width="100" Command="{Binding InstallCommand}" />
+            <Button Grid.Row="4" Grid.ColumnSpan="2" Content="Install" Padding="10" HorizontalAlignment="Right" Width="100" Command="{Binding InstallCommand}" />
+        </Grid>
+
+        <StackPanel x:Name="MaintenancePanel" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <StackPanel.Style>
+                <Style TargetType="StackPanel">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsInstalled}" Value="True">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </StackPanel.Style>
+            <Button Content="Check for Updates" Width="150" Margin="0,0,0,10" Command="{Binding CheckUpdatesCommand}" />
+            <Button Content="Uninstall" Width="150" Command="{Binding UninstallCommand}" />
+        </StackPanel>
     </Grid>
 </Window>

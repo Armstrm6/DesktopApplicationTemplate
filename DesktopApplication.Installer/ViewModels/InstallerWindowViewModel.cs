@@ -15,11 +15,23 @@ namespace DesktopApplication.Installer.ViewModels
         private string _installPath = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
         private bool _addFirewallRule;
         private bool _runOnStartup;
+        private bool _isInstalled;
 
         public string InstallPath
         {
             get => _installPath;
-            set { _installPath = value; OnPropertyChanged(); }
+            set
+            {
+                _installPath = value;
+                OnPropertyChanged();
+                UpdateIsInstalled();
+            }
+        }
+
+        public bool IsInstalled
+        {
+            get => _isInstalled;
+            private set { _isInstalled = value; OnPropertyChanged(); }
         }
 
         public bool AddFirewallRule
@@ -36,14 +48,21 @@ namespace DesktopApplication.Installer.ViewModels
 
         public ICommand BrowseCommand { get; }
         public ICommand InstallCommand { get; }
+        public ICommand UninstallCommand { get; }
+        public ICommand CheckUpdatesCommand { get; }
 
         public event Action<string, bool, bool>? InstallRequested;
+        public event Action<string>? UninstallRequested;
+        public event Action? CheckUpdatesRequested;
 
         public InstallerWindowViewModel(ILoggingService? logger = null)
         {
             _logger = logger;
             BrowseCommand = new RelayCommand(Browse);
             InstallCommand = new RelayCommand(Install);
+            UninstallCommand = new RelayCommand(Uninstall);
+            CheckUpdatesCommand = new RelayCommand(CheckForUpdates);
+            UpdateIsInstalled();
             _logger?.Log("Installer window initialized", LogLevel.Debug);
         }
 
@@ -62,6 +81,23 @@ namespace DesktopApplication.Installer.ViewModels
         {
             _logger?.Log("Install command triggered", LogLevel.Debug);
             InstallRequested?.Invoke(InstallPath, AddFirewallRule, RunOnStartup);
+        }
+
+        private void Uninstall()
+        {
+            _logger?.Log("Uninstall command triggered", LogLevel.Debug);
+            UninstallRequested?.Invoke(InstallPath);
+        }
+
+        private void CheckForUpdates()
+        {
+            _logger?.Log("Check for updates command triggered", LogLevel.Debug);
+            CheckUpdatesRequested?.Invoke();
+        }
+
+        private void UpdateIsInstalled()
+        {
+            IsInstalled = File.Exists(Path.Combine(InstallPath, "install_log.txt"));
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
