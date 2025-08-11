@@ -2,6 +2,7 @@
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Views;
+using DesktopApplicationTemplate.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -39,6 +40,8 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<MainView>();
             services.AddSingleton<IStartupService, StartupService>();
             services.AddSingleton<MainViewModel>();
+            services.AddSingleton<IProcessRunner, ProcessRunner>();
+            services.AddSingleton<INetworkConfigurationService, NetworkConfigurationService>();
             services.AddSingleton<TcpServiceViewModel>();
             services.AddSingleton<DependencyChecker>();
             services.AddSingleton<HttpServiceView>();
@@ -68,7 +71,7 @@ namespace DesktopApplicationTemplate.UI
 
 
             // Load strongly typed settings
-            services.Configure<Models.AppSettings>(configuration.GetSection("AppSettings"));
+            services.Configure<AppSettings>(configuration.GetSection("AppSettings"));
         }
 
         protected override async void OnStartup(StartupEventArgs e)

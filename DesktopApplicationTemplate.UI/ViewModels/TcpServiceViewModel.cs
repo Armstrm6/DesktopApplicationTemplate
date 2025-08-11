@@ -10,10 +10,11 @@ using System.Windows;
 using System.Windows.Input;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.Helpers;
+using DesktopApplicationTemplate.UI.Models;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
-public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel
+public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, INetworkAwareViewModel
     {
         private string _statusMessage = string.Empty;
         private bool _isServerRunning;
@@ -279,6 +280,12 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel
         }
 
         private void Save() => SaveConfirmationHelper.Show();
+
+        public void UpdateNetworkConfiguration(NetworkConfiguration configuration)
+        {
+            ComputerIp = configuration.IpAddress;
+            ServerGateway = configuration.Gateway;
+        }
 
         // OnPropertyChanged inherited from ViewModelBase
     }
