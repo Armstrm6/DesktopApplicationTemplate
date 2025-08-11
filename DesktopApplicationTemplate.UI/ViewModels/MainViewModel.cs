@@ -153,12 +153,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public NetworkConfigurationViewModel NetworkConfig { get; }
 
-        public MainViewModel(CsvService csvService, INetworkConfigurationService networkService, ILoggingService? logger = null, string? servicesFilePath = null)
+        public MainViewModel(CsvService csvService, NetworkConfigurationViewModel networkConfig, INetworkConfigurationService networkService, ILoggingService? logger = null, string? servicesFilePath = null)
         {
             _csvService = csvService;
             _networkService = networkService;
             _logger = logger;
-            NetworkConfig = new NetworkConfigurationViewModel(networkService, logger);
+            NetworkConfig = networkConfig;
             _ = NetworkConfig.LoadAsync();
             _networkService.ConfigurationChanged += (_, cfg) => ApplyNetworkConfiguration(cfg);
             ServiceViewModel.ResolveService = (type, name) =>

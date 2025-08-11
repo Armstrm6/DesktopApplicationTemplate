@@ -16,7 +16,8 @@ namespace DesktopApplicationTemplate.Tests
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
             var csv = new CsvService(new CsvViewerViewModel(configPath));
             var network = new Mock<INetworkConfigurationService>();
-            var vm = new MainViewModel(csv, network.Object);
+            var networkVm = new NetworkConfigurationViewModel(network.Object);
+            var vm = new MainViewModel(csv, networkVm, network.Object);
             vm.Services.Add(new ServiceViewModel
             {
                 DisplayName = "HTTP - HTTP1",
@@ -47,10 +48,11 @@ namespace DesktopApplicationTemplate.Tests
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
             var csv = new CsvService(new CsvViewerViewModel(configPath));
             var network = new Mock<INetworkConfigurationService>();
+            var networkVm = new NetworkConfigurationViewModel(network.Object);
 
             var servicesPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "services.json");
             Directory.CreateDirectory(Path.GetDirectoryName(servicesPath)!);
-            var vm = new MainViewModel(csv, network.Object, logger.Object, servicesPath);
+            var vm = new MainViewModel(csv, networkVm, network.Object, logger.Object, servicesPath);
             var service = new ServiceViewModel { DisplayName = "HTTP - HTTP1", ServiceType = "HTTP" };
             vm.Services.Add(service);
             vm.SelectedService = service;

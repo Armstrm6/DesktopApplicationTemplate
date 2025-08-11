@@ -357,7 +357,7 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private void OpenSettings_Click(object sender, RoutedEventArgs e)
         {
-            var page = new SettingsPage(App.AppHost.Services.GetRequiredService<SettingsViewModel>());
+            var page = App.AppHost.Services.GetRequiredService<SettingsPage>();
             ContentFrame.Content = page;
         }
 
