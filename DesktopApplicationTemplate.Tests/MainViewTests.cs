@@ -34,7 +34,8 @@ namespace DesktopApplicationTemplate.Tests
                     var servicesPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "services.json");
                     Directory.CreateDirectory(Path.GetDirectoryName(servicesPath)!);
                     var network = new Mock<INetworkConfigurationService>();
-                    var vm = new MainViewModel(new CsvService(new CsvViewerViewModel(configPath)), network.Object, null, servicesPath);
+                    var networkVm = new NetworkConfigurationViewModel(network.Object);
+                    var vm = new MainViewModel(new CsvService(new CsvViewerViewModel(configPath)), networkVm, network.Object, null, servicesPath);
                     var view = new MainView(vm);
                     var list = view.FindName("ServiceList") as System.Windows.Controls.ListBox;
                     Assert.Equal(350, list?.MaxHeight);
@@ -70,7 +71,8 @@ namespace DesktopApplicationTemplate.Tests
                     var servicesPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "services.json");
                     Directory.CreateDirectory(Path.GetDirectoryName(servicesPath)!);
                     var network = new Mock<INetworkConfigurationService>();
-                    var vm = new MainViewModel(new CsvService(new CsvViewerViewModel(configPath)), network.Object, null, servicesPath);
+                    var networkVm = new NetworkConfigurationViewModel(network.Object);
+                    var vm = new MainViewModel(new CsvService(new CsvViewerViewModel(configPath)), networkVm, network.Object, null, servicesPath);
                     var view = new MainView(vm);
                     bool bound = view.CommandBindings.OfType<CommandBinding>()
                                         .Any(b => b.Command == SystemCommands.CloseWindowCommand);
@@ -107,7 +109,8 @@ namespace DesktopApplicationTemplate.Tests
                     var servicesPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "services.json");
                     Directory.CreateDirectory(Path.GetDirectoryName(servicesPath)!);
                     var network = new Mock<INetworkConfigurationService>();
-                    var vm = new MainViewModel(new CsvService(new CsvViewerViewModel(configPath)), network.Object, null, servicesPath);
+                    var networkVm = new NetworkConfigurationViewModel(network.Object);
+                    var vm = new MainViewModel(new CsvService(new CsvViewerViewModel(configPath)), networkVm, network.Object, null, servicesPath);
                     var view = new MainView(vm);
                     bool bound = view.CommandBindings.OfType<CommandBinding>()
                                         .Any(b => b.Command == SystemCommands.MinimizeWindowCommand);

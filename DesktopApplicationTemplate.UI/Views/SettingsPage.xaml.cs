@@ -7,15 +7,17 @@ namespace DesktopApplicationTemplate.UI.Views
     public partial class SettingsPage : Page
     {
         private readonly SettingsViewModel _viewModel;
-        public SettingsPage() : this(new SettingsViewModel())
-        {
-        }
-        public SettingsPage(SettingsViewModel vm)
+        private readonly NetworkConfigurationViewModel _networkViewModel;
+
+        public SettingsPage(SettingsViewModel settingsViewModel, NetworkConfigurationViewModel networkViewModel)
         {
             InitializeComponent();
-            _viewModel = vm;
+            _viewModel = settingsViewModel;
+            _networkViewModel = networkViewModel;
             DataContext = _viewModel;
+            NetworkConfigGrid.DataContext = _networkViewModel;
             _viewModel.Load();
+            _ = _networkViewModel.LoadAsync();
         }
 
         private void Save_Click(object sender, RoutedEventArgs e)
@@ -26,19 +28,19 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private void Back_Click(object sender, RoutedEventArgs e)
         {
-            HandleBack();
+            NavigateBack();
         }
 
         private void Logo_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            HandleBack();
+            NavigateBack();
         }
 
-        private void HandleBack()
+        public void NavigateBack()
         {
             if (_viewModel.HasUnsavedChanges)
             {
-                var res = System.Windows.MessageBox.Show("Save changes?", "Settings", MessageBoxButton.YesNoCancel);
+                var res = MessageBox.Show("Save changes?", "Settings", MessageBoxButton.YesNoCancel);
                 if (res == MessageBoxResult.Cancel)
                     return;
                 if (res == MessageBoxResult.Yes)
@@ -47,8 +49,13 @@ namespace DesktopApplicationTemplate.UI.Views
                     Services.ThemeManager.ApplyTheme(_viewModel.DarkTheme);
                 }
             }
-            if (Parent is Frame frame)
-                frame.Content = new HomePage { DataContext = App.AppHost.Services.GetService(typeof(MainViewModel)) };
+
+            var mainWindow = Window.GetWindow(this) as MainView;
+            var mainViewModel = mainWindow?.DataContext as MainViewModel;
+            if (mainWindow != null && mainViewModel != null)
+            {
+                mainWindow.ContentFrame.Content = new HomePage { DataContext = mainViewModel };
+            }
         }
     }
 }

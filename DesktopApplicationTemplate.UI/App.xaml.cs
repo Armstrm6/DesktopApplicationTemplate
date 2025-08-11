@@ -39,9 +39,10 @@ namespace DesktopApplicationTemplate.UI
         {
             services.AddSingleton<MainView>();
             services.AddSingleton<IStartupService, StartupService>();
-            services.AddSingleton<MainViewModel>();
             services.AddSingleton<IProcessRunner, ProcessRunner>();
             services.AddSingleton<INetworkConfigurationService, NetworkConfigurationService>();
+            services.AddSingleton<NetworkConfigurationViewModel>();
+            services.AddSingleton<MainViewModel>();
             services.AddSingleton<TcpServiceViewModel>();
             services.AddSingleton<DependencyChecker>();
             services.AddSingleton<HttpServiceView>();
