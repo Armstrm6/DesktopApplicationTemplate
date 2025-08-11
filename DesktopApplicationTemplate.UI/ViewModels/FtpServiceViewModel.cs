@@ -2,10 +2,11 @@ using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.Helpers;
+using DesktopApplicationTemplate.UI.Models;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
-public class FtpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel
+public class FtpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, INetworkAwareViewModel
     {
         private string _host = string.Empty;
         public string Host
@@ -99,6 +100,11 @@ public class FtpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel
         }
 
         private void Save() => SaveConfirmationHelper.Show();
+
+        public void UpdateNetworkConfiguration(NetworkConfiguration configuration)
+        {
+            Host = configuration.IpAddress;
+        }
 
         // OnPropertyChanged provided by ViewModelBase
     }

@@ -12,6 +12,7 @@ using System.Text.RegularExpressions;
 using WpfBrush = System.Windows.Media.Brush;
 using WpfBrushes = System.Windows.Media.Brushes;
 using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.UI.Models;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -148,11 +149,18 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         private readonly CsvService _csvService;
         private readonly ILoggingService? _logger;
+        private readonly INetworkConfigurationService _networkService;
 
-        public MainViewModel(CsvService csvService, ILoggingService? logger = null, string? servicesFilePath = null)
+        public NetworkConfigurationViewModel NetworkConfig { get; }
+
+        public MainViewModel(CsvService csvService, INetworkConfigurationService networkService, ILoggingService? logger = null, string? servicesFilePath = null)
         {
             _csvService = csvService;
+            _networkService = networkService;
             _logger = logger;
+            NetworkConfig = new NetworkConfigurationViewModel(networkService, logger);
+            _ = NetworkConfig.LoadAsync();
+            _networkService.ConfigurationChanged += (_, cfg) => ApplyNetworkConfiguration(cfg);
             ServiceViewModel.ResolveService = (type, name) =>
                 Services.FirstOrDefault(s =>
                     s.ServiceType.Equals(type, StringComparison.OrdinalIgnoreCase) &&
@@ -168,6 +176,17 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             Filters.PropertyChanged += (_, __) => ApplyFilters();
             LoadServices();
             ApplyFilters();
+        }
+
+        private void ApplyNetworkConfiguration(NetworkConfiguration config)
+        {
+            foreach (var svc in Services)
+            {
+                if (svc.ServicePage?.DataContext is INetworkAwareViewModel navm)
+                {
+                    navm.UpdateNetworkConfiguration(config);
+                }
+            }
         }
 
         private void AddService()

@@ -89,6 +89,11 @@ namespace DesktopApplicationTemplate.UI.Views
                         logger.LogAdded += entry => svc.AddLog(entry.Message, entry.Color, entry.Level);
                     }
                 }
+
+                if (svc.ServicePage.DataContext is INetworkAwareViewModel navm)
+                {
+                    navm.UpdateNetworkConfiguration(_viewModel.NetworkConfig.CurrentConfiguration);
+                }
             }
 
             return svc.ServicePage;
