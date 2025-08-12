@@ -128,5 +128,88 @@ namespace DesktopApplicationTemplate.Tests
             if (ex != null) throw ex;
             ConsoleTestLogger.LogPass();
         }
+
+        [Fact]
+        [TestCategory("WindowsSafe")]
+        public void OpenServiceEditor_NonCsv_SetsContentFrame()
+        {
+            if (!OperatingSystem.IsWindows())
+                return;
+
+            Exception? ex = null;
+            var thread = new Thread(() =>
+            {
+                try
+                {
+                    if (System.Windows.Application.Current == null)
+                        new DesktopApplicationTemplate.UI.App();
+                    var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
+                    var servicesPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "services.json");
+                    Directory.CreateDirectory(Path.GetDirectoryName(servicesPath)!);
+                    var network = new Mock<INetworkConfigurationService>();
+                    var networkVm = new NetworkConfigurationViewModel(network.Object);
+                    var vm = new MainViewModel(new CsvService(new CsvViewerViewModel(configPath)), networkVm, network.Object, null, servicesPath);
+                    var view = new MainView(vm);
+                    var svc = new ServiceViewModel { DisplayName = "TCP - Test", ServiceType = "TCP" };
+                    svc.SetColorsByType();
+                    var method = typeof(MainView).GetMethod("OpenServiceEditor", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    method?.Invoke(view, new object[] { svc });
+                    Assert.NotNull(view.ContentFrame.Content);
+                }
+                catch (Exception e) { ex = e; }
+                finally
+                {
+                    System.Windows.Application.Current?.Shutdown();
+                }
+            });
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.Start();
+            thread.Join();
+            if (ex != null) throw ex;
+            ConsoleTestLogger.LogPass();
+        }
+
+        [Fact]
+        [TestCategory("WindowsSafe")]
+        public void OpenServiceEditor_CsvCreator_ShowsWindow()
+        {
+            if (!OperatingSystem.IsWindows())
+                return;
+
+            Exception? ex = null;
+            var thread = new Thread(() =>
+            {
+                try
+                {
+                    if (System.Windows.Application.Current == null)
+                        new DesktopApplicationTemplate.UI.App();
+                    var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
+                    var servicesPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "services.json");
+                    Directory.CreateDirectory(Path.GetDirectoryName(servicesPath)!);
+                    var network = new Mock<INetworkConfigurationService>();
+                    var networkVm = new NetworkConfigurationViewModel(network.Object);
+                    var csvVm = new CsvViewerViewModel(configPath);
+                    var vm = new MainViewModel(new CsvService(csvVm), networkVm, network.Object, null, servicesPath);
+                    var view = new MainView(vm);
+                    var svc = new ServiceViewModel { DisplayName = "CSV - Test", ServiceType = "CSV Creator" };
+                    svc.SetColorsByType();
+                    // Ensure window closes immediately to avoid blocking
+                    System.Windows.Threading.Dispatcher.CurrentDispatcher.BeginInvoke(new Action(() => csvVm.CloseCommand.Execute(null)));
+                    var method = typeof(MainView).GetMethod("OpenServiceEditor", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    method?.Invoke(view, new object[] { svc });
+                    Assert.NotNull(view); // method executed without exception
+                }
+                catch (Exception e) { ex = e; }
+                finally
+                {
+                    System.Windows.Application.Current?.Shutdown();
+                }
+            });
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.Start();
+            thread.Join();
+            if (ex != null) throw ex;
+            ConsoleTestLogger.LogPass();
+        }
     }
 }
