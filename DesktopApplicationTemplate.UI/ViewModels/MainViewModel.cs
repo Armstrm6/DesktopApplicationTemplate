@@ -134,6 +134,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         }
         public ICommand AddServiceCommand { get; }
         public ICommand RemoveServiceCommand { get; }
+        public ICommand ExportLogCommand { get; }
+        public ICommand ClearLogCommand { get; }
+        public ICommand UpdateLogCommand { get; }
         public event Action<ServiceViewModel>? EditRequested;
         public int ServicesCreated => Services.Count;
         public int CurrentActiveServices => Services.Count(s => s.IsActive);
@@ -172,6 +175,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
             AddServiceCommand = new RelayCommand(AddService);
             RemoveServiceCommand = new RelayCommand(RemoveSelectedService, () => SelectedService != null);
+            ExportLogCommand = new RelayCommand(ExportLogs);
+            ClearLogCommand = new RelayCommand(ClearLogs, () => AllLogs.Any());
+            UpdateLogCommand = new RelayCommand(UpdateLogs);
             FilteredServices = CollectionViewSource.GetDefaultView(Services);
             Filters.PropertyChanged += (_, __) => ApplyFilters();
             LoadServices();
@@ -221,6 +227,24 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 _logger?.Log($"Service {newService.DisplayName} created", LogLevel.Debug);
             }
             _logger?.Log("AddService completed", LogLevel.Debug);
+        }
+
+        private void ExportLogs()
+        {
+            _logger?.Log("ExportLog requested", LogLevel.Information);
+        }
+
+        private void ClearLogs()
+        {
+            AllLogs.Clear();
+            ((RelayCommand)ClearLogCommand).RaiseCanExecuteChanged();
+            OnPropertyChanged(nameof(DisplayLogs));
+            _logger?.Log("Logs cleared", LogLevel.Information);
+        }
+
+        private void UpdateLogs()
+        {
+            _logger?.Log("UpdateLog requested", LogLevel.Information);
         }
 
         internal string GenerateServiceName(string serviceType)
