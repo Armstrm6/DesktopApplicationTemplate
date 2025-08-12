@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Git pre-commit hook that blocks files larger than the allowed size from being committed.
+# Usage: Place this file in the repository's .githooks directory and configure git hooks path.
+
+set -euo pipefail
+
+MAX_SIZE_BYTES=$((5 * 1024 * 1024)) # 5 MB
+
+# Get list of files staged for commit
+staged_files=$(git diff --cached --name-only --diff-filter=ACM)
+
+for staged_file in $staged_files; do
+    if [ -f "$staged_file" ]; then
+        file_size=$(wc -c <"$staged_file")
+        if [ "$file_size" -gt "$MAX_SIZE_BYTES" ]; then
+            size_in_mb=$((file_size / 1024 / 1024))
+            echo "Error: $staged_file is ${size_in_mb}MB, exceeding the maximum allowed size of $((MAX_SIZE_BYTES / 1024 / 1024))MB." >&2
+            exit 1
+        fi
+    fi
+done
+
+exit 0
