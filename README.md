@@ -139,6 +139,23 @@ chmod +x setup.sh
 
 This is helpful on CI hosts or when preparing a fresh development machine.
 
+## Repository size audit
+
+Run the following command to list the largest objects in the Git history:
+
+```bash
+git verify-pack -v .git/objects/pack/*.idx | sort -k3 -n | tail -20
+```
+
+No objects larger than 100 MB were found during the latest audit. If an object exceeds hosting limits, remove it using [git filter-repo](https://github.com/newren/git-filter-repo) or [BFG Repo-Cleaner](https://rtyley.github.io/bfg-repo-cleaner/), then force-push all refs:
+
+```bash
+git filter-repo --path path/to/large/file --invert-paths
+git push --force-with-lease --all
+git push --force-with-lease --tags
+```
+
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
