@@ -33,6 +33,9 @@
     <Resource Include="Themes/LightTheme.xaml" />
     <Resource Include="Themes/DarkTheme.xaml" />
     <Resource Include="Themes/ToggleSwitch.xaml" />
+    <Resource Include="Themes/Colors.xaml" />
+    <Resource Include="Themes/TextStyles.xaml" />
+    <Resource Include="Themes/Theme.xaml" />
     <Resource Include="Resources/*" />
   </ItemGroup>
 

@@ -1,0 +1,25 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Auto-generated color resources from MainWindow-Design.layout.json -->
+    <SolidColorBrush x:Key="Color0Brush" Color="#000000" />
+    <SolidColorBrush x:Key="Color1Brush" Color="#00c2c2" />
+    <SolidColorBrush x:Key="Color2Brush" Color="#333333" />
+    <SolidColorBrush x:Key="Color3Brush" Color="#666666" />
+    <SolidColorBrush x:Key="Color4Brush" Color="#79f910" />
+    <SolidColorBrush x:Key="Color5Brush" Color="#80ff00" />
+    <SolidColorBrush x:Key="Color6Brush" Color="#999999" />
+    <SolidColorBrush x:Key="Color7Brush" Color="#99FF99" />
+    <SolidColorBrush x:Key="Color8Brush" Color="#99ff99" />
+    <SolidColorBrush x:Key="Color9Brush" Color="#99ffff" />
+    <SolidColorBrush x:Key="Color10Brush" Color="#b3b3b3" />
+    <SolidColorBrush x:Key="Color11Brush" Color="#ccccff" />
+    <SolidColorBrush x:Key="Color12Brush" Color="#e6e6e6" />
+    <SolidColorBrush x:Key="Color13Brush" Color="#ededed" />
+    <SolidColorBrush x:Key="Color14Brush" Color="#ff6666" />
+    <SolidColorBrush x:Key="Color15Brush" Color="#ffcccc" />
+    <SolidColorBrush x:Key="Color16Brush" Color="#ffffcc" />
+    <SolidColorBrush x:Key="Color17Brush" Color="#ffffff" />
+    <SolidColorBrush x:Key="Color18Brush" Color="#000000" />
+    <SolidColorBrush x:Key="Color19Brush" Color="#ffffff" />
+    <!-- TODO: Color20 uses a gradient url(#mx-gradient-ddeeff-1-aaddff-1-s-0); gradient not implemented -->
+</ResourceDictionary>
