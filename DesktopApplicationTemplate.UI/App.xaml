@@ -7,6 +7,11 @@
                 <ResourceDictionary Source="Themes/ToggleSwitch.xaml" />
                 <ResourceDictionary Source="Themes/BubblyWindow.xaml" />
             </ResourceDictionary.MergedDictionaries>
+            <Style TargetType="TextBox">
+                <Setter Property="Height" Value="24" />
+                <Setter Property="Margin" Value="0,4,0,4" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

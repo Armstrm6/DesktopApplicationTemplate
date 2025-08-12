@@ -1,9 +1,8 @@
 <Window x:Class="DesktopApplicationTemplate.UI.Views.CreateServiceWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Create Service" Width="900" Height="700"
+        Title="Create Service" Width="800" Height="600"
         WindowStartupLocation="CenterOwner"
-        AllowsTransparency="True"
         Style="{DynamicResource BubblyWindowStyle}">
     <Window.Resources>
         <ResourceDictionary>

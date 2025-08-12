@@ -6,10 +6,8 @@
         xmlns:local="clr-namespace:DesktopApplicationTemplate.UI.Views"
         xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
         mc:Ignorable="d"
-        Title="MainView" Width="900" Height="700" ResizeMode="CanResizeWithGrip"
-        AllowsTransparency="True"
-        Style="{DynamicResource BubblyWindowStyle}" BorderBrush="LimeGreen" BorderThickness="3"
-        MouseLeftButtonDown="Window_MouseLeftButtonDown">
+        Title="MainView" Width="800" Height="600"
+        Style="{DynamicResource BubblyWindowStyle}" BorderBrush="LimeGreen" BorderThickness="3">
 
     <Window.Resources>
         <ResourceDictionary>
@@ -29,11 +27,13 @@
         <!-- Top Bar -->
         <Grid Grid.Row="0" Margin="10">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Image Source="pack://application:,,,/Resources/Logo.png" Height="60" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-            <Button Grid.Column="1" Content="⚙" Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Top" Click="OpenSettings_Click"/>
+            <Image Grid.Column="1" Source="pack://application:,,,/Resources/Logo.png" Height="60" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+            <Button Grid.Column="0" Content="🏠" Width="30" Height="30" Click="HomeButton_Click"/>
+            <Button Grid.Column="2" Content="⚙" Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Top" Click="OpenSettings_Click"/>
         </Grid>
 
         <!-- Main Content -->
@@ -74,7 +74,6 @@
                                     Background="{Binding BackgroundColor}"
                                     BorderThickness="2" Padding="5" Margin="2"
                                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                                    MouseLeftButtonDown="ServiceItem_DoubleClick"
                                     PreviewMouseLeftButtonDown="ServiceItem_PreviewMouseLeftButtonDown"
                                     PreviewMouseMove="ServiceItem_PreviewMouseMove"
                                     AllowDrop="True" Drop="ServiceItem_Drop">

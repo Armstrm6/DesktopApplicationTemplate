@@ -39,15 +39,6 @@ namespace DesktopApplicationTemplate.UI.Views
             Closing += (_, _) => _logger?.LogInformation("MainView closing");
         }
 
-        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.ButtonState == MouseButtonState.Pressed)
-            {
-                _logger?.LogDebug("Window drag initiated");
-                DragMove();
-            }
-        }
-
         private void CloseCommand_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             _logger?.LogInformation("Close command invoked");
@@ -58,6 +49,13 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             _logger?.LogInformation("Minimize command invoked");
             SystemCommands.MinimizeWindow(this);
+        }
+
+        private void HomeButton_Click(object sender, RoutedEventArgs e)
+        {
+            _logger?.LogInformation("Home button clicked");
+            _viewModel.SelectedService = null;
+            ContentFrame.Content = new HomePage { DataContext = _viewModel };
         }
 
         private Page? GetOrCreateServicePage(ServiceViewModel svc)
@@ -147,9 +145,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 }
                 else if (newService.ServicePage != null)
                 {
-                    var editor = new ServiceEditorWindow(newService.ServicePage);
-                    editor.ShowDialog();
-                    ContentFrame.Content = new HomePage { DataContext = _viewModel };
+                    ContentFrame.Content = newService.ServicePage;
                 }
                 _viewModel.SaveServices();
                 _logger?.LogDebug("AddService workflow completed");
@@ -162,9 +158,7 @@ namespace DesktopApplicationTemplate.UI.Views
             var page = GetOrCreateServicePage(service);
             if (page != null)
             {
-                var editor = new ServiceEditorWindow(page);
-                editor.ShowDialog();
-                ContentFrame.Content = new HomePage { DataContext = _viewModel };
+                ContentFrame.Content = page;
                 _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
             }
         }
@@ -199,9 +193,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 if (page != null)
                 {
                     _viewModel.SelectedService.IsActive = false;
-                    var editor = new ServiceEditorWindow(page);
-                    editor.ShowDialog();
-                    ContentFrame.Content = new HomePage { DataContext = _viewModel };
+                    ContentFrame.Content = page;
                     _logger?.LogDebug("EditService workflow completed for {Name}", _viewModel.SelectedService.DisplayName);
                 }
             }
@@ -210,34 +202,17 @@ namespace DesktopApplicationTemplate.UI.Views
         private void ServiceList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             _logger?.LogDebug("Service selection changed");
-            ContentFrame.Content = new HomePage { DataContext = _viewModel };
-        }
-
-        private void ServiceItem_DoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            // Ensure the handler only executes on a true double click
-            if (e.ClickCount != 2)
-                return;
-
-            if ((sender as Border)?.DataContext is ServiceViewModel svc)
+            if (_viewModel.SelectedService != null)
             {
-                if (svc.ServiceType == "CSV Creator")
-                {
-                    var vm = App.AppHost.Services.GetRequiredService<CsvViewerViewModel>();
-                    var window = new CsvViewerWindow(vm);
-                    vm.RequestClose += () => window.Close();
-                    window.ShowDialog();
-                    return;
-                }
-
-                var page = GetOrCreateServicePage(svc);
+                var page = GetOrCreateServicePage(_viewModel.SelectedService);
                 if (page != null)
                 {
-                    svc.IsActive = false;
-                    var editor = new ServiceEditorWindow(page);
-                    editor.ShowDialog();
-                    ContentFrame.Content = new HomePage { DataContext = _viewModel };
+                    ContentFrame.Content = page;
                 }
+            }
+            else
+            {
+                ContentFrame.Content = new HomePage { DataContext = _viewModel };
             }
         }
 
@@ -275,9 +250,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 if (page != null)
                 {
                     svc.IsActive = false;
-                    var editor = new ServiceEditorWindow(page);
-                    editor.ShowDialog();
-                    ContentFrame.Content = new HomePage { DataContext = _viewModel };
+                    ContentFrame.Content = page;
                 }
             }
         }

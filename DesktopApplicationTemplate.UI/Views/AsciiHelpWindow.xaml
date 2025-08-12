@@ -1,8 +1,7 @@
 <Window x:Class="DesktopApplicationTemplate.UI.Views.AsciiHelpWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="ASCII Help" Width="900" Height="700"
-        AllowsTransparency="True"
+        Title="ASCII Help" Width="800" Height="600"
         Style="{DynamicResource BubblyWindowStyle}">
     <Window.Resources>
         <ResourceDictionary>
