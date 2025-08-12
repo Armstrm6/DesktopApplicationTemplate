@@ -3,11 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:DesktopApplicationTemplate.UI.Views"
         xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
         mc:Ignorable="d"
-        Title="MainView" Width="800" Height="600"
-        Style="{DynamicResource BubblyWindowStyle}" BorderBrush="LimeGreen" BorderThickness="3">
+        Title="MainView" Width="1200" Height="800"
+        Style="{DynamicResource BubblyWindowStyle}">
 
     <Window.Resources>
         <ResourceDictionary>
@@ -18,120 +17,120 @@
         </ResourceDictionary>
     </Window.Resources>
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-
-        <!-- Top Bar -->
-        <Grid Grid.Row="0" Margin="10">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <Image Grid.Column="1" Source="pack://application:,,,/Resources/Logo.png" Height="60" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-            <Button Grid.Column="0" Content="🏠" Width="30" Height="30" Click="HomeButton_Click"/>
-            <Button Grid.Column="2" Content="⚙" Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Top" Click="OpenSettings_Click"/>
-        </Grid>
-
-        <!-- Main Content -->
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="230"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            <!-- Left Panel -->
-            <Grid Grid.Column="0" Margin="10">
+    <Border Background="#99FFFF" BorderBrush="#80FF00" BorderThickness="13" CornerRadius="10">
+        <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="160"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Row="0">
-                <Button Content="+" Width="30" Click="AddService_Click"/>
-                <Button Content="-" Width="30" Margin="5,0,0,0" Click="RemoveService_Click"/>
-            </StackPanel>
 
-            <StackPanel Orientation="Horizontal" Margin="0,10" Grid.Row="1">
-                <TextBlock Text="Services" FontWeight="Bold" />
-                <Button Content="🔍" Width="20" Margin="5,0,0,0" Click="OpenFilter_Click"/>
-            </StackPanel>
-            <ListBox x:Name="ServiceList" Grid.Row="2" ItemsSource="{Binding FilteredServices}"
-                     SelectedItem="{Binding SelectedService}"
-                     BorderThickness="0"
-                     MaxHeight="350"
-                     HorizontalContentAlignment="Stretch"
-                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                     ScrollViewer.VerticalScrollBarVisibility="Auto"
-                     SelectionChanged="ServiceList_SelectionChanged">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <Border CornerRadius="8"
-                                    BorderBrush="{Binding BorderColor}"
-                                    Background="{Binding BackgroundColor}"
-                                    BorderThickness="2" Padding="5" Margin="2"
-                                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                                    PreviewMouseLeftButtonDown="ServiceItem_PreviewMouseLeftButtonDown"
-                                    PreviewMouseMove="ServiceItem_PreviewMouseMove"
-                                    AllowDrop="True" Drop="ServiceItem_Drop"
-                                    MouseLeftButtonDown="ServiceItem_MouseLeftButtonDown">
-                                <Border CornerRadius="8" BorderBrush="Gray" BorderThickness="1" Padding="5" Margin="2">
-                                    <Border.ContextMenu>
-                                        <ContextMenu>
-                                            <MenuItem Header="Edit Service" Click="EditServiceMenu_Click" />
-                                            <MenuItem Header="Rename Service" Click="RenameServiceMenu_Click" />
-                                            <MenuItem Header="Delete Service" Click="DeleteServiceMenu_Click" />
-                                            <MenuItem Header="Change Color" Click="ChangeColorMenu_Click" />
-                                        </ContextMenu>
-                                    </Border.ContextMenu>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
+            <!-- Top Bar -->
+            <Border Grid.Row="0" Background="#00C2C2" CornerRadius="40" Margin="0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-                                        <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" FontWeight="Bold"/>
-                                        <ToggleButton Grid.Column="1" IsChecked="{Binding IsActive, Mode=TwoWay}"
-                                                      Style="{StaticResource ToggleSwitchStyle}"/>
-                                    </Grid>
-                                </Border>
-                            </Border>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-            </ListBox>
+                    <TextBlock Text="TexSupport"
+                               FontFamily="Forte" FontSize="72"
+                               VerticalAlignment="Center" HorizontalAlignment="Center"/>
+
+                    <Button Grid.Column="1" Content="🛠️" Width="60" Height="60" Margin="20"
+                            VerticalAlignment="Center" Click="OpenSettings_Click"/>
+                </Grid>
+            </Border>
+
+            <!-- Content Area -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="350"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Services Panel -->
+                <Border Grid.Column="0" Background="#E6E6E6" CornerRadius="5" Margin="20">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Orientation="Horizontal" Margin="10" Grid.Row="0">
+                            <Button Content="☰" Width="40" Height="40" Margin="0,0,5,0" Click="OpenFilter_Click"/>
+                            <Button Content="-" Width="40" Height="40" Margin="0,0,5,0" Click="RemoveService_Click"/>
+                            <Button Content="+" Width="40" Height="40" Click="AddService_Click"/>
+                        </StackPanel>
+
+                        <TextBlock Grid.Row="1" Margin="10,0" Text="ACTIVE SERVICES:" FontWeight="Bold"/>
+
+                        <ListBox x:Name="ServiceList" Grid.Row="2" Margin="10" ItemsSource="{Binding FilteredServices}"
+                                 SelectedItem="{Binding SelectedService}" BorderThickness="0"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                 SelectionChanged="ServiceList_SelectionChanged">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border CornerRadius="14" Background="White" Margin="5" Padding="10">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding DisplayName}" FontWeight="Bold"/>
+                                                <TextBlock Text="Port: {Binding Port}" FontSize="12"/>
+                                                <TextBlock Text="Connected Steps: {Binding ConnectedSteps}" FontSize="12"/>
+                                            </StackPanel>
+                                            <ToggleButton Grid.Column="1" IsChecked="{Binding IsActive, Mode=TwoWay}"
+                                                          Width="60" Height="30"
+                                                          Style="{StaticResource ToggleSwitchStyle}" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                </Border>
+
+                <!-- Logs Panel -->
+                <Border Grid.Column="1" Background="#E6E6E6" CornerRadius="5" Margin="0,20,20,20">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Orientation="Horizontal" Margin="10" Grid.Row="0" VerticalAlignment="Center">
+                            <TextBlock Text="LOG LEVEL" FontWeight="Bold" VerticalAlignment="Center"/>
+                            <ComboBox x:Name="GlobalLogLevelBox" Width="200" Margin="10,0,0,0"
+                                      SelectionChanged="GlobalLogLevelBox_SelectionChanged" SelectedIndex="0">
+                                <ComboBoxItem Content="All"/>
+                                <ComboBoxItem Content="Debug"/>
+                                <ComboBoxItem Content="Warning"/>
+                                <ComboBoxItem Content="Error"/>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <ListBox Grid.Row="1" Margin="10" ItemsSource="{Binding DisplayLogs}" BorderThickness="0">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Message}" Foreground="{Binding Color}"/>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+
+                        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+                            <Button Content="Update Log" Width="150" Height="40" Margin="5"/>
+                            <Button Content="Export Log" Width="150" Height="40" Margin="5"/>
+                            <Button Content="Clear Log" Width="150" Height="40" Margin="5"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
         </Grid>
-
-            <!-- Right Panel -->
-
-            <StackPanel Grid.Column="1" Margin="10">
-            <Frame x:Name="ContentFrame" NavigationUIVisibility="Hidden" />
-            <TextBlock Text="{Binding SelectedService.DisplayName}" FontWeight="Bold" FontSize="14"/>
-            <TextBlock Text="Services Created:" />
-            <TextBlock Text="{Binding ServicesCreated}" />
-            <TextBlock Text="Current Active Services:" />
-            <TextBlock Text="{Binding CurrentActiveServices}" />
-            <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
-                <TextBlock Text="Log Level:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                <ComboBox x:Name="GlobalLogLevelBox" Width="120" SelectionChanged="GlobalLogLevelBox_SelectionChanged" SelectedIndex="0">
-                    <ComboBoxItem Content="All"/>
-                    <ComboBoxItem Content="Debug"/>
-                    <ComboBoxItem Content="Warning"/>
-                    <ComboBoxItem Content="Error"/>
-                </ComboBox>
-            </StackPanel>
-            <ListBox ItemsSource="{Binding DisplayLogs}" Height="150">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding Message}" Foreground="{Binding Color}"/>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-            </StackPanel>
-
-            <ResizeGrip Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Bottom" />
-        </Grid>
-    </Grid>
+    </Border>
 </Window>
+
