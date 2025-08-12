@@ -13,6 +13,9 @@ using WpfBrush = System.Windows.Media.Brush;
 using WpfBrushes = System.Windows.Media.Brushes;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.Models;
+using System.IO;
+using System.Threading.Tasks;
+using System;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -137,6 +140,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public event Action<ServiceViewModel>? EditRequested;
         public int ServicesCreated => Services.Count;
         public int CurrentActiveServices => Services.Count(s => s.IsActive);
+        public string? LastExportedLogPath { get; private set; }
 
         private LogLevel _logLevelFilter = LogLevel.Debug;
         public LogLevel LogLevelFilter
@@ -349,6 +353,30 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 }
             }
             OnPropertyChanged(nameof(DisplayLogs));
+        }
+
+        public void ClearLogs()
+        {
+            var targetLogs = SelectedService?.Logs ?? AllLogs;
+            targetLogs.Clear();
+            _logger?.Log("Logs cleared", LogLevel.Debug);
+            OnPropertyChanged(nameof(DisplayLogs));
+        }
+
+        public async Task ExportLogsAsync(string? filePath = null)
+        {
+            var logs = SelectedService?.Logs ?? AllLogs;
+            string path = filePath ?? Path.Combine(Path.GetTempPath(), $"logs_{DateTime.Now:yyyyMMddHHmmssfff}.txt");
+            await File.WriteAllLinesAsync(path, logs.Select(l => l.Message));
+            LastExportedLogPath = path;
+            OnPropertyChanged(nameof(LastExportedLogPath));
+            _logger?.Log($"Exported {logs.Count} logs to {path}", LogLevel.Debug);
+        }
+
+        public void RefreshLogs()
+        {
+            OnPropertyChanged(nameof(DisplayLogs));
+            _logger?.Log("Log view refreshed", LogLevel.Debug);
         }
 
         internal void OnServiceActiveChanged(bool _)

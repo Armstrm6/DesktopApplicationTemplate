@@ -1,6 +1,7 @@
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Models;
 using System;
 using System.Linq;
 using System.Threading;
@@ -198,6 +199,90 @@ namespace DesktopApplicationTemplate.Tests
                     var method = typeof(MainView).GetMethod("OpenServiceEditor", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                     method?.Invoke(view, new object[] { svc });
                     Assert.NotNull(view); // method executed without exception
+                }
+                catch (Exception e) { ex = e; }
+                finally
+                {
+                    System.Windows.Application.Current?.Shutdown();
+                }
+            });
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.Start();
+            thread.Join();
+            if (ex != null) throw ex;
+            ConsoleTestLogger.LogPass();
+        }
+
+        [Fact]
+        [TestCategory("WindowsSafe")]
+        public void ClearLogsInternal_ClearsLogs()
+        {
+            if (!OperatingSystem.IsWindows())
+                return;
+
+            Exception? ex = null;
+            var thread = new Thread(() =>
+            {
+                MainViewModel? vm = null;
+                try
+                {
+                    if (System.Windows.Application.Current == null)
+                        new DesktopApplicationTemplate.UI.App();
+                    var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
+                    var servicesPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "services.json");
+                    Directory.CreateDirectory(Path.GetDirectoryName(servicesPath)!);
+                    var network = new Mock<INetworkConfigurationService>();
+                    var networkVm = new NetworkConfigurationViewModel(network.Object);
+                    vm = new MainViewModel(new CsvService(new CsvViewerViewModel(configPath)), networkVm, network.Object, null, servicesPath);
+                    vm.AllLogs.Add(new LogEntry { Message = "Test", Color = System.Windows.Media.Brushes.Black });
+                    var view = new MainView(vm);
+                    var method = typeof(MainView).GetMethod("ClearLogsInternal", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    method?.Invoke(view, null);
+                    Assert.Empty(vm.AllLogs);
+                }
+                catch (Exception e) { ex = e; }
+                finally
+                {
+                    System.Windows.Application.Current?.Shutdown();
+                }
+            });
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.Start();
+            thread.Join();
+            if (ex != null) throw ex;
+            ConsoleTestLogger.LogPass();
+        }
+
+        [Fact]
+        [TestCategory("WindowsSafe")]
+        public void ExportLogsInternalAsync_CreatesFile()
+        {
+            if (!OperatingSystem.IsWindows())
+                return;
+
+            Exception? ex = null;
+            var thread = new Thread(() =>
+            {
+                MainViewModel? vm = null;
+                try
+                {
+                    if (System.Windows.Application.Current == null)
+                        new DesktopApplicationTemplate.UI.App();
+                    var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
+                    var servicesPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "services.json");
+                    Directory.CreateDirectory(Path.GetDirectoryName(servicesPath)!);
+                    var network = new Mock<INetworkConfigurationService>();
+                    var networkVm = new NetworkConfigurationViewModel(network.Object);
+                    vm = new MainViewModel(new CsvService(new CsvViewerViewModel(configPath)), networkVm, network.Object, null, servicesPath);
+                    vm.AllLogs.Add(new LogEntry { Message = "Export", Color = System.Windows.Media.Brushes.Black });
+                    var view = new MainView(vm);
+                    var method = typeof(MainView).GetMethod("ExportLogsInternalAsync", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    var task = method?.Invoke(view, null) as Task;
+                    task?.Wait();
+                    Assert.NotNull(vm.LastExportedLogPath);
+                    Assert.True(File.Exists(vm.LastExportedLogPath!));
+                    if (vm.LastExportedLogPath != null)
+                        File.Delete(vm.LastExportedLogPath);
                 }
                 catch (Exception e) { ex = e; }
                 finally

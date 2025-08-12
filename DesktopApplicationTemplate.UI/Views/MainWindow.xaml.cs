@@ -13,6 +13,7 @@ using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Views;
 using System.Windows.Input;
 using System.Windows.Controls.Primitives;
+using System.Threading.Tasks;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
@@ -412,6 +413,39 @@ namespace DesktopApplicationTemplate.UI.Views
 
                 _logger?.LogInformation("Global log level set to {Level}", _viewModel.LogLevelFilter);
             }
+        }
+
+        internal async Task ExportLogsInternalAsync()
+        {
+            _logger?.LogInformation("Export log button clicked");
+            await _viewModel.ExportLogsAsync();
+        }
+
+        private async void ExportLog_Click(object sender, RoutedEventArgs e)
+        {
+            await ExportLogsInternalAsync();
+        }
+
+        internal void ClearLogsInternal()
+        {
+            _logger?.LogInformation("Clear log button clicked");
+            _viewModel.ClearLogs();
+        }
+
+        private void ClearLog_Click(object sender, RoutedEventArgs e)
+        {
+            ClearLogsInternal();
+        }
+
+        internal void RefreshLogsInternal()
+        {
+            _logger?.LogInformation("Update log button clicked");
+            _viewModel.RefreshLogs();
+        }
+
+        private void UpdateLog_Click(object sender, RoutedEventArgs e)
+        {
+            RefreshLogsInternal();
         }
 
     }
