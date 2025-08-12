@@ -12,6 +12,7 @@ using System.Windows.Media;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Views;
 using System.Windows.Input;
+using System.Windows.Controls.Primitives;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
@@ -179,24 +180,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 return;
 
             _logger?.LogDebug("EditService button clicked for {Name}", _viewModel.SelectedService.DisplayName);
-
-            if (_viewModel.SelectedService.ServiceType == "CSV Creator")
-            {
-                var vm = App.AppHost.Services.GetRequiredService<CsvViewerViewModel>();
-                var window = new CsvViewerWindow(vm);
-                vm.RequestClose += () => window.Close();
-                window.ShowDialog();
-            }
-            else
-            {
-                var page = GetOrCreateServicePage(_viewModel.SelectedService);
-                if (page != null)
-                {
-                    _viewModel.SelectedService.IsActive = false;
-                    ContentFrame.Content = page;
-                    _logger?.LogDebug("EditService workflow completed for {Name}", _viewModel.SelectedService.DisplayName);
-                }
-            }
+            OpenServiceEditor(_viewModel.SelectedService);
         }
 
         private void ServiceList_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -237,21 +221,7 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             if ((sender as MenuItem)?.DataContext is ServiceViewModel svc)
             {
-                if (svc.ServiceType == "CSV Creator")
-                {
-                    var vm = App.AppHost.Services.GetRequiredService<CsvViewerViewModel>();
-                    var window = new CsvViewerWindow(vm);
-                    vm.RequestClose += () => window.Close();
-                    window.ShowDialog();
-                    return;
-                }
-
-                var page = GetOrCreateServicePage(svc);
-                if (page != null)
-                {
-                    svc.IsActive = false;
-                    ContentFrame.Content = page;
-                }
+                OpenServiceEditor(svc);
             }
         }
 
@@ -319,12 +289,59 @@ namespace DesktopApplicationTemplate.UI.Views
         private void MainView_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             var element = e.OriginalSource as DependencyObject;
-            if (_viewModel.SelectedService != null &&
-                Helpers.VisualTreeHelperExtensions.FindParent<ListBoxItem>(element) == null &&
-                Helpers.VisualTreeHelperExtensions.FindParent<Frame>(element) == null)
+            bool clickedListItem = Helpers.VisualTreeHelperExtensions.FindParent<ListBoxItem>(element) != null;
+            bool clickedFrame = Helpers.VisualTreeHelperExtensions.FindParent<Frame>(element) != null;
+            bool clickedButton = Helpers.VisualTreeHelperExtensions.FindParent<ButtonBase>(element) != null;
+
+            if (e.ChangedButton == System.Windows.Input.MouseButton.Left && !clickedListItem && !clickedFrame && !clickedButton)
+            {
+                try
+                {
+                    DragMove();
+                }
+                catch (InvalidOperationException ex)
+                {
+                    _logger?.LogWarning(ex, "DragMove failed");
+                }
+            }
+
+            if (_viewModel.SelectedService != null && !clickedListItem && !clickedFrame)
             {
                 _viewModel.SelectedService = null;
                 ContentFrame.Content = new HomePage { DataContext = _viewModel };
+            }
+        }
+
+        private void ServiceItem_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (e.ClickCount < 2)
+                return;
+
+            if ((sender as Border)?.DataContext is ServiceViewModel svc)
+            {
+                _logger?.LogDebug("Service {Name} double-clicked", svc.DisplayName);
+                OpenServiceEditor(svc);
+            }
+        }
+
+        private void OpenServiceEditor(ServiceViewModel svc)
+        {
+            if (svc.ServiceType == "CSV Creator")
+            {
+                var vm = App.AppHost.Services.GetRequiredService<CsvViewerViewModel>();
+                var window = new CsvViewerWindow(vm);
+                vm.RequestClose += () => window.Close();
+                window.ShowDialog();
+            }
+            else
+            {
+                var page = GetOrCreateServicePage(svc);
+                if (page != null)
+                {
+                    svc.IsActive = false;
+                    ContentFrame.Content = page;
+                    _logger?.LogDebug("EditService workflow completed for {Name}", svc.DisplayName);
+                }
             }
         }
 
