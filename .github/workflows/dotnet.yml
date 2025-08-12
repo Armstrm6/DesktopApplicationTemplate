@@ -1,4 +1,4 @@
-name: .NET
+name: .NET 8.0 Desktop Build & Test
 
 on:
   push:
@@ -7,18 +7,24 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
-    runs-on: windows-latest
-    steps:
-    - uses: actions/checkout@v4
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: '8.0.x'
-    - name: Restore
-      run: dotnet restore
-    - name: Build
-      run: dotnet build DesktopApplicationTemplate.sln --configuration Release
-    - name: Test
-      run: dotnet test DesktopApplicationTemplate.Tests/DesktopApplicationTemplate.Tests.csproj --no-build --settings tests.runsettings
+  build-test:
+    runs-on: windows-latest   # Needed for .NET Desktop SDK
 
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8.0 Desktop SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+          include-prerelease: false
+
+      - name: Install dependencies
+        run: dotnet restore
+
+      - name: Build solution
+        run: dotnet build --configuration Release
+
+      - name: Run unit tests
+        run: dotnet test --configuration Release --no-build --verbosity normal
