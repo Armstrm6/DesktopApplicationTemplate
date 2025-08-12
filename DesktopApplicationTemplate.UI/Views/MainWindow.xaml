@@ -31,9 +31,13 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Image Grid.Column="1" Source="pack://application:,,,/Resources/Logo.png" Height="60" HorizontalAlignment="Left" VerticalAlignment="Center"/>
             <Button Grid.Column="0" Content="🏠" Width="30" Height="30" Click="HomeButton_Click"/>
-            <Button Grid.Column="2" Content="⚙" Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Top" Click="OpenSettings_Click"/>
+            <Image Grid.Column="1" Source="pack://application:,,,/Resources/Logo.png" Height="60" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <TextBlock Text="Active Services:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <TextBlock Text="{Binding ActiveServicesSummary}" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <Button Content="⚙" Width="30" Height="30" Click="OpenSettings_Click"/>
+            </StackPanel>
         </Grid>
 
         <!-- Main Content -->
@@ -67,68 +71,69 @@
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                      ScrollViewer.VerticalScrollBarVisibility="Auto"
                      SelectionChanged="ServiceList_SelectionChanged">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <Border CornerRadius="8"
-                                    BorderBrush="{Binding BorderColor}"
-                                    Background="{Binding BackgroundColor}"
-                                    BorderThickness="2" Padding="5" Margin="2"
-                                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                                    PreviewMouseLeftButtonDown="ServiceItem_PreviewMouseLeftButtonDown"
-                                    PreviewMouseMove="ServiceItem_PreviewMouseMove"
-                                    AllowDrop="True" Drop="ServiceItem_Drop"
-                                    MouseLeftButtonDown="ServiceItem_MouseLeftButtonDown">
-                                <Border CornerRadius="8" BorderBrush="Gray" BorderThickness="1" Padding="5" Margin="2">
-                                    <Border.ContextMenu>
-                                        <ContextMenu>
-                                            <MenuItem Header="Edit Service" Click="EditServiceMenu_Click" />
-                                            <MenuItem Header="Rename Service" Click="RenameServiceMenu_Click" />
-                                            <MenuItem Header="Delete Service" Click="DeleteServiceMenu_Click" />
-                                            <MenuItem Header="Change Color" Click="ChangeColorMenu_Click" />
-                                        </ContextMenu>
-                                    </Border.ContextMenu>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-
-                                        <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" FontWeight="Bold"/>
-                                        <ToggleButton Grid.Column="1" IsChecked="{Binding IsActive, Mode=TwoWay}"
-                                                      Style="{StaticResource ToggleSwitchStyle}"/>
-                                    </Grid>
-                                </Border>
-                            </Border>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Border CornerRadius="14"
+                                BorderBrush="{Binding BorderColor}"
+                                Background="{Binding BackgroundColor}"
+                                BorderThickness="1" Padding="8" Margin="4"
+                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                PreviewMouseLeftButtonDown="ServiceItem_PreviewMouseLeftButtonDown"
+                                PreviewMouseMove="ServiceItem_PreviewMouseMove"
+                                AllowDrop="True" Drop="ServiceItem_Drop"
+                                MouseLeftButtonDown="ServiceItem_MouseLeftButtonDown">
+                            <Border.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Edit Service" Click="EditServiceMenu_Click" />
+                                    <MenuItem Header="Rename Service" Click="RenameServiceMenu_Click" />
+                                    <MenuItem Header="Delete Service" Click="DeleteServiceMenu_Click" />
+                                    <MenuItem Header="Change Color" Click="ChangeColorMenu_Click" />
+                                </ContextMenu>
+                            </Border.ContextMenu>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding DisplayName}" FontWeight="Bold" TextTrimming="CharacterEllipsis" ToolTip="{Binding DisplayName}"/>
+                                    <TextBlock Text="{Binding Port, StringFormat=Port: {0}}" FontSize="10"/>
+                                    <TextBlock Text="{Binding ConnectedSteps, StringFormat=Connected Steps: {0}}" FontSize="10"/>
+                                </StackPanel>
+                                <ToggleButton Grid.Column="1" IsChecked="{Binding IsActive, Mode=TwoWay}"
+                                              Style="{StaticResource ToggleSwitchStyle}" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
             </ListBox>
         </Grid>
 
             <!-- Right Panel -->
 
             <StackPanel Grid.Column="1" Margin="10">
-            <Frame x:Name="ContentFrame" NavigationUIVisibility="Hidden" />
-            <TextBlock Text="{Binding SelectedService.DisplayName}" FontWeight="Bold" FontSize="14"/>
-            <TextBlock Text="Services Created:" />
-            <TextBlock Text="{Binding ServicesCreated}" />
-            <TextBlock Text="Current Active Services:" />
-            <TextBlock Text="{Binding CurrentActiveServices}" />
-            <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
-                <TextBlock Text="Log Level:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                <ComboBox x:Name="GlobalLogLevelBox" Width="120" SelectionChanged="GlobalLogLevelBox_SelectionChanged" SelectedIndex="0">
-                    <ComboBoxItem Content="All"/>
-                    <ComboBoxItem Content="Debug"/>
-                    <ComboBoxItem Content="Warning"/>
-                    <ComboBoxItem Content="Error"/>
-                </ComboBox>
-            </StackPanel>
-            <ListBox ItemsSource="{Binding DisplayLogs}" Height="150">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding Message}" Foreground="{Binding Color}"/>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+                <Frame x:Name="ContentFrame" NavigationUIVisibility="Hidden" />
+                <TextBlock Text="{Binding SelectedService.DisplayName}" FontWeight="Bold" FontSize="14"/>
+                <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
+                    <TextBlock Text="Active Services:" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding ActiveServicesSummary}" FontWeight="Bold" Margin="5,0,0,0" VerticalAlignment="Center"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
+                    <TextBlock Text="Log Level:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                    <ComboBox x:Name="GlobalLogLevelBox" Width="120" SelectionChanged="GlobalLogLevelBox_SelectionChanged" SelectedIndex="0">
+                        <ComboBoxItem Content="All"/>
+                        <ComboBoxItem Content="Debug"/>
+                        <ComboBoxItem Content="Warning"/>
+                        <ComboBoxItem Content="Error"/>
+                    </ComboBox>
+                </StackPanel>
+                <ListBox ItemsSource="{Binding DisplayLogs}" Height="150">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Message}" Foreground="{Binding Color}"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
             </StackPanel>
 
             <ResizeGrip Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Bottom" />
