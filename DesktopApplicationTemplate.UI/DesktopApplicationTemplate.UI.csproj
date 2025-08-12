@@ -35,4 +35,8 @@
     <Resource Include="Themes/ToggleSwitch.xaml" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Resource Include="Assets\**\*" />
+  </ItemGroup>
+
 </Project>
