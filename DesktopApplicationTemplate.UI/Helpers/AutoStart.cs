@@ -25,13 +25,13 @@ namespace DesktopApplicationTemplate.UI.Helpers
 
         public static void DisableAutoStart()
         {
-            using RegistryKey key = Registry.CurrentUser.OpenSubKey(RegistryKeyPath, true);
+            using RegistryKey? key = Registry.CurrentUser.OpenSubKey(RegistryKeyPath, true);
             key?.DeleteValue(AppName, false);
         }
 
         public static bool IsAutoStartEnabled()
         {
-            using RegistryKey key = Registry.CurrentUser.OpenSubKey(RegistryKeyPath);
+            using RegistryKey? key = Registry.CurrentUser.OpenSubKey(RegistryKeyPath);
             string? value = key?.GetValue(AppName) as string;
             return !string.IsNullOrEmpty(value);
         }
