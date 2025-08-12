@@ -26,10 +26,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-            <Image Source="pack://application:,,,/Resources/Desktop-Icon.png" Width="40" Height="40"/>
-            <TextBlock Text="HTTP Tester" FontSize="20" FontWeight="Bold" Margin="10,0,0,0" VerticalAlignment="Center"/>
-        </StackPanel>
+        <TextBlock Text="HTTP Tester" FontSize="20" FontWeight="Bold" Margin="0,0,0,10"/>
 
         <StackPanel Orientation="Horizontal" Margin="0 0 0 10">
             <ComboBox Width="100" ItemsSource="{Binding Methods}" SelectedItem="{Binding SelectedMethod}" />

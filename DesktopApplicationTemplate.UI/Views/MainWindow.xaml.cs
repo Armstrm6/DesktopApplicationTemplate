@@ -32,12 +32,26 @@ namespace DesktopApplicationTemplate.UI.Views
             _logger = factory?.CreateLogger<MainView>();
             DataContext = _viewModel;
             _viewModel.EditRequested += OnEditRequested;
-            ContentFrame.Content = new HomePage { DataContext = _viewModel };
             KeyDown += MainView_KeyDown;
             MouseDown += MainView_MouseDown;
             CommandBindings.Add(new CommandBinding(SystemCommands.CloseWindowCommand, CloseCommand_Executed));
             CommandBindings.Add(new CommandBinding(SystemCommands.MinimizeWindowCommand, MinimizeCommand_Executed));
             Closing += (_, _) => _logger?.LogInformation("MainView closing");
+            ShowHome();
+        }
+
+        public void ShowHome()
+        {
+            ContentFrame.Content = null;
+            ContentFrame.Visibility = Visibility.Collapsed;
+            HomeContentGrid.Visibility = Visibility.Visible;
+        }
+
+        private void ShowPage(Page page)
+        {
+            HomeContentGrid.Visibility = Visibility.Collapsed;
+            ContentFrame.Visibility = Visibility.Visible;
+            ContentFrame.Content = page;
         }
 
         private void CloseCommand_Executed(object sender, ExecutedRoutedEventArgs e)
@@ -56,7 +70,7 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             _logger?.LogInformation("Home button clicked");
             _viewModel.SelectedService = null;
-            ContentFrame.Content = new HomePage { DataContext = _viewModel };
+            ShowHome();
         }
 
         private Page? GetOrCreateServicePage(ServiceViewModel svc)
@@ -146,7 +160,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 }
                 else if (newService.ServicePage != null)
                 {
-                    ContentFrame.Content = newService.ServicePage;
+                    ShowPage(newService.ServicePage);
                 }
                 _viewModel.SaveServices();
                 _logger?.LogDebug("AddService workflow completed");
@@ -159,7 +173,7 @@ namespace DesktopApplicationTemplate.UI.Views
             var page = GetOrCreateServicePage(service);
             if (page != null)
             {
-                ContentFrame.Content = page;
+                ShowPage(page);
                 _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
             }
         }
@@ -191,12 +205,12 @@ namespace DesktopApplicationTemplate.UI.Views
                 var page = GetOrCreateServicePage(_viewModel.SelectedService);
                 if (page != null)
                 {
-                    ContentFrame.Content = page;
+                    ShowPage(page);
                 }
             }
             else
             {
-                ContentFrame.Content = new HomePage { DataContext = _viewModel };
+                ShowHome();
             }
         }
 
@@ -282,7 +296,7 @@ namespace DesktopApplicationTemplate.UI.Views
             if (e.Key == System.Windows.Input.Key.Escape)
             {
                 _viewModel.SelectedService = null;
-                ContentFrame.Content = new HomePage { DataContext = _viewModel };
+                ShowHome();
             }
         }
 
@@ -308,7 +322,7 @@ namespace DesktopApplicationTemplate.UI.Views
             if (_viewModel.SelectedService != null && !clickedListItem && !clickedFrame)
             {
                 _viewModel.SelectedService = null;
-                ContentFrame.Content = new HomePage { DataContext = _viewModel };
+                ShowHome();
             }
         }
 
@@ -339,7 +353,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 if (page != null)
                 {
                     svc.IsActive = false;
-                    ContentFrame.Content = page;
+                    ShowPage(page);
                     _logger?.LogDebug("EditService workflow completed for {Name}", svc.DisplayName);
                 }
             }
@@ -348,7 +362,7 @@ namespace DesktopApplicationTemplate.UI.Views
         private void OpenSettings_Click(object sender, RoutedEventArgs e)
         {
             var page = App.AppHost.Services.GetRequiredService<SettingsPage>();
-            ContentFrame.Content = page;
+            ShowPage(page);
         }
 
         private System.Windows.Point _dragStart;
@@ -412,6 +426,26 @@ namespace DesktopApplicationTemplate.UI.Views
 
                 _logger?.LogInformation("Global log level set to {Level}", _viewModel.LogLevelFilter);
             }
+        }
+
+        private void ClearLog_Click(object sender, RoutedEventArgs e)
+        {
+            _logger?.LogInformation("Clear log button clicked");
+            _viewModel.ClearLogs();
+        }
+
+        private void ExportLog_Click(object sender, RoutedEventArgs e)
+        {
+            _logger?.LogInformation("Export log button clicked");
+            var path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "exported_logs.txt");
+            _viewModel.ExportDisplayedLogs(path);
+            _logger?.LogInformation("Logs exported to {Path}", path);
+        }
+
+        private void RefreshLog_Click(object sender, RoutedEventArgs e)
+        {
+            _logger?.LogDebug("Refresh log button clicked");
+            _viewModel.RefreshLogs();
         }
 
     }

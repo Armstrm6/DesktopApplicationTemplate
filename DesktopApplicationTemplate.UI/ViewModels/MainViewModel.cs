@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Linq;
+using System.IO;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Data;
@@ -354,6 +355,33 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         internal void OnServiceActiveChanged(bool _)
         {
             OnPropertyChanged(nameof(CurrentActiveServices));
+        }
+
+        public void ClearLogs()
+        {
+            if (SelectedService != null)
+            {
+                SelectedService.Logs.Clear();
+            }
+            else
+            {
+                AllLogs.Clear();
+            }
+            OnPropertyChanged(nameof(DisplayLogs));
+            _logger?.Log("Logs cleared", LogLevel.Debug);
+        }
+
+        public void ExportDisplayedLogs(string filePath)
+        {
+            var lines = DisplayLogs.Select(l => l.Message).ToList();
+            File.WriteAllLines(filePath, lines);
+            _logger?.Log($"Exported {lines.Count} logs to {filePath}", LogLevel.Debug);
+        }
+
+        public void RefreshLogs()
+        {
+            OnPropertyChanged(nameof(DisplayLogs));
+            _logger?.Log("Logs refreshed", LogLevel.Debug);
         }
 
         // OnPropertyChanged inherited from ViewModelBase
