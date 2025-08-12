@@ -19,6 +19,14 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
     public class ServiceViewModel : ViewModelBase
     {
+        private readonly ILoggingService? _logger;
+
+        public ServiceViewModel(ILoggingService? logger = null)
+        {
+            _logger = logger;
+            AssociatedServices.CollectionChanged += (_, __) => OnPropertyChanged(nameof(ConnectedSteps));
+        }
+
         public string DisplayName { get; set; } = string.Empty;
         public string ServiceType { get; set; } = string.Empty;
         public Page? Page { get; set; }
@@ -43,6 +51,14 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public static Func<string, string, ServiceViewModel?>? ResolveService { get; set; }
 
+        private string _port = string.Empty;
+        public string Port
+        {
+            get => _port;
+            set { _port = value; OnPropertyChanged(); }
+        }
+
+        public int ConnectedSteps => AssociatedServices.Count;
 
         private bool _isActive;
         public bool IsActive
@@ -67,6 +83,33 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public event Action<bool>? ActiveChanged;
 
         public event Action<ServiceViewModel, LogEntry>? LogAdded;
+
+        public void AttachPortListener(INotifyPropertyChanged vm)
+        {
+            _logger?.Log($"Attaching port listener to {DisplayName}", LogLevel.Debug);
+            vm.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName == null)
+                    return;
+
+                if (e.PropertyName.Equals("Port", StringComparison.OrdinalIgnoreCase) ||
+                    e.PropertyName.Equals("ListeningPort", StringComparison.OrdinalIgnoreCase) ||
+                    e.PropertyName.Equals("ServerPort", StringComparison.OrdinalIgnoreCase))
+                {
+                    Port = ExtractPort(vm) ?? string.Empty;
+                    _logger?.Log($"Port updated for {DisplayName}: {Port}", LogLevel.Debug);
+                }
+            };
+            Port = ExtractPort(vm) ?? string.Empty;
+        }
+
+        private static string? ExtractPort(object vm)
+        {
+            var type = vm.GetType();
+            return type.GetProperty("Port")?.GetValue(vm)?.ToString()
+                   ?? type.GetProperty("ListeningPort")?.GetValue(vm)?.ToString()
+                   ?? type.GetProperty("ServerPort")?.GetValue(vm)?.ToString();
+        }
 
         public void AddLog(string message, WpfBrush? color = null, LogLevel level = LogLevel.Debug, bool checkReference = true)
         {
@@ -137,6 +180,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public event Action<ServiceViewModel>? EditRequested;
         public int ServicesCreated => Services.Count;
         public int CurrentActiveServices => Services.Count(s => s.IsActive);
+        public string ActiveServicesSummary => $"{CurrentActiveServices} / {ServicesCreated}";
 
         private LogLevel _logLevelFilter = LogLevel.Debug;
         public LogLevel LogLevelFilter
@@ -218,6 +262,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 Services.Add(newService);
                 OnPropertyChanged(nameof(ServicesCreated));
                 OnPropertyChanged(nameof(CurrentActiveServices));
+                OnPropertyChanged(nameof(ActiveServicesSummary));
                 _logger?.Log($"Service {newService.DisplayName} created", LogLevel.Debug);
             }
             _logger?.Log("AddService completed", LogLevel.Debug);
@@ -260,6 +305,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 }
                 OnPropertyChanged(nameof(ServicesCreated));
                 OnPropertyChanged(nameof(CurrentActiveServices));
+                OnPropertyChanged(nameof(ActiveServicesSummary));
                 OnPropertyChanged(nameof(DisplayLogs));
                 SaveServices();
                 _logger?.Log("Service removed", LogLevel.Debug);
@@ -308,6 +354,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
             OnPropertyChanged(nameof(ServicesCreated));
             OnPropertyChanged(nameof(CurrentActiveServices));
+            OnPropertyChanged(nameof(ActiveServicesSummary));
         }
 
         private void ApplyFilters()
@@ -354,6 +401,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         internal void OnServiceActiveChanged(bool _)
         {
             OnPropertyChanged(nameof(CurrentActiveServices));
+            OnPropertyChanged(nameof(ActiveServicesSummary));
         }
 
         // OnPropertyChanged inherited from ViewModelBase
