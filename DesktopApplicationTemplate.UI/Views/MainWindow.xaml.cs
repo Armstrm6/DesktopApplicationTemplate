@@ -13,7 +13,6 @@ using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Views;
 using System.Windows.Input;
 using System.Windows.Controls.Primitives;
-using System.ComponentModel;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
@@ -93,11 +92,6 @@ namespace DesktopApplicationTemplate.UI.Views
                 if (svc.ServicePage.DataContext is INetworkAwareViewModel navm)
                 {
                     navm.UpdateNetworkConfiguration(_viewModel.NetworkConfig.CurrentConfiguration);
-                }
-
-                if (svc.ServicePage.DataContext is INotifyPropertyChanged npc)
-                {
-                    svc.AttachPortListener(npc);
                 }
             }
 

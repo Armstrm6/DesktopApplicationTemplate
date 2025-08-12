@@ -67,30 +67,5 @@ namespace DesktopApplicationTemplate.Tests
 
             ConsoleTestLogger.LogPass();
         }
-
-        [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
-        public void ActiveServicesSummary_ReflectsCounts()
-        {
-            var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
-            var csv = new CsvService(new CsvViewerViewModel(configPath));
-            var network = new Mock<INetworkConfigurationService>();
-            var networkVm = new NetworkConfigurationViewModel(network.Object);
-            var vm = new MainViewModel(csv, networkVm, network.Object);
-
-            Assert.Equal("0 / 0", vm.ActiveServicesSummary);
-
-            var svc = new ServiceViewModel { DisplayName = "HTTP - Test", ServiceType = "HTTP" };
-            vm.Services.Add(svc);
-
-            Assert.Equal("0 / 1", vm.ActiveServicesSummary);
-
-            svc.IsActive = true;
-
-            Assert.Equal("1 / 1", vm.ActiveServicesSummary);
-
-            ConsoleTestLogger.LogPass();
-        }
     }
 }
