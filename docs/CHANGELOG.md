@@ -8,6 +8,9 @@
 - Updated unit tests to inject mock loggers.
 - Application logo displayed in the main window navigation bar.
 
+### Changed
+- CI workflow now runs on pushes to `feature/**` and `bugfix/**` branches and supports manual triggers, ensuring tests execute on GitHub.
+
 ### Removed
 - Placeholder "Desktop Template" text from the navigation bar.
 
