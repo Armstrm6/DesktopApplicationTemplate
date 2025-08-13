@@ -25,5 +25,19 @@ namespace DesktopApplicationTemplate.Tests
 
             ConsoleTestLogger.LogPass();
         }
+
+        [Fact]
+        [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
+        public void AddLog_PrefixesServiceName()
+        {
+            var svc = new ServiceViewModel { DisplayName = "HTTP - S1", ServiceType = "HTTP" };
+
+            svc.AddLog("Test entry");
+
+            Assert.Contains("[HTTP - S1] Test entry", svc.Logs[0].Message);
+
+            ConsoleTestLogger.LogPass();
+        }
     }
 }

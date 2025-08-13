@@ -98,7 +98,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 {
                     if (vm.Logger != null)
                     {
-                        logger.LogAdded += entry => svc.AddLog(entry.Message, entry.Color, entry.Level);
+                        logger.LogAdded += entry => svc.AddLog(entry.Message, entry.Color, entry.Level, false, false);
                     }
                 }
 

@@ -69,10 +69,22 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public event Action<ServiceViewModel, LogEntry>? LogAdded;
 
-        public void AddLog(string message, WpfBrush? color = null, LogLevel level = LogLevel.Debug, bool checkReference = true)
+        public void AddLog(
+            string message,
+            WpfBrush? color = null,
+            LogLevel level = LogLevel.Debug,
+            bool checkReference = true,
+            bool includeTimestamp = true)
         {
-            var ts = DateTime.Now.ToString("MM.dd.yyyy - HH:mm:ss.fffffff");
-            var entry = new LogEntry { Message = $"{ts} {message}", Color = color ?? WpfBrushes.Black, Level = level };
+            var ts = includeTimestamp
+                ? DateTime.Now.ToString("MM.dd.yyyy - HH:mm:ss.fffffff ")
+                : string.Empty;
+            var entry = new LogEntry
+            {
+                Message = $"{ts}[{DisplayName}] {message}",
+                Color = color ?? WpfBrushes.Black,
+                Level = level
+            };
             Logs.Insert(0, entry);
             LogAdded?.Invoke(this, entry);
             if (checkReference)
