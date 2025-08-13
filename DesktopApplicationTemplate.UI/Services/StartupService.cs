@@ -1,10 +1,8 @@
 ﻿using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.Models;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using Microsoft.Win32;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using DesktopApplicationTemplate.Core.Services;
 
@@ -31,16 +29,44 @@ namespace DesktopApplicationTemplate.UI.Services
 
             if (_appSettings.AutoStart)
             {
-                AutoStartHelper.EnableAutoStart();
+                EnableAutoStart();
                 _logger?.Log("Auto-start enabled", LogLevel.Debug);
             }
             else
             {
-                AutoStartHelper.DisableAutoStart();
+                DisableAutoStart();
                 _logger?.Log("Auto-start disabled", LogLevel.Debug);
             }
         }
 
         public AppSettings GetSettings() => _appSettings;
+
+        private const string AppName = "DesktopApplicationTemplate";
+        private const string RegistryKeyPath = @"Software\\Microsoft\\Windows\\CurrentVersion\\Run";
+
+        private static void EnableAutoStart()
+        {
+            using RegistryKey key = Registry.CurrentUser.OpenSubKey(RegistryKeyPath, true)
+                                     ?? Registry.CurrentUser.CreateSubKey(RegistryKeyPath)!;
+
+            string exePath = Process.GetCurrentProcess().MainModule?.FileName ?? string.Empty;
+            if (!string.IsNullOrWhiteSpace(exePath))
+            {
+                key.SetValue(AppName, $"\"{exePath}\"");
+            }
+        }
+
+        private static void DisableAutoStart()
+        {
+            using RegistryKey? key = Registry.CurrentUser.OpenSubKey(RegistryKeyPath, true);
+            key?.DeleteValue(AppName, false);
+        }
+
+        private static bool IsAutoStartEnabled()
+        {
+            using RegistryKey? key = Registry.CurrentUser.OpenSubKey(RegistryKeyPath);
+            string? value = key?.GetValue(AppName) as string;
+            return !string.IsNullOrEmpty(value);
+        }
     }
 }

@@ -95,6 +95,26 @@ namespace DesktopApplicationTemplate.Tests
         [Fact]
         [TestCategory("CodexSafe")]
         [TestCategory("WindowsSafe")]
+        public void OnServiceLogAdded_PrefixesServiceName()
+        {
+            var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
+            var csv = new CsvService(new CsvViewerViewModel(configPath));
+            var network = new Mock<INetworkConfigurationService>();
+            var networkVm = new NetworkConfigurationViewModel(network.Object);
+            var vm = new MainViewModel(csv, networkVm, network.Object);
+            var svc = new ServiceViewModel { DisplayName = "HTTP - HTTP1", ServiceType = "HTTP" };
+            var entry = new LogEntry { Message = "test", Level = LogLevel.Debug };
+
+            vm.OnServiceLogAdded(svc, entry);
+
+            Assert.StartsWith(svc.DisplayName, vm.AllLogs.First().Message);
+            Assert.Equal("test", entry.Message);
+            ConsoleTestLogger.LogPass();
+        }
+
+        [Fact]
+        [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
         public void ExportDisplayedLogs_WritesFile()
         {
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
