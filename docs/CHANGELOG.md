@@ -21,7 +21,9 @@
 - Placeholder "Desktop Template" text from the navigation bar.
 - Legacy GitHub workflows (`dotnet.yml`, `dotnet-desktop-ci.yml`, `ci.yml`).
 - Unused `RichTextLogger` service and installer `CustomControl1` control.
+- WPF workload installation steps from CI workflow and setup script.
 
 ### Fixed
 - Corrected logo resource path so the image renders in the navigation bar.
-- Updated GitHub workflows to install the WPF workload instead of the deprecated windowsdesktop workload.
+- CI test job now builds projects before executing to ensure test assemblies are available.
+- Test job now uploads results even when tests fail so failures are visible.
