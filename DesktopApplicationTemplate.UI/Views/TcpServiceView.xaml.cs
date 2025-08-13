@@ -3,6 +3,7 @@ using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI.Helpers;
+using DesktopApplicationTemplate.Core.Services;
 using System.Windows.Controls;
 
 namespace DesktopApplicationTemplate.UI.Views

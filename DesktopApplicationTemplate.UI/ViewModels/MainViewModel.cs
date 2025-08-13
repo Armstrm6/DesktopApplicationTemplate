@@ -14,10 +14,10 @@ using WpfBrush = System.Windows.Media.Brush;
 using WpfBrushes = System.Windows.Media.Brushes;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.Models;
+using DesktopApplicationTemplate.Core.Services;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
-
     public class ServiceViewModel : ViewModelBase
     {
         public string DisplayName { get; set; } = string.Empty;

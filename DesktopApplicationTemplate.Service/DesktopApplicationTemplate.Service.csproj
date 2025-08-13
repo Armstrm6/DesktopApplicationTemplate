@@ -15,4 +15,8 @@
     <PackageReference Include="FluentFTP" Version="53.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\DesktopApplicationTemplate.Core\DesktopApplicationTemplate.Core.csproj" />
+  </ItemGroup>
+
 </Project>

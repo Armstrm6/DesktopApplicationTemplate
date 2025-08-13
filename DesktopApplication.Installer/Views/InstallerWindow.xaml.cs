@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using DesktopApplication.Installer.Services;
 using DesktopApplication.Installer.ViewModels;
-using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Core.Services;
 
 namespace DesktopApplication.Installer.Views
 {

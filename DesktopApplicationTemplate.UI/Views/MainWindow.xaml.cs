@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
+using LogLevel = DesktopApplicationTemplate.Core.Services.LogLevel;
 using Microsoft.VisualBasic;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -418,10 +419,10 @@ namespace DesktopApplicationTemplate.UI.Views
             {
                 _viewModel.LogLevelFilter = item.Content.ToString() switch
                 {
-                    "Warning" => DesktopApplicationTemplate.UI.Services.LogLevel.Warning,
-                    "Error" => DesktopApplicationTemplate.UI.Services.LogLevel.Error,
-                    "Debug" => DesktopApplicationTemplate.UI.Services.LogLevel.Debug,
-                    _ => DesktopApplicationTemplate.UI.Services.LogLevel.Debug
+                    "Warning" => LogLevel.Warning,
+                    "Error" => LogLevel.Error,
+                    "Debug" => LogLevel.Debug,
+                    _ => LogLevel.Debug
                 };
 
                 _logger?.LogInformation("Global log level set to {Level}", _viewModel.LogLevelFilter);

@@ -1,6 +1,10 @@
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Services;
-using Moq;
+using DesktopApplicationTemplate.Core.Services;
+using WpfControls = System.Windows.Controls;
+using System.Windows.Documents;
+using System.Windows.Threading;
+
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;

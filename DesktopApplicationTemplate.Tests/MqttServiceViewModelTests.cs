@@ -1,4 +1,5 @@
 using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using MQTTnet.Client;
 using Moq;

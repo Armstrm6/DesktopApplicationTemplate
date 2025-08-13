@@ -3,8 +3,9 @@ using System;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using DesktopApplicationTemplate.Core.Services;
 
-namespace DesktopApplicationTemplate.UI.Services
+namespace DesktopApplicationTemplate.Service.Services
 {
     public class FtpService : IFtpService
     {

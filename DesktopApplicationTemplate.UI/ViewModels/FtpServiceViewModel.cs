@@ -3,6 +3,8 @@ using System.Windows.Input;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Models;
+using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Service.Services;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {

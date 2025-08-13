@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DesktopApplicationTemplate.UI.Services
+namespace DesktopApplicationTemplate.Core.Services
 {
     public interface ILoggingService
     {

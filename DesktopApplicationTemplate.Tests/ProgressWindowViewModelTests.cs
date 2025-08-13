@@ -1,5 +1,5 @@
 using DesktopApplication.Installer.ViewModels;
-using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Core.Services;
 using Moq;
 using Xunit;
 using System.IO;

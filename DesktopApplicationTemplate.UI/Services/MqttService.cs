@@ -2,6 +2,7 @@ using MQTTnet;
 using MQTTnet.Client;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using DesktopApplicationTemplate.Core.Services;
 
 namespace DesktopApplicationTemplate.UI.Services
 {
