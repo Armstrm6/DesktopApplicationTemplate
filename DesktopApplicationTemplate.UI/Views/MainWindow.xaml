@@ -33,17 +33,13 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Image Source="/Assets/DesktopTemplateLayout-Logo.png"
-                   Height="60"
-                   Margin="10,15,0,15"
-                   VerticalAlignment="Center"
-                   Stretch="Uniform" />
             <Button Grid.Column="2" Content="_" Width="40" Height="40" Margin="0,25,10,25" Command="SystemCommands.MinimizeWindowCommand"/>
             <Button Grid.Column="3" Content="X" Width="40" Height="40" Margin="0,25,10,25" Command="SystemCommands.CloseWindowCommand"/>
         </Grid>
 
         <!-- Main Content -->
         <Grid Grid.Row="1" Margin="10">
+
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="3*"/>
                 <ColumnDefinition Width="7*"/>
@@ -173,5 +169,10 @@
 
             </Grid>
         </Grid>
+        <Image Source="/Assets/DesktopTemplateLayout-Logo.png"
+                   Height="109"
+                   Margin="-38,-19,511,0"
+                   VerticalAlignment="Top"
+                   Stretch="Uniform" />
     </Grid>
 </Window>
