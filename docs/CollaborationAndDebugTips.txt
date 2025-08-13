@@ -44,3 +44,11 @@ Effective Prompts / Instructions that worked: n/a
 Decisions & Rationale: Single pipeline with build, test, quality, and packaging jobs.
 Action Items: Monitor self-heal integration with new pipeline.
 Related Commits/PRs: (this PR)
+[2025-08-13 18:50] Topic: On-demand CI via /test comment
+Context: Enabled `/test` comment workflow and documented CI-only testing policy.
+Observations: CI can run without local test execution.
+Codex Limitations noticed: Tests cannot run on Linux container; rely on GitHub Actions.
+Effective Prompts / Instructions that worked: Using comment trigger pattern from user guidance.
+Decisions & Rationale: Centralize validation in CI and enforce via docs and PR template.
+Action Items: Ensure branch protection requires CI.
+Related Commits/PRs: (this PR)
