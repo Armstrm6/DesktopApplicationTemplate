@@ -12,6 +12,18 @@ SDK version. If multiple SDKs are installed, the `dotnet` CLI will use
 version `8.0.404` as specified in this file. Running commands from the
 repository root will automatically respect this setting.
 
+## Initial setup
+
+After cloning the repository, run the setup script to configure the Git
+hooks and [Git LFS](https://git-lfs.com/). The script also restores
+dependencies, builds the solution, and executes the unit tests:
+
+```bash
+./setup.sh
+```
+
+Run the script any time the project dependencies or hooks need to be refreshed.
+
 ## Build the solution
 
 Restore NuGet packages and build all projects:
@@ -26,8 +38,8 @@ The `dotnet` commands will use the SDK version defined in
 there is no need to switch manually when working inside this
 repository.
 
-You can also execute `setup.sh` to restore dependencies, build the solution and
-run the unit tests in a single step:
+You can also execute `setup.sh` to configure Git hooks and Git LFS, restore
+dependencies, build the solution and run the unit tests in a single step:
 
 ```bash
 ./setup.sh
@@ -129,8 +141,8 @@ the script template will be loaded automatically.
 
 ## Running startup scripts
 
-To restore dependencies, build the solution and run the unit tests from a shell
-environment use:
+To configure Git hooks and Git LFS, restore dependencies, build the solution
+and run the unit tests from a shell environment use:
 
 ```bash
 chmod +x setup.sh
