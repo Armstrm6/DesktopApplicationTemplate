@@ -10,12 +10,16 @@ git lfs install
 dotnet restore
 
 if [ -z "$SKIP_WORKLOAD" ]; then
-    echo "Checking for wpf workload..."
-    if ! dotnet workload list | grep -q wpf; then
-        echo "Installing wpf workload..."
-        dotnet workload install wpf
+    if [ "$OS" = "Windows_NT" ]; then
+        echo "Checking for wpf workload..."
+        if ! dotnet workload list | grep -q wpf; then
+            echo "Installing wpf workload..."
+            dotnet workload install wpf
+        else
+            echo "wpf workload already installed."
+        fi
     else
-        echo "wpf workload already installed."
+        echo "Non-Windows environment detected - skipping wpf workload installation."
     fi
 else
     echo "SKIP_WORKLOAD set - skipping wpf workload installation."
