@@ -20,7 +20,8 @@ namespace DesktopApplicationTemplate.UI.Views
             _startupService = startupService;
 
             DataContext = _viewModel;
-            _logger = new LoggingService(LogBox, Dispatcher);
+            var uiLogger = new RichTextLogger(LogBox, Dispatcher);
+            _logger = new LoggingService(uiLogger);
             _viewModel.Logger = _logger;
             SaveConfirmationHelper.Logger = _logger;
             CloseConfirmationHelper.Logger = _logger;
