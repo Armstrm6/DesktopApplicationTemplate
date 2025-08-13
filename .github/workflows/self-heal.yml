@@ -2,7 +2,7 @@ name: Self Heal
 
 on:
   workflow_run:
-    workflows: ['.NET 8.0 Desktop CI/CD']
+    workflows: ['CI']
     types:
       - completed
 
