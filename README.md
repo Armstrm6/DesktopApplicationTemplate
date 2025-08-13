@@ -5,7 +5,19 @@ This repository contains a basic WPF UI application, a Windows Service and unit 
 ## Prerequisites
 
 - [.NET 8 SDK](https://dotnet.microsoft.com/download) (8.0.404)
+- [Git LFS](https://git-lfs.com) for large binary assets
 - Windows OS is required to run the WPF UI and service projects.
+
+### Git LFS
+
+Install and initialize Git LFS, then download any LFS-tracked binaries:
+
+```bash
+git lfs install
+git lfs pull
+```
+
+Run these commands after cloning to ensure all binary dependencies are available.
 
 This repository includes a `global.json` file that pins the required
 SDK version. If multiple SDKs are installed, the `dotnet` CLI will use
