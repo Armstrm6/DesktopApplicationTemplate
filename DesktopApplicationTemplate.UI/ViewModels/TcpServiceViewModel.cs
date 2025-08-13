@@ -1,16 +1,12 @@
 ﻿using System;
-using Microsoft.CodeAnalysis.CSharp.Scripting;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Models;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -226,7 +222,7 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
             IsServerRunning = false;
             SaveCommand = new RelayCommand(Save);
             ToggleServerCommand = new RelayCommand(ToggleServer);
-            TestScriptCommand = new RelayCommand(TestScript);
+            TestScriptCommand = new AsyncRelayCommand(TestScriptAsync);
             SetDefaultTemplate();
         }
 
@@ -241,41 +237,46 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
         {
             if (SettingsViewModel.TcpLoggingEnabled)
                 Logger?.Log("Toggling server state", LogLevel.Debug);
+
             IsServerRunning = !IsServerRunning;
-            if (IsServerRunning)
-                if (SettingsViewModel.TcpLoggingEnabled)
-                    Logger?.Log($"Server started on {ComputerIp}:{ListeningPort}", LogLevel.Debug);
-            else
-                if (SettingsViewModel.TcpLoggingEnabled)
-                    Logger?.Log("Server stopped", LogLevel.Debug);
+
+            if (!SettingsViewModel.TcpLoggingEnabled)
+                return;
+
+            var message = IsServerRunning
+                ? $"Server started on {ComputerIp}:{ListeningPort}"
+                : "Server stopped";
+            Logger?.Log(message, LogLevel.Debug);
         }
 
-        private void TestScript()
+        private async Task TestScriptAsync()
         {
             if (string.IsNullOrWhiteSpace(TestMessage))
             {
                 if (SettingsViewModel.TcpLoggingEnabled)
                     Logger?.Log("TestScript called with empty message", LogLevel.Warning);
+                return;
             }
+
             if (SettingsViewModel.TcpLoggingEnabled)
                 Logger?.Log($"Executing script using {SelectedLanguage}", LogLevel.Debug);
+
             try
             {
                 if (SelectedLanguage == "C#")
                 {
-                    var script = ScriptContent + $"\nProcess(\"{TestMessage}\");";
-                    var result = CSharpScript.EvaluateAsync<string>(script).Result;
+                    var script = $"{ScriptContent}\nProcess(\"{TestMessage}\");";
+                    var result = await CSharpScript.EvaluateAsync<string>(script);
                     if (SettingsViewModel.TcpLoggingEnabled)
                         Logger?.Log($"Script output: {result}", LogLevel.Debug);
-                    System.Windows.MessageBox.Show(result, "Test Result");
+                    MessageBox.Show(result, "Test Result");
                 }
-                else
+                else if (SettingsViewModel.TcpLoggingEnabled)
                 {
-                    if (SettingsViewModel.TcpLoggingEnabled)
-                        Logger?.Log("Python execution not supported", LogLevel.Warning);
+                    Logger?.Log("Python execution not supported", LogLevel.Warning);
                 }
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 if (SettingsViewModel.TcpLoggingEnabled)
                     Logger?.Log($"Script execution error: {ex.Message}", LogLevel.Error);

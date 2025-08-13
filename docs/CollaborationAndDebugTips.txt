@@ -52,3 +52,11 @@ Effective Prompts / Instructions that worked: Using comment trigger pattern from
 Decisions & Rationale: Centralize validation in CI and enforce via docs and PR template.
 Action Items: Ensure branch protection requires CI.
 Related Commits/PRs: (this PR)
+[2025-08-13 19:01] Topic: Async command refactor
+Context: Introduced AsyncRelayCommand and async script evaluation to prevent UI blocking.
+Observations: Async command simplifies long-running actions and avoids deadlocks.
+Codex Limitations noticed: PowerShell unavailable; tip appended manually.
+Effective Prompts / Instructions that worked: n/a
+Decisions & Rationale: Use AsyncRelayCommand for operations needing await without blocking.
+Action Items: Monitor for unhandled exceptions in async commands.
+Related Commits/PRs: (this PR)
