@@ -1,0 +1,29 @@
+<Window x:Class="DesktopApplicationTemplate.UI.Views.AsciiHelpWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="ASCII Help" Width="800" Height="600"
+        Style="{DynamicResource BubblyWindowStyle}">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/BubblyWindow.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid Margin="10">
+        <TextBlock TextWrapping="Wrap" Width="300">
+            <Run Text="Common ASCII commands:"/>
+            <LineBreak/>
+            <Run Text="ACK (0x06) - acknowledge"/>
+            <LineBreak/>
+            <Run Text="NAK (0x15) - negative acknowledge"/>
+            <LineBreak/>
+            <Run Text="ENQ (0x05) - enquiry"/>
+            <LineBreak/>
+            <Run Text="ETX (0x03) - end of text"/>
+            <LineBreak/>
+            <LineBreak/>
+            <Run Text="Use these byte values when building messages to confirm or reject operations."/>
+        </TextBlock>
+    </Grid>
+</Window>

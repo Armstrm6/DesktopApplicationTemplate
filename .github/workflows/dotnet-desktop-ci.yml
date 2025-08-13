@@ -1,0 +1,113 @@
+name: .NET 8.0 Desktop CI/CD
+
+on:
+  push:
+    branches: [main, dev]
+    tags: ['v*']
+  pull_request:
+    branches: [main, dev]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Install windowsdesktop workload
+        run: dotnet workload install windowsdesktop
+      - name: Restore
+        run: dotnet restore
+      - name: Build
+        run: dotnet build -c Release --no-restore
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: |
+            **/bin/Release/**
+            !**/obj/**
+
+  test:
+    runs-on: windows-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Install windowsdesktop workload
+        run: dotnet workload install windowsdesktop
+      - name: Restore
+        run: dotnet restore
+      - name: Test
+        run: dotnet test -c Release --no-build --collect:"XPlat Code Coverage" --results-directory TestResults
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            TestResults
+            **/coverage.cobertura.xml
+
+  quality:
+    runs-on: windows-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Install windowsdesktop workload
+        run: dotnet workload install windowsdesktop
+      - name: Restore
+        run: dotnet restore
+      - name: Verify formatting
+        run: dotnet format --verify-no-changes
+      - name: Build with warnings as errors
+        run: dotnet build -c Release /p:TreatWarningsAsErrors=true
+
+  package:
+    runs-on: windows-latest
+    needs: [test, quality]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Install windowsdesktop workload
+        run: dotnet workload install windowsdesktop
+      - name: Restore
+        run: dotnet restore
+      - name: Publish
+        run: dotnet publish -c Release -o out
+      - name: Archive package
+        run: Compress-Archive -Path out -DestinationPath MyApp.zip
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-package
+          path: MyApp.zip
+
+  deploy:
+    runs-on: windows-latest
+    needs: package
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Download package
+        uses: actions/download-artifact@v4
+        with:
+          name: app-package
+          path: .
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: MyApp.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

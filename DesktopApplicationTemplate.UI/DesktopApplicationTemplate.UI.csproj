@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+      <OutputType>WinExe</OutputType>
+      <TargetFramework>net8.0-windows</TargetFramework>
+      <Nullable>enable</Nullable>
+      <ImplicitUsings>enable</ImplicitUsings>
+      <UseWPF>true</UseWPF>
+      <UseWindowsForms>false</UseWindowsForms>
+    </PropertyGroup>
+	
+	<PropertyGroup>
+                <StartupObject>DesktopApplicationTemplate.UI.App</StartupObject>
+	</PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.7" />
+    <PackageReference Include="Microsoft.Extensions.Logging.EventLog" Version="9.0.7" />
+    <PackageReference Include="SSH.NET" Version="2025.0.0" />
+    <PackageReference Include="MQTTnet" Version="4.3.7.1207" />
+    <PackageReference Include="FluentFTP" Version="53.0.1" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.10.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.7" />
+    <PackageReference Include="Xceed.Wpf.Toolkit" Version="4.7.25103.5738" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DesktopApplicationTemplate.Service\DesktopApplicationTemplate.Service.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Themes\" />
+    <Resource Include="Themes/BubblyWindow.xaml" />
+    <Resource Include="Themes/LightTheme.xaml" />
+    <Resource Include="Themes/DarkTheme.xaml" />
+    <Resource Include="Themes/ToggleSwitch.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\**\*" />
+  </ItemGroup>
+
+</Project>
