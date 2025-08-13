@@ -414,5 +414,25 @@ namespace DesktopApplicationTemplate.UI.Views
             }
         }
 
+        private void ClearLog_Click(object sender, RoutedEventArgs e)
+        {
+            _logger?.LogInformation("Clear log button clicked");
+            _viewModel.ClearLogs();
+        }
+
+        private void ExportLog_Click(object sender, RoutedEventArgs e)
+        {
+            _logger?.LogInformation("Export log button clicked");
+            var path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "exported_logs.txt");
+            _viewModel.ExportDisplayedLogs(path);
+            _logger?.LogInformation("Logs exported to {Path}", path);
+        }
+
+        private void RefreshLog_Click(object sender, RoutedEventArgs e)
+        {
+            _logger?.LogDebug("Refresh log button clicked");
+            _viewModel.RefreshLogs();
+        }
+
     }
 }
