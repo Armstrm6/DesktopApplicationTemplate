@@ -27,3 +27,12 @@ Effective Prompts / Instructions that worked: Providing exact asset location.
 Decisions & Rationale: Use root-relative resource paths for WPF assets.
 Action Items: Ensure future asset references include leading slash.
 Related Commits/PRs: (this PR)
+
+[2025-08-13 18:09] Topic: CI runs on feature branches
+Context: Enabled GitHub Actions to execute tests on pushes to `feature/**` and `bugfix/**` branches.
+Observations: Codex can push code to trigger remote tests without local execution.
+Codex Limitations noticed: `dotnet test` cannot run `net8.0-windows` tests on Linux.
+Effective Prompts / Instructions that worked: Configuring push patterns and `workflow_dispatch`.
+Decisions & Rationale: Use GitHub-hosted runners to centralize validation.
+Action Items: Monitor CI runs for unexpected failures.
+Related Commits/PRs: (this PR)
