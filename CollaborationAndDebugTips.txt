@@ -33,3 +33,12 @@ Miscellaneous Tips
 - Favor async/await patterns to keep the UI responsive and avoid deadlocks.
 - Reuse existing services and view models instead of duplicating logic.
 - Maintain clear, purpose-driven variable names for readability and maintainability.
+
+[2025-08-13 23:14] Topic: WPF test dispatcher shutdown
+Context: SettingsPageNavigationTests crashed when calling Application.Current.Shutdown directly.
+Observations: WPF requires invoking Shutdown on the owning dispatcher; direct calls raised cross-thread InvalidOperationException.
+Codex Limitations noticed: Local container lacks the .NET SDK to run tests.
+Effective Prompts / Instructions that worked: Provided failing stack trace to guide dispatcher-based fix.
+Decisions & Rationale: Wrap shutdown logic in dispatcher invocation to marshal to the UI thread.
+Action Items: Verify on Windows CI that tests pass with the updated dispatcher call.
+Related Commits/PRs:

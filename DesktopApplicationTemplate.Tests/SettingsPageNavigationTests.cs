@@ -50,7 +50,8 @@ namespace DesktopApplicationTemplate.Tests
                 catch (Exception e) { ex = e; }
                 finally
                 {
-                    System.Windows.Application.Current?.Shutdown();
+                    var dispatcher = Application.Current?.Dispatcher;
+                    dispatcher?.Invoke(() => Application.Current?.Shutdown());
                 }
             });
             thread.SetApartmentState(ApartmentState.STA);
