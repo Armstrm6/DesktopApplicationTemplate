@@ -1,11 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using WpfRichTextBox = System.Windows.Controls.RichTextBox;
-using System.Windows.Documents;
-using WpfBrush = System.Windows.Media.Brush;
-using WpfBrushes = System.Windows.Media.Brushes;
-using System.Windows.Threading;
+using System.Threading.Tasks;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.Core.Services;
 
@@ -13,8 +10,7 @@ namespace DesktopApplicationTemplate.UI.Services
 {
     public class LoggingService : ILoggingService
     {
-        private readonly WpfRichTextBox _outputRichTextBox;
-        private readonly Dispatcher _dispatcher;
+        private readonly IRichTextLogger _richTextLogger;
         private readonly string _logFilePath;
         private readonly List<LogEntry> _logEntries = new();
 
@@ -32,64 +28,59 @@ namespace DesktopApplicationTemplate.UI.Services
 
         public event Action<LogEntry>? LogAdded;
 
-        public LoggingService(WpfRichTextBox outputRichTextBox, Dispatcher dispatcher, string logFilePath = "app.log")
+        public LoggingService(IRichTextLogger richTextLogger, string logFilePath = "app.log")
         {
-            _outputRichTextBox = outputRichTextBox;
-            _dispatcher = dispatcher;
+            _richTextLogger = richTextLogger;
             _logFilePath = logFilePath;
         }
 
         public void Log(string message, LogLevel level)
         {
-            var entry = new LogEntry { Message = $"[{DateTime.Now:HH:mm:ss}] [{level}] {message}",
-                                        Color = LevelToColor(level),
-                                        Level = level };
+            var entry = new LogEntry
+            {
+                Message = $"[{DateTime.Now:HH:mm:ss}] [{level}] {message}",
+                Color = LevelToColor(level),
+                Level = level
+            };
 
             _logEntries.Add(entry);
 
             if (level >= MinimumLevel)
             {
-                _dispatcher.Invoke(() =>
-                {
-                    var paragraph = new Paragraph(new Run(entry.Message) { Foreground = entry.Color });
-                    _outputRichTextBox.Document.Blocks.Add(paragraph);
-                    _outputRichTextBox.ScrollToEnd();
-                });
+                _ = _richTextLogger.AppendAsync(entry);
             }
 
             LogAdded?.Invoke(entry);
 
-            try
-            {
-                System.IO.File.AppendAllText(_logFilePath, entry.Message + Environment.NewLine);
-            }
-            catch
-            {
-                // ignore logging errors
-            }
-
+            _ = WriteToFileAsync(entry.Message + Environment.NewLine);
         }
 
-        private static WpfBrush LevelToColor(LogLevel level) => level switch
+        private static System.Windows.Media.Brush LevelToColor(LogLevel level) => level switch
         {
-            LogLevel.Debug => WpfBrushes.Black,
-            LogLevel.Warning => WpfBrushes.Orange,
-            LogLevel.Error => WpfBrushes.Red,
-            LogLevel.Critical => WpfBrushes.DarkRed,
-            _ => WpfBrushes.Black
+            LogLevel.Debug => System.Windows.Media.Brushes.Black,
+            LogLevel.Warning => System.Windows.Media.Brushes.Orange,
+            LogLevel.Error => System.Windows.Media.Brushes.Red,
+            LogLevel.Critical => System.Windows.Media.Brushes.DarkRed,
+            _ => System.Windows.Media.Brushes.Black
         };
 
         private void UpdateLogDisplay()
         {
-            _dispatcher.Invoke(() =>
+            _ = _richTextLogger.SetEntriesAsync(_logEntries.Where(e => e.Level >= MinimumLevel));
+        }
+
+        private Task WriteToFileAsync(string text)
+        {
+            return Task.Run(async () =>
             {
-                _outputRichTextBox.Document.Blocks.Clear();
-                foreach (var e in _logEntries.Where(e => e.Level >= MinimumLevel))
+                try
                 {
-                    var paragraph = new Paragraph(new Run(e.Message) { Foreground = e.Color });
-                    _outputRichTextBox.Document.Blocks.Add(paragraph);
+                    await File.AppendAllTextAsync(_logFilePath, text).ConfigureAwait(false);
                 }
-                _outputRichTextBox.ScrollToEnd();
+                catch
+                {
+                    // ignore logging errors
+                }
             });
         }
     }

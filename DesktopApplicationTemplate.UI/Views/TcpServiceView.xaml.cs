@@ -21,7 +21,8 @@ namespace DesktopApplicationTemplate.UI.Views
             _startupService = startupService;
 
             DataContext = _viewModel;
-            _logger = new LoggingService(LogBox, Dispatcher);
+            var uiLogger = new RichTextLogger(LogBox, Dispatcher);
+            _logger = new LoggingService(uiLogger);
             _viewModel.Logger = _logger;
             SaveConfirmationHelper.Logger = _logger;
             CloseConfirmationHelper.Logger = _logger;
@@ -45,9 +46,6 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private void LogLevelBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (_logger == null)
-                return;
-
             if (LogLevelBox.SelectedItem is ComboBoxItem item)
             {
                 switch (item.Content?.ToString())
