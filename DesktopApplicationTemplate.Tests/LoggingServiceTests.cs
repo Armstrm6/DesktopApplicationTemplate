@@ -30,7 +30,8 @@ namespace DesktopApplicationTemplate.Tests
                 try
                 {
                     var box = new System.Windows.Controls.RichTextBox();
-                    var service = new LoggingService(box, Dispatcher.CurrentDispatcher);
+                    var service = new LoggingService();
+                    service.Initialize(box, Dispatcher.CurrentDispatcher);
 
                     service.Log("test", level);
 
@@ -68,7 +69,8 @@ namespace DesktopApplicationTemplate.Tests
                 try
                 {
                     var box = new System.Windows.Controls.RichTextBox();
-                    var service = new LoggingService(box, Dispatcher.CurrentDispatcher, path);
+                    var service = new LoggingService(path);
+                    service.Initialize(box, Dispatcher.CurrentDispatcher);
                     service.Log("file-test", LogLevel.Debug);
                     var content = File.ReadAllText(path);
                     Assert.Contains("file-test", content);
@@ -109,7 +111,8 @@ namespace DesktopApplicationTemplate.Tests
                 try
                 {
                     var box = new System.Windows.Controls.RichTextBox();
-                    var service = new LoggingService(box, Dispatcher.CurrentDispatcher);
+                    var service = new LoggingService();
+                    service.Initialize(box, Dispatcher.CurrentDispatcher);
                     service.Log("debug", LogLevel.Debug);
                     service.Log("error", LogLevel.Error);
                     service.MinimumLevel = LogLevel.Error;

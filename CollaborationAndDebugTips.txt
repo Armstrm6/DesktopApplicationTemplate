@@ -1,0 +1,4 @@
+# Collaboration And Debug Tips
+- Incorporating services into dependency injection ensures views and view models remain testable and modular.
+- When refactoring static helpers, replace shared state with constructor injection to simplify unit testing.
+- Logging services that interact with UI elements can be initialized after construction to maintain DI compatibility.

@@ -82,14 +82,23 @@ namespace DesktopApplicationTemplate.UI.Views
             {
                 "TCP" => new TcpServiceView(
                     App.AppHost.Services.GetRequiredService<TcpServiceViewModel>(),
-                    App.AppHost.Services.GetRequiredService<IStartupService>()),
-                "HTTP" => App.AppHost.Services.GetRequiredService<HttpServiceView>(),
+                    App.AppHost.Services.GetRequiredService<IStartupService>(),
+                    App.AppHost.Services.GetRequiredService<ILoggingService>()),
+                "HTTP" => new HttpServiceView(
+                    App.AppHost.Services.GetRequiredService<HttpServiceViewModel>(),
+                    App.AppHost.Services.GetRequiredService<ILoggingService>()),
                 "File Observer" => App.AppHost.Services.GetRequiredService<FileObserverView>(),
                 "HID" => App.AppHost.Services.GetRequiredService<HidViews>(),
                 "Heartbeat" => new HeartbeatView(App.AppHost.Services.GetRequiredService<HeartbeatViewModel>()),
-                "SCP" => new SCPServiceView(App.AppHost.Services.GetRequiredService<ScpServiceViewModel>()),
-                "MQTT" => new MQTTServiceView(App.AppHost.Services.GetRequiredService<MqttServiceViewModel>()),
-                "FTP" => new FTPServiceView(App.AppHost.Services.GetRequiredService<FtpServiceViewModel>()),
+                "SCP" => new SCPServiceView(
+                    App.AppHost.Services.GetRequiredService<ScpServiceViewModel>(),
+                    App.AppHost.Services.GetRequiredService<ILoggingService>()),
+                "MQTT" => new MQTTServiceView(
+                    App.AppHost.Services.GetRequiredService<MqttServiceViewModel>(),
+                    App.AppHost.Services.GetRequiredService<ILoggingService>()),
+                "FTP" => new FTPServiceView(
+                    App.AppHost.Services.GetRequiredService<FtpServiceViewModel>(),
+                    App.AppHost.Services.GetRequiredService<ILoggingService>()),
                 _ => null
             };
 

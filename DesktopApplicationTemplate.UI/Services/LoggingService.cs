@@ -12,8 +12,8 @@ namespace DesktopApplicationTemplate.UI.Services
 {
     public class LoggingService : ILoggingService
     {
-        private readonly WpfRichTextBox _outputRichTextBox;
-        private readonly Dispatcher _dispatcher;
+        private WpfRichTextBox? _outputRichTextBox;
+        private Dispatcher? _dispatcher;
         private readonly string _logFilePath;
         private readonly List<LogEntry> _logEntries = new();
 
@@ -31,11 +31,15 @@ namespace DesktopApplicationTemplate.UI.Services
 
         public event Action<LogEntry>? LogAdded;
 
-        public LoggingService(WpfRichTextBox outputRichTextBox, Dispatcher dispatcher, string logFilePath = "app.log")
+        public LoggingService(string logFilePath = "app.log")
+        {
+            _logFilePath = logFilePath;
+        }
+
+        public void Initialize(WpfRichTextBox outputRichTextBox, Dispatcher dispatcher)
         {
             _outputRichTextBox = outputRichTextBox;
             _dispatcher = dispatcher;
-            _logFilePath = logFilePath;
         }
 
         public void Log(string message, LogLevel level)
@@ -46,7 +50,7 @@ namespace DesktopApplicationTemplate.UI.Services
 
             _logEntries.Add(entry);
 
-            if (level >= MinimumLevel)
+            if (level >= MinimumLevel && _dispatcher != null && _outputRichTextBox != null)
             {
                 _dispatcher.Invoke(() =>
                 {
@@ -80,6 +84,9 @@ namespace DesktopApplicationTemplate.UI.Services
 
         private void UpdateLogDisplay()
         {
+            if (_dispatcher == null || _outputRichTextBox == null)
+                return;
+
             _dispatcher.Invoke(() =>
             {
                 _outputRichTextBox.Document.Blocks.Clear();

@@ -1,30 +1,25 @@
 using System.Windows.Controls;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Services;
-using DesktopApplicationTemplate.UI.Helpers;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
     public partial class SCPServiceView : Page
     {
         private readonly ScpServiceViewModel _viewModel;
-        private readonly LoggingService _logger;
-        public SCPServiceView(ScpServiceViewModel vm)
+        private readonly ILoggingService _logger;
+        public SCPServiceView(ScpServiceViewModel vm, ILoggingService logger)
         {
             InitializeComponent();
             _viewModel = vm;
             DataContext = vm;
-            _logger = new LoggingService(LogBox, Dispatcher);
+            _logger = logger;
+            (logger as LoggingService)?.Initialize(LogBox, Dispatcher);
             _viewModel.Logger = _logger;
-            SaveConfirmationHelper.Logger = _logger;
-            CloseConfirmationHelper.Logger = _logger;
         }
 
         private void LogLevelBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (_logger == null)
-                return;
-
             if (LogLevelBox.SelectedItem is ComboBoxItem item)
             {
                 switch (item.Content?.ToString())

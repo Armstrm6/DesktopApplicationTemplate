@@ -1,4 +1,5 @@
 using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Models;
 using System.Collections.Generic;
 
 namespace DesktopApplicationTemplate.Tests
@@ -7,9 +8,14 @@ namespace DesktopApplicationTemplate.Tests
     {
         public List<(string Message, LogLevel Level)> Entries { get; } = new();
 
+        public LogLevel MinimumLevel { get; set; } = LogLevel.Debug;
+
+        public event Action<LogEntry>? LogAdded;
+
         public void Log(string message, LogLevel level)
         {
             Entries.Add((message, level));
+            LogAdded?.Invoke(new LogEntry { Message = message, Level = level, Color = System.Windows.Media.Brushes.Black });
         }
     }
 }

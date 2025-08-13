@@ -1,13 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DesktopApplicationTemplate.UI.Services
 {
     public interface ILoggingService
     {
+        /// <summary>
+        /// Gets or sets the minimum log level that will be processed.
+        /// </summary>
+        LogLevel MinimumLevel { get; set; }
+
+        /// <summary>
+        /// Logs a message at the specified level.
+        /// </summary>
         void Log(string message, LogLevel level);
     }
 

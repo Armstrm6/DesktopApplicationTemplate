@@ -1,42 +1,47 @@
+using System;
 using System.Windows;
+using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Views;
-using DesktopApplicationTemplate.UI.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DesktopApplicationTemplate.UI.Helpers
 {
-    public static class SaveConfirmationHelper
+    public class SaveConfirmationHelper
     {
-        public static ILoggingService? Logger { get; set; }
+        private readonly ILoggingService? _logger;
+
+        public SaveConfirmationHelper(ILoggingService? logger = null)
+        {
+            _logger = logger;
+        }
+
         /// <summary>
         /// Gets or sets a value indicating whether the save confirmation dialog
-        /// should be suppressed. This simply forwards to
-        /// <see cref="SettingsViewModel.SaveConfirmationSuppressed"/> so callers
-        /// do not need to depend on <see cref="SettingsViewModel"/> directly.
+        /// should be suppressed. This forwards to <see cref="SettingsViewModel.SaveConfirmationSuppressed"/>.
         /// </summary>
-        public static bool SaveConfirmationSuppressed
+        public bool SaveConfirmationSuppressed
         {
             get => SettingsViewModel.SaveConfirmationSuppressed;
             set => SettingsViewModel.SaveConfirmationSuppressed = value;
         }
 
-        public static event Action? SaveConfirmed;
+        public event Action? SaveConfirmed;
 
-        public static void Show()
+        public void Show()
         {
-            Logger?.Log("Displaying save confirmation", LogLevel.Debug);
+            _logger?.Log("Displaying save confirmation", LogLevel.Debug);
             if (SaveConfirmationSuppressed)
             {
-                Logger?.Log("Confirmation suppressed", LogLevel.Debug);
+                _logger?.Log("Confirmation suppressed", LogLevel.Debug);
                 SaveConfirmed?.Invoke();
-                Logger?.Log("Save confirmed via suppression", LogLevel.Debug);
+                _logger?.Log("Save confirmed via suppression", LogLevel.Debug);
                 return;
             }
 
             var window = new SaveConfirmationWindow
             {
-                Owner = System.Windows.Application.Current.MainWindow
+                Owner = Application.Current.MainWindow
             };
             if (window.ShowDialog() == true)
             {
@@ -48,7 +53,7 @@ namespace DesktopApplicationTemplate.UI.Helpers
                 }
 
                 SaveConfirmed?.Invoke();
-                Logger?.Log("Save confirmed via dialog", LogLevel.Debug);
+                _logger?.Log("Save confirmed via dialog", LogLevel.Debug);
             }
         }
     }

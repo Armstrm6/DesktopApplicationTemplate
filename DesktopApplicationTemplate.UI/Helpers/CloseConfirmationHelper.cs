@@ -1,27 +1,32 @@
-using System.Windows;
+using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Views;
-using DesktopApplicationTemplate.UI.Services;
 using Microsoft.Extensions.DependencyInjection;
+using System.Windows;
 
 namespace DesktopApplicationTemplate.UI.Helpers
 {
-    public static class CloseConfirmationHelper
+    public class CloseConfirmationHelper
     {
-        public static ILoggingService? Logger { get; set; }
+        private readonly ILoggingService? _logger;
 
-        public static bool CloseConfirmationSuppressed
+        public CloseConfirmationHelper(ILoggingService? logger = null)
+        {
+            _logger = logger;
+        }
+
+        public bool CloseConfirmationSuppressed
         {
             get => SettingsViewModel.CloseConfirmationSuppressed;
             set => SettingsViewModel.CloseConfirmationSuppressed = value;
         }
 
-        public static bool Show()
+        public bool Show()
         {
-            Logger?.Log("Displaying close confirmation", LogLevel.Debug);
+            _logger?.Log("Displaying close confirmation", LogLevel.Debug);
             if (CloseConfirmationSuppressed)
             {
-                Logger?.Log("Close confirmation suppressed", LogLevel.Debug);
+                _logger?.Log("Close confirmation suppressed", LogLevel.Debug);
                 return true;
             }
 
@@ -37,7 +42,7 @@ namespace DesktopApplicationTemplate.UI.Helpers
                 settingsVm.Save();
             }
 
-            Logger?.Log(result ? "Close confirmed" : "Close canceled", LogLevel.Debug);
+            _logger?.Log(result ? "Close confirmed" : "Close canceled", LogLevel.Debug);
             return result;
         }
     }

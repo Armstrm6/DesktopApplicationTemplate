@@ -1,19 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using DesktopApplicationTemplate.UI.Services;
-using DesktopApplicationTemplate.UI.Helpers;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
@@ -23,17 +10,16 @@ namespace DesktopApplicationTemplate.UI.Views
     public partial class HttpServiceView : Page
     {
         private readonly ViewModels.HttpServiceViewModel _viewModel;
-        private readonly LoggingService _logger;
+        private readonly ILoggingService _logger;
 
-        public HttpServiceView(ViewModels.HttpServiceViewModel viewModel)
+        public HttpServiceView(ViewModels.HttpServiceViewModel viewModel, ILoggingService logger)
         {
             InitializeComponent();
             _viewModel = viewModel;
             DataContext = _viewModel;
-            _logger = new LoggingService(LogBox, Dispatcher);
+            _logger = logger;
+            (logger as LoggingService)?.Initialize(LogBox, Dispatcher);
             _viewModel.Logger = _logger;
-            SaveConfirmationHelper.Logger = _logger;
-            CloseConfirmationHelper.Logger = _logger;
         }
 
         private void Help_Click(object sender, RoutedEventArgs e)
@@ -44,9 +30,6 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private void LogLevelBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (_logger == null)
-                return;
-
             if (LogLevelBox.SelectedItem is ComboBoxItem item)
             {
                 switch (item.Content?.ToString())

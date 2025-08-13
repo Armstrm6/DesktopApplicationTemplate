@@ -65,8 +65,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public ICommand BuildCommand { get; }
         public ICommand SaveCommand { get; }
 
-        public HidViewModel()
+        private readonly SaveConfirmationHelper _saveHelper;
+
+        public HidViewModel(SaveConfirmationHelper saveHelper)
         {
+            _saveHelper = saveHelper;
             BuildCommand = new RelayCommand(BuildMessage);
             SaveCommand = new RelayCommand(Save);
         }
@@ -86,7 +89,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private void Save()
         {
             Logger?.Log("Saving HID configuration", LogLevel.Debug);
-            SaveConfirmationHelper.Show();
+            _saveHelper.Show();
         }
     }
 }

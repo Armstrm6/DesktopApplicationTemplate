@@ -38,6 +38,9 @@ namespace DesktopApplicationTemplate.UI
         private void ConfigureServices(IConfiguration configuration, IServiceCollection services)
         {
             services.AddSingleton<MainView>();
+            services.AddTransient<ILoggingService, LoggingService>();
+            services.AddSingleton<SaveConfirmationHelper>();
+            services.AddSingleton<CloseConfirmationHelper>();
             services.AddSingleton<IStartupService, StartupService>();
             services.AddSingleton<IProcessRunner, ProcessRunner>();
             services.AddSingleton<INetworkConfigurationService, NetworkConfigurationService>();

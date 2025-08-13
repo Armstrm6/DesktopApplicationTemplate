@@ -1,5 +1,6 @@
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI.Helpers;
 using System.Threading.Tasks;
 using System.Net.Http;
 using Moq;
@@ -17,7 +18,7 @@ namespace DesktopApplicationTemplate.Tests
         public void TcpService_ToggleServer_LogsMessage()
         {
             var logger = new Mock<ILoggingService>();
-            var vm = new TcpServiceViewModel { Logger = logger.Object };
+            var vm = new TcpServiceViewModel(new SaveConfirmationHelper(logger.Object)) { Logger = logger.Object };
             vm.ComputerIp = "127.0.0.1";
             vm.ListeningPort = "5000";
 
@@ -34,7 +35,7 @@ namespace DesktopApplicationTemplate.Tests
         public async Task HttpService_InvalidUrl_LogsWarning()
         {
             var logger = new Mock<ILoggingService>();
-            var vm = new HttpServiceViewModel { Logger = logger.Object };
+            var vm = new HttpServiceViewModel(new SaveConfirmationHelper(logger.Object)) { Logger = logger.Object };
             vm.Url = string.Empty;
 
             await vm.SendRequestAsync();
@@ -58,7 +59,7 @@ namespace DesktopApplicationTemplate.Tests
                     Content = new StringContent("ok")
                 });
 
-            var vm = new HttpServiceViewModel { Logger = logger.Object, MessageHandler = handler.Object, Url = "http://localhost/" };
+            var vm = new HttpServiceViewModel(new SaveConfirmationHelper(logger.Object)) { Logger = logger.Object, MessageHandler = handler.Object, Url = "http://localhost/" };
 
             await vm.SendRequestAsync();
 
@@ -75,7 +76,7 @@ namespace DesktopApplicationTemplate.Tests
         public void HttpService_SetInvalidUrl_AddsError()
         {
             var logger = new Mock<ILoggingService>();
-            var vm = new HttpServiceViewModel { Logger = logger.Object };
+            var vm = new HttpServiceViewModel(new SaveConfirmationHelper(logger.Object)) { Logger = logger.Object };
             vm.Url = "htp://bad";
 
             Assert.True(vm.HasErrors);

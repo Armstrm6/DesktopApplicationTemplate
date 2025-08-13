@@ -51,8 +51,11 @@ public class ScpServiceViewModel : ViewModelBase, ILoggingViewModel, INetworkAwa
 
         public ILoggingService? Logger { get; set; }
 
-        public ScpServiceViewModel()
+        private readonly SaveConfirmationHelper _saveHelper;
+
+        public ScpServiceViewModel(SaveConfirmationHelper saveHelper)
         {
+            _saveHelper = saveHelper;
             BrowseCommand = new RelayCommand(Browse);
             TransferCommand = new RelayCommand(async () => await TransferAsync());
             SaveCommand = new RelayCommand(Save);
@@ -76,7 +79,7 @@ public class ScpServiceViewModel : ViewModelBase, ILoggingViewModel, INetworkAwa
             Logger?.Log("SCP transfer finished", LogLevel.Debug);
         }
 
-        private void Save() => SaveConfirmationHelper.Show();
+        private void Save() => _saveHelper.Show();
 
         public void UpdateNetworkConfiguration(NetworkConfiguration configuration)
         {

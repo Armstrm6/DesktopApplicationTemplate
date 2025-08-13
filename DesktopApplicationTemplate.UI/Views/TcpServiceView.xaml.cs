@@ -2,7 +2,6 @@
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.Views;
-using DesktopApplicationTemplate.UI.Helpers;
 using System.Windows.Controls;
 
 namespace DesktopApplicationTemplate.UI.Views
@@ -11,19 +10,18 @@ namespace DesktopApplicationTemplate.UI.Views
     {
         private readonly TcpServiceViewModel _viewModel;
         private readonly IStartupService _startupService;
-        private readonly LoggingService _logger;
+        private readonly ILoggingService _logger;
 
-        public TcpServiceView(TcpServiceViewModel viewModel, IStartupService startupService)
+        public TcpServiceView(TcpServiceViewModel viewModel, IStartupService startupService, ILoggingService logger)
         {
             InitializeComponent();
             _viewModel = viewModel;
             _startupService = startupService;
 
             DataContext = _viewModel;
-            _logger = new LoggingService(LogBox, Dispatcher);
+            _logger = logger;
+            (logger as LoggingService)?.Initialize(LogBox, Dispatcher);
             _viewModel.Logger = _logger;
-            SaveConfirmationHelper.Logger = _logger;
-            CloseConfirmationHelper.Logger = _logger;
 
             Loaded += MainWindow_Loaded;
         }

@@ -63,9 +63,11 @@ public class MqttServiceViewModel : ViewModelBase, ILoggingViewModel, INetworkAw
         public ILoggingService? Logger { get; set; }
 
         private readonly MqttService _service;
+        private readonly SaveConfirmationHelper _saveHelper;
 
-        public MqttServiceViewModel(MqttService? service = null, ILoggingService? logger = null)
+        public MqttServiceViewModel(SaveConfirmationHelper saveHelper, MqttService? service = null, ILoggingService? logger = null)
         {
+            _saveHelper = saveHelper;
             Logger = logger;
             _service = service ?? new MqttService(logger);
             AddTopicCommand = new RelayCommand(() => { if(!string.IsNullOrWhiteSpace(NewTopic)){Topics.Add(NewTopic); NewTopic = string.Empty;} });
@@ -94,7 +96,7 @@ public class MqttServiceViewModel : ViewModelBase, ILoggingViewModel, INetworkAw
             Logger?.Log("MQTT publish finished", LogLevel.Debug);
         }
 
-        private void Save() => SaveConfirmationHelper.Show();
+        private void Save() => _saveHelper.Show();
 
         public void UpdateNetworkConfiguration(NetworkConfiguration configuration)
         {
