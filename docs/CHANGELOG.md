@@ -10,3 +10,6 @@
 
 ### Removed
 - Placeholder "Desktop Template" text from the navigation bar.
+
+### Fixed
+- Corrected logo resource path so the image renders in the navigation bar.

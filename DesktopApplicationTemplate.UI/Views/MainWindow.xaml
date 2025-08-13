@@ -33,7 +33,7 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Image Source="Assets/DesktopTemplateLayout-Logo.png"
+            <Image Source="/Assets/DesktopTemplateLayout-Logo.png"
                    Height="60"
                    Margin="10,15,0,15"
                    VerticalAlignment="Center"

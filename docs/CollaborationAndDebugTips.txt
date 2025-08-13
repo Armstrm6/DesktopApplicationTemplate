@@ -18,3 +18,12 @@ Effective Prompts / Instructions that worked: n/a
 Decisions & Rationale: Use embedded image resource for branding.
 Action Items: none
 Related Commits/PRs: (this PR)
+
+[2025-08-13 17:52] Topic: Logo resource path fix
+Context: Navigation bar logo failed to render because image path was relative to the view folder.
+Observations: Using a root-relative path loads the embedded image correctly.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: Providing exact asset location.
+Decisions & Rationale: Use root-relative resource paths for WPF assets.
+Action Items: Ensure future asset references include leading slash.
+Related Commits/PRs: (this PR)
