@@ -52,7 +52,7 @@ jobs:
       - name: Restore
         run: dotnet restore
       - name: Test
-        run: dotnet test -c Release --no-build --collect:"XPlat Code Coverage" --results-directory TestResults
+        run: dotnet test -c Release --collect:"XPlat Code Coverage" --results-directory TestResults
       - name: Upload test results
         uses: actions/upload-artifact@v4
         with:
