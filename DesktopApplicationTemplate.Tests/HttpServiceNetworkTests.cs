@@ -1,5 +1,7 @@
 using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.Tests;
+using DesktopApplicationTemplate.Core.Services;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -37,7 +39,8 @@ public class HttpServiceNetworkTests
             listener.Stop();
         });
 
-        var vm = new HttpServiceViewModel { Url = $"http://localhost:{port}/" };
+        var helper = new SaveConfirmationHelper(new Mock<ILoggingService>().Object);
+        var vm = new HttpServiceViewModel(helper) { Url = $"http://localhost:{port}/" };
         await vm.SendRequestAsync();
 
         await respondTask;
@@ -63,7 +66,8 @@ public class HttpServiceNetworkTests
                 Content = new StringContent("ok")
             });
 
-        var vm = new HttpServiceViewModel { Url = "http://localhost/", SelectedMethod = "POST", RequestBody = "data", MessageHandler = handlerMock.Object };
+        var helper = new SaveConfirmationHelper(new Mock<ILoggingService>().Object);
+        var vm = new HttpServiceViewModel(helper) { Url = "http://localhost/", SelectedMethod = "POST", RequestBody = "data", MessageHandler = handlerMock.Object };
         vm.Headers.Add(new HttpServiceViewModel.HeaderItem { Key = "X-Test", Value = "1" });
 
         await vm.SendRequestAsync();

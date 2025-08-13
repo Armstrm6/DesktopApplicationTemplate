@@ -81,16 +81,14 @@ namespace DesktopApplicationTemplate.UI.Views
 
             svc.ServicePage = svc.ServiceType switch
             {
-                "TCP" => new TcpServiceView(
-                    App.AppHost.Services.GetRequiredService<TcpServiceViewModel>(),
-                    App.AppHost.Services.GetRequiredService<IStartupService>()),
+                "TCP" => App.AppHost.Services.GetRequiredService<TcpServiceView>(),
                 "HTTP" => App.AppHost.Services.GetRequiredService<HttpServiceView>(),
                 "File Observer" => App.AppHost.Services.GetRequiredService<FileObserverView>(),
                 "HID" => App.AppHost.Services.GetRequiredService<HidViews>(),
-                "Heartbeat" => new HeartbeatView(App.AppHost.Services.GetRequiredService<HeartbeatViewModel>()),
-                "SCP" => new SCPServiceView(App.AppHost.Services.GetRequiredService<ScpServiceViewModel>()),
-                "MQTT" => new MQTTServiceView(App.AppHost.Services.GetRequiredService<MqttServiceViewModel>()),
-                "FTP" => new FTPServiceView(App.AppHost.Services.GetRequiredService<FtpServiceViewModel>()),
+                "Heartbeat" => App.AppHost.Services.GetRequiredService<HeartbeatView>(),
+                "SCP" => App.AppHost.Services.GetRequiredService<SCPServiceView>(),
+                "MQTT" => App.AppHost.Services.GetRequiredService<MQTTServiceView>(),
+                "FTP" => App.AppHost.Services.GetRequiredService<FTPServiceView>(),
                 _ => null
             };
 

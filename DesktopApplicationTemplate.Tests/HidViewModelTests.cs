@@ -1,6 +1,7 @@
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI.Helpers;
 using Moq;
 
 namespace DesktopApplicationTemplate.Tests
@@ -20,7 +21,8 @@ namespace DesktopApplicationTemplate.Tests
             };
 
             var logger = new Mock<ILoggingService>();
-            var vm = new HidViewModel { Logger = logger.Object };
+            var helper = new SaveConfirmationHelper(logger.Object);
+            var vm = new HidViewModel(helper) { Logger = logger.Object };
             vm.AvailableServices.Add("Target");
             vm.AttachedService = "Target";
             vm.MessageTemplate = "test";

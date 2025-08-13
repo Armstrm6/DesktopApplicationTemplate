@@ -1,6 +1,7 @@
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI.Helpers;
 using MQTTnet.Client;
 using Moq;
 using Xunit;
@@ -20,7 +21,8 @@ namespace DesktopApplicationTemplate.Tests
             {
                 return;
             }
-            var vm = new MqttServiceViewModel();
+            var helper = new SaveConfirmationHelper(new Mock<ILoggingService>().Object);
+            var vm = new MqttServiceViewModel(helper);
             vm.NewTopic = "test/topic";
             vm.AddTopicCommand.Execute(null);
             Assert.Contains("test/topic", vm.Topics);
@@ -40,7 +42,8 @@ namespace DesktopApplicationTemplate.Tests
             client.Setup(c => c.SubscribeAsync(It.IsAny<MqttClientSubscribeOptions>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new MqttClientSubscribeResult(0, Array.Empty<MqttClientSubscribeResultItem>(), string.Empty, Array.Empty<MqttUserProperty>()));
             var service = new MqttService(client.Object, logger.Object);
-            var vm = new MqttServiceViewModel(service, logger.Object) { Host = "127.0.0.1", Port = "1883", ClientId = "c" };
+            var helper = new SaveConfirmationHelper(logger.Object);
+            var vm = new MqttServiceViewModel(helper, service, logger.Object) { Host = "127.0.0.1", Port = "1883", ClientId = "c" };
 
             await vm.ConnectAsync();
 

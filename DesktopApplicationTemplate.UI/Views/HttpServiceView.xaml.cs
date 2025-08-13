@@ -13,7 +13,6 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using DesktopApplicationTemplate.UI.Services;
-using DesktopApplicationTemplate.UI.Helpers;
 
 using DesktopApplicationTemplate.Core.Services;
 
@@ -25,18 +24,15 @@ namespace DesktopApplicationTemplate.UI.Views
     public partial class HttpServiceView : Page
     {
         private readonly ViewModels.HttpServiceViewModel _viewModel;
-        private readonly LoggingService _logger;
+        private readonly ILoggingService _logger;
 
-        public HttpServiceView(ViewModels.HttpServiceViewModel viewModel)
+        public HttpServiceView(ViewModels.HttpServiceViewModel viewModel, ILoggingService logger)
         {
             InitializeComponent();
             _viewModel = viewModel;
             DataContext = _viewModel;
-            var uiLogger = new RichTextLogger(LogBox, Dispatcher);
-            _logger = new LoggingService(uiLogger);
+            _logger = logger;
             _viewModel.Logger = _logger;
-            SaveConfirmationHelper.Logger = _logger;
-            CloseConfirmationHelper.Logger = _logger;
         }
 
         private void Help_Click(object sender, RoutedEventArgs e)
@@ -49,20 +45,23 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             if (LogLevelBox.SelectedItem is ComboBoxItem item)
             {
-                switch (item.Content?.ToString())
+                if (_logger is LoggingService concrete)
                 {
-                    case "Warning":
-                        _logger.MinimumLevel = LogLevel.Warning;
-                        break;
-                    case "Error":
-                        _logger.MinimumLevel = LogLevel.Error;
-                        break;
-                    case "Debug":
-                        _logger.MinimumLevel = LogLevel.Debug;
-                        break;
-                    default:
-                        _logger.MinimumLevel = LogLevel.Debug;
-                        break;
+                    switch (item.Content?.ToString())
+                    {
+                        case "Warning":
+                            concrete.MinimumLevel = LogLevel.Warning;
+                            break;
+                        case "Error":
+                            concrete.MinimumLevel = LogLevel.Error;
+                            break;
+                        case "Debug":
+                            concrete.MinimumLevel = LogLevel.Debug;
+                            break;
+                        default:
+                            concrete.MinimumLevel = LogLevel.Debug;
+                            break;
+                    }
                 }
             }
         }

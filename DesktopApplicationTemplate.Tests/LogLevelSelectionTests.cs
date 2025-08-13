@@ -1,12 +1,15 @@
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.UI.Helpers;
 using System;
 using System.Linq;
 using System.Threading;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using Xunit;
+using Moq;
+using DesktopApplicationTemplate.Core.Services;
 
 namespace DesktopApplicationTemplate.Tests
 {
@@ -27,8 +30,11 @@ namespace DesktopApplicationTemplate.Tests
                     if (System.Windows.Application.Current == null)
                         new DesktopApplicationTemplate.UI.App();
 
-                    var viewModel = new HttpServiceViewModel();
-                    var view = new HttpServiceView(viewModel);
+                    var helper = new SaveConfirmationHelper(new Mock<ILoggingService>().Object);
+                    var viewModel = new HttpServiceViewModel(helper);
+                    var logger = new LoggingService(new NullRichTextLogger());
+                    viewModel.Logger = logger;
+                    var view = new HttpServiceView(viewModel, logger);
 
                     var targetItem = view.LogLevelBox.Items
                         .OfType<ComboBoxItem>()
@@ -48,8 +54,8 @@ namespace DesktopApplicationTemplate.Tests
                             Array.Empty<object>())
                     });
 
-                    var logger = Assert.IsType<LoggingService>(viewModel.Logger);
-                    Assert.Equal(LogLevel.Error, logger.MinimumLevel);
+                    var concrete = Assert.IsType<LoggingService>(viewModel.Logger);
+                    Assert.Equal(LogLevel.Error, concrete.MinimumLevel);
                 }
                 catch (Exception e)
                 {

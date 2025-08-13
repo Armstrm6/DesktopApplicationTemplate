@@ -50,8 +50,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public ICommand BuildCommand { get; }
         public ICommand SaveCommand { get; }
 
-        public HeartbeatViewModel()
+        private readonly SaveConfirmationHelper _saveHelper;
+
+        public HeartbeatViewModel(SaveConfirmationHelper saveHelper)
         {
+            _saveHelper = saveHelper;
             BuildCommand = new RelayCommand(BuildMessage);
             SaveCommand = new RelayCommand(Save);
         }
@@ -70,7 +73,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             FinalMessage = msg;
         }
 
-        private void Save() => SaveConfirmationHelper.Show();
+        private void Save() => _saveHelper.Show();
 
         // OnPropertyChanged from ViewModelBase
     }

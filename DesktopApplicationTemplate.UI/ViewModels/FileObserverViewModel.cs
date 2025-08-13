@@ -78,8 +78,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public ICommand BrowseCommand { get; }
         public ICommand SaveCommand { get; }
 
-        public FileObserverViewModel()
+        private readonly SaveConfirmationHelper _saveHelper;
+
+        public FileObserverViewModel(SaveConfirmationHelper saveHelper)
         {
+            _saveHelper = saveHelper;
             AddObserverCommand = new RelayCommand(AddObserver);
             RemoveObserverCommand = new RelayCommand(RemoveObserver);
             BrowseCommand = new RelayCommand(BrowseFilePath);
@@ -129,7 +132,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
         }
 
-        private void Save() => SaveConfirmationHelper.Show();
+        private void Save() => _saveHelper.Show();
 
         // OnPropertyChanged inherited from ViewModelBase
     }

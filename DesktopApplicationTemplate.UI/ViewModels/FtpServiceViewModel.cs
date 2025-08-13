@@ -74,9 +74,11 @@ public class FtpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
         public IFtpService? Service { get; set; }
 
         private readonly IFileDialogService _fileDialog;
+        private readonly SaveConfirmationHelper _saveHelper;
 
-        public FtpServiceViewModel(IFileDialogService? fileDialog = null)
+        public FtpServiceViewModel(SaveConfirmationHelper saveHelper, IFileDialogService? fileDialog = null)
         {
+            _saveHelper = saveHelper;
             _fileDialog = fileDialog ?? new FileDialogService();
             BrowseCommand = new RelayCommand(Browse);
             TransferCommand = new RelayCommand(async () => await TransferAsync());
@@ -101,7 +103,7 @@ public class FtpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
             Logger?.Log("Finished FTP transfer", LogLevel.Debug);
         }
 
-        private void Save() => SaveConfirmationHelper.Show();
+        private void Save() => _saveHelper.Show();
 
         public void UpdateNetworkConfiguration(NetworkConfiguration configuration)
         {
