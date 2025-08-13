@@ -22,9 +22,6 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private void LogLevelBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (_logger == null)
-                return;
-
             if (LogLevelBox.SelectedItem is ComboBoxItem item)
             {
                 switch (item.Content?.ToString())
