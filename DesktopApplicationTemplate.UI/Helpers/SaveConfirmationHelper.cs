@@ -1,7 +1,7 @@
 using System.Windows;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Views;
-using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DesktopApplicationTemplate.UI.Helpers

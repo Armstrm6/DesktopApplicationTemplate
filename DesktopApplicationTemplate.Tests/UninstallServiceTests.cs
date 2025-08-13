@@ -1,7 +1,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using DesktopApplication.Installer.Services;
-using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Core.Services;
 using Moq;
 using Xunit;
 

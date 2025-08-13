@@ -11,6 +11,7 @@
   <ItemGroup>
     <ProjectReference Include="..\DesktopApplicationTemplate.UI\DesktopApplicationTemplate.UI.csproj" />
     <ProjectReference Include="..\DesktopApplicationTemplate.Service\DesktopApplicationTemplate.Service.csproj" />
+    <ProjectReference Include="..\DesktopApplicationTemplate.Core\DesktopApplicationTemplate.Core.csproj" />
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.7" />
     <PackageReference Include="Microsoft.Extensions.Logging.EventLog" Version="9.0.7" />
     <PackageReference Include="SSH.NET" Version="2025.0.0" />

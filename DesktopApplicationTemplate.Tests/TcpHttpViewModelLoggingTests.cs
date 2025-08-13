@@ -1,4 +1,4 @@
-using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using System.Threading.Tasks;
 using System.Net.Http;

@@ -2,6 +2,7 @@
 using System.Windows.Input;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Core.Services;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {

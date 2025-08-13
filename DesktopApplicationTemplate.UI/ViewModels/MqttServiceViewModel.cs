@@ -5,6 +5,7 @@ using System.Windows.Input;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Models;
+using DesktopApplicationTemplate.Core.Services;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {

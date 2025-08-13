@@ -15,6 +15,8 @@ using System.Windows.Shapes;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.Helpers;
 
+using DesktopApplicationTemplate.Core.Services;
+
 namespace DesktopApplicationTemplate.UI.Views
 {
     /// <summary>

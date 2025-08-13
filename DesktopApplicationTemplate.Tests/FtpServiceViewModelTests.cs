@@ -4,6 +4,7 @@ using System;
 using Moq;
 using DesktopApplicationTemplate.UI.Services;
 using System.Threading;
+using DesktopApplicationTemplate.Core.Services;
 
 namespace DesktopApplicationTemplate.Tests
 {
