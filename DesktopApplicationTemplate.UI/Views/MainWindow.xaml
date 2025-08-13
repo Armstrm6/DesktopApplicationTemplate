@@ -28,14 +28,18 @@
         <!-- Navigation Bar -->
         <Grid Grid.Row="0" Background="#00C2C2">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <TextBlock Text="Desktop Template" VerticalAlignment="Center" Margin="10,0,0,0"
-                       FontSize="24" FontWeight="Bold" Foreground="#333333"/>
-            <Button Grid.Column="1" Content="_" Width="40" Height="40" Margin="0,25,10,25" Command="SystemCommands.MinimizeWindowCommand"/>
-            <Button Grid.Column="2" Content="X" Width="40" Height="40" Margin="0,25,10,25" Command="SystemCommands.CloseWindowCommand"/>
+            <Image Source="Assets/DesktopTemplateLayout-Logo.png"
+                   Height="60"
+                   Margin="10,15,0,15"
+                   VerticalAlignment="Center"
+                   Stretch="Uniform" />
+            <Button Grid.Column="2" Content="_" Width="40" Height="40" Margin="0,25,10,25" Command="SystemCommands.MinimizeWindowCommand"/>
+            <Button Grid.Column="3" Content="X" Width="40" Height="40" Margin="0,25,10,25" Command="SystemCommands.CloseWindowCommand"/>
         </Grid>
 
         <!-- Main Content -->

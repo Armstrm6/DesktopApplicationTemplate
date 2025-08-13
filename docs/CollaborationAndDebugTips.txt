@@ -9,3 +9,12 @@ Effective Prompts / Instructions that worked: n/a
 Decisions & Rationale: Use DI to share single logging service and helpers.
 Action Items: Monitor CI for Windows-specific behaviors.
 Related Commits/PRs: (this PR)
+
+[2025-08-13 17:40] Topic: Navigation bar logo
+Context: Replaced placeholder text with application logo in main window.
+Observations: Logo displays brand and cleans up header.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: n/a
+Decisions & Rationale: Use embedded image resource for branding.
+Action Items: none
+Related Commits/PRs: (this PR)
