@@ -1,5 +1,7 @@
 # DesktopApplicationTemplate
 
+![CI](https://github.com/OWNER/REPO/actions/workflows/ci.yml/badge.svg)
+
 This repository contains a basic WPF UI application, a Windows Service and unit tests.
 
 ## Prerequisites

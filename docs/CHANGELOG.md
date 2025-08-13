@@ -8,6 +8,8 @@
 - Updated unit tests to inject mock loggers.
 - Application logo displayed in the main window navigation bar.
 - Consolidated GitHub Actions into a single `CI` workflow and introduced `AGENTS.md` with instructions to review collaboration docs.
+- Added `/test` comment workflow to run CI on demand.
+- Created `CONTRIBUTING.md` and PR template enforcing CI-only testing with a CI badge in the README.
 
 ### Changed
 - CI workflow now runs on pushes to `feature/**` and `bugfix/**` branches and supports manual triggers, ensuring tests execute on GitHub.

@@ -1,0 +1,32 @@
+name: PR Comment Test
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  run-on-comment:
+    if: github.event.issue.pull_request != null && contains(github.event.comment.body, '/test')
+    runs-on: windows-latest
+    permissions:
+      checks: write
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/pull/${{ github.event.issue.number }}/head
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - run: dotnet workload install windowsdesktop
+      - run: dotnet restore
+      - run: dotnet build -c Release --no-restore /warnaserror
+      - run: dotnet test -c Release --no-build --logger "trx;LogFileName=test.trx"
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            **/TestResults/*.trx
