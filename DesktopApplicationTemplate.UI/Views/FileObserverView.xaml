@@ -20,10 +20,6 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <Image Source="pack://application:,,,/Resources/Desktop-Icon.png" Width="100" HorizontalAlignment="Left" Margin="0,0,0,10"/>
-
-        <Image Source="pack://application:,,,/Resources/Desktop-Icon.png" Width="300" Height="60" Grid.ColumnSpan="2" Margin="0,0,0,10"/>
-
         <!-- Observer List Panel -->
         <StackPanel Grid.Column="0" Margin="0,0,10,0">
             <TextBlock Text="File Observers" FontWeight="Bold" Margin="0 0 0 10"/>

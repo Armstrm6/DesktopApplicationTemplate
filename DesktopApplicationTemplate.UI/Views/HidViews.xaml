@@ -15,7 +15,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Image Source="pack://application:,,,/Resources/Desktop-Icon.png" Width="100" HorizontalAlignment="Left" Margin="0,0,0,10"/>
+        <TextBlock Text="HID Views" FontSize="18" FontWeight="Bold" Margin="0,0,0,10"/>
 
         <StackPanel Grid.Row="1" Margin="0,40,0,0" Width="400">
             <TextBlock Text="HID Message" FontWeight="Bold" Margin="0,0,0,5"/>

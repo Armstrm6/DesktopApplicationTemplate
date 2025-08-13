@@ -18,7 +18,7 @@
         <Setter Property="ResizeMode" Value="CanResize" />
         <Setter Property="chrome:WindowChrome.WindowChrome">
             <Setter.Value>
-                <chrome:WindowChrome CaptionHeight="30" CornerRadius="10" ResizeBorderThickness="5" GlassFrameThickness="0" UseAeroCaptionButtons="False" />
+                <chrome:WindowChrome CaptionHeight="0" CornerRadius="10" ResizeBorderThickness="5" GlassFrameThickness="0" UseAeroCaptionButtons="False" />
             </Setter.Value>
         </Setter>
         <Setter Property="Template">
@@ -32,29 +32,7 @@
                         <Border.Effect>
                             <DropShadowEffect BlurRadius="15" ShadowDepth="0" Opacity="0.3" />
                         </Border.Effect>
-                        <Grid>
-                            <DockPanel LastChildFill="True">
-                                <Border DockPanel.Dock="Top" Background="#ADD8E6" Height="30" CornerRadius="8,8,0,0">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition />
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text="{TemplateBinding Title}" VerticalAlignment="Center" Margin="10,0" FontWeight="Bold" chrome:WindowChrome.IsHitTestVisibleInChrome="True" />
-                                        <Button Grid.Column="1" Content="_" Width="30" Height="30"
-                                                Command="{x:Static shell:SystemCommands.MinimizeWindowCommand}"
-                                                CommandTarget="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
-                                                Background="Transparent" BorderThickness="0" chrome:WindowChrome.IsHitTestVisibleInChrome="True" />
-                                        <Button Grid.Column="2" Content="X" Width="30" Height="30"
-                                                Command="{x:Static shell:SystemCommands.CloseWindowCommand}"
-                                                CommandTarget="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
-                                                Background="Transparent" BorderThickness="0" chrome:WindowChrome.IsHitTestVisibleInChrome="True" />
-                                    </Grid>
-                                </Border>
-                                <ContentPresenter />
-                            </DockPanel>
-                        </Grid>
+                        <ContentPresenter />
                     </Border>
                 </ControlTemplate>
             </Setter.Value>

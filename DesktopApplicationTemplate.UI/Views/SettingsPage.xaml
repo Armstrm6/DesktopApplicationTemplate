@@ -8,7 +8,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-            <Image Source="pack://application:,,,/Resources/Logo.png" Width="120" MouseDown="Logo_Click" Cursor="Hand"/>
+            <TextBlock Text="Back" FontSize="16" FontWeight="Bold" MouseDown="BackText_Click" Cursor="Hand"/>
         </StackPanel>
         <StackPanel Grid.Row="1" Margin="0,20,0,0">
             <CheckBox Content="Dark Theme" IsChecked="{Binding DarkTheme}"/>

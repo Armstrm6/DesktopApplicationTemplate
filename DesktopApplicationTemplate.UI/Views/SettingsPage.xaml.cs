@@ -31,7 +31,7 @@ namespace DesktopApplicationTemplate.UI.Views
             NavigateBack();
         }
 
-        private void Logo_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void BackText_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             NavigateBack();
         }
@@ -51,10 +51,9 @@ namespace DesktopApplicationTemplate.UI.Views
             }
 
             var mainWindow = Window.GetWindow(this) as MainView;
-            var mainViewModel = mainWindow?.DataContext as MainViewModel;
-            if (mainWindow != null && mainViewModel != null)
+            if (mainWindow != null)
             {
-                mainWindow.ContentFrame.Content = new HomePage { DataContext = mainViewModel };
+                mainWindow.ShowHome();
             }
         }
     }

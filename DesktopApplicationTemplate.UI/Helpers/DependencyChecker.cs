@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using DesktopApplicationTemplate.UI.Services;
 
 namespace DesktopApplicationTemplate.UI.Helpers
@@ -31,24 +26,7 @@ namespace DesktopApplicationTemplate.UI.Helpers
 
         private static void CheckRequiredFiles(ILoggingService? logger)
         {
-            var basePath = AppContext.BaseDirectory;
-            var requiredFiles = new[] {
-                    "Resources/mascot-body.png",
-                    "Resources/mascot-head.png",
-                    "Resources/mascot-eye1.png"
-                    }.Select(f => Path.Combine(basePath, f)).ToArray();
-
-            foreach (var file in requiredFiles)
-            {
-                if (!File.Exists(file))
-                {
-                    logger?.Log($"[DependencyChecker] MISSING FILE: {file}", LogLevel.Warning);
-                }
-                else
-                {
-                    logger?.Log($"[DependencyChecker] OK: {file}", LogLevel.Debug);
-                }
-            }
+            logger?.Log("[DependencyChecker] No binary resources to verify.", LogLevel.Debug);
         }
     }
 }

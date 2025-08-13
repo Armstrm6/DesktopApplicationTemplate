@@ -45,7 +45,7 @@ namespace DesktopApplicationTemplate.Tests
 
                     settingsPage.NavigateBack();
 
-                    Assert.IsType<HomePage>(mainView.ContentFrame.Content);
+                    Assert.Null(mainView.ContentFrame.Content);
                 }
                 catch (Exception e) { ex = e; }
                 finally
