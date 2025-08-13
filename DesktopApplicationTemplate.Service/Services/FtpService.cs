@@ -30,17 +30,20 @@ namespace DesktopApplicationTemplate.UI.Services
             _logger?.Log($"Connecting to FTP {_client.Host}:{_client.Port}", LogLevel.Debug);
             try
             {
-                await _client.Connect(token);
+                await _client.Connect(token).ConfigureAwait(false);
                 _logger?.Log($"Uploading {localPath} -> {remotePath}", LogLevel.Debug);
-                await _client.UploadFile(localPath, remotePath, FtpRemoteExists.Overwrite, true, FtpVerify.None, null, token);
-                await _client.Disconnect(token);
+                await _client.UploadFile(localPath, remotePath, FtpRemoteExists.Overwrite, true, FtpVerify.None, null, token).ConfigureAwait(false);
                 _logger?.Log("Upload finished", LogLevel.Debug);
-                _logger?.Log("FTP upload completed", LogLevel.Debug);
             }
             catch (Exception ex)
             {
                 _logger?.Log($"FTP upload failed: {ex.Message}", LogLevel.Error);
                 throw;
+            }
+            finally
+            {
+                await _client.Disconnect(token).ConfigureAwait(false);
+                _logger?.Log("FTP upload completed", LogLevel.Debug);
             }
         }
     }
