@@ -10,15 +10,15 @@ git lfs install
 dotnet restore
 
 if [ -z "$SKIP_WORKLOAD" ]; then
-    echo "Checking for windowsdesktop workload..."
-    if ! dotnet workload list | grep -q windowsdesktop; then
-        echo "Installing windowsdesktop workload..."
-        dotnet workload install windowsdesktop
+    echo "Checking for wpf workload..."
+    if ! dotnet workload list | grep -q wpf; then
+        echo "Installing wpf workload..."
+        dotnet workload install wpf
     else
-        echo "windowsdesktop workload already installed."
+        echo "wpf workload already installed."
     fi
 else
-    echo "SKIP_WORKLOAD set - skipping windowsdesktop workload installation." 
+    echo "SKIP_WORKLOAD set - skipping wpf workload installation."
 fi
 dotnet build DesktopApplicationTemplate.sln
 dotnet test DesktopApplicationTemplate.Tests/DesktopApplicationTemplate.Tests.csproj

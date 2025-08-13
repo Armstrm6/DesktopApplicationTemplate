@@ -10,6 +10,15 @@ Decisions & Rationale: Use DI to share single logging service and helpers.
 Action Items: Monitor CI for Windows-specific behaviors.
 Related Commits/PRs: (this PR)
 
+[2025-08-13 20:41] Topic: WPF workload in CI
+Context: GitHub Actions failed because the `windowsdesktop` workload is no longer recognized.
+Observations: Replacing it with the `wpf` workload restores pipeline compatibility.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: verifying commands against GitHub runners.
+Decisions & Rationale: Use the `wpf` workload across build, test, quality, and packaging jobs.
+Action Items: Monitor CI for workload availability changes.
+Related Commits/PRs: (this PR)
+
 [2025-08-13 17:40] Topic: Navigation bar logo
 Context: Replaced placeholder text with application logo in main window.
 Observations: Logo displays brand and cleans up header.

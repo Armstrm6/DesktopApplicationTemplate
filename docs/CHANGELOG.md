@@ -24,3 +24,4 @@
 
 ### Fixed
 - Corrected logo resource path so the image renders in the navigation bar.
+- Updated GitHub workflows to install the WPF workload instead of the deprecated windowsdesktop workload.
