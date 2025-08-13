@@ -45,8 +45,6 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
-      - name: Install WPF workload
-        run: dotnet workload install wpf
       - name: Restore
         run: dotnet restore
       - name: Test
@@ -68,8 +66,6 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
-      - name: Install WPF workload
-        run: dotnet workload install wpf
       - name: Restore
         run: dotnet restore
       - name: Verify formatting
@@ -86,8 +82,6 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
-      - name: Install WPF workload
-        run: dotnet workload install wpf
       - name: Restore
         run: dotnet restore
       - name: Publish
