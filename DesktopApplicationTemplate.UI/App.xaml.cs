@@ -42,6 +42,8 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<IProcessRunner, ProcessRunner>();
             services.AddSingleton<INetworkConfigurationService, NetworkConfigurationService>();
             services.AddSingleton<NetworkConfigurationViewModel>();
+            services.AddSingleton<IRichTextLogger, NullRichTextLogger>();
+            services.AddSingleton<ILoggingService, LoggingService>();
             services.AddSingleton<MainViewModel>();
             services.AddSingleton<TcpServiceViewModel>();
             services.AddSingleton<DependencyChecker>();
