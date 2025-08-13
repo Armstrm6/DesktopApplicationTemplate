@@ -99,8 +99,11 @@ public class HttpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel
         /// </summary>
         public HttpMessageHandler? MessageHandler { get; set; }
 
-        public HttpServiceViewModel()
+        private readonly SaveConfirmationHelper _saveHelper;
+
+        public HttpServiceViewModel(SaveConfirmationHelper saveHelper)
         {
+            _saveHelper = saveHelper;
             SendCommand = new RelayCommand(async () => await SendRequestAsync());
             AddHeaderCommand = new RelayCommand(() => Headers.Add(new HeaderItem()));
             RemoveHeaderCommand = new RelayCommand(() =>
@@ -111,7 +114,7 @@ public class HttpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel
             SaveCommand = new RelayCommand(Save);
         }
 
-        private void Save() => SaveConfirmationHelper.Show();
+        private void Save() => _saveHelper.Show();
 
         public async Task SendRequestAsync()
         {

@@ -1,5 +1,7 @@
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.Core.Services;
+using Moq;
 using Xunit;
 
 namespace DesktopApplicationTemplate.Tests
@@ -11,7 +13,9 @@ namespace DesktopApplicationTemplate.Tests
         public void Show_ReturnsTrue_WhenSuppressed()
         {
             SettingsViewModel.CloseConfirmationSuppressed = true;
-            var result = CloseConfirmationHelper.Show();
+            var logger = new Mock<ILoggingService>();
+            var helper = new CloseConfirmationHelper(logger.Object);
+            var result = helper.Show();
             Assert.True(result);
             SettingsViewModel.CloseConfirmationSuppressed = false;
             ConsoleTestLogger.LogPass();

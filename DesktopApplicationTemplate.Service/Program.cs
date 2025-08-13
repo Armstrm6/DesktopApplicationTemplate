@@ -3,6 +3,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Linq;
 using System;
+using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Service.Services;
 
 namespace DesktopApplicationTemplate.Service
 {
@@ -25,6 +27,7 @@ namespace DesktopApplicationTemplate.Service
             return builder.ConfigureServices((hostContext, services) =>
             {
                 services.AddHostedService<Worker>(); // register the background service
+                services.AddSingleton<ILoggingService, LoggingService>();
             });
         }
     }

@@ -3,6 +3,7 @@ using Xunit;
 using System;
 using Moq;
 using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.UI.Helpers;
 using System.Threading;
 using DesktopApplicationTemplate.Core.Services;
 
@@ -20,7 +21,9 @@ namespace DesktopApplicationTemplate.Tests
         [TestCategory("WindowsSafe")]
         public void BrowseCommand_InitialPathEmpty_DoesNotThrow()
         {
-            var vm = new FtpServiceViewModel(new StubFileDialogService());
+            var logger = new Mock<ILoggingService>();
+            var helper = new SaveConfirmationHelper(logger.Object);
+            var vm = new FtpServiceViewModel(helper, new StubFileDialogService());
             vm.BrowseCommand.Execute(null);
             Assert.Equal("stub.txt", vm.LocalPath);
 
@@ -34,7 +37,8 @@ namespace DesktopApplicationTemplate.Tests
         {
             var mock = new Mock<IFtpService>();
             var logger = new Mock<ILoggingService>();
-            var vm = new FtpServiceViewModel { Service = mock.Object, Logger = logger.Object };
+            var helper = new SaveConfirmationHelper(logger.Object);
+            var vm = new FtpServiceViewModel(helper) { Service = mock.Object, Logger = logger.Object };
             vm.LocalPath = "local";
             vm.RemotePath = "remote";
 
@@ -53,7 +57,8 @@ namespace DesktopApplicationTemplate.Tests
         public void SettingInvalidHost_AddsError()
         {
             var logger = new Mock<ILoggingService>();
-            var vm = new FtpServiceViewModel { Logger = logger.Object };
+            var helper = new SaveConfirmationHelper(logger.Object);
+            var vm = new FtpServiceViewModel(helper) { Logger = logger.Object };
             vm.Host = "bad_host";
 
             Assert.True(vm.HasErrors);
@@ -68,7 +73,8 @@ namespace DesktopApplicationTemplate.Tests
         public void SettingInvalidPort_AddsError()
         {
             var logger = new Mock<ILoggingService>();
-            var vm = new FtpServiceViewModel { Logger = logger.Object };
+            var helper = new SaveConfirmationHelper(logger.Object);
+            var vm = new FtpServiceViewModel(helper) { Logger = logger.Object };
             vm.Port = "abc";
 
             Assert.True(vm.HasErrors);
@@ -82,7 +88,8 @@ namespace DesktopApplicationTemplate.Tests
         [TestCategory("WindowsSafe")]
         public void PartialHost_WithTrailingDot_DoesNotError()
         {
-            var vm = new FtpServiceViewModel();
+            var helper = new SaveConfirmationHelper(new Mock<ILoggingService>().Object);
+            var vm = new FtpServiceViewModel(helper);
             vm.Host = "192.168.";
 
             Assert.False(vm.HasErrors);

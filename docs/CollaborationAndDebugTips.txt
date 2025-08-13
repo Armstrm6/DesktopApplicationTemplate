@@ -1,0 +1,11 @@
+# Collaboration & Debug Tips (Codex <-> Matt)
+Purpose: Running log of what worked, what broke, and why.
+
+[2025-08-13 17:00] Topic: Logging DI refactor
+Context: Introduced constructor injection for logging services and confirmation helpers.
+Observations: Simplifies testing and removes static logger state.
+Codex Limitations noticed: Unable to execute Windows-specific tests in container.
+Effective Prompts / Instructions that worked: n/a
+Decisions & Rationale: Use DI to share single logging service and helpers.
+Action Items: Monitor CI for Windows-specific behaviors.
+Related Commits/PRs: (this PR)

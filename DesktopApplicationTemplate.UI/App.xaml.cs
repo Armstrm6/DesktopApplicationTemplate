@@ -3,6 +3,7 @@ using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.Models;
+using DesktopApplicationTemplate.Core.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -44,7 +45,10 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<NetworkConfigurationViewModel>();
             services.AddSingleton<IRichTextLogger, NullRichTextLogger>();
             services.AddSingleton<ILoggingService, LoggingService>();
+            services.AddSingleton<SaveConfirmationHelper>();
+            services.AddSingleton<CloseConfirmationHelper>();
             services.AddSingleton<MainViewModel>();
+            services.AddSingleton<TcpServiceView>();
             services.AddSingleton<TcpServiceViewModel>();
             services.AddSingleton<DependencyChecker>();
             services.AddSingleton<HttpServiceView>();

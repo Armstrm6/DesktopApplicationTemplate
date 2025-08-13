@@ -195,6 +195,8 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
         public ICommand ToggleServerCommand { get; }
         public ICommand TestScriptCommand { get; }
 
+        private readonly SaveConfirmationHelper _saveHelper;
+
         public string StatusMessage
         {
             get => _statusMessage;
@@ -217,8 +219,9 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
 
         public ICommand SaveCommand { get; }
 
-        public TcpServiceViewModel()
+        public TcpServiceViewModel(SaveConfirmationHelper saveHelper)
         {
+            _saveHelper = saveHelper;
             StatusMessage = "Chappie is initializing...";
             IsServerRunning = false;
             SaveCommand = new RelayCommand(Save);
@@ -279,7 +282,7 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
             }
         }
 
-        private void Save() => SaveConfirmationHelper.Show();
+        private void Save() => _saveHelper.Show();
 
         public void UpdateNetworkConfiguration(NetworkConfiguration configuration)
         {
