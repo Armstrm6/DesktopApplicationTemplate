@@ -16,11 +16,15 @@
 - CI workflow now runs on pushes to `feature/**` and `bugfix/**` branches and supports manual triggers, ensuring tests execute on GitHub.
 - `self-heal` workflow now monitors the unified `CI` pipeline.
 - `TcpServiceViewModel` now evaluates scripts asynchronously and streamlined server toggle logging.
+- Consolidated auto-start logic into `StartupService` for simpler configuration.
+- Aggregated collaboration tips into `docs/CollaborationAndDebugTips.txt` with improved formatting.
+- Prefixed global service log entries with the originating service name for clarity.
 
 ### Removed
 - Placeholder "Desktop Template" text from the navigation bar.
 - Legacy GitHub workflows (`dotnet.yml`, `dotnet-desktop-ci.yml`, `ci.yml`).
 - Unused `RichTextLogger` service and installer `CustomControl1` control.
+- `AutoStartHelper` and design-time layout files.
 
 ### Fixed
 - Corrected logo resource path so the image renders in the navigation bar.

@@ -337,7 +337,13 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public void OnServiceLogAdded(ServiceViewModel svc, LogEntry entry)
         {
-            AllLogs.Insert(0, entry);
+            var allEntry = new LogEntry
+            {
+                Message = $"{svc.DisplayName}: {entry.Message}",
+                Color = entry.Color,
+                Level = entry.Level
+            };
+            AllLogs.Insert(0, allEntry);
             if (svc.ServiceType != "CSV Creator" && Services.Any(s => s.ServiceType == "CSV Creator"))
             {
                 try

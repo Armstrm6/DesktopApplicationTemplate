@@ -1,6 +1,37 @@
-# Collaboration & Debug Tips (Codex <-> Matt)
+Collaboration & Debug Tips (Codex <-> Matt)
+==========================================
+
 Purpose: Running log of what worked, what broke, and why.
 
+Effective Collaboration Techniques
+----------------------------------
+- Provide clear goals, file paths, and context for each task.
+- Prefer small, incremental changes that compile and test quickly.
+- Run programmatic checks after modifications and share their output.
+- Use `rg` or targeted `find` commands instead of recursive `ls` or `grep`.
+
+GitHub Workflow Notes
+---------------------
+- Keep changes on the main branch and make atomic commits with descriptive messages.
+- After all code updates, run `dotnet test` and include the output in the pull request.
+- Only committed code is evaluated, so ensure the working tree is clean before calling `make_pr`.
+
+Unit Testing Insights
+---------------------
+- Tests use xUnit with Moq for mocking and reside in `DesktopApplicationTemplate.Tests`.
+- Prefer isolated tests that validate one behavior and use expressive method names.
+- Configure dependencies through DI to keep tests focused and deterministic.
+- Run tests with `dotnet test` to ensure stability across platforms and CI environments.
+
+Miscellaneous Tips
+------------------
+- Validate all file paths, indexes, and dictionary keys before use to avoid runtime errors.
+- Favor async/await patterns to keep the UI responsive and avoid deadlocks.
+- Reuse existing services and view models instead of duplicating logic.
+- Maintain clear, purpose-driven variable names for readability and maintainability.
+
+Collaboration Log
+-----------------
 [2025-08-13 17:00] Topic: Logging DI refactor
 Context: Introduced constructor injection for logging services and confirmation helpers.
 Observations: Simplifies testing and removes static logger state.
@@ -36,6 +67,7 @@ Effective Prompts / Instructions that worked: Configuring push patterns and `wor
 Decisions & Rationale: Use GitHub-hosted runners to centralize validation.
 Action Items: Monitor CI runs for unexpected failures.
 Related Commits/PRs: (this PR)
+
 [2025-08-13 18:28] Topic: CI workflow consolidation
 Context: Unified multiple GitHub workflows into a single pipeline and added AGENTS instructions to review changelog and collaboration tips.
 Observations: Centralized CI reduces maintenance overhead.
@@ -44,6 +76,7 @@ Effective Prompts / Instructions that worked: n/a
 Decisions & Rationale: Single pipeline with build, test, quality, and packaging jobs.
 Action Items: Monitor self-heal integration with new pipeline.
 Related Commits/PRs: (this PR)
+
 [2025-08-13 18:50] Topic: On-demand CI via /test comment
 Context: Enabled `/test` comment workflow and documented CI-only testing policy.
 Observations: CI can run without local test execution.
@@ -52,6 +85,7 @@ Effective Prompts / Instructions that worked: Using comment trigger pattern from
 Decisions & Rationale: Centralize validation in CI and enforce via docs and PR template.
 Action Items: Ensure branch protection requires CI.
 Related Commits/PRs: (this PR)
+
 [2025-08-13 19:01] Topic: Async command refactor
 Context: Introduced AsyncRelayCommand and async script evaluation to prevent UI blocking.
 Observations: Async command simplifies long-running actions and avoids deadlocks.
@@ -60,6 +94,7 @@ Effective Prompts / Instructions that worked: n/a
 Decisions & Rationale: Use AsyncRelayCommand for operations needing await without blocking.
 Action Items: Monitor for unhandled exceptions in async commands.
 Related Commits/PRs: (this PR)
+
 [2025-08-13 19:42] Topic: Remove unused classes
 Context: Cleaned up obsolete logging and template control types.
 Observations: Deleting `RichTextLogger` and installer `CustomControl1` simplified the codebase with no build impact.
@@ -68,3 +103,22 @@ Effective Prompts / Instructions that worked: n/a
 Decisions & Rationale: Prefer removing stale classes to reduce maintenance and confusion.
 Action Items: Monitor builds for any lingering references.
 Related Commits/PRs: (this PR)
+
+[2025-08-13 19:57] Topic: Auto-start helper consolidation
+Context: Moved auto-start registry logic into StartupService and removed redundant helper and design files.
+Observations: Startup configuration simplified and repository trimmed of unused assets.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: n/a
+Decisions & Rationale: Consolidate startup behavior for easier maintenance.
+Action Items: none
+Related Commits/PRs: (this PR)
+
+[2025-08-13 20:17] Topic: Service log labeling
+Context: Prefixed global log entries with service name and merged collaboration tips.
+Observations: Easier to trace logs to originating service; documentation unified.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: n/a
+Decisions & Rationale: Prefix logs with service name to improve traceability; consolidate guidance into a single document.
+Action Items: none
+Related Commits/PRs: (this PR)
+
