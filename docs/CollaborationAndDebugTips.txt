@@ -159,3 +159,11 @@ Decisions & Rationale: Provide options model for future DI and configuration bin
 Action Items: Wire options into service and configuration pipeline later.
 
 Related Commits/PRs: (this PR)
+[2025-08-14 15:59] Topic: Message routing service cleanup
+Context: Refactored message routing service to remove legacy route method and expose interface; simplified workflows by dropping explicit WPF workload installation.
+Observations: .NET 8 SDK already includes WPF; ConcurrentDictionary ensures thread safety.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: Guidance to remove redundant workload installs.
+Decisions & Rationale: Introduced IMessageRoutingService and optional logging; rely on built-in WPF workload in SDK to streamline CI.
+Action Items: Monitor CI for future SDK changes.
+Related Commits/PRs: (this PR)

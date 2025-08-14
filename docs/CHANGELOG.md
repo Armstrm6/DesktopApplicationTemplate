@@ -28,11 +28,13 @@
 - `self-heal` workflow now monitors the unified `CI` pipeline.
 - `TcpServiceViewModel` now evaluates scripts asynchronously and streamlined server toggle logging.
 - Refactored `MqttService` with a single options-based constructor, clean reconnect logic, and consolidated publish methods.
+- Simplified `MessageRoutingService` with a dedicated interface and thread-safe message tracking.
 
 ### Removed
 - Placeholder "Desktop Template" text from the navigation bar.
 - Legacy GitHub workflows (`dotnet.yml`, `dotnet-desktop-ci.yml`, `ci.yml`).
 - Unused `RichTextLogger` service and installer `CustomControl1` control.
+- WPF workload installation steps in GitHub workflows now that .NET 8 includes WPF.
 
 ### Fixed
 - Corrected logo resource path so the image renders in the navigation bar.
