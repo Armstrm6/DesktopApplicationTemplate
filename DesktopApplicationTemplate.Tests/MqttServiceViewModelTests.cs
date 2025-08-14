@@ -9,6 +9,7 @@ using Moq;
 using Xunit;
 using System.Threading;
 using System;
+using System.Collections.Generic;
 using MQTTnet.Packets;
 using DesktopApplicationTemplate.UI.Models;
 
@@ -101,56 +102,83 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("CodexSafe")]
-        public void HostChange_Disconnects_WhenConnected()
+        [TestCategory("WindowsSafe")]
+        public void Constructor_SetsDefaultPlaceholders()
         {
-            var logger = new Mock<ILoggingService>();
-            var client = new Mock<IMqttClient>();
-            client.SetupGet(c => c.IsConnected).Returns(true);
-            client.Setup(c => c.DisconnectAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask).Verifiable();
+            if (!OperatingSystem.IsWindows())
+            {
+                return;
+            }
+            var helper = new SaveConfirmationHelper(new Mock<ILoggingService>().Object);
+            var vm = new MqttServiceViewModel(helper);
+            Assert.Equal(string.Empty, vm.Host);
+            Assert.Equal("1883", vm.Port);
+            Assert.Equal("client1", vm.ClientId);
 
-            var options = new MqttServiceOptions { Host = "127.0.0.1" };
-            var service = new MqttService(client.Object, options, logger.Object);
-            var helper = new SaveConfirmationHelper(logger.Object);
-            var vm = new MqttServiceViewModel(helper, options, service, logger.Object);
+            ConsoleTestLogger.LogPass();
+        }
 
-            vm.Host = "192.168.0.1";
+        [Fact]
+        [TestCategory("WindowsSafe")]
+        public void PortSetter_RejectsOutOfRange()
+        {
+            if (!OperatingSystem.IsWindows())
+            {
+                return;
+            }
+            var helper = new SaveConfirmationHelper(new Mock<ILoggingService>().Object);
+            var vm = new MqttServiceViewModel(helper);
+            vm.Port = "70000";
+            Assert.Equal("1883", vm.Port);
 
-            client.Verify(c => c.DisconnectAsync(It.IsAny<CancellationToken>()), Times.Once);
             ConsoleTestLogger.LogPass();
         }
 
         [Fact]
         [TestCategory("CodexSafe")]
         [TestCategory("WindowsSafe")]
-        public async Task PublishSelectedAsync_ResolvesTokens()
+        public async Task ConnectAsync_Disconnects_OnReconfigure()
         {
             var logger = new Mock<ILoggingService>();
-            var client = new Mock<IMqttClient>();
-            string? publishedTopic = null;
-            string? publishedPayload = null;
-            client.Setup(c => c.PublishAsync(It.IsAny<MqttApplicationMessage>(), It.IsAny<CancellationToken>()))
-                .Callback<MqttApplicationMessage, CancellationToken>((m, _) =>
-                {
-                    publishedTopic = m.Topic;
-                    publishedPayload = Encoding.UTF8.GetString(m.PayloadSegment);
-                })
-                .ReturnsAsync(new MqttClientPublishResult(null, MqttClientPublishReasonCode.Success, null!, Array.Empty<MqttUserProperty>()));
+            var service = new Mock<MqttService>(new Mock<IMqttClient>().Object, logger.Object);
+            service.Setup(s => s.ConnectAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+            service.Setup(s => s.SubscribeAsync(It.IsAny<IEnumerable<string>>())).Returns(Task.CompletedTask);
+            service.Setup(s => s.DisconnectAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
-            var options = new MqttServiceOptions { Host = "host", Port = 1883, ClientId = "id" };
-            var service = new MqttService(client.Object, options, logger.Object);
             var helper = new SaveConfirmationHelper(logger.Object);
-            var vm = new MqttServiceViewModel(helper, options, service, logger.Object);
+            var vm = new MqttServiceViewModel(helper, service.Object, logger.Object) { Host = "1.1.1.1", Port = "1883", ClientId = "c" };
 
-            vm.NewEndpoint = "topic/{CLIENTID}";
-            vm.NewMessage = "hello {HOST}:{PORT}";
-            vm.AddMessageCommand.Execute(null);
-            vm.SelectedMessage = vm.Messages.First();
+            await vm.ConnectAsync();
+            vm.Host = "2.2.2.2";
+            await vm.ConnectAsync();
 
-            await vm.PublishSelectedAsync();
+            service.Verify(s => s.DisconnectAsync(It.IsAny<CancellationToken>()), Times.Once);
+            ConsoleTestLogger.LogPass();
+        }
 
-            Assert.Equal("topic/id", publishedTopic);
-            Assert.Equal("hello host:1883", publishedPayload);
+        [Fact]
+        [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
+        public async Task PublishAsync_ResolvesTokens_AndRoutesToMultipleTopics()
+        {
+            var logger = new Mock<ILoggingService>();
+            var service = new Mock<MqttService>(new Mock<IMqttClient>().Object, logger.Object);
+            service.Setup(s => s.PublishAsync(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.CompletedTask);
+
+            var tokens = new Dictionary<string, string> { ["Svc"] = "payload" };
+            var helper = new SaveConfirmationHelper(logger.Object);
+            var vm = new MqttServiceViewModel(helper, service.Object, logger.Object, tokens)
+            {
+                PublishTopic = "t1;t2",
+                PublishMessage = "{Svc.Message}"
+            };
+
+            await vm.PublishAsync();
+
+            service.Verify(s => s.PublishAsync("t1", "payload"), Times.Once);
+            service.Verify(s => s.PublishAsync("t2", "payload"), Times.Once);
+
+
             ConsoleTestLogger.LogPass();
         }
     }

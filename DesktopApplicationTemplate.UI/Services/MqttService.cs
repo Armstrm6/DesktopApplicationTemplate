@@ -60,7 +60,7 @@ namespace DesktopApplicationTemplate.UI.Services
             _options = options.Value;
         }
 
-        public async Task ConnectAsync(string? host = null, int? port = null, string? clientId = null, string? user = null, string? pass = null)
+        public virtual async Task ConnectAsync(string host, int port, string clientId, string? user, string? pass, bool useTls = false, CancellationToken token = default)
         {
             _logger.Log("MqttService connect start", LogLevel.Debug);
             var builder = new MqttClientOptionsBuilder()
@@ -110,6 +110,24 @@ namespace DesktopApplicationTemplate.UI.Services
                 .WithTcpServer(host, port)
                 .WithClientId(clientId);
 
+            if (!string.IsNullOrEmpty(user))
+            {
+                options = options.WithCredentials(user, pass);
+            }
+
+            if (useTls)
+            {
+                options = options.WithTlsOptions(o => o.UseTls());
+            }
+
+            _logger?.Log($"Connecting to MQTT {host}:{port}", LogLevel.Debug);
+
+            if (_client.IsConnected)
+            {
+                await _client.DisconnectAsync(cancellationToken: token).ConfigureAwait(false);
+            }
+
+            await _client.ConnectAsync(options.Build(), token).ConfigureAwait(false);
             var builder = new MqttClientOptionsBuilder()
                 .WithTcpServer(Options.Host, Options.Port)
                 .WithClientId(Options.ClientId);
@@ -124,36 +142,17 @@ namespace DesktopApplicationTemplate.UI.Services
             OnConnectionStateChanged(true);
         }
 
-        /// <summary>
-        /// Disconnects from the MQTT broker if connected.
-        /// </summary>
-        public async Task DisconnectAsync()
-        {
-            if (!_client.IsConnected)
-                return;
-
-            _logger?.Log("MqttService disconnect start", LogLevel.Debug);
-            await _client.DisconnectAsync().ConfigureAwait(false);
-            _logger?.Log("MqttService disconnect finished", LogLevel.Debug);
-            OnConnectionStateChanged(false);
-        }
-
-        /// <summary>
-        /// Subscribes the client to the provided topics.
-        /// </summary>
-        public async Task SubscribeAsync(IEnumerable<string> topics)
+        public virtual async Task SubscribeAsync(IEnumerable<string> topics)
         {
             foreach (var t in topics)
             {
-                _logger.Log($"Subscribing to {t}", LogLevel.Debug);
+                _logger?.Log($"Subscribing to {t}", LogLevel.Debug);
+
                 await _client.SubscribeAsync(t).ConfigureAwait(false);
             }
         }
 
-        /// <summary>
-        /// Publishes a message to a topic.
-        /// </summary>
-        public async Task PublishAsync(string topic, string message)
+        public virtual async Task PublishAsync(string topic, string message)
         {
 
             _logger?.Log("MqttService publish start", LogLevel.Debug);
@@ -183,6 +182,11 @@ namespace DesktopApplicationTemplate.UI.Services
             {
                 await PublishAsync(pair.Key, pair.Value).ConfigureAwait(false);
             }
+        }
+
+        public virtual Task DisconnectAsync(CancellationToken token = default)
+        {
+            return _client.DisconnectAsync(cancellationToken: token);
         }
     }
 }

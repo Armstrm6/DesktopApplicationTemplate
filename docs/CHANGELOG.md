@@ -12,6 +12,8 @@
 - Added `/test` comment workflow to run CI on demand.
 - Created `CONTRIBUTING.md` and PR template enforcing CI-only testing with a CI badge in the README.
 - Introduced `AsyncRelayCommand` for asynchronous UI actions.
+- Extended MQTT service with TLS support and safe reconnect behavior.
+- Added MQTT view model token resolution and multi-topic publishing tests.
 - Tooltips for MQTT endpoint configuration fields.
 - Expanded MQTT configuration with token-based message routing using `{ServiceName.Message}` tokens and multiple endpoint mappings.
 - Registered `MqttServiceOptions` and `MessageRoutingService` with DI and injected options into MQTT components.

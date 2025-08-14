@@ -93,6 +93,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             get => _options.Port;
             set
             {
+                if (int.TryParse(value, out var p) && p >= 0 && p <= 65535)
+                {
+                    _port = value;
+                }
                 if (_options.Port == value)
                     return;
                 if (value < 1 || value > 65535)
@@ -173,6 +177,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         /// </summary>
         public ObservableCollection<MqttEndpointMessage> Messages { get; }
 
+        private bool _useTls;
+        public bool UseTls { get => _useTls; set { _useTls = value; OnPropertyChanged(); } }
+
+        private string _newTopic = string.Empty;
+        public string NewTopic { get => _newTopic; set { _newTopic = value; OnPropertyChanged(); } }
         /// <summary>
         /// Selected message for publishing.
         /// </summary>
@@ -263,6 +272,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
         }
 
+        private readonly MqttService _service;
+        private readonly SaveConfirmationHelper _saveHelper;
+        private readonly IDictionary<string, string> _tokenValues;
+        private bool _isConnected;
+
+        public MqttServiceViewModel(SaveConfirmationHelper saveHelper, MqttService? service = null, ILoggingService? logger = null, IDictionary<string, string>? tokenValues = null)
         private void RemoveTopic()
         {
             if (Topics.Contains(NewTopic))
@@ -274,6 +289,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             _saveHelper = saveHelper;
             _service = service;
             Logger = logger;
+            _service = service ?? new MqttService(logger);
+            _tokenValues = tokenValues ?? new Dictionary<string, string>();
             var opts = options.Value;
             Host = opts.Host;
             Port = opts.Port.ToString();
@@ -317,7 +334,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public async Task ConnectAsync()
         {
             Logger?.Log("MQTT connect start", LogLevel.Debug);
-            await _service.ConnectAsync(Host, int.Parse(Port), ClientId, Username, Password).ConfigureAwait(false);
+            if (_isConnected)
+            {
+                await _service.DisconnectAsync();
+            }
+            await _service.ConnectAsync(Host, int.Parse(Port), ClientId, Username, Password, UseTls);
             await _service.SubscribeAsync(Topics).ConfigureAwait(false);
 
             var options = new MqttServiceOptions
@@ -330,6 +351,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             };
             await _service.ConnectAsync(options);
             await _service.SubscribeAsync(Topics);
+            _isConnected = true;
             Logger?.Log("MQTT connected", LogLevel.Debug);
             Logger?.Log("MQTT connect finished", LogLevel.Debug);
         }
@@ -344,7 +366,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             var topic = ResolveTokens(SelectedMessage.Endpoint);
             var payload = ResolveTokens(SelectedMessage.Message);
             Logger?.Log("MQTT publish start", LogLevel.Debug);
-            await _service.PublishAsync(PublishTopic, PublishMessage).ConfigureAwait(false);
+            var resolved = ResolveTokens(PublishMessage);
+            foreach (var topic in PublishTopic.Split(';', StringSplitOptions.RemoveEmptyEntries))
+            {
+                await _service.PublishAsync(topic, resolved);
+            }
             Logger?.Log($"Published to {PublishTopic}", LogLevel.Debug);
 
             Logger?.Log("MQTT publish finished", LogLevel.Debug);
@@ -389,5 +415,17 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         {
             Host = configuration.IpAddress;
         }
+
+        private string ResolveTokens(string message)
+        {
+            foreach (var kvp in _tokenValues)
+            {
+                message = message.Replace($"{{{kvp.Key}.Message}}", kvp.Value);
+            }
+            return message;
+        }
+
+        // OnPropertyChanged provided by ViewModelBase
+
     }
 }
