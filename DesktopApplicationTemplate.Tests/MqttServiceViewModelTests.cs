@@ -1,7 +1,9 @@
 using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Helpers;
+using Microsoft.Extensions.Options;
 using MQTTnet.Client;
 using Moq;
 using Xunit;
@@ -9,6 +11,12 @@ using System.Threading;
 using System;
 using System.Collections.Generic;
 using MQTTnet.Packets;
+using DesktopApplicationTemplate.UI.Models;
+
+using MQTTnet;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace DesktopApplicationTemplate.Tests
 {
@@ -22,11 +30,49 @@ namespace DesktopApplicationTemplate.Tests
             {
                 return;
             }
+            var logger = new Mock<ILoggingService>().Object;
+            var options = Options.Create(new DesktopApplicationTemplate.Models.MqttServiceOptions());
+            var service = new MqttService(options, logger);
+            var vm = new MqttServiceViewModel(helper, service, options, logger);
             var helper = new SaveConfirmationHelper(new Mock<ILoggingService>().Object);
-            var vm = new MqttServiceViewModel(helper);
+            var vm = new MqttServiceViewModel(helper, new MqttServiceOptions());
             vm.NewTopic = "test/topic";
             vm.AddTopicCommand.Execute(null);
             Assert.Contains("test/topic", vm.Topics);
+
+            ConsoleTestLogger.LogPass();
+        }
+
+        [Fact]
+        [TestCategory("WindowsSafe")]
+        public void AddEndpointMessageCommand_AddsPair()
+        {
+            if (!OperatingSystem.IsWindows())
+            {
+                return;
+            }
+            var helper = new SaveConfirmationHelper(new Mock<ILoggingService>().Object);
+            var vm = new MqttServiceViewModel(helper);
+            vm.AddEndpointMessageCommand.Execute(null);
+            Assert.Single(vm.EndpointMessages);
+
+            ConsoleTestLogger.LogPass();
+        }
+
+        [Fact]
+        [TestCategory("WindowsSafe")]
+        public void RemoveEndpointMessageCommand_RemovesSelectedPair()
+        {
+            if (!OperatingSystem.IsWindows())
+            {
+                return;
+            }
+            var helper = new SaveConfirmationHelper(new Mock<ILoggingService>().Object);
+            var vm = new MqttServiceViewModel(helper);
+            vm.EndpointMessages.Add(new EndpointMessagePair { Endpoint = "topic", Message = "msg" });
+            vm.SelectedEndpointMessage = vm.EndpointMessages[0];
+            vm.RemoveEndpointMessageCommand.Execute(null);
+            Assert.Empty(vm.EndpointMessages);
 
             ConsoleTestLogger.LogPass();
         }
@@ -42,9 +88,10 @@ namespace DesktopApplicationTemplate.Tests
                 .ReturnsAsync(new MqttClientConnectResult());
             client.Setup(c => c.SubscribeAsync(It.IsAny<MqttClientSubscribeOptions>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new MqttClientSubscribeResult(0, Array.Empty<MqttClientSubscribeResultItem>(), string.Empty, Array.Empty<MqttUserProperty>()));
-            var service = new MqttService(client.Object, logger.Object);
+            var options = Options.Create(new DesktopApplicationTemplate.Models.MqttServiceOptions());
+            var service = new MqttService(client.Object, options, logger.Object);
             var helper = new SaveConfirmationHelper(logger.Object);
-            var vm = new MqttServiceViewModel(helper, service, logger.Object) { Host = "127.0.0.1", Port = "1883", ClientId = "c" };
+            var vm = new MqttServiceViewModel(helper, service, options, logger.Object) { Host = "127.0.0.1", Port = "1883", ClientId = "c" };
 
             await vm.ConnectAsync();
 
@@ -106,7 +153,6 @@ namespace DesktopApplicationTemplate.Tests
             await vm.ConnectAsync();
 
             service.Verify(s => s.DisconnectAsync(It.IsAny<CancellationToken>()), Times.Once);
-
             ConsoleTestLogger.LogPass();
         }
 
@@ -131,6 +177,7 @@ namespace DesktopApplicationTemplate.Tests
 
             service.Verify(s => s.PublishAsync("t1", "payload"), Times.Once);
             service.Verify(s => s.PublishAsync("t2", "payload"), Times.Once);
+
 
             ConsoleTestLogger.LogPass();
         }
