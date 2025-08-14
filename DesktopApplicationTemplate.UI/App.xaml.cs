@@ -47,6 +47,7 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<IRichTextLogger, NullRichTextLogger>();
             services.AddSingleton<MqttServiceOptions>();
             services.AddSingleton<ILoggingService, LoggingService>();
+            services.AddSingleton<IMessageRoutingService, MessageRoutingService>();
             services.AddSingleton<SaveConfirmationHelper>();
             services.AddSingleton<CloseConfirmationHelper>();
             services.AddSingleton<MainViewModel>();

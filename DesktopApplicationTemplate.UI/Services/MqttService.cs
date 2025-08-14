@@ -1,10 +1,18 @@
+
+using MQTTnet;
+using MQTTnet.Client;
+
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Models;
 using MQTTnet;
 using MQTTnet.Client;
+using MQTTnet.Protocol;
+using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 
 namespace DesktopApplicationTemplate.UI.Services
 {
@@ -14,7 +22,12 @@ namespace DesktopApplicationTemplate.UI.Services
     public class MqttService
     {
         private readonly IMqttClient _client;
+        private readonly IMessageRoutingService _routingService;
         private readonly ILoggingService? _logger;
+        private readonly HashSet<string> _subscriptions = new();
+        private MqttClientOptions? _clientOptions;
+        private MqttServiceOptions? _serviceOptions;
+        private Func<MqttClientDisconnectedEventArgs, Task>? _reconnectHandler;
 
         /// <summary>
         /// Connection options in use by the service.
@@ -56,6 +69,11 @@ namespace DesktopApplicationTemplate.UI.Services
         /// </summary>
         public async Task ConnectAsync()
         {
+            if (options is null)
+                throw new ArgumentNullException(nameof(options));
+            if (string.IsNullOrWhiteSpace(options.Host))
+                throw new ArgumentException("Host cannot be null or whitespace.", nameof(options));
+
             _logger?.Log("MqttService connect start", LogLevel.Debug);
 
             var builder = new MqttClientOptionsBuilder()
@@ -105,13 +123,30 @@ namespace DesktopApplicationTemplate.UI.Services
         {
             _logger?.Log("MqttService publish start", LogLevel.Debug);
             _logger?.Log($"Publishing to {topic}", LogLevel.Debug);
+            var resolved = _routingService.ResolveTokens(message);
             var msg = new MqttApplicationMessageBuilder()
                 .WithTopic(topic)
-                .WithPayload(message)
+                .WithPayload(resolved)
                 .Build();
             await _client.PublishAsync(msg).ConfigureAwait(false);
             _logger?.Log("Publish complete", LogLevel.Debug);
             _logger?.Log("MqttService publish finished", LogLevel.Debug);
+        }
+
+        public async Task PublishAsync(string topic, IEnumerable<string> messages)
+        {
+            foreach (var msg in messages)
+            {
+                await PublishAsync(topic, msg).ConfigureAwait(false);
+            }
+        }
+
+        public async Task PublishAsync(IDictionary<string, IEnumerable<string>> endpointMessages)
+        {
+            foreach (var pair in endpointMessages)
+            {
+                await PublishAsync(pair.Key, pair.Value).ConfigureAwait(false);
+            }
         }
     }
 }

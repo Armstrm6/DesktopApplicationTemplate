@@ -264,6 +264,16 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             Messages.Add(new MqttEndpointMessage { Endpoint = NewEndpoint, Message = NewMessage });
             NewEndpoint = string.Empty;
             NewMessage = string.Empty;
+        public MqttServiceViewModel(SaveConfirmationHelper saveHelper, IMessageRoutingService routingService, MqttService? service = null, ILoggingService? logger = null)
+        {
+            _saveHelper = saveHelper;
+            Logger = logger;
+            _service = service ?? new MqttService(routingService, logger);
+            AddTopicCommand = new RelayCommand(() => { if(!string.IsNullOrWhiteSpace(NewTopic)){Topics.Add(NewTopic); NewTopic = string.Empty;} });
+            RemoveTopicCommand = new RelayCommand(() => { if(Topics.Contains(NewTopic)) Topics.Remove(NewTopic); });
+            ConnectCommand = new RelayCommand(async () => await ConnectAsync());
+            PublishCommand = new RelayCommand(async () => await PublishAsync());
+            SaveCommand = new RelayCommand(Save);
         }
 
         private void RemoveSelectedMessage()
@@ -280,6 +290,17 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             Logger?.Log("MQTT connect start", LogLevel.Debug);
             await _service.ConnectAsync().ConfigureAwait(false);
             await _service.SubscribeAsync(Topics).ConfigureAwait(false);
+            var options = new MqttServiceOptions
+            {
+                Host = Host,
+                Port = int.Parse(Port),
+                ClientId = ClientId,
+                Username = string.IsNullOrWhiteSpace(Username) ? null : Username,
+                Password = string.IsNullOrWhiteSpace(Password) ? null : Password
+            };
+            await _service.ConnectAsync(options);
+            await _service.SubscribeAsync(Topics);
+            Logger?.Log("MQTT connected", LogLevel.Debug);
             Logger?.Log("MQTT connect finished", LogLevel.Debug);
         }
 
