@@ -9,7 +9,6 @@ Effective Prompts / Instructions that worked: n/a
 Decisions & Rationale: Use DI to share single logging service and helpers.
 Action Items: Monitor CI for Windows-specific behaviors.
 Related Commits/PRs: (this PR)
-
 [2025-08-13 20:41] Topic: WPF workload in CI
 Context: GitHub Actions failed because the `windowsdesktop` workload is no longer recognized.
 Observations: Replacing it with the `wpf` workload restores pipeline compatibility.
@@ -76,4 +75,37 @@ Codex Limitations noticed: none
 Effective Prompts / Instructions that worked: n/a
 Decisions & Rationale: Prefer removing stale classes to reduce maintenance and confusion.
 Action Items: Monitor builds for any lingering references.
+Related Commits/PRs: (this PR)
+[2025-08-13 21:15] Topic: WPF workload install guard
+Context: Running setup on non-Windows environments attempted to install the `wpf` workload and failed.
+Observations: WPF workload is only supported on Windows; attempting installation elsewhere causes errors.
+Codex Limitations noticed: `dotnet` unavailable in container, preventing local validation.
+Effective Prompts / Instructions that worked: n/a
+Decisions & Rationale: Setup script skips WPF workload installation when `OS` is not `Windows_NT`.
+Action Items: Ensure Windows dev environments continue installing the workload.
+Related Commits/PRs: (this PR)
+[2025-08-13 21:43] Topic: CI test job build
+Context: The `test` job ran `dotnet test` with `--no-build` and failed to find the test assembly.
+Observations: Job checks out fresh code without build artifacts, so Release binaries were missing.
+Codex Limitations noticed: `dotnet` unavailable in container, preventing local execution.
+Effective Prompts / Instructions that worked: n/a
+Decisions & Rationale: Removed `--no-build` so the test job compiles before running.
+Action Items: Monitor CI performance; consider artifact sharing to avoid redundant builds.
+Related Commits/PRs: (this PR)
+[2025-08-13 22:03] Topic: Remove WPF workload installs
+Context: CI and setup scripts redundantly installed the WPF workload already bundled with .NET 8.
+Observations: Removing install steps simplified the pipeline and setup script, and test job now always uploads results.
+Codex Limitations noticed: dotnet SDK unavailable locally for validation.
+Effective Prompts / Instructions that worked: n/a
+Decisions & Rationale: Rely on built-in WPF support and surface test failures via artifact upload.
+Action Items: Monitor CI to ensure failures are reported and artifacts persist.
+Related Commits/PRs: (this PR)
+
+[2025-08-14 00:30] Topic: WPF Application ambiguity
+Context: Build failed when both WPF and WinForms implicit usings introduced conflicting `Application` types.
+Observations: Explicitly qualifying the WPF `Application` resolved the ambiguity and restored compilation.
+Codex Limitations noticed: dotnet SDK unavailable locally for validation.
+Effective Prompts / Instructions that worked: Error log pinpointing ambiguous type reference.
+Decisions & Rationale: Alias `System.Windows.Application` and use it directly in the test.
+Action Items: Verify CI builds and tests succeed on Windows runners.
 Related Commits/PRs: (this PR)

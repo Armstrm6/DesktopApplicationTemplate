@@ -24,8 +24,6 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
-      - name: Install WPF workload
-        run: dotnet workload install wpf
       - name: Restore
         run: dotnet restore
       - name: Build
@@ -47,19 +45,23 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
-      - name: Install WPF workload
-        run: dotnet workload install wpf
       - name: Restore
         run: dotnet restore
       - name: Test
-        run: dotnet test -c Release --no-build --collect:"XPlat Code Coverage" --results-directory TestResults
+        id: test
+        continue-on-error: true
+        run: dotnet test -c Release --collect:"XPlat Code Coverage" --results-directory TestResults
       - name: Upload test results
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-results
           path: |
             TestResults
             **/coverage.cobertura.xml
+      - name: Fail if tests failed
+        if: steps.test.outcome == 'failure'
+        run: exit 1
 
   quality:
     runs-on: windows-latest
@@ -70,8 +72,6 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
-      - name: Install WPF workload
-        run: dotnet workload install wpf
       - name: Restore
         run: dotnet restore
       - name: Verify formatting
@@ -88,8 +88,6 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
-      - name: Install WPF workload
-        run: dotnet workload install wpf
       - name: Restore
         run: dotnet restore
       - name: Publish
