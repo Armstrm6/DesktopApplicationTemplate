@@ -77,3 +77,11 @@ Effective Prompts / Instructions that worked: n/a
 Decisions & Rationale: Prefer removing stale classes to reduce maintenance and confusion.
 Action Items: Monitor builds for any lingering references.
 Related Commits/PRs: (this PR)
+[2025-08-14 14:04] Topic: MQTT options and token publishing
+Context: Exposed MqttServiceOptions with validation and disconnect-on-change logic; added tokenized endpoint/message publishing.
+Observations: Shared options instance simplifies configuration updates and publishing multiple messages.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: leveraging existing MVVM validation patterns
+Decisions & Rationale: Disconnect before applying new settings to avoid stale connections.
+Action Items: Monitor MQTT connection stability in UI.
+Related Commits/PRs: (this PR)
