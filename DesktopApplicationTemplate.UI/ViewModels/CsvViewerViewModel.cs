@@ -1,6 +1,8 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Windows.Input;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
@@ -53,7 +55,28 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public void Save()
         {
-            var json = JsonSerializer.Serialize(Configuration, new JsonSerializerOptions { WriteIndented = true });
+            if (Configuration is null)
+                return;
+
+            var snapshot = new CsvConfiguration
+            {
+                FileNamePattern = Configuration.FileNamePattern,
+                Columns = new ObservableCollection<CsvColumnConfig>(Configuration.Columns.Select(c => new CsvColumnConfig
+                {
+                    Name = c.Name,
+                    Service = c.Service,
+                    Script = c.Script
+                }))
+            };
+
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                ReferenceHandler = ReferenceHandler.IgnoreCycles,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            };
+
+            var json = JsonSerializer.Serialize(snapshot, options);
             System.IO.File.WriteAllText(_configPath, json);
         }
 
