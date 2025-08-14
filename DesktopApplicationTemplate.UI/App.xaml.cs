@@ -45,7 +45,6 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<INetworkConfigurationService, NetworkConfigurationService>();
             services.AddSingleton<NetworkConfigurationViewModel>();
             services.AddSingleton<IRichTextLogger, NullRichTextLogger>();
-            services.AddSingleton<MqttServiceOptions>();
             services.AddSingleton<ILoggingService, LoggingService>();
             services.AddSingleton<IMessageRoutingService, MessageRoutingService>();
             services.AddSingleton<SaveConfirmationHelper>();

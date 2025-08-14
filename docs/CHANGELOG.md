@@ -30,6 +30,8 @@
 - Refactored `MqttService` with a single options-based constructor, clean reconnect logic, and consolidated publish methods.
 - Extracted `IMessageRoutingService`, removed legacy `Route` API, and improved thread-safe message tracking with optional logging.
 - Simplified `MqttServiceViewModel` to use `MqttServiceOptions` for settings and delegate token resolution to `MessageRoutingService`.
+- `MqttService` and `MqttServiceViewModel` now consume `IOptions<MqttServiceOptions>` and the direct singleton registration was removed.
+- Added a DI container test ensuring the service provider builds with MQTT components.
 
 ### Removed
 - Placeholder "Desktop Template" text from the navigation bar.

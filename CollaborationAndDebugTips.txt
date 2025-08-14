@@ -41,3 +41,11 @@ Effective Prompts / Instructions that worked: Register options and inject
 Decisions & Rationale: Used IOptions to supply defaults
 Action Items: Run tests
 Related Commits/PRs: 
+[2025-08-15 10:00] Topic: MQTT DI options
+Context: (summarize the scenario)
+Observations: Removed standalone options registration, adopted IOptions in constructors, and added DI container test.
+Codex Limitations noticed:
+Effective Prompts / Instructions that worked:
+Decisions & Rationale: Standardized on IOptions for configuration and verified ServiceProvider builds.
+Action Items: Run tests
+Related Commits/PRs:

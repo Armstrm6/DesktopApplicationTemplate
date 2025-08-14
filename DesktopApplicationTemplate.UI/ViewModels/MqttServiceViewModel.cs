@@ -6,6 +6,7 @@ using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.Services;
+using Microsoft.Extensions.Options;
 
 namespace DesktopApplicationTemplate.UI.ViewModels;
 
@@ -32,13 +33,13 @@ public class MqttServiceViewModel : ValidatableViewModelBase, ILoggingViewModel,
         MqttService service,
         IMessageRoutingService routing,
         SaveConfirmationHelper saveHelper,
-        MqttServiceOptions options,
+        IOptions<MqttServiceOptions> options,
         ILoggingService? logger = null)
     {
         _service = service ?? throw new ArgumentNullException(nameof(service));
         _routing = routing ?? throw new ArgumentNullException(nameof(routing));
         _saveHelper = saveHelper ?? throw new ArgumentNullException(nameof(saveHelper));
-        _options = options ?? throw new ArgumentNullException(nameof(options));
+        _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
         Logger = logger;
 
         _service.ConnectionStateChanged += (_, connected) => IsConnected = connected;
