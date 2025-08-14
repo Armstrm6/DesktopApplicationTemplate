@@ -131,7 +131,7 @@ Codex Limitations noticed: pwsh not available to run add-tip script.
 Effective Prompts / Instructions that worked: Instructions emphasized placeholders and tooltips.
 Decisions & Rationale: Added DataGrid with Add/Remove commands to manage pairs.
 Action Items: Extend MqttServiceViewModel and tests.
-Related Commits/PRs: 
+Related Commits/PRs:
 
 [2025-08-14 14:04] Topic: MQTT options and token publishing
 Context: Exposed MqttServiceOptions with validation and disconnect-on-change logic; added tokenized endpoint/message publishing.
@@ -158,4 +158,12 @@ Effective Prompts / Instructions that worked: Detailed property list with defaul
 Decisions & Rationale: Provide options model for future DI and configuration binding.
 Action Items: Wire options into service and configuration pipeline later.
 
+Related Commits/PRs: (this PR)
+[2025-08-15 12:00] Topic: Message routing service cleanup
+Context: Simplified message tracking and removed redundant WPF workload installs.
+Observations: ConcurrentDictionary with optional logging keeps token resolution thread-safe.
+Codex Limitations noticed: Unable to run net8.0-windows tests on Linux container.
+Effective Prompts / Instructions that worked: Following AGENTS.md to update docs and remove unused workflow steps.
+Decisions & Rationale: Extract interface and rely on built-in .NET 8 SDK components for cleaner CI.
+Action Items: Validate on Windows runners.
 Related Commits/PRs: (this PR)

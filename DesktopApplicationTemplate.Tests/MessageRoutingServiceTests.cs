@@ -7,6 +7,21 @@ namespace DesktopApplicationTemplate.Tests
     {
         [Fact]
         [TestCategory("CodexSafe")]
+        public void UpdateMessage_PersistsAndReturnsLatest()
+        {
+            var routing = new MessageRoutingService();
+
+            routing.UpdateMessage("svc", "first");
+            routing.UpdateMessage("svc", "second");
+
+            var found = routing.TryGetMessage("svc", out var message);
+
+            Assert.True(found);
+            Assert.Equal("second", message);
+        }
+
+        [Fact]
+        [TestCategory("CodexSafe")]
         public void ResolveTokens_ReplacesWithLatestMessage()
         {
             var routing = new MessageRoutingService();
