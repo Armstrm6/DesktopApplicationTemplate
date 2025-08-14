@@ -43,3 +43,4 @@
 - Corrected logo resource path so the image renders in the navigation bar.
 - Updated GitHub workflows to install the WPF workload instead of the deprecated windowsdesktop workload.
 - MQTT service now disconnects before reconnecting when settings change.
+- Removed obsolete MQTT options model that caused duplicate property definitions.

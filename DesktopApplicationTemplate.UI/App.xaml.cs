@@ -3,7 +3,6 @@ using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI.Models;
-using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.Core.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

@@ -184,3 +184,11 @@ Effective Prompts / Instructions that worked:
 Decisions & Rationale: Standardized on IOptions for configuration and verified ServiceProvider builds.
 Action Items: Run tests
 Related Commits/PRs:
+[2025-08-16 12:00] Topic: MQTT options duplication fix
+Context: Build failed due to duplicate ClientId property from obsolete options model.
+Observations: Removing the legacy model and updating references restored a successful build.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: ripgrep to locate conflicting types.
+Decisions & Rationale: Consolidated MQTT options under Services namespace to avoid ambiguity.
+Action Items: Ensure tests reference the unified options type.
+Related Commits/PRs: (this PR)
