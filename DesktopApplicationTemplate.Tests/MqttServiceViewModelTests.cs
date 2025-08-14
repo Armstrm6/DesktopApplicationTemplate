@@ -8,6 +8,7 @@ using Xunit;
 using System.Threading;
 using System;
 using MQTTnet.Packets;
+using DesktopApplicationTemplate.UI.Models;
 
 namespace DesktopApplicationTemplate.Tests
 {
@@ -26,6 +27,40 @@ namespace DesktopApplicationTemplate.Tests
             vm.NewTopic = "test/topic";
             vm.AddTopicCommand.Execute(null);
             Assert.Contains("test/topic", vm.Topics);
+
+            ConsoleTestLogger.LogPass();
+        }
+
+        [Fact]
+        [TestCategory("WindowsSafe")]
+        public void AddEndpointMessageCommand_AddsPair()
+        {
+            if (!OperatingSystem.IsWindows())
+            {
+                return;
+            }
+            var helper = new SaveConfirmationHelper(new Mock<ILoggingService>().Object);
+            var vm = new MqttServiceViewModel(helper);
+            vm.AddEndpointMessageCommand.Execute(null);
+            Assert.Single(vm.EndpointMessages);
+
+            ConsoleTestLogger.LogPass();
+        }
+
+        [Fact]
+        [TestCategory("WindowsSafe")]
+        public void RemoveEndpointMessageCommand_RemovesSelectedPair()
+        {
+            if (!OperatingSystem.IsWindows())
+            {
+                return;
+            }
+            var helper = new SaveConfirmationHelper(new Mock<ILoggingService>().Object);
+            var vm = new MqttServiceViewModel(helper);
+            vm.EndpointMessages.Add(new EndpointMessagePair { Endpoint = "topic", Message = "msg" });
+            vm.SelectedEndpointMessage = vm.EndpointMessages[0];
+            vm.RemoveEndpointMessageCommand.Execute(null);
+            Assert.Empty(vm.EndpointMessages);
 
             ConsoleTestLogger.LogPass();
         }

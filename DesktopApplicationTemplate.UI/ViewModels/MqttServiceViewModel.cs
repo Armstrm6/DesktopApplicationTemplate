@@ -55,11 +55,21 @@ public class MqttServiceViewModel : ViewModelBase, ILoggingViewModel, INetworkAw
 
         public ObservableCollection<string> Topics { get; } = new();
 
+        public ObservableCollection<EndpointMessagePair> EndpointMessages { get; } = new();
+        private EndpointMessagePair? _selectedEndpointMessage;
+        public EndpointMessagePair? SelectedEndpointMessage
+        {
+            get => _selectedEndpointMessage;
+            set { _selectedEndpointMessage = value; OnPropertyChanged(); }
+        }
+
         public ICommand AddTopicCommand { get; }
         public ICommand RemoveTopicCommand { get; }
         public ICommand ConnectCommand { get; }
         public ICommand PublishCommand { get; }
         public ICommand SaveCommand { get; }
+        public ICommand AddEndpointMessageCommand { get; }
+        public ICommand RemoveEndpointMessageCommand { get; }
 
         public ILoggingService? Logger { get; set; }
 
@@ -76,6 +86,19 @@ public class MqttServiceViewModel : ViewModelBase, ILoggingViewModel, INetworkAw
             ConnectCommand = new RelayCommand(async () => await ConnectAsync());
             PublishCommand = new RelayCommand(async () => await PublishAsync());
             SaveCommand = new RelayCommand(Save);
+            AddEndpointMessageCommand = new RelayCommand(() =>
+            {
+                EndpointMessages.Add(new EndpointMessagePair());
+                Logger?.Log("Added endpoint-message pair", LogLevel.Debug);
+            });
+            RemoveEndpointMessageCommand = new RelayCommand(() =>
+            {
+                if (SelectedEndpointMessage != null)
+                {
+                    EndpointMessages.Remove(SelectedEndpointMessage);
+                    Logger?.Log("Removed endpoint-message pair", LogLevel.Debug);
+                }
+            });
         }
 
         public async Task ConnectAsync()

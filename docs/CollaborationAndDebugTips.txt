@@ -77,3 +77,11 @@ Effective Prompts / Instructions that worked: n/a
 Decisions & Rationale: Prefer removing stale classes to reduce maintenance and confusion.
 Action Items: Monitor builds for any lingering references.
 Related Commits/PRs: (this PR)
+[2025-08-14 14:02] Topic: MQTT endpoint-message UI
+Context: (summarize the scenario)
+Observations: Implemented endpoint-message pair configuration with placeholders and tooltips.
+Codex Limitations noticed: pwsh not available to run add-tip script.
+Effective Prompts / Instructions that worked: Instructions emphasized placeholders and tooltips.
+Decisions & Rationale: Added DataGrid with Add/Remove commands to manage pairs.
+Action Items: Extend MqttServiceViewModel and tests.
+Related Commits/PRs: 
