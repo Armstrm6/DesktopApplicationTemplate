@@ -52,3 +52,4 @@
 - Removed obsolete `MQTTnet.Client.Publishing` import in MQTT view model tests to resolve missing namespace build errors.
 - Guarded CSV viewer configuration serialization to prevent stack overflow when saving empty data.
 - Main window sizes to content so UI elements are no longer clipped at the edges.
+- Added missing `FluentAssertions` package reference to the test project and documented dependency checks to avoid build failures.
