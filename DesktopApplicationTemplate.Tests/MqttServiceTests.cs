@@ -1,4 +1,6 @@
 using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Core.Services;
+using Microsoft.Extensions.Options;
 using DesktopApplicationTemplate.UI.Models;
 using Moq;
 using MQTTnet.Client;
@@ -28,8 +30,11 @@ namespace DesktopApplicationTemplate.Tests
             client.Setup(c => c.PublishAsync(It.IsAny<MQTTnet.MqttApplicationMessage>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new MqttClientPublishResult(null, MqttClientPublishReasonCode.Success, null!, Array.Empty<MqttUserProperty>()));
 
+            var options = Microsoft.Extensions.Options.Options.Create(new DesktopApplicationTemplate.Models.MqttServiceOptions());
+            var logger = new Mock<ILoggingService>().Object;
+            var service = new MqttService(client.Object, options, logger);
+            await service.ConnectAsync("host", 1234, "id", null, null);
             var options = new MqttServiceOptions { Host = "host", Port = 1234, ClientId = "id" };
-            var service = new MqttService(client.Object, options);
             await service.ConnectAsync();
             await service.SubscribeAsync(new[] { "topic" });
             await service.PublishAsync("topic", "msg", MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce, true);

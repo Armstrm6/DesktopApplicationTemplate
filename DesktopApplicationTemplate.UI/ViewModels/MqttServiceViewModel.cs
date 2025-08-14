@@ -6,6 +6,8 @@ using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Models;
+using DesktopApplicationTemplate.Core.Services;
+using Microsoft.Extensions.Options;
 using DesktopApplicationTemplate.UI.Services;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
@@ -267,18 +269,22 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 Topics.Remove(NewTopic);
         }
 
-        private void AddMessage()
-        {
-            if (string.IsNullOrWhiteSpace(NewEndpoint) || string.IsNullOrWhiteSpace(NewMessage))
-                return;
-            Messages.Add(new MqttEndpointMessage { Endpoint = NewEndpoint, Message = NewMessage });
-            NewEndpoint = string.Empty;
-            NewMessage = string.Empty;
-        public MqttServiceViewModel(SaveConfirmationHelper saveHelper, IMessageRoutingService routingService, MqttService? service = null, ILoggingService? logger = null)
+        public MqttServiceViewModel(SaveConfirmationHelper saveHelper, MqttService service, IOptions<MqttServiceOptions> options, ILoggingService logger)
         {
             _saveHelper = saveHelper;
+            _service = service;
             Logger = logger;
-            _service = service ?? new MqttService(routingService, logger);
+            var opts = options.Value;
+            Host = opts.Host;
+            Port = opts.Port.ToString();
+            ClientId = opts.ClientId;
+            Username = opts.Username;
+            Password = opts.Password;
+            if (opts.Topics != null)
+            {
+                foreach (var t in opts.Topics)
+                    Topics.Add(t);
+            }
             AddTopicCommand = new RelayCommand(() => { if(!string.IsNullOrWhiteSpace(NewTopic)){Topics.Add(NewTopic); NewTopic = string.Empty;} });
             RemoveTopicCommand = new RelayCommand(() => { if(Topics.Contains(NewTopic)) Topics.Remove(NewTopic); });
             ConnectCommand = new RelayCommand(async () => await ConnectAsync());
@@ -311,8 +317,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public async Task ConnectAsync()
         {
             Logger?.Log("MQTT connect start", LogLevel.Debug);
-            await _service.ConnectAsync().ConfigureAwait(false);
+            await _service.ConnectAsync(Host, int.Parse(Port), ClientId, Username, Password).ConfigureAwait(false);
             await _service.SubscribeAsync(Topics).ConfigureAwait(false);
+
             var options = new MqttServiceOptions
             {
                 Host = Host,
@@ -337,7 +344,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             var topic = ResolveTokens(SelectedMessage.Endpoint);
             var payload = ResolveTokens(SelectedMessage.Message);
             Logger?.Log("MQTT publish start", LogLevel.Debug);
-            await _service.PublishAsync(topic, payload).ConfigureAwait(false);
+            await _service.PublishAsync(PublishTopic, PublishMessage).ConfigureAwait(false);
+            Logger?.Log($"Published to {PublishTopic}", LogLevel.Debug);
+
             Logger?.Log("MQTT publish finished", LogLevel.Debug);
         }
 

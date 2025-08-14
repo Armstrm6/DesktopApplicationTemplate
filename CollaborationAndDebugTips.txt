@@ -33,3 +33,11 @@ Miscellaneous Tips
 - Favor async/await patterns to keep the UI responsive and avoid deadlocks.
 - Reuse existing services and view models instead of duplicating logic.
 - Maintain clear, purpose-driven variable names for readability and maintainability.
+[2025-08-14 14:03] Topic: MQTT options
+Context: (summarize the scenario)
+Observations: Added MqttServiceOptions and MessageRoutingService with DI
+Codex Limitations noticed: pwsh not available for add-tip script
+Effective Prompts / Instructions that worked: Register options and inject
+Decisions & Rationale: Used IOptions to supply defaults
+Action Items: Run tests
+Related Commits/PRs: 

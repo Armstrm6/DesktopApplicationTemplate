@@ -1,3 +1,4 @@
+
 using System;
 using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
@@ -5,6 +6,14 @@ using DesktopApplicationTemplate.Core.Services;
 
 namespace DesktopApplicationTemplate.UI.Services
 {
+    /// <summary>
+    /// Provides a simple mechanism for routing messages between services.
+    /// </summary>
+    public class MessageRoutingService
+    {
+        private readonly ILoggingService _logger;
+
+        public MessageRoutingService(ILoggingService logger)
     public interface IMessageRoutingService
     {
         void UpdateMessage(string serviceName, string message);
@@ -26,6 +35,18 @@ namespace DesktopApplicationTemplate.UI.Services
             _logger = logger;
         }
 
+        /// <summary>
+        /// Routes a message from a source service to a destination service.
+        /// </summary>
+        /// <param name="source">The originating service.</param>
+        /// <param name="destination">The target service.</param>
+        /// <param name="message">The message to route.</param>
+        public void Route(string source, string destination, string message)
+        {
+            _logger.Log($"Routing message from {source} to {destination}", LogLevel.Debug);
+            MessageForwarder.Forward(destination, message);
+            _logger.Log("Message routed", LogLevel.Debug);
+        }
         public void UpdateMessage(string serviceName, string message)
         {
             if (string.IsNullOrWhiteSpace(serviceName))
@@ -54,4 +75,3 @@ namespace DesktopApplicationTemplate.UI.Services
         }
     }
 }
-

@@ -82,6 +82,7 @@ namespace DesktopApplicationTemplate.UI
 
             // Load strongly typed settings
             services.Configure<AppSettings>(configuration.GetSection("AppSettings"));
+            services.Configure<MqttServiceOptions>(configuration.GetSection("MqttService"));
         }
 
         protected override async void OnStartup(StartupEventArgs e)
