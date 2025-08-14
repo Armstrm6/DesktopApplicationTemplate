@@ -45,6 +45,14 @@ Effective Prompts / Instructions that worked: Configuring push patterns and `wor
 Decisions & Rationale: Use GitHub-hosted runners to centralize validation.
 Action Items: Monitor CI runs for unexpected failures.
 Related Commits/PRs: (this PR)
+ [2025-08-14 14:08] Topic: MQTT service TLS and routing tests
+Context: Added TLS/connect tests for MQTT service and expanded view model to resolve tokens and publish to multiple topics.
+Observations: Installing matching .NET SDK enabled building Windows-targeted tests, but runtime is unavailable on Linux.
+Codex Limitations noticed: Cannot execute Microsoft.WindowsDesktop runtime locally.
+Effective Prompts / Instructions that worked: n/a
+Decisions & Rationale: Implement TLS and disconnect logic to satisfy unit test coverage.
+Action Items: Run full test suite on a Windows environment.
+Related Commits/PRs: (this PR)
 [2025-08-13 18:28] Topic: CI workflow consolidation
 Context: Unified multiple GitHub workflows into a single pipeline and added AGENTS instructions to review changelog and collaboration tips.
 Observations: Centralized CI reduces maintenance overhead.

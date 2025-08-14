@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -29,8 +31,10 @@ public class MqttServiceViewModel : ViewModelBase, ILoggingViewModel, INetworkAw
             get => _port;
             set
             {
-                if (int.TryParse(value, out _))
+                if (int.TryParse(value, out var p) && p >= 0 && p <= 65535)
+                {
                     _port = value;
+                }
                 OnPropertyChanged();
             }
         }
@@ -50,6 +54,9 @@ public class MqttServiceViewModel : ViewModelBase, ILoggingViewModel, INetworkAw
         private string _publishMessage = string.Empty;
         public string PublishMessage { get => _publishMessage; set { _publishMessage = value; OnPropertyChanged(); } }
 
+        private bool _useTls;
+        public bool UseTls { get => _useTls; set { _useTls = value; OnPropertyChanged(); } }
+
         private string _newTopic = string.Empty;
         public string NewTopic { get => _newTopic; set { _newTopic = value; OnPropertyChanged(); } }
 
@@ -65,12 +72,15 @@ public class MqttServiceViewModel : ViewModelBase, ILoggingViewModel, INetworkAw
 
         private readonly MqttService _service;
         private readonly SaveConfirmationHelper _saveHelper;
+        private readonly IDictionary<string, string> _tokenValues;
+        private bool _isConnected;
 
-        public MqttServiceViewModel(SaveConfirmationHelper saveHelper, MqttService? service = null, ILoggingService? logger = null)
+        public MqttServiceViewModel(SaveConfirmationHelper saveHelper, MqttService? service = null, ILoggingService? logger = null, IDictionary<string, string>? tokenValues = null)
         {
             _saveHelper = saveHelper;
             Logger = logger;
             _service = service ?? new MqttService(logger);
+            _tokenValues = tokenValues ?? new Dictionary<string, string>();
             AddTopicCommand = new RelayCommand(() => { if(!string.IsNullOrWhiteSpace(NewTopic)){Topics.Add(NewTopic); NewTopic = string.Empty;} });
             RemoveTopicCommand = new RelayCommand(() => { if(Topics.Contains(NewTopic)) Topics.Remove(NewTopic); });
             ConnectCommand = new RelayCommand(async () => await ConnectAsync());
@@ -81,8 +91,13 @@ public class MqttServiceViewModel : ViewModelBase, ILoggingViewModel, INetworkAw
         public async Task ConnectAsync()
         {
             Logger?.Log("MQTT connect start", LogLevel.Debug);
-            await _service.ConnectAsync(Host, int.Parse(Port), ClientId, Username, Password);
+            if (_isConnected)
+            {
+                await _service.DisconnectAsync();
+            }
+            await _service.ConnectAsync(Host, int.Parse(Port), ClientId, Username, Password, UseTls);
             await _service.SubscribeAsync(Topics);
+            _isConnected = true;
             Logger?.Log("MQTT connected", LogLevel.Debug);
             Logger?.Log("MQTT connect finished", LogLevel.Debug);
         }
@@ -92,7 +107,11 @@ public class MqttServiceViewModel : ViewModelBase, ILoggingViewModel, INetworkAw
             if(string.IsNullOrWhiteSpace(PublishTopic) || string.IsNullOrWhiteSpace(PublishMessage))
                 return;
             Logger?.Log("MQTT publish start", LogLevel.Debug);
-            await _service.PublishAsync(PublishTopic, PublishMessage);
+            var resolved = ResolveTokens(PublishMessage);
+            foreach (var topic in PublishTopic.Split(';', StringSplitOptions.RemoveEmptyEntries))
+            {
+                await _service.PublishAsync(topic, resolved);
+            }
             Logger?.Log($"Published to {PublishTopic}", LogLevel.Debug);
             Logger?.Log("MQTT publish finished", LogLevel.Debug);
         }
@@ -102,6 +121,15 @@ public class MqttServiceViewModel : ViewModelBase, ILoggingViewModel, INetworkAw
         public void UpdateNetworkConfiguration(NetworkConfiguration configuration)
         {
             Host = configuration.IpAddress;
+        }
+
+        private string ResolveTokens(string message)
+        {
+            foreach (var kvp in _tokenValues)
+            {
+                message = message.Replace($"{{{kvp.Key}.Message}}", kvp.Value);
+            }
+            return message;
         }
 
         // OnPropertyChanged provided by ViewModelBase

@@ -11,6 +11,8 @@
 - Added `/test` comment workflow to run CI on demand.
 - Created `CONTRIBUTING.md` and PR template enforcing CI-only testing with a CI badge in the README.
 - Introduced `AsyncRelayCommand` for asynchronous UI actions.
+- Extended MQTT service with TLS support and safe reconnect behavior.
+- Added MQTT view model token resolution and multi-topic publishing tests.
 
 ### Changed
 - CI workflow now runs on pushes to `feature/**` and `bugfix/**` branches and supports manual triggers, ensuring tests execute on GitHub.
