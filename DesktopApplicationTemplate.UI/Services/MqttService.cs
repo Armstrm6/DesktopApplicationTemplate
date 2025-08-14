@@ -27,6 +27,13 @@ namespace DesktopApplicationTemplate.UI.Services
         public async Task ConnectAsync(string host, int port, string clientId, string? user, string? pass)
         {
             _logger?.Log("MqttService connect start", LogLevel.Debug);
+
+            if (_client.IsConnected)
+            {
+                _logger?.Log("Disconnecting existing MQTT connection", LogLevel.Debug);
+                await _client.DisconnectAsync();
+            }
+
             var options = new MqttClientOptionsBuilder()
                 .WithTcpServer(host, port)
                 .WithClientId(clientId);
@@ -38,6 +45,16 @@ namespace DesktopApplicationTemplate.UI.Services
             await _client.ConnectAsync(options.Build());
             _logger?.Log("MQTT connected", LogLevel.Debug);
             _logger?.Log("MqttService connect finished", LogLevel.Debug);
+        }
+
+        public async Task DisconnectAsync()
+        {
+            if (!_client.IsConnected)
+                return;
+
+            _logger?.Log("MqttService disconnect start", LogLevel.Debug);
+            await _client.DisconnectAsync();
+            _logger?.Log("MqttService disconnect finished", LogLevel.Debug);
         }
 
         public async Task SubscribeAsync(IEnumerable<string> topics)

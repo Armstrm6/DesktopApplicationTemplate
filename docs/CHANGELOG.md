@@ -11,6 +11,7 @@
 - Added `/test` comment workflow to run CI on demand.
 - Created `CONTRIBUTING.md` and PR template enforcing CI-only testing with a CI badge in the README.
 - Introduced `AsyncRelayCommand` for asynchronous UI actions.
+- Tooltips for MQTT endpoint configuration fields.
 
 ### Changed
 - CI workflow now runs on pushes to `feature/**` and `bugfix/**` branches and supports manual triggers, ensuring tests execute on GitHub.
@@ -25,3 +26,4 @@
 ### Fixed
 - Corrected logo resource path so the image renders in the navigation bar.
 - Updated GitHub workflows to install the WPF workload instead of the deprecated windowsdesktop workload.
+- MQTT service now disconnects before reconnecting when settings change.
