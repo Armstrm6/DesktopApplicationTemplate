@@ -105,3 +105,13 @@ Decisions & Rationale: Standardize cycle-safe JSON options across services.
 Action Items: Monitor CI for serialization regressions.
 Related Commits/PRs: (this PR)
 
+
+[2025-08-17 12:00] Topic: CSV file naming and key handling
+Context: Adjusted CSV service file naming to respect `{index}` placeholder and confirmed main window only responds to Escape key.
+Observations: Incrementing index only when placeholder is present prevents runaway file creation; added regression tests for key handling and cyclic service persistence.
+Codex Limitations noticed: Linux environment lacks WPF runtime, preventing full test execution.
+Effective Prompts / Instructions that worked: Reviewing AGENTS instructions and prior changelog before editing.
+Decisions & Rationale: Follow placeholder presence to advance index and ensure keyboard events remain scoped to Escape.
+Action Items: Rely on CI to execute Windows-specific tests.
+Related Commits/PRs: (this PR)
+

@@ -95,7 +95,7 @@ namespace DesktopApplicationTemplate.UI.Services
         {
             string pattern = _viewModel.Configuration.FileNamePattern;
             string name = pattern.Replace("{index}", _index.ToString());
-            if (!name.Contains("{index}"))
+            if (pattern.Contains("{index}"))
                 _index++;
             return name;
         }

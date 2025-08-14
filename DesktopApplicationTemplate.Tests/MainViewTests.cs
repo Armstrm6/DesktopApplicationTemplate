@@ -211,5 +211,59 @@ namespace DesktopApplicationTemplate.Tests
             if (ex != null) throw ex;
             ConsoleTestLogger.LogPass();
         }
+
+        [Fact]
+        [TestCategory("WindowsSafe")]
+        public void MainView_KeyDown_IgnoresNonEscape()
+        {
+            if (!OperatingSystem.IsWindows())
+                return;
+
+            Exception? ex = null;
+            var thread = new Thread(() =>
+            {
+                try
+                {
+                    if (System.Windows.Application.Current == null)
+                        new DesktopApplicationTemplate.UI.App();
+                    var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
+                    var servicesPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "services.json");
+                    Directory.CreateDirectory(Path.GetDirectoryName(servicesPath)!);
+                    var network = new Mock<INetworkConfigurationService>();
+                    var networkVm = new NetworkConfigurationViewModel(network.Object);
+                    var vm = new MainViewModel(new CsvService(new CsvViewerViewModel(configPath)), networkVm, network.Object, null, servicesPath);
+                    vm.SelectedService = new ServiceViewModel { DisplayName = "Svc", ServiceType = "TCP" };
+                    var view = new MainView(vm);
+
+                    var method = typeof(MainView).GetMethod("MainView_KeyDown", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    var src = new TestPresentationSource();
+
+                    var dArgs = new KeyEventArgs(Keyboard.PrimaryDevice, src, 0, Key.D) { RoutedEvent = Keyboard.KeyDownEvent };
+                    method?.Invoke(view, new object[] { view, dArgs });
+                    Assert.NotNull(vm.SelectedService);
+
+                    var escArgs = new KeyEventArgs(Keyboard.PrimaryDevice, src, 0, Key.Escape) { RoutedEvent = Keyboard.KeyDownEvent };
+                    method?.Invoke(view, new object[] { view, escArgs });
+                    Assert.Null(vm.SelectedService);
+                }
+                catch (Exception e) { ex = e; }
+                finally
+                {
+                    System.Windows.Application.Current?.Shutdown();
+                }
+            });
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.Start();
+            thread.Join();
+            if (ex != null) throw ex;
+            ConsoleTestLogger.LogPass();
+        }
+
+        private class TestPresentationSource : PresentationSource
+        {
+            public override Visual RootVisual { get; set; } = new DrawingVisual();
+            protected override CompositionTarget? GetCompositionTargetCore() => null;
+            public override bool IsDisposed => false;
+        }
     }
 }
