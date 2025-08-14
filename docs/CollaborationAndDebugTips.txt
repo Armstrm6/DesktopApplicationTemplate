@@ -208,3 +208,11 @@ Effective Prompts / Instructions that worked: Search for lingering namespace ref
 Decisions & Rationale: Align startup services and tests with relocated AppSettings type to avoid build breaks.
 Action Items: Monitor for additional namespace mismatches in future refactors.
 Related Commits/PRs: (this PR)
+[2025-08-16 18:00] Topic: MQTT view model test result types
+Context: Build failed because MQTT view model tests mocked MQTTnet methods with `Task.CompletedTask` after APIs changed to return typed results.
+Observations: Compiler raised CS1503 when tasks lacked generic result types for `PublishAsync` and `ConnectAsync`.
+Codex Limitations noticed: net8.0-windows tests still cannot execute in Linux container.
+Effective Prompts / Instructions that worked: Inspecting compile errors and comparing with working service tests.
+Decisions & Rationale: Updated mocks to use `ReturnsAsync` with `MqttClientPublishResult` and `MqttClientConnectResult` and noted the mismatch in docs.
+Action Items: Watch for upstream API changes and adjust test doubles accordingly.
+Related Commits/PRs: (this PR)

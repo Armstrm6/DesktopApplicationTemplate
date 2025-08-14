@@ -10,6 +10,8 @@ using DesktopApplicationTemplate.UI.ViewModels;
 using Moq;
 using MQTTnet;
 using MQTTnet.Client;
+using MQTTnet.Client.Publishing;
+using MQTTnet.Packets;
 using Xunit;
 
 namespace DesktopApplicationTemplate.Tests;
@@ -25,9 +27,9 @@ public class MqttServiceViewModelTests
         var routing = routingMock ?? new Mock<IMessageRoutingService>();
         var client = clientMock ?? new Mock<IMqttClient>();
         client.Setup(c => c.PublishAsync(It.IsAny<MqttApplicationMessage>(), It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
+            .ReturnsAsync(new MqttClientPublishResult(null, MqttClientPublishReasonCode.Success, null!, Array.Empty<MqttUserProperty>()));
         client.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
+            .ReturnsAsync(new MqttClientConnectResult());
         var service = new MqttService(client.Object, options, routing.Object, logger);
         var helper = new SaveConfirmationHelper(logger);
         return new MqttServiceViewModel(service, routing.Object, helper, options, logger);
@@ -75,7 +77,7 @@ public class MqttServiceViewModelTests
         if (!OperatingSystem.IsWindows()) return;
         var client = new Mock<IMqttClient>();
         client.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
+            .ReturnsAsync(new MqttClientConnectResult());
         var vm = CreateViewModel(client);
         await vm.ConnectAsync();
         Assert.True(vm.IsConnected);
@@ -92,7 +94,7 @@ public class MqttServiceViewModelTests
         routing.Setup(r => r.ResolveTokens("payload")).Returns("resolvedPayload");
         var client = new Mock<IMqttClient>();
         client.Setup(c => c.PublishAsync(It.IsAny<MqttApplicationMessage>(), It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
+            .ReturnsAsync(new MqttClientPublishResult(null, MqttClientPublishReasonCode.Success, null!, Array.Empty<MqttUserProperty>()));
         var vm = CreateViewModel(client, routing);
         vm.Messages.Add(new MqttEndpointMessage { Endpoint = "endpoint", Message = "payload" });
         vm.SelectedMessage = vm.Messages.First();

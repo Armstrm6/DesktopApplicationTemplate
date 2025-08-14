@@ -48,3 +48,4 @@
 - Replaced unsupported information-level logs with debug logs in message routing components.
 - Corrected `AppSettings` namespace to ensure configuration binding compiles.
 - Fixed missing `AppSettings` references in startup services.
+- Adjusted MQTT view model tests to return typed MQTTnet results instead of `Task.CompletedTask`, preventing build failures when APIs return generic tasks.
