@@ -1,5 +1,6 @@
 using MQTTnet;
 using MQTTnet.Client;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DesktopApplicationTemplate.Core.Services;
@@ -9,18 +10,21 @@ namespace DesktopApplicationTemplate.UI.Services
     public class MqttService
     {
         private readonly IMqttClient _client;
+        private readonly IMessageRoutingService _routingService;
         private readonly ILoggingService? _logger;
 
-        public MqttService(ILoggingService? logger = null)
+        public MqttService(IMessageRoutingService routingService, ILoggingService? logger = null)
         {
             var factory = new MqttFactory();
             _client = factory.CreateMqttClient();
+            _routingService = routingService ?? throw new ArgumentNullException(nameof(routingService));
             _logger = logger;
         }
 
-        internal MqttService(IMqttClient client, ILoggingService? logger = null)
+        internal MqttService(IMqttClient client, IMessageRoutingService routingService, ILoggingService? logger = null)
         {
             _client = client;
+            _routingService = routingService ?? throw new ArgumentNullException(nameof(routingService));
             _logger = logger;
         }
 
@@ -53,13 +57,30 @@ namespace DesktopApplicationTemplate.UI.Services
         {
             _logger?.Log("MqttService publish start", LogLevel.Debug);
             _logger?.Log($"Publishing to {topic}", LogLevel.Debug);
+            var resolved = _routingService.ResolveTokens(message);
             var msg = new MqttApplicationMessageBuilder()
                 .WithTopic(topic)
-                .WithPayload(message)
+                .WithPayload(resolved)
                 .Build();
             await _client.PublishAsync(msg);
             _logger?.Log("Publish complete", LogLevel.Debug);
             _logger?.Log("MqttService publish finished", LogLevel.Debug);
+        }
+
+        public async Task PublishAsync(string topic, IEnumerable<string> messages)
+        {
+            foreach (var msg in messages)
+            {
+                await PublishAsync(topic, msg).ConfigureAwait(false);
+            }
+        }
+
+        public async Task PublishAsync(IDictionary<string, IEnumerable<string>> endpointMessages)
+        {
+            foreach (var pair in endpointMessages)
+            {
+                await PublishAsync(pair.Key, pair.Value).ConfigureAwait(false);
+            }
         }
     }
 }

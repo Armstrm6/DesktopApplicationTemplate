@@ -11,6 +11,8 @@
 - Added `/test` comment workflow to run CI on demand.
 - Created `CONTRIBUTING.md` and PR template enforcing CI-only testing with a CI badge in the README.
 - Introduced `AsyncRelayCommand` for asynchronous UI actions.
+- Added `MessageRoutingService` to track latest messages per service and resolve `{ServiceName.Message}` tokens before MQTT publishing.
+- `MqttService` can now resolve message tokens and publish multiple messages per endpoint.
 
 ### Changed
 - CI workflow now runs on pushes to `feature/**` and `bugfix/**` branches and supports manual triggers, ensuring tests execute on GitHub.
