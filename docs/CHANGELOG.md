@@ -29,11 +29,13 @@
 - `TcpServiceViewModel` now evaluates scripts asynchronously and streamlined server toggle logging.
 - Refactored `MqttService` with a single options-based constructor, clean reconnect logic, and consolidated publish methods.
 - Extracted `IMessageRoutingService`, removed legacy `Route` API, and improved thread-safe message tracking with optional logging.
+- Simplified `MqttServiceViewModel` to use `MqttServiceOptions` for settings and delegate token resolution to `MessageRoutingService`.
 
 ### Removed
 - Placeholder "Desktop Template" text from the navigation bar.
 - Legacy GitHub workflows (`dotnet.yml`, `dotnet-desktop-ci.yml`, `ci.yml`).
 - Unused `RichTextLogger` service and installer `CustomControl1` control.
+- `PublishTopic` and `PublishMessage` fields from `MqttServiceViewModel`.
 
 ### Fixed
 - Corrected logo resource path so the image renders in the navigation bar.
