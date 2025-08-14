@@ -1,192 +1,145 @@
-
-using MQTTnet;
-using MQTTnet.Client;
-
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.Models;
 using Microsoft.Extensions.Options;
-using DesktopApplicationTemplate.UI.Models;
 using MQTTnet;
 using MQTTnet.Client;
-using MQTTnet.Protocol;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 
-namespace DesktopApplicationTemplate.UI.Services
+namespace DesktopApplicationTemplate.UI.Services;
+
+/// <summary>
+/// Provides MQTT connectivity and tokenized message publishing.
+/// </summary>
+public class MqttService
 {
+    private readonly IMqttClient _client;
+    private readonly IMessageRoutingService _routingService;
+    private readonly ILoggingService _logger;
+    private readonly MqttServiceOptions _options;
+
     /// <summary>
-    /// Provides basic MQTT operations.
+    /// Initializes a new instance of the <see cref="MqttService"/> class.
     /// </summary>
-    public class MqttService
+    public MqttService(IOptions<MqttServiceOptions> options, IMessageRoutingService routingService, ILoggingService logger)
+        : this(new MqttFactory().CreateMqttClient(), options, routingService, logger)
     {
-        private readonly IMqttClient _client;
-        private readonly ILoggingService _logger;
-        private readonly MqttServiceOptions _options;
-        private readonly IMessageRoutingService _routingService;
-        private readonly ILoggingService? _logger;
-        private readonly HashSet<string> _subscriptions = new();
-        private MqttClientOptions? _clientOptions;
-        private MqttServiceOptions? _serviceOptions;
-        private Func<MqttClientDisconnectedEventArgs, Task>? _reconnectHandler;
-        public MqttService(IOptions<MqttServiceOptions> options, ILoggingService logger)
+    }
 
-        /// <summary>
-        /// Connection options in use by the service.
-        /// </summary>
-        public MqttServiceOptions Options { get; }
+    internal MqttService(IMqttClient client, IOptions<MqttServiceOptions> options, IMessageRoutingService routingService, ILoggingService logger)
+    {
+        _client = client ?? throw new ArgumentNullException(nameof(client));
+        _routingService = routingService ?? throw new ArgumentNullException(nameof(routingService));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MqttService"/> class.
-        /// </summary>
-        public MqttService(MqttServiceOptions options, ILoggingService? logger = null)
+    /// <summary>
+    /// Gets a value indicating whether the client is connected.
+    /// </summary>
+    public bool IsConnected => _client.IsConnected;
+
+    /// <summary>
+    /// Raised when the connection state changes.
+    /// </summary>
+    public event EventHandler<bool>? ConnectionStateChanged;
+
+    private void OnConnectionStateChanged(bool connected) => ConnectionStateChanged?.Invoke(this, connected);
+
+    /// <summary>
+    /// Connects to the MQTT broker using configured or override options.
+    /// </summary>
+    public async Task ConnectAsync(MqttServiceOptions? overrideOptions = null, CancellationToken token = default)
+    {
+        var opts = overrideOptions ?? _options;
+        if (string.IsNullOrWhiteSpace(opts.Host))
+            throw new ArgumentException("Host cannot be null or whitespace.", nameof(overrideOptions));
+
+        _logger.Log("MQTT connect start", LogLevel.Debug);
+
+        if (_client.IsConnected)
         {
-            _options = options.Value;
-            _logger = logger;
-            var factory = new MqttFactory();
-            _client = factory.CreateMqttClient();
+            _logger.Log("Disconnecting existing MQTT connection", LogLevel.Debug);
+            await _client.DisconnectAsync(cancellationToken: token).ConfigureAwait(false);
+            OnConnectionStateChanged(false);
         }
 
-
-
-        internal MqttService(IMqttClient client, MqttServiceOptions options, ILoggingService? logger = null)
+        var builder = new MqttClientOptionsBuilder().WithClientId(opts.ClientId);
+        if (opts.ConnectionType == MqttConnectionType.WebSocket)
         {
-            _client = client;
-            Options = options;
-            _logger = logger;
-            _options = options.Value;
+            builder = builder.WithWebSocketServer($"{opts.Host}:{opts.Port}");
+        }
+        else
+        {
+            builder = builder.WithTcpServer(opts.Host, opts.Port);
         }
 
-        public virtual async Task ConnectAsync(string host, int port, string clientId, string? user, string? pass, bool useTls = false, CancellationToken token = default)
+        if (!string.IsNullOrEmpty(opts.Username))
+            builder = builder.WithCredentials(opts.Username, opts.Password);
+
+        if (opts.UseTls)
         {
-            _logger.Log("MqttService connect start", LogLevel.Debug);
-            var builder = new MqttClientOptionsBuilder()
-                .WithTcpServer(host ?? _options.Host, port ?? _options.Port)
-                .WithClientId(clientId ?? _options.ClientId);
-
-            var username = user ?? _options.Username;
-            var password = pass ?? _options.Password;
-            if (!string.IsNullOrEmpty(username))
-                builder = builder.WithCredentials(username, password);
-
-            _logger.Log($"Connecting to MQTT {host ?? _options.Host}:{port ?? _options.Port}", LogLevel.Debug);
-            await _client.ConnectAsync(builder.Build()).ConfigureAwait(false);
-            _logger.Log("MQTT connected", LogLevel.Debug);
-            _logger.Log("MqttService connect finished", LogLevel.Debug);
-        /// <summary>
-        /// Gets a value indicating whether the client is connected.
-        /// </summary>
-        public bool IsConnected => _client.IsConnected;
-
-        /// <summary>
-        /// Raised when the connection state changes.
-        /// </summary>
-        public event EventHandler<bool>? ConnectionStateChanged;
-
-        private void OnConnectionStateChanged(bool connected) => ConnectionStateChanged?.Invoke(this, connected);
-
-        /// <summary>
-        /// Connects to the MQTT broker using the configured options.
-        /// </summary>
-        public async Task ConnectAsync()
-        {
-            if (options is null)
-                throw new ArgumentNullException(nameof(options));
-            if (string.IsNullOrWhiteSpace(options.Host))
-                throw new ArgumentException("Host cannot be null or whitespace.", nameof(options));
-
-            _logger?.Log("MqttService connect start", LogLevel.Debug);
-
-            if (_client.IsConnected)
+            builder = builder.WithTlsOptions(o =>
             {
-                _logger?.Log("Disconnecting existing MQTT connection", LogLevel.Debug);
-                await _client.DisconnectAsync();
-            }
-
-            var options = new MqttClientOptionsBuilder()
-                .WithTcpServer(host, port)
-                .WithClientId(clientId);
-
-            if (!string.IsNullOrEmpty(user))
-            {
-                options = options.WithCredentials(user, pass);
-            }
-
-            if (useTls)
-            {
-                options = options.WithTlsOptions(o => o.UseTls());
-            }
-
-            _logger?.Log($"Connecting to MQTT {host}:{port}", LogLevel.Debug);
-
-            if (_client.IsConnected)
-            {
-                await _client.DisconnectAsync(cancellationToken: token).ConfigureAwait(false);
-            }
-
-            await _client.ConnectAsync(options.Build(), token).ConfigureAwait(false);
-            var builder = new MqttClientOptionsBuilder()
-                .WithTcpServer(Options.Host, Options.Port)
-                .WithClientId(Options.ClientId);
-
-            if (!string.IsNullOrEmpty(Options.Username))
-                builder = builder.WithCredentials(Options.Username, Options.Password);
-
-            _logger?.Log($"Connecting to MQTT {Options.Host}:{Options.Port}", LogLevel.Debug);
-            await _client.ConnectAsync(builder.Build()).ConfigureAwait(false);
-            _logger?.Log("MQTT connected", LogLevel.Debug);
-            _logger?.Log("MqttService connect finished", LogLevel.Debug);
-            OnConnectionStateChanged(true);
+                o.UseTls();
+                if (opts.ClientCertificate is not null)
+                {
+                    o.WithClientCertificates(new X509Certificate2(opts.ClientCertificate));
+                }
+            });
         }
 
-        public virtual async Task SubscribeAsync(IEnumerable<string> topics)
-        {
-            foreach (var t in topics)
-            {
-                _logger?.Log($"Subscribing to {t}", LogLevel.Debug);
+        await _client.ConnectAsync(builder.Build(), token).ConfigureAwait(false);
+        _logger.Log("MQTT connected", LogLevel.Debug);
+        OnConnectionStateChanged(true);
+        _logger.Log("MQTT connect finished", LogLevel.Debug);
+    }
 
-                await _client.SubscribeAsync(t).ConfigureAwait(false);
+    /// <summary>
+    /// Publishes a single message to an endpoint.
+    /// </summary>
+    public async Task PublishAsync(string topic, string message, CancellationToken token = default)
+    {
+        if (topic is null) throw new ArgumentNullException(nameof(topic));
+        if (message is null) throw new ArgumentNullException(nameof(message));
+
+        _logger.Log("MQTT publish start", LogLevel.Debug);
+        var payload = _routingService.ResolveTokens(message);
+        var msg = new MqttApplicationMessageBuilder()
+            .WithTopic(topic)
+            .WithPayload(payload)
+            .Build();
+        await _client.PublishAsync(msg, token).ConfigureAwait(false);
+        _logger.Log("MQTT publish finished", LogLevel.Debug);
+    }
+
+    /// <summary>
+    /// Publishes multiple messages per endpoint.
+    /// </summary>
+    public async Task PublishAsync(IDictionary<string, IEnumerable<string>> endpointMessages, CancellationToken token = default)
+    {
+        if (endpointMessages is null) throw new ArgumentNullException(nameof(endpointMessages));
+        foreach (var pair in endpointMessages)
+        {
+            foreach (var msg in pair.Value)
+            {
+                await PublishAsync(pair.Key, msg, token).ConfigureAwait(false);
             }
         }
+    }
 
-        public virtual async Task PublishAsync(string topic, string message)
+    /// <summary>
+    /// Disconnects from the broker if connected.
+    /// </summary>
+    public async Task DisconnectAsync(CancellationToken token = default)
+    {
+        if (_client.IsConnected)
         {
-
-            _logger?.Log("MqttService publish start", LogLevel.Debug);
-            _logger?.Log($"Publishing to {topic}", LogLevel.Debug);
-            var resolved = _routingService.ResolveTokens(message);
-            var msg = new MqttApplicationMessageBuilder()
-                .WithTopic(topic)
-                .WithPayload(resolved)
-                .Build();
-            await _client.PublishAsync(msg).ConfigureAwait(false);
-            _logger.Log("Publish complete", LogLevel.Debug);
-            _logger.Log("MqttService publish finished", LogLevel.Debug);
-
-        }
-
-        public async Task PublishAsync(string topic, IEnumerable<string> messages)
-        {
-            foreach (var msg in messages)
-            {
-                await PublishAsync(topic, msg).ConfigureAwait(false);
-            }
-        }
-
-        public async Task PublishAsync(IDictionary<string, IEnumerable<string>> endpointMessages)
-        {
-            foreach (var pair in endpointMessages)
-            {
-                await PublishAsync(pair.Key, pair.Value).ConfigureAwait(false);
-            }
-        }
-
-        public virtual Task DisconnectAsync(CancellationToken token = default)
-        {
-            return _client.DisconnectAsync(cancellationToken: token);
+            await _client.DisconnectAsync(cancellationToken: token).ConfigureAwait(false);
+            OnConnectionStateChanged(false);
         }
     }
 }
+

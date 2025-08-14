@@ -27,6 +27,7 @@
 - CI workflow now runs on pushes to `feature/**` and `bugfix/**` branches and supports manual triggers, ensuring tests execute on GitHub.
 - `self-heal` workflow now monitors the unified `CI` pipeline.
 - `TcpServiceViewModel` now evaluates scripts asynchronously and streamlined server toggle logging.
+- Refactored `MqttService` with a single options-based constructor, clean reconnect logic, and consolidated publish methods.
 
 ### Removed
 - Placeholder "Desktop Template" text from the navigation bar.

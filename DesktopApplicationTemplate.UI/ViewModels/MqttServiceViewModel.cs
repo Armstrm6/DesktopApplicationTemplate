@@ -34,7 +34,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             _saveHelper = saveHelper;
             _options = options;
             Logger = logger;
-            _service = service ?? new MqttService(options, logger);
+            _service = service ?? new MqttService(Options.Create(options), new MessageRoutingService(logger), logger);
             _service.ConnectionStateChanged += (_, connected) => IsConnected = connected;
 
             Topics = new ObservableCollection<string>();
@@ -289,7 +289,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             _saveHelper = saveHelper;
             _service = service;
             Logger = logger;
-            _service = service ?? new MqttService(logger);
+            _service = service ?? new MqttService(Options.Create(new MqttServiceOptions()), new MessageRoutingService(logger), logger);
             _tokenValues = tokenValues ?? new Dictionary<string, string>();
             var opts = options.Value;
             Host = opts.Host;

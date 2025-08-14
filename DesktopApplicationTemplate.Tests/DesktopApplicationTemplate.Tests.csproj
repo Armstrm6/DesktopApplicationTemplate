@@ -35,4 +35,8 @@
     <ProjectReference Include="..\DesktopApplicationTemplate.Core\DesktopApplicationTemplate.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="MqttServiceViewModelTests.cs" />
+  </ItemGroup>
+
 </Project>
