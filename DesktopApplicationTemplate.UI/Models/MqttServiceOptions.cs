@@ -1,60 +1,29 @@
 using System;
-using System.Collections.Generic;
 
 namespace DesktopApplicationTemplate.UI.Models
 {
     /// <summary>
-    /// Options for configuring MQTT connectivity.
+    /// Options controlling MQTT connection settings.
     /// </summary>
     public class MqttServiceOptions
     {
-        private const int MinPort = 1;
-        private const int MaxPort = 65535;
-        private const int MinKeepAlive = 0;
-        private const int MaxKeepAlive = 65535;
-        private const int MinQoS = 0;
-        private const int MaxQoS = 2;
-        private const int MinReconnectDelay = 0;
-        private const int MaxReconnectDelay = 3600;
-
-        private IList<int> _ports = new List<int> { 1883 };
-        private int _keepAlive = 60;
-        private int _qos = 0;
-        private int _reconnectDelay = 5;
-
         /// <summary>
-        /// Broker host name or IP address.
+        /// MQTT broker host name or IP address.
         /// </summary>
-        public string Host { get; set; } = "localhost";
+        public string Host { get; set; } = "127.0.0.1";
 
         /// <summary>
-        /// TCP ports to connect to. 1883 is standard MQTT; 8883 is MQTT over TLS.
+        /// MQTT broker port.
         /// </summary>
-        public IList<int> Ports
-        {
-            get => _ports;
-            set
-            {
-                if (value == null || value.Count == 0)
-                    throw new ArgumentException("At least one port is required.", nameof(value));
-
-                foreach (var port in value)
-                {
-                    if (port < MinPort || port > MaxPort)
-                        throw new ArgumentOutOfRangeException(nameof(value), $"Port {port} must be between {MinPort} and {MaxPort}.");
-                }
-
-                _ports = value;
-            }
-        }
+        public int Port { get; set; } = 1883;
 
         /// <summary>
-        /// Connection protocol, e.g., 'mqtt' or 'mqtts'.
+        /// Client identifier used when connecting.
         /// </summary>
-        public string Protocol { get; set; } = "mqtt";
+        public string ClientId { get; set; } = "client1";
 
         /// <summary>
-        /// Username for broker authentication.
+        /// Username for authentication.
         /// </summary>
         public string Username { get; set; } = string.Empty;
 
