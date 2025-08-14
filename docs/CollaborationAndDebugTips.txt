@@ -9,6 +9,14 @@ Effective Prompts / Instructions that worked: n/a
 Decisions & Rationale: Use DI to share single logging service and helpers.
 Action Items: Monitor CI for Windows-specific behaviors.
 Related Commits/PRs: (this PR)
+[2025-08-14 14:08] Topic: MQTT service options
+Context: Added option-based MQTT service with reconnection and TLS/WebSocket support.
+Observations: MQTTnet API changes required using new builder patterns.
+Codex Limitations noticed: Missing WindowsDesktop runtime prevented executing tests.
+Effective Prompts / Instructions that worked: Following AGENTS.md to attempt local tests and update docs.
+Decisions & Rationale: Centralized connection settings via options and enabled auto-reconnect for resilience.
+Action Items: Ensure environment has WindowsDesktop runtime for full test coverage.
+Related Commits/PRs: (this PR)
 
 [2025-08-13 20:41] Topic: WPF workload in CI
 Context: GitHub Actions failed because the `windowsdesktop` workload is no longer recognized.
