@@ -91,6 +91,14 @@ Decisions & Rationale: Prefer removing stale classes to reduce maintenance and c
 Action Items: Monitor builds for any lingering references.
 Related Commits/PRs: (this PR)
 
+[2025-08-14 14:00] Topic: MQTT token routing
+Context: Documented configuration requirements for new MQTT routing features.
+Observations: Need to disconnect before changing MQTT settings; `{ServiceName.Message}` tokens enable routing across multiple endpoints.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: n/a
+Decisions & Rationale: Highlight prerequisites and token usage to prevent misconfiguration.
+Action Items: Disconnect prior to updating MQTT settings; map tokens to desired endpoints.
+
 [2025-08-14 14:02] Topic: MQTT endpoint-message UI
 Context: (summarize the scenario)
 Observations: Implemented endpoint-message pair configuration with placeholders and tooltips.
@@ -124,4 +132,5 @@ Codex Limitations noticed: Original spec table unavailable; defaults inferred fr
 Effective Prompts / Instructions that worked: Detailed property list with default and range guidance.
 Decisions & Rationale: Provide options model for future DI and configuration binding.
 Action Items: Wire options into service and configuration pipeline later.
+
 Related Commits/PRs: (this PR)
