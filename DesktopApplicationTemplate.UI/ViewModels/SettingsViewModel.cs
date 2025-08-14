@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.IO;
 using DesktopApplicationTemplate.Models;
 
@@ -76,7 +77,14 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 SuppressSaveConfirmation = SaveConfirmationSuppressed,
                 SuppressCloseConfirmation = CloseConfirmationSuppressed
             };
-            File.WriteAllText(FilePath, JsonSerializer.Serialize(data));
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                ReferenceHandler = ReferenceHandler.IgnoreCycles,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            };
+
+            File.WriteAllText(FilePath, JsonSerializer.Serialize(data, options));
             TcpLoggingEnabled = _logTcpMessages;
             _dirty = false;
         }

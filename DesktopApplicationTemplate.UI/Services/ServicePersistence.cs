@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.Core.Services;
 
@@ -28,7 +29,14 @@ namespace DesktopApplicationTemplate.UI.Services
                 });
             }
 
-            var json = JsonSerializer.Serialize(data);
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                ReferenceHandler = ReferenceHandler.IgnoreCycles,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            };
+
+            var json = JsonSerializer.Serialize(data, options);
             logger?.Log($"Persisting services to {FilePath}", LogLevel.Debug);
             using var fs = new FileStream(FilePath, FileMode.Create, FileAccess.Write, FileShare.None);
             using var sw = new StreamWriter(fs);

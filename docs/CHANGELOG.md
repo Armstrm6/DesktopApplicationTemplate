@@ -53,3 +53,4 @@
 - Guarded CSV viewer configuration serialization to prevent stack overflow when saving empty data.
 - Main window sizes to content so UI elements are no longer clipped at the edges.
 - Added missing `FluentAssertions` package reference to the test project and documented dependency checks to avoid build failures.
+- Service and settings persistence now ignore reference cycles during JSON serialization to avoid stack overflow when saving configuration.

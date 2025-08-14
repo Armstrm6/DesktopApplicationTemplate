@@ -96,3 +96,12 @@ Effective Prompts / Instructions that worked: Reviewing AGENTS and project files
 Decisions & Rationale: Verify `.csproj` files for needed packages and read AGENTS instructions before coding.
 Action Items: Add package references when introducing new libraries and document dependency checks in changelog.
 Related Commits/PRs: (this PR)
+[2025-08-14 19:14] Topic: Reference-safe configuration saves
+Context: Avoided stack overflow during configuration persistence by guarding JSON serialization.
+Observations: Used ReferenceHandler.IgnoreCycles for settings and service persistence to prevent recursive writes when CSV configuration updates.
+Codex Limitations noticed: PowerShell unavailable; appended entry manually.
+Effective Prompts / Instructions that worked: n/a
+Decisions & Rationale: Standardize cycle-safe JSON options across services.
+Action Items: Monitor CI for serialization regressions.
+Related Commits/PRs: (this PR)
+
