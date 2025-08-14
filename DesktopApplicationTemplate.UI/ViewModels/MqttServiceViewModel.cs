@@ -81,7 +81,15 @@ public class MqttServiceViewModel : ViewModelBase, ILoggingViewModel, INetworkAw
         public async Task ConnectAsync()
         {
             Logger?.Log("MQTT connect start", LogLevel.Debug);
-            await _service.ConnectAsync(Host, int.Parse(Port), ClientId, Username, Password);
+            var options = new MqttServiceOptions
+            {
+                Host = Host,
+                Port = int.Parse(Port),
+                ClientId = ClientId,
+                Username = string.IsNullOrWhiteSpace(Username) ? null : Username,
+                Password = string.IsNullOrWhiteSpace(Password) ? null : Password
+            };
+            await _service.ConnectAsync(options);
             await _service.SubscribeAsync(Topics);
             Logger?.Log("MQTT connected", LogLevel.Debug);
             Logger?.Log("MQTT connect finished", LogLevel.Debug);
