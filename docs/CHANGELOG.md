@@ -30,6 +30,8 @@
 - Refactored `MqttService` with a single options-based constructor, clean reconnect logic, and consolidated publish methods.
 - Extracted `IMessageRoutingService`, removed legacy `Route` API, and improved thread-safe message tracking with optional logging.
 - Simplified `MqttServiceViewModel` to use `MqttServiceOptions` for settings and delegate token resolution to `MessageRoutingService`.
+- `MqttService` and `MqttServiceViewModel` now consume `IOptions<MqttServiceOptions>` and the direct singleton registration was removed.
+- Added a DI container test ensuring the service provider builds with MQTT components.
 
 ### Removed
 - Placeholder "Desktop Template" text from the navigation bar.
@@ -41,3 +43,10 @@
 - Corrected logo resource path so the image renders in the navigation bar.
 - Updated GitHub workflows to install the WPF workload instead of the deprecated windowsdesktop workload.
 - MQTT service now disconnects before reconnecting when settings change.
+- Removed obsolete MQTT options model that caused duplicate property definitions.
+- Updated MQTT service for new WebSocket configuration API and client certificate handling.
+- Replaced unsupported information-level logs with debug logs in message routing components.
+- Corrected `AppSettings` namespace to ensure configuration binding compiles.
+- Fixed missing `AppSettings` references in startup services.
+- Adjusted MQTT view model tests to return typed MQTTnet results instead of `Task.CompletedTask`, preventing build failures when APIs return generic tasks.
+- Removed obsolete `MQTTnet.Client.Publishing` import in MQTT view model tests to resolve missing namespace build errors.

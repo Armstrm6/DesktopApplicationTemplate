@@ -3,7 +3,6 @@ using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI.Models;
-using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.Core.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -45,7 +44,6 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<INetworkConfigurationService, NetworkConfigurationService>();
             services.AddSingleton<NetworkConfigurationViewModel>();
             services.AddSingleton<IRichTextLogger, NullRichTextLogger>();
-            services.AddSingleton<MqttServiceOptions>();
             services.AddSingleton<ILoggingService, LoggingService>();
             services.AddSingleton<IMessageRoutingService, MessageRoutingService>();
             services.AddSingleton<SaveConfirmationHelper>();

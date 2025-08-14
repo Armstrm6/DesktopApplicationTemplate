@@ -69,7 +69,10 @@ public class MqttService
         var builder = new MqttClientOptionsBuilder().WithClientId(opts.ClientId);
         if (opts.ConnectionType == MqttConnectionType.WebSocket)
         {
-            builder = builder.WithWebSocketServer($"{opts.Host}:{opts.Port}");
+            builder = builder.WithWebSocketServer(o =>
+            {
+                o.WithUri($"ws://{opts.Host}:{opts.Port}");
+            });
         }
         else
         {
@@ -86,7 +89,7 @@ public class MqttService
                 o.UseTls();
                 if (opts.ClientCertificate is not null)
                 {
-                    o.WithClientCertificates(new X509Certificate2(opts.ClientCertificate));
+                    o.WithClientCertificates(new[] { new X509Certificate2(opts.ClientCertificate) });
                 }
             });
         }
