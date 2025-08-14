@@ -27,4 +27,24 @@ public class CsvViewerViewModelTests
             }
         }
     }
+
+    [Fact]
+    public void DebugSaveCommand_WritesFile()
+    {
+        var temp = Path.GetTempFileName();
+        try
+        {
+            var vm = new CsvViewerViewModel(temp);
+            Action act = () => vm.DebugSaveCommand.Execute(null);
+            act.Should().NotThrow();
+            File.Exists(temp).Should().BeTrue();
+        }
+        finally
+        {
+            if (File.Exists(temp))
+            {
+                File.Delete(temp);
+            }
+        }
+    }
 }

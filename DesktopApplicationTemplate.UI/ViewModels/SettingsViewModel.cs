@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
@@ -84,9 +85,24 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
             };
 
-            File.WriteAllText(FilePath, JsonSerializer.Serialize(data, options));
-            TcpLoggingEnabled = _logTcpMessages;
-            _dirty = false;
+            try
+            {
+                File.WriteAllText(FilePath, JsonSerializer.Serialize(data, options));
+                TcpLoggingEnabled = _logTcpMessages;
+                _dirty = false;
+            }
+            catch (StackOverflowException ex)
+            {
+                var debugPath = Path.GetTempFileName();
+                var debugOptions = new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    ReferenceHandler = ReferenceHandler.Preserve
+                };
+                File.WriteAllText(debugPath, JsonSerializer.Serialize(data, debugOptions));
+                Console.Error.WriteLine($"Stack overflow saving user settings. Snapshot: {debugPath}");
+                Environment.FailFast("Stack overflow during settings save", ex);
+            }
         }
 
         // OnPropertyChanged provided by ViewModelBase

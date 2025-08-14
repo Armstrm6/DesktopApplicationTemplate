@@ -36,12 +36,27 @@ namespace DesktopApplicationTemplate.UI.Services
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
             };
 
-            var json = JsonSerializer.Serialize(data, options);
-            logger?.Log($"Persisting services to {FilePath}", LogLevel.Debug);
-            using var fs = new FileStream(FilePath, FileMode.Create, FileAccess.Write, FileShare.None);
-            using var sw = new StreamWriter(fs);
-            sw.Write(json);
-            logger?.Log($"Saved {data.Count} services to {FilePath}", LogLevel.Debug);
+            try
+            {
+                var json = JsonSerializer.Serialize(data, options);
+                logger?.Log($"Persisting services to {FilePath}", LogLevel.Debug);
+                using var fs = new FileStream(FilePath, FileMode.Create, FileAccess.Write, FileShare.None);
+                using var sw = new StreamWriter(fs);
+                sw.Write(json);
+                logger?.Log($"Saved {data.Count} services to {FilePath}", LogLevel.Debug);
+            }
+            catch (StackOverflowException ex)
+            {
+                var debugPath = Path.GetTempFileName();
+                var debugOptions = new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    ReferenceHandler = ReferenceHandler.Preserve
+                };
+                File.WriteAllText(debugPath, JsonSerializer.Serialize(data, debugOptions));
+                logger?.Log($"Stack overflow persisting services. Snapshot: {debugPath}", LogLevel.Error);
+                Environment.FailFast("Stack overflow during service persistence", ex);
+            }
         }
 
         public static List<ServiceInfo> Load(ILoggingService? logger = null)

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -31,6 +32,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public ICommand RemoveColumnCommand { get; }
         public ICommand SaveCommand { get; }
         public ICommand CloseCommand { get; }
+        public ICommand DebugSaveCommand { get; }
 
         public event Action? RequestClose;
 
@@ -42,6 +44,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             RemoveColumnCommand = new RelayCommand(() => { if (SelectedColumn != null) Configuration.Columns.Remove(SelectedColumn); });
             SaveCommand = new RelayCommand(Save);
             CloseCommand = new RelayCommand(() => RequestClose?.Invoke());
+            DebugSaveCommand = new RelayCommand(DebugSave);
         }
 
         private void Load()
@@ -76,8 +79,36 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
             };
 
-            var json = JsonSerializer.Serialize(snapshot, options);
-            System.IO.File.WriteAllText(_configPath, json);
+            try
+            {
+                var json = JsonSerializer.Serialize(snapshot, options);
+                File.WriteAllText(_configPath, json);
+            }
+            catch (StackOverflowException ex)
+            {
+                var debugPath = Path.GetTempFileName();
+                var debugOptions = new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    ReferenceHandler = ReferenceHandler.Preserve
+                };
+                File.WriteAllText(debugPath, JsonSerializer.Serialize(snapshot, debugOptions));
+                Console.Error.WriteLine($"Stack overflow saving CSV configuration. Snapshot: {debugPath}");
+                Environment.FailFast("Stack overflow during CSV save", ex);
+            }
+        }
+
+        private void DebugSave()
+        {
+            Configuration = new CsvConfiguration
+            {
+                FileNamePattern = "debug.csv",
+                Columns = new ObservableCollection<CsvColumnConfig>
+                {
+                    new CsvColumnConfig { Name = "Test", Service = "Test", Script = string.Empty }
+                }
+            };
+            Save();
         }
 
         // Uses OnPropertyChanged from ViewModelBase

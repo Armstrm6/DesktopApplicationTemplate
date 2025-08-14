@@ -115,3 +115,12 @@ Decisions & Rationale: Follow placeholder presence to advance index and ensure k
 Action Items: Rely on CI to execute Windows-specific tests.
 Related Commits/PRs: (this PR)
 
+[2025-08-17 13:30] Topic: Stack overflow diagnostics
+Context: Added guards around configuration persistence and a debug command for reproducing save issues.
+Observations: Saving now captures snapshots to a temp file and terminates fast on overflow; DebugSaveCommand creates a minimal reproducible config.
+Codex Limitations noticed: Linux container cannot trigger WPF stack overflows; rely on snapshot files from users.
+Effective Prompts / Instructions that worked: Requesting try/catch wrappers with `ReferenceHandler.Preserve`.
+Decisions & Rationale: Use `Environment.FailFast` to avoid inconsistent state and preserve snapshot for inspection.
+Action Items: Share snapshot path when failures occur.
+Related Commits/PRs: (this PR)
+
