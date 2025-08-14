@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 ### Added
+- Expanded MQTT service with option-based connections, TLS/WebSocket support, and structured logging.
 - Register `ILoggingService` and helper services with the DI container.
 - Refactored save/close confirmation helpers to use constructor injection.
 - Views now accept `ILoggingService` instances instead of creating loggers.
@@ -12,6 +13,12 @@
 - Created `CONTRIBUTING.md` and PR template enforcing CI-only testing with a CI badge in the README.
 - Introduced `AsyncRelayCommand` for asynchronous UI actions.
 - Expanded MQTT configuration with token-based message routing using `{ServiceName.Message}` tokens and multiple endpoint mappings.
+- Registered `MqttServiceOptions` and `MessageRoutingService` with DI and injected options into MQTT components.
+- Added UI for configuring MQTT endpoint-message pairs with placeholders and tooltips.
+- Added `MqttServiceOptions` with validation and tokenized endpoint/message publishing in `MqttServiceViewModel`.
+- Added `MessageRoutingService` to track latest messages per service and resolve `{ServiceName.Message}` tokens before MQTT publishing.
+- `MqttService` can now resolve message tokens and publish multiple messages per endpoint.
+- Introduced `MqttServiceOptions` for configuring MQTT connection parameters.
 
 ### Changed
 - CI workflow now runs on pushes to `feature/**` and `bugfix/**` branches and supports manual triggers, ensuring tests execute on GitHub.
