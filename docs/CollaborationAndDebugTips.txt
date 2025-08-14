@@ -77,3 +77,11 @@ Effective Prompts / Instructions that worked: n/a
 Decisions & Rationale: Prefer removing stale classes to reduce maintenance and confusion.
 Action Items: Monitor builds for any lingering references.
 Related Commits/PRs: (this PR)
+[2025-08-14 14:00] Topic: MQTT token routing
+Context: Documented configuration requirements for new MQTT routing features.
+Observations: Need to disconnect before changing MQTT settings; `{ServiceName.Message}` tokens enable routing across multiple endpoints.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: n/a
+Decisions & Rationale: Highlight prerequisites and token usage to prevent misconfiguration.
+Action Items: Disconnect prior to updating MQTT settings; map tokens to desired endpoints.
+Related Commits/PRs: (this PR)
