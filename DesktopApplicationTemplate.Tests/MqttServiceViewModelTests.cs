@@ -2,6 +2,7 @@ using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Helpers;
+using Microsoft.Extensions.Options;
 using MQTTnet.Client;
 using Moq;
 using Xunit;
@@ -21,8 +22,11 @@ namespace DesktopApplicationTemplate.Tests
             {
                 return;
             }
-            var helper = new SaveConfirmationHelper(new Mock<ILoggingService>().Object);
-            var vm = new MqttServiceViewModel(helper);
+            var logger = new Mock<ILoggingService>().Object;
+            var helper = new SaveConfirmationHelper(logger);
+            var options = Options.Create(new DesktopApplicationTemplate.Models.MqttServiceOptions());
+            var service = new MqttService(options, logger);
+            var vm = new MqttServiceViewModel(helper, service, options, logger);
             vm.NewTopic = "test/topic";
             vm.AddTopicCommand.Execute(null);
             Assert.Contains("test/topic", vm.Topics);
@@ -41,9 +45,10 @@ namespace DesktopApplicationTemplate.Tests
                 .ReturnsAsync(new MqttClientConnectResult());
             client.Setup(c => c.SubscribeAsync(It.IsAny<MqttClientSubscribeOptions>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new MqttClientSubscribeResult(0, Array.Empty<MqttClientSubscribeResultItem>(), string.Empty, Array.Empty<MqttUserProperty>()));
-            var service = new MqttService(client.Object, logger.Object);
+            var options = Options.Create(new DesktopApplicationTemplate.Models.MqttServiceOptions());
+            var service = new MqttService(client.Object, options, logger.Object);
             var helper = new SaveConfirmationHelper(logger.Object);
-            var vm = new MqttServiceViewModel(helper, service, logger.Object) { Host = "127.0.0.1", Port = "1883", ClientId = "c" };
+            var vm = new MqttServiceViewModel(helper, service, options, logger.Object) { Host = "127.0.0.1", Port = "1883", ClientId = "c" };
 
             await vm.ConnectAsync();
 

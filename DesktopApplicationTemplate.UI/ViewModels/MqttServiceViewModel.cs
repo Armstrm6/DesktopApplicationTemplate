@@ -6,10 +6,11 @@ using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.Core.Services;
+using Microsoft.Extensions.Options;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
-public class MqttServiceViewModel : ViewModelBase, ILoggingViewModel, INetworkAwareViewModel
+    public class MqttServiceViewModel : ViewModelBase, ILoggingViewModel, INetworkAwareViewModel
     {
         private string _host = string.Empty;
         public string Host
@@ -66,11 +67,22 @@ public class MqttServiceViewModel : ViewModelBase, ILoggingViewModel, INetworkAw
         private readonly MqttService _service;
         private readonly SaveConfirmationHelper _saveHelper;
 
-        public MqttServiceViewModel(SaveConfirmationHelper saveHelper, MqttService? service = null, ILoggingService? logger = null)
+        public MqttServiceViewModel(SaveConfirmationHelper saveHelper, MqttService service, IOptions<MqttServiceOptions> options, ILoggingService logger)
         {
             _saveHelper = saveHelper;
+            _service = service;
             Logger = logger;
-            _service = service ?? new MqttService(logger);
+            var opts = options.Value;
+            Host = opts.Host;
+            Port = opts.Port.ToString();
+            ClientId = opts.ClientId;
+            Username = opts.Username;
+            Password = opts.Password;
+            if (opts.Topics != null)
+            {
+                foreach (var t in opts.Topics)
+                    Topics.Add(t);
+            }
             AddTopicCommand = new RelayCommand(() => { if(!string.IsNullOrWhiteSpace(NewTopic)){Topics.Add(NewTopic); NewTopic = string.Empty;} });
             RemoveTopicCommand = new RelayCommand(() => { if(Topics.Contains(NewTopic)) Topics.Remove(NewTopic); });
             ConnectCommand = new RelayCommand(async () => await ConnectAsync());
@@ -81,8 +93,8 @@ public class MqttServiceViewModel : ViewModelBase, ILoggingViewModel, INetworkAw
         public async Task ConnectAsync()
         {
             Logger?.Log("MQTT connect start", LogLevel.Debug);
-            await _service.ConnectAsync(Host, int.Parse(Port), ClientId, Username, Password);
-            await _service.SubscribeAsync(Topics);
+            await _service.ConnectAsync(Host, int.Parse(Port), ClientId, Username, Password).ConfigureAwait(false);
+            await _service.SubscribeAsync(Topics).ConfigureAwait(false);
             Logger?.Log("MQTT connected", LogLevel.Debug);
             Logger?.Log("MQTT connect finished", LogLevel.Debug);
         }
@@ -92,7 +104,7 @@ public class MqttServiceViewModel : ViewModelBase, ILoggingViewModel, INetworkAw
             if(string.IsNullOrWhiteSpace(PublishTopic) || string.IsNullOrWhiteSpace(PublishMessage))
                 return;
             Logger?.Log("MQTT publish start", LogLevel.Debug);
-            await _service.PublishAsync(PublishTopic, PublishMessage);
+            await _service.PublishAsync(PublishTopic, PublishMessage).ConfigureAwait(false);
             Logger?.Log($"Published to {PublishTopic}", LogLevel.Debug);
             Logger?.Log("MQTT publish finished", LogLevel.Debug);
         }

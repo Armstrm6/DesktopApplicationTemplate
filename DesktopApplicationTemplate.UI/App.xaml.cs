@@ -45,6 +45,7 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<NetworkConfigurationViewModel>();
             services.AddSingleton<IRichTextLogger, NullRichTextLogger>();
             services.AddSingleton<ILoggingService, LoggingService>();
+            services.AddSingleton<MessageRoutingService>();
             services.AddSingleton<SaveConfirmationHelper>();
             services.AddSingleton<CloseConfirmationHelper>();
             services.AddSingleton<MainViewModel>();
@@ -79,6 +80,7 @@ namespace DesktopApplicationTemplate.UI
 
             // Load strongly typed settings
             services.Configure<AppSettings>(configuration.GetSection("AppSettings"));
+            services.Configure<MqttServiceOptions>(configuration.GetSection("MqttService"));
         }
 
         protected override async void OnStartup(StartupEventArgs e)
