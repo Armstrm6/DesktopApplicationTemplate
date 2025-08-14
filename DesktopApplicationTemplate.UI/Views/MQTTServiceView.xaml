@@ -75,6 +75,51 @@
                     <Button Content="Remove" Width="60" Margin="5,0,0,0" Command="{Binding RemoveTopicCommand}"/>
                 </StackPanel>
                 <ListBox ItemsSource="{Binding Topics}" Height="120" Margin="0,10,0,0"/>
+
+                <TextBlock Text="Endpoint-Message Pairs" FontWeight="Bold" Margin="0,10,0,0"/>
+                <Border CornerRadius="5" BorderBrush="LightGray" BorderThickness="1" Margin="0,5,0,0">
+                    <DataGrid ItemsSource="{Binding EndpointMessages}" SelectedItem="{Binding SelectedEndpointMessage}"
+                              AutoGenerateColumns="False" CanUserAddRows="False" HeadersVisibility="Column" Height="120">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="Endpoint">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Grid>
+                                            <TextBox Text="{Binding Endpoint}" x:Name="EndpointBox">
+                                                <TextBox.ToolTip>
+                                                    <ToolTip Content="MQTT topic to publish to."/>
+                                                </TextBox.ToolTip>
+                                            </TextBox>
+                                            <TextBlock Text="topic/example" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0"
+                                                       VerticalAlignment="Center"
+                                                       Visibility="{Binding Text, ElementName=EndpointBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Message">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Grid>
+                                            <TextBox Text="{Binding Message}" x:Name="MessageBox">
+                                                <TextBox.ToolTip>
+                                                    <ToolTip Content="Payload message sent to the topic."/>
+                                                </TextBox.ToolTip>
+                                            </TextBox>
+                                            <TextBlock Text="Hello world" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0"
+                                                       VerticalAlignment="Center"
+                                                       Visibility="{Binding Text, ElementName=MessageBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Border>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,5,0,0">
+                    <Button Content="Add" Width="50" Command="{Binding AddEndpointMessageCommand}"/>
+                    <Button Content="Remove" Width="60" Margin="5,0,0,0" Command="{Binding RemoveEndpointMessageCommand}"/>
+                </StackPanel>
             </StackPanel>
             <StackPanel Grid.Column="1" Margin="10,0,0,0">
                 <TextBlock Text="Logs" FontWeight="Bold"/>

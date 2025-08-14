@@ -198,6 +198,14 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             set { _newEndpoint = value; OnPropertyChanged(); }
         }
 
+        public ObservableCollection<EndpointMessagePair> EndpointMessages { get; } = new();
+        private EndpointMessagePair? _selectedEndpointMessage;
+        public EndpointMessagePair? SelectedEndpointMessage
+        {
+            get => _selectedEndpointMessage;
+            set { _selectedEndpointMessage = value; OnPropertyChanged(); }
+        }
+
         /// <summary>
         /// Message used when creating a new message pair.
         /// </summary>
@@ -241,6 +249,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         /// Command to trigger save confirmation.
         /// </summary>
         public ICommand SaveCommand { get; }
+        public ICommand AddEndpointMessageCommand { get; }
+        public ICommand RemoveEndpointMessageCommand { get; }
 
         private void AddTopic()
         {
@@ -274,6 +284,19 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             ConnectCommand = new RelayCommand(async () => await ConnectAsync());
             PublishCommand = new RelayCommand(async () => await PublishAsync());
             SaveCommand = new RelayCommand(Save);
+            AddEndpointMessageCommand = new RelayCommand(() =>
+            {
+                EndpointMessages.Add(new EndpointMessagePair());
+                Logger?.Log("Added endpoint-message pair", LogLevel.Debug);
+            });
+            RemoveEndpointMessageCommand = new RelayCommand(() =>
+            {
+                if (SelectedEndpointMessage != null)
+                {
+                    EndpointMessages.Remove(SelectedEndpointMessage);
+                    Logger?.Log("Removed endpoint-message pair", LogLevel.Debug);
+                }
+            });
         }
 
         private void RemoveSelectedMessage()
