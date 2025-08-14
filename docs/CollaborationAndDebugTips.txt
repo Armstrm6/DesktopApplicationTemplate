@@ -200,3 +200,11 @@ Effective Prompts / Instructions that worked: Reviewing compiler errors from pip
 Decisions & Rationale: Use action-based WebSocket configuration and collection-based certificate method.
 Action Items: Ensure CI includes WindowsDesktop workload; verify build on Windows.
 Related Commits/PRs: (this PR)
+[2025-08-14 17:14] Topic: AppSettings namespace cleanup
+Context: Startup services failed to compile after moving AppSettings into UI models.
+Observations: Updating using directives restored build readiness.
+Codex Limitations noticed: Missing WindowsDesktop targets prevented full build/test.
+Effective Prompts / Instructions that worked: Search for lingering namespace references.
+Decisions & Rationale: Align startup services and tests with relocated AppSettings type to avoid build breaks.
+Action Items: Monitor for additional namespace mismatches in future refactors.
+Related Commits/PRs: (this PR)

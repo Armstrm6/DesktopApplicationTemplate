@@ -1,8 +1,8 @@
+using System.Collections.Generic;
+using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.Services;
-using DesktopApplicationTemplate.Models;
 using Microsoft.Extensions.Configuration;
 using Xunit;
-using System.Collections.Generic;
 
 namespace DesktopApplicationTemplate.Tests
 {

@@ -47,3 +47,4 @@
 - Updated MQTT service for new WebSocket configuration API and client certificate handling.
 - Replaced unsupported information-level logs with debug logs in message routing components.
 - Corrected `AppSettings` namespace to ensure configuration binding compiles.
+- Fixed missing `AppSettings` references in startup services.

@@ -1,12 +1,8 @@
-﻿using DesktopApplicationTemplate.UI.Helpers;
-using DesktopApplicationTemplate.Models;
-using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.UI.Helpers;
+using DesktopApplicationTemplate.UI.Models;
+using Microsoft.Extensions.Configuration;
 
 namespace DesktopApplicationTemplate.UI.Services
 {
@@ -22,7 +18,6 @@ namespace DesktopApplicationTemplate.UI.Services
             _appSettings = _configuration.GetSection("AppSettings").Get<AppSettings>() ?? new AppSettings();
             _logger = logger;
         }
-
 
         public async Task RunStartupChecksAsync()
         {
