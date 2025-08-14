@@ -100,6 +100,16 @@ namespace DesktopApplicationTemplate.UI.Services
 
             _logger?.Log("MqttService connect start", LogLevel.Debug);
 
+            if (_client.IsConnected)
+            {
+                _logger?.Log("Disconnecting existing MQTT connection", LogLevel.Debug);
+                await _client.DisconnectAsync();
+            }
+
+            var options = new MqttClientOptionsBuilder()
+                .WithTcpServer(host, port)
+                .WithClientId(clientId);
+
             var builder = new MqttClientOptionsBuilder()
                 .WithTcpServer(Options.Host, Options.Port)
                 .WithClientId(Options.ClientId);

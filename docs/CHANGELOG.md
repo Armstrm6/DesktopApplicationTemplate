@@ -12,6 +12,7 @@
 - Added `/test` comment workflow to run CI on demand.
 - Created `CONTRIBUTING.md` and PR template enforcing CI-only testing with a CI badge in the README.
 - Introduced `AsyncRelayCommand` for asynchronous UI actions.
+- Tooltips for MQTT endpoint configuration fields.
 - Expanded MQTT configuration with token-based message routing using `{ServiceName.Message}` tokens and multiple endpoint mappings.
 - Registered `MqttServiceOptions` and `MessageRoutingService` with DI and injected options into MQTT components.
 - Added UI for configuring MQTT endpoint-message pairs with placeholders and tooltips.
@@ -33,3 +34,4 @@
 ### Fixed
 - Corrected logo resource path so the image renders in the navigation bar.
 - Updated GitHub workflows to install the WPF workload instead of the deprecated windowsdesktop workload.
+- MQTT service now disconnects before reconnecting when settings change.

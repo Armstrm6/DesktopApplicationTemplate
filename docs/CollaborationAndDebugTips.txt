@@ -91,6 +91,14 @@ Decisions & Rationale: Prefer removing stale classes to reduce maintenance and c
 Action Items: Monitor builds for any lingering references.
 Related Commits/PRs: (this PR)
 
+[2025-08-14 14:03] Topic: MQTT endpoint tooltips
+Context: Added tooltips for MQTT fields and enforced disconnect-before-reconnect behavior.
+Observations: Static and token messages publish across multiple endpoints.
+Codex Limitations noticed: WindowsDesktop runtime unavailable; tests aborted.
+Effective Prompts / Instructions that worked: n/a
+Decisions & Rationale: Disconnect before reconnect ensures settings apply cleanly.
+Action Items: Review MQTT reconnect logic.
+
 [2025-08-14 14:00] Topic: MQTT token routing
 Context: Documented configuration requirements for new MQTT routing features.
 Observations: Need to disconnect before changing MQTT settings; `{ServiceName.Message}` tokens enable routing across multiple endpoints.
