@@ -1,3 +1,6 @@
+using MQTTnet;
+using MQTTnet.Client;
+
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -14,22 +17,25 @@ namespace DesktopApplicationTemplate.UI.Services
     public class MqttService
     {
         private readonly IMqttClient _client;
+        private readonly IMessageRoutingService _routingService;
         private readonly ILoggingService? _logger;
         private readonly HashSet<string> _subscriptions = new();
         private MqttClientOptions? _clientOptions;
         private MqttServiceOptions? _serviceOptions;
         private Func<MqttClientDisconnectedEventArgs, Task>? _reconnectHandler;
 
-        public MqttService(ILoggingService? logger = null)
+        public MqttService(IMessageRoutingService routingService, ILoggingService? logger = null)
         {
             var factory = new MqttFactory();
             _client = factory.CreateMqttClient();
+            _routingService = routingService ?? throw new ArgumentNullException(nameof(routingService));
             _logger = logger;
         }
 
-        internal MqttService(IMqttClient client, ILoggingService? logger = null)
+        internal MqttService(IMqttClient client, IMessageRoutingService routingService, ILoggingService? logger = null)
         {
             _client = client;
+            _routingService = routingService ?? throw new ArgumentNullException(nameof(routingService));
             _logger = logger;
         }
 
@@ -181,21 +187,30 @@ namespace DesktopApplicationTemplate.UI.Services
         public async Task PublishAsync(string topic, string message, MqttQualityOfServiceLevel qos = MqttQualityOfServiceLevel.AtMostOnce, bool retainFlag = false, CancellationToken cancellationToken = default)
         {
             _logger?.Log("MqttService publish start", LogLevel.Debug);
-            try
+            _logger?.Log($"Publishing to {topic}", LogLevel.Debug);
+            var resolved = _routingService.ResolveTokens(message);
+            var msg = new MqttApplicationMessageBuilder()
+                .WithTopic(topic)
+                .WithPayload(resolved)
+                .Build();
+            await _client.PublishAsync(msg);
+            _logger?.Log("Publish complete", LogLevel.Debug);
+            _logger?.Log("MqttService publish finished", LogLevel.Debug);
+        }
+
+        public async Task PublishAsync(string topic, IEnumerable<string> messages)
+        {
+            foreach (var msg in messages)
             {
-                var msg = new MqttApplicationMessageBuilder()
-                    .WithTopic(topic)
-                    .WithPayload(message)
-                    .WithQualityOfServiceLevel(qos)
-                    .WithRetainFlag(retainFlag)
-                    .Build();
-                await _client.PublishAsync(msg, cancellationToken).ConfigureAwait(false);
-                _logger?.Log("MqttService publish finished", LogLevel.Debug);
+                await PublishAsync(topic, msg).ConfigureAwait(false);
             }
-            catch (Exception ex)
+        }
+
+        public async Task PublishAsync(IDictionary<string, IEnumerable<string>> endpointMessages)
+        {
+            foreach (var pair in endpointMessages)
             {
-                _logger?.Log($"MqttService publish error: {ex.Message}", LogLevel.Error);
-                throw;
+                await PublishAsync(pair.Key, pair.Value).ConfigureAwait(false);
             }
         }
     }

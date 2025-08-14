@@ -9,6 +9,7 @@ Effective Prompts / Instructions that worked: n/a
 Decisions & Rationale: Use DI to share single logging service and helpers.
 Action Items: Monitor CI for Windows-specific behaviors.
 Related Commits/PRs: (this PR)
+
 [2025-08-14 14:08] Topic: MQTT service options
 Context: Added option-based MQTT service with reconnection and TLS/WebSocket support.
 Observations: MQTTnet API changes required using new builder patterns.
@@ -53,6 +54,7 @@ Effective Prompts / Instructions that worked: Configuring push patterns and `wor
 Decisions & Rationale: Use GitHub-hosted runners to centralize validation.
 Action Items: Monitor CI runs for unexpected failures.
 Related Commits/PRs: (this PR)
+
 [2025-08-13 18:28] Topic: CI workflow consolidation
 Context: Unified multiple GitHub workflows into a single pipeline and added AGENTS instructions to review changelog and collaboration tips.
 Observations: Centralized CI reduces maintenance overhead.
@@ -61,6 +63,7 @@ Effective Prompts / Instructions that worked: n/a
 Decisions & Rationale: Single pipeline with build, test, quality, and packaging jobs.
 Action Items: Monitor self-heal integration with new pipeline.
 Related Commits/PRs: (this PR)
+
 [2025-08-13 18:50] Topic: On-demand CI via /test comment
 Context: Enabled `/test` comment workflow and documented CI-only testing policy.
 Observations: CI can run without local test execution.
@@ -69,6 +72,7 @@ Effective Prompts / Instructions that worked: Using comment trigger pattern from
 Decisions & Rationale: Centralize validation in CI and enforce via docs and PR template.
 Action Items: Ensure branch protection requires CI.
 Related Commits/PRs: (this PR)
+
 [2025-08-13 19:01] Topic: Async command refactor
 Context: Introduced AsyncRelayCommand and async script evaluation to prevent UI blocking.
 Observations: Async command simplifies long-running actions and avoids deadlocks.
@@ -77,6 +81,7 @@ Effective Prompts / Instructions that worked: n/a
 Decisions & Rationale: Use AsyncRelayCommand for operations needing await without blocking.
 Action Items: Monitor for unhandled exceptions in async commands.
 Related Commits/PRs: (this PR)
+
 [2025-08-13 19:42] Topic: Remove unused classes
 Context: Cleaned up obsolete logging and template control types.
 Observations: Deleting `RichTextLogger` and installer `CustomControl1` simplified the codebase with no build impact.
@@ -85,6 +90,15 @@ Effective Prompts / Instructions that worked: n/a
 Decisions & Rationale: Prefer removing stale classes to reduce maintenance and confusion.
 Action Items: Monitor builds for any lingering references.
 Related Commits/PRs: (this PR)
+
+[2025-08-14 00:00] Topic: MQTT message routing
+Context: Introduced registry to resolve service message tokens before publishing.
+Observations: Enables multiple services to publish through one endpoint.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: leveraging token patterns like {Service.Message}.
+Decisions & Rationale: Central registry simplifies token resolution and keeps MQTT service focused on transport.
+Action Items: Expand registry usage across services as needed.
+
 [2025-08-14 14:01] Topic: MQTT service options
 Context: Introduced strongly typed options with defaults and bounds for MQTT configuration.
 Observations: Centralizes broker settings and guards against invalid ranges.

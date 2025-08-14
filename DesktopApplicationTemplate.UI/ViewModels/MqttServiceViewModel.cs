@@ -66,11 +66,11 @@ public class MqttServiceViewModel : ViewModelBase, ILoggingViewModel, INetworkAw
         private readonly MqttService _service;
         private readonly SaveConfirmationHelper _saveHelper;
 
-        public MqttServiceViewModel(SaveConfirmationHelper saveHelper, MqttService? service = null, ILoggingService? logger = null)
+        public MqttServiceViewModel(SaveConfirmationHelper saveHelper, IMessageRoutingService routingService, MqttService? service = null, ILoggingService? logger = null)
         {
             _saveHelper = saveHelper;
             Logger = logger;
-            _service = service ?? new MqttService(logger);
+            _service = service ?? new MqttService(routingService, logger);
             AddTopicCommand = new RelayCommand(() => { if(!string.IsNullOrWhiteSpace(NewTopic)){Topics.Add(NewTopic); NewTopic = string.Empty;} });
             RemoveTopicCommand = new RelayCommand(() => { if(Topics.Contains(NewTopic)) Topics.Remove(NewTopic); });
             ConnectCommand = new RelayCommand(async () => await ConnectAsync());

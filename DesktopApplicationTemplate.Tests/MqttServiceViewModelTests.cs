@@ -22,7 +22,8 @@ namespace DesktopApplicationTemplate.Tests
                 return;
             }
             var helper = new SaveConfirmationHelper(new Mock<ILoggingService>().Object);
-            var vm = new MqttServiceViewModel(helper);
+            var routing = new MessageRoutingService();
+            var vm = new MqttServiceViewModel(helper, routing);
             vm.NewTopic = "test/topic";
             vm.AddTopicCommand.Execute(null);
             Assert.Contains("test/topic", vm.Topics);
@@ -41,9 +42,10 @@ namespace DesktopApplicationTemplate.Tests
                 .ReturnsAsync(new MqttClientConnectResult());
             client.Setup(c => c.SubscribeAsync(It.IsAny<MqttClientSubscribeOptions>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new MqttClientSubscribeResult(0, Array.Empty<MqttClientSubscribeResultItem>(), string.Empty, Array.Empty<MqttUserProperty>()));
-            var service = new MqttService(client.Object, logger.Object);
+            var routing = new MessageRoutingService();
+            var service = new MqttService(client.Object, routing, logger.Object);
             var helper = new SaveConfirmationHelper(logger.Object);
-            var vm = new MqttServiceViewModel(helper, service, logger.Object) { Host = "127.0.0.1", Port = "1883", ClientId = "c" };
+            var vm = new MqttServiceViewModel(helper, routing, service, logger.Object) { Host = "127.0.0.1", Port = "1883", ClientId = "c" };
 
             await vm.ConnectAsync();
 
