@@ -192,3 +192,11 @@ Effective Prompts / Instructions that worked: ripgrep to locate conflicting type
 Decisions & Rationale: Consolidated MQTT options under Services namespace to avoid ambiguity.
 Action Items: Ensure tests reference the unified options type.
 Related Commits/PRs: (this PR)
+[2025-08-14 17:03] Topic: MQTT WebSocket API update
+Context: Updated MQTT service to new WebSocket builder and certificate APIs while aligning log levels with custom enum.
+Observations: Build errors resolved locally after adjusting API calls; WindowsDesktop workload still missing for tests.
+Codex Limitations noticed: Unable to run WPF tests on Linux even after installing .NET SDK.
+Effective Prompts / Instructions that worked: Reviewing compiler errors from pipeline log.
+Decisions & Rationale: Use action-based WebSocket configuration and collection-based certificate method.
+Action Items: Ensure CI includes WindowsDesktop workload; verify build on Windows.
+Related Commits/PRs: (this PR)

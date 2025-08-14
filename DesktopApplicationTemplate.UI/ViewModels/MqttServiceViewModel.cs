@@ -338,7 +338,7 @@ public class MqttServiceViewModel : ValidatableViewModelBase, ILoggingViewModel,
     {
         if (!_service.IsConnected)
             return;
-        Logger?.Log("Disconnecting MQTT due to configuration change", LogLevel.Information);
+        Logger?.Log("Disconnecting MQTT due to configuration change", LogLevel.Debug);
         _ = _service.DisconnectAsync();
     }
 

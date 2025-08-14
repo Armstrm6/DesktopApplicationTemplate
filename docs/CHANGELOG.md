@@ -44,3 +44,6 @@
 - Updated GitHub workflows to install the WPF workload instead of the deprecated windowsdesktop workload.
 - MQTT service now disconnects before reconnecting when settings change.
 - Removed obsolete MQTT options model that caused duplicate property definitions.
+- Updated MQTT service for new WebSocket configuration API and client certificate handling.
+- Replaced unsupported information-level logs with debug logs in message routing components.
+- Corrected `AppSettings` namespace to ensure configuration binding compiles.

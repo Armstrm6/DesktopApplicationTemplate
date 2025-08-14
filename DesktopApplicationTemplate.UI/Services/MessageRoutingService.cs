@@ -29,9 +29,9 @@ public class MessageRoutingService : IMessageRoutingService
         if (string.IsNullOrWhiteSpace(serviceName))
             throw new ArgumentException("Service name cannot be null or whitespace.", nameof(serviceName));
 
-        _logger?.Log($"Updating message for {serviceName}", LogLevel.Information);
+        _logger?.Log($"Updating message for {serviceName}", LogLevel.Debug);
         _messages.AddOrUpdate(serviceName, _ => message ?? string.Empty, (_, _) => message ?? string.Empty);
-        _logger?.Log($"Message for {serviceName} updated", LogLevel.Information);
+        _logger?.Log($"Message for {serviceName} updated", LogLevel.Debug);
     }
 
     /// <inheritdoc />
@@ -44,13 +44,13 @@ public class MessageRoutingService : IMessageRoutingService
         if (template is null)
             throw new ArgumentNullException(nameof(template));
 
-        _logger?.Log($"Resolving tokens in '{template}'", LogLevel.Information);
+        _logger?.Log($"Resolving tokens in '{template}'", LogLevel.Debug);
         string result = TokenRegex.Replace(template, m =>
         {
             var name = m.Groups[1].Value;
             return _messages.TryGetValue(name, out var msg) ? msg : string.Empty;
         });
-        _logger?.Log($"Resolved template to '{result}'", LogLevel.Information);
+        _logger?.Log($"Resolved template to '{result}'", LogLevel.Debug);
         return result;
     }
 }
