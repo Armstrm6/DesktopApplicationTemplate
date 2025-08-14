@@ -49,3 +49,4 @@
 - Corrected `AppSettings` namespace to ensure configuration binding compiles.
 - Fixed missing `AppSettings` references in startup services.
 - Adjusted MQTT view model tests to return typed MQTTnet results instead of `Task.CompletedTask`, preventing build failures when APIs return generic tasks.
+- Removed obsolete `MQTTnet.Client.Publishing` import in MQTT view model tests to resolve missing namespace build errors.

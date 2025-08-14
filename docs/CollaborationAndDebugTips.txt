@@ -192,6 +192,14 @@ Effective Prompts / Instructions that worked: ripgrep to locate conflicting type
 Decisions & Rationale: Consolidated MQTT options under Services namespace to avoid ambiguity.
 Action Items: Ensure tests reference the unified options type.
 Related Commits/PRs: (this PR)
+[2025-08-14 17:48] Topic: MQTT test namespace
+Context: Build failed when tests imported non-existent MQTTnet namespace.
+Observations: `MQTTnet.Client.Publishing` is absent in the referenced package, causing CS0234.
+Codex Limitations noticed: WindowsDesktop SDK missing prevents full build/test.
+Effective Prompts / Instructions that worked: Inspecting compiler logs to identify obsolete using.
+Decisions & Rationale: Removed the invalid namespace and rely on `MQTTnet.Client` types.
+Action Items: Verify available namespaces before adding imports.
+Related Commits/PRs: (this PR)
 [2025-08-14 17:03] Topic: MQTT WebSocket API update
 Context: Updated MQTT service to new WebSocket builder and certificate APIs while aligning log levels with custom enum.
 Observations: Build errors resolved locally after adjusting API calls; WindowsDesktop workload still missing for tests.

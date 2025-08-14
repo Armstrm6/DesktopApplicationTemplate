@@ -10,7 +10,6 @@ using DesktopApplicationTemplate.UI.ViewModels;
 using Moq;
 using MQTTnet;
 using MQTTnet.Client;
-using MQTTnet.Client.Publishing;
 using MQTTnet.Packets;
 using Xunit;
 
