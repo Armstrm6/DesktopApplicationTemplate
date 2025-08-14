@@ -6,8 +6,7 @@ using Moq;
 using System;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
+using WpfApplication = System.Windows.Application;
 using Xunit;
 
 namespace DesktopApplicationTemplate.Tests
@@ -26,7 +25,7 @@ namespace DesktopApplicationTemplate.Tests
             {
                 try
                 {
-                    if (System.Windows.Application.Current == null)
+                    if (WpfApplication.Current == null)
                         new DesktopApplicationTemplate.UI.App();
 
                     var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
@@ -50,8 +49,8 @@ namespace DesktopApplicationTemplate.Tests
                 catch (Exception e) { ex = e; }
                 finally
                 {
-                    var dispatcher = Application.Current?.Dispatcher;
-                    dispatcher?.Invoke(() => Application.Current?.Shutdown());
+                    var dispatcher = WpfApplication.Current?.Dispatcher;
+                    dispatcher?.Invoke(() => WpfApplication.Current?.Shutdown());
                 }
             });
             thread.SetApartmentState(ApartmentState.STA);

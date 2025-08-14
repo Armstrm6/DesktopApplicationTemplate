@@ -42,3 +42,12 @@ Effective Prompts / Instructions that worked: Provided failing stack trace to gu
 Decisions & Rationale: Wrap shutdown logic in dispatcher invocation to marshal to the UI thread.
 Action Items: Verify on Windows CI that tests pass with the updated dispatcher call.
 Related Commits/PRs:
+
+[2025-08-14 00:30] Topic: WPF Application aliasing
+Context: Build failed due to ambiguous `Application` reference when WinForms implicit usings were enabled.
+Observations: Using a namespace alias for `System.Windows.Application` removed the ambiguity.
+Codex Limitations noticed: dotnet SDK unavailable in container to recompile locally.
+Effective Prompts / Instructions that worked: Compiler error output identifying conflicting `Application` types.
+Decisions & Rationale: Alias the WPF `Application` and refer to it explicitly in tests.
+Action Items: Ensure CI builds succeed on Windows runners.
+Related Commits/PRs: (this PR)

@@ -28,3 +28,4 @@
 - CI test job now builds projects before executing to ensure test assemblies are available.
 - Test job now uploads results even when tests fail so failures are visible.
 - Settings page navigation test now shuts down the WPF application on its dispatcher to prevent cross-thread crashes.
+- Resolved ambiguous `Application` reference in settings navigation test when Windows Forms implicit using was enabled.

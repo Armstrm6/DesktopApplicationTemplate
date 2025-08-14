@@ -100,3 +100,12 @@ Effective Prompts / Instructions that worked: n/a
 Decisions & Rationale: Rely on built-in WPF support and surface test failures via artifact upload.
 Action Items: Monitor CI to ensure failures are reported and artifacts persist.
 Related Commits/PRs: (this PR)
+
+[2025-08-14 00:30] Topic: WPF Application ambiguity
+Context: Build failed when both WPF and WinForms implicit usings introduced conflicting `Application` types.
+Observations: Explicitly qualifying the WPF `Application` resolved the ambiguity and restored compilation.
+Codex Limitations noticed: dotnet SDK unavailable locally for validation.
+Effective Prompts / Instructions that worked: Error log pinpointing ambiguous type reference.
+Decisions & Rationale: Alias `System.Windows.Application` and use it directly in the test.
+Action Items: Verify CI builds and tests succeed on Windows runners.
+Related Commits/PRs: (this PR)
