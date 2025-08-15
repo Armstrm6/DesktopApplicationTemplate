@@ -1,8 +1,14 @@
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI.Views;
+using DesktopApplicationTemplate.Core.Services;
 using System;
 using System.IO;
+using System.Threading;
+using System.Windows;
+using System.Windows.Controls;
 using Xunit;
+using Moq;
 
 namespace DesktopApplicationTemplate.Tests
 {
@@ -122,6 +128,50 @@ namespace DesktopApplicationTemplate.Tests
                 Directory.Delete(tempDir, true);
             }
 
+            ConsoleTestLogger.LogPass();
+        }
+
+        [Fact]
+        [TestCategory("WindowsSafe")]
+        public void CsvServiceView_LoadsInto_ContentFrame()
+        {
+            if (!OperatingSystem.IsWindows())
+                return;
+
+            Exception? ex = null;
+            var thread = new Thread(() =>
+            {
+                try
+                {
+                    if (Application.Current == null)
+                        new DesktopApplicationTemplate.UI.App();
+
+                    var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
+                    var servicesPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "services.json");
+                    Directory.CreateDirectory(Path.GetDirectoryName(servicesPath)!);
+                    var network = new Mock<INetworkConfigurationService>();
+                    var networkVm = new NetworkConfigurationViewModel(network.Object);
+                    var mainVm = new MainViewModel(new CsvService(new CsvViewerViewModel(configPath)), networkVm, network.Object, null, servicesPath);
+                    var view = new MainView(mainVm);
+
+                    var svc = new ServiceViewModel { DisplayName = "CSV Creator - Test", ServiceType = "CSV Creator" };
+                    svc.SetColorsByType();
+
+                    var method = typeof(MainView).GetMethod("OpenServiceEditor", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    method?.Invoke(view, new object[] { svc });
+
+                    Assert.IsType<CsvServiceView>(view.ContentFrame.Content);
+                }
+                catch (Exception e) { ex = e; }
+                finally
+                {
+                    Application.Current?.Shutdown();
+                }
+            });
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.Start();
+            thread.Join();
+            if (ex != null) throw ex;
             ConsoleTestLogger.LogPass();
         }
     }

@@ -69,9 +69,9 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<FtpServiceViewModel>();
             services.AddSingleton<CsvViewerViewModel>();
             services.AddSingleton<CsvService>();
+            services.AddSingleton<CsvServiceView>();
             services.AddSingleton<SettingsViewModel>();
             services.AddTransient<SplashWindow>();
-            services.AddTransient<CsvViewerWindow>();
             services.AddTransient<CreateServiceWindow>();
             services.AddTransient<CreateServicePage>();
             services.AddTransient<CreateServiceViewModel>();

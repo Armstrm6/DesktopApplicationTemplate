@@ -89,6 +89,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 "SCP" => App.AppHost.Services.GetRequiredService<SCPServiceView>(),
                 "MQTT" => App.AppHost.Services.GetRequiredService<MQTTServiceView>(),
                 "FTP" => App.AppHost.Services.GetRequiredService<FTPServiceView>(),
+                "CSV Creator" => App.AppHost.Services.GetRequiredService<CsvServiceView>(),
                 _ => null
             };
 
@@ -151,14 +152,7 @@ namespace DesktopApplicationTemplate.UI.Views
                     };
                 }
 
-                if (type == "CSV Creator")
-                {
-                    var csvVm = App.AppHost.Services.GetRequiredService<CsvViewerViewModel>();
-                    var csvWindow = new CsvViewerWindow(csvVm);
-                    csvVm.RequestClose += () => csvWindow.Close();
-                    csvWindow.ShowDialog();
-                }
-                else if (newService.ServicePage != null)
+                if (newService.ServicePage != null)
                 {
                     ShowPage(newService.ServicePage);
                 }
@@ -212,14 +206,6 @@ namespace DesktopApplicationTemplate.UI.Views
             {
                 ShowHome();
             }
-        }
-
-        private void OpenCsvViewer_Click(object sender, RoutedEventArgs e)
-        {
-            var vm = App.AppHost.Services.GetRequiredService<CsvViewerViewModel>();
-            var window = new CsvViewerWindow(vm);
-            vm.RequestClose += () => window.Close();
-            window.ShowDialog();
         }
 
         private void OpenFilter_Click(object sender, RoutedEventArgs e)
@@ -379,22 +365,12 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private void OpenServiceEditor(ServiceViewModel svc)
         {
-            if (svc.ServiceType == "CSV Creator")
+            var page = GetOrCreateServicePage(svc);
+            if (page != null)
             {
-                var vm = App.AppHost.Services.GetRequiredService<CsvViewerViewModel>();
-                var window = new CsvViewerWindow(vm);
-                vm.RequestClose += () => window.Close();
-                window.ShowDialog();
-            }
-            else
-            {
-                var page = GetOrCreateServicePage(svc);
-                if (page != null)
-                {
-                    svc.IsActive = false;
-                    ShowPage(page);
-                    _logger?.LogDebug("EditService workflow completed for {Name}", svc.DisplayName);
-                }
+                svc.IsActive = false;
+                ShowPage(page);
+                _logger?.LogDebug("EditService workflow completed for {Name}", svc.DisplayName);
             }
         }
 
