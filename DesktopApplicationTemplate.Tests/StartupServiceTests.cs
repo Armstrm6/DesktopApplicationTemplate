@@ -40,5 +40,28 @@ namespace DesktopApplicationTemplate.Tests
 
             ConsoleTestLogger.LogPass();
         }
+
+        [Fact]
+        [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
+        public void AutoStart_DefaultsToFalse_WhenNotConfigured()
+        {
+            var inMemorySettings = new Dictionary<string, string?>
+            {
+                {"AppSettings:Environment", "Test"}
+            };
+
+            IConfiguration configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(inMemorySettings)
+                .Build();
+
+            var startupService = new StartupService(configuration);
+
+            AppSettings settings = startupService.GetSettings();
+
+            Assert.False(settings.AutoStart);
+
+            ConsoleTestLogger.LogPass();
+        }
     }
 }

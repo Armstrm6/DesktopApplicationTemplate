@@ -18,7 +18,7 @@ namespace DesktopApplicationTemplate.UI.Models
         public string LogLevel { get; set; } = "Debug";
 
         /// <summary>Gets or sets a value indicating whether services should start automatically.</summary>
-        public bool AutoStart { get; set; } = true;
+        public bool AutoStart { get; set; } = false;
 
         /// <summary>Gets or sets the path for the default C# script.</summary>
         public string DefaultCSharpScriptPath { get; set; } = string.Empty;

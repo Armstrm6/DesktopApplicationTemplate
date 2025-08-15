@@ -158,3 +158,12 @@ Effective Prompts / Instructions that worked: Reusing existing window layout ens
 Decisions & Rationale: Align CSV Creator with other services to simplify navigation.
 Action Items: Monitor CI for UI test reliability.
 Related Commits/PRs: (this PR)
+[2025-08-15 17:51] Topic: Auto-start default
+Context: AppSettings and configuration files now default AutoStart to disabled.
+Observations: StartupService leaves auto-start disabled unless explicitly enabled.
+Codex Limitations noticed: PowerShell unavailable; tip appended manually.
+Effective Prompts / Instructions that worked: n/a
+Decisions & Rationale: Disable auto-start by default to prevent unintended application launches.
+Action Items: Rely on CI to validate registry updates on Windows.
+Related Commits/PRs: (this PR)
+
