@@ -8,6 +8,7 @@
 - Views now accept `ILoggingService` instances instead of creating loggers.
 - Updated unit tests to inject mock loggers.
 - Application logo displayed in the main window navigation bar.
+- Navigation bar `HeaderBar` now supports drag and toggles window state on double-click.
 - Consolidated GitHub Actions into a single `CI` workflow and introduced `AGENTS.md` with instructions to review collaboration docs.
 - Added `/test` comment workflow to run CI on demand.
 - Created `CONTRIBUTING.md` and PR template enforcing CI-only testing with a CI badge in the README.

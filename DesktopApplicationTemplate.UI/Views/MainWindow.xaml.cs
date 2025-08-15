@@ -299,6 +299,40 @@ namespace DesktopApplicationTemplate.UI.Views
             }
         }
 
+        private void HeaderBar_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (e.ClickCount == 1)
+            {
+                var element = e.OriginalSource as DependencyObject;
+                if (Helpers.VisualTreeHelperExtensions.FindParent<ButtonBase>(element) == null)
+                {
+                    try
+                    {
+                        DragMove();
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        _logger?.LogWarning(ex, "DragMove failed");
+                    }
+                }
+                e.Handled = true;
+            }
+        }
+
+        private void HeaderBar_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            var element = e.OriginalSource as DependencyObject;
+            if (Helpers.VisualTreeHelperExtensions.FindParent<ButtonBase>(element) != null)
+                return;
+
+            WindowState = WindowState == WindowState.Maximized
+                ? WindowState.Normal
+                : WindowState.Maximized;
+
+            _logger?.LogInformation("Window state changed to {State}", WindowState);
+            e.Handled = true;
+        }
+
         private void MainView_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             var element = e.OriginalSource as DependencyObject;
