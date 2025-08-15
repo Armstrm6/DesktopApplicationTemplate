@@ -199,15 +199,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             var popup = new CreateServiceWindow(vm); // Replace with DI if needed
             if (popup.ShowDialog() == true)
             {
-                string name = popup.CreatedServiceName;
-                if (string.IsNullOrWhiteSpace(name))
-                {
-                    name = GenerateServiceName(popup.CreatedServiceType);
-                }
+                var name = popup.CreatedServiceName;
+                var type = popup.CreatedServiceType;
                 var newService = new ServiceViewModel
                 {
-                    DisplayName = $"{popup.CreatedServiceType} - {name}",
-                    ServiceType = popup.CreatedServiceType,
+                    DisplayName = $"{type} - {name}",
+                    ServiceType = type,
                     IsActive = false,
                     Order = Services.Count
                 };

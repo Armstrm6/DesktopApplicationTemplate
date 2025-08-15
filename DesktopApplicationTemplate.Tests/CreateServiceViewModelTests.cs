@@ -5,17 +5,24 @@ namespace DesktopApplicationTemplate.Tests
 {
     public class CreateServiceViewModelTests
     {
-        [Fact]
+        [Theory]
+        [InlineData("HID")]
+        [InlineData("TCP")]
+        [InlineData("HTTP")]
+        [InlineData("File Observer")]
+        [InlineData("Heartbeat")]
+        [InlineData("CSV Creator")]
+        [InlineData("SCP")]
+        [InlineData("MQTT")]
+        [InlineData("FTP")]
         [TestCategory("CodexSafe")]
         [TestCategory("WindowsSafe")]
-        public void SelectedServiceType_GeneratesDefaultName()
+        public void GenerateDefaultName_ReturnsIncrementedName(string type)
         {
-            var existing = new[] { "Heartbeat1" };
+            var existing = new[] { $"{type}1" };
             var vm = new CreateServiceViewModel(existing);
-            vm.SelectedServiceType = "Heartbeat";
-
-            Assert.Equal("Heartbeat2", vm.ServiceName);
-
+            var name = vm.GenerateDefaultName(type);
+            Assert.Equal($"{type}2", name);
             ConsoleTestLogger.LogPass();
         }
     }

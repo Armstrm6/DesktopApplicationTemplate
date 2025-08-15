@@ -1,3 +1,4 @@
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using DesktopApplicationTemplate.UI.ViewModels;
@@ -7,9 +8,7 @@ namespace DesktopApplicationTemplate.UI.Views
     public partial class CreateServicePage : Page
     {
         private readonly CreateServiceViewModel _viewModel;
-        public string CreatedServiceName { get; private set; } = string.Empty;
-        public string CreatedServiceType { get; private set; } = string.Empty;
-        public event Action<string,string>? ServiceCreated;
+        public event Action<string, string>? ServiceCreated;
         public event Action? Cancelled;
 
         public CreateServicePage(CreateServiceViewModel viewModel)
@@ -19,19 +18,13 @@ namespace DesktopApplicationTemplate.UI.Views
             DataContext = _viewModel;
         }
 
-        private void Create_Click(object sender, RoutedEventArgs e)
+        private void ServiceType_Click(object sender, RoutedEventArgs e)
         {
-            var vm = (CreateServiceViewModel)DataContext;
-            CreatedServiceName = vm.ServiceName;
-            CreatedServiceType = vm.SelectedServiceType;
-
-            if (string.IsNullOrWhiteSpace(CreatedServiceName) || string.IsNullOrWhiteSpace(CreatedServiceType))
+            if (sender is Button button && button.DataContext is CreateServiceViewModel.ServiceTypeMetadata meta)
             {
-                System.Windows.MessageBox.Show("Please enter a name and select a type.", "Missing Info", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
+                var name = _viewModel.GenerateDefaultName(meta.Type);
+                ServiceCreated?.Invoke(name, meta.Type);
             }
-
-            ServiceCreated?.Invoke(CreatedServiceName, CreatedServiceType);
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
