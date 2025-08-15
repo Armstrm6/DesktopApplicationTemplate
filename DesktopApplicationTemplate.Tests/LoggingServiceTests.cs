@@ -90,5 +90,40 @@ namespace DesktopApplicationTemplate.Tests
 
             ConsoleTestLogger.LogPass();
         }
+
+        [Fact]
+        [TestCategory("WindowsSafe")]
+        public async Task Reload_ReplaysEntriesFromExistingFile()
+        {
+            var path = Path.GetTempFileName();
+            try
+            {
+                var first = new LoggingService(new Mock<IRichTextLogger>().Object, path);
+                first.Log("persisted", LogLevel.Error);
+                await Task.Delay(50);
+
+                var uiLogger = new Mock<IRichTextLogger>();
+                var second = new LoggingService(uiLogger.Object, path);
+                var entries = new List<LogEntry>();
+                second.LogAdded += e => entries.Add(e);
+
+                second.Reload();
+
+                Assert.Contains(entries, e => e.Message.Contains("persisted"));
+            }
+            finally
+            {
+                try
+                {
+                    if (File.Exists(path))
+                        File.Delete(path);
+                }
+                catch
+                {
+                }
+            }
+
+            ConsoleTestLogger.LogPass();
+        }
     }
 }

@@ -176,3 +176,12 @@ Decisions & Rationale: Ensure consistent SDK version across developers and CI.
 Action Items: Install .NET SDK 8.0.404 locally and validate tests on Windows CI.
 Related Commits/PRs: (this PR)
 
+[2025-08-19 00:00] Topic: Log reload behavior
+Context: Logging service now reloads previous session entries and respects minimum level changes.
+Observations: Replaying log file entries keeps UI history after restart.
+Codex Limitations noticed: None
+Effective Prompts / Instructions that worked: Specifying constructor loading and reload method.
+Decisions & Rationale: Read log file at startup and expose reload for level filter updates.
+Action Items: Monitor duplicate entries when reloading filters.
+Related Commits/PRs: (this PR)
+
