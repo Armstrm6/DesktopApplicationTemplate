@@ -31,6 +31,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public ICommand RemoveColumnCommand { get; }
         public ICommand SaveCommand { get; }
         public ICommand CloseCommand { get; }
+#if DEBUG
+        public ICommand DebugSaveCommand { get; }
+#endif
 
         public event Action? RequestClose;
 
@@ -42,6 +45,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             RemoveColumnCommand = new RelayCommand(() => { if (SelectedColumn != null) Configuration.Columns.Remove(SelectedColumn); });
             SaveCommand = new RelayCommand(Save);
             CloseCommand = new RelayCommand(() => RequestClose?.Invoke());
+#if DEBUG
+            DebugSaveCommand = new RelayCommand(() => Save());
+#endif
         }
 
         private void Load()
@@ -58,26 +64,41 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             if (Configuration is null)
                 return;
 
-            var snapshot = new CsvConfiguration
+            try
             {
-                FileNamePattern = Configuration.FileNamePattern,
-                Columns = new ObservableCollection<CsvColumnConfig>(Configuration.Columns.Select(c => new CsvColumnConfig
+                var snapshot = new CsvConfiguration
                 {
-                    Name = c.Name,
-                    Service = c.Service,
-                    Script = c.Script
-                }))
-            };
+                    FileNamePattern = Configuration.FileNamePattern,
+                    Columns = new ObservableCollection<CsvColumnConfig>(Configuration.Columns.Select(c => new CsvColumnConfig
+                    {
+                        Name = c.Name,
+                        Service = c.Service,
+                        Script = c.Script
+                    }))
+                };
 
-            var options = new JsonSerializerOptions
+                var options = new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    ReferenceHandler = ReferenceHandler.IgnoreCycles,
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+                };
+
+                var json = JsonSerializer.Serialize(snapshot, options);
+                System.IO.File.WriteAllText(_configPath, json);
+            }
+            catch (StackOverflowException)
             {
-                WriteIndented = true,
-                ReferenceHandler = ReferenceHandler.IgnoreCycles,
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-            };
-
-            var json = JsonSerializer.Serialize(snapshot, options);
-            System.IO.File.WriteAllText(_configPath, json);
+                var dumpOptions = new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    ReferenceHandler = ReferenceHandler.Preserve
+                };
+                var dump = JsonSerializer.Serialize(Configuration, dumpOptions);
+                var temp = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "csv_config_dump.json");
+                System.IO.File.WriteAllText(temp, dump);
+                Environment.FailFast($"Stack overflow while saving CSV configuration. Dump written to {temp}");
+            }
         }
 
         // Uses OnPropertyChanged from ViewModelBase

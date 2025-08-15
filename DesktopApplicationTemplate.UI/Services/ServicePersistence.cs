@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.Core.Services;
 
@@ -28,12 +29,34 @@ namespace DesktopApplicationTemplate.UI.Services
                 });
             }
 
-            var json = JsonSerializer.Serialize(data);
-            logger?.Log($"Persisting services to {FilePath}", LogLevel.Debug);
-            using var fs = new FileStream(FilePath, FileMode.Create, FileAccess.Write, FileShare.None);
-            using var sw = new StreamWriter(fs);
-            sw.Write(json);
-            logger?.Log($"Saved {data.Count} services to {FilePath}", LogLevel.Debug);
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                ReferenceHandler = ReferenceHandler.IgnoreCycles,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            };
+
+            try
+            {
+                var json = JsonSerializer.Serialize(data, options);
+                logger?.Log($"Persisting services to {FilePath}", LogLevel.Debug);
+                using var fs = new FileStream(FilePath, FileMode.Create, FileAccess.Write, FileShare.None);
+                using var sw = new StreamWriter(fs);
+                sw.Write(json);
+                logger?.Log($"Saved {data.Count} services to {FilePath}", LogLevel.Debug);
+            }
+            catch (StackOverflowException)
+            {
+                var dumpOptions = new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    ReferenceHandler = ReferenceHandler.Preserve
+                };
+                var dump = JsonSerializer.Serialize(data, dumpOptions);
+                var temp = Path.Combine(Path.GetTempPath(), "services_dump.json");
+                File.WriteAllText(temp, dump);
+                Environment.FailFast($"Stack overflow while saving services. Dump written to {temp}");
+            }
         }
 
         public static List<ServiceInfo> Load(ILoggingService? logger = null)
