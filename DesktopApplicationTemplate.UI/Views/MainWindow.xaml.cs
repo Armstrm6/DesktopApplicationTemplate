@@ -114,8 +114,9 @@ namespace DesktopApplicationTemplate.UI.Views
         private void AddService_Click(object sender, RoutedEventArgs e)
         {
             _logger?.LogDebug("AddService button clicked");
-            // Open the service creation workflow in its own window
-            var window = App.AppHost.Services.GetRequiredService<CreateServiceWindow>();
+            var existing = _viewModel.Services.Select(s => s.DisplayName.Split(" - ").Last());
+            var vm = new CreateServiceViewModel(existing);
+            var window = new CreateServiceWindow(vm);
 
             if (window.ShowDialog() == true)
             {

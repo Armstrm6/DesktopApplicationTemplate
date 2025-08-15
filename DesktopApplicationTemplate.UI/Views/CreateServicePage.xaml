@@ -3,38 +3,41 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
         mc:Ignorable="d">
-
-    
-    <Page.Resources>
-        <local:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter" />
-    </Page.Resources>
-    
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="1" Text="Create New Service" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
-        <StackPanel Grid.Row="2" Margin="0,20,0,10">
-            <Grid Width="400" Margin="10 0">
-                <TextBox x:Name="NameTextBox" Text="{Binding ServiceName, UpdateSourceTrigger=PropertyChanged}"/>
-                <TextBlock Text="Enter New Service Name" IsHitTestVisible="False" Foreground="Gray" VerticalAlignment="Center" Margin="77,0,74,0" Visibility="{Binding Text, ElementName=NameTextBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
-            </Grid>
+        <TextBlock Grid.Row="0" Text="Select Service Type" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
 
-            <ComboBox Width="250"
-                      ItemsSource="{Binding ServiceTypes}"
-                      SelectedItem="{Binding SelectedServiceType}"
-                      Height="30"/>
-        </StackPanel>
+        <ItemsControl Grid.Row="1" ItemsSource="{Binding ServiceTypes}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel HorizontalAlignment="Center"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Margin="10" HorizontalAlignment="Center">
+                        <Button Width="80" Height="80" Click="ServiceType_Click">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border CornerRadius="40" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                            <Image Source="{Binding IconPath}" Width="40" Height="40"/>
+                        </Button>
+                        <TextBlock Text="{Binding DisplayText}" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
 
-        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
-            <Button Content="Cancel" Width="100" Margin="0,0,10,0" Click="Cancel_Click"/>
-            <Button Content="Create" Width="100" Click="Create_Click"/>
-        </StackPanel>
+        <Button Grid.Row="2" Content="Cancel" Width="100" HorizontalAlignment="Center" Margin="0,10,0,0" Click="Cancel_Click"/>
     </Grid>
 </Page>

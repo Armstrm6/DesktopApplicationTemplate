@@ -132,3 +132,12 @@ Effective Prompts / Instructions that worked: Direct request to wire header even
 Decisions & Rationale: Provide familiar window management behavior through code-behind handlers.
 Action Items: Monitor CI for Windows-specific regressions.
 Related Commits/PRs: (this PR)
+
+[2025-08-18 17:30] Topic: Service creation bubble UI
+Context: Replaced text and combo selection with icon bubbles that auto-generate service names.
+Observations: Streamlines service creation and reduces user input errors.
+Codex Limitations noticed: Missing WindowsDesktop workload prevented local test execution.
+Effective Prompts / Instructions that worked: Following AGENTS.md to attempt tests and document changes.
+Decisions & Rationale: Expose service metadata from the view model for UI binding and name generation.
+Action Items: Rely on CI for cross-platform validation.
+Related Commits/PRs: (this PR)

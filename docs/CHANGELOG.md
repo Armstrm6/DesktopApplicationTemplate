@@ -23,6 +23,7 @@
 - Added `MessageRoutingService` to track latest messages per service and resolve `{ServiceName.Message}` tokens before MQTT publishing.
 - `MqttService` can now resolve message tokens and publish multiple messages per endpoint.
 - Introduced `MqttServiceOptions` for configuring MQTT connection parameters.
+- Unit tests covering default service name generation for all service types.
 
 ### Changed
 - CI workflow now runs on pushes to `feature/**` and `bugfix/**` branches and supports manual triggers, ensuring tests execute on GitHub.
@@ -33,6 +34,7 @@
 - Simplified `MqttServiceViewModel` to use `MqttServiceOptions` for settings and delegate token resolution to `MessageRoutingService`.
 - `MqttService` and `MqttServiceViewModel` now consume `IOptions<MqttServiceOptions>` and the direct singleton registration was removed.
 - Added a DI container test ensuring the service provider builds with MQTT components.
+- Service creation now presents service types as icon bubbles and auto-generates default names upon selection.
 
 ### Removed
 - Placeholder "Desktop Template" text from the navigation bar.
