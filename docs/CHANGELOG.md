@@ -27,6 +27,7 @@
 - Integrated `CsvServiceView` page, embedding CSV Creator configuration within the main window.
 
 ### Changed
+- Updated `global.json` to require the .NET 8 SDK version `8.0.404`.
 - Default `AutoStart` is now disabled and all environment configuration files set `"AutoStart": false`.
 - CI workflow now runs on pushes to `feature/**` and `bugfix/**` branches and supports manual triggers, ensuring tests execute on GitHub.
 - `self-heal` workflow now monitors the unified `CI` pipeline.

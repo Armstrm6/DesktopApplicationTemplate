@@ -167,3 +167,12 @@ Decisions & Rationale: Disable auto-start by default to prevent unintended appli
 Action Items: Rely on CI to validate registry updates on Windows.
 Related Commits/PRs: (this PR)
 
+[2025-08-15 18:40] Topic: SDK upgrade to 8.0.404
+Context: Pinned `global.json` to .NET SDK 8.0.404 to align with documentation.
+Observations: `dotnet --info` shows the required SDK is missing and tests cannot run.
+Codex Limitations noticed: Linux environment lacks .NET SDK 8.0.404 and WindowsDesktop support.
+Effective Prompts / Instructions that worked: Version update and verification steps.
+Decisions & Rationale: Ensure consistent SDK version across developers and CI.
+Action Items: Install .NET SDK 8.0.404 locally and validate tests on Windows CI.
+Related Commits/PRs: (this PR)
+

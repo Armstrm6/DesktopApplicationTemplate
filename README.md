@@ -10,6 +10,8 @@ This repository contains a basic WPF UI application, a Windows Service and unit 
 - [Git LFS](https://git-lfs.com) for large binary assets
 - Windows OS is required to run the WPF UI and service projects.
 
+Ensure the 8.0.404 SDK is installed so the pinned `global.json` version resolves correctly.
+
 ### Git LFS
 
 Install and initialize Git LFS, then download any LFS-tracked binaries:
