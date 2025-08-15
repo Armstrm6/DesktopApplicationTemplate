@@ -266,7 +266,12 @@ namespace DesktopApplicationTemplate.UI.Views
                 string input = Interaction.InputBox("Enter new service name:", "Rename Service", svc.DisplayName);
                 if (!string.IsNullOrWhiteSpace(input))
                 {
-                    svc.DisplayName = input;
+                    var namePart = input.Contains(" - ") ? input.Split(" - ").Last() : input;
+                    if (_viewModel.Services.Any(s => s != svc && s.DisplayName.Split(" - ").Last().Equals(namePart, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        namePart = _viewModel.GenerateServiceName(svc.ServiceType);
+                    }
+                    svc.DisplayName = $"{svc.ServiceType} - {namePart}";
                     _viewModel.SaveServices();
                 }
             }

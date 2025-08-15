@@ -141,3 +141,12 @@ Effective Prompts / Instructions that worked: Following AGENTS.md to attempt tes
 Decisions & Rationale: Expose service metadata from the view model for UI binding and name generation.
 Action Items: Rely on CI for cross-platform validation.
 Related Commits/PRs: (this PR)
+
+[2025-08-18 21:00] Topic: Service name uniqueness
+Context: Prevented duplicate service names during creation and rename operations.
+Observations: New services and renames auto-append numeric suffixes when collisions occur.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: request to handle duplicates via GenerateServiceName.
+Decisions & Rationale: Ensure consistent name uniqueness across sessions and persistence.
+Action Items: Monitor persistence for unexpected duplicate entries.
+Related Commits/PRs: (this PR)

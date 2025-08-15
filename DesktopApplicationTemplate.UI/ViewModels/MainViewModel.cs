@@ -201,6 +201,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             {
                 var name = popup.CreatedServiceName;
                 var type = popup.CreatedServiceType;
+                if (Services.Any(s => s.DisplayName.Split(" - ").Last().Equals(name, StringComparison.OrdinalIgnoreCase)))
+                {
+                    name = GenerateServiceName(type);
+                }
                 var newService = new ServiceViewModel
                 {
                     DisplayName = $"{type} - {name}",
