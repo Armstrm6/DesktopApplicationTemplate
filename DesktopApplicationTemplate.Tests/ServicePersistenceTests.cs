@@ -3,6 +3,7 @@ using DesktopApplicationTemplate.UI.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Xunit;
 
 namespace DesktopApplicationTemplate.Tests
@@ -33,6 +34,7 @@ namespace DesktopApplicationTemplate.Tests
                 Assert.Equal(2, loaded.Count);
                 Assert.Equal("A", loaded[0].DisplayName);
                 Assert.Contains("B", loaded[0].AssociatedServices);
+                Assert.Equal(loaded.Count, loaded.Select(s => s.DisplayName).Distinct(StringComparer.OrdinalIgnoreCase).Count());
             }
             finally
             {
