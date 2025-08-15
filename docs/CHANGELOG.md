@@ -24,6 +24,7 @@
 - `MqttService` can now resolve message tokens and publish multiple messages per endpoint.
 - Introduced `MqttServiceOptions` for configuring MQTT connection parameters.
 - Unit tests covering default service name generation for all service types.
+- Integrated `CsvServiceView` page, embedding CSV Creator configuration within the main window.
 
 ### Changed
 - CI workflow now runs on pushes to `feature/**` and `bugfix/**` branches and supports manual triggers, ensuring tests execute on GitHub.

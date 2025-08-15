@@ -150,3 +150,11 @@ Effective Prompts / Instructions that worked: request to handle duplicates via G
 Decisions & Rationale: Ensure consistent name uniqueness across sessions and persistence.
 Action Items: Monitor persistence for unexpected duplicate entries.
 Related Commits/PRs: (this PR)
+[2025-08-15 17:39] Topic: CSV service view integration
+Context: Moved CSV Creator from a pop-up window to an embedded page.
+Observations: CsvServiceView now loads within ContentFrame when the service is opened.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: Reusing existing window layout ensured quick conversion to a page.
+Decisions & Rationale: Align CSV Creator with other services to simplify navigation.
+Action Items: Monitor CI for UI test reliability.
+Related Commits/PRs: (this PR)

@@ -1,13 +1,17 @@
 using System.Windows;
+using System.Windows.Controls;
 using DesktopApplicationTemplate.UI.ViewModels;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
-    public partial class CsvViewerWindow : Window
+    public partial class CsvServiceView : Page
     {
-        public CsvViewerWindow(CsvViewerViewModel vm)
+        private readonly CsvViewerViewModel _viewModel;
+
+        public CsvServiceView(CsvViewerViewModel vm)
         {
             InitializeComponent();
+            _viewModel = vm;
             DataContext = vm;
         }
 
