@@ -4,10 +4,26 @@ Purpose: Running log of what worked, what broke, and why.
 [2025-08-13 17:00] Topic: Logging DI refactor
 Context: Introduced constructor injection for logging services and confirmation helpers.
 Observations: Simplifies testing and removes static logger state.
-Codex Limitations noticed: Unable to execute Windows-specific tests in container.
 Effective Prompts / Instructions that worked: n/a
 Decisions & Rationale: Use DI to share single logging service and helpers.
 Action Items: Monitor CI for Windows-specific behaviors.
+Related Commits/PRs: (this PR)
+
+[2025-08-15 00:00] Topic: MQTT service refactor
+Context: Simplified MQTT client by unifying constructors and publish APIs.
+Observations: Connect now disconnects before reconnecting and raises connection state events.
+Effective Prompts / Instructions that worked: n/a
+Decisions & Rationale: Reduce surface area and ensure consistent token resolution across publishes.
+Action Items: Monitor CI for MQTT regressions.
+Related Commits/PRs: (this PR)
+
+[2025-08-13 20:41] Topic: WPF workload in CI
+Context: GitHub Actions failed because the `windowsdesktop` workload is no longer recognized.
+Observations: Replacing it with the `wpf` workload restores pipeline compatibility.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: verifying commands against GitHub runners.
+Decisions & Rationale: Use the `wpf` workload across build, test, quality, and packaging jobs.
+Action Items: Monitor CI for workload availability changes.
 Related Commits/PRs: (this PR)
 
 [2025-08-13 17:40] Topic: Navigation bar logo
@@ -28,30 +44,16 @@ Decisions & Rationale: Use root-relative resource paths for WPF assets.
 Action Items: Ensure future asset references include leading slash.
 Related Commits/PRs: (this PR)
 
-[2025-08-13 18:09] Topic: CI runs on feature branches
-Context: Enabled GitHub Actions to execute tests on pushes to `feature/**` and `bugfix/**` branches.
-Observations: Codex can push code to trigger remote tests without local execution.
-Codex Limitations noticed: `dotnet test` cannot run `net8.0-windows` tests on Linux.
-Effective Prompts / Instructions that worked: Configuring push patterns and `workflow_dispatch`.
-Decisions & Rationale: Use GitHub-hosted runners to centralize validation.
-Action Items: Monitor CI runs for unexpected failures.
+
+[2025-08-13 18:30] Topic: CI workflow and remote testing
+Context: Centralized CI pipeline runs on `feature/**` and `bugfix/**` branches with optional `/test` comment triggers.
+Observations: Single workflow handles build, test, quality, and packaging; remote runs compensate for missing WindowsDesktop support locally.
+Codex Limitations noticed: `dotnet test` for `net8.0-windows` projects fails on Linux.
+Effective Prompts / Instructions that worked: Configuring branch patterns and comment triggers.
+Decisions & Rationale: Rely on GitHub-hosted runners for validation and keep AGENTS instructions to review docs.
+Action Items: Monitor CI for workload changes and enforce branch protection requiring CI success.
 Related Commits/PRs: (this PR)
-[2025-08-13 18:28] Topic: CI workflow consolidation
-Context: Unified multiple GitHub workflows into a single pipeline and added AGENTS instructions to review changelog and collaboration tips.
-Observations: Centralized CI reduces maintenance overhead.
-Codex Limitations noticed: none
-Effective Prompts / Instructions that worked: n/a
-Decisions & Rationale: Single pipeline with build, test, quality, and packaging jobs.
-Action Items: Monitor self-heal integration with new pipeline.
-Related Commits/PRs: (this PR)
-[2025-08-13 18:50] Topic: On-demand CI via /test comment
-Context: Enabled `/test` comment workflow and documented CI-only testing policy.
-Observations: CI can run without local test execution.
-Codex Limitations noticed: Tests cannot run on Linux container; rely on GitHub Actions.
-Effective Prompts / Instructions that worked: Using comment trigger pattern from user guidance.
-Decisions & Rationale: Centralize validation in CI and enforce via docs and PR template.
-Action Items: Ensure branch protection requires CI.
-Related Commits/PRs: (this PR)
+
 [2025-08-13 19:01] Topic: Async command refactor
 Context: Introduced AsyncRelayCommand and async script evaluation to prevent UI blocking.
 Observations: Async command simplifies long-running actions and avoids deadlocks.
@@ -60,6 +62,7 @@ Effective Prompts / Instructions that worked: n/a
 Decisions & Rationale: Use AsyncRelayCommand for operations needing await without blocking.
 Action Items: Monitor for unhandled exceptions in async commands.
 Related Commits/PRs: (this PR)
+
 [2025-08-13 19:42] Topic: Remove unused classes
 Context: Cleaned up obsolete logging and template control types.
 Observations: Deleting `RichTextLogger` and installer `CustomControl1` simplified the codebase with no build impact.
@@ -67,4 +70,56 @@ Codex Limitations noticed: none
 Effective Prompts / Instructions that worked: n/a
 Decisions & Rationale: Prefer removing stale classes to reduce maintenance and confusion.
 Action Items: Monitor builds for any lingering references.
+Related Commits/PRs: (this PR)
+
+[2025-08-16 18:00] Topic: MQTT enhancements
+Context: Consolidated MQTT updates: options-based configuration, tokenized endpoint/message publishing, endpoint UI with tooltips, and message routing service.
+Observations: Shared options instance simplifies updates and cleanly disconnects before reconnecting. Tests require WindowsDesktop runtime.
+Effective Prompts / Instructions that worked: Following AGENTS.md to attempt tests and update docs.
+Decisions & Rationale: Centralize configuration via IOptions and route messages through a dedicated service.
+Action Items: Validate MQTT behavior via CI test runs.
+Related Commits/PRs: (this PR)
+
+[2025-08-16 20:00] Topic: Configuration save guard
+Context: Prevented stack overflow when saving empty CSV configuration and ensured main window sizes to content.
+Observations: Cloning configuration before serialization avoids recursion; sizing to content keeps controls visible.
+Effective Prompts / Instructions that worked: Using `ReferenceHandler.IgnoreCycles` and snapshotting configuration data.
+Decisions & Rationale: Detach event references and ignore cycles to ensure safe persistence.
+Action Items: Rely on CI to validate serialization and UI sizing.
+Related Commits/PRs: (this PR)
+
+[2025-08-17 00:00] Topic: Dependency checks and instruction review
+Context: Build failed because `FluentAssertions` was used without a package reference and AGENTS.md wasn't consulted.
+Observations: Missing dependencies cause compile errors; instructions files provide required setup details.
+Codex Limitations noticed: `net8.0-windows` tests cannot execute on Linux; rely on CI after package restores.
+Effective Prompts / Instructions that worked: Reviewing AGENTS and project files before committing.
+Decisions & Rationale: Verify `.csproj` files for needed packages and read AGENTS instructions before coding.
+Action Items: Add package references when introducing new libraries and document dependency checks in changelog.
+Related Commits/PRs: (this PR)
+[2025-08-14 19:14] Topic: Reference-safe configuration saves
+Context: Avoided stack overflow during configuration persistence by guarding JSON serialization.
+Observations: Used ReferenceHandler.IgnoreCycles for settings and service persistence to prevent recursive writes when CSV configuration updates.
+Codex Limitations noticed: PowerShell unavailable; appended entry manually.
+Effective Prompts / Instructions that worked: n/a
+Decisions & Rationale: Standardize cycle-safe JSON options across services.
+Action Items: Monitor CI for serialization regressions.
+Related Commits/PRs: (this PR)
+
+
+[2025-08-17 12:00] Topic: CSV file naming and key handling
+Context: Adjusted CSV service file naming to respect `{index}` placeholder and confirmed main window only responds to Escape key.
+Observations: Incrementing index only when placeholder is present prevents runaway file creation; added regression tests for key handling and cyclic service persistence.
+Codex Limitations noticed: Linux environment lacks WPF runtime, preventing full test execution.
+Effective Prompts / Instructions that worked: Reviewing AGENTS instructions and prior changelog before editing.
+Decisions & Rationale: Follow placeholder presence to advance index and ensure keyboard events remain scoped to Escape.
+Action Items: Rely on CI to execute Windows-specific tests.
+Related Commits/PRs: (this PR)
+
+[2025-08-17 18:00] Topic: CSV logging recursion
+Context: Stack overflow occurred when CSV service logged its own writes.
+Observations: Logging within CsvService re-entered LoggingService and triggered infinite RecordLog loops.
+Codex Limitations noticed: cannot catch StackOverflowException reliably; rely on snapshot then fail fast.
+Effective Prompts / Instructions that worked: request to wrap saves and add debug command.
+Decisions & Rationale: Removed internal logging from CsvService and added serialization guards producing dump files on overflow.
+Action Items: Use DebugSaveCommand for minimal reproduction and examine dump files if Environment.FailFast is triggered.
 Related Commits/PRs: (this PR)

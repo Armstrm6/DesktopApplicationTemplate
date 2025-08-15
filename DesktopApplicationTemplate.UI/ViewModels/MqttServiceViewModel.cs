@@ -1,109 +1,353 @@
+using System;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows.Input;
-using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Models;
-using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.UI.Services;
+using Microsoft.Extensions.Options;
 
-namespace DesktopApplicationTemplate.UI.ViewModels
+namespace DesktopApplicationTemplate.UI.ViewModels;
+
+/// <summary>
+/// View model for interacting with an MQTT broker.
+/// </summary>
+public class MqttServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, INetworkAwareViewModel
 {
-public class MqttServiceViewModel : ViewModelBase, ILoggingViewModel, INetworkAwareViewModel
+    private readonly MqttService _service;
+    private readonly IMessageRoutingService _routing;
+    private readonly SaveConfirmationHelper _saveHelper;
+    private readonly MqttServiceOptions _options;
+
+    private string _newTopic = string.Empty;
+    private string? _selectedTopic;
+    private string _newEndpoint = string.Empty;
+    private string _newMessage = string.Empty;
+    private MqttEndpointMessage? _selectedMessage;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MqttServiceViewModel"/> class.
+    /// </summary>
+    public MqttServiceViewModel(
+        MqttService service,
+        IMessageRoutingService routing,
+        SaveConfirmationHelper saveHelper,
+        IOptions<MqttServiceOptions> options,
+        ILoggingService? logger = null)
     {
-        private string _host = string.Empty;
-        public string Host
+        _service = service ?? throw new ArgumentNullException(nameof(service));
+        _routing = routing ?? throw new ArgumentNullException(nameof(routing));
+        _saveHelper = saveHelper ?? throw new ArgumentNullException(nameof(saveHelper));
+        _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
+        Logger = logger;
+
+        _service.ConnectionStateChanged += (_, connected) => IsConnected = connected;
+
+        Topics = new ObservableCollection<string>();
+        Messages = new ObservableCollection<MqttEndpointMessage>();
+
+        AddTopicCommand = new RelayCommand(AddTopic);
+        RemoveTopicCommand = new RelayCommand(RemoveTopic, () => SelectedTopic != null);
+        AddMessageCommand = new RelayCommand(AddMessage);
+        RemoveMessageCommand = new RelayCommand(RemoveSelectedMessage, () => SelectedMessage != null);
+        ConnectCommand = new AsyncRelayCommand(ConnectAsync);
+        PublishCommand = new AsyncRelayCommand(PublishSelectedAsync, () => SelectedMessage != null);
+        SaveCommand = new RelayCommand(Save);
+    }
+
+    /// <inheritdoc />
+    public ILoggingService? Logger { get; set; }
+
+    private bool _isConnected;
+    /// <summary>
+    /// Gets a value indicating whether the service is currently connected.
+    /// </summary>
+    public bool IsConnected
+    {
+        get => _isConnected;
+        private set { _isConnected = value; OnPropertyChanged(); }
+    }
+
+    /// <summary>
+    /// Broker host name or IP address.
+    /// </summary>
+    public string Host
+    {
+        get => _options.Host;
+        set
         {
-            get => _host;
-            set
-            {
-                if (InputValidators.IsValidPartialIp(value))
-                    _host = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private string _port = "1883";
-        public string Port
-        {
-            get => _port;
-            set
-            {
-                if (int.TryParse(value, out _))
-                    _port = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private string _clientId = "client1";
-        public string ClientId { get => _clientId; set { _clientId = value; OnPropertyChanged(); } }
-
-        private string _username = string.Empty;
-        public string Username { get => _username; set { _username = value; OnPropertyChanged(); } }
-
-        private string _password = string.Empty;
-        public string Password { get => _password; set { _password = value; OnPropertyChanged(); } }
-
-        private string _publishTopic = string.Empty;
-        public string PublishTopic { get => _publishTopic; set { _publishTopic = value; OnPropertyChanged(); } }
-
-        private string _publishMessage = string.Empty;
-        public string PublishMessage { get => _publishMessage; set { _publishMessage = value; OnPropertyChanged(); } }
-
-        private string _newTopic = string.Empty;
-        public string NewTopic { get => _newTopic; set { _newTopic = value; OnPropertyChanged(); } }
-
-        public ObservableCollection<string> Topics { get; } = new();
-
-        public ICommand AddTopicCommand { get; }
-        public ICommand RemoveTopicCommand { get; }
-        public ICommand ConnectCommand { get; }
-        public ICommand PublishCommand { get; }
-        public ICommand SaveCommand { get; }
-
-        public ILoggingService? Logger { get; set; }
-
-        private readonly MqttService _service;
-        private readonly SaveConfirmationHelper _saveHelper;
-
-        public MqttServiceViewModel(SaveConfirmationHelper saveHelper, MqttService? service = null, ILoggingService? logger = null)
-        {
-            _saveHelper = saveHelper;
-            Logger = logger;
-            _service = service ?? new MqttService(logger);
-            AddTopicCommand = new RelayCommand(() => { if(!string.IsNullOrWhiteSpace(NewTopic)){Topics.Add(NewTopic); NewTopic = string.Empty;} });
-            RemoveTopicCommand = new RelayCommand(() => { if(Topics.Contains(NewTopic)) Topics.Remove(NewTopic); });
-            ConnectCommand = new RelayCommand(async () => await ConnectAsync());
-            PublishCommand = new RelayCommand(async () => await PublishAsync());
-            SaveCommand = new RelayCommand(Save);
-        }
-
-        public async Task ConnectAsync()
-        {
-            Logger?.Log("MQTT connect start", LogLevel.Debug);
-            await _service.ConnectAsync(Host, int.Parse(Port), ClientId, Username, Password);
-            await _service.SubscribeAsync(Topics);
-            Logger?.Log("MQTT connected", LogLevel.Debug);
-            Logger?.Log("MQTT connect finished", LogLevel.Debug);
-        }
-
-        public async Task PublishAsync()
-        {
-            if(string.IsNullOrWhiteSpace(PublishTopic) || string.IsNullOrWhiteSpace(PublishMessage))
+            if (_options.Host == value)
                 return;
-            Logger?.Log("MQTT publish start", LogLevel.Debug);
-            await _service.PublishAsync(PublishTopic, PublishMessage);
-            Logger?.Log($"Published to {PublishTopic}", LogLevel.Debug);
-            Logger?.Log("MQTT publish finished", LogLevel.Debug);
+            if (!InputValidators.IsValidPartialIp(value))
+            {
+                AddError(nameof(Host), "Invalid host");
+                Logger?.Log("Invalid MQTT host entered", LogLevel.Warning);
+                return;
+            }
+            ClearErrors(nameof(Host));
+            DisconnectIfConnected();
+            _options.Host = value;
+            OnPropertyChanged();
         }
+    }
 
-        private void Save() => _saveHelper.Show();
-
-        public void UpdateNetworkConfiguration(NetworkConfiguration configuration)
+    /// <summary>
+    /// Broker port.
+    /// </summary>
+    public int Port
+    {
+        get => _options.Port;
+        set
         {
-            Host = configuration.IpAddress;
+            if (_options.Port == value)
+                return;
+            if (value < 1 || value > 65535)
+            {
+                AddError(nameof(Port), "Port must be 1-65535");
+                Logger?.Log("Invalid MQTT port entered", LogLevel.Warning);
+                return;
+            }
+            ClearErrors(nameof(Port));
+            DisconnectIfConnected();
+            _options.Port = value;
+            OnPropertyChanged();
         }
+    }
 
-        // OnPropertyChanged provided by ViewModelBase
+    /// <summary>
+    /// Client identifier.
+    /// </summary>
+    public string ClientId
+    {
+        get => _options.ClientId;
+        set
+        {
+            if (_options.ClientId == value)
+                return;
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                AddError(nameof(ClientId), "ClientId required");
+                Logger?.Log("Invalid MQTT client id entered", LogLevel.Warning);
+                return;
+            }
+            ClearErrors(nameof(ClientId));
+            DisconnectIfConnected();
+            _options.ClientId = value;
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>
+    /// Username for authentication.
+    /// </summary>
+    public string? Username
+    {
+        get => _options.Username;
+        set
+        {
+            if (_options.Username == value)
+                return;
+            DisconnectIfConnected();
+            _options.Username = value;
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>
+    /// Password for authentication.
+    /// </summary>
+    public string? Password
+    {
+        get => _options.Password;
+        set
+        {
+            if (_options.Password == value)
+                return;
+            DisconnectIfConnected();
+            _options.Password = value;
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>
+    /// When true, TLS is used for the connection.
+    /// </summary>
+    public bool UseTls
+    {
+        get => _options.UseTls;
+        set
+        {
+            if (_options.UseTls == value)
+                return;
+            DisconnectIfConnected();
+            _options.UseTls = value;
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>
+    /// Topics to subscribe to when connected.
+    /// </summary>
+    public ObservableCollection<string> Topics { get; }
+
+    /// <summary>
+    /// Topic entry used when adding new subscriptions.
+    /// </summary>
+    public string NewTopic
+    {
+        get => _newTopic;
+        set { _newTopic = value; OnPropertyChanged(); }
+    }
+
+    /// <summary>
+    /// Currently selected topic.
+    /// </summary>
+    public string? SelectedTopic
+    {
+        get => _selectedTopic;
+        set { _selectedTopic = value; OnPropertyChanged(); }
+    }
+
+    /// <summary>
+    /// Collection of endpoint-message pairs to publish.
+    /// </summary>
+    public ObservableCollection<MqttEndpointMessage> Messages { get; }
+
+    /// <summary>
+    /// Endpoint used when creating a new message pair.
+    /// </summary>
+    public string NewEndpoint
+    {
+        get => _newEndpoint;
+        set { _newEndpoint = value; OnPropertyChanged(); }
+    }
+
+    /// <summary>
+    /// Message used when creating a new message pair.
+    /// </summary>
+    public string NewMessage
+    {
+        get => _newMessage;
+        set { _newMessage = value; OnPropertyChanged(); }
+    }
+
+    /// <summary>
+    /// Selected message for publishing.
+    /// </summary>
+    public MqttEndpointMessage? SelectedMessage
+    {
+        get => _selectedMessage;
+        set { _selectedMessage = value; OnPropertyChanged(); }
+    }
+
+    /// <summary>
+    /// Command to add a topic subscription.
+    /// </summary>
+    public ICommand AddTopicCommand { get; }
+
+    /// <summary>
+    /// Command to remove a topic subscription.
+    /// </summary>
+    public ICommand RemoveTopicCommand { get; }
+
+    /// <summary>
+    /// Command to add a new endpoint/message pair.
+    /// </summary>
+    public ICommand AddMessageCommand { get; }
+
+    /// <summary>
+    /// Command to remove the selected endpoint/message pair.
+    /// </summary>
+    public ICommand RemoveMessageCommand { get; }
+
+    /// <summary>
+    /// Command to connect to the broker.
+    /// </summary>
+    public ICommand ConnectCommand { get; }
+
+    /// <summary>
+    /// Command to publish the selected message.
+    /// </summary>
+    public ICommand PublishCommand { get; }
+
+    /// <summary>
+    /// Command to trigger save confirmation.
+    /// </summary>
+    public ICommand SaveCommand { get; }
+
+    private void AddTopic()
+    {
+        if (string.IsNullOrWhiteSpace(NewTopic))
+            return;
+        Topics.Add(NewTopic);
+        NewTopic = string.Empty;
+    }
+
+    private void RemoveTopic()
+    {
+        if (SelectedTopic is null)
+            return;
+        Topics.Remove(SelectedTopic);
+        SelectedTopic = null;
+    }
+
+    private void AddMessage()
+    {
+        if (string.IsNullOrWhiteSpace(NewEndpoint) || string.IsNullOrWhiteSpace(NewMessage))
+            return;
+        Messages.Add(new MqttEndpointMessage { Endpoint = NewEndpoint, Message = NewMessage });
+        NewEndpoint = string.Empty;
+        NewMessage = string.Empty;
+    }
+
+    private void RemoveSelectedMessage()
+    {
+        if (SelectedMessage is null)
+            return;
+        Messages.Remove(SelectedMessage);
+        SelectedMessage = null;
+    }
+
+    /// <summary>
+    /// Connects to the broker.
+    /// </summary>
+    public async Task ConnectAsync()
+    {
+        Logger?.Log("MQTT connect start", LogLevel.Debug);
+        await _service.ConnectAsync().ConfigureAwait(false);
+        IsConnected = true;
+        Logger?.Log("MQTT connect finished", LogLevel.Debug);
+    }
+
+    /// <summary>
+    /// Publishes the selected endpoint/message pair after resolving tokens.
+    /// </summary>
+    public async Task PublishSelectedAsync()
+    {
+        if (SelectedMessage is null)
+            return;
+        Logger?.Log("MQTT publish start", LogLevel.Debug);
+        var topic = _routing.ResolveTokens(SelectedMessage.Endpoint);
+        var payload = _routing.ResolveTokens(SelectedMessage.Message);
+        await _service.PublishAsync(topic, payload).ConfigureAwait(false);
+        Logger?.Log("MQTT publish finished", LogLevel.Debug);
+    }
+
+    private void DisconnectIfConnected()
+    {
+        if (!_service.IsConnected)
+            return;
+        Logger?.Log("Disconnecting MQTT due to configuration change", LogLevel.Debug);
+        _ = _service.DisconnectAsync();
+    }
+
+    private void Save() => _saveHelper.Show();
+
+    /// <inheritdoc />
+    public void UpdateNetworkConfiguration(NetworkConfiguration configuration)
+    {
+        Host = configuration.IpAddress;
     }
 }
+

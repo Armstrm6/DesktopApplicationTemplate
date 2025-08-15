@@ -15,6 +15,7 @@ using WpfBrushes = System.Windows.Media.Brushes;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.Core.Services;
+using System.Text.Json.Serialization;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -22,7 +23,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
     {
         public string DisplayName { get; set; } = string.Empty;
         public string ServiceType { get; set; } = string.Empty;
-        public Page? Page { get; set; }
+        [JsonIgnore] public Page? Page { get; set; }
         public int Order { get; set; }
 
         private WpfBrush _backgroundColor = WpfBrushes.LightGray;
@@ -38,7 +39,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             get => _borderColor;
             set { _borderColor = value; OnPropertyChanged(); }
         }
-        public Page? ServicePage { get; set; }
+        [JsonIgnore] public Page? ServicePage { get; set; }
 
         public ObservableCollection<string> AssociatedServices { get; } = new();
 

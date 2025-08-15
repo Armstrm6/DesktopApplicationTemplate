@@ -19,7 +19,6 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
-      - run: dotnet workload install windowsdesktop
       - run: dotnet restore
       - run: dotnet build -c Release --no-restore /warnaserror
       - run: dotnet test -c Release --no-build --logger "trx;LogFileName=test.trx"
