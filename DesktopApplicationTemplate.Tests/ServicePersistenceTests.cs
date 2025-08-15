@@ -42,5 +42,35 @@ namespace DesktopApplicationTemplate.Tests
 
             ConsoleTestLogger.LogPass();
         }
+
+        [Fact]
+        [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
+        public void Save_WithCyclicalReferences_DoesNotOverflow()
+        {
+            var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(tempDir);
+            string oldPath = ServicePersistence.FilePath;
+            ServicePersistence.FilePath = Path.Combine(tempDir, "services.json");
+            try
+            {
+                var a = new ServiceViewModel { DisplayName = "A", ServiceType = "TCP" };
+                var b = new ServiceViewModel { DisplayName = "B", ServiceType = "TCP" };
+                a.AssociatedServices.Add("B");
+                b.AssociatedServices.Add("A");
+                var services = new List<ServiceViewModel> { a, b };
+
+                ServicePersistence.Save(services);
+
+                Assert.True(File.Exists(ServicePersistence.FilePath));
+            }
+            finally
+            {
+                ServicePersistence.FilePath = oldPath;
+                Directory.Delete(tempDir, true);
+            }
+
+            ConsoleTestLogger.LogPass();
+        }
     }
 }

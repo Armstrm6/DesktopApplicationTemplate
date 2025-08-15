@@ -93,5 +93,36 @@ namespace DesktopApplicationTemplate.Tests
 
             ConsoleTestLogger.LogPass();
         }
+
+        [Fact]
+        [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
+        public void AppendRow_WithoutIndexPlaceholder_UsesSingleFile()
+        {
+            var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(tempDir);
+            try
+            {
+                var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()+".json");
+                var vm = new CsvViewerViewModel(configPath);
+
+                var filePath = Path.Combine(tempDir, "output.csv");
+                vm.Configuration.FileNamePattern = filePath;
+                var service = new CsvService(vm);
+
+                service.AppendRow(new[] { "x", "y" });
+                service.AppendRow(new[] { "z", "w" });
+
+                Assert.True(File.Exists(filePath));
+                var files = Directory.GetFiles(tempDir, "*.csv");
+                Assert.Single(files);
+            }
+            finally
+            {
+                Directory.Delete(tempDir, true);
+            }
+
+            ConsoleTestLogger.LogPass();
+        }
     }
 }

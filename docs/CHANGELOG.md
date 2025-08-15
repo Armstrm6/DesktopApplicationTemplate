@@ -53,3 +53,7 @@
 - Guarded CSV viewer configuration serialization to prevent stack overflow when saving empty data.
 - Main window sizes to content so UI elements are no longer clipped at the edges.
 - Added missing `FluentAssertions` package reference to the test project and documented dependency checks to avoid build failures.
+- Service and settings persistence now ignore reference cycles during JSON serialization to avoid stack overflow when saving configuration.
+- CSV service now increments file index only when `FileNamePattern` contains `{index}`.
+- Added tests confirming the main view ignores non-Escape key presses and service persistence handles cyclical references.
+- Eliminated recursive logging in CSV service to prevent stack overflow and added guards that capture configuration snapshots on save failures.

@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.IO;
 using DesktopApplicationTemplate.Models;
 
@@ -76,9 +77,31 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 SuppressSaveConfirmation = SaveConfirmationSuppressed,
                 SuppressCloseConfirmation = CloseConfirmationSuppressed
             };
-            File.WriteAllText(FilePath, JsonSerializer.Serialize(data));
-            TcpLoggingEnabled = _logTcpMessages;
-            _dirty = false;
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                ReferenceHandler = ReferenceHandler.IgnoreCycles,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            };
+
+            try
+            {
+                File.WriteAllText(FilePath, JsonSerializer.Serialize(data, options));
+                TcpLoggingEnabled = _logTcpMessages;
+                _dirty = false;
+            }
+            catch (StackOverflowException)
+            {
+                var dumpOptions = new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    ReferenceHandler = ReferenceHandler.Preserve
+                };
+                var dump = JsonSerializer.Serialize(data, dumpOptions);
+                var temp = Path.Combine(Path.GetTempPath(), "settings_dump.json");
+                File.WriteAllText(temp, dump);
+                Environment.FailFast($"Stack overflow while saving settings. Dump written to {temp}");
+            }
         }
 
         // OnPropertyChanged provided by ViewModelBase
