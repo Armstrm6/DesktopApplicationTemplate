@@ -123,3 +123,12 @@ Effective Prompts / Instructions that worked: request to wrap saves and add debu
 Decisions & Rationale: Removed internal logging from CsvService and added serialization guards producing dump files on overflow.
 Action Items: Use DebugSaveCommand for minimal reproduction and examine dump files if Environment.FailFast is triggered.
 Related Commits/PRs: (this PR)
+
+[2025-08-18 12:00] Topic: Window header double-click
+Context: Named navigation header and added drag and double-click handlers.
+Observations: Header drag restores window dragging; double-click toggles maximize state.
+Codex Limitations noticed: Linux environment lacks WPF runtime, so rely on CI for full validation.
+Effective Prompts / Instructions that worked: Direct request to wire header events and provide unit test.
+Decisions & Rationale: Provide familiar window management behavior through code-behind handlers.
+Action Items: Monitor CI for Windows-specific regressions.
+Related Commits/PRs: (this PR)

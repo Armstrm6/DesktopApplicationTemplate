@@ -28,7 +28,11 @@
         </Grid.RowDefinitions>
 
         <!-- Navigation Bar -->
-        <Grid Grid.Row="0" Background="#00C2C2">
+        <Grid x:Name="HeaderBar"
+              Grid.Row="0"
+              Background="#00C2C2"
+              MouseLeftButtonDown="HeaderBar_MouseLeftButtonDown"
+              MouseDoubleClick="HeaderBar_MouseDoubleClick">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
