@@ -178,6 +178,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             Filters.PropertyChanged += (_, __) => ApplyFilters();
             LoadServices();
             ApplyFilters();
+            if (_logger is LoggingService concreteLogger)
+            {
+                concreteLogger.Reload();
+            }
         }
 
         private void ApplyNetworkConfiguration(NetworkConfiguration config)

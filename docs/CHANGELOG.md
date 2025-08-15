@@ -25,6 +25,7 @@
 - Introduced `MqttServiceOptions` for configuring MQTT connection parameters.
 - Unit tests covering default service name generation for all service types.
 - Integrated `CsvServiceView` page, embedding CSV Creator configuration within the main window.
+- Logging service loads existing log file on startup and can reload entries when the minimum level changes.
 
 ### Changed
 - Updated `global.json` to require the .NET 8 SDK version `8.0.404`.
