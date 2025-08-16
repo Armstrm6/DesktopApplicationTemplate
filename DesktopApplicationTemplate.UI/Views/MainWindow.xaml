@@ -60,7 +60,12 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,5">
                     <Button Content="+" Width="30" Click="AddService_Click" Background="#E6E6E6" Foreground="#333333"/>
                     <Button Content="-" Width="30" Margin="5,0,0,0" Click="RemoveService_Click" Background="#E6E6E6" Foreground="#333333"/>
-                    <Button Content="☰" Width="30" Margin="5,0,0,0" Click="OpenFilter_Click" Background="#E6E6E6" Foreground="#333333"/>
+                    <Button x:Name="FilterButton" Content="☰" Width="30" Margin="5,0,0,0" Click="FilterButton_Click" Background="#E6E6E6" Foreground="#333333"/>
+                    <Popup x:Name="FilterPopup" PlacementTarget="{Binding ElementName=FilterButton}" Placement="Bottom" StaysOpen="False" DataContext="{Binding DataContext, ElementName=FilterButton}">
+                        <Border Background="White" CornerRadius="5" Padding="10">
+                            <local:FilterPanel DataContext="{Binding Filters}"/>
+                        </Border>
+                    </Popup>
                 </StackPanel>
                 <Border Grid.Row="1" Background="#E6E6E6" CornerRadius="3" Padding="5">
                     <ListBox x:Name="ServiceList" ItemsSource="{Binding FilteredServices}" SelectedItem="{Binding SelectedService}"

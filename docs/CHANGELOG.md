@@ -26,6 +26,7 @@
 - Unit tests covering default service name generation for all service types.
 - Integrated `CsvServiceView` page, embedding CSV Creator configuration within the main window.
 - Logging service loads existing log file on startup and can reload entries when the minimum level changes.
+- Popup-based `FilterPanel` user control for in-place service filtering.
 
 ### Changed
 - Updated `global.json` to require the .NET 8 SDK version `8.0.404`.
@@ -45,6 +46,7 @@
 - Legacy GitHub workflows (`dotnet.yml`, `dotnet-desktop-ci.yml`, `ci.yml`).
 - Unused `RichTextLogger` service and installer `CustomControl1` control.
 - `PublishTopic` and `PublishMessage` fields from `MqttServiceViewModel`.
+- Standalone `FilterWindow` in favor of inline filter popup.
 
 ### Fixed
 - Corrected logo resource path so the image renders in the navigation bar.
