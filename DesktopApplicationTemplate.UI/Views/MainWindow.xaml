@@ -58,6 +58,9 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,5">
+                    <TextBlock VerticalAlignment="Center" Margin="0,0,5,0">
+                        Active Services: <Run Text="{Binding CurrentActiveServices}"/>/<Run Text="{Binding ServicesCreated}"/>
+                    </TextBlock>
                     <Button Content="+" Width="30" Click="AddService_Click" Background="#E6E6E6" Foreground="#333333"/>
                     <Button Content="-" Width="30" Margin="5,0,0,0" Click="RemoveService_Click" Background="#E6E6E6" Foreground="#333333"/>
                     <Button x:Name="FilterButton" Content="☰" Width="30" Margin="5,0,0,0" Click="FilterButton_Click" Background="#E6E6E6" Foreground="#333333"/>

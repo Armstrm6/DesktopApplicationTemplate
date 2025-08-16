@@ -361,6 +361,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         internal void OnServiceActiveChanged(bool _)
         {
             OnPropertyChanged(nameof(CurrentActiveServices));
+            OnPropertyChanged(nameof(ServicesCreated));
         }
 
         public void ClearLogs()

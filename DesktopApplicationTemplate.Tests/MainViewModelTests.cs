@@ -134,5 +134,59 @@ namespace DesktopApplicationTemplate.Tests
             Assert.True(raised);
             ConsoleTestLogger.LogPass();
         }
+
+        private class TestMainViewModel : MainViewModel
+        {
+            public TestMainViewModel(CsvService csv, NetworkConfigurationViewModel networkConfig, INetworkConfigurationService networkService)
+                : base(csv, networkConfig, networkService)
+            {
+            }
+
+            public void AddServiceForTest(ServiceViewModel svc)
+            {
+                Services.Add(svc);
+                OnPropertyChanged(nameof(ServicesCreated));
+                OnPropertyChanged(nameof(CurrentActiveServices));
+            }
+        }
+
+        [Fact]
+        [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
+        public void ServiceCounts_Update_OnAddRemoveActivation()
+        {
+            var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
+            var csv = new CsvService(new CsvViewerViewModel(configPath));
+            var network = new Mock<INetworkConfigurationService>();
+            var networkVm = new NetworkConfigurationViewModel(network.Object);
+            var vm = new TestMainViewModel(csv, networkVm, network.Object);
+            int createdChanges = 0;
+            int activeChanges = 0;
+            vm.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(MainViewModel.ServicesCreated)) createdChanges++;
+                if (e.PropertyName == nameof(MainViewModel.CurrentActiveServices)) activeChanges++;
+            };
+            var svc = new ServiceViewModel { DisplayName = "HTTP - HTTP1", ServiceType = "HTTP" };
+            svc.ActiveChanged += vm.OnServiceActiveChanged;
+            vm.AddServiceForTest(svc);
+
+            Assert.Equal(1, vm.ServicesCreated);
+            Assert.Equal(0, vm.CurrentActiveServices);
+
+            svc.IsActive = true;
+
+            Assert.Equal(1, vm.CurrentActiveServices);
+
+            vm.SelectedService = svc;
+            vm.RemoveServiceCommand.Execute(null);
+
+            Assert.Equal(0, vm.ServicesCreated);
+            Assert.Equal(0, vm.CurrentActiveServices);
+
+            Assert.Equal(3, createdChanges);
+            Assert.Equal(3, activeChanges);
+            ConsoleTestLogger.LogPass();
+        }
     }
 }
