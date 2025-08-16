@@ -11,7 +11,6 @@ using DesktopApplicationTemplate.UI.Helpers;
 using System.Linq;
 using System.Windows.Media;
 using DesktopApplicationTemplate.Models;
-using DesktopApplicationTemplate.UI.Views;
 using System.Windows.Input;
 using System.Windows.Controls.Primitives;
 
@@ -208,12 +207,11 @@ namespace DesktopApplicationTemplate.UI.Views
             }
         }
 
-        private void OpenFilter_Click(object sender, RoutedEventArgs e)
+        private void FilterButton_Click(object sender, RoutedEventArgs e)
         {
-            var window = new FilterWindow { DataContext = _viewModel.Filters };
-            if (window.ShowDialog() == true)
+            if (FilterPopup != null)
             {
-                // filters already applied via PropertyChanged event
+                FilterPopup.IsOpen = !FilterPopup.IsOpen;
             }
         }
 
