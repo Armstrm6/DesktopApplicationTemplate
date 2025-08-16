@@ -227,3 +227,11 @@ Effective Prompts / Instructions that worked: Reviewing build errors and adjusti
 Decisions & Rationale: Consolidate header events and avoid unused events to satisfy warnings-as-errors policy.
 Action Items: Rely on CI for full test execution.
 Related Commits/PRs: (this PR)
+[2025-08-16 20:55] Topic: Service count binding mode
+Context: App crashed on startup due to TwoWay binding on read-only service count properties.
+Observations: Set Run.Text bindings to Mode=OneWay to avoid InvalidOperationException.
+Codex Limitations noticed: Linux environment cannot run WPF for full verification.
+Effective Prompts / Instructions that worked: Error message pointing to CurrentActiveServices binding.
+Decisions & Rationale: Explicitly specify one-way bindings for read-only properties.
+Action Items: Rely on CI to validate on Windows.
+Related Commits/PRs: (this PR)
