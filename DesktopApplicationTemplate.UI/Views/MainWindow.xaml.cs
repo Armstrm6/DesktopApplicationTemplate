@@ -141,15 +141,15 @@ namespace DesktopApplicationTemplate.UI.Views
                 _viewModel.SelectedService = newService;
                 ServiceList.ScrollIntoView(newService);
 
-                if (type == "MQTT" && newService.ServicePage is MQTTServiceView mqttView)
-                {
-                    var vm = (MqttServiceViewModel)mqttView.DataContext!;
-                    newService.ActiveChanged += async active =>
-                    {
-                        if (active)
-                            await vm.ConnectAsync();
-                    };
-                }
+                  if (type == "MQTT" && newService.ServicePage is MQTTServiceView mqttView)
+                  {
+                      var mqttVm = (MqttServiceViewModel)mqttView.DataContext!;
+                      newService.ActiveChanged += async active =>
+                      {
+                          if (active)
+                              await mqttVm.ConnectAsync();
+                      };
+                  }
 
                 if (newService.ServicePage != null)
                 {
@@ -291,22 +291,26 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private void HeaderBar_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            if (e.ClickCount == 1)
+            if (e.ClickCount == 2)
             {
-                var element = e.OriginalSource as DependencyObject;
-                if (Helpers.VisualTreeHelperExtensions.FindParent<ButtonBase>(element) == null)
-                {
-                    try
-                    {
-                        DragMove();
-                    }
-                    catch (InvalidOperationException ex)
-                    {
-                        _logger?.LogWarning(ex, "DragMove failed");
-                    }
-                }
+                HeaderBar_MouseDoubleClick(sender, e);
                 e.Handled = true;
+                return;
             }
+
+            var element = e.OriginalSource as DependencyObject;
+            if (Helpers.VisualTreeHelperExtensions.FindParent<ButtonBase>(element) == null)
+            {
+                try
+                {
+                    DragMove();
+                }
+                catch (InvalidOperationException ex)
+                {
+                    _logger?.LogWarning(ex, "DragMove failed");
+                }
+            }
+            e.Handled = true;
         }
 
         private void HeaderBar_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
