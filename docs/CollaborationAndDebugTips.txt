@@ -9,6 +9,15 @@ Decisions & Rationale: Use DI to share single logging service and helpers.
 Action Items: Monitor CI for Windows-specific behaviors.
 Related Commits/PRs: (this PR)
 
+[2025-08-16 15:50] Topic: Service count indicators
+Context: Display active service counts and ensure view model notifies on changes.
+Observations: TextBlock near add/remove buttons shows active/total services with bindings; unit test covers add/remove/activation.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: Reviewing AGENTS.md and following MVVM update steps.
+Decisions & Rationale: Expose service counts to UI for quick monitoring and raise PropertyChanged on all service state changes.
+Action Items: Rely on CI for Windows-specific validation.
+Related Commits/PRs: (this PR)
+
 [2025-08-15 00:00] Topic: MQTT service refactor
 Context: Simplified MQTT client by unifying constructors and publish APIs.
 Observations: Connect now disconnects before reconnecting and raises connection state events.
@@ -192,4 +201,13 @@ Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; rely 
 Effective Prompts / Instructions that worked: Direct request to embed filters via Popup with StaysOpen=false.
 Decisions & Rationale: Use WPF Popup hosting FilterPanel to provide unobtrusive, in-place filtering.
 Action Items: Monitor CI for popup interaction regressions.
+Related Commits/PRs: (this PR)
+
+[2025-08-16 15:50] Topic: Service count indicators
+Context: Display active service counts and ensure view model notifies on changes.
+Observations: TextBlock near add/remove buttons shows active/total services with bindings; unit test covers add/remove/activation.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: Reviewing AGENTS.md and following MVVM update steps.
+Decisions & Rationale: Expose service counts to UI for quick monitoring and raise PropertyChanged on all service state changes.
+Action Items: Rely on CI for Windows-specific validation.
 Related Commits/PRs: (this PR)
