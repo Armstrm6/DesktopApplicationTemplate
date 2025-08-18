@@ -89,7 +89,11 @@ namespace DesktopApplicationTemplate.Tests
 
         private class StubNetworkService : INetworkConfigurationService
         {
-            public event EventHandler<NetworkConfiguration>? ConfigurationChanged;
+            public event EventHandler<NetworkConfiguration>? ConfigurationChanged
+            {
+                add { }
+                remove { }
+            }
             public Task<NetworkConfiguration> GetConfigurationAsync(CancellationToken cancellationToken = default)
                 => Task.FromResult(new NetworkConfiguration());
             public Task ApplyConfigurationAsync(NetworkConfiguration configuration, CancellationToken cancellationToken = default)

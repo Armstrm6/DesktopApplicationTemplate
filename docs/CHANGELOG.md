@@ -68,3 +68,5 @@
 - CSV service now increments file index only when `FileNamePattern` contains `{index}`.
 - Added tests confirming the main view ignores non-Escape key presses and service persistence handles cyclical references.
 - Eliminated recursive logging in CSV service to prevent stack overflow and added guards that capture configuration snapshots on save failures.
+- Removed invalid `MouseDoubleClick` XAML handler and cleaned up ambiguous WPF references causing build failures.
+- Corrected service count bindings to use one-way mode, preventing runtime errors on read-only properties.

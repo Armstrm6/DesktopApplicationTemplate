@@ -8,6 +8,14 @@ Effective Prompts / Instructions that worked: n/a
 Decisions & Rationale: Use DI to share single logging service and helpers.
 Action Items: Monitor CI for Windows-specific behaviors.
 Related Commits/PRs: (this PR)
+[2025-08-16 16:30] Topic: WPF reference cleanup
+Context: Build failed due to invalid `MouseDoubleClick` handler and ambiguous WinForms references.
+Observations: Removed WinForms usage, added WPF media imports, and integrated double-click logic into existing handler.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; tests aborted.
+Effective Prompts / Instructions that worked: Reviewing build errors and adjusting XAML and csproj references.
+Decisions & Rationale: Consolidate header events and avoid unused events to satisfy warnings-as-errors policy.
+Action Items: Rely on CI for full test execution.
+Related Commits/PRs: (this PR)
 
 [2025-08-16 15:50] Topic: Service count indicators
 Context: Display active service counts and ensure view model notifies on changes.
@@ -210,4 +218,20 @@ Codex Limitations noticed: none
 Effective Prompts / Instructions that worked: Reviewing AGENTS.md and following MVVM update steps.
 Decisions & Rationale: Expose service counts to UI for quick monitoring and raise PropertyChanged on all service state changes.
 Action Items: Rely on CI for Windows-specific validation.
+Related Commits/PRs: (this PR)
+[2025-08-16 16:30] Topic: WPF reference cleanup
+Context: Build failed due to invalid `MouseDoubleClick` handler and ambiguous WinForms references.
+Observations: Removed WinForms usage, added WPF media imports, and integrated double-click logic into existing handler.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; tests aborted.
+Effective Prompts / Instructions that worked: Reviewing build errors and adjusting XAML and csproj references.
+Decisions & Rationale: Consolidate header events and avoid unused events to satisfy warnings-as-errors policy.
+Action Items: Rely on CI for full test execution.
+Related Commits/PRs: (this PR)
+[2025-08-16 20:55] Topic: Service count binding mode
+Context: App crashed on startup due to TwoWay binding on read-only service count properties.
+Observations: Set Run.Text bindings to Mode=OneWay to avoid InvalidOperationException.
+Codex Limitations noticed: Linux environment cannot run WPF for full verification.
+Effective Prompts / Instructions that worked: Error message pointing to CurrentActiveServices binding.
+Decisions & Rationale: Explicitly specify one-way bindings for read-only properties.
+Action Items: Rely on CI to validate on Windows.
 Related Commits/PRs: (this PR)
