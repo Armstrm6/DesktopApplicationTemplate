@@ -188,5 +188,25 @@ namespace DesktopApplicationTemplate.Tests
             Assert.Equal(3, activeChanges);
             ConsoleTestLogger.LogPass();
         }
+
+        [Fact]
+        [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
+        public void AddServiceCommand_RaisesNavigationEvent()
+        {
+            var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
+            var csv = new CsvService(new CsvViewerViewModel(configPath));
+            var network = new Mock<INetworkConfigurationService>();
+            var networkVm = new NetworkConfigurationViewModel(network.Object);
+            var vm = new MainViewModel(csv, networkVm, network.Object);
+
+            string? requestedName = null;
+            vm.AddMqttServiceRequested += name => requestedName = name;
+
+            vm.AddServiceCommand.Execute(null);
+
+            Assert.Equal("MQTT1", requestedName);
+            ConsoleTestLogger.LogPass();
+        }
     }
 }

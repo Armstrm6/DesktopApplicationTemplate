@@ -52,6 +52,7 @@
 - Added a DI container test ensuring the service provider builds with MQTT components.
 - Service creation now presents service types as icon bubbles and auto-generates default names upon selection.
 - Main window routes MQTT service creation through a dedicated create view and opens the tag subscriptions view after setup. Editing an existing MQTT service now uses the connection edit view and persists updated options.
+- MQTT service creation now occurs within the main window frame and returns to the previous view after completion, removing the popup window dependency.
 
 ### Removed
 - Placeholder "Desktop Template" text from the navigation bar.

@@ -329,3 +329,11 @@ Effective Prompts / Instructions that worked: Following AGENTS guidance and user
 Decisions & Rationale: Use transient lifetimes for views/view models and provide IFileDialogService for TLS cert browsing.
 Action Items: Monitor CI for DI regressions.
 Related Commits/PRs: (this PR)
+[2025-08-19 15:53] Topic: MQTT service creation navigation
+Context: Replaced popup-based MQTT service creation with in-frame navigation and restored previous view on completion.
+Observations: Service creation now triggers an event that navigates the main frame to the create view.
+Codex Limitations noticed: pwsh unavailable for add-tip script; entry added manually.
+Effective Prompts / Instructions that worked: Followed AGENTS.md to update docs and tests.
+Decisions & Rationale: Used view model event to request navigation and added unit test to verify event raising.
+Action Items: Verify navigation restoration and service addition in future UI tests.
+Related Commits/PRs: (this PR)
