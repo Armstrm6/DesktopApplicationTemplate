@@ -2,11 +2,19 @@
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
+      xmlns:mqtt="clr-namespace:MQTTnet.Protocol;assembly=MQTTnet"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:mqtt="clr-namespace:MQTTnet.Protocol;assembly=MQTTnet"
+      xmlns:sys="clr-namespace:System;assembly=mscorlib"
       mc:Ignorable="d">
     <Page.Resources>
         <helpers:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter" />
+        <ObjectDataProvider x:Key="QoSValues" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="mqtt:MqttQualityOfServiceLevel" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
     </Page.Resources>
     <Grid Margin="10">
         <Grid.RowDefinitions>
@@ -29,6 +37,48 @@
         <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,10,0,0">
             <Grid Width="200">
                 <TextBox Text="{Binding SelectedSubscription.OutgoingMessage, UpdateSourceTrigger=PropertyChanged}" x:Name="TestMessageBox" ToolTip="Message to send"/>
+        <ListBox Grid.Row="1" ItemsSource="{Binding Topics}" SelectedItem="{Binding SelectedTopic}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding Topic}" Width="150"/>
+                        <ComboBox SelectedValue="{Binding QoS}" SelectedValuePath="Tag" Width="120" Margin="5,0,0,0">
+                            <ComboBoxItem Content="At Most Once" Tag="{x:Static mqtt:MqttQualityOfServiceLevel.AtMostOnce}"/>
+                            <ComboBoxItem Content="At Least Once" Tag="{x:Static mqtt:MqttQualityOfServiceLevel.AtLeastOnce}"/>
+                            <ComboBoxItem Content="Exactly Once" Tag="{x:Static mqtt:MqttQualityOfServiceLevel.ExactlyOnce}"/>
+                        </ComboBox>
+        <Grid Grid.Row="0" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Connect" Command="{Binding ConnectCommand}" Width="80"/>
+                <Grid Width="200" Margin="10,0,0,0">
+                    <TextBox Text="{Binding NewTopic}" x:Name="NewTopicBox" ToolTip="Topic to subscribe"/>
+                    <TextBlock Text="New Topic" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0"
+                               VerticalAlignment="Center"
+                               Visibility="{Binding Text, ElementName=NewTopicBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+                </Grid>
+                <ComboBox Width="100" Margin="5,0,0,0" ItemsSource="{Binding Source={StaticResource QoSValues}}" SelectedItem="{Binding NewQoS}"/>
+                <Button Content="Add" Command="{Binding AddTopicCommand}" Width="50" Margin="5,0,0,0"/>
+                <Button Content="Remove" Command="{Binding RemoveTopicCommand}" Width="70" Margin="5,0,0,0"/>
+            </StackPanel>
+            <ItemsControl Grid.Column="1" ItemsSource="{Binding SubscriptionResults}" ItemTemplate="{DynamicResource SubscriptionResultTemplate}" HorizontalAlignment="Right" />
+        </Grid>
+        <ListBox Grid.Row="1" ItemsSource="{Binding Subscriptions}" SelectedItem="{Binding SelectedSubscription}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding Topic}" />
+                        <TextBlock Text="{Binding QoS}" Margin="5,0,0,0" />
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,10,0,0">
+            <Grid Width="200">
+                <TextBox Text="{Binding SelectedSubscription.OutgoingMessage}" x:Name="TestMessageBox" ToolTip="Message to send"/>
                 <TextBlock Text="Test Message" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0"
                            VerticalAlignment="Center"
                            Visibility="{Binding Text, ElementName=TestMessageBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>

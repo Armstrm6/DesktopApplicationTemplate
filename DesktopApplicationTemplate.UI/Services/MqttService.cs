@@ -7,6 +7,7 @@ using DesktopApplicationTemplate.Core.Services;
 using Microsoft.Extensions.Options;
 using MQTTnet;
 using MQTTnet.Client;
+using MQTTnet.Protocol;
 
 namespace DesktopApplicationTemplate.UI.Services;
 
@@ -137,6 +138,88 @@ public class MqttService
     }
 
     /// <summary>
+    /// Subscribes to a single topic.
+    /// </summary>
+    public async Task SubscribeAsync(string topic, MqttQualityOfServiceLevel qos, CancellationToken token = default)
+    {
+        if (topic is null) throw new ArgumentNullException(nameof(topic));
+        _logger.Log("MQTT subscribe start", LogLevel.Debug);
+        await _client.SubscribeAsync(topic, qos, token).ConfigureAwait(false);
+        _logger.Log("MQTT subscribe finished", LogLevel.Debug);
+    /// Subscribes to a topic with the specified quality of service level.
+    /// </summary>
+    /// <param name="topic">The topic to subscribe to.</param>
+    /// <param name="qos">The desired QoS level.</param>
+    /// <param name="token">Cancellation token.</param>
+    /// <returns>The MQTT subscribe result when successful.</returns>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="topic"/> is null or whitespace.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when the broker rejects the subscription.</exception>
+    public async Task<MqttClientSubscribeResult> SubscribeAsync(string topic, MqttQualityOfServiceLevel qos, CancellationToken token = default)
+    {
+        if (string.IsNullOrWhiteSpace(topic))
+            throw new ArgumentException("Topic cannot be null or whitespace.", nameof(topic));
+
+        _logger.Log("MQTT subscribe start", LogLevel.Debug);
+
+        var filter = new MqttTopicFilterBuilder()
+            .WithTopic(topic)
+            .WithQualityOfServiceLevel(qos)
+            .Build();
+        var options = new MqttClientSubscribeOptionsBuilder()
+            .WithTopicFilter(filter)
+            .Build();
+
+        var result = await _client.SubscribeAsync(options, token).ConfigureAwait(false);
+
+        var success = true;
+        foreach (var item in result.Items)
+        {
+            if (item.ResultCode != MqttClientSubscribeResultCode.GrantedQoS0 &&
+                item.ResultCode != MqttClientSubscribeResultCode.GrantedQoS1 &&
+                item.ResultCode != MqttClientSubscribeResultCode.GrantedQoS2)
+            {
+                success = false;
+                break;
+            }
+        }
+
+        if (!success)
+        {
+            var codes = string.Join(',', result.Items.Select(i => i.ResultCode));
+            _logger.Log($"MQTT subscribe failed: {codes}", LogLevel.Error);
+            throw new InvalidOperationException($"Subscription failed: {codes}");
+        }
+
+        _logger.Log("MQTT subscribe finished", LogLevel.Debug);
+        return result;
+    }
+
+    /// <summary>
+    /// Unsubscribes from a topic.
+    /// </summary>
+    /// <param name="topic">The topic to unsubscribe from.</param>
+    /// <param name="token">Cancellation token.</param>
+    /// <returns>The MQTT unsubscribe result when successful.</returns>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="topic"/> is null or whitespace.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when the broker rejects the request.</exception>
+    public async Task<MqttClientUnsubscribeResult> UnsubscribeAsync(string topic, CancellationToken token = default)
+    {
+        if (string.IsNullOrWhiteSpace(topic))
+            throw new ArgumentException("Topic cannot be null or whitespace.", nameof(topic));
+
+        _logger.Log("MQTT unsubscribe start", LogLevel.Debug);
+
+        var options = new MqttClientUnsubscribeOptionsBuilder()
+            .WithTopicFilter(topic)
+            .Build();
+
+        var result = await _client.UnsubscribeAsync(options, token).ConfigureAwait(false);
+
+        _logger.Log("MQTT unsubscribe finished", LogLevel.Debug);
+        return result;
+    }
+
+    /// <summary>
     /// Publishes a single message to an endpoint.
     /// </summary>
     public async Task PublishAsync(string topic, string message, CancellationToken token = default)
@@ -181,4 +264,3 @@ public class MqttService
         }
     }
 }
-
