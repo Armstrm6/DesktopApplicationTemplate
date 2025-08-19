@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DesktopApplicationTemplate.Core.Services;
@@ -58,8 +59,11 @@ public class MqttEditConnectionViewModelTests
         var options = Microsoft.Extensions.Options.Options.Create(new MqttServiceOptions());
         var service = new MqttService(client.Object, options, Mock.Of<IMessageRoutingService>(), Mock.Of<ILoggingService>());
         var vm = new MqttEditConnectionViewModel(service, options);
+        var closed = false;
+        vm.RequestClose += (_, _) => closed = true;
         await vm.UnsubscribeAsync();
         client.Verify(c => c.DisconnectAsync(It.IsAny<MqttClientDisconnectOptions?>(), It.IsAny<CancellationToken>()), Times.Once);
+        Assert.True(closed);
     }
 
     [Fact]
@@ -74,7 +78,67 @@ public class MqttEditConnectionViewModelTests
         var service = new MqttService(client.Object, options, Mock.Of<IMessageRoutingService>(), Mock.Of<ILoggingService>());
         var vm = new MqttEditConnectionViewModel(service, options);
         vm.Host = "changed";
+        var closed = false;
+        vm.RequestClose += (_, _) => closed = true;
         vm.Cancel();
         Assert.Equal("original", options.Value.Host);
+        Assert.True(closed);
+    }
+
+    [Fact]
+    [TestCategory("WindowsSafe")]
+    public void Host_Invalid_AddsError()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        var vm = CreateViewModel();
+        var original = vm.Host;
+        vm.Host = "bad host";
+        Assert.Equal(original, vm.Host);
+        Assert.True(vm.HasErrors);
+        Assert.Contains("Invalid host", vm.GetErrors(nameof(vm.Host)).Cast<string>());
+    }
+
+    [Fact]
+    [TestCategory("WindowsSafe")]
+    public void Port_Invalid_AddsError()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        var vm = CreateViewModel();
+        var original = vm.Port;
+        vm.Port = 70000;
+        Assert.Equal(original, vm.Port);
+        Assert.True(vm.HasErrors);
+        Assert.Contains("Port must be 1-65535", vm.GetErrors(nameof(vm.Port)).Cast<string>());
+    }
+
+    [Fact]
+    [TestCategory("WindowsSafe")]
+    public async Task UpdateAsync_UpdatesAllOptionsAndRaisesRequestClose()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        var client = new Mock<IMqttClient>();
+        client.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new MqttClientConnectResult());
+        var options = Microsoft.Extensions.Options.Options.Create(new MqttServiceOptions());
+        var service = new MqttService(client.Object, options, Mock.Of<IMessageRoutingService>(), Mock.Of<ILoggingService>());
+        var vm = new MqttEditConnectionViewModel(service, options);
+        bool closed = false;
+        vm.RequestClose += (_, _) => closed = true;
+        vm.Host = "example.com";
+        vm.Port = 8883;
+        vm.ClientId = "cid";
+        vm.Username = "user";
+        vm.Password = "pass";
+        vm.ConnectionType = MqttConnectionType.WebSocket;
+        vm.UseTls = true;
+        await vm.UpdateAsync();
+        Assert.Equal("example.com", options.Value.Host);
+        Assert.Equal(8883, options.Value.Port);
+        Assert.Equal("cid", options.Value.ClientId);
+        Assert.Equal("user", options.Value.Username);
+        Assert.Equal("pass", options.Value.Password);
+        Assert.Equal(MqttConnectionType.WebSocket, options.Value.ConnectionType);
+        Assert.True(options.Value.UseTls);
+        Assert.True(closed);
     }
 }

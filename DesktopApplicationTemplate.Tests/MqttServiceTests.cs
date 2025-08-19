@@ -113,6 +113,38 @@ public class MqttServiceTests
 
     [Fact]
     [TestCategory("CodexSafe")]
+    public async Task ConnectAsync_AppliesTlsAndCredentials()
+    {
+        var client = new Mock<IMqttClient>();
+        client.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new MqttClientConnectResult());
+        var cert = new byte[] { 1, 2, 3 };
+        var options = Options.Create(new MqttServiceOptions
+        {
+            Host = "h",
+            Port = 1,
+            ClientId = "id",
+            Username = "u",
+            Password = "p",
+            UseTls = true,
+            ClientCertificate = cert
+        });
+        var service = new MqttService(client.Object, options, Mock.Of<IMessageRoutingService>(), Mock.Of<ILoggingService>());
+
+        await service.ConnectAsync();
+
+        client.Verify(c => c.ConnectAsync(It.Is<MqttClientOptions>(o =>
+            o.Credentials != null &&
+            o.Credentials.GetUserName(o) == "u" &&
+            Encoding.UTF8.GetString(o.Credentials.GetPassword(o)) == "p" &&
+            o.ChannelOptions != null &&
+            o.ChannelOptions.TlsOptions != null
+        ), It.IsAny<CancellationToken>()), Times.Once);
+        ConsoleTestLogger.LogPass();
+    }
+
+    [Fact]
+    [TestCategory("CodexSafe")]
     public async Task PublishAsync_ResolvesTokensBeforeSending()
     {
         var client = new Mock<IMqttClient>();

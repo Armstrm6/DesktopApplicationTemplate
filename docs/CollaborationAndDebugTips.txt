@@ -296,6 +296,15 @@ Decisions & Rationale: Keep ScrollViewer with Grid as the sole content to mainta
 Action Items: Monitor CI for other XAML compilation issues.
 Related Commits/PRs: (this PR)
 
+[2025-08-19 15:35] Topic: ViewModel and MQTT option tests
+Context: Added unit tests for MQTT create, subscription, and edit view models plus TLS/credential coverage in MQTT service tests.
+Observations: Tests cover validation, command behavior, and option mapping.
+Codex Limitations noticed: Linux container skips Windows-specific tests; rely on CI.
+Effective Prompts / Instructions that worked: Followed AGENTS guidance to update changelog and tips.
+Decisions & Rationale: Improve confidence in new view models and advanced connection options.
+Action Items: Run full test suite in CI.
+Related Commits/PRs: (this PR)
+
 [2025-08-19 15:10] Topic: Mqtt QoS enum namespace
 Context: Build failed because `MqttCreateServiceViewModel` lacked the `MQTTnet.Protocol` import.
 Observations: Adding the using directive restored `MqttQualityOfServiceLevel` references.

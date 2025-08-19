@@ -71,4 +71,40 @@ public class MqttTagSubscriptionsViewModelTests
         await vm.PublishTestAsync();
         client.Verify(c => c.PublishAsync(It.IsAny<MQTTnet.MqttApplicationMessage>(), It.IsAny<CancellationToken>()), Times.Never);
     }
+
+    [Fact]
+    [TestCategory("WindowsSafe")]
+    public void AddTopic_AddsTopicAndClearsInput()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        var vm = CreateViewModel();
+        vm.NewTopic = "topic";
+        vm.AddTopicCommand.Execute(null);
+        Assert.Contains("topic", vm.Topics);
+        Assert.Equal(string.Empty, vm.NewTopic);
+    }
+
+    [Fact]
+    [TestCategory("WindowsSafe")]
+    public void AddTopic_IgnoresEmptyInput()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        var vm = CreateViewModel();
+        vm.NewTopic = "   ";
+        vm.AddTopicCommand.Execute(null);
+        Assert.Empty(vm.Topics);
+    }
+
+    [Fact]
+    [TestCategory("WindowsSafe")]
+    public void RemoveTopic_RemovesSelectedTopic()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        var vm = CreateViewModel();
+        vm.Topics.Add("t");
+        vm.SelectedTopic = "t";
+        vm.RemoveTopicCommand.Execute(null);
+        Assert.Empty(vm.Topics);
+        Assert.Null(vm.SelectedTopic);
+    }
 }
