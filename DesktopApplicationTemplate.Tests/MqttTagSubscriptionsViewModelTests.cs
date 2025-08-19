@@ -1,3 +1,4 @@
+
 using System;
 using System.Linq;
 using System.Threading;
@@ -80,6 +81,9 @@ public class MqttTagSubscriptionsViewModelTests
         client.Setup(c => c.PublishAsync(It.IsAny<MQTTnet.MqttApplicationMessage>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new MqttClientPublishResult(null, MqttClientPublishReasonCode.Success, null!, Array.Empty<MQTTnet.Packets.MqttUserProperty>()));
         var vm = CreateViewModel(client);
+        var sub = new TagSubscription { Tag = "t", OutgoingMessage = "m" };
+        vm.TagSubscriptions.Add(sub);
+        vm.SelectedSubscription = sub;
         var sub = new TagSubscription { Topic = "t", QoS = MqttQualityOfServiceLevel.AtMostOnce };
         vm.Topics.Add(sub);
         vm.SelectedTopic = sub;
@@ -111,6 +115,7 @@ public class MqttTagSubscriptionsViewModelTests
         var vm = CreateViewModel();
         vm.NewTopic = "topic";
         vm.AddTopicCommand.Execute(null);
+        Assert.Contains(vm.TagSubscriptions, t => t.Tag == "topic");
         Assert.Contains(vm.Topics, t => t.Topic == "topic");
         await vm.AddTopicAsync();
         Assert.Contains(vm.Subscriptions, s => s.Topic == "topic");
@@ -125,6 +130,8 @@ public class MqttTagSubscriptionsViewModelTests
         var client = new Mock<IMqttClient>();
         var vm = CreateViewModel(client);
         vm.NewTopic = "   ";
+        vm.AddTopicCommand.Execute(null);
+        Assert.Empty(vm.TagSubscriptions);
         await vm.AddTopicAsync();
         client.Verify(c => c.SubscribeAsync(It.IsAny<MqttClientSubscribeOptions>(), It.IsAny<CancellationToken>()), Times.Never);
         Assert.Empty(vm.Subscriptions);
@@ -132,6 +139,18 @@ public class MqttTagSubscriptionsViewModelTests
 
     [Fact]
     [TestCategory("WindowsSafe")]
+    public void RemoveTopic_RemovesSelectedSubscription()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        var vm = CreateViewModel();
+        var sub = new TagSubscription { Tag = "t" };
+        vm.TagSubscriptions.Add(sub);
+        vm.SelectedSubscription = sub;
+        vm.RemoveTopicCommand.Execute(null);
+        Assert.Empty(vm.TagSubscriptions);
+        Assert.Null(vm.SelectedSubscription);
+
+    }
     public async Task RemoveTopic_RemovesSelectedSubscription()
     {
         if (!OperatingSystem.IsWindows()) return;
@@ -151,7 +170,25 @@ public class MqttTagSubscriptionsViewModelTests
 
     [Fact]
     [TestCategory("WindowsSafe")]
-    public async Task AddTopicAsync_RecordsSuccessResult()
+    public void SelectingTag_LoadsAndPersistsMessage()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        var vm = CreateViewModel();
+        var sub1 = new TagSubscription { Tag = "t1", OutgoingMessage = "m1" };
+        var sub2 = new TagSubscription { Tag = "t2", OutgoingMessage = "m2" };
+        vm.TagSubscriptions.Add(sub1);
+        vm.TagSubscriptions.Add(sub2);
+
+        vm.SelectedSubscription = sub1;
+        Assert.Equal("m1", vm.SelectedSubscription?.OutgoingMessage);
+
+        vm.SelectedSubscription!.OutgoingMessage = "updated";
+        vm.SelectedSubscription = sub2;
+
+        Assert.Equal("updated", sub1.OutgoingMessage);
+        Assert.Equal("m2", vm.SelectedSubscription?.OutgoingMessage);
+    }
+      public async Task AddTopicAsync_RecordsSuccessResult()
     {
         if (!OperatingSystem.IsWindows()) return;
         var client = new Mock<IMqttClient>();

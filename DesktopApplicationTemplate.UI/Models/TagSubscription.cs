@@ -1,3 +1,5 @@
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 using System.ComponentModel;
 using MQTTnet.Protocol;
@@ -5,6 +7,29 @@ using MQTTnet.Protocol;
 namespace DesktopApplicationTemplate.UI.Models;
 
 /// <summary>
+/// Represents a tag subscription with an associated outgoing test message.
+/// </summary>
+public class TagSubscription : INotifyPropertyChanged
+{
+    private string _tag = string.Empty;
+
+    /// <summary>
+    /// Tag or topic to subscribe to.
+    /// </summary>
+    public string Tag
+    {
+        get => _tag;
+        set
+        {
+            _tag = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private string _outgoingMessage = string.Empty;
+
+    /// <summary>
+    /// Message published when testing this tag.
 /// Represents a topic subscription with QoS and an outgoing test message.
 /// </summary>
 public class TagSubscription : INotifyPropertyChanged
@@ -49,6 +74,9 @@ public class TagSubscription : INotifyPropertyChanged
         get => _outgoingMessage;
         set
         {
+            _outgoingMessage = value;
+            OnPropertyChanged();
+
             if (_outgoingMessage == value) return;
             _outgoingMessage = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(OutgoingMessage)));
@@ -57,4 +85,8 @@ public class TagSubscription : INotifyPropertyChanged
 
     /// <inheritdoc />
     public event PropertyChangedEventHandler? PropertyChanged;
+
+    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
 }

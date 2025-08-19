@@ -329,6 +329,13 @@ Effective Prompts / Instructions that worked: Following AGENTS guidance and user
 Decisions & Rationale: Use transient lifetimes for views/view models and provide IFileDialogService for TLS cert browsing.
 Action Items: Monitor CI for DI regressions.
 Related Commits/PRs: (this PR)
+[2025-08-19 15:53] Topic: MQTT tag message persistence
+Context: Added per-tag outgoing message storage and bindings in subscriptions view.
+Observations: Editing a tag's test message now persists when switching selections.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: Followed AGENTS.md and user story steps.
+Decisions & Rationale: Bind textbox directly to selected tag's message and update command state on changes.
+Action Items: Verify Windows UI behavior via CI.
 [2025-08-19 15:54] Topic: MQTT tag QoS selection
 Context: Added per-topic QoS to MQTT tag subscriptions and forwarded levels through the service.
 Observations: TagSubscription now tracks QoS and view binds combo boxes per topic.

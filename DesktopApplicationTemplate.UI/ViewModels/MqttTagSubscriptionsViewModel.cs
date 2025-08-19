@@ -6,6 +6,7 @@ using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Helpers;
 
+
 using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.Services;
 using MQTTnet.Protocol;
@@ -20,7 +21,7 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
     private readonly MqttService _service;
 
     private string _newTopic = string.Empty;
-    private TagSubscription? _selectedTopic;
+    private TagSubscription? _selectedSubscription;
     private string _testMessage = string.Empty;
 
     private MqttQualityOfServiceLevel _newQoS = MqttQualityOfServiceLevel.AtMostOnce;
@@ -34,6 +35,9 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
     {
         _service = service ?? throw new ArgumentNullException(nameof(service));
 
+        TagSubscriptions = new ObservableCollection<TagSubscription>();
+        AddTopicCommand = new RelayCommand(AddTopic);
+        RemoveTopicCommand = new RelayCommand(RemoveTopic, () => SelectedSubscription != null);
         Topics = new ObservableCollection<TagSubscription>();
         AddTopicCommand = new RelayCommand(AddTopic);
         RemoveTopicCommand = new RelayCommand(RemoveTopic, () => SelectedTopic != null);
@@ -50,8 +54,9 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
     public ILoggingService? Logger { get; set; }
 
     /// <summary>
-    /// Topics subscribed to by this service.
+    /// Subscriptions maintained by this service.
     /// </summary>
+    public ObservableCollection<TagSubscription> TagSubscriptions { get; }
     public ObservableCollection<TagSubscription> Topics { get; }
     public ObservableCollection<TagSubscription> Subscriptions { get; }
 
@@ -70,6 +75,8 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
     }
 
     /// <summary>
+    /// Gets or sets the selected subscription.
+    /// </summary>
     /// Gets or sets the QoS level for new subscriptions.
     /// </summary>
     public MqttQualityOfServiceLevel NewQoS
@@ -87,6 +94,15 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
         get => _selectedSubscription;
         set
         {
+            if (_selectedSubscription != null)
+            {
+                _selectedSubscription.PropertyChanged -= SelectedSubscription_PropertyChanged;
+            }
+            _selectedSubscription = value;
+            if (_selectedSubscription != null)
+            {
+                _selectedSubscription.PropertyChanged += SelectedSubscription_PropertyChanged;
+            }
             if (_selectedSubscription == value) return;
             if (_selectedSubscription is not null)
                 _selectedSubscription.PropertyChanged -= SelectedSubscriptionOnPropertyChanged;
@@ -98,6 +114,7 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
                 _selectedSubscription.PropertyChanged += SelectedSubscriptionOnPropertyChanged;
         }
     }
+
 
     private void SelectedSubscriptionOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
@@ -143,6 +160,7 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
     {
         if (string.IsNullOrWhiteSpace(NewTopic))
             return;
+        TagSubscriptions.Add(new TagSubscription { Tag = NewTopic });
         Topics.Add(new TagSubscription { Topic = NewTopic, QoS = MqttQualityOfServiceLevel.AtMostOnce });
         NewTopic = string.Empty;
 
@@ -166,6 +184,7 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
     {
         if (SelectedSubscription is null)
             return;
+        TagSubscriptions.Remove(SelectedSubscription);
 
         try
         {
@@ -204,8 +223,17 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
         if (!CanPublishTest())
             return;
         Logger?.Log("MQTT test publish start", LogLevel.Debug);
+        await _service.PublishAsync(SelectedSubscription!.Tag, SelectedSubscription.OutgoingMessage).ConfigureAwait(false);
         await _service.PublishAsync(SelectedTopic!.Topic, TestMessage).ConfigureAwait(false);
         await _service.PublishAsync(SelectedSubscription!.Topic, SelectedSubscription.OutgoingMessage).ConfigureAwait(false);
         Logger?.Log("MQTT test publish finished", LogLevel.Debug);
+    }
+
+    private void SelectedSubscription_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(TagSubscription.OutgoingMessage))
+        {
+            ((AsyncRelayCommand)PublishTestMessageCommand).RaiseCanExecuteChanged();
+        }
     }
 }

@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 ### Added
+- Each MQTT tag subscription now retains its own outgoing test message, and the test message box binds to the selected tag's message.
 - Wizard-style MQTT service creation view capturing broker, credentials, TLS, and will message options.
 - Expanded MQTT service with option-based connections, TLS/WebSocket support, and structured logging.
 - MQTT connections now support will message configuration, QoS, retain flag, keep-alive period, clean session, and reconnect delay with retry and option logging.
