@@ -312,3 +312,11 @@ Effective Prompts / Instructions that worked: Following AGENTS instructions to u
 Decisions & Rationale: Preserve existing event handlers while swapping views and save services after edits.
 Action Items: Ensure CI covers MQTT edit scenarios.
 Related Commits/PRs: (this PR)
+[2025-08-20 16:00] Topic: MQTT view registrations
+Context: Ensured new MQTT views and view models use transient lifetime and added file dialog helper to DI.
+Observations: Transient registration prevents state leakage; file picker service supports TLS certificate selection.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: Following AGENTS guidance and user request.
+Decisions & Rationale: Use transient lifetimes for views/view models and provide IFileDialogService for TLS cert browsing.
+Action Items: Monitor CI for DI regressions.
+Related Commits/PRs: (this PR)
