@@ -33,11 +33,13 @@
 - MQTT view model now exposes will-message and connection options with validation and bindings in create/edit views.
 - Dedicated window for editing MQTT connection settings with update, cancel, and unsubscribe commands accessible from the topic subscription view.
 - MqttTagSubscriptionsView and view model for managing MQTT topic subscriptions displayed when adding new MQTT services.
+- File dialog service registered for TLS certificate selection in MQTT views.
 
 ### Changed
 - Updated `global.json` to require the .NET 8 SDK version `8.0.404`.
 - Default `AutoStart` is now disabled and all environment configuration files set `"AutoStart": false`.
 - CI workflow now runs on pushes to `feature/**` and `bugfix/**` branches and supports manual triggers, ensuring tests execute on GitHub.
+- `MqttCreateServiceView`, `MqttTagSubscriptionsView`, and `MqttEditConnectionView` along with their view models are now registered as transient services.
 - `self-heal` workflow now monitors the unified `CI` pipeline.
 - `TcpServiceViewModel` now evaluates scripts asynchronously and streamlined server toggle logging.
 - Refactored `MqttService` with a single options-based constructor, clean reconnect logic, and consolidated publish methods.
