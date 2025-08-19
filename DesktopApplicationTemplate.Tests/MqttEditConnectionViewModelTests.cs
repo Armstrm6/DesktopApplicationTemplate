@@ -18,7 +18,7 @@ public class MqttEditConnectionViewModelTests
         var client = clientMock ?? new Mock<IMqttClient>();
         client.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new MqttClientConnectResult());
-        client.Setup(c => c.DisconnectAsync(It.IsAny<CancellationToken>()))
+        client.Setup(c => c.DisconnectAsync(It.IsAny<MqttClientDisconnectOptions?>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
         var options = Microsoft.Extensions.Options.Options.Create(new MqttServiceOptions());
         var service = new MqttService(client.Object, options, Mock.Of<IMessageRoutingService>(), Mock.Of<ILoggingService>());
@@ -53,11 +53,13 @@ public class MqttEditConnectionViewModelTests
         var client = new Mock<IMqttClient>();
         client.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new MqttClientConnectResult());
+        client.Setup(c => c.DisconnectAsync(It.IsAny<MqttClientDisconnectOptions?>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
         var options = Microsoft.Extensions.Options.Options.Create(new MqttServiceOptions());
         var service = new MqttService(client.Object, options, Mock.Of<IMessageRoutingService>(), Mock.Of<ILoggingService>());
         var vm = new MqttEditConnectionViewModel(service, options);
         await vm.UnsubscribeAsync();
-        client.Verify(c => c.DisconnectAsync(It.IsAny<CancellationToken>()), Times.Once);
+        client.Verify(c => c.DisconnectAsync(It.IsAny<MqttClientDisconnectOptions?>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]

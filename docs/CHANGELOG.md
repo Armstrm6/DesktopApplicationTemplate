@@ -46,6 +46,7 @@
 - `MqttService` and `MqttServiceViewModel` now consume `IOptions<MqttServiceOptions>` and the direct singleton registration was removed.
 - Added a DI container test ensuring the service provider builds with MQTT components.
 - Service creation now presents service types as icon bubbles and auto-generates default names upon selection.
+- Main window routes MQTT service creation through a dedicated create view and opens the tag subscriptions view after setup. Editing an existing MQTT service now uses the connection edit view and persists updated options.
 
 ### Removed
 - Placeholder "Desktop Template" text from the navigation bar.
@@ -77,3 +78,4 @@
 - Corrected service count bindings to use one-way mode, preventing runtime errors on read-only properties.
 - Resolved WPF build error by removing duplicate StackPanel from `MqttCreateServiceView` so the page hosts a single `ScrollViewer`.
 - Added missing `MQTTnet.Protocol` using in `MqttCreateServiceViewModel` to restore `MqttQualityOfServiceLevel` references.
+- Removed obsolete MQTT service view and dialog-based edit calls that broke build-time helper resolution.

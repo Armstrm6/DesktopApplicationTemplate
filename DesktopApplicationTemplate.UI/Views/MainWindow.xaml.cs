@@ -4,9 +4,10 @@ using System.Windows.Controls;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using LogLevel = DesktopApplicationTemplate.Core.Services.LogLevel;
-using Microsoft.VisualBasic;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Microsoft.VisualBasic;
 using DesktopApplicationTemplate.UI.Helpers;
 using System.Linq;
 using System.Windows.Media;
@@ -138,26 +139,22 @@ namespace DesktopApplicationTemplate.UI.Views
 
                 GetOrCreateServicePage(newService);
 
-                if (type == "MQTT" && mqttOptions != null && newService.ServicePage is MQTTServiceView mqttView)
+                if (type == "MQTT" && mqttOptions != null)
                 {
-                    var mqttVm = (MqttServiceViewModel)mqttView.DataContext!;
-                    mqttVm.Host = mqttOptions.Host;
-                    mqttVm.Port = mqttOptions.Port;
-                    mqttVm.ClientId = mqttOptions.ClientId;
-                    mqttVm.Username = mqttOptions.Username;
-                    mqttVm.Password = mqttOptions.Password;
-                    mqttVm.UseTls = mqttOptions.UseTls;
-                    mqttVm.WillTopic = mqttOptions.WillTopic;
-                    mqttVm.WillPayload = mqttOptions.WillPayload;
-                    mqttVm.WillQualityOfService = mqttOptions.WillQualityOfService;
-                    mqttVm.WillRetain = mqttOptions.WillRetain;
-                    mqttVm.KeepAliveSeconds = mqttOptions.KeepAliveSeconds;
-                    mqttVm.CleanSession = mqttOptions.CleanSession;
-                    newService.ActiveChanged += async active =>
-                    {
-                        if (active)
-                            await mqttVm.ConnectAsync(mqttOptions);
-                    };
+                    var options = App.AppHost.Services.GetRequiredService<IOptions<MqttServiceOptions>>().Value;
+                    options.Host = mqttOptions.Host;
+                    options.Port = mqttOptions.Port;
+                    options.ClientId = mqttOptions.ClientId;
+                    options.Username = mqttOptions.Username;
+                    options.Password = mqttOptions.Password;
+                    options.UseTls = mqttOptions.UseTls;
+                    options.WillTopic = mqttOptions.WillTopic;
+                    options.WillPayload = mqttOptions.WillPayload;
+                    options.WillQualityOfService = mqttOptions.WillQualityOfService;
+                    options.WillRetain = mqttOptions.WillRetain;
+                    options.KeepAliveSeconds = mqttOptions.KeepAliveSeconds;
+                    options.CleanSession = mqttOptions.CleanSession;
+                    options.ReconnectDelay = mqttOptions.ReconnectDelay;
                 }
 
                 _viewModel.Services.Add(newService);
@@ -186,6 +183,25 @@ namespace DesktopApplicationTemplate.UI.Views
         private void OnEditRequested(ServiceViewModel service)
         {
             _logger?.LogDebug("Edit requested for {Name}", service.DisplayName);
+
+            if (service.ServiceType == "MQTT")
+            {
+                var tagPage = GetOrCreateServicePage(service);
+                var editView = App.AppHost.Services.GetRequiredService<MqttEditConnectionView>();
+                if (editView.DataContext is MqttEditConnectionViewModel vm)
+                {
+                    vm.RequestClose += (_, _) =>
+                    {
+                        if (tagPage != null)
+                            ShowPage(tagPage);
+                        _viewModel.SaveServices();
+                    };
+                }
+                ShowPage(editView);
+                _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
+                return;
+            }
+
             var page = GetOrCreateServicePage(service);
             if (page != null)
             {

@@ -304,3 +304,11 @@ Effective Prompts / Instructions that worked: n/a
 Decisions & Rationale: Ensure files referencing MQTT enums include `MQTTnet.Protocol`.
 Action Items: Rely on CI for full Windows validation.
 Related Commits/PRs: (this PR)
+[2025-08-20 12:00] Topic: MQTT edit flow routing
+Context: Routed new MQTT services from creation through tag subscriptions and switched editing to a dedicated connection view.
+Observations: Removing legacy MQTT view resolved missing helper build errors.
+Codex Limitations noticed: dotnet CLI unavailable on container; relied on CI for validation.
+Effective Prompts / Instructions that worked: Following AGENTS instructions to update routing and persistence.
+Decisions & Rationale: Preserve existing event handlers while swapping views and save services after edits.
+Action Items: Ensure CI covers MQTT edit scenarios.
+Related Commits/PRs: (this PR)
