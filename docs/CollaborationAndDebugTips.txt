@@ -235,3 +235,11 @@ Effective Prompts / Instructions that worked: Error message pointing to CurrentA
 Decisions & Rationale: Explicitly specify one-way bindings for read-only properties.
 Action Items: Rely on CI to validate on Windows.
 Related Commits/PRs: (this PR)
+[2025-08-19 12:30] Topic: MQTT service view modes
+Context: Introduced create, tag subscription, and edit connection modes toggled via enum and visibility bindings.
+Observations: View transitions verified in unit tests; UI swaps sections without navigation.
+Codex Limitations noticed: Linux container lacks WindowsDesktop runtime; rely on CI for full WPF validation.
+Effective Prompts / Instructions that worked: Request to display different MQTT windows based on service state.
+Decisions & Rationale: Use enum-based ViewMode with commands for create/edit/cancel to keep logic in the view model.
+Action Items: Ensure CI confirms layout on Windows.
+Related Commits/PRs: (this PR)

@@ -122,5 +122,20 @@ public class MqttServiceViewModelTests
         vm.Host = "invalid_host";
         Assert.Contains("Invalid host", vm.GetErrors(nameof(vm.Host)).Cast<string>());
     }
+
+    [Fact]
+    [TestCategory("WindowsSafe")]
+    public async Task ViewMode_Transitions()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        var vm = CreateViewModel();
+        Assert.Equal(MqttServiceViewMode.CreateService, vm.ViewMode);
+        await vm.ConnectAsync();
+        Assert.Equal(MqttServiceViewMode.TagSubscriptions, vm.ViewMode);
+        vm.BeginEditCommand.Execute(null);
+        Assert.Equal(MqttServiceViewMode.EditConnection, vm.ViewMode);
+        vm.CancelEditCommand.Execute(null);
+        Assert.Equal(MqttServiceViewMode.TagSubscriptions, vm.ViewMode);
+    }
 }
 

@@ -47,4 +47,31 @@ namespace DesktopApplicationTemplate.UI.Helpers
             throw new NotImplementedException();
         }
     }
+
+    public class EnumToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is null || parameter is null)
+                return Visibility.Collapsed;
+
+            var current = value.ToString();
+            var targets = parameter.ToString()?.Split(',');
+            if (targets is null)
+                return Visibility.Collapsed;
+
+            foreach (var t in targets)
+            {
+                if (string.Equals(current, t.Trim(), StringComparison.OrdinalIgnoreCase))
+                    return Visibility.Visible;
+            }
+
+            return Visibility.Collapsed;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

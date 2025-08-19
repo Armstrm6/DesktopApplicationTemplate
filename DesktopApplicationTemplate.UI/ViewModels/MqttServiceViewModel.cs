@@ -25,6 +25,7 @@ public class MqttServiceViewModel : ValidatableViewModelBase, ILoggingViewModel,
     private string _newEndpoint = string.Empty;
     private string _newMessage = string.Empty;
     private MqttEndpointMessage? _selectedMessage;
+    private MqttServiceViewMode _viewMode = MqttServiceViewMode.CreateService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MqttServiceViewModel"/> class.
@@ -54,6 +55,8 @@ public class MqttServiceViewModel : ValidatableViewModelBase, ILoggingViewModel,
         ConnectCommand = new AsyncRelayCommand(ConnectAsync);
         PublishCommand = new AsyncRelayCommand(PublishSelectedAsync, () => SelectedMessage != null);
         SaveCommand = new RelayCommand(Save);
+        BeginEditCommand = new RelayCommand(() => ViewMode = MqttServiceViewMode.EditConnection);
+        CancelEditCommand = new RelayCommand(() => ViewMode = MqttServiceViewMode.TagSubscriptions);
     }
 
     /// <inheritdoc />
@@ -276,6 +279,25 @@ public class MqttServiceViewModel : ValidatableViewModelBase, ILoggingViewModel,
     /// </summary>
     public ICommand SaveCommand { get; }
 
+    /// <summary>
+    /// Command to enter edit mode.
+    /// </summary>
+    public ICommand BeginEditCommand { get; }
+
+    /// <summary>
+    /// Command to cancel editing.
+    /// </summary>
+    public ICommand CancelEditCommand { get; }
+
+    /// <summary>
+    /// Current view mode for the MQTT service.
+    /// </summary>
+    public MqttServiceViewMode ViewMode
+    {
+        get => _viewMode;
+        private set { _viewMode = value; OnPropertyChanged(); }
+    }
+
     private void AddTopic()
     {
         if (string.IsNullOrWhiteSpace(NewTopic))
@@ -317,6 +339,7 @@ public class MqttServiceViewModel : ValidatableViewModelBase, ILoggingViewModel,
         Logger?.Log("MQTT connect start", LogLevel.Debug);
         await _service.ConnectAsync().ConfigureAwait(false);
         IsConnected = true;
+        ViewMode = MqttServiceViewMode.TagSubscriptions;
         Logger?.Log("MQTT connect finished", LogLevel.Debug);
     }
 

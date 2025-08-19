@@ -7,6 +7,7 @@
       mc:Ignorable="d">
     <Page.Resources>
         <helpers:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter" />
+        <helpers:EnumToVisibilityConverter x:Key="EnumToVisibilityConverter" />
     </Page.Resources>
     <Grid Margin="10">
         <Grid.RowDefinitions>
@@ -14,7 +15,8 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,10"
+                    Visibility="{Binding ViewMode, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=CreateService,EditConnection}">
             <Grid Width="140">
                 <TextBox Text="{Binding Host}" x:Name="HostBox" ToolTip="MQTT broker address"/>
                 <TextBlock Text="Host (e.g. broker.example.com)" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0"
@@ -40,9 +42,26 @@
                            Visibility="{Binding Text, ElementName=UserBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
             </Grid>
             <PasswordBox Width="100" Margin="5,0,0,0" helpers:PasswordBoxAssistant.BindPassword="True" helpers:PasswordBoxAssistant.BoundPassword="{Binding Password}" ToolTip="Broker password"/>
-            <Button Content="Connect" Command="{Binding ConnectCommand}" Margin="5,0,0,0" Width="80"/>
+            <Button Command="{Binding ConnectCommand}" Margin="5,0,0,0" Width="80">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Content" Value="Create"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ViewMode}" Value="EditConnection">
+                                <Setter Property="Content" Value="Update"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+            <Button Content="Cancel" Command="{Binding CancelEditCommand}" Margin="5,0,0,0" Width="80"
+                    Visibility="{Binding ViewMode, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=EditConnection}"/>
         </StackPanel>
-        <Grid Grid.Row="1">
+
+        <Button Grid.Row="0" Content="Edit Connection" Command="{Binding BeginEditCommand}" Width="120" Margin="0,0,0,10"
+                Visibility="{Binding ViewMode, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=TagSubscriptions}"/>
+
+        <Grid Grid.Row="1" Visibility="{Binding ViewMode, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=TagSubscriptions}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*"/>
                 <ColumnDefinition Width="*"/>
@@ -132,6 +151,7 @@
                 <RichTextBox x:Name="LogBox" Height="200" IsReadOnly="True"/>
             </StackPanel>
         </Grid>
-        <Button Grid.Row="2" Content="Save Configuration" Command="{Binding SaveCommand}" Width="150" HorizontalAlignment="Right" Margin="0,10,0,0"/>
+        <Button Grid.Row="2" Content="Save Configuration" Command="{Binding SaveCommand}" Width="150" HorizontalAlignment="Right" Margin="0,10,0,0"
+                Visibility="{Binding ViewMode, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=TagSubscriptions}"/>
     </Grid>
 </Page>
