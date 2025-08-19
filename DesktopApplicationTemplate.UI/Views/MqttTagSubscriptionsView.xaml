@@ -17,11 +17,11 @@
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
     </Page.Resources>
-    <Grid Margin="10">
+    <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
             <Button x:Name="ConnectButton" Content="Connect" Command="{Binding ConnectCommand}" Width="80" AutomationProperties.Name="Connect MQTT"/>
@@ -34,6 +34,7 @@
             <Button x:Name="AddButton" Content="Add" Command="{Binding AddTopicCommand}" Width="50" Margin="5,0,0,0" AutomationProperties.Name="Add Topic"/>
             <Button x:Name="RemoveButton" Content="Remove" Command="{Binding RemoveTopicCommand}" Width="70" Margin="5,0,0,0" AutomationProperties.Name="Remove Topic"/>
         </StackPanel>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,10">
         <ListBox Grid.Row="1" ItemsSource="{Binding Subscriptions}" SelectedItem="{Binding SelectedSubscription}">
             <ListBox.ItemTemplate>
                 <DataTemplate DataType="{x:Type models:TagSubscription}">
@@ -101,5 +102,6 @@
             </Grid>
             <Button x:Name="SendButton" Content="Send" Command="{Binding PublishTestMessageCommand}" Width="60" Margin="5,0,0,0" AutomationProperties.Name="Send Test Message"/>
         </StackPanel>
+        <ListBox Grid.Row="2" ItemsSource="{Binding Topics}" SelectedItem="{Binding SelectedTopic}"/>
     </Grid>
 </Page>
