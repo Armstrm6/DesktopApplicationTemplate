@@ -46,6 +46,7 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<IRichTextLogger, NullRichTextLogger>();
             services.AddSingleton<ILoggingService, LoggingService>();
             services.AddSingleton<IMessageRoutingService, MessageRoutingService>();
+            services.AddSingleton<IFileDialogService, FileDialogService>();
             services.AddSingleton<SaveConfirmationHelper>();
             services.AddSingleton<CloseConfirmationHelper>();
             services.AddSingleton<MainViewModel>();
@@ -63,22 +64,22 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<HidViewModel>();
             services.AddSingleton<HidViews>();
             services.AddSingleton<MqttService>();
-            services.AddSingleton<MqttTagSubscriptionsView>();
-            services.AddSingleton<MqttTagSubscriptionsViewModel>();
             services.AddSingleton<FTPServiceView>();
             services.AddSingleton<FtpServiceViewModel>();
             services.AddSingleton<CsvViewerViewModel>();
             services.AddSingleton<CsvService>();
             services.AddSingleton<CsvServiceView>();
             services.AddSingleton<SettingsViewModel>();
-            services.AddTransient<MqttEditConnectionView>();
-            services.AddTransient<MqttEditConnectionViewModel>();
             services.AddTransient<SplashWindow>();
             services.AddTransient<CreateServiceWindow>();
             services.AddTransient<CreateServicePage>();
             services.AddTransient<CreateServiceViewModel>();
             services.AddTransient<MqttCreateServiceView>();
             services.AddTransient<MqttCreateServiceViewModel>();
+            services.AddTransient<MqttEditConnectionView>();
+            services.AddTransient<MqttEditConnectionViewModel>();
+            services.AddTransient<MqttTagSubscriptionsView>();
+            services.AddTransient<MqttTagSubscriptionsViewModel>();
             services.AddTransient<SettingsPage>();
 
 
