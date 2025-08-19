@@ -19,7 +19,7 @@ public class DiContainerTests
         services.AddSingleton<IMessageRoutingService, MessageRoutingService>();
         services.AddSingleton<SaveConfirmationHelper>();
         services.AddSingleton<MqttService>();
-        services.AddSingleton<MqttServiceViewModel>();
+        services.AddSingleton<MqttTagSubscriptionsViewModel>();
         services.Configure<MqttServiceOptions>(o =>
         {
             o.Host = "localhost";
@@ -28,7 +28,7 @@ public class DiContainerTests
         });
 
         using var provider = services.BuildServiceProvider();
-        var vm = provider.GetRequiredService<MqttServiceViewModel>();
+        var vm = provider.GetRequiredService<MqttTagSubscriptionsViewModel>();
         Assert.NotNull(vm);
     }
 }

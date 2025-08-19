@@ -1,5 +1,6 @@
 using System.Windows.Controls;
 using DesktopApplicationTemplate.Core.Services;
+using System.Windows;
 using DesktopApplicationTemplate.UI.ViewModels;
 
 namespace DesktopApplicationTemplate.UI.Views;

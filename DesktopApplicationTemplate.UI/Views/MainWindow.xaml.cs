@@ -13,6 +13,7 @@ using System.Windows.Media;
 using DesktopApplicationTemplate.Models;
 using System.Windows.Input;
 using System.Windows.Controls.Primitives;
+using DesktopApplicationTemplate.UI;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
@@ -86,7 +87,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 "HID" => App.AppHost.Services.GetRequiredService<HidViews>(),
                 "Heartbeat" => App.AppHost.Services.GetRequiredService<HeartbeatView>(),
                 "SCP" => App.AppHost.Services.GetRequiredService<SCPServiceView>(),
-                "MQTT" => App.AppHost.Services.GetRequiredService<MQTTServiceView>(),
+                "MQTT" => App.AppHost.Services.GetRequiredService<MqttTagSubscriptionsView>(),
                 "FTP" => App.AppHost.Services.GetRequiredService<FTPServiceView>(),
                 "CSV Creator" => App.AppHost.Services.GetRequiredService<CsvServiceView>(),
                 _ => null
@@ -116,12 +117,13 @@ namespace DesktopApplicationTemplate.UI.Views
             _logger?.LogDebug("AddService button clicked");
             var existing = _viewModel.Services.Select(s => s.DisplayName.Split(" - ").Last());
             var vm = new CreateServiceViewModel(existing);
-            var window = new CreateServiceWindow(vm);
+            var window = new CreateServiceWindow(vm, App.AppHost.Services);
 
             if (window.ShowDialog() == true)
             {
                 var name = window.CreatedServiceName;
                 var type = window.CreatedServiceType;
+                var mqttOptions = window.MqttOptions;
 
                 var newService = new ServiceViewModel
                 {
@@ -136,21 +138,42 @@ namespace DesktopApplicationTemplate.UI.Views
 
                 GetOrCreateServicePage(newService);
 
+                if (type == "MQTT" && mqttOptions != null && newService.ServicePage is MQTTServiceView mqttView)
+                {
+                    var mqttVm = (MqttServiceViewModel)mqttView.DataContext!;
+                    mqttVm.Host = mqttOptions.Host;
+                    mqttVm.Port = mqttOptions.Port;
+                    mqttVm.ClientId = mqttOptions.ClientId;
+                    mqttVm.Username = mqttOptions.Username;
+                    mqttVm.Password = mqttOptions.Password;
+                    mqttVm.UseTls = mqttOptions.UseTls;
+                    mqttVm.WillTopic = mqttOptions.WillTopic;
+                    mqttVm.WillPayload = mqttOptions.WillPayload;
+                    mqttVm.WillQualityOfService = mqttOptions.WillQualityOfService;
+                    mqttVm.WillRetain = mqttOptions.WillRetain;
+                    mqttVm.KeepAliveSeconds = mqttOptions.KeepAliveSeconds;
+                    mqttVm.CleanSession = mqttOptions.CleanSession;
+                    newService.ActiveChanged += async active =>
+                    {
+                        if (active)
+                            await mqttVm.ConnectAsync(mqttOptions);
+                    };
+                }
+
                 _viewModel.Services.Add(newService);
                 _logger?.LogInformation("Service {Name} added", newService.DisplayName);
                 _viewModel.SelectedService = newService;
                 ServiceList.ScrollIntoView(newService);
 
-                  if (type == "MQTT" && newService.ServicePage is MQTTServiceView mqttView)
+                  if (type == "MQTT" && newService.ServicePage is MqttTagSubscriptionsView mqttView)
                   {
-                      var mqttVm = (MqttServiceViewModel)mqttView.DataContext!;
+                      var mqttVm = (MqttTagSubscriptionsViewModel)mqttView.DataContext!;
                       newService.ActiveChanged += async active =>
                       {
                           if (active)
                               await mqttVm.ConnectAsync();
                       };
                   }
-
                 if (newService.ServicePage != null)
                 {
                     ShowPage(newService.ServicePage);

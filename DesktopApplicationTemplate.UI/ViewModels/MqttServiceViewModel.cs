@@ -52,7 +52,7 @@ public class MqttServiceViewModel : ValidatableViewModelBase, ILoggingViewModel,
         RemoveTopicCommand = new RelayCommand(RemoveTopic, () => SelectedTopic != null);
         AddMessageCommand = new RelayCommand(AddMessage);
         RemoveMessageCommand = new RelayCommand(RemoveSelectedMessage, () => SelectedMessage != null);
-        ConnectCommand = new AsyncRelayCommand(ConnectAsync);
+        ConnectCommand = new AsyncRelayCommand(() => ConnectAsync());
         PublishCommand = new AsyncRelayCommand(PublishSelectedAsync, () => SelectedMessage != null);
         SaveCommand = new RelayCommand(Save);
     }
@@ -461,10 +461,10 @@ public class MqttServiceViewModel : ValidatableViewModelBase, ILoggingViewModel,
     /// <summary>
     /// Connects to the broker.
     /// </summary>
-    public async Task ConnectAsync()
+    public async Task ConnectAsync(MqttServiceOptions? options = null)
     {
         Logger?.Log("MQTT connect start", LogLevel.Debug);
-        await _service.ConnectAsync().ConfigureAwait(false);
+        await _service.ConnectAsync(options).ConfigureAwait(false);
         IsConnected = true;
         Logger?.Log("MQTT connect finished", LogLevel.Debug);
     }
