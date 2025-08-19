@@ -7,6 +7,7 @@ using DesktopApplicationTemplate.Core.Services;
 using Microsoft.Extensions.Options;
 using MQTTnet;
 using MQTTnet.Client;
+using MQTTnet.Protocol;
 
 namespace DesktopApplicationTemplate.UI.Services;
 
@@ -137,6 +138,17 @@ public class MqttService
     }
 
     /// <summary>
+    /// Subscribes to a single topic.
+    /// </summary>
+    public async Task SubscribeAsync(string topic, MqttQualityOfServiceLevel qos, CancellationToken token = default)
+    {
+        if (topic is null) throw new ArgumentNullException(nameof(topic));
+        _logger.Log("MQTT subscribe start", LogLevel.Debug);
+        await _client.SubscribeAsync(topic, qos, token).ConfigureAwait(false);
+        _logger.Log("MQTT subscribe finished", LogLevel.Debug);
+    }
+
+    /// <summary>
     /// Publishes a single message to an endpoint.
     /// </summary>
     public async Task PublishAsync(string topic, string message, CancellationToken token = default)
@@ -181,4 +193,3 @@ public class MqttService
         }
     }
 }
-
