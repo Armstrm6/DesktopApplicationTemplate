@@ -94,3 +94,4 @@
 - Added missing `MQTTnet.Protocol` using in `MqttCreateServiceViewModel` to restore `MqttQualityOfServiceLevel` references.
 - Removed obsolete MQTT service view and dialog-based edit calls that broke build-time helper resolution.
 - Aligned `AsyncRelayCommand` namespace with Helpers folder.
+- Resolved merge artifacts in MQTT tag subscription model, view, and service that introduced duplicate namespaces and conflicting methods.

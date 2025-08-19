@@ -150,7 +150,7 @@ public class MqttServiceTests
     {
         var client = new Mock<IMqttClient>();
         client.Setup(c => c.SubscribeAsync("t", MqttQualityOfServiceLevel.ExactlyOnce, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new MqttClientSubscribeResult());
+            .ReturnsAsync(new MqttClientSubscribeResult(0, Array.Empty<MqttClientSubscribeResultItem>(), null!, Array.Empty<MQTTnet.Packets.MqttUserProperty>()));
         var service = new MqttService(client.Object, Options.Create(new MqttServiceOptions()), Mock.Of<IMessageRoutingService>(), Mock.Of<ILoggingService>());
 
         await service.SubscribeAsync("t", MqttQualityOfServiceLevel.ExactlyOnce);

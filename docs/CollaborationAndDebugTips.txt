@@ -414,3 +414,11 @@ Effective Prompts / Instructions that worked: Following request to capture resul
 Decisions & Rationale: Store per-topic QoS and message; visualize subscription outcomes for user clarity.
 Action Items: Monitor CI for UI styling discrepancies.
 Related Commits/PRs: (this PR)
+[2025-08-19 16:41] Topic: MQTT tag subscription merge cleanup
+Context: Merge conflicts left duplicate namespaces and corrupted view model and service definitions.
+Observations: Restored TagSubscription model, view, view model, and service; build no longer fails.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: Review changelog and debug tips to guide reconstruction.
+Decisions & Rationale: Rebuild affected files to reflect intended features and remove conflicting methods.
+Action Items: Monitor CI for additional MQTT regressions.
+Related Commits/PRs: (this PR)
