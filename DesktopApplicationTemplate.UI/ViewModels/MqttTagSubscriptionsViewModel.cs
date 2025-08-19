@@ -1,9 +1,11 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Helpers;
+using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.Services;
 
 namespace DesktopApplicationTemplate.UI.ViewModels;
@@ -16,7 +18,7 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
     private readonly MqttService _service;
 
     private string _newTopic = string.Empty;
-    private string? _selectedTopic;
+    private TagSubscription? _selectedSubscription;
     private string _testMessage = string.Empty;
     private bool _isConnected;
 
@@ -27,9 +29,11 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
     {
         _service = service ?? throw new ArgumentNullException(nameof(service));
 
-        Topics = new ObservableCollection<string>();
+        Subscriptions = new ObservableCollection<TagSubscription>(_service.TagSubscriptions);
+        _service.TagSubscriptionChanged += OnTagSubscriptionChanged;
+
         AddTopicCommand = new RelayCommand(AddTopic);
-        RemoveTopicCommand = new RelayCommand(RemoveTopic, () => SelectedTopic != null);
+        RemoveTopicCommand = new RelayCommand(RemoveTopic, () => SelectedSubscription != null);
         ConnectCommand = new AsyncRelayCommand(ConnectAsync);
         PublishTestMessageCommand = new AsyncRelayCommand(PublishTestAsync, CanPublishTest);
     }
@@ -38,9 +42,9 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
     public ILoggingService? Logger { get; set; }
 
     /// <summary>
-    /// Topics subscribed to by this service.
+    /// Tag subscriptions tracked by this service.
     /// </summary>
-    public ObservableCollection<string> Topics { get; }
+    public ObservableCollection<TagSubscription> Subscriptions { get; }
 
     /// <summary>
     /// Gets or sets the new topic entry.
@@ -52,14 +56,14 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
     }
 
     /// <summary>
-    /// Gets or sets the selected topic.
+    /// Gets or sets the selected tag subscription.
     /// </summary>
-    public string? SelectedTopic
+    public TagSubscription? SelectedSubscription
     {
-        get => _selectedTopic;
+        get => _selectedSubscription;
         set
         {
-            _selectedTopic = value;
+            _selectedSubscription = value;
             OnPropertyChanged();
             ((RelayCommand)RemoveTopicCommand).RaiseCanExecuteChanged();
             ((AsyncRelayCommand)PublishTestMessageCommand).RaiseCanExecuteChanged();
@@ -113,19 +117,19 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
     {
         if (string.IsNullOrWhiteSpace(NewTopic))
             return;
-        Topics.Add(NewTopic);
+        _service.UpdateTagSubscription(new TagSubscription(NewTopic));
         NewTopic = string.Empty;
     }
 
     private void RemoveTopic()
     {
-        if (SelectedTopic is null)
+        if (SelectedSubscription is null)
             return;
-        Topics.Remove(SelectedTopic);
-        SelectedTopic = null;
+        Subscriptions.Remove(SelectedSubscription);
+        SelectedSubscription = null;
     }
 
-    private bool CanPublishTest() => SelectedTopic != null && !string.IsNullOrWhiteSpace(TestMessage);
+    private bool CanPublishTest() => SelectedSubscription != null && !string.IsNullOrWhiteSpace(TestMessage);
 
     /// <summary>
     /// Connects to the MQTT broker.
@@ -146,7 +150,21 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
         if (!CanPublishTest())
             return;
         Logger?.Log("MQTT test publish start", LogLevel.Debug);
-        await _service.PublishAsync(SelectedTopic!, TestMessage).ConfigureAwait(false);
+        await _service.PublishAsync(SelectedSubscription!.Topic, TestMessage).ConfigureAwait(false);
         Logger?.Log("MQTT test publish finished", LogLevel.Debug);
+    }
+
+    private void OnTagSubscriptionChanged(object? sender, TagSubscription subscription)
+    {
+        var existing = Subscriptions.FirstOrDefault(t => t.Topic == subscription.Topic);
+        if (existing is null)
+        {
+            Subscriptions.Add(subscription);
+        }
+        else
+        {
+            existing.StatusColor = subscription.StatusColor;
+            existing.Icon = subscription.Icon;
+        }
     }
 }

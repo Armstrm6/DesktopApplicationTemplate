@@ -4,6 +4,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.UI.Models;
 using Microsoft.Extensions.Options;
 using MQTTnet;
 using MQTTnet.Client;
@@ -19,6 +20,7 @@ public class MqttService
     private readonly IMessageRoutingService _routingService;
     private readonly ILoggingService _logger;
     private readonly MqttServiceOptions _options;
+    private readonly Dictionary<string, TagSubscription> _tagSubscriptions = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MqttService"/> class.
@@ -47,6 +49,27 @@ public class MqttService
     public event EventHandler<bool>? ConnectionStateChanged;
 
     private void OnConnectionStateChanged(bool connected) => ConnectionStateChanged?.Invoke(this, connected);
+
+    /// <summary>
+    /// Raised when tag subscription metadata changes.
+    /// </summary>
+    public event EventHandler<TagSubscription>? TagSubscriptionChanged;
+
+    /// <summary>
+    /// Gets the current set of tag subscriptions.
+    /// </summary>
+    public IReadOnlyCollection<TagSubscription> TagSubscriptions => _tagSubscriptions.Values;
+
+    /// <summary>
+    /// Adds or updates a tag subscription and notifies listeners.
+    /// </summary>
+    /// <param name="subscription">The subscription to upsert.</param>
+    public void UpdateTagSubscription(TagSubscription subscription)
+    {
+        if (subscription is null) throw new ArgumentNullException(nameof(subscription));
+        _tagSubscriptions[subscription.Topic] = subscription;
+        TagSubscriptionChanged?.Invoke(this, subscription);
+    }
 
     /// <summary>
     /// Connects to the MQTT broker using configured or override options.
