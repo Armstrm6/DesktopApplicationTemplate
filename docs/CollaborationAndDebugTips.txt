@@ -329,3 +329,12 @@ Effective Prompts / Instructions that worked: Following AGENTS guidance and user
 Decisions & Rationale: Use transient lifetimes for views/view models and provide IFileDialogService for TLS cert browsing.
 Action Items: Monitor CI for DI regressions.
 Related Commits/PRs: (this PR)
+[2025-08-19 15:54] Topic: Tag subscription endpoint testing
+Context: Added per-tag endpoint field and test command in subscriptions view.
+Observations: Command publishes tag message to its endpoint via new row Test button.
+Codex Limitations noticed: Linux environment cannot render WPF; rely on CI.
+Effective Prompts / Instructions that worked: user request to expose TestTagEndpointCommand.
+Decisions & Rationale: Enable validating tag routing by publishing configured message to its endpoint.
+Action Items: Monitor CI for layout or command binding issues.
+Related Commits/PRs: (this PR)
+
