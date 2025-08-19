@@ -329,3 +329,11 @@ Effective Prompts / Instructions that worked: Following AGENTS guidance and user
 Decisions & Rationale: Use transient lifetimes for views/view models and provide IFileDialogService for TLS cert browsing.
 Action Items: Monitor CI for DI regressions.
 Related Commits/PRs: (this PR)
+[2025-08-19 15:53] Topic: MQTT tag subscriptions layout
+Context: Reordered test-message controls above the topic list and aligned margins with design.
+Observations: Grid margin increased to 20 and Send button stack precedes topic list.
+Codex Limitations noticed: dotnet CLI unavailable; tests could not run locally.
+Effective Prompts / Instructions that worked: User request to adjust layout per design file.
+Decisions & Rationale: Match spacing conventions with 10px vertical gaps; rely on CI for layout verification.
+Action Items: Verify WPF layout on Windows via CI.
+Related Commits/PRs: (this PR)
