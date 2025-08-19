@@ -61,6 +61,7 @@
 - Reordered test-message controls above the topic list in `MqttTagSubscriptionsView` and aligned margins with design guidance.
 - MQTT service creation now occurs within the main window frame and returns to the previous view after completion, removing the popup window dependency.
 - Service context menus invoke a new `EditServiceCommand`; editing an MQTT service opens the connection view with current options preloaded.
+- Consolidated `MqttTagSubscriptionsViewModel` to a single subscription collection and unified topic properties.
 
 ### Removed
 - Placeholder "Desktop Template" text from the navigation bar.
