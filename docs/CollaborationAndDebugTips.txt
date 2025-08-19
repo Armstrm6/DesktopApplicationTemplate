@@ -337,4 +337,32 @@ Codex Limitations noticed: Linux environment cannot run WPF tests; rely on CI.
 Effective Prompts / Instructions that worked: Referencing design XMLs and consolidating repeated styles.
 Decisions & Rationale: Use shared styles for consistency and validate key buttons via snapshot tests.
 Action Items: Monitor CI for any layout regressions on Windows.
+[2025-08-20 18:00] Topic: EditServiceCommand for MQTT
+Context: Added command-based editing for services and ensured MQTT edits load existing connection options.
+Observations: Generic RelayCommand enabled passing the service from context menus.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: Followed user request to prepopulate edit view model via options.
+Decisions & Rationale: Use event-driven navigation to decouple UI and view models.
+Action Items: Monitor CI for integration test stability.
+[2025-08-19 15:53] Topic: MQTT tag message persistence
+Context: Added per-tag outgoing message storage and bindings in subscriptions view.
+Observations: Editing a tag's test message now persists when switching selections.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: Followed AGENTS.md and user story steps.
+Decisions & Rationale: Bind textbox directly to selected tag's message and update command state on changes.
+Action Items: Verify Windows UI behavior via CI.
+[2025-08-19 15:54] Topic: MQTT tag QoS selection
+Context: Added per-topic QoS to MQTT tag subscriptions and forwarded levels through the service.
+Observations: TagSubscription now tracks QoS and view binds combo boxes per topic.
+Codex Limitations noticed: Linux container lacks dotnet; tests rely on CI.
+Effective Prompts / Instructions that worked: Followed AGENTS guidelines for logging and docs.
+Decisions & Rationale: Ensure QoS reaches MQTT client to honor broker delivery requirements.
+Action Items: Verify on Windows via CI.
+[2025-08-19 15:55] Topic: MQTT subscription result bubbles
+Context: Added Subscribe/Unsubscribe APIs, QoS-aware tag subscription model, and UI feedback bubbles.
+Observations: Async commands allow subscription attempts with success/failure notifications.
+Codex Limitations noticed: Linux environment cannot render WPF; rely on CI.
+Effective Prompts / Instructions that worked: Following request to capture results and update docs.
+Decisions & Rationale: Store per-topic QoS and message; visualize subscription outcomes for user clarity.
+Action Items: Monitor CI for UI styling discrepancies.
 Related Commits/PRs: (this PR)

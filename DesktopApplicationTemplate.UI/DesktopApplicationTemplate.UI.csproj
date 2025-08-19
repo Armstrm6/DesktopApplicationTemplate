@@ -35,6 +35,7 @@
     <Resource Include="Themes/DarkTheme.xaml" />
     <Resource Include="Themes/ToggleSwitch.xaml" />
     <Resource Include="Themes/Forms.xaml" />
+    <Resource Include="Themes/MqttTagSubscriptionsView.xaml" />
   </ItemGroup>
 
   <ItemGroup>

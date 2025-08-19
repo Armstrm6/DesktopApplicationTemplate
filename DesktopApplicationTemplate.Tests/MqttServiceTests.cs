@@ -11,6 +11,7 @@ using Moq;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Packets;
+using MQTTnet.Protocol;
 using Xunit;
 
 namespace DesktopApplicationTemplate.Tests;
@@ -74,7 +75,7 @@ public class MqttServiceTests
             ClientId = "id",
             WillTopic = "t",
             WillPayload = "p",
-            WillQualityOfService = MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce,
+            WillQualityOfService = MqttQualityOfServiceLevel.AtLeastOnce,
             WillRetain = true,
             KeepAliveSeconds = 10,
             CleanSession = false
@@ -140,6 +141,21 @@ public class MqttServiceTests
             o.ChannelOptions != null &&
             o.ChannelOptions.TlsOptions != null
         ), It.IsAny<CancellationToken>()), Times.Once);
+        ConsoleTestLogger.LogPass();
+    }
+
+    [Fact]
+    [TestCategory("CodexSafe")]
+    public async Task SubscribeAsync_ForwardsQoS()
+    {
+        var client = new Mock<IMqttClient>();
+        client.Setup(c => c.SubscribeAsync("t", MqttQualityOfServiceLevel.ExactlyOnce, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new MqttClientSubscribeResult());
+        var service = new MqttService(client.Object, Options.Create(new MqttServiceOptions()), Mock.Of<IMessageRoutingService>(), Mock.Of<ILoggingService>());
+
+        await service.SubscribeAsync("t", MqttQualityOfServiceLevel.ExactlyOnce);
+
+        client.Verify(c => c.SubscribeAsync("t", MqttQualityOfServiceLevel.ExactlyOnce, It.IsAny<CancellationToken>()), Times.Once);
         ConsoleTestLogger.LogPass();
     }
 
