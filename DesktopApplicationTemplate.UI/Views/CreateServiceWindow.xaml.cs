@@ -1,5 +1,8 @@
+using System;
 using System.Windows;
+using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
@@ -7,22 +10,41 @@ namespace DesktopApplicationTemplate.UI.Views
     {
         public string CreatedServiceName { get; private set; } = string.Empty;
         public string CreatedServiceType { get; private set; } = string.Empty;
+        public MqttServiceOptions? MqttOptions { get; private set; }
 
-        public CreateServiceWindow(CreateServiceViewModel viewModel)
+        private readonly IServiceProvider _services;
+        private readonly CreateServicePage _page;
+
+        public CreateServiceWindow(CreateServiceViewModel viewModel, IServiceProvider services)
         {
             InitializeComponent();
-            var page = new CreateServicePage(viewModel);
-            page.ServiceCreated += (name, type) =>
+            _services = services ?? throw new ArgumentNullException(nameof(services));
+            _page = new CreateServicePage(viewModel);
+            _page.ServiceCreated += (name, type) =>
             {
                 CreatedServiceName = name;
                 CreatedServiceType = type;
                 DialogResult = true;
             };
-            page.Cancelled += () =>
+            _page.Cancelled += () => DialogResult = false;
+            _page.MqttSelected += NavigateToMqtt;
+            ContentFrame.Content = _page;
+        }
+
+        private void NavigateToMqtt(string defaultName)
+        {
+            var vm = _services.GetRequiredService<MqttCreateServiceViewModel>();
+            vm.ServiceName = defaultName;
+            vm.ServiceCreated += (name, options) =>
             {
-                DialogResult = false;
+                CreatedServiceName = name;
+                CreatedServiceType = "MQTT";
+                MqttOptions = options;
+                DialogResult = true;
             };
-            ContentFrame.Content = page;
+            vm.Cancelled += () => ContentFrame.Content = _page;
+            var view = ActivatorUtilities.CreateInstance<MqttCreateServiceView>(_services, vm);
+            ContentFrame.Content = view;
         }
     }
 }
