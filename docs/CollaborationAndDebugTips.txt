@@ -329,6 +329,13 @@ Effective Prompts / Instructions that worked: Following AGENTS guidance and user
 Decisions & Rationale: Use transient lifetimes for views/view models and provide IFileDialogService for TLS cert browsing.
 Action Items: Monitor CI for DI regressions.
 Related Commits/PRs: (this PR)
+[2025-08-19 15:54] Topic: MQTT tag QoS selection
+Context: Added per-topic QoS to MQTT tag subscriptions and forwarded levels through the service.
+Observations: TagSubscription now tracks QoS and view binds combo boxes per topic.
+Codex Limitations noticed: Linux container lacks dotnet; tests rely on CI.
+Effective Prompts / Instructions that worked: Followed AGENTS guidelines for logging and docs.
+Decisions & Rationale: Ensure QoS reaches MQTT client to honor broker delivery requirements.
+Action Items: Verify on Windows via CI.
 [2025-08-19 15:55] Topic: MQTT subscription result bubbles
 Context: Added Subscribe/Unsubscribe APIs, QoS-aware tag subscription model, and UI feedback bubbles.
 Observations: Async commands allow subscription attempts with success/failure notifications.

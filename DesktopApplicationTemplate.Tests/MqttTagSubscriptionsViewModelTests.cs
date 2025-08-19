@@ -27,6 +27,8 @@ public class MqttTagSubscriptionsViewModelTests
             .ReturnsAsync(new MqttClientConnectResult());
         client.Setup(c => c.PublishAsync(It.IsAny<MQTTnet.MqttApplicationMessage>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new MqttClientPublishResult(null, MqttClientPublishReasonCode.Success, null!, Array.Empty<MQTTnet.Packets.MqttUserProperty>()));
+        client.Setup(c => c.SubscribeAsync(It.IsAny<string>(), It.IsAny<MqttQualityOfServiceLevel>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new MqttClientSubscribeResult());
         client.Setup(c => c.SubscribeAsync(It.IsAny<MqttClientSubscribeOptions>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new MqttClientSubscribeResult(0, Array.Empty<MqttClientSubscribeResultItem>(), null!, Array.Empty<MQTTnet.Packets.MqttUserProperty>()));
         client.Setup(c => c.UnsubscribeAsync(It.IsAny<MqttClientUnsubscribeOptions>(), It.IsAny<CancellationToken>()))
@@ -43,10 +45,28 @@ public class MqttTagSubscriptionsViewModelTests
         var client = new Mock<IMqttClient>();
         client.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new MqttClientConnectResult());
+        client.Setup(c => c.SubscribeAsync(It.IsAny<string>(), It.IsAny<MqttQualityOfServiceLevel>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new MqttClientSubscribeResult());
         var vm = CreateViewModel(client);
         await vm.ConnectAsync();
         client.Verify(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()), Times.Once);
         Assert.True(vm.IsConnected);
+    }
+
+    [Fact]
+    [TestCategory("WindowsSafe")]
+    public async Task ConnectAsync_SubscribesWithSelectedQoS()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        var client = new Mock<IMqttClient>();
+        client.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new MqttClientConnectResult());
+        client.Setup(c => c.SubscribeAsync("t", MqttQualityOfServiceLevel.AtLeastOnce, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new MqttClientSubscribeResult());
+        var vm = CreateViewModel(client);
+        vm.Topics.Add(new TagSubscription { Topic = "t", QoS = MqttQualityOfServiceLevel.AtLeastOnce });
+        await vm.ConnectAsync();
+        client.Verify(c => c.SubscribeAsync("t", MqttQualityOfServiceLevel.AtLeastOnce, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -60,6 +80,10 @@ public class MqttTagSubscriptionsViewModelTests
         client.Setup(c => c.PublishAsync(It.IsAny<MQTTnet.MqttApplicationMessage>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new MqttClientPublishResult(null, MqttClientPublishReasonCode.Success, null!, Array.Empty<MQTTnet.Packets.MqttUserProperty>()));
         var vm = CreateViewModel(client);
+        var sub = new TagSubscription { Topic = "t", QoS = MqttQualityOfServiceLevel.AtMostOnce };
+        vm.Topics.Add(sub);
+        vm.SelectedTopic = sub;
+        vm.TestMessage = "m";
         vm.Subscriptions.Add(new TagSubscription { Topic = "t", OutgoingMessage = "m" });
         vm.SelectedSubscription = vm.Subscriptions.First();
         await vm.PublishTestAsync();
@@ -86,6 +110,8 @@ public class MqttTagSubscriptionsViewModelTests
         if (!OperatingSystem.IsWindows()) return;
         var vm = CreateViewModel();
         vm.NewTopic = "topic";
+        vm.AddTopicCommand.Execute(null);
+        Assert.Contains(vm.Topics, t => t.Topic == "topic");
         await vm.AddTopicAsync();
         Assert.Contains(vm.Subscriptions, s => s.Topic == "topic");
         Assert.Equal(string.Empty, vm.NewTopic);
@@ -110,6 +136,12 @@ public class MqttTagSubscriptionsViewModelTests
     {
         if (!OperatingSystem.IsWindows()) return;
         var vm = CreateViewModel();
+        var sub = new TagSubscription { Topic = "t", QoS = MqttQualityOfServiceLevel.AtMostOnce };
+        vm.Topics.Add(sub);
+        vm.SelectedTopic = sub;
+        vm.RemoveTopicCommand.Execute(null);
+        Assert.Empty(vm.Topics);
+        Assert.Null(vm.SelectedTopic);
         vm.Subscriptions.Add(new TagSubscription { Topic = "t" });
         vm.SelectedSubscription = vm.Subscriptions.First();
         await vm.RemoveTopicAsync();
