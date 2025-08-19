@@ -1,3 +1,4 @@
+
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -5,51 +6,41 @@ using System.Runtime.CompilerServices;
 namespace DesktopApplicationTemplate.UI.Models;
 
 /// <summary>
-/// Represents a subscribed MQTT tag with optional styling metadata.
+/// Represents a subscription to a tag with test publish details.
 /// </summary>
 public class TagSubscription : INotifyPropertyChanged
 {
-    private string? _statusColor;
-    private string? _icon;
-
+    private string _tag = string.Empty;
     /// <summary>
-    /// Initializes a new instance of the <see cref="TagSubscription"/> class.
+    /// Identifier of the tag.
     /// </summary>
-    /// <param name="topic">The MQTT topic.</param>
-    public TagSubscription(string topic)
+    public string Tag
     {
-        Topic = topic ?? throw new ArgumentNullException(nameof(topic));
-    }
-
-    /// <summary>
-    /// Gets the MQTT topic for this subscription.
-    /// </summary>
-    public string Topic { get; }
-
-    /// <summary>
-    /// Gets or sets the status color associated with the tag.
-    /// </summary>
-    public string? StatusColor
-    {
-        get => _statusColor;
+        get => _tag;
         set
         {
-            _statusColor = value;
+            _tag = value;
             OnPropertyChanged();
         }
     }
 
+    private string _endpoint = string.Empty;
     /// <summary>
-    /// Gets or sets an optional icon representing the tag.
+    /// MQTT endpoint used for testing this tag.
     /// </summary>
-    public string? Icon
+    public string Endpoint
     {
-        get => _icon;
+        get => _endpoint;
         set
         {
-            _icon = value;
+            _endpoint = value;
             OnPropertyChanged();
-    /// Gets or sets the outgoing message used for test publishing.
+        }
+    }
+
+    private string _outgoingMessage = string.Empty;
+    /// <summary>
+    /// Test message sent when validating the tag's endpoint.
     /// </summary>
     public string OutgoingMessage
     {

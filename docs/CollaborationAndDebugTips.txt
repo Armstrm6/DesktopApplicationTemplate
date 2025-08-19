@@ -8,6 +8,14 @@ Effective Prompts / Instructions that worked: n/a
 Decisions & Rationale: Use DI to share single logging service and helpers.
 Action Items: Monitor CI for Windows-specific behaviors.
 Related Commits/PRs: (this PR)
+[2025-08-19 16:11] Topic: AsyncRelayCommand namespace
+Context: Moved AsyncRelayCommand classes into Helpers namespace to match folder structure and updated tests.
+Observations: View models now import DesktopApplicationTemplate.UI.Helpers; tests compile without namespace ambiguity.
+Codex Limitations noticed: Linux environment still lacks WPF runtime, so rely on CI for test execution.
+Effective Prompts / Instructions that worked: Addressing review feedback on namespace alignment.
+Decisions & Rationale: Keeping helpers outside ViewModels clarifies intent and avoids circular dependencies.
+Action Items: Ensure future helper utilities live under Helpers namespace.
+Related Commits/PRs: (this PR)
 [2025-08-19 12:00] Topic: MQTT will options
 Context: Added will message and connection settings to MQTT view model and bound them in create/edit views.
 Observations: Properties validate ranges and log warnings; new views expose fields for user input.
@@ -329,6 +337,23 @@ Effective Prompts / Instructions that worked: Following AGENTS guidance and user
 Decisions & Rationale: Use transient lifetimes for views/view models and provide IFileDialogService for TLS cert browsing.
 Action Items: Monitor CI for DI regressions.
 Related Commits/PRs: (this PR)
+[2025-08-19 15:54] Topic: Tag subscription endpoint testing
+Context: Added per-tag endpoint field and test command in subscriptions view.
+Observations: Command publishes tag message to its endpoint via new row Test button.
+Codex Limitations noticed: Linux environment cannot render WPF; rely on CI.
+Effective Prompts / Instructions that worked: user request to expose TestTagEndpointCommand.
+Decisions & Rationale: Enable validating tag routing by publishing configured message to its endpoint.
+Action Items: Monitor CI for layout or command binding issues.
+Related Commits/PRs: (this PR)
+
+[2025-08-19 16:11] Topic: AsyncRelayCommand namespace
+Context: Moved AsyncRelayCommand classes into Helpers namespace to match folder structure and updated tests.
+Observations: View models now import DesktopApplicationTemplate.UI.Helpers; tests compile without namespace ambiguity.
+Codex Limitations noticed: Linux environment still lacks WPF runtime, so rely on CI for test execution.
+Effective Prompts / Instructions that worked: Addressing review feedback on namespace alignment.
+Decisions & Rationale: Keeping helpers outside ViewModels clarifies intent and avoids circular dependencies.
+Action Items: Ensure future helper utilities live under Helpers namespace.
+
 [2025-08-19 15:53] Topic: MQTT tag subscriptions layout
 Context: Reordered test-message controls above the topic list and aligned margins with design.
 Observations: Grid margin increased to 20 and Send button stack precedes topic list.

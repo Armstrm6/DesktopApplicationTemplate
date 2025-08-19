@@ -35,6 +35,7 @@
 - MQTT view model now exposes will-message and connection options with validation and bindings in create/edit views.
 - Dedicated window for editing MQTT connection settings with update, cancel, and unsubscribe commands accessible from the topic subscription view.
 - MqttTagSubscriptionsView and view model for managing MQTT topic subscriptions displayed when adding new MQTT services.
+- Tag subscriptions now include per-tag endpoints with in-row test publishing.
 - xUnit tests for MQTT create, subscription, and connection edit view models covering validation, command behavior, and option mapping.
 - MqttService tests now verify TLS and credential configuration alongside will messages and keep-alive options.
 - Tag subscriptions now allow per-topic QoS selection with forwarding to the MQTT client.
@@ -92,3 +93,4 @@
 - Resolved WPF build error by removing duplicate StackPanel from `MqttCreateServiceView` so the page hosts a single `ScrollViewer`.
 - Added missing `MQTTnet.Protocol` using in `MqttCreateServiceViewModel` to restore `MqttQualityOfServiceLevel` references.
 - Removed obsolete MQTT service view and dialog-based edit calls that broke build-time helper resolution.
+- Aligned `AsyncRelayCommand` namespace with Helpers folder.
