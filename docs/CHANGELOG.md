@@ -35,6 +35,7 @@
 - MqttTagSubscriptionsView and view model for managing MQTT topic subscriptions displayed when adding new MQTT services.
 - xUnit tests for MQTT create, subscription, and connection edit view models covering validation, command behavior, and option mapping.
 - MqttService tests now verify TLS and credential configuration alongside will messages and keep-alive options.
+- Subscribe/unsubscribe support for MQTT topics with QoS selection and visual feedback for subscription results.
 
 - File dialog service registered for TLS certificate selection in MQTT views.
 
