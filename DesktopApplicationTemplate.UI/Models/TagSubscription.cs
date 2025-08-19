@@ -49,6 +49,19 @@ public class TagSubscription : INotifyPropertyChanged
         {
             _icon = value;
             OnPropertyChanged();
+    /// Gets or sets the outgoing message used for test publishing.
+    /// </summary>
+    public string OutgoingMessage
+    {
+        get => _outgoingMessage;
+        set
+        {
+            _outgoingMessage = value;
+            OnPropertyChanged();
+
+            if (_outgoingMessage == value) return;
+            _outgoingMessage = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(OutgoingMessage)));
         }
     }
 
@@ -57,4 +70,5 @@ public class TagSubscription : INotifyPropertyChanged
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
 }
