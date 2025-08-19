@@ -11,6 +11,7 @@ using Moq;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Packets;
+using MQTTnet.Protocol;
 using Xunit;
 
 namespace DesktopApplicationTemplate.Tests;
@@ -121,6 +122,36 @@ public class MqttServiceViewModelTests
         var vm = CreateViewModel();
         vm.Host = "invalid_host";
         Assert.Contains("Invalid host", vm.GetErrors(nameof(vm.Host)).Cast<string>());
+    }
+
+    [Fact]
+    [TestCategory("WindowsSafe")]
+    public void KeepAliveSecondsSetter_RejectsOutOfRange()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        var vm = CreateViewModel();
+        vm.KeepAliveSeconds = -1;
+        Assert.Contains("Keep alive must be 0-65535", vm.GetErrors(nameof(vm.KeepAliveSeconds)).Cast<string>());
+    }
+
+    [Fact]
+    [TestCategory("WindowsSafe")]
+    public void ReconnectDelaySetter_RejectsNegative()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        var vm = CreateViewModel();
+        vm.ReconnectDelay = -5;
+        Assert.Contains("Reconnect delay must be >= 0", vm.GetErrors(nameof(vm.ReconnectDelay)).Cast<string>());
+    }
+
+    [Fact]
+    [TestCategory("WindowsSafe")]
+    public void WillQualityOfServiceSetter_InvalidAddsError()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        var vm = CreateViewModel();
+        vm.WillQualityOfService = (MqttQualityOfServiceLevel)99;
+        Assert.Contains("Invalid QoS", vm.GetErrors(nameof(vm.WillQualityOfService)).Cast<string>());
     }
 }
 

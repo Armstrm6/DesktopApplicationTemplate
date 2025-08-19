@@ -28,6 +28,7 @@
 - Logging service loads existing log file on startup and can reload entries when the minimum level changes.
 - Popup-based `FilterPanel` user control for in-place service filtering.
 - Active service counter displayed in the main window with real-time updates when services change.
+- MQTT view model now exposes will-message and connection options with validation and bindings in create/edit views.
 
 ### Changed
 - Updated `global.json` to require the .NET 8 SDK version `8.0.404`.
