@@ -329,6 +329,14 @@ Effective Prompts / Instructions that worked: Following AGENTS guidance and user
 Decisions & Rationale: Use transient lifetimes for views/view models and provide IFileDialogService for TLS cert browsing.
 Action Items: Monitor CI for DI regressions.
 Related Commits/PRs: (this PR)
+[2025-08-23 12:00] Topic: Tag subscription styling
+Context: Added styling metadata to tag subscriptions and refreshed view model when tags change.
+Observations: View model listens to service updates to refresh colors/icons.
+Codex Limitations noticed: Linux environment cannot run WPF tests; rely on CI.
+Effective Prompts / Instructions that worked: Following AGENTS instructions for style binding and tests.
+Decisions & Rationale: Use TagSubscription model with INotifyPropertyChanged for styling updates.
+Action Items: Validate WPF styling on Windows CI.
+
 
 [2025-08-21 00:00] Topic: MQTT view layout refresh
 Context: Aligned MQTT create, edit, and subscription views with design spacing and shared form styles.
