@@ -1,4 +1,4 @@
-using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI.Helpers;
 using System.Threading.Tasks;
 using Xunit;
 

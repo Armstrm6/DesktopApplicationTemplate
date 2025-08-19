@@ -12,28 +12,34 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
             <Button Content="Connect" Command="{Binding ConnectCommand}" Width="80"/>
             <Grid Width="200" Margin="10,0,0,0">
-                <TextBox Text="{Binding NewTopic}" x:Name="NewTopicBox" ToolTip="Topic to subscribe"/>
-                <TextBlock Text="New Topic" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0"
+                <TextBox Text="{Binding NewTag}" x:Name="NewTagBox" ToolTip="Tag to subscribe"/>
+                <TextBlock Text="New Tag" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0"
                            VerticalAlignment="Center"
-                           Visibility="{Binding Text, ElementName=NewTopicBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+                           Visibility="{Binding Text, ElementName=NewTagBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
             </Grid>
-            <Button Content="Add" Command="{Binding AddTopicCommand}" Width="50" Margin="5,0,0,0"/>
-            <Button Content="Remove" Command="{Binding RemoveTopicCommand}" Width="70" Margin="5,0,0,0"/>
+            <Button Content="Add" Command="{Binding AddTagCommand}" Width="50" Margin="5,0,0,0"/>
+            <Button Content="Remove" Command="{Binding RemoveTagCommand}" Width="70" Margin="5,0,0,0"/>
         </StackPanel>
-        <ListBox Grid.Row="1" ItemsSource="{Binding Topics}" SelectedItem="{Binding SelectedTopic}"/>
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,10,0,0">
-            <Grid Width="200">
-                <TextBox Text="{Binding TestMessage}" x:Name="TestMessageBox" ToolTip="Message to send"/>
-                <TextBlock Text="Test Message" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0"
-                           VerticalAlignment="Center"
-                           Visibility="{Binding Text, ElementName=TestMessageBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
-            </Grid>
-            <Button Content="Send" Command="{Binding PublishTestMessageCommand}" Width="60" Margin="5,0,0,0"/>
-        </StackPanel>
+        <DataGrid Grid.Row="1" ItemsSource="{Binding Subscriptions}" SelectedItem="{Binding SelectedSubscription}"
+                  AutoGenerateColumns="False" HeadersVisibility="Column" CanUserAddRows="False">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Tag" Binding="{Binding Tag}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Endpoint" Binding="{Binding Endpoint, UpdateSourceTrigger=PropertyChanged}"/>
+                <DataGridTextColumn Header="Message" Binding="{Binding OutgoingMessage, UpdateSourceTrigger=PropertyChanged}"/>
+                <DataGridTemplateColumn Header="Test">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Content="Test" Width="50"
+                                    Command="{Binding DataContext.TestTagEndpointCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                    CommandParameter="{Binding}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </Page>
