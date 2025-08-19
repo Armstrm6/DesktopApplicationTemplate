@@ -44,6 +44,7 @@
 - CI workflow now runs on pushes to `feature/**` and `bugfix/**` branches and supports manual triggers, ensuring tests execute on GitHub.
 - `MqttCreateServiceView`, `MqttTagSubscriptionsView`, and `MqttEditConnectionView` along with their view models are now registered as transient services.
 - `self-heal` workflow now monitors the unified `CI` pipeline.
+- MQTT create, edit, and subscription views now follow design spacing with shared form styles and accessibility names.
 - `TcpServiceViewModel` now evaluates scripts asynchronously and streamlined server toggle logging.
 - Refactored `MqttService` with a single options-based constructor, clean reconnect logic, and consolidated publish methods.
 - Extracted `IMessageRoutingService`, removed legacy `Route` API, and improved thread-safe message tracking with optional logging.
