@@ -29,7 +29,7 @@ public class HttpServiceNetworkTests
         listener.Prefixes.Add($"http://localhost:{port}/");
         listener.Start();
 
-        var respondTask = Task.Run(async () =>
+        var listenerTask = Task.Run(async () =>
         {
             var ctx = await listener.GetContextAsync();
             var buffer = Encoding.UTF8.GetBytes("ok");
@@ -43,7 +43,7 @@ public class HttpServiceNetworkTests
         var vm = new HttpServiceViewModel(helper) { Url = $"http://localhost:{port}/" };
         await vm.SendRequestAsync();
 
-        await respondTask;
+        await listenerTask;
 
         Assert.Equal(200, vm.StatusCode);
         Assert.Equal("ok", vm.ResponseBody);

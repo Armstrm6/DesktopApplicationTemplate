@@ -94,9 +94,9 @@ namespace DesktopApplicationTemplate.Tests
                 add { }
                 remove { }
             }
-            public Task<NetworkConfiguration> GetConfigurationAsync(CancellationToken cancellationToken = default)
+            public Task<NetworkConfiguration> GetConfigurationAsync(CancellationToken ct = default)
                 => Task.FromResult(new NetworkConfiguration());
-            public Task ApplyConfigurationAsync(NetworkConfiguration configuration, CancellationToken cancellationToken = default)
+            public Task ApplyConfigurationAsync(NetworkConfiguration configuration, CancellationToken ct = default)
                 => Task.CompletedTask;
         }
     }
