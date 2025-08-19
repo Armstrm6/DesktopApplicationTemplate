@@ -132,10 +132,18 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public ServiceViewModel? SelectedService
         {
             get => _selectedService;
-            set { _selectedService = value; OnPropertyChanged(); OnPropertyChanged(nameof(DisplayLogs)); }
+            set
+            {
+                _selectedService = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(DisplayLogs));
+                (RemoveServiceCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                (EditServiceCommand as RelayCommand<ServiceViewModel?>)?.RaiseCanExecuteChanged();
+            }
         }
         public ICommand AddServiceCommand { get; }
         public ICommand RemoveServiceCommand { get; }
+        public ICommand EditServiceCommand { get; }
         public event Action<ServiceViewModel>? EditRequested;
         public int ServicesCreated => Services.Count;
         public int CurrentActiveServices => Services.Count(s => s.IsActive);
@@ -174,6 +182,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
             AddServiceCommand = new RelayCommand(AddService);
             RemoveServiceCommand = new RelayCommand(RemoveSelectedService, () => SelectedService != null);
+            EditServiceCommand = new RelayCommand<ServiceViewModel?>(EditService, svc => svc != null);
             FilteredServices = CollectionViewSource.GetDefaultView(Services);
             Filters.PropertyChanged += (_, __) => ApplyFilters();
             LoadServices();
@@ -196,6 +205,14 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         }
 
         public event Action<string>? AddMqttServiceRequested;
+        private void EditService(ServiceViewModel? service)
+        {
+            var target = service ?? SelectedService;
+            if (target != null)
+            {
+                EditRequested?.Invoke(target);
+            }
+        }
 
         private void AddService()
         {

@@ -29,6 +29,7 @@
 - Unit tests covering default service name generation for all service types.
 - Integrated `CsvServiceView` page, embedding CSV Creator configuration within the main window.
 - Logging service loads existing log file on startup and can reload entries when the minimum level changes.
+- Tag subscriptions expose styling metadata (color/icon) and update UI when tag data changes.
 - Popup-based `FilterPanel` user control for in-place service filtering.
 - Active service counter displayed in the main window with real-time updates when services change.
 - MQTT view model now exposes will-message and connection options with validation and bindings in create/edit views.
@@ -47,6 +48,7 @@
 - CI workflow now runs on pushes to `feature/**` and `bugfix/**` branches and supports manual triggers, ensuring tests execute on GitHub.
 - `MqttCreateServiceView`, `MqttTagSubscriptionsView`, and `MqttEditConnectionView` along with their view models are now registered as transient services.
 - `self-heal` workflow now monitors the unified `CI` pipeline.
+- MQTT create, edit, and subscription views now follow design spacing with shared form styles and accessibility names.
 - `TcpServiceViewModel` now evaluates scripts asynchronously and streamlined server toggle logging.
 - Refactored `MqttService` with a single options-based constructor, clean reconnect logic, and consolidated publish methods.
 - Extracted `IMessageRoutingService`, removed legacy `Route` API, and improved thread-safe message tracking with optional logging.
@@ -56,6 +58,7 @@
 - Service creation now presents service types as icon bubbles and auto-generates default names upon selection.
 - Main window routes MQTT service creation through a dedicated create view and opens the tag subscriptions view after setup. Editing an existing MQTT service now uses the connection edit view and persists updated options.
 - MQTT service creation now occurs within the main window frame and returns to the previous view after completion, removing the popup window dependency.
+- Service context menus invoke a new `EditServiceCommand`; editing an MQTT service opens the connection view with current options preloaded.
 
 ### Removed
 - Placeholder "Desktop Template" text from the navigation bar.

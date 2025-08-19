@@ -83,7 +83,9 @@
                                     <Border CornerRadius="8" BorderBrush="Gray" BorderThickness="1" Padding="5" Margin="2">
                                         <Border.ContextMenu>
                                             <ContextMenu>
-                                                <MenuItem Header="Edit Service" Click="EditServiceMenu_Click" />
+                                                <MenuItem Header="Edit Service"
+                                                          Command="{Binding DataContext.EditServiceCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                          CommandParameter="{Binding}" />
                                                 <MenuItem Header="Rename Service" Click="RenameServiceMenu_Click" />
                                                 <MenuItem Header="Delete Service" Click="DeleteServiceMenu_Click" />
                                                 <MenuItem Header="Change Color" Click="ChangeColorMenu_Click" />

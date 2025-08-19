@@ -1,72 +1,54 @@
+using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-
-using System.ComponentModel;
-using MQTTnet.Protocol;
 
 namespace DesktopApplicationTemplate.UI.Models;
 
 /// <summary>
-/// Represents a tag subscription with an associated outgoing test message.
+/// Represents a subscribed MQTT tag with optional styling metadata.
 /// </summary>
 public class TagSubscription : INotifyPropertyChanged
 {
-    private string _tag = string.Empty;
+    private string? _statusColor;
+    private string? _icon;
 
     /// <summary>
-    /// Tag or topic to subscribe to.
+    /// Initializes a new instance of the <see cref="TagSubscription"/> class.
     /// </summary>
-    public string Tag
+    /// <param name="topic">The MQTT topic.</param>
+    public TagSubscription(string topic)
     {
-        get => _tag;
+        Topic = topic ?? throw new ArgumentNullException(nameof(topic));
+    }
+
+    /// <summary>
+    /// Gets the MQTT topic for this subscription.
+    /// </summary>
+    public string Topic { get; }
+
+    /// <summary>
+    /// Gets or sets the status color associated with the tag.
+    /// </summary>
+    public string? StatusColor
+    {
+        get => _statusColor;
         set
         {
-            _tag = value;
+            _statusColor = value;
             OnPropertyChanged();
         }
     }
 
-    private string _outgoingMessage = string.Empty;
-
     /// <summary>
-    /// Message published when testing this tag.
-/// Represents a topic subscription with QoS and an outgoing test message.
-/// </summary>
-public class TagSubscription : INotifyPropertyChanged
-{
-    private string _topic = string.Empty;
-    private MqttQualityOfServiceLevel _qos;
-    private string _outgoingMessage = string.Empty;
-
-    /// <summary>
-    /// Gets or sets the topic.
+    /// Gets or sets an optional icon representing the tag.
     /// </summary>
-    public string Topic
+    public string? Icon
     {
-        get => _topic;
+        get => _icon;
         set
         {
-            if (_topic == value) return;
-            _topic = value;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Topic)));
-        }
-    }
-
-    /// <summary>
-    /// Gets or sets the quality of service level.
-    /// </summary>
-    public MqttQualityOfServiceLevel QoS
-    {
-        get => _qos;
-        set
-        {
-            if (_qos == value) return;
-            _qos = value;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(QoS)));
-        }
-    }
-
-    /// <summary>
+            _icon = value;
+            OnPropertyChanged();
     /// Gets or sets the outgoing message used for test publishing.
     /// </summary>
     public string OutgoingMessage

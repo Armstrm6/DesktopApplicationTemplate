@@ -6,6 +6,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Themes/ToggleSwitch.xaml" />
                 <ResourceDictionary Source="Themes/BubblyWindow.xaml" />
+                <ResourceDictionary Source="Themes/Forms.xaml" />
                 <ResourceDictionary Source="Themes/MqttTagSubscriptionsView.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <Style TargetType="TextBox">

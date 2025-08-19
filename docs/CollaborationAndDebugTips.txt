@@ -336,6 +336,30 @@ Codex Limitations noticed: pwsh unavailable for add-tip script; entry added manu
 Effective Prompts / Instructions that worked: Followed AGENTS.md to update docs and tests.
 Decisions & Rationale: Used view model event to request navigation and added unit test to verify event raising.
 Action Items: Verify navigation restoration and service addition in future UI tests.
+[2025-08-23 12:00] Topic: Tag subscription styling
+Context: Added styling metadata to tag subscriptions and refreshed view model when tags change.
+Observations: View model listens to service updates to refresh colors/icons.
+Codex Limitations noticed: Linux environment cannot run WPF tests; rely on CI.
+Effective Prompts / Instructions that worked: Following AGENTS instructions for style binding and tests.
+Decisions & Rationale: Use TagSubscription model with INotifyPropertyChanged for styling updates.
+Action Items: Validate WPF styling on Windows CI.
+
+
+[2025-08-21 00:00] Topic: MQTT view layout refresh
+Context: Aligned MQTT create, edit, and subscription views with design spacing and shared form styles.
+Observations: Centralized label/input margins in a new Forms resource dictionary and added AutomationProperties names for accessibility tests.
+Codex Limitations noticed: Linux environment cannot run WPF tests; rely on CI.
+Effective Prompts / Instructions that worked: Referencing design XMLs and consolidating repeated styles.
+Decisions & Rationale: Use shared styles for consistency and validate key buttons via snapshot tests.
+Action Items: Monitor CI for any layout regressions on Windows.
+[2025-08-20 18:00] Topic: EditServiceCommand for MQTT
+Context: Added command-based editing for services and ensured MQTT edits load existing connection options.
+Observations: Generic RelayCommand enabled passing the service from context menus.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: Followed user request to prepopulate edit view model via options.
+Decisions & Rationale: Use event-driven navigation to decouple UI and view models.
+Action Items: Monitor CI for integration test stability.
+
 [2025-08-19 15:53] Topic: MQTT tag message persistence
 Context: Added per-tag outgoing message storage and bindings in subscriptions view.
 Observations: Editing a tag's test message now persists when switching selections.

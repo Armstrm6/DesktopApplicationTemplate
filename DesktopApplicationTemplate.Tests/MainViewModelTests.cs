@@ -6,6 +6,9 @@ using System.IO;
 using System.Linq;
 using DesktopApplicationTemplate.Models;
 using Xunit;
+using MQTTnet.Client;
+using Microsoft.Extensions.Options;
+using MQTTnet;
 
 namespace DesktopApplicationTemplate.Tests
 {
@@ -132,6 +135,42 @@ namespace DesktopApplicationTemplate.Tests
             vm.RefreshLogs();
 
             Assert.True(raised);
+            ConsoleTestLogger.LogPass();
+        }
+
+        [Fact]
+        [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
+        public void EditServiceCommand_LoadsCurrentMqttOptions()
+        {
+            var options = Options.Create(new MqttServiceOptions
+            {
+                Host = "existing",
+                Port = 1883,
+                ClientId = "client"
+            });
+            var client = new Mock<IMqttClient>();
+            client.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new MqttClientConnectResult());
+            var service = new MqttService(client.Object, options, Mock.Of<IMessageRoutingService>(), Mock.Of<ILoggingService>());
+
+            var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
+            var csv = new CsvService(new CsvViewerViewModel(configPath));
+            var network = new Mock<INetworkConfigurationService>();
+            var networkVm = new NetworkConfigurationViewModel(network.Object);
+            var vm = new MainViewModel(csv, networkVm, network.Object);
+            var svc = new ServiceViewModel { DisplayName = "MQTT - Test", ServiceType = "MQTT" };
+            vm.Services.Add(svc);
+
+            MqttEditConnectionViewModel? captured = null;
+            vm.EditRequested += _ => captured = new MqttEditConnectionViewModel(service, options);
+
+            vm.EditServiceCommand.Execute(svc);
+
+            Assert.NotNull(captured);
+            Assert.Equal("existing", captured!.Host);
+            Assert.Equal(1883, captured.Port);
+            Assert.Equal("client", captured.ClientId);
             ConsoleTestLogger.LogPass();
         }
 

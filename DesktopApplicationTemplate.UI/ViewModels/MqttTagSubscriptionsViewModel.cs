@@ -1,11 +1,11 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Helpers;
-
 
 using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.Services;
@@ -35,6 +35,11 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
     {
         _service = service ?? throw new ArgumentNullException(nameof(service));
 
+        Subscriptions = new ObservableCollection<TagSubscription>(_service.TagSubscriptions);
+        _service.TagSubscriptionChanged += OnTagSubscriptionChanged;
+
+        AddTopicCommand = new RelayCommand(AddTopic);
+        RemoveTopicCommand = new RelayCommand(RemoveTopic, () => SelectedSubscription != null);
         TagSubscriptions = new ObservableCollection<TagSubscription>();
         AddTopicCommand = new RelayCommand(AddTopic);
         RemoveTopicCommand = new RelayCommand(RemoveTopic, () => SelectedSubscription != null);
@@ -54,6 +59,9 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
     public ILoggingService? Logger { get; set; }
 
     /// <summary>
+    /// Tag subscriptions tracked by this service.
+    /// </summary>
+    public ObservableCollection<TagSubscription> Subscriptions { get; }
     /// Subscriptions maintained by this service.
     /// </summary>
     public ObservableCollection<TagSubscription> TagSubscriptions { get; }
@@ -75,6 +83,13 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
     }
 
     /// <summary>
+    /// Gets or sets the selected tag subscription.
+    /// </summary>
+    public TagSubscription? SelectedSubscription
+    {
+        get => _selectedSubscription;
+        set
+        {
     /// Gets or sets the selected subscription.
     /// </summary>
     /// Gets or sets the QoS level for new subscriptions.
@@ -160,6 +175,7 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
     {
         if (string.IsNullOrWhiteSpace(NewTopic))
             return;
+        _service.UpdateTagSubscription(new TagSubscription(NewTopic));
         TagSubscriptions.Add(new TagSubscription { Tag = NewTopic });
         Topics.Add(new TagSubscription { Topic = NewTopic, QoS = MqttQualityOfServiceLevel.AtMostOnce });
         NewTopic = string.Empty;
@@ -184,6 +200,7 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
     {
         if (SelectedSubscription is null)
             return;
+
         TagSubscriptions.Remove(SelectedSubscription);
 
         try
@@ -198,6 +215,7 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
         SelectedSubscription = null;
     }
 
+    private bool CanPublishTest() => SelectedSubscription != null && !string.IsNullOrWhiteSpace(TestMessage);
     private bool CanPublishTest() => SelectedSubscription != null && !string.IsNullOrWhiteSpace(SelectedSubscription.OutgoingMessage);
 
     /// <summary>
@@ -223,6 +241,21 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
         if (!CanPublishTest())
             return;
         Logger?.Log("MQTT test publish start", LogLevel.Debug);
+        await _service.PublishAsync(SelectedSubscription!.Topic, TestMessage).ConfigureAwait(false);
+        Logger?.Log("MQTT test publish finished", LogLevel.Debug);
+    }
+
+    private void OnTagSubscriptionChanged(object? sender, TagSubscription subscription)
+    {
+        var existing = Subscriptions.FirstOrDefault(t => t.Topic == subscription.Topic);
+        if (existing is null)
+        {
+            Subscriptions.Add(subscription);
+        }
+        else
+        {
+            existing.StatusColor = subscription.StatusColor;
+            existing.Icon = subscription.Icon;
         await _service.PublishAsync(SelectedSubscription!.Tag, SelectedSubscription.OutgoingMessage).ConfigureAwait(false);
         await _service.PublishAsync(SelectedTopic!.Topic, TestMessage).ConfigureAwait(false);
         await _service.PublishAsync(SelectedSubscription!.Topic, SelectedSubscription.OutgoingMessage).ConfigureAwait(false);

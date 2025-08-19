@@ -2,6 +2,7 @@
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
+      xmlns:models="clr-namespace:DesktopApplicationTemplate.UI.Models"
       xmlns:mqtt="clr-namespace:MQTTnet.Protocol;assembly=MQTTnet"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -23,19 +24,34 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-            <Button Content="Connect" Command="{Binding ConnectCommand}" Width="80"/>
+            <Button x:Name="ConnectButton" Content="Connect" Command="{Binding ConnectCommand}" Width="80" AutomationProperties.Name="Connect MQTT"/>
             <Grid Width="200" Margin="10,0,0,0">
-                <TextBox Text="{Binding NewTopic}" x:Name="NewTopicBox" ToolTip="Topic to subscribe"/>
+                <TextBox Text="{Binding NewTopic}" x:Name="NewTopicBox" ToolTip="Topic to subscribe" Style="{StaticResource FormField}"/>
                 <TextBlock Text="New Topic" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0"
                            VerticalAlignment="Center"
                            Visibility="{Binding Text, ElementName=NewTopicBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
             </Grid>
-            <Button Content="Add" Command="{Binding AddTopicCommand}" Width="50" Margin="5,0,0,0"/>
-            <Button Content="Remove" Command="{Binding RemoveTopicCommand}" Width="70" Margin="5,0,0,0"/>
+            <Button x:Name="AddButton" Content="Add" Command="{Binding AddTopicCommand}" Width="50" Margin="5,0,0,0" AutomationProperties.Name="Add Topic"/>
+            <Button x:Name="RemoveButton" Content="Remove" Command="{Binding RemoveTopicCommand}" Width="70" Margin="5,0,0,0" AutomationProperties.Name="Remove Topic"/>
         </StackPanel>
+        <ListBox Grid.Row="1" ItemsSource="{Binding Subscriptions}" SelectedItem="{Binding SelectedSubscription}">
+            <ListBox.ItemTemplate>
+                <DataTemplate DataType="{x:Type models:TagSubscription}">
+                    <Border BorderBrush="{Binding StatusColor}" BorderThickness="2" CornerRadius="4" Padding="4" Margin="0,2">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="{Binding Icon}" Width="16" Height="16" Margin="0,0,5,0"
+                                   Visibility="{Binding Icon, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+                            <TextBlock Text="{Binding Topic}"/>
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
         <ListBox Grid.Row="1" ItemsSource="{Binding TagSubscriptions}" SelectedItem="{Binding SelectedSubscription}" DisplayMemberPath="Tag"/>
         <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,10,0,0">
             <Grid Width="200">
+                <TextBox Text="{Binding TestMessage}" x:Name="TestMessageBox" ToolTip="Message to send" Style="{StaticResource FormField}"/>
                 <TextBox Text="{Binding SelectedSubscription.OutgoingMessage, UpdateSourceTrigger=PropertyChanged}" x:Name="TestMessageBox" ToolTip="Message to send"/>
         <ListBox Grid.Row="1" ItemsSource="{Binding Topics}" SelectedItem="{Binding SelectedTopic}">
             <ListBox.ItemTemplate>
@@ -83,7 +99,7 @@
                            VerticalAlignment="Center"
                            Visibility="{Binding Text, ElementName=TestMessageBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
             </Grid>
-            <Button Content="Send" Command="{Binding PublishTestMessageCommand}" Width="60" Margin="5,0,0,0"/>
+            <Button x:Name="SendButton" Content="Send" Command="{Binding PublishTestMessageCommand}" Width="60" Margin="5,0,0,0" AutomationProperties.Name="Send Test Message"/>
         </StackPanel>
     </Grid>
 </Page>
