@@ -262,6 +262,14 @@ Decisions & Rationale: Explicitly specify one-way bindings for read-only propert
 Action Items: Rely on CI to validate on Windows.
 Related Commits/PRs: (this PR)
 
+[2025-08-19 10:00] Topic: MQTT will/reconnect options
+Context: Extended MQTT client to apply will message, QoS, retain flag, keep-alive, clean session, and reconnect delay with structured option logging.
+Observations: ConnectAsync now loops using ReconnectDelay after failures to improve resilience.
+Codex Limitations noticed: dotnet SDK missing; tests could not run locally.
+Effective Prompts / Instructions that worked: request to update MqttService.ConnectAsync.
+Decisions & Rationale: Honor retry delay and expose connection options for observability.
+Action Items: Rely on CI for verification of MQTT features.
+
 [2025-08-19 12:00] Topic: MQTT will options
 Context: Added will message and connection settings to MQTT view model and bound them in create/edit views.
 Observations: Properties validate ranges and log warnings; new views expose fields for user input.

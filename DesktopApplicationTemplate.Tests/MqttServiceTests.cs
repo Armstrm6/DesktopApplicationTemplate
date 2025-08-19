@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -55,6 +57,57 @@ public class MqttServiceTests
         await service.ConnectAsync();
 
         client.Verify(c => c.DisconnectAsync(It.IsAny<MqttClientDisconnectOptions?>(), It.IsAny<CancellationToken>()), Times.Once);
+        ConsoleTestLogger.LogPass();
+    }
+
+    [Fact]
+    [TestCategory("CodexSafe")]
+    public async Task ConnectAsync_AppliesWillAndKeepAliveOptions()
+    {
+        var client = new Mock<IMqttClient>();
+        client.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new MqttClientConnectResult());
+        var options = Options.Create(new MqttServiceOptions
+        {
+            Host = "h",
+            Port = 1,
+            ClientId = "id",
+            WillTopic = "t",
+            WillPayload = "p",
+            WillQualityOfService = MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce,
+            WillRetain = true,
+            KeepAliveSeconds = 10,
+            CleanSession = false
+        });
+        var service = new MqttService(client.Object, options, Mock.Of<IMessageRoutingService>(), Mock.Of<ILoggingService>());
+
+        await service.ConnectAsync();
+
+        client.Verify(c => c.ConnectAsync(It.Is<MqttClientOptions>(o =>
+            o.WillTopic == options.Value.WillTopic &&
+            o.WillPayload.SequenceEqual(System.Text.Encoding.UTF8.GetBytes(options.Value.WillPayload!)) &&
+            o.WillQualityOfServiceLevel == options.Value.WillQualityOfService &&
+            o.WillRetain == options.Value.WillRetain &&
+            o.KeepAlivePeriod == TimeSpan.FromSeconds(options.Value.KeepAliveSeconds) &&
+            o.CleanSession == options.Value.CleanSession
+        ), It.IsAny<CancellationToken>()), Times.Once);
+        ConsoleTestLogger.LogPass();
+    }
+
+    [Fact]
+    [TestCategory("CodexSafe")]
+    public async Task ConnectAsync_Retries_When_Failure_And_ReconnectDelay_Set()
+    {
+        var client = new Mock<IMqttClient>();
+        client.SetupSequence(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new MQTTnet.Exceptions.MqttCommunicationException("fail"))
+            .ReturnsAsync(new MqttClientConnectResult());
+        var options = Options.Create(new MqttServiceOptions { Host = "h", Port = 1, ClientId = "id", ReconnectDelay = TimeSpan.FromMilliseconds(1) });
+        var service = new MqttService(client.Object, options, Mock.Of<IMessageRoutingService>(), Mock.Of<ILoggingService>());
+
+        await service.ConnectAsync();
+
+        client.Verify(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
         ConsoleTestLogger.LogPass();
     }
 
