@@ -1,7 +1,7 @@
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using Moq;
@@ -52,9 +52,9 @@ public class MqttTagSubscriptionsViewModelTests
         client.Setup(c => c.PublishAsync(It.IsAny<MQTTnet.MqttApplicationMessage>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new MqttClientPublishResult(null, MqttClientPublishReasonCode.Success, null!, Array.Empty<MQTTnet.Packets.MqttUserProperty>()));
         var vm = CreateViewModel(client);
-        vm.Topics.Add("t");
-        vm.SelectedTopic = "t";
-        vm.TestMessage = "m";
+        var sub = new TagSubscription { Tag = "t", OutgoingMessage = "m" };
+        vm.TagSubscriptions.Add(sub);
+        vm.SelectedSubscription = sub;
         await vm.PublishTestAsync();
         client.Verify(c => c.PublishAsync(It.Is<MQTTnet.MqttApplicationMessage>(m => m.Topic == "t"), It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -80,7 +80,7 @@ public class MqttTagSubscriptionsViewModelTests
         var vm = CreateViewModel();
         vm.NewTopic = "topic";
         vm.AddTopicCommand.Execute(null);
-        Assert.Contains("topic", vm.Topics);
+        Assert.Contains(vm.TagSubscriptions, t => t.Tag == "topic");
         Assert.Equal(string.Empty, vm.NewTopic);
     }
 
@@ -92,19 +92,42 @@ public class MqttTagSubscriptionsViewModelTests
         var vm = CreateViewModel();
         vm.NewTopic = "   ";
         vm.AddTopicCommand.Execute(null);
-        Assert.Empty(vm.Topics);
+        Assert.Empty(vm.TagSubscriptions);
     }
 
     [Fact]
     [TestCategory("WindowsSafe")]
-    public void RemoveTopic_RemovesSelectedTopic()
+    public void RemoveTopic_RemovesSelectedSubscription()
     {
         if (!OperatingSystem.IsWindows()) return;
         var vm = CreateViewModel();
-        vm.Topics.Add("t");
-        vm.SelectedTopic = "t";
+        var sub = new TagSubscription { Tag = "t" };
+        vm.TagSubscriptions.Add(sub);
+        vm.SelectedSubscription = sub;
         vm.RemoveTopicCommand.Execute(null);
-        Assert.Empty(vm.Topics);
-        Assert.Null(vm.SelectedTopic);
+        Assert.Empty(vm.TagSubscriptions);
+        Assert.Null(vm.SelectedSubscription);
+
+    }
+
+    [Fact]
+    [TestCategory("WindowsSafe")]
+    public void SelectingTag_LoadsAndPersistsMessage()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        var vm = CreateViewModel();
+        var sub1 = new TagSubscription { Tag = "t1", OutgoingMessage = "m1" };
+        var sub2 = new TagSubscription { Tag = "t2", OutgoingMessage = "m2" };
+        vm.TagSubscriptions.Add(sub1);
+        vm.TagSubscriptions.Add(sub2);
+
+        vm.SelectedSubscription = sub1;
+        Assert.Equal("m1", vm.SelectedSubscription?.OutgoingMessage);
+
+        vm.SelectedSubscription!.OutgoingMessage = "updated";
+        vm.SelectedSubscription = sub2;
+
+        Assert.Equal("updated", sub1.OutgoingMessage);
+        Assert.Equal("m2", vm.SelectedSubscription?.OutgoingMessage);
     }
 }
