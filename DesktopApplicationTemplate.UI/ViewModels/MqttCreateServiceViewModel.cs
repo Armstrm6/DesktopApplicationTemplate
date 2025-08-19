@@ -6,6 +6,7 @@ using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Services;
+using MQTTnet.Protocol;
 
 namespace DesktopApplicationTemplate.UI.ViewModels;
 

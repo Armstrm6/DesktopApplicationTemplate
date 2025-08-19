@@ -295,3 +295,12 @@ Effective Prompts / Instructions that worked: Following merge instructions to en
 Decisions & Rationale: Keep ScrollViewer with Grid as the sole content to maintain layout.
 Action Items: Monitor CI for other XAML compilation issues.
 Related Commits/PRs: (this PR)
+
+[2025-08-19 15:10] Topic: Mqtt QoS enum namespace
+Context: Build failed because `MqttCreateServiceViewModel` lacked the `MQTTnet.Protocol` import.
+Observations: Adding the using directive restored `MqttQualityOfServiceLevel` references.
+Codex Limitations noticed: `dotnet test` exposed additional WPF compile errors on Linux.
+Effective Prompts / Instructions that worked: n/a
+Decisions & Rationale: Ensure files referencing MQTT enums include `MQTTnet.Protocol`.
+Action Items: Rely on CI for full Windows validation.
+Related Commits/PRs: (this PR)
