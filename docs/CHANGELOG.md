@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 ### Added
+- Each MQTT tag subscription now retains its own outgoing test message, and the test message box binds to the selected tag's message.
 - Wizard-style MQTT service creation view capturing broker, credentials, TLS, and will message options.
 - Expanded MQTT service with option-based connections, TLS/WebSocket support, and structured logging.
 - MQTT connections now support will message configuration, QoS, retain flag, keep-alive period, clean session, and reconnect delay with retry and option logging.
@@ -35,6 +36,8 @@
 - MqttTagSubscriptionsView and view model for managing MQTT topic subscriptions displayed when adding new MQTT services.
 - xUnit tests for MQTT create, subscription, and connection edit view models covering validation, command behavior, and option mapping.
 - MqttService tests now verify TLS and credential configuration alongside will messages and keep-alive options.
+- Tag subscriptions now allow per-topic QoS selection with forwarding to the MQTT client.
+- Subscribe/unsubscribe support for MQTT topics with QoS selection and visual feedback for subscription results.
 
 - File dialog service registered for TLS certificate selection in MQTT views.
 
