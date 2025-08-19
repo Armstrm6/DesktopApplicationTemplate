@@ -8,6 +8,14 @@ Effective Prompts / Instructions that worked: n/a
 Decisions & Rationale: Use DI to share single logging service and helpers.
 Action Items: Monitor CI for Windows-specific behaviors.
 Related Commits/PRs: (this PR)
+[2025-08-19 12:00] Topic: MQTT will options
+Context: Added will message and connection settings to MQTT view model and bound them in create/edit views.
+Observations: Properties validate ranges and log warnings; new views expose fields for user input.
+Codex Limitations noticed: Linux environment cannot run WPF tests; rely on CI.
+Effective Prompts / Instructions that worked: Following AGENTS instructions and user request for property mirroring.
+Decisions & Rationale: Mirror `MqttServiceOptions` in view model for consistency and user configurability.
+Action Items: Monitor CI for Windows-specific UI issues.
+Related Commits/PRs: (this PR)
 [2025-08-16 16:30] Topic: WPF reference cleanup
 Context: Build failed due to invalid `MouseDoubleClick` handler and ambiguous WinForms references.
 Observations: Removed WinForms usage, added WPF media imports, and integrated double-click logic into existing handler.
@@ -159,6 +167,15 @@ Decisions & Rationale: Expose service metadata from the view model for UI bindin
 Action Items: Rely on CI for cross-platform validation.
 Related Commits/PRs: (this PR)
 
+[2025-08-19 12:00] Topic: MQTT will options
+Context: Added will message and connection settings to MQTT view model and bound them in create/edit views.
+Observations: Properties validate ranges and log warnings; new views expose fields for user input.
+Codex Limitations noticed: Linux environment cannot run WPF tests; rely on CI.
+Effective Prompts / Instructions that worked: Following AGENTS instructions and user request for property mirroring.
+Decisions & Rationale: Mirror `MqttServiceOptions` in view model for consistency and user configurability.
+Action Items: Monitor CI for Windows-specific UI issues.
+Related Commits/PRs: (this PR)
+
 [2025-08-18 21:00] Topic: Service name uniqueness
 Context: Prevented duplicate service names during creation and rename operations.
 Observations: New services and renames auto-append numeric suffixes when collisions occur.
@@ -244,6 +261,15 @@ Effective Prompts / Instructions that worked: Error message pointing to CurrentA
 Decisions & Rationale: Explicitly specify one-way bindings for read-only properties.
 Action Items: Rely on CI to validate on Windows.
 Related Commits/PRs: (this PR)
+
+[2025-08-19 12:00] Topic: MQTT will options
+Context: Added will message and connection settings to MQTT view model and bound them in create/edit views.
+Observations: Properties validate ranges and log warnings; new views expose fields for user input.
+Codex Limitations noticed: Linux environment cannot run WPF tests; rely on CI.
+Effective Prompts / Instructions that worked: Following AGENTS instructions and user request for property mirroring.
+Decisions & Rationale: Mirror `MqttServiceOptions` in view model for consistency and user configurability.
+Action Items: Monitor CI for Windows-specific UI issues.
+
 [2025-08-19 14:40] Topic: MQTT tag subscriptions view
 Context: Added dedicated view and view model for managing MQTT topic subscriptions and test messages.
 Observations: New view displays topics on creation and connects service when activated.

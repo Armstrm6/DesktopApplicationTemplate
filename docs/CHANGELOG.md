@@ -29,6 +29,7 @@
 - Logging service loads existing log file on startup and can reload entries when the minimum level changes.
 - Popup-based `FilterPanel` user control for in-place service filtering.
 - Active service counter displayed in the main window with real-time updates when services change.
+- MQTT view model now exposes will-message and connection options with validation and bindings in create/edit views.
 - Dedicated window for editing MQTT connection settings with update, cancel, and unsubscribe commands accessible from the topic subscription view.
 - MqttTagSubscriptionsView and view model for managing MQTT topic subscriptions displayed when adding new MQTT services.
 

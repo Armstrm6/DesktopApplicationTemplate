@@ -1,17 +1,16 @@
+using System.Windows.Controls;
+using DesktopApplicationTemplate.Core.Services;
 using System.Windows;
 using DesktopApplicationTemplate.UI.ViewModels;
 
 namespace DesktopApplicationTemplate.UI.Views;
 
-/// <summary>
-/// Interaction logic for editing MQTT connection settings.
-/// </summary>
-public partial class MqttEditConnectionView : Window
+public partial class MqttEditConnectionView : Page
 {
-    public MqttEditConnectionView(MqttEditConnectionViewModel viewModel)
+    public MqttEditConnectionView(MqttServiceViewModel vm, ILoggingService logger)
     {
         InitializeComponent();
-        DataContext = viewModel;
-        viewModel.RequestClose += (_, _) => Close();
+        DataContext = vm;
+        vm.Logger = logger;
     }
 }
