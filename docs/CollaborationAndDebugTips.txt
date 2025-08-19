@@ -244,3 +244,11 @@ Effective Prompts / Instructions that worked: Error message pointing to CurrentA
 Decisions & Rationale: Explicitly specify one-way bindings for read-only properties.
 Action Items: Rely on CI to validate on Windows.
 Related Commits/PRs: (this PR)
+[2025-08-19 14:40] Topic: MQTT tag subscriptions view
+Context: Added dedicated view and view model for managing MQTT topic subscriptions and test messages.
+Observations: New view displays topics on creation and connects service when activated.
+Codex Limitations noticed: Windows desktop tests cannot run in container.
+Effective Prompts / Instructions that worked: Followed AGENTS instructions and existing MQTT patterns.
+Decisions & Rationale: Replace basic MQTT view with subscription-focused view for clarity.
+Action Items: Verify on Windows via CI.
+Related Commits/PRs: (this PR)

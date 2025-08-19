@@ -87,7 +87,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 "HID" => App.AppHost.Services.GetRequiredService<HidViews>(),
                 "Heartbeat" => App.AppHost.Services.GetRequiredService<HeartbeatView>(),
                 "SCP" => App.AppHost.Services.GetRequiredService<SCPServiceView>(),
-                "MQTT" => App.AppHost.Services.GetRequiredService<MQTTServiceView>(),
+                "MQTT" => App.AppHost.Services.GetRequiredService<MqttTagSubscriptionsView>(),
                 "FTP" => App.AppHost.Services.GetRequiredService<FTPServiceView>(),
                 "CSV Creator" => App.AppHost.Services.GetRequiredService<CsvServiceView>(),
                 _ => null
@@ -165,6 +165,15 @@ namespace DesktopApplicationTemplate.UI.Views
                 _viewModel.SelectedService = newService;
                 ServiceList.ScrollIntoView(newService);
 
+                  if (type == "MQTT" && newService.ServicePage is MqttTagSubscriptionsView mqttView)
+                  {
+                      var mqttVm = (MqttTagSubscriptionsViewModel)mqttView.DataContext!;
+                      newService.ActiveChanged += async active =>
+                      {
+                          if (active)
+                              await mqttVm.ConnectAsync();
+                      };
+                  }
                 if (newService.ServicePage != null)
                 {
                     ShowPage(newService.ServicePage);
