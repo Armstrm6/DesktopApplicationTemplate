@@ -1,58 +1,118 @@
-
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using MQTTnet.Protocol;
 
 namespace DesktopApplicationTemplate.UI.Models;
 
 /// <summary>
-/// Represents a subscription to a tag with test publish details.
+/// Represents an MQTT topic subscription with test publishing metadata.
 /// </summary>
 public class TagSubscription : INotifyPropertyChanged
 {
-    private string _tag = string.Empty;
+    private string _topic = string.Empty;
+    private MqttQualityOfServiceLevel _qoS;
+    private string _endpoint = string.Empty;
+    private string _outgoingMessage = string.Empty;
+    private string? _statusColor;
+    private string? _icon;
+
     /// <summary>
-    /// Identifier of the tag.
+    /// Initializes a new instance of the <see cref="TagSubscription"/> class.
     /// </summary>
-    public string Tag
+    public TagSubscription()
     {
-        get => _tag;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TagSubscription"/> class with the specified topic.
+    /// </summary>
+    public TagSubscription(string topic)
+    {
+        _topic = topic ?? throw new ArgumentNullException(nameof(topic));
+    }
+
+    /// <summary>
+    /// Gets or sets the MQTT topic.
+    /// </summary>
+    public string Topic
+    {
+        get => _topic;
         set
         {
-            _tag = value;
+            if (_topic == value) return;
+            _topic = value;
             OnPropertyChanged();
         }
     }
 
-    private string _endpoint = string.Empty;
     /// <summary>
-    /// MQTT endpoint used for testing this tag.
+    /// Gets or sets the quality of service level.
+    /// </summary>
+    public MqttQualityOfServiceLevel QoS
+    {
+        get => _qoS;
+        set
+        {
+            if (_qoS == value) return;
+            _qoS = value;
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the endpoint for test publishing.
     /// </summary>
     public string Endpoint
     {
         get => _endpoint;
         set
         {
+            if (_endpoint == value) return;
             _endpoint = value;
             OnPropertyChanged();
         }
     }
 
-    private string _outgoingMessage = string.Empty;
     /// <summary>
-    /// Test message sent when validating the tag's endpoint.
+    /// Gets or sets the outgoing test message.
     /// </summary>
     public string OutgoingMessage
     {
         get => _outgoingMessage;
         set
         {
-            _outgoingMessage = value;
-            OnPropertyChanged();
-
             if (_outgoingMessage == value) return;
             _outgoingMessage = value;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(OutgoingMessage)));
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the status color for UI display.
+    /// </summary>
+    public string? StatusColor
+    {
+        get => _statusColor;
+        set
+        {
+            if (_statusColor == value) return;
+            _statusColor = value;
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the icon for UI display.
+    /// </summary>
+    public string? Icon
+    {
+        get => _icon;
+        set
+        {
+            if (_icon == value) return;
+            _icon = value;
+            OnPropertyChanged();
         }
     }
 
@@ -61,5 +121,4 @@ public class TagSubscription : INotifyPropertyChanged
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-
 }

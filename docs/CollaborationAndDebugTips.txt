@@ -8,6 +8,15 @@ Effective Prompts / Instructions that worked: n/a
 Decisions & Rationale: Use DI to share single logging service and helpers.
 Action Items: Monitor CI for Windows-specific behaviors.
 Related Commits/PRs: (this PR)
+
+[2025-08-23 18:00] Topic: MQTT ViewModel cleanup
+Context: Removed duplicate fields and unified topic subscription properties.
+Observations: View model now exposes a single subscriptions collection with NewTopic/NewQoS inputs and updated commands.
+Codex Limitations noticed: pwsh unavailable for add-tip script.
+Effective Prompts / Instructions that worked: Following user request to consolidate properties.
+Decisions & Rationale: Simplify state management and ensure commands reference consistent members.
+Action Items: Monitor CI for regression in MQTT subscription workflow.
+Related Commits/PRs: (this PR)
 [2025-08-19 16:11] Topic: AsyncRelayCommand namespace
 Context: Moved AsyncRelayCommand classes into Helpers namespace to match folder structure and updated tests.
 Observations: View models now import DesktopApplicationTemplate.UI.Helpers; tests compile without namespace ambiguity.
