@@ -423,3 +423,11 @@ Effective Prompts / Instructions that worked: Following request to capture resul
 Decisions & Rationale: Store per-topic QoS and message; visualize subscription outcomes for user clarity.
 Action Items: Monitor CI for UI styling discrepancies.
 Related Commits/PRs: (this PR)
+[2025-08-19 16:52] Topic: Mqtt subscriptions view cleanup
+Context: Removed redundant namespace and duplicate controls from MqttTagSubscriptionsView.
+Observations: Simplified grid with connection bar, subscription list, and test message bar. Build fails on Linux with MqttService.cs errors.
+Codex Limitations noticed: WPF project fails to build in Linux environment.
+Effective Prompts / Instructions that worked: Following user request to consolidate layout and bindings.
+Decisions & Rationale: Streamlined view to match cleaned view model and remove duplicate definitions.
+Action Items: Verify XAML on Windows CI.
+Related Commits/PRs: (this PR)
