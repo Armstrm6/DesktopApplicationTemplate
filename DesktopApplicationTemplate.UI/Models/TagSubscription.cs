@@ -1,3 +1,5 @@
+
+using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
@@ -47,6 +49,10 @@ public class TagSubscription : INotifyPropertyChanged
         {
             _outgoingMessage = value;
             OnPropertyChanged();
+
+            if (_outgoingMessage == value) return;
+            _outgoingMessage = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(OutgoingMessage)));
         }
     }
 
@@ -55,5 +61,5 @@ public class TagSubscription : INotifyPropertyChanged
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-}
 
+}
