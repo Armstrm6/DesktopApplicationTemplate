@@ -16,6 +16,7 @@ using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.Core.Services;
 using System.Text.Json.Serialization;
+using DesktopApplicationTemplate.UI;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -200,7 +201,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             _logger?.Log("AddService invoked", LogLevel.Debug);
             var existing = Services.Select(s => s.DisplayName.Split(" - ").Last());
             var vm = new CreateServiceViewModel(existing);
-            var popup = new CreateServiceWindow(vm); // Replace with DI if needed
+            var popup = new CreateServiceWindow(vm, App.AppHost.Services); // Replace with DI if needed
             if (popup.ShowDialog() == true)
             {
                 var name = popup.CreatedServiceName;

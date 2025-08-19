@@ -202,6 +202,15 @@ Decisions & Rationale: Read log file at startup and expose reload for level filt
 Action Items: Monitor duplicate entries when reloading filters.
 Related Commits/PRs: (this PR)
 
+[2025-08-19 14:41] Topic: MQTT service creation view
+Context: Added dedicated view to configure MQTT options during service creation.
+Observations: Navigation within CreateServiceWindow collects broker settings and returns options to main window.
+Codex Limitations noticed: net8.0-windows tests cannot run on Linux.
+Effective Prompts / Instructions that worked: Following AGENTS instructions to add docs and tests.
+Decisions & Rationale: Capture MQTT settings before service addition for smoother workflow.
+Action Items: Rely on CI to validate WPF bindings.
+Related Commits/PRs: (this PR)
+
 [2025-08-15 20:40] Topic: Inline filter popup
 Context: Replaced separate filter window with popup-based FilterPanel triggered from main view.
 Observations: Users adjust service filters without leaving the main window.

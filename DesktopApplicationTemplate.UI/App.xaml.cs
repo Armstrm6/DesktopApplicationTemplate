@@ -75,6 +75,8 @@ namespace DesktopApplicationTemplate.UI
             services.AddTransient<CreateServiceWindow>();
             services.AddTransient<CreateServicePage>();
             services.AddTransient<CreateServiceViewModel>();
+            services.AddTransient<MqttCreateServiceView>();
+            services.AddTransient<MqttCreateServiceViewModel>();
             services.AddTransient<SettingsPage>();
 
 
