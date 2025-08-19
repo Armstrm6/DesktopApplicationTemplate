@@ -329,6 +329,13 @@ Effective Prompts / Instructions that worked: Following AGENTS guidance and user
 Decisions & Rationale: Use transient lifetimes for views/view models and provide IFileDialogService for TLS cert browsing.
 Action Items: Monitor CI for DI regressions.
 Related Commits/PRs: (this PR)
+[2025-08-20 18:00] Topic: EditServiceCommand for MQTT
+Context: Added command-based editing for services and ensured MQTT edits load existing connection options.
+Observations: Generic RelayCommand enabled passing the service from context menus.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: Followed user request to prepopulate edit view model via options.
+Decisions & Rationale: Use event-driven navigation to decouple UI and view models.
+Action Items: Monitor CI for integration test stability.
 [2025-08-19 15:53] Topic: MQTT tag message persistence
 Context: Added per-tag outgoing message storage and bindings in subscriptions view.
 Observations: Editing a tag's test message now persists when switching selections.
