@@ -3,6 +3,7 @@
 ## [Unreleased]
 ### Added
 - Expanded MQTT service with option-based connections, TLS/WebSocket support, and structured logging.
+- MQTT connections now support will message configuration, QoS, retain flag, keep-alive period, clean session, and reconnect delay with retry and option logging.
 - Register `ILoggingService` and helper services with the DI container.
 - Refactored save/close confirmation helpers to use constructor injection.
 - Views now accept `ILoggingService` instances instead of creating loggers.

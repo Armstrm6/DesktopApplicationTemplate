@@ -66,7 +66,26 @@ public class MqttService
             OnConnectionStateChanged(false);
         }
 
-        var builder = new MqttClientOptionsBuilder().WithClientId(opts.ClientId);
+        _logger.Log(
+            $"MQTT options: Host={opts.Host}, Port={opts.Port}, ClientId={opts.ClientId}, " +
+            $"WillTopic={opts.WillTopic}, WillQoS={opts.WillQualityOfService}, WillRetain={opts.WillRetain}, " +
+            $"KeepAlive={opts.KeepAliveSeconds}, CleanSession={opts.CleanSession}, ReconnectDelay={opts.ReconnectDelay}",
+            LogLevel.Debug);
+
+        var builder = new MqttClientOptionsBuilder()
+            .WithClientId(opts.ClientId)
+            .WithKeepAlivePeriod(TimeSpan.FromSeconds(opts.KeepAliveSeconds))
+            .WithCleanSession(opts.CleanSession);
+
+        if (!string.IsNullOrEmpty(opts.WillTopic))
+        {
+            builder = builder
+                .WithWillTopic(opts.WillTopic)
+                .WithWillPayload(opts.WillPayload ?? string.Empty)
+                .WithWillQualityOfServiceLevel(opts.WillQualityOfService)
+                .WithWillRetain(opts.WillRetain);
+        }
+
         if (opts.ConnectionType == MqttConnectionType.WebSocket)
         {
             builder = builder.WithWebSocketServer(o =>
@@ -80,7 +99,9 @@ public class MqttService
         }
 
         if (!string.IsNullOrEmpty(opts.Username))
+        {
             builder = builder.WithCredentials(opts.Username, opts.Password);
+        }
 
         if (opts.UseTls)
         {
@@ -94,10 +115,25 @@ public class MqttService
             });
         }
 
-        await _client.ConnectAsync(builder.Build(), token).ConfigureAwait(false);
-        _logger.Log("MQTT connected", LogLevel.Debug);
-        OnConnectionStateChanged(true);
-        _logger.Log("MQTT connect finished", LogLevel.Debug);
+        _logger.Log("MQTT options configured", LogLevel.Debug);
+        var mqttOptions = builder.Build();
+
+        while (true)
+        {
+            try
+            {
+                await _client.ConnectAsync(mqttOptions, token).ConfigureAwait(false);
+                _logger.Log("MQTT connected", LogLevel.Debug);
+                OnConnectionStateChanged(true);
+                _logger.Log("MQTT connect finished", LogLevel.Debug);
+                break;
+            }
+            catch (Exception ex) when (opts.ReconnectDelay.HasValue && !token.IsCancellationRequested)
+            {
+                _logger.Log($"MQTT connect failed: {ex.Message}. Retrying in {opts.ReconnectDelay}", LogLevel.Warning);
+                await Task.Delay(opts.ReconnectDelay.Value, token).ConfigureAwait(false);
+            }
+        }
     }
 
     /// <summary>
