@@ -329,3 +329,11 @@ Effective Prompts / Instructions that worked: Following AGENTS guidance and user
 Decisions & Rationale: Use transient lifetimes for views/view models and provide IFileDialogService for TLS cert browsing.
 Action Items: Monitor CI for DI regressions.
 Related Commits/PRs: (this PR)
+[2025-08-19 15:55] Topic: MQTT subscription result bubbles
+Context: Added Subscribe/Unsubscribe APIs, QoS-aware tag subscription model, and UI feedback bubbles.
+Observations: Async commands allow subscription attempts with success/failure notifications.
+Codex Limitations noticed: Linux environment cannot render WPF; rely on CI.
+Effective Prompts / Instructions that worked: Following request to capture results and update docs.
+Decisions & Rationale: Store per-topic QoS and message; visualize subscription outcomes for user clarity.
+Action Items: Monitor CI for UI styling discrepancies.
+Related Commits/PRs: (this PR)
