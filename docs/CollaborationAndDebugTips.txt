@@ -286,3 +286,12 @@ Effective Prompts / Instructions that worked: Followed AGENTS instructions and e
 Decisions & Rationale: Replace basic MQTT view with subscription-focused view for clarity.
 Action Items: Verify on Windows via CI.
 Related Commits/PRs: (this PR)
+
+[2025-08-19 14:57] Topic: MqttCreateServiceView build error
+Context: Page contained both a StackPanel and ScrollViewer after merge, breaking build.
+Observations: Removing the StackPanel allowed Page to host a single ScrollViewer and compile.
+Codex Limitations noticed: `pwsh` not available to run add-tip script.
+Effective Prompts / Instructions that worked: Following merge instructions to ensure each Page has one child.
+Decisions & Rationale: Keep ScrollViewer with Grid as the sole content to maintain layout.
+Action Items: Monitor CI for other XAML compilation issues.
+Related Commits/PRs: (this PR)
