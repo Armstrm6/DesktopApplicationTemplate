@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using MQTTnet.Protocol;
 
 namespace DesktopApplicationTemplate.UI.Models;
 
@@ -39,6 +40,7 @@ public class TagSubscription : INotifyPropertyChanged
     private string _outgoingMessage = string.Empty;
     /// <summary>
     /// Test message sent when validating the tag's endpoint.
+
     /// </summary>
     public string OutgoingMessage
     {
@@ -47,13 +49,13 @@ public class TagSubscription : INotifyPropertyChanged
         {
             _outgoingMessage = value;
             OnPropertyChanged();
+            if (_outgoingMessage == value) return;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(OutgoingMessage)));
         }
     }
 
     /// <inheritdoc />
     public event PropertyChangedEventHandler? PropertyChanged;
-
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }
-
