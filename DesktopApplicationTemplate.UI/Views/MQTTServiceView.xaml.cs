@@ -1,3 +1,5 @@
+using System;
+using System.Windows;
 using System.Windows.Controls;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Services;
@@ -10,12 +12,14 @@ namespace DesktopApplicationTemplate.UI.Views
     {
         private readonly MqttServiceViewModel _viewModel;
         private readonly ILoggingService _logger;
-        public MQTTServiceView(MqttServiceViewModel vm, ILoggingService logger)
+        private readonly Func<MqttEditConnectionView> _editViewFactory;
+        public MQTTServiceView(MqttServiceViewModel vm, ILoggingService logger, Func<MqttEditConnectionView> editViewFactory)
         {
             InitializeComponent();
             _viewModel = vm;
             DataContext = vm;
             _logger = logger;
+            _editViewFactory = editViewFactory;
             _viewModel.Logger = _logger;
         }
 
@@ -48,6 +52,13 @@ namespace DesktopApplicationTemplate.UI.Views
                     }
                 }
             }
+        }
+
+        private void EditConnection_Click(object sender, RoutedEventArgs e)
+        {
+            var window = _editViewFactory();
+            window.Owner = Window.GetWindow(this);
+            window.ShowDialog();
         }
     }
 }

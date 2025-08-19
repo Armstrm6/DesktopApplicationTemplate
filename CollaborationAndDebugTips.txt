@@ -42,3 +42,11 @@ Effective Prompts / Instructions that worked: Register options and inject via DI
 Decisions & Rationale: Use `IOptions` to supply defaults and centralize configuration.
 Action Items: Run tests.
 Related Commits/PRs:
+[2025-08-19 14:42] Topic: MQTT connection editor
+Context: Added window for editing MQTT connection settings from tag subscriptions.
+Observations: Introduced dedicated view model with update, cancel, and unsubscribe commands.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: follow MVVM and DI registration guidelines.
+Decisions & Rationale: Separate connection editing to keep subscription view focused.
+Action Items: run tests
+Related Commits/PRs:
