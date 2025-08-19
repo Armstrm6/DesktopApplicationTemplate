@@ -1,5 +1,4 @@
 using DesktopApplicationTemplate.Models;
-using DesktopApplicationTemplate.UI.Views;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -205,6 +204,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
         }
 
+        public event Action<string>? AddMqttServiceRequested;
         private void EditService(ServiceViewModel? service)
         {
             var target = service ?? SelectedService;
@@ -217,35 +217,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private void AddService()
         {
             _logger?.Log("AddService invoked", LogLevel.Debug);
-            var existing = Services.Select(s => s.DisplayName.Split(" - ").Last());
-            var vm = new CreateServiceViewModel(existing);
-            var popup = new CreateServiceWindow(vm, App.AppHost.Services); // Replace with DI if needed
-            if (popup.ShowDialog() == true)
-            {
-                var name = popup.CreatedServiceName;
-                var type = popup.CreatedServiceType;
-                if (Services.Any(s => s.DisplayName.Split(" - ").Last().Equals(name, StringComparison.OrdinalIgnoreCase)))
-                {
-                    name = GenerateServiceName(type);
-                }
-                var newService = new ServiceViewModel
-                {
-                    DisplayName = $"{type} - {name}",
-                    ServiceType = type,
-                    IsActive = false,
-                    Order = Services.Count
-                };
-                newService.SetColorsByType();
-                newService.LogAdded += OnServiceLogAdded;
-                newService.ActiveChanged += OnServiceActiveChanged;
-                newService.AddLog($"Default name '{name}' assigned", WpfBrushes.Gray);
-                newService.AddLog("Service created", WpfBrushes.Blue);
-                _csvService.EnsureColumnsForService(newService.DisplayName);
-                Services.Add(newService);
-                OnPropertyChanged(nameof(ServicesCreated));
-                OnPropertyChanged(nameof(CurrentActiveServices));
-                _logger?.Log($"Service {newService.DisplayName} created", LogLevel.Debug);
-            }
+            var defaultName = GenerateServiceName("MQTT");
+            AddMqttServiceRequested?.Invoke(defaultName);
             _logger?.Log("AddService completed", LogLevel.Debug);
         }
 

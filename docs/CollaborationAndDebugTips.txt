@@ -329,6 +329,13 @@ Effective Prompts / Instructions that worked: Following AGENTS guidance and user
 Decisions & Rationale: Use transient lifetimes for views/view models and provide IFileDialogService for TLS cert browsing.
 Action Items: Monitor CI for DI regressions.
 Related Commits/PRs: (this PR)
+[2025-08-19 15:53] Topic: MQTT service creation navigation
+Context: Replaced popup-based MQTT service creation with in-frame navigation and restored previous view on completion.
+Observations: Service creation now triggers an event that navigates the main frame to the create view.
+Codex Limitations noticed: pwsh unavailable for add-tip script; entry added manually.
+Effective Prompts / Instructions that worked: Followed AGENTS.md to update docs and tests.
+Decisions & Rationale: Used view model event to request navigation and added unit test to verify event raising.
+Action Items: Verify navigation restoration and service addition in future UI tests.
 [2025-08-23 12:00] Topic: Tag subscription styling
 Context: Added styling metadata to tag subscriptions and refreshed view model when tags change.
 Observations: View model listens to service updates to refresh colors/icons.
@@ -352,6 +359,7 @@ Codex Limitations noticed: none
 Effective Prompts / Instructions that worked: Followed user request to prepopulate edit view model via options.
 Decisions & Rationale: Use event-driven navigation to decouple UI and view models.
 Action Items: Monitor CI for integration test stability.
+
 [2025-08-19 15:53] Topic: MQTT tag message persistence
 Context: Added per-tag outgoing message storage and bindings in subscriptions view.
 Observations: Editing a tag's test message now persists when switching selections.
