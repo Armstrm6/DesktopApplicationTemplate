@@ -14,7 +14,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 public class MqttEditConnectionViewModel : ValidatableViewModelBase, ILoggingViewModel
 {
     private readonly MqttService _service;
-    private readonly MqttServiceOptions _options;
+    private MqttServiceOptions _options;
 
     private string _host;
     private int _port;
@@ -36,14 +36,7 @@ public class MqttEditConnectionViewModel : ValidatableViewModelBase, ILoggingVie
         _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
         Logger = logger;
 
-        // copy existing values for editing
-        _host = _options.Host;
-        _port = _options.Port;
-        _clientId = _options.ClientId;
-        _username = _options.Username;
-        _password = _options.Password;
-        _connectionType = _options.ConnectionType;
-        _useTls = _options.UseTls;
+        Load(_options);
 
         UpdateCommand = new AsyncRelayCommand(UpdateAsync);
         CancelCommand = new RelayCommand(Cancel);
@@ -159,6 +152,25 @@ public class MqttEditConnectionViewModel : ValidatableViewModelBase, ILoggingVie
     /// Command to unsubscribe from the broker.
     /// </summary>
     public ICommand UnsubscribeCommand { get; }
+
+    internal void Load(MqttServiceOptions options)
+    {
+        _options = options ?? throw new ArgumentNullException(nameof(options));
+        _host = _options.Host;
+        _port = _options.Port;
+        _clientId = _options.ClientId;
+        _username = _options.Username;
+        _password = _options.Password;
+        _connectionType = _options.ConnectionType;
+        _useTls = _options.UseTls;
+        OnPropertyChanged(nameof(Host));
+        OnPropertyChanged(nameof(Port));
+        OnPropertyChanged(nameof(ClientId));
+        OnPropertyChanged(nameof(Username));
+        OnPropertyChanged(nameof(Password));
+        OnPropertyChanged(nameof(ConnectionType));
+        OnPropertyChanged(nameof(UseTls));
+    }
 
     /// <summary>
     /// Applies changes and reconnects using updated options.

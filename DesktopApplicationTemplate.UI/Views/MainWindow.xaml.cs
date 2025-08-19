@@ -190,6 +190,8 @@ namespace DesktopApplicationTemplate.UI.Views
                 var editView = App.AppHost.Services.GetRequiredService<MqttEditConnectionView>();
                 if (editView.DataContext is MqttEditConnectionViewModel vm)
                 {
+                    var options = App.AppHost.Services.GetRequiredService<IOptions<MqttServiceOptions>>().Value;
+                    vm.Load(options);
                     vm.RequestClose += (_, _) =>
                     {
                         if (tagPage != null)
@@ -220,15 +222,6 @@ namespace DesktopApplicationTemplate.UI.Views
                 _logger?.LogDebug("RemoveService command executed");
             }
         }
-        private void EditService_Click(object sender, RoutedEventArgs e)
-        {
-            if (_viewModel.SelectedService == null)
-                return;
-
-            _logger?.LogDebug("EditService button clicked for {Name}", _viewModel.SelectedService.DisplayName);
-            OpenServiceEditor(_viewModel.SelectedService);
-        }
-
         private void ServiceList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             _logger?.LogDebug("Service selection changed");
@@ -251,14 +244,6 @@ namespace DesktopApplicationTemplate.UI.Views
             if (FilterPopup != null)
             {
                 FilterPopup.IsOpen = !FilterPopup.IsOpen;
-            }
-        }
-
-        private void EditServiceMenu_Click(object sender, RoutedEventArgs e)
-        {
-            if ((sender as MenuItem)?.DataContext is ServiceViewModel svc)
-            {
-                OpenServiceEditor(svc);
             }
         }
 
@@ -400,18 +385,10 @@ namespace DesktopApplicationTemplate.UI.Views
             if ((sender as Border)?.DataContext is ServiceViewModel svc)
             {
                 _logger?.LogDebug("Service {Name} double-clicked", svc.DisplayName);
-                OpenServiceEditor(svc);
-            }
-        }
-
-        private void OpenServiceEditor(ServiceViewModel svc)
-        {
-            var page = GetOrCreateServicePage(svc);
-            if (page != null)
-            {
-                svc.IsActive = false;
-                ShowPage(page);
-                _logger?.LogDebug("EditService workflow completed for {Name}", svc.DisplayName);
+                if (_viewModel.EditServiceCommand.CanExecute(svc))
+                {
+                    _viewModel.EditServiceCommand.Execute(svc);
+                }
             }
         }
 
