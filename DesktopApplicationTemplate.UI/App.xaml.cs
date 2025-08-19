@@ -63,8 +63,8 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<HidViewModel>();
             services.AddSingleton<HidViews>();
             services.AddSingleton<MqttService>();
-            services.AddSingleton<MQTTServiceView>();
-            services.AddSingleton<MqttServiceViewModel>();
+            services.AddSingleton<MqttTagSubscriptionsView>();
+            services.AddSingleton<MqttTagSubscriptionsViewModel>();
             services.AddSingleton<FTPServiceView>();
             services.AddSingleton<FtpServiceViewModel>();
             services.AddSingleton<CsvViewerViewModel>();
@@ -77,6 +77,8 @@ namespace DesktopApplicationTemplate.UI
             services.AddTransient<CreateServiceWindow>();
             services.AddTransient<CreateServicePage>();
             services.AddTransient<CreateServiceViewModel>();
+            services.AddTransient<MqttCreateServiceView>();
+            services.AddTransient<MqttCreateServiceViewModel>();
             services.AddTransient<SettingsPage>();
 
 

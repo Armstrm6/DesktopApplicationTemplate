@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 ### Added
+- Wizard-style MQTT service creation view capturing broker, credentials, TLS, and will message options.
 - Expanded MQTT service with option-based connections, TLS/WebSocket support, and structured logging.
 - Register `ILoggingService` and helper services with the DI container.
 - Refactored save/close confirmation helpers to use constructor injection.
@@ -29,6 +30,7 @@
 - Popup-based `FilterPanel` user control for in-place service filtering.
 - Active service counter displayed in the main window with real-time updates when services change.
 - Dedicated window for editing MQTT connection settings with update, cancel, and unsubscribe commands accessible from the topic subscription view.
+- MqttTagSubscriptionsView and view model for managing MQTT topic subscriptions displayed when adding new MQTT services.
 
 ### Changed
 - Updated `global.json` to require the .NET 8 SDK version `8.0.404`.
