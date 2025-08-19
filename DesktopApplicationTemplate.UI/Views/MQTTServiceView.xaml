@@ -41,6 +41,7 @@
             </Grid>
             <PasswordBox Width="100" Margin="5,0,0,0" helpers:PasswordBoxAssistant.BindPassword="True" helpers:PasswordBoxAssistant.BoundPassword="{Binding Password}" ToolTip="Broker password"/>
             <Button Content="Connect" Command="{Binding ConnectCommand}" Margin="5,0,0,0" Width="80"/>
+            <Button Content="Edit Connection" Margin="5,0,0,0" Width="120" Click="EditConnection_Click"/>
         </StackPanel>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>

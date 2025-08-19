@@ -9,6 +9,7 @@ namespace DesktopApplicationTemplate.UI.Views
     {
         private readonly CreateServiceViewModel _viewModel;
         public event Action<string, string>? ServiceCreated;
+        public event Action<string>? MqttSelected;
         public event Action? Cancelled;
 
         public CreateServicePage(CreateServiceViewModel viewModel)
@@ -23,6 +24,11 @@ namespace DesktopApplicationTemplate.UI.Views
             if (sender is Button button && button.DataContext is CreateServiceViewModel.ServiceTypeMetadata meta)
             {
                 var name = _viewModel.GenerateDefaultName(meta.Type);
+                if (meta.Type == "MQTT")
+                {
+                    MqttSelected?.Invoke(name);
+                    return;
+                }
                 ServiceCreated?.Invoke(name, meta.Type);
             }
         }

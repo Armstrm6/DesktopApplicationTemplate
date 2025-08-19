@@ -1,0 +1,46 @@
+<Page x:Class="DesktopApplicationTemplate.UI.Views.MqttEditConnectionView"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mqtt="clr-namespace:MQTTnet.Protocol;assembly=MQTTnet"
+      xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d">
+    <Page.Resources>
+        <helpers:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter" />
+    </Page.Resources>
+    <StackPanel Margin="10">
+        <Grid Margin="0,0,0,5">
+            <TextBox Text="{Binding WillTopic, UpdateSourceTrigger=PropertyChanged}" x:Name="WillTopicBox"/>
+            <TextBlock Text="Will Topic" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0"
+                       VerticalAlignment="Center"
+                       Visibility="{Binding Text, ElementName=WillTopicBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+        </Grid>
+        <Grid Margin="0,0,0,5">
+            <TextBox Text="{Binding WillPayload, UpdateSourceTrigger=PropertyChanged}" x:Name="WillPayloadBox"/>
+            <TextBlock Text="Will Payload" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0"
+                       VerticalAlignment="Center"
+                       Visibility="{Binding Text, ElementName=WillPayloadBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+        </Grid>
+        <ComboBox SelectedValue="{Binding WillQualityOfService}" SelectedValuePath="Tag" Margin="0,0,0,5">
+            <ComboBoxItem Content="At Most Once" Tag="{x:Static mqtt:MqttQualityOfServiceLevel.AtMostOnce}"/>
+            <ComboBoxItem Content="At Least Once" Tag="{x:Static mqtt:MqttQualityOfServiceLevel.AtLeastOnce}"/>
+            <ComboBoxItem Content="Exactly Once" Tag="{x:Static mqtt:MqttQualityOfServiceLevel.ExactlyOnce}"/>
+        </ComboBox>
+        <CheckBox Content="Retain Will" IsChecked="{Binding WillRetain}" Margin="0,0,0,5"/>
+        <Grid Margin="0,0,0,5">
+            <TextBox Text="{Binding KeepAliveSeconds, UpdateSourceTrigger=PropertyChanged}" x:Name="KeepAliveBox"/>
+            <TextBlock Text="Keep Alive Seconds" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0"
+                       VerticalAlignment="Center"
+                       Visibility="{Binding Text, ElementName=KeepAliveBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+        </Grid>
+        <CheckBox Content="Clean Session" IsChecked="{Binding CleanSession}" Margin="0,0,0,5"/>
+        <Grid>
+            <TextBox Text="{Binding ReconnectDelay, UpdateSourceTrigger=PropertyChanged}" x:Name="ReconnectBox"/>
+            <TextBlock Text="Reconnect Delay Seconds" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0"
+                       VerticalAlignment="Center"
+                       Visibility="{Binding Text, ElementName=ReconnectBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+        </Grid>
+    </StackPanel>
+</Page>
+
