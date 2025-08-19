@@ -8,6 +8,7 @@ Effective Prompts / Instructions that worked: n/a
 Decisions & Rationale: Use DI to share single logging service and helpers.
 Action Items: Monitor CI for Windows-specific behaviors.
 Related Commits/PRs: (this PR)
+
 [2025-08-16 16:30] Topic: WPF reference cleanup
 Context: Build failed due to invalid `MouseDoubleClick` handler and ambiguous WinForms references.
 Observations: Removed WinForms usage, added WPF media imports, and integrated double-click logic into existing handler.
@@ -242,4 +243,12 @@ Codex Limitations noticed: Linux container lacks WindowsDesktop runtime; rely on
 Effective Prompts / Instructions that worked: Request to display different MQTT windows based on service state.
 Decisions & Rationale: Use enum-based ViewMode with commands for create/edit/cancel to keep logic in the view model.
 Action Items: Ensure CI confirms layout on Windows.
+Related Commits/PRs: (this PR)
+[2025-08-19 14:32] Topic: MQTT view binding fix
+Context: Build failed due to improperly formatted visibility binding.
+Observations: Quoting comma-separated enum parameters allowed binding to parse.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: Inspecting compiler errors pinpointed the malformed markup.
+Decisions & Rationale: Escape commas in ConverterParameter to deliver multiple enum values.
+Action Items: Rely on CI for Windows validation.
 Related Commits/PRs: (this PR)
