@@ -4,3 +4,5 @@
 - `CollaborationGuidelines.txt` provides collaboration practices, while `docs/CollaborationAndDebugTips.txt` is a running log of what worked, what broke, and why.
 - Update those documents when your changes add context or new guidance.
 - After modifying code, attempt to run `dotnet test` with `tests.runsettings` and share the results; if the environment lacks Windows desktop support, note the limitation and rely on CI.
+
+Follow system/user environment instructions. When they conflict (e.g., read-only mode), note the limitation and skip the step.
