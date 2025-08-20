@@ -1,3 +1,12 @@
+[2025-08-20 18:38] Topic: Codex architecture reference
+Context: Added "Architecture & Coding Standards" section to AGENTS.md.
+Observations: Section summarizes DI registration, testing, logging policies, and references Codex guidelines.
+Codex Limitations noticed: dotnet test aborted; missing Microsoft.WindowsDesktop.App on Linux.
+Effective Prompts / Instructions that worked: User request to reference Codex architecture standards.
+Decisions & Rationale: Provide quick reference to core Codex rules for contributors.
+Action Items: none
+Related Commits/PRs: (this PR)
+
 # Collaboration & Debug Tips (Codex <-> Matt)
 Purpose: Running log of what worked, what broke, and why.
 
