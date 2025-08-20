@@ -34,6 +34,11 @@ Miscellaneous Tips
 - Reuse existing services and view models instead of duplicating logic.
 - Maintain clear, purpose-driven variable names for readability and maintainability.
 
+Working in restricted environments
+----------------------------------
+- Review AGENTS and docs.
+- Note limitations (tests, writes) in PRs or collaboration log.
+
 [2025-08-15 10:00] Topic: MQTT options and DI
 Context: Introduced `MqttServiceOptions` with DI support and consolidated registrations using `IOptions`.
 Observations: Added `MessageRoutingService` and verified the service provider builds cleanly.

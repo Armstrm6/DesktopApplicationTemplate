@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 ### Added
+- Section on working in restricted environments and reminder to log limitations in collaboration docs.
 - Documented Codex architecture and coding standards in `AGENTS.md`.
 - Each MQTT tag subscription now retains its own outgoing test message, and the test message box binds to the selected tag's message.
 - Wizard-style MQTT service creation view capturing broker, credentials, TLS, and will message options.
