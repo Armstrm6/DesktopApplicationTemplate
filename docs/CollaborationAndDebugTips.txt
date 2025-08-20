@@ -1,6 +1,15 @@
 # Collaboration & Debug Tips (Codex <-> Matt)
 Purpose: Running log of what worked, what broke, and why.
 
+[2025-08-20 13:35] Topic: QoS ItemsSource binding
+Context: Clicking MQTT service crashed because QoS enum provider was assigned directly to ItemsSource.
+Observations: Binding through resource source and restoring send button accessibility prevents runtime ArgumentException.
+Codex Limitations noticed: Linux container lacks WPF runtime; rely on CI for view tests.
+Effective Prompts / Instructions that worked: User report highlighting ItemsSource exception.
+Decisions & Rationale: Use binding to resolve ObjectDataProvider data and set AutomationProperties for accessibility tests.
+Action Items: Verify Windows CI renders view without error.
+Related Commits/PRs: (this PR)
+
 [2025-08-13 17:00] Topic: Logging DI refactor
 Context: Introduced constructor injection for logging services and confirmation helpers.
 Observations: Simplifies testing and removes static logger state.

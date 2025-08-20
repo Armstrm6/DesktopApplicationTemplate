@@ -22,6 +22,12 @@ namespace DesktopApplicationTemplate.UI.Helpers
 
         public async void Execute(object? parameter) => await _execute();
 
+        /// <summary>
+        /// Executes the command asynchronously.
+        /// </summary>
+        /// <param name="parameter">Unused parameter for signature compatibility.</param>
+        public Task ExecuteAsync(object? parameter = null) => _execute();
+
         public event EventHandler? CanExecuteChanged;
 
         public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);

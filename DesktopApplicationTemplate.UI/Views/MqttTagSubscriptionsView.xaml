@@ -25,7 +25,7 @@
             <Button Content="Connect" Command="{Binding ConnectCommand}" Width="80" AutomationProperties.Name="Connect MQTT"/>
             <TextBox Text="{Binding NewTopic}" Width="200" Margin="10,0,0,0" x:Name="NewTopicBox" ToolTip="Topic to subscribe"/>
             <ComboBox Width="100" Margin="5,0,0,0"
-                      ItemsSource="{StaticResource QoSValues}"
+                      ItemsSource="{Binding Source={StaticResource QoSValues}}"
                       SelectedItem="{Binding NewQoS}"/>
             <Button Content="Add" Command="{Binding AddTopicCommand}" Width="50" Margin="5,0,0,0"/>
             <Button Content="Remove" Command="{Binding RemoveTopicCommand}" Width="70" Margin="5,0,0,0"/>
@@ -41,7 +41,7 @@
                 <DataGridTextColumn Header="Topic" Binding="{Binding Topic}" IsReadOnly="True"/>
                 <DataGridComboBoxColumn Header="QoS"
                                         SelectedItemBinding="{Binding QoS}"
-                                        ItemsSource="{StaticResource QoSValues}"/>
+                                        ItemsSource="{Binding Source={StaticResource QoSValues}}"/>
                 <DataGridTextColumn Header="Endpoint"
                                     Binding="{Binding Endpoint, UpdateSourceTrigger=PropertyChanged}"/>
                 <DataGridTextColumn Header="Message"
@@ -63,7 +63,12 @@
                      Width="200"
                      x:Name="TestMessageBox"
                      ToolTip="Message to send"/>
-            <Button Content="Send" Command="{Binding PublishTestMessageCommand}" Width="60" Margin="5,0,0,0"/>
+            <Button x:Name="SendButton"
+                    Content="Send"
+                    Command="{Binding PublishTestMessageCommand}"
+                    Width="60"
+                    Margin="5,0,0,0"
+                    AutomationProperties.Name="Send Test Message"/>
             <Button Content="Test"
                     Command="{Binding TestTagEndpointCommand}"
                     CommandParameter="{Binding SelectedSubscription}"

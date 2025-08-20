@@ -50,3 +50,12 @@ Effective Prompts / Instructions that worked: follow MVVM and DI registration gu
 Decisions & Rationale: Separate connection editing to keep subscription view focused.
 Action Items: run tests
 Related Commits/PRs:
+
+[2025-08-20 13:26] Topic: Build error fixes
+Context: Build failed due to logging package downgrade and duplicate MQTT subscribe method.
+Observations: Resolved package downgrade and MQTT subscription build errors by updating logging abstractions, exposing connection helpers, and initializing required fields.
+Codex Limitations noticed: Linux container lacks Microsoft.WindowsDesktop runtime so tests cannot execute.
+Effective Prompts / Instructions that worked: clarify specific compiler errors and upgrade paths.
+Decisions & Rationale: remove duplicate SubscribeAsync method and add async command helpers for testability.
+Action Items: Rely on CI for full test run.
+Related Commits/PRs:
