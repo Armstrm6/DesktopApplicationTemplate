@@ -10,6 +10,7 @@ Decisions & Rationale: Use binding to resolve ObjectDataProvider data and set Au
 Action Items: Verify Windows CI renders view without error.
 Related Commits/PRs: (this PR)
 
+
 [2025-08-13 17:00] Topic: Logging DI refactor
 Context: Introduced constructor injection for logging services and confirmation helpers.
 Observations: Simplifies testing and removes static logger state.
@@ -447,4 +448,12 @@ Codex Limitations noticed: dotnet CLI unavailable; could not run tests locally.
 Effective Prompts / Instructions that worked: Request to debug pipeline and refactor tests.
 Decisions & Rationale: Align package versions with .NET 8 SDK to restore builds and clarify variable names.
 Action Items: Verify CI restores packages successfully.
+Related Commits/PRs: (this PR)
+[2025-08-20 17:23] Topic: Renamed collaboration tips file
+Context: Renamed root CollaborationAndDebugTips.txt to CollaborationGuidelines.txt while keeping docs/CollaborationAndDebugTips.txt as the log file.
+Observations: Updated references and added guidance in AGENTS.md.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: User request to rename and clarify docs.
+Decisions & Rationale: Separate static collaboration guidelines from the evolving log.
+Action Items: Monitor CI after documentation updates.
 Related Commits/PRs: (this PR)

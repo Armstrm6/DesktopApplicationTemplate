@@ -4,6 +4,8 @@
 
 This repository contains a basic WPF UI application, a Windows Service and unit tests.
 
+See `CollaborationGuidelines.txt` for tips on working with the repository. A running log of past collaboration decisions lives in `docs/CollaborationAndDebugTips.txt`.
+
 ## Prerequisites
 
 - [.NET 8 SDK](https://dotnet.microsoft.com/download) (8.0.404)
