@@ -203,7 +203,7 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
         Logger?.Log("MQTT tag test publish finished", LogLevel.Debug);
     }
 
-    private async Task ConnectAsync()
+    public async Task ConnectAsync()
     {
         Logger?.Log("MQTT connect start", LogLevel.Debug);
         await _service.ConnectAsync().ConfigureAwait(false);

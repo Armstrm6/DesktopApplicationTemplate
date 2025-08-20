@@ -16,9 +16,9 @@ public class MqttEditConnectionViewModel : ValidatableViewModelBase, ILoggingVie
     private readonly MqttService _service;
     private MqttServiceOptions _options;
 
-    private string _host;
+    private string _host = string.Empty;
     private int _port;
-    private string _clientId;
+    private string _clientId = string.Empty;
     private string? _username;
     private string? _password;
     private MqttConnectionType _connectionType;

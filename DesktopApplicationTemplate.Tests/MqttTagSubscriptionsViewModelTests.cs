@@ -56,7 +56,7 @@ public class MqttTagSubscriptionsViewModelTests
         var (vm, client, _) = CreateViewModel();
         vm.NewTopic = "t";
         vm.NewQoS = MqttQualityOfServiceLevel.AtLeastOnce;
-        await ((AsyncRelayCommand)vm.AddTopicCommand).ExecuteAsync(null);
+        await ((AsyncRelayCommand)vm.AddTopicCommand).ExecuteAsync();
 
         client.Verify(c => c.SubscribeAsync(It.IsAny<MqttClientSubscribeOptions>(), It.IsAny<CancellationToken>()), Times.Once);
         Assert.Contains(vm.Subscriptions, s => s.Topic == "t" && s.QoS == MqttQualityOfServiceLevel.AtLeastOnce);
@@ -74,7 +74,7 @@ public class MqttTagSubscriptionsViewModelTests
         service.UpdateTagSubscription(sub);
         vm.Subscriptions.Add(sub);
         vm.SelectedSubscription = sub;
-        await ((AsyncRelayCommand)vm.RemoveTopicCommand).ExecuteAsync(null);
+        await ((AsyncRelayCommand)vm.RemoveTopicCommand).ExecuteAsync();
         client.Verify(c => c.UnsubscribeAsync(It.IsAny<MqttClientUnsubscribeOptions>(), It.IsAny<CancellationToken>()), Times.Once);
         Assert.Empty(vm.Subscriptions);
         Assert.Null(vm.SelectedSubscription);
@@ -89,7 +89,7 @@ public class MqttTagSubscriptionsViewModelTests
         var sub = new TagSubscription("t") { OutgoingMessage = "m" };
         vm.Subscriptions.Add(sub);
         vm.SelectedSubscription = sub;
-        await ((AsyncRelayCommand)vm.PublishTestMessageCommand).ExecuteAsync(null);
+        await ((AsyncRelayCommand)vm.PublishTestMessageCommand).ExecuteAsync();
         client.Verify(c => c.PublishAsync(It.Is<MQTTnet.MqttApplicationMessage>(m => m.Topic == "t"), It.IsAny<CancellationToken>()), Times.Once);
     }
 

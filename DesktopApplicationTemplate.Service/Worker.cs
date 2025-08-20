@@ -13,7 +13,7 @@ namespace DesktopApplicationTemplate.Service
         private readonly ILoggerFactory _loggerFactory;
         private readonly IConfiguration _config;
         
-        public string HeartbeatMessage { get; private set; }
+        public string HeartbeatMessage { get; private set; } = string.Empty;
         public int IntervalSeconds { get; private set; }
 
         public Worker(ILogger<Worker> logger, ILoggerFactory loggerFactory, IConfiguration config)
@@ -22,7 +22,7 @@ namespace DesktopApplicationTemplate.Service
             _loggerFactory = loggerFactory;
             _config = config;
             var hbSection = _config.GetSection("Heartbeat");
-            HeartbeatMessage = hbSection.GetValue<string>("Message", "PING");
+            HeartbeatMessage = hbSection.GetValue<string>("Message") ?? "PING";
             IntervalSeconds = hbSection.GetValue<int>("IntervalSeconds", 30);
         }
 

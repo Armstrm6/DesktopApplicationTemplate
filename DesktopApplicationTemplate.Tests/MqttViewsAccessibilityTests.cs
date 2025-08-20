@@ -92,7 +92,7 @@ namespace DesktopApplicationTemplate.Tests
                     var options = Options.Create(new MqttServiceOptions { Host = "h", Port = 1, ClientId = "c" });
                     var service = new MqttService(new Mock<IMqttClient>().Object, options, new Mock<IMessageRoutingService>().Object, new Mock<ILoggingService>().Object);
                     var vm = new MqttTagSubscriptionsViewModel(service) { Logger = new Mock<ILoggingService>().Object };
-                    var view = new MqttTagSubscriptionsView(vm);
+                    var view = new MqttTagSubscriptionsView(vm, new Mock<ILoggingService>().Object);
                     var send = (Button)view.FindName("SendButton");
                     Assert.Equal("Send Test Message", AutomationProperties.GetName(send));
                 }
