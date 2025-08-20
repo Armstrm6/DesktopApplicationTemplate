@@ -431,3 +431,11 @@ Effective Prompts / Instructions that worked: Following user request to consolid
 Decisions & Rationale: Streamlined view to match cleaned view model and remove duplicate definitions.
 Action Items: Verify XAML on Windows CI.
 Related Commits/PRs: (this PR)
+[2025-08-19 19:20] Topic: NuGet package version alignment
+Context: (summarize the scenario)
+Observations: Pipeline failed restoring preview Microsoft.Extensions packages and tests hit duplicate variable names.
+Codex Limitations noticed: dotnet CLI unavailable; could not run tests locally.
+Effective Prompts / Instructions that worked: Request to debug pipeline and refactor tests.
+Decisions & Rationale: Align package versions with .NET 8 SDK to restore builds and clarify variable names.
+Action Items: Verify CI restores packages successfully.
+Related Commits/PRs: (this PR)

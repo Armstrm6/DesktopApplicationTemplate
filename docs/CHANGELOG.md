@@ -96,3 +96,4 @@
 - Added missing `MQTTnet.Protocol` using in `MqttCreateServiceViewModel` to restore `MqttQualityOfServiceLevel` references.
 - Removed obsolete MQTT service view and dialog-based edit calls that broke build-time helper resolution.
 - Aligned `AsyncRelayCommand` namespace with Helpers folder.
+- Replaced preview Microsoft.Extensions.* package references with stable 8.0 versions and renamed test variables to eliminate duplicate declarations.
