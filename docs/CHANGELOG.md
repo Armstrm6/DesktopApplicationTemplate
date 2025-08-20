@@ -98,3 +98,4 @@
 - Aligned `AsyncRelayCommand` namespace with Helpers folder.
 - Replaced preview Microsoft.Extensions.* package references with stable 8.0 versions and renamed test variables to eliminate duplicate declarations.
 - Addressed build failures by upgrading logging abstractions, exposing MQTT connect helpers, removing duplicate subscribe implementations, and initializing non-null fields.
+- Fixed ObjectDataProvider bindings in `MqttTagSubscriptionsView` to prevent runtime `ArgumentException` and restored send button accessibility metadata.
