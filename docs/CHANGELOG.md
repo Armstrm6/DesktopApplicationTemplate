@@ -44,6 +44,7 @@
 - File dialog service registered for TLS certificate selection in MQTT views.
 
 ### Changed
+- Clarified environment instruction precedence in `AGENTS.md`.
 - Renamed root `CollaborationAndDebugTips.txt` to `CollaborationGuidelines.txt` and clarified distinction from `docs/CollaborationAndDebugTips.txt`.
 - Updated `global.json` to require the .NET 8 SDK version `8.0.404`.
 - Default `AutoStart` is now disabled and all environment configuration files set `"AutoStart": false`.

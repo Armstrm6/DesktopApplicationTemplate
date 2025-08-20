@@ -1,6 +1,15 @@
 # Collaboration & Debug Tips (Codex <-> Matt)
 Purpose: Running log of what worked, what broke, and why.
 
+[2025-08-20 17:33] Topic: Environment precedence docs
+Context: Clarified AGENTS instructions about following environment directives.
+Observations: Added paragraph to note limitations when instructions conflict, such as read-only mode.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: User request to clarify environment precedence.
+Decisions & Rationale: Document conflict handling so steps are skipped instead of failing.
+Action Items: none
+Related Commits/PRs: (this PR)
+
 [2025-08-20 13:35] Topic: QoS ItemsSource binding
 Context: Clicking MQTT service crashed because QoS enum provider was assigned directly to ItemsSource.
 Observations: Binding through resource source and restoring send button accessibility prevents runtime ArgumentException.
