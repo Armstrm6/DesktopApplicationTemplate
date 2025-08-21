@@ -103,6 +103,7 @@
 - Added tests confirming the main view ignores non-Escape key presses and service persistence handles cyclical references.
 - Eliminated recursive logging in CSV service to prevent stack overflow and added guards that capture configuration snapshots on save failures.
 - Removed invalid `MouseDoubleClick` XAML handler and cleaned up ambiguous WPF references causing build failures.
+- Host validation now accepts domain names for all services, preventing connection errors when using non-IP hosts.
 - Corrected service count bindings to use one-way mode, preventing runtime errors on read-only properties.
 - Resolved WPF build error by removing duplicate StackPanel from `MqttCreateServiceView` so the page hosts a single `ScrollViewer`.
 - Added missing `MQTTnet.Protocol` using in `MqttCreateServiceViewModel` to restore `MqttQualityOfServiceLevel` references.

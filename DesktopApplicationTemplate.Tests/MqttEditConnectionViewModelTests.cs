@@ -14,14 +14,14 @@ namespace DesktopApplicationTemplate.Tests;
 
 public class MqttEditConnectionViewModelTests
 {
-    private static MqttEditConnectionViewModel CreateViewModel(Mock<IMqttClient>? clientMock = null)
+    private static MqttEditConnectionViewModel CreateViewModel(Mock<IMqttClient>? clientMock = null, bool isConnected = false)
     {
         var client = clientMock ?? new Mock<IMqttClient>();
         client.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new MqttClientConnectResult());
         client.Setup(c => c.DisconnectAsync(It.IsAny<MqttClientDisconnectOptions?>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
-        client.SetupGet(c => c.IsConnected).Returns(true);
+        client.SetupGet(c => c.IsConnected).Returns(isConnected);
         var options = Microsoft.Extensions.Options.Options.Create(new MqttServiceOptions());
         var service = new MqttService(client.Object, options, Mock.Of<IMessageRoutingService>(), Mock.Of<ILoggingService>());
         return new MqttEditConnectionViewModel(service, options, Mock.Of<ILoggingService>());
@@ -57,9 +57,7 @@ public class MqttEditConnectionViewModelTests
             .ReturnsAsync(new MqttClientConnectResult());
         client.Setup(c => c.DisconnectAsync(It.IsAny<MqttClientDisconnectOptions?>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
-        var options = Microsoft.Extensions.Options.Options.Create(new MqttServiceOptions());
-        var service = new MqttService(client.Object, options, Mock.Of<IMessageRoutingService>(), Mock.Of<ILoggingService>());
-        var vm = new MqttEditConnectionViewModel(service, options);
+        var vm = CreateViewModel(client, true);
         var closed = false;
         vm.RequestClose += (_, _) => closed = true;
         await vm.ToggleSubscriptionAsync();

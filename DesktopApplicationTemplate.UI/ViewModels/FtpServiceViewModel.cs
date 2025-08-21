@@ -17,7 +17,7 @@ public class FtpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
             set
             {
                 _host = value;
-                if (!InputValidators.IsValidPartialIp(value))
+                if (!InputValidators.IsValidHost(value))
                 {
                     AddError(nameof(Host), "Invalid host or IP address");
                     Logger?.Log("Invalid FTP host entered", LogLevel.Warning);
