@@ -55,6 +55,7 @@
 - Updated `global.json` to require the .NET 8 SDK version `8.0.404`.
 - Default `AutoStart` is now disabled and all environment configuration files set `"AutoStart": false`.
 - CI workflow now runs on pushes to `feature/**` and `bugfix/**` branches and supports manual triggers, ensuring tests execute on GitHub.
+- CI workflow skips checks for pull requests targeting the `dev` branch to speed up integration.
 - `MqttCreateServiceView`, `MqttTagSubscriptionsView`, and `MqttEditConnectionView` along with their view models are now registered as transient services.
 - `self-heal` workflow now monitors the unified `CI` pipeline.
 - MQTT create, edit, and subscription views now follow design spacing with shared form styles and accessibility names.
