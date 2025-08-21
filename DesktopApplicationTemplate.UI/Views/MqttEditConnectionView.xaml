@@ -44,25 +44,25 @@
                 <ComboBoxItem Content="WebSocket" Tag="{x:Static svc:MqttConnectionType.WebSocket}"/>
             </ComboBox>
 
-            <TextBlock Grid.Row="6" Grid.Column="0" Text="WS Path" Style="{StaticResource FormLabel}">
+            <TextBlock Grid.Row="6" Grid.Column="0" Text="WS Path">
                 <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                        <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style TargetType="TextBlock" BasedOn="{StaticResource FormLabel}">
+                        <Setter Property="Visibility" Value="Collapsed" />
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding ConnectionType}" Value="WebSocket">
-                                <Setter Property="Visibility" Value="Visible"/>
+                                <Setter Property="Visibility" Value="Visible" />
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </TextBlock.Style>
             </TextBlock>
-            <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding WebSocketPath}" Style="{StaticResource FormField}">
+            <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding WebSocketPath}">
                 <TextBox.Style>
-                    <Style TargetType="TextBox">
-                        <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style TargetType="TextBox" BasedOn="{StaticResource FormField}">
+                        <Setter Property="Visibility" Value="Collapsed" />
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding ConnectionType}" Value="WebSocket">
-                                <Setter Property="Visibility" Value="Visible"/>
+                                <Setter Property="Visibility" Value="Visible" />
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>

@@ -1,3 +1,12 @@
+[2025-08-21 13:14] Topic: Fix duplicate XAML styles
+Context: Build error from multiple Style assignments in MQTT connection view.
+Observations: Consolidated styles with BasedOn to remove duplicate property settings.
+Codex Limitations noticed: dotnet CLI unavailable; tests not executed.
+Effective Prompts / Instructions that worked: reviewer warning about "Style" property duplicates.
+Decisions & Rationale: Use BasedOn to retain base styles while applying visibility triggers.
+Action Items: rely on CI for validation.
+Related Commits/PRs: (this PR)
+
 [2025-08-21 12:51] Topic: MQTT UX fixes
 Context: Added WebSocket path, subscribe toggle, and connection validation.
 Observations: Help window gains close button; CSV removal now clears file.
