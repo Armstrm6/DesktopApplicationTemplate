@@ -40,7 +40,7 @@ namespace DesktopApplicationTemplate.Tests
         {
             var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             Directory.CreateDirectory(tempDir);
-            var csvVm = new CsvViewerViewModel(Path.Combine(tempDir, "csv.json"));
+            var csvVm = new CsvViewerViewModel(new StubFileDialogService(), Path.Combine(tempDir, "csv.json"));
             var csv = new CsvService(csvVm);
             var net = new StubNetworkService();
             var netVm = new NetworkConfigurationViewModel(net);
@@ -63,7 +63,7 @@ namespace DesktopApplicationTemplate.Tests
         {
             var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             Directory.CreateDirectory(tempDir);
-            var csvVm = new CsvViewerViewModel(Path.Combine(tempDir, "csv.json"));
+            var csvVm = new CsvViewerViewModel(new StubFileDialogService(), Path.Combine(tempDir, "csv.json"));
             var csv = new CsvService(csvVm);
             var net = new StubNetworkService();
             var netVm = new NetworkConfigurationViewModel(net);

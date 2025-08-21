@@ -92,7 +92,12 @@ namespace DesktopApplicationTemplate.UI.Services
             string name = pattern.Replace("{index}", _index.ToString());
             if (pattern.Contains("{index}"))
                 _index++;
-            return name;
+            var directory = _viewModel.Configuration.OutputDirectory ?? string.Empty;
+            var path = Path.Combine(directory, name);
+            var folder = Path.GetDirectoryName(path);
+            if (!string.IsNullOrEmpty(folder))
+                Directory.CreateDirectory(folder);
+            return path;
         }
 
     }

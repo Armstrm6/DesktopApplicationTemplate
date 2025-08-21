@@ -14,14 +14,21 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <StackPanel Orientation="Horizontal" Margin="0 0 0 10">
-            <TextBlock Text="File Name Pattern:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-            <Grid Width="300">
-                <TextBox Text="{Binding Configuration.FileNamePattern}" x:Name="PatternBox"/>
-                <TextBlock Text="e.g. *.csv" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0"
-                           VerticalAlignment="Center"
-                           Visibility="{Binding Text, ElementName=PatternBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
-            </Grid>
+        <StackPanel Margin="0 0 0 10">
+            <StackPanel Orientation="Horizontal" Margin="0 0 0 10">
+                <TextBlock Text="Output Directory:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <TextBox Text="{Binding Configuration.OutputDirectory}" Width="300"/>
+                <Button Content="Browse" Command="{Binding BrowseCommand}" Width="70" Margin="5,0,0,0"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="File Name Pattern:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <Grid Width="300">
+                    <TextBox Text="{Binding Configuration.FileNamePattern}" x:Name="PatternBox"/>
+                    <TextBlock Text="e.g. *.csv" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0"
+                               VerticalAlignment="Center"
+                               Visibility="{Binding Text, ElementName=PatternBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+                </Grid>
+            </StackPanel>
         </StackPanel>
         <DataGrid Grid.Row="1" ItemsSource="{Binding Configuration.Columns}" AutoGenerateColumns="False" SelectedItem="{Binding SelectedColumn}">
             <DataGrid.Columns>
