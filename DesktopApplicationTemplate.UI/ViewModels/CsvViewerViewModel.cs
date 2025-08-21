@@ -55,7 +55,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             if (System.IO.File.Exists(_configPath))
             {
                 var json = System.IO.File.ReadAllText(_configPath);
-                Configuration = JsonSerializer.Deserialize<CsvConfiguration>(json) ?? new CsvConfiguration();
+                if (!string.IsNullOrWhiteSpace(json))
+                {
+                    Configuration = JsonSerializer.Deserialize<CsvConfiguration>(json) ?? new CsvConfiguration();
+                }
             }
         }
 

@@ -23,6 +23,8 @@ public class MqttEditConnectionViewModel : ValidatableViewModelBase, ILoggingVie
     private string? _password;
     private MqttConnectionType _connectionType;
     private bool _useTls;
+    private string? _webSocketPath;
+    private bool _isConnected;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MqttEditConnectionViewModel"/> class.
@@ -40,7 +42,14 @@ public class MqttEditConnectionViewModel : ValidatableViewModelBase, ILoggingVie
 
         UpdateCommand = new AsyncRelayCommand(UpdateAsync);
         CancelCommand = new RelayCommand(Cancel);
-        UnsubscribeCommand = new AsyncRelayCommand(UnsubscribeAsync);
+        ToggleSubscriptionCommand = new AsyncRelayCommand(ToggleSubscriptionAsync);
+
+        _service.ConnectionStateChanged += (_, c) =>
+        {
+            IsConnected = c;
+            OnPropertyChanged(nameof(SubscriptionButtonText));
+        };
+        IsConnected = _service.IsConnected;
     }
 
     /// <inheritdoc />
@@ -126,7 +135,7 @@ public class MqttEditConnectionViewModel : ValidatableViewModelBase, ILoggingVie
     public MqttConnectionType ConnectionType
     {
         get => _connectionType;
-        set { _connectionType = value; OnPropertyChanged(); }
+        set { _connectionType = value; OnPropertyChanged(); UpdateTlsState(); }
     }
 
     /// <summary>
@@ -137,6 +146,34 @@ public class MqttEditConnectionViewModel : ValidatableViewModelBase, ILoggingVie
         get => _useTls;
         set { _useTls = value; OnPropertyChanged(); }
     }
+
+    /// <summary>
+    /// WebSocket path when using a WebSocket connection.
+    /// </summary>
+    public string? WebSocketPath
+    {
+        get => _webSocketPath;
+        set { _webSocketPath = value; OnPropertyChanged(); }
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether TLS options are enabled.
+    /// </summary>
+    public bool IsTlsEnabled => ConnectionType == MqttConnectionType.Tcp;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the service is connected.
+    /// </summary>
+    public bool IsConnected
+    {
+        get => _isConnected;
+        private set { _isConnected = value; OnPropertyChanged(); OnPropertyChanged(nameof(SubscriptionButtonText)); }
+    }
+
+    /// <summary>
+    /// Text for the subscription toggle button.
+    /// </summary>
+    public string SubscriptionButtonText => IsConnected ? "Unsubscribe" : "Subscribe";
 
     /// <summary>
     /// Command to update the connection settings.
@@ -151,7 +188,7 @@ public class MqttEditConnectionViewModel : ValidatableViewModelBase, ILoggingVie
     /// <summary>
     /// Command to unsubscribe from the broker.
     /// </summary>
-    public ICommand UnsubscribeCommand { get; }
+    public ICommand ToggleSubscriptionCommand { get; }
 
     internal void Load(MqttServiceOptions options)
     {
@@ -162,6 +199,7 @@ public class MqttEditConnectionViewModel : ValidatableViewModelBase, ILoggingVie
         _username = _options.Username;
         _password = _options.Password;
         _connectionType = _options.ConnectionType;
+        _webSocketPath = _options.WebSocketPath;
         _useTls = _options.UseTls;
         OnPropertyChanged(nameof(Host));
         OnPropertyChanged(nameof(Port));
@@ -169,7 +207,9 @@ public class MqttEditConnectionViewModel : ValidatableViewModelBase, ILoggingVie
         OnPropertyChanged(nameof(Username));
         OnPropertyChanged(nameof(Password));
         OnPropertyChanged(nameof(ConnectionType));
+        OnPropertyChanged(nameof(WebSocketPath));
         OnPropertyChanged(nameof(UseTls));
+        UpdateTlsState();
     }
 
     /// <summary>
@@ -184,8 +224,9 @@ public class MqttEditConnectionViewModel : ValidatableViewModelBase, ILoggingVie
         _options.Username = _username;
         _options.Password = _password;
         _options.ConnectionType = _connectionType;
+        _options.WebSocketPath = _webSocketPath;
         _options.UseTls = _useTls;
-        await _service.ConnectAsync().ConfigureAwait(false);
+        await _service.ConnectAsync(_options).ConfigureAwait(false);
         Logger?.Log("MQTT connection update finished", LogLevel.Debug);
         RequestClose?.Invoke(this, EventArgs.Empty);
     }
@@ -202,11 +243,40 @@ public class MqttEditConnectionViewModel : ValidatableViewModelBase, ILoggingVie
     /// <summary>
     /// Disconnects from the broker.
     /// </summary>
-    public async Task UnsubscribeAsync()
+    public async Task ToggleSubscriptionAsync()
     {
-        Logger?.Log("MQTT unsubscribe start", LogLevel.Debug);
-        await _service.DisconnectAsync().ConfigureAwait(false);
-        Logger?.Log("MQTT unsubscribe finished", LogLevel.Debug);
+        if (IsConnected)
+        {
+            Logger?.Log("MQTT unsubscribe start", LogLevel.Debug);
+            await _service.DisconnectAsync().ConfigureAwait(false);
+            Logger?.Log("MQTT unsubscribe finished", LogLevel.Debug);
+        }
+        else
+        {
+            Logger?.Log("MQTT subscribe start", LogLevel.Debug);
+            await _service.ConnectAsync().ConfigureAwait(false);
+            Logger?.Log("MQTT subscribe finished", LogLevel.Debug);
+        }
         RequestClose?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>
+    /// Highlights missing required fields.
+    /// </summary>
+    public void HighlightMissingFields()
+    {
+        if (string.IsNullOrWhiteSpace(Host))
+            AddError(nameof(Host), "Host required");
+        if (string.IsNullOrWhiteSpace(ClientId))
+            AddError(nameof(ClientId), "Client Id required");
+    }
+
+    private void UpdateTlsState()
+    {
+        if (_connectionType == MqttConnectionType.WebSocket)
+        {
+            UseTls = false;
+        }
+        OnPropertyChanged(nameof(IsTlsEnabled));
     }
 }

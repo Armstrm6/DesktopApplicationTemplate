@@ -231,7 +231,7 @@ namespace DesktopApplicationTemplate.Tests
         [Fact]
         [TestCategory("CodexSafe")]
         [TestCategory("WindowsSafe")]
-        public void AddServiceCommand_RaisesNavigationEvent()
+        public void AddServiceCommand_RaisesAddServiceRequested()
         {
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
             var csv = new CsvService(new CsvViewerViewModel(configPath));
@@ -239,12 +239,12 @@ namespace DesktopApplicationTemplate.Tests
             var networkVm = new NetworkConfigurationViewModel(network.Object);
             var vm = new MainViewModel(csv, networkVm, network.Object);
 
-            string? requestedName = null;
-            vm.AddMqttServiceRequested += name => requestedName = name;
+            bool raised = false;
+            vm.AddServiceRequested += () => raised = true;
 
             vm.AddServiceCommand.Execute(null);
 
-            Assert.Equal("MQTT1", requestedName);
+            Assert.True(raised);
             ConsoleTestLogger.LogPass();
         }
     }

@@ -149,13 +149,15 @@ public class MqttServiceTests
     public async Task SubscribeAsync_ForwardsQoS()
     {
         var client = new Mock<IMqttClient>();
-        client.Setup(c => c.SubscribeAsync("t", MqttQualityOfServiceLevel.ExactlyOnce, It.IsAny<CancellationToken>()))
+        client.Setup(c => c.SubscribeAsync(It.IsAny<MqttClientSubscribeOptions>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new MqttClientSubscribeResult(0, Array.Empty<MqttClientSubscribeResultItem>(), string.Empty, Array.Empty<MqttUserProperty>()));
         var service = new MqttService(client.Object, Options.Create(new MqttServiceOptions()), Mock.Of<IMessageRoutingService>(), Mock.Of<ILoggingService>());
 
         await service.SubscribeAsync("t", MqttQualityOfServiceLevel.ExactlyOnce);
 
-        client.Verify(c => c.SubscribeAsync("t", MqttQualityOfServiceLevel.ExactlyOnce, It.IsAny<CancellationToken>()), Times.Once);
+        client.Verify(c => c.SubscribeAsync(It.Is<MqttClientSubscribeOptions>(o =>
+            o.TopicFilters.Any(f => f.Topic == "t" && f.QualityOfServiceLevel == MqttQualityOfServiceLevel.ExactlyOnce)),
+            It.IsAny<CancellationToken>()), Times.Once);
         ConsoleTestLogger.LogPass();
     }
 
