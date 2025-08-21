@@ -1002,6 +1002,7 @@ Effective Prompts / Instructions that worked:
 Decisions & Rationale: Updated tests and logging to reflect new behavior
 Action Items:
 Related Commits/PRs:
+
 [2025-08-21 13:39] Topic: CSV output directory selection
 Context: Added ability to browse for CSV output folders and support nested file patterns.
 Observations: View model now stores an output directory and service ensures directories exist when writing files.
@@ -1018,3 +1019,21 @@ Effective Prompts / Instructions that worked: User request to exclude CSV servic
 Decisions & Rationale: Guard against CSV-related service names before creating or removing columns.
 Action Items: Rely on CI for full test execution.
 Related Commits/PRs: (this PR)
+
+[2025-08-21 13:38] Topic: Hostname validation for network services
+Context: Tests failed because hostnames were rejected by IP-only validation.
+Observations: Expanded validation to allow domain names and updated MQTT edit tests for connection state handling.
+Codex Limitations noticed: pwsh unavailable for add-tip script.
+Effective Prompts / Instructions that worked: user provided failing test output highlighting host requirement.
+Decisions & Rationale: Ensure host validation accepts both IP addresses and domain names to prevent false errors.
+Action Items: run tests.
+Related Commits/PRs: (this PR)
+[2025-08-21 14:11] Topic: Skip CI for dev pull requests
+Context: Pipeline ran unnecessarily on PRs targeting dev.
+Observations: Removed dev branch from pull_request trigger to bypass checks and build steps for dev PRs.
+Codex Limitations noticed: pwsh and dotnet CLI unavailable; tests not executed.
+Effective Prompts / Instructions that worked: user request to disable CI for dev pull requests.
+Decisions & Rationale: Excluding dev from pull_request triggers avoids redundant builds.
+Action Items: rely on CI for validation on other branches.
+Related Commits/PRs: (this PR)
+

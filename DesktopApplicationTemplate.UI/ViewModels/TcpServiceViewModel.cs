@@ -72,7 +72,7 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
             set
             {
                 _computerIp = value;
-                if (!InputValidators.IsValidPartialIp(value))
+                if (!InputValidators.IsValidHost(value))
                 {
                     AddError(nameof(ComputerIp), "Invalid IP address");
                     Logger?.Log("Invalid computer IP entered", LogLevel.Warning);
@@ -110,7 +110,7 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
             set
             {
                 _serverIp = value;
-                if (!InputValidators.IsValidPartialIp(value))
+                if (!InputValidators.IsValidHost(value))
                 {
                     AddError(nameof(ServerIp), "Invalid IP address");
                     Logger?.Log("Invalid server IP entered", LogLevel.Warning);
@@ -129,7 +129,7 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
             set
             {
                 _serverGateway = value;
-                if (!InputValidators.IsValidPartialIp(value))
+                if (!InputValidators.IsValidHost(value))
                 {
                     AddError(nameof(ServerGateway), "Invalid IP address");
                     Logger?.Log("Invalid server gateway entered", LogLevel.Warning);
