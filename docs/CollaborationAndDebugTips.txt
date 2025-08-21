@@ -1,3 +1,8 @@
+# Collaboration & Debug Tips (Codex <-> Matt)
+Purpose: Running log of what worked, what broke, and why.
+
+Remember to record environment limitations (e.g., missing tests or write restrictions) in each log entry.
+
 [2025-08-21 13:14] Topic: Fix duplicate XAML styles
 Context: Build error from multiple Style assignments in MQTT connection view.
 Observations: Consolidated styles with BasedOn to remove duplicate property settings.
@@ -34,10 +39,7 @@ Decisions & Rationale: Provide quick reference to core Codex rules for contribut
 Action Items: none
 Related Commits/PRs: (this PR)
 
-# Collaboration & Debug Tips (Codex <-> Matt)
-Purpose: Running log of what worked, what broke, and why.
 
-Remember to record environment limitations (e.g., missing tests or write restrictions) in each log entry.
 
 [2025-08-20 17:33] Topic: Environment precedence docs
 Context: Clarified AGENTS instructions about following environment directives.
