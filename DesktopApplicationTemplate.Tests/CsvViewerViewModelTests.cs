@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI.Services;
 using FluentAssertions;
 using Xunit;
 
@@ -27,6 +28,27 @@ public class CsvViewerViewModelTests
             }
         }
     }
+
+    private class StubFileDialogService : IFileDialogService
+    {
+        public string? Folder { get; set; }
+        public string? OpenFile() => null;
+        public string? SelectFolder() => Folder;
+    }
+
+    [Fact]
+    public void BrowseCommand_UpdatesFileNamePattern()
+    {
+        var temp = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+        var dialog = new StubFileDialogService { Folder = temp };
+        var vm = new CsvViewerViewModel(fileDialog: dialog);
+        vm.Configuration.FileNamePattern = "output_{index}.csv";
+
+        vm.BrowseCommand.Execute(null);
+
+        vm.Configuration.FileNamePattern.Should().StartWith(temp);
+    }
+}
 
 #if DEBUG
     [Fact]

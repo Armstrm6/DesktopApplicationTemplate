@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Windows.Input;
+using System.IO;
+using DesktopApplicationTemplate.UI.Services;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -23,6 +25,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
     public class CsvViewerViewModel : ViewModelBase
     {
         private readonly string _configPath;
+        private readonly IFileDialogService _fileDialog;
 
         public CsvConfiguration Configuration { get; private set; } = new();
         public CsvColumnConfig? SelectedColumn { get; set; }
@@ -31,23 +34,31 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public ICommand RemoveColumnCommand { get; }
         public ICommand SaveCommand { get; }
         public ICommand CloseCommand { get; }
+        public ICommand BrowseCommand { get; }
 #if DEBUG
         public ICommand DebugSaveCommand { get; }
 #endif
 
         public event Action? RequestClose;
 
-        public CsvViewerViewModel(string? configPath = null)
+        public CsvViewerViewModel(IFileDialogService fileDialog, string? configPath = null)
         {
+            _fileDialog = fileDialog ?? throw new ArgumentNullException(nameof(fileDialog));
             _configPath = configPath ?? "csv_config.json";
             Load();
             AddColumnCommand = new RelayCommand(() => Configuration.Columns.Add(new CsvColumnConfig()));
             RemoveColumnCommand = new RelayCommand(() => { if (SelectedColumn != null) Configuration.Columns.Remove(SelectedColumn); });
             SaveCommand = new RelayCommand(Save);
             CloseCommand = new RelayCommand(() => RequestClose?.Invoke());
+            BrowseCommand = new RelayCommand(Browse);
 #if DEBUG
             DebugSaveCommand = new RelayCommand(() => Save());
 #endif
+        }
+
+        public CsvViewerViewModel(string? configPath = null)
+            : this(new FileDialogService(), configPath)
+        {
         }
 
         private void Load()
@@ -102,6 +113,18 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 System.IO.File.WriteAllText(temp, dump);
                 Environment.FailFast($"Stack overflow while saving CSV configuration. Dump written to {temp}");
             }
+        }
+
+        private void Browse()
+        {
+            var folder = _fileDialog.SelectFolder();
+            if (string.IsNullOrWhiteSpace(folder))
+                return;
+            var file = Path.GetFileName(Configuration.FileNamePattern);
+            if (string.IsNullOrWhiteSpace(file))
+                file = "output_{index}.csv";
+            Configuration.FileNamePattern = Path.Combine(folder, file);
+            OnPropertyChanged(nameof(Configuration));
         }
 
         // Uses OnPropertyChanged from ViewModelBase

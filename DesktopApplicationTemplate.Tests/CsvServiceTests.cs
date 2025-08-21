@@ -164,6 +164,33 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
+        [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
+        public void RecordLog_UsesServiceAndMessageTokens()
+        {
+            var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(tempDir);
+            try
+            {
+                var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
+                var vm = new CsvViewerViewModel(configPath);
+                vm.Configuration.FileNamePattern = Path.Combine(tempDir, "{service}.{message}/output_{index}.csv");
+                var svc = new CsvService(vm);
+
+                svc.RecordLog("TCP1", "message");
+
+                var expected = Path.Combine(tempDir, "TCP1.message", "output_0.csv");
+                Assert.True(File.Exists(expected));
+            }
+            finally
+            {
+                Directory.Delete(tempDir, true);
+            }
+
+            ConsoleTestLogger.LogPass();
+        }
+
+        [Fact]
         [TestCategory("WindowsSafe")]
         public void CsvServiceView_LoadsInto_ContentFrame()
         {

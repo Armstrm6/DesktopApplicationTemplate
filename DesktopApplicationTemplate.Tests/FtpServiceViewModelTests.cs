@@ -14,6 +14,7 @@ namespace DesktopApplicationTemplate.Tests
         private class StubFileDialogService : IFileDialogService
         {
             public string? OpenFile() => "stub.txt";
+            public string? SelectFolder() => null;
         }
 
         [Fact]

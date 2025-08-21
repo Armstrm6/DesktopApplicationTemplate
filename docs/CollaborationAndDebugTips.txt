@@ -1002,3 +1002,11 @@ Effective Prompts / Instructions that worked:
 Decisions & Rationale: Updated tests and logging to reflect new behavior
 Action Items:
 Related Commits/PRs:
+[2025-08-21 13:37] Topic: CSV folder token support
+Context: Added folder browse button and service/message tokens for CSV file paths.
+Observations: CSV files can now be organized under tokenized directories via the Browse command.
+Codex Limitations noticed: dotnet CLI unavailable; tests not executed.
+Effective Prompts / Instructions that worked: User request for configurable folder structures.
+Decisions & Rationale: Introduced SelectFolder dialog service and token replacement in CsvService.
+Action Items: rely on CI for verification.
+Related Commits/PRs: (this PR)

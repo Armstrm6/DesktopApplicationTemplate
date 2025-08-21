@@ -22,6 +22,7 @@
                            VerticalAlignment="Center"
                            Visibility="{Binding Text, ElementName=PatternBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
             </Grid>
+            <Button Content="Browse" Command="{Binding BrowseCommand}" Width="60" Margin="5,0,0,0"/>
         </StackPanel>
         <DataGrid Grid.Row="1" ItemsSource="{Binding Configuration.Columns}" AutoGenerateColumns="False" SelectedItem="{Binding SelectedColumn}">
             <DataGrid.Columns>
