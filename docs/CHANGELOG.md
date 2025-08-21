@@ -56,6 +56,7 @@
 - Updated `global.json` to require the .NET 8 SDK version `8.0.404`.
 - Default `AutoStart` is now disabled and all environment configuration files set `"AutoStart": false`.
 - CI workflow now runs on pushes to `feature/**` and `bugfix/**` branches and supports manual triggers, ensuring tests execute on GitHub.
+- CI workflow skips checks for pull requests targeting the `dev` branch to speed up integration.
 - `MqttCreateServiceView`, `MqttTagSubscriptionsView`, and `MqttEditConnectionView` along with their view models are now registered as transient services.
 - `self-heal` workflow now monitors the unified `CI` pipeline.
 - MQTT create, edit, and subscription views now follow design spacing with shared form styles and accessibility names.
@@ -104,6 +105,7 @@
 - Added tests confirming the main view ignores non-Escape key presses and service persistence handles cyclical references.
 - Eliminated recursive logging in CSV service to prevent stack overflow and added guards that capture configuration snapshots on save failures.
 - Removed invalid `MouseDoubleClick` XAML handler and cleaned up ambiguous WPF references causing build failures.
+- Host validation now accepts domain names for all services, preventing connection errors when using non-IP hosts.
 - Corrected service count bindings to use one-way mode, preventing runtime errors on read-only properties.
 - Resolved WPF build error by removing duplicate StackPanel from `MqttCreateServiceView` so the page hosts a single `ScrollViewer`.
 - Added missing `MQTTnet.Protocol` using in `MqttCreateServiceViewModel` to restore `MqttQualityOfServiceLevel` references.

@@ -28,8 +28,11 @@ public class MqttServiceViewModelTests
         var client = clientMock ?? new Mock<IMqttClient>();
         client.Setup(c => c.PublishAsync(It.IsAny<MqttApplicationMessage>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new MqttClientPublishResult(null, MqttClientPublishReasonCode.Success, null!, Array.Empty<MqttUserProperty>()));
-        client.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new MqttClientConnectResult());
+        if (clientMock is null)
+        {
+            client.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new MqttClientConnectResult());
+        }
         var service = new MqttService(client.Object, options, routing.Object, logger);
         var helper = new SaveConfirmationHelper(logger);
         return new MqttServiceViewModel(service, routing.Object, helper, options, logger);

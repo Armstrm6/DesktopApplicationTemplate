@@ -16,7 +16,7 @@ public class ScpServiceViewModel : ViewModelBase, ILoggingViewModel, INetworkAwa
             get => _host;
             set
             {
-                if (InputValidators.IsValidPartialIp(value))
+                if (InputValidators.IsValidHost(value))
                     _host = value;
                 OnPropertyChanged();
             }
