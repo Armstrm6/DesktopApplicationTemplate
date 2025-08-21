@@ -1002,3 +1002,19 @@ Effective Prompts / Instructions that worked:
 Decisions & Rationale: Updated tests and logging to reflect new behavior
 Action Items:
 Related Commits/PRs:
+[2025-08-21 13:39] Topic: CSV output directory selection
+Context: Added ability to browse for CSV output folders and support nested file patterns.
+Observations: View model now stores an output directory and service ensures directories exist when writing files.
+Codex Limitations noticed: dotnet CLI may lack WPF runtime; rely on CI for full test execution.
+Effective Prompts / Instructions that worked: User request to select output directory and create folder structures.
+Decisions & Rationale: Use IFileDialogService for folder browsing and create directories before writing.
+Action Items: Monitor CI for Windows-specific issues.
+Related Commits/PRs: (this PR)
+[2025-08-21 14:25] Topic: CSV service column exclusion
+Context: Avoid self-referencing in CSV logs.
+Observations: CsvService now skips names containing "CSV" and MainViewModel ignores CSV services when managing columns.
+Codex Limitations noticed: pwsh unavailable for add-tip script; WindowsDesktop runtime missing for tests.
+Effective Prompts / Instructions that worked: User request to exclude CSV services from CSV output.
+Decisions & Rationale: Guard against CSV-related service names before creating or removing columns.
+Action Items: Rely on CI for full test execution.
+Related Commits/PRs: (this PR)

@@ -11,11 +11,6 @@ namespace DesktopApplicationTemplate.Tests
 {
     public class FtpServiceViewModelTests
     {
-        private class StubFileDialogService : IFileDialogService
-        {
-            public string? OpenFile() => "stub.txt";
-        }
-
         [Fact]
         [TestCategory("CodexSafe")]
         [TestCategory("WindowsSafe")]

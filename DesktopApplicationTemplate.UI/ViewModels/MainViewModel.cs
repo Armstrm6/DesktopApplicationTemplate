@@ -243,7 +243,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 _logger?.Log($"Removing service {SelectedService.DisplayName}", LogLevel.Debug);
                 var index = Services.IndexOf(SelectedService);
                 SelectedService.AddLog("Service removed", WpfBrushes.Red);
-                _csvService.RemoveColumnsForService(SelectedService.DisplayName);
+                if (!SelectedService.ServiceType.Contains("CSV", StringComparison.OrdinalIgnoreCase))
+                    _csvService.RemoveColumnsForService(SelectedService.DisplayName);
                 SelectedService.LogAdded -= OnServiceLogAdded;
                 SelectedService.ActiveChanged -= OnServiceActiveChanged;
                 Services.Remove(SelectedService);
@@ -300,7 +301,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 svc.SetColorsByType();
                 svc.LogAdded += OnServiceLogAdded;
                 svc.ActiveChanged += OnServiceActiveChanged;
-                _csvService.EnsureColumnsForService(svc.DisplayName);
+                if (!svc.ServiceType.Contains("CSV", StringComparison.OrdinalIgnoreCase))
+                    _csvService.EnsureColumnsForService(svc.DisplayName);
                 Services.Add(svc);
                 _logger?.Log($"Loaded service {svc.DisplayName}", LogLevel.Debug);
             }

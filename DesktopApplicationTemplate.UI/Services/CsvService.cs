@@ -19,8 +19,14 @@ namespace DesktopApplicationTemplate.UI.Services
             _viewModel = vm;
         }
 
+        private static bool IsCsvService(string serviceName) =>
+            serviceName.Contains("CSV", System.StringComparison.OrdinalIgnoreCase);
+
         public void EnsureColumnsForService(string serviceName)
         {
+            if (IsCsvService(serviceName))
+                return;
+
             if (!_viewModel.Configuration.Columns.Any(c => c.Name == serviceName))
             {
                 _viewModel.Configuration.Columns.Add(new CsvColumnConfig { Name = serviceName, Service = serviceName });
@@ -35,6 +41,9 @@ namespace DesktopApplicationTemplate.UI.Services
 
         public void RemoveColumnsForService(string serviceName)
         {
+            if (IsCsvService(serviceName))
+                return;
+
             var sent = $"{serviceName} Sent";
             var toRemove = _viewModel.Configuration.Columns
                 .Where(c => c.Name == serviceName || c.Name == sent)
@@ -54,6 +63,9 @@ namespace DesktopApplicationTemplate.UI.Services
 
         public void RecordLog(string serviceName, string message)
         {
+            if (IsCsvService(serviceName))
+                return;
+
             EnsureColumnsForService(serviceName);
             EnsureHeader();
             var columns = _viewModel.Configuration.Columns.Select(_ => string.Empty).ToArray();
@@ -92,7 +104,12 @@ namespace DesktopApplicationTemplate.UI.Services
             string name = pattern.Replace("{index}", _index.ToString());
             if (pattern.Contains("{index}"))
                 _index++;
-            return name;
+            var directory = _viewModel.Configuration.OutputDirectory ?? string.Empty;
+            var path = Path.Combine(directory, name);
+            var folder = Path.GetDirectoryName(path);
+            if (!string.IsNullOrEmpty(folder))
+                Directory.CreateDirectory(folder);
+            return path;
         }
 
     }
