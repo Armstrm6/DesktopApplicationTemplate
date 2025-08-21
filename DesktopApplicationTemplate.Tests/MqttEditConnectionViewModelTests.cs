@@ -21,6 +21,7 @@ public class MqttEditConnectionViewModelTests
             .ReturnsAsync(new MqttClientConnectResult());
         client.Setup(c => c.DisconnectAsync(It.IsAny<MqttClientDisconnectOptions?>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
+        client.SetupGet(c => c.IsConnected).Returns(true);
         var options = Microsoft.Extensions.Options.Options.Create(new MqttServiceOptions());
         var service = new MqttService(client.Object, options, Mock.Of<IMessageRoutingService>(), Mock.Of<ILoggingService>());
         return new MqttEditConnectionViewModel(service, options, Mock.Of<ILoggingService>());
@@ -48,7 +49,7 @@ public class MqttEditConnectionViewModelTests
 
     [Fact]
     [TestCategory("WindowsSafe")]
-    public async Task UnsubscribeAsync_Disconnects()
+    public async Task ToggleSubscriptionAsync_Disconnects()
     {
         if (!OperatingSystem.IsWindows()) return;
         var client = new Mock<IMqttClient>();
@@ -61,7 +62,7 @@ public class MqttEditConnectionViewModelTests
         var vm = new MqttEditConnectionViewModel(service, options);
         var closed = false;
         vm.RequestClose += (_, _) => closed = true;
-        await vm.UnsubscribeAsync();
+        await vm.ToggleSubscriptionAsync();
         client.Verify(c => c.DisconnectAsync(It.IsAny<MqttClientDisconnectOptions?>(), It.IsAny<CancellationToken>()), Times.Once);
         Assert.True(closed);
     }
@@ -130,7 +131,7 @@ public class MqttEditConnectionViewModelTests
         vm.Username = "user";
         vm.Password = "pass";
         vm.ConnectionType = MqttConnectionType.WebSocket;
-        vm.UseTls = true;
+        vm.WebSocketPath = "/mqtt";
         await vm.UpdateAsync();
         Assert.Equal("example.com", options.Value.Host);
         Assert.Equal(8883, options.Value.Port);
@@ -138,7 +139,29 @@ public class MqttEditConnectionViewModelTests
         Assert.Equal("user", options.Value.Username);
         Assert.Equal("pass", options.Value.Password);
         Assert.Equal(MqttConnectionType.WebSocket, options.Value.ConnectionType);
-        Assert.True(options.Value.UseTls);
+        Assert.Equal("/mqtt", options.Value.WebSocketPath);
         Assert.True(closed);
+    }
+
+    [Fact]
+    [TestCategory("WindowsSafe")]
+    public void ConnectionType_WebSocket_DisablesTls()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        var vm = CreateViewModel();
+        vm.ConnectionType = MqttConnectionType.WebSocket;
+        Assert.False(vm.IsTlsEnabled);
+        Assert.False(vm.UseTls);
+    }
+
+    [Fact]
+    [TestCategory("WindowsSafe")]
+    public void SubscriptionButtonText_ReflectsConnectionState()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        var vm = CreateViewModel();
+        Assert.Equal("Subscribe", vm.SubscriptionButtonText);
+        vm.GetType().GetProperty("IsConnected")!.SetValue(vm, true);
+        Assert.Equal("Unsubscribe", vm.SubscriptionButtonText);
     }
 }

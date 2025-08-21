@@ -413,17 +413,22 @@ public class MqttServiceViewModel : ValidatableViewModelBase, ILoggingViewModel,
     /// <summary>
     /// Command to connect to the broker.
     /// </summary>
-    public ICommand ConnectCommand { get; }
+        public ICommand ConnectCommand { get; }
 
     /// <summary>
     /// Command to publish the selected message.
     /// </summary>
-    public ICommand PublishCommand { get; }
+        public ICommand PublishCommand { get; }
 
     /// <summary>
     /// Command to trigger save confirmation.
     /// </summary>
     public ICommand SaveCommand { get; }
+
+    /// <summary>
+    /// Raised when connection settings require editing.
+    /// </summary>
+    public event EventHandler? EditConnectionRequested;
 
     private void AddTopic()
     {
@@ -461,12 +466,20 @@ public class MqttServiceViewModel : ValidatableViewModelBase, ILoggingViewModel,
     /// <summary>
     /// Connects to the broker.
     /// </summary>
-    public async Task ConnectAsync(MqttServiceOptions? options = null)
+        public async Task ConnectAsync(MqttServiceOptions? options = null)
     {
         Logger?.Log("MQTT connect start", LogLevel.Debug);
-        await _service.ConnectAsync(options).ConfigureAwait(false);
-        IsConnected = true;
-        Logger?.Log("MQTT connect finished", LogLevel.Debug);
+        try
+        {
+            await _service.ConnectAsync(options).ConfigureAwait(false);
+            IsConnected = true;
+            Logger?.Log("MQTT connect finished", LogLevel.Debug);
+        }
+        catch (ArgumentException ex)
+        {
+            Logger?.Log(ex.Message, LogLevel.Warning);
+            EditConnectionRequested?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     /// <summary>
@@ -478,8 +491,7 @@ public class MqttServiceViewModel : ValidatableViewModelBase, ILoggingViewModel,
             return;
         Logger?.Log("MQTT publish start", LogLevel.Debug);
         var topic = _routing.ResolveTokens(SelectedMessage.Endpoint);
-        var payload = _routing.ResolveTokens(SelectedMessage.Message);
-        await _service.PublishAsync(topic, payload).ConfigureAwait(false);
+        await _service.PublishAsync(topic, SelectedMessage.Message).ConfigureAwait(false);
         Logger?.Log("MQTT publish finished", LogLevel.Debug);
     }
 

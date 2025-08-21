@@ -34,7 +34,7 @@ namespace DesktopApplicationTemplate.UI.Views
             _logger = factory?.CreateLogger<MainView>();
             DataContext = _viewModel;
             _viewModel.EditRequested += OnEditRequested;
-            _viewModel.AddMqttServiceRequested += OnAddMqttServiceRequested;
+            _viewModel.AddServiceRequested += OnAddServiceRequested;
             KeyDown += MainView_KeyDown;
             MouseDown += MainView_MouseDown;
             CommandBindings.Add(new CommandBinding(SystemCommands.CloseWindowCommand, CloseCommand_Executed));
@@ -123,33 +123,34 @@ namespace DesktopApplicationTemplate.UI.Views
             }
         }
 
-        private void OnAddMqttServiceRequested(string defaultName)
+        private void OnAddServiceRequested()
         {
-            var previousPage = ContentFrame.Content as Page;
-            var wasHome = HomeContentGrid.Visibility == Visibility.Visible;
-
-            var view = App.AppHost.Services.GetRequiredService<MqttCreateServiceView>();
-            if (view.DataContext is not MqttCreateServiceViewModel vm)
-                return;
-
-            vm.ServiceName = defaultName;
-            vm.ServiceCreated += (name, options) =>
+            var window = App.AppHost.Services.GetRequiredService<CreateServiceWindow>();
+            window.Owner = this;
+            if (window.ShowDialog() == true)
             {
-                AddMqttService(name, options);
-                if (wasHome)
-                    ShowHome();
-                else if (previousPage != null)
-                    ShowPage(previousPage);
-            };
-            vm.Cancelled += () =>
-            {
-                if (wasHome)
-                    ShowHome();
-                else if (previousPage != null)
-                    ShowPage(previousPage);
-            };
-
-            ShowPage(view);
+                if (window.CreatedServiceType == "MQTT")
+                {
+                    AddMqttService(window.CreatedServiceName, window.MqttOptions ?? new MqttServiceOptions());
+                }
+                else if (!string.IsNullOrWhiteSpace(window.CreatedServiceType))
+                {
+                    var svc = new ServiceViewModel
+                    {
+                        DisplayName = $"{window.CreatedServiceType} - {window.CreatedServiceName}",
+                        ServiceType = window.CreatedServiceType,
+                        IsActive = false
+                    };
+                    svc.SetColorsByType();
+                    svc.LogAdded += _viewModel.OnServiceLogAdded;
+                    svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
+                    GetOrCreateServicePage(svc);
+                    _viewModel.Services.Add(svc);
+                    _logger?.LogInformation("Service {Name} added", svc.DisplayName);
+                    _viewModel.SelectedService = svc;
+                    ServiceList.ScrollIntoView(svc);
+                }
+            }
         }
 
         private void AddMqttService(string name, MqttServiceOptions options)
@@ -194,6 +195,24 @@ namespace DesktopApplicationTemplate.UI.Views
                 {
                     if (active)
                         await mqttVm.ConnectAsync();
+                };
+
+                mqttVm.EditConnectionRequested += (_, _) =>
+                {
+                    var editView = App.AppHost.Services.GetRequiredService<MqttEditConnectionView>();
+                    if (editView.DataContext is MqttEditConnectionViewModel vm)
+                    {
+                        var options = App.AppHost.Services.GetRequiredService<IOptions<MqttServiceOptions>>().Value;
+                        vm.Load(options);
+                        vm.HighlightMissingFields();
+                        vm.RequestClose += (_, _) =>
+                        {
+                            if (newService.ServicePage != null)
+                                ShowPage(newService.ServicePage);
+                            _viewModel.SaveServices();
+                        };
+                    }
+                    ShowPage(editView);
                 };
             }
 

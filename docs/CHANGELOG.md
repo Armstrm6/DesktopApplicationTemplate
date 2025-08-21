@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 ### Added
+- WebSocket path configuration with TLS disabled when using WebSockets.
+- Connection edit window toggles subscribe/unsubscribe with color cues and highlights missing fields.
+- Help window now includes a close button.
 - Section on working in restricted environments and reminder to log limitations in collaboration docs.
 - Documented Codex architecture and coding standards in `AGENTS.md`.
 - Each MQTT tag subscription now retains its own outgoing test message, and the test message box binds to the selected tag's message.
@@ -46,6 +49,7 @@
 - File dialog service registered for TLS certificate selection in MQTT views.
 
 ### Changed
+- Removing a service also deletes its columns from the CSV list and resets the output file.
 - Clarified environment instruction precedence in `AGENTS.md`.
 - Renamed root `CollaborationAndDebugTips.txt` to `CollaborationGuidelines.txt` and clarified distinction from `docs/CollaborationAndDebugTips.txt`.
 - Updated `global.json` to require the .NET 8 SDK version `8.0.404`.
@@ -89,6 +93,10 @@
 - Removed obsolete `MQTTnet.Client.Publishing` import in MQTT view model tests to resolve missing namespace build errors.
 - Guarded CSV viewer configuration serialization to prevent stack overflow when saving empty data.
 - Main window sizes to content so UI elements are no longer clipped at the edges.
+- Service creation now prompts for a service type instead of defaulting to MQTT.
+- CSV logging rotates to a new indexed file when services are removed without deleting existing output.
+- Empty CSV configuration files no longer cause JSON parsing errors.
+- Logging minimum level changes now re-filter existing log entries without reloading from disk.
 - Added missing `FluentAssertions` package reference to the test project and documented dependency checks to avoid build failures.
 - Service and settings persistence now ignore reference cycles during JSON serialization to avoid stack overflow when saving configuration.
 - CSV service now increments file index only when `FileNamePattern` contains `{index}`.

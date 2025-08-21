@@ -4,6 +4,7 @@ using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.Core.Services;
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -45,6 +46,37 @@ namespace DesktopApplicationTemplate.Tests
             Assert.DoesNotContain(vm.Configuration.Columns, c => c.Name == "Svc");
             Assert.DoesNotContain(vm.Configuration.Columns, c => c.Name == "Svc Sent");
 
+            ConsoleTestLogger.LogPass();
+        }
+
+        [Fact]
+        [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
+        public void RemoveColumnsForService_StartsNewFile()
+        {
+            var dir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(dir);
+            try
+            {
+                var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()+".json");
+                var vm = new CsvViewerViewModel(configPath);
+                vm.Configuration.FileNamePattern = Path.Combine(dir, "out_{index}.csv");
+                var svc = new CsvService(vm);
+
+                svc.RecordLog("Svc", "one");
+                var existing = Directory.GetFiles(dir);
+
+                svc.RemoveColumnsForService("Svc");
+                svc.RecordLog("Svc2", "two");
+
+                var files = Directory.GetFiles(dir);
+                Assert.True(existing.All(f => File.Exists(f)));
+                Assert.True(files.Length > existing.Length);
+            }
+            finally
+            {
+                Directory.Delete(dir, true);
+            }
             ConsoleTestLogger.LogPass();
         }
 

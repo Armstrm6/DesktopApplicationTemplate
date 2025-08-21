@@ -43,9 +43,12 @@ namespace DesktopApplicationTemplate.UI.Services
             {
                 _viewModel.Configuration.Columns.Remove(col);
             }
+
             if (toRemove.Count > 0)
             {
                 _viewModel.Save();
+                _index++;
+                _headerWritten = false;
             }
         }
 
@@ -91,5 +94,6 @@ namespace DesktopApplicationTemplate.UI.Services
                 _index++;
             return name;
         }
+
     }
 }
