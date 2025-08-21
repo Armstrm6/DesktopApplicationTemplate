@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 ### Added
+- CSV creator now supports selecting an output directory and nested folder patterns when naming files.
 - WebSocket path configuration with TLS disabled when using WebSockets.
 - Connection edit window toggles subscribe/unsubscribe with color cues and highlights missing fields.
 - Help window now includes a close button.
@@ -115,4 +116,5 @@
 - Fixed ObjectDataProvider bindings in `MqttTagSubscriptionsView` to prevent runtime `ArgumentException` and restored send button accessibility metadata.
 - Eliminated duplicate Style assignments in `MqttEditConnectionView` to prevent XAML parse failures.
 - Cleaned up `CollaborationAndDebugTips.txt` by removing duplicate headers and restoring log structure.
+- CSV creator no longer adds columns for itself or other CSV services, preventing self-referencing entries.
 

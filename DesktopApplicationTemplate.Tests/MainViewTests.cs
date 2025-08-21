@@ -36,7 +36,7 @@ namespace DesktopApplicationTemplate.Tests
                     Directory.CreateDirectory(Path.GetDirectoryName(servicesPath)!);
                     var network = new Mock<INetworkConfigurationService>();
                     var networkVm = new NetworkConfigurationViewModel(network.Object);
-                    var vm = new MainViewModel(new CsvService(new CsvViewerViewModel(configPath)), networkVm, network.Object, null, servicesPath);
+                    var vm = new MainViewModel(new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath)), networkVm, network.Object, null, servicesPath);
                     var view = new MainView(vm);
                     var list = view.FindName("ServiceList") as System.Windows.Controls.ListBox;
                     Assert.Equal(350, list?.MaxHeight);
@@ -73,7 +73,7 @@ namespace DesktopApplicationTemplate.Tests
                     Directory.CreateDirectory(Path.GetDirectoryName(servicesPath)!);
                     var network = new Mock<INetworkConfigurationService>();
                     var networkVm = new NetworkConfigurationViewModel(network.Object);
-                    var vm = new MainViewModel(new CsvService(new CsvViewerViewModel(configPath)), networkVm, network.Object, null, servicesPath);
+                    var vm = new MainViewModel(new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath)), networkVm, network.Object, null, servicesPath);
                     var view = new MainView(vm);
                     bool bound = view.CommandBindings.OfType<CommandBinding>()
                                         .Any(b => b.Command == SystemCommands.CloseWindowCommand);
@@ -111,7 +111,7 @@ namespace DesktopApplicationTemplate.Tests
                     Directory.CreateDirectory(Path.GetDirectoryName(servicesPath)!);
                     var network = new Mock<INetworkConfigurationService>();
                     var networkVm = new NetworkConfigurationViewModel(network.Object);
-                    var vm = new MainViewModel(new CsvService(new CsvViewerViewModel(configPath)), networkVm, network.Object, null, servicesPath);
+                    var vm = new MainViewModel(new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath)), networkVm, network.Object, null, servicesPath);
                     var view = new MainView(vm);
                     bool bound = view.CommandBindings.OfType<CommandBinding>()
                                         .Any(b => b.Command == SystemCommands.MinimizeWindowCommand);
@@ -149,7 +149,7 @@ namespace DesktopApplicationTemplate.Tests
                     Directory.CreateDirectory(Path.GetDirectoryName(servicesPath)!);
                     var network = new Mock<INetworkConfigurationService>();
                     var networkVm = new NetworkConfigurationViewModel(network.Object);
-                    var vm = new MainViewModel(new CsvService(new CsvViewerViewModel(configPath)), networkVm, network.Object, null, servicesPath);
+                    var vm = new MainViewModel(new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath)), networkVm, network.Object, null, servicesPath);
                     var view = new MainView(vm);
                     var svc = new ServiceViewModel { DisplayName = "TCP - Test", ServiceType = "TCP" };
                     svc.SetColorsByType();
@@ -189,7 +189,7 @@ namespace DesktopApplicationTemplate.Tests
                     Directory.CreateDirectory(Path.GetDirectoryName(servicesPath)!);
                     var network = new Mock<INetworkConfigurationService>();
                     var networkVm = new NetworkConfigurationViewModel(network.Object);
-                    var csvVm = new CsvViewerViewModel(configPath);
+                    var csvVm = new CsvViewerViewModel(new StubFileDialogService(), configPath);
                     var vm = new MainViewModel(new CsvService(csvVm), networkVm, network.Object, null, servicesPath);
                     var view = new MainView(vm);
                     var svc = new ServiceViewModel { DisplayName = "CSV - Test", ServiceType = "CSV Creator" };
@@ -232,7 +232,7 @@ namespace DesktopApplicationTemplate.Tests
                     Directory.CreateDirectory(Path.GetDirectoryName(servicesPath)!);
                     var network = new Mock<INetworkConfigurationService>();
                     var networkVm = new NetworkConfigurationViewModel(network.Object);
-                    var vm = new MainViewModel(new CsvService(new CsvViewerViewModel(configPath)), networkVm, network.Object, null, servicesPath);
+                    var vm = new MainViewModel(new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath)), networkVm, network.Object, null, servicesPath);
                     vm.SelectedService = new ServiceViewModel { DisplayName = "Svc", ServiceType = "TCP" };
                     var view = new MainView(vm);
 
@@ -279,7 +279,7 @@ namespace DesktopApplicationTemplate.Tests
                     Directory.CreateDirectory(Path.GetDirectoryName(servicesPath)!);
                     var network = new Mock<INetworkConfigurationService>();
                     var networkVm = new NetworkConfigurationViewModel(network.Object);
-                    var vm = new MainViewModel(new CsvService(new CsvViewerViewModel(configPath)), networkVm, network.Object, null, servicesPath);
+                    var vm = new MainViewModel(new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath)), networkVm, network.Object, null, servicesPath);
                     var view = new MainView(vm) { WindowState = WindowState.Normal };
                     var method = typeof(MainView).GetMethod("HeaderBar_MouseDoubleClick", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                     var args = new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left) { RoutedEvent = Control.MouseDoubleClickEvent };

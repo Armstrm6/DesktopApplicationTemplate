@@ -20,7 +20,7 @@ namespace DesktopApplicationTemplate.Tests
         public void GenerateServiceName_IncrementsBasedOnExisting()
         {
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
-            var csv = new CsvService(new CsvViewerViewModel(configPath));
+            var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
             var network = new Mock<INetworkConfigurationService>();
             var networkVm = new NetworkConfigurationViewModel(network.Object);
             var vm = new MainViewModel(csv, networkVm, network.Object);
@@ -52,7 +52,7 @@ namespace DesktopApplicationTemplate.Tests
         {
             var logger = new Mock<ILoggingService>();
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
-            var csv = new CsvService(new CsvViewerViewModel(configPath));
+            var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
             var network = new Mock<INetworkConfigurationService>();
             var networkVm = new NetworkConfigurationViewModel(network.Object);
 
@@ -80,7 +80,7 @@ namespace DesktopApplicationTemplate.Tests
         public void ClearLogs_RemovesEntries()
         {
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
-            var csv = new CsvService(new CsvViewerViewModel(configPath));
+            var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
             var network = new Mock<INetworkConfigurationService>();
             var networkVm = new NetworkConfigurationViewModel(network.Object);
             var vm = new MainViewModel(csv, networkVm, network.Object);
@@ -101,7 +101,7 @@ namespace DesktopApplicationTemplate.Tests
         public void ExportDisplayedLogs_WritesFile()
         {
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
-            var csv = new CsvService(new CsvViewerViewModel(configPath));
+            var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
             var network = new Mock<INetworkConfigurationService>();
             var networkVm = new NetworkConfigurationViewModel(network.Object);
             var vm = new MainViewModel(csv, networkVm, network.Object);
@@ -125,7 +125,7 @@ namespace DesktopApplicationTemplate.Tests
         public void RefreshLogs_RaisesPropertyChanged()
         {
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
-            var csv = new CsvService(new CsvViewerViewModel(configPath));
+            var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
             var network = new Mock<INetworkConfigurationService>();
             var networkVm = new NetworkConfigurationViewModel(network.Object);
             var vm = new MainViewModel(csv, networkVm, network.Object);
@@ -155,7 +155,7 @@ namespace DesktopApplicationTemplate.Tests
             var service = new MqttService(client.Object, options, Mock.Of<IMessageRoutingService>(), Mock.Of<ILoggingService>());
 
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
-            var csv = new CsvService(new CsvViewerViewModel(configPath));
+            var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
             var network = new Mock<INetworkConfigurationService>();
             var networkVm = new NetworkConfigurationViewModel(network.Object);
             var vm = new MainViewModel(csv, networkVm, network.Object);
@@ -195,7 +195,7 @@ namespace DesktopApplicationTemplate.Tests
         public void ServiceCounts_Update_OnAddRemoveActivation()
         {
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
-            var csv = new CsvService(new CsvViewerViewModel(configPath));
+            var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
             var network = new Mock<INetworkConfigurationService>();
             var networkVm = new NetworkConfigurationViewModel(network.Object);
             var vm = new TestMainViewModel(csv, networkVm, network.Object);
@@ -234,7 +234,7 @@ namespace DesktopApplicationTemplate.Tests
         public void AddServiceCommand_RaisesAddServiceRequested()
         {
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
-            var csv = new CsvService(new CsvViewerViewModel(configPath));
+            var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
             var network = new Mock<INetworkConfigurationService>();
             var networkVm = new NetworkConfigurationViewModel(network.Object);
             var vm = new MainViewModel(csv, networkVm, network.Object);

@@ -38,7 +38,7 @@ namespace DesktopApplicationTemplate.Tests
                               .ReturnsAsync(new NetworkConfiguration());
                     var networkVm = new NetworkConfigurationViewModel(networkSvc.Object);
 
-                    var mainVm = new MainViewModel(new CsvService(new CsvViewerViewModel(configPath)), networkVm, networkSvc.Object, null, servicesPath);
+                    var mainVm = new MainViewModel(new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath)), networkVm, networkSvc.Object, null, servicesPath);
                     var mainView = new MainView(mainVm);
                     var settingsPage = new SettingsPage(new SettingsViewModel(), networkVm);
                     mainView.ContentFrame.Content = settingsPage;
