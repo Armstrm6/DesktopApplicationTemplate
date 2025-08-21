@@ -1002,3 +1002,11 @@ Effective Prompts / Instructions that worked:
 Decisions & Rationale: Updated tests and logging to reflect new behavior
 Action Items:
 Related Commits/PRs:
+[2025-08-21 13:38] Topic: Hostname validation for network services
+Context: Tests failed because hostnames were rejected by IP-only validation.
+Observations: Expanded validation to allow domain names and updated MQTT edit tests for connection state handling.
+Codex Limitations noticed: pwsh unavailable for add-tip script.
+Effective Prompts / Instructions that worked: user provided failing test output highlighting host requirement.
+Decisions & Rationale: Ensure host validation accepts both IP addresses and domain names to prevent false errors.
+Action Items: run tests.
+Related Commits/PRs: (this PR)

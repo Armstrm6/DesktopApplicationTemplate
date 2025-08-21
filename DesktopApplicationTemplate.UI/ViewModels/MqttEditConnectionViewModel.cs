@@ -69,7 +69,7 @@ public class MqttEditConnectionViewModel : ValidatableViewModelBase, ILoggingVie
         set
         {
             if (_host == value) return;
-            if (!InputValidators.IsValidPartialIp(value))
+            if (!InputValidators.IsValidHost(value))
             {
                 AddError(nameof(Host), "Invalid host");
                 Logger?.Log("Invalid MQTT host entered", LogLevel.Warning);
