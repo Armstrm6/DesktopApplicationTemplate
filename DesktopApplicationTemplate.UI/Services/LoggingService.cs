@@ -20,9 +20,9 @@ namespace DesktopApplicationTemplate.UI.Services
             get => _minimumLevel;
             set
             {
+                if (_minimumLevel == value) return;
                 _minimumLevel = value;
-                Log($"Minimum level changed to {value}", LogLevel.Debug);
-                Reload();
+                UpdateLogDisplay();
             }
         }
 

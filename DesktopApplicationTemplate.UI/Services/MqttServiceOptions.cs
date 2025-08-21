@@ -17,6 +17,7 @@ namespace DesktopApplicationTemplate.UI.Services
         public string? Username { get; set; }
         public string? Password { get; set; }
         public MqttConnectionType ConnectionType { get; set; } = MqttConnectionType.Tcp;
+        public string? WebSocketPath { get; set; }
         public bool UseTls { get; set; }
         public byte[]? ClientCertificate { get; set; }
         public string? WillTopic { get; set; }

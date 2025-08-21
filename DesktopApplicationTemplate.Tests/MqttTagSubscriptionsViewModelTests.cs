@@ -50,6 +50,23 @@ public class MqttTagSubscriptionsViewModelTests
 
     [Fact]
     [TestCategory("WindowsSafe")]
+    public async Task ConnectAsync_RaisesEditRequested_OnInvalidOptions()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        var client = new Mock<IMqttClient>();
+        client.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new ArgumentException("Host cannot be null or whitespace."));
+        var options = Options.Create(new MqttServiceOptions());
+        var service = new MqttService(client.Object, options, Mock.Of<IMessageRoutingService>(), Mock.Of<ILoggingService>());
+        var vm = new MqttTagSubscriptionsViewModel(service);
+        bool raised = false;
+        vm.EditConnectionRequested += (_, _) => raised = true;
+        await vm.ConnectAsync();
+        Assert.True(raised);
+    }
+
+    [Fact]
+    [TestCategory("WindowsSafe")]
     public async Task AddTopicAsync_SubscribesAndAdds()
     {
         if (!OperatingSystem.IsWindows()) return;

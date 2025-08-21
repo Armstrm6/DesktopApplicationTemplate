@@ -1,3 +1,26 @@
+# Collaboration & Debug Tips (Codex <-> Matt)
+Purpose: Running log of what worked, what broke, and why.
+
+Remember to record environment limitations (e.g., missing tests or write restrictions) in each log entry.
+
+[2025-08-21 13:14] Topic: Fix duplicate XAML styles
+Context: Build error from multiple Style assignments in MQTT connection view.
+Observations: Consolidated styles with BasedOn to remove duplicate property settings.
+Codex Limitations noticed: dotnet CLI unavailable; tests not executed.
+Effective Prompts / Instructions that worked: reviewer warning about "Style" property duplicates.
+Decisions & Rationale: Use BasedOn to retain base styles while applying visibility triggers.
+Action Items: rely on CI for validation.
+Related Commits/PRs: (this PR)
+
+[2025-08-21 12:51] Topic: MQTT UX fixes
+Context: Added WebSocket path, subscribe toggle, and connection validation.
+Observations: Help window gains close button; CSV removal now clears file.
+Codex Limitations noticed: dotnet CLI unavailable; tests not executed.
+Effective Prompts / Instructions that worked: user bug reports about MQTT UI and service removal.
+Decisions & Rationale: improved UX and safety per guidelines.
+Action Items: rely on CI for verification.
+Related Commits/PRs: (this PR)
+
 [2025-08-20 18:51] Topic: Document read-only workflow
 Context: Added restricted-environment guidance and preamble about logging limitations.
 Observations: Guidelines now instruct contributors to review AGENTS/docs and note constraints.
@@ -16,10 +39,7 @@ Decisions & Rationale: Provide quick reference to core Codex rules for contribut
 Action Items: none
 Related Commits/PRs: (this PR)
 
-# Collaboration & Debug Tips (Codex <-> Matt)
-Purpose: Running log of what worked, what broke, and why.
 
-Remember to record environment limitations (e.g., missing tests or write restrictions) in each log entry.
 
 [2025-08-20 17:33] Topic: Environment precedence docs
 Context: Clarified AGENTS instructions about following environment directives.

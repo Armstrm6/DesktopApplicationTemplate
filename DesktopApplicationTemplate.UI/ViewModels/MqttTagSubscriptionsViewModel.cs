@@ -15,8 +15,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// <summary>
 /// View model for managing MQTT topic subscriptions and test messages.
 /// </summary>
-public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingViewModel
-{
+    public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingViewModel
+    {
     private readonly MqttService _service;
     private readonly AsyncRelayCommand _addTopicCommand;
     private readonly AsyncRelayCommand _removeTopicCommand;
@@ -132,12 +132,17 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
     /// <summary>
     /// Command to connect to the MQTT broker.
     /// </summary>
-    public ICommand ConnectCommand { get; }
+        public ICommand ConnectCommand { get; }
 
     /// <summary>
     /// Command to test publishing to a tag's endpoint.
     /// </summary>
     public ICommand TestTagEndpointCommand => _testTagEndpointCommand;
+
+    /// <summary>
+    /// Raised when connection settings are invalid and need editing.
+    /// </summary>
+    public event EventHandler? EditConnectionRequested;
 
     private bool CanAddTopic() => !string.IsNullOrWhiteSpace(NewTopic);
 
@@ -173,7 +178,9 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
             // ignore failures, UI already reflects removal
         }
 
-        Subscriptions.Remove(SelectedSubscription);
+        var topic = SelectedSubscription.Topic;
+        foreach (var item in Subscriptions.Where(s => s.Topic == topic).ToList())
+            Subscriptions.Remove(item);
         SelectedSubscription = null;
     }
 
@@ -206,8 +213,16 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
     public async Task ConnectAsync()
     {
         Logger?.Log("MQTT connect start", LogLevel.Debug);
-        await _service.ConnectAsync().ConfigureAwait(false);
-        Logger?.Log("MQTT connect finished", LogLevel.Debug);
+        try
+        {
+            await _service.ConnectAsync().ConfigureAwait(false);
+            Logger?.Log("MQTT connect finished", LogLevel.Debug);
+        }
+        catch (ArgumentException ex)
+        {
+            Logger?.Log(ex.Message, LogLevel.Warning);
+            EditConnectionRequested?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     private void OnTagSubscriptionChanged(object? sender, TagSubscription subscription)

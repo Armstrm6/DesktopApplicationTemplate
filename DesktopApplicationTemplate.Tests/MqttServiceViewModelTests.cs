@@ -23,7 +23,7 @@ public class MqttServiceViewModelTests
         Mock<IMessageRoutingService>? routingMock = null)
     {
         var logger = Mock.Of<ILoggingService>();
-        var options = Microsoft.Extensions.Options.Options.Create(new MqttServiceOptions());
+        var options = Microsoft.Extensions.Options.Options.Create(new MqttServiceOptions { Host = "h", Port = 1, ClientId = "id" });
         var routing = routingMock ?? new Mock<IMessageRoutingService>();
         var client = clientMock ?? new Mock<IMqttClient>();
         client.Setup(c => c.PublishAsync(It.IsAny<MqttApplicationMessage>(), It.IsAny<CancellationToken>()))
@@ -82,6 +82,21 @@ public class MqttServiceViewModelTests
         await vm.ConnectAsync();
         Assert.True(vm.IsConnected);
         client.Verify(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    [TestCategory("WindowsSafe")]
+    public async Task ConnectAsync_InvalidOptions_RaisesEditRequested()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        var client = new Mock<IMqttClient>();
+        client.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new ArgumentException("Host cannot be null"));
+        var vm = CreateViewModel(client);
+        bool raised = false;
+        vm.EditConnectionRequested += (_, _) => raised = true;
+        await vm.ConnectAsync();
+        Assert.True(raised);
     }
 
     [Fact]

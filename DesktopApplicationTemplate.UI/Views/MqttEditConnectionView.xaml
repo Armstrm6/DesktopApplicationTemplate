@@ -18,6 +18,7 @@
                 <RowDefinition Height="Auto" /> <!-- Username -->
                 <RowDefinition Height="Auto" /> <!-- Password -->
                 <RowDefinition Height="Auto" /> <!-- Connection Type -->
+                <RowDefinition Height="Auto" /> <!-- WebSocket Path -->
                 <RowDefinition Height="Auto" /> <!-- UseTls -->
                 <RowDefinition Height="Auto" /> <!-- Buttons -->
             </Grid.RowDefinitions>
@@ -43,10 +44,46 @@
                 <ComboBoxItem Content="WebSocket" Tag="{x:Static svc:MqttConnectionType.WebSocket}"/>
             </ComboBox>
 
-            <CheckBox Grid.Row="6" Grid.Column="1" Content="Use TLS" IsChecked="{Binding UseTls}" Style="{StaticResource FormField}"/>
+            <TextBlock Grid.Row="6" Grid.Column="0" Text="WS Path">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock" BasedOn="{StaticResource FormLabel}">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ConnectionType}" Value="WebSocket">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+            <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding WebSocketPath}">
+                <TextBox.Style>
+                    <Style TargetType="TextBox" BasedOn="{StaticResource FormField}">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ConnectionType}" Value="WebSocket">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBox.Style>
+            </TextBox>
 
-            <StackPanel Grid.Row="7" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
-                <Button x:Name="UnsubscribeButton" Content="Unsubscribe" Width="110" Margin="5" Command="{Binding UnsubscribeCommand}" AutomationProperties.Name="Unsubscribe from Broker"/>
+            <CheckBox Grid.Row="7" Grid.Column="1" Content="Use TLS" IsChecked="{Binding UseTls}" IsEnabled="{Binding IsTlsEnabled}" Style="{StaticResource FormField}"/>
+
+            <StackPanel Grid.Row="8" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+                <Button x:Name="SubscriptionButton" Content="{Binding SubscriptionButtonText}" Width="110" Margin="5" Command="{Binding ToggleSubscriptionCommand}" AutomationProperties.Name="{Binding SubscriptionButtonText}">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Background" Value="Green"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsConnected}" Value="True">
+                                    <Setter Property="Background" Value="Red"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
                 <Button x:Name="CancelButton" Content="Cancel" Width="90" Margin="5" Command="{Binding CancelCommand}" AutomationProperties.Name="Cancel Update"/>
                 <Button x:Name="UpdateButton" Content="Update" Width="90" Margin="5" Command="{Binding UpdateCommand}" AutomationProperties.Name="Update Connection"/>
             </StackPanel>

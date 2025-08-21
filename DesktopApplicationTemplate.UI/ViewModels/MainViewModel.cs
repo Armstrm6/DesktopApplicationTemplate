@@ -204,7 +204,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
         }
 
-        public event Action<string>? AddMqttServiceRequested;
+        public event Action? AddServiceRequested;
         private void EditService(ServiceViewModel? service)
         {
             var target = service ?? SelectedService;
@@ -217,8 +217,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private void AddService()
         {
             _logger?.Log("AddService invoked", LogLevel.Debug);
-            var defaultName = GenerateServiceName("MQTT");
-            AddMqttServiceRequested?.Invoke(defaultName);
+            AddServiceRequested?.Invoke();
             _logger?.Log("AddService completed", LogLevel.Debug);
         }
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
@@ -112,9 +113,10 @@ public class MqttService
 
         if (opts.ConnectionType == MqttConnectionType.WebSocket)
         {
+            var path = string.IsNullOrWhiteSpace(opts.WebSocketPath) ? string.Empty : opts.WebSocketPath;
             builder = builder.WithWebSocketServer(o =>
             {
-                o.WithUri($"ws://{opts.Host}:{opts.Port}");
+                o.WithUri($"ws://{opts.Host}:{opts.Port}{path}");
             });
         }
         else
@@ -127,14 +129,21 @@ public class MqttService
             builder = builder.WithCredentials(opts.Username, opts.Password);
         }
 
-        if (opts.UseTls)
+        if (opts.UseTls && opts.ConnectionType != MqttConnectionType.WebSocket)
         {
             builder = builder.WithTlsOptions(o =>
             {
                 o.UseTls();
                 if (opts.ClientCertificate is not null)
                 {
-                    o.WithClientCertificates(new[] { new X509Certificate2(opts.ClientCertificate) });
+                    try
+                    {
+                        o.WithClientCertificates(new[] { new X509Certificate2(opts.ClientCertificate) });
+                    }
+                    catch (CryptographicException ex)
+                    {
+                        _logger.Log($"Invalid client certificate: {ex.Message}", LogLevel.Warning);
+                    }
                 }
             });
         }
