@@ -113,3 +113,4 @@
 - Fixed ObjectDataProvider bindings in `MqttTagSubscriptionsView` to prevent runtime `ArgumentException` and restored send button accessibility metadata.
 - Eliminated duplicate Style assignments in `MqttEditConnectionView` to prevent XAML parse failures.
 - Cleaned up `CollaborationAndDebugTips.txt` by removing duplicate headers and restoring log structure.
+
