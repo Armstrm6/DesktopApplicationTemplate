@@ -76,6 +76,8 @@ namespace DesktopApplicationTemplate.UI
             services.AddTransient<CreateServiceViewModel>();
             services.AddTransient<MqttCreateServiceView>();
             services.AddTransient<MqttCreateServiceViewModel>();
+            services.AddTransient<TcpCreateServiceView>();
+            services.AddTransient<TcpCreateServiceViewModel>();
             services.AddTransient<MqttEditConnectionView>();
             services.AddTransient<MqttEditConnectionViewModel>();
             services.AddTransient<MqttTagSubscriptionsView>();

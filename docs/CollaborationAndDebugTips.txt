@@ -3,6 +3,15 @@ Purpose: Running log of what worked, what broke, and why.
 
 Remember to record environment limitations (e.g., missing tests or write restrictions) in each log entry.
 
+[2025-08-22 13:39] Topic: TCP service creation view
+Context: Added TCP create view model, view, options, DI registrations, and tests.
+Observations: View model mirrors MQTT pattern and raises create/cancel events.
+Codex Limitations noticed: Linux container lacks WPF runtime; tests rely on CI.
+Effective Prompts / Instructions that worked: user request for TCP create wizard.
+Decisions & Rationale: Reuse form styles and logging pattern for consistency.
+Action Items: run tests.
+Related Commits/PRs: (this PR)
+
 [2025-08-21 13:14] Topic: Fix duplicate XAML styles
 Context: Build error from multiple Style assignments in MQTT connection view.
 Observations: Consolidated styles with BasedOn to remove duplicate property settings.
