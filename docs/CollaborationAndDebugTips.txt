@@ -1073,3 +1073,11 @@ Decisions & Rationale: Excluding dev from pull_request triggers avoids redundant
 Action Items: rely on CI for validation on other branches.
 Related Commits/PRs: (this PR)
 
+[2025-08-22 15:29] Topic: TCP DI options
+Context: Registered transient TCP view models and bound TcpServiceOptions to configuration.
+Observations: DI container updated; added tests ensuring options binding.
+Codex Limitations noticed: pwsh unavailable for add-tip script.
+Effective Prompts / Instructions that worked: user request to register TCP view models and options.
+Decisions & Rationale: use Configure to bind TcpServiceOptions and register view models as transient.
+Action Items: rely on CI for Windows-specific validation.
+Related Commits/PRs: (this PR)

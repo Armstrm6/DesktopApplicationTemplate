@@ -53,7 +53,7 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<TcpServiceView>();
             services.AddSingleton<TcpServiceViewModel>();
             services.AddSingleton<TcpServiceMessagesView>();
-            services.AddSingleton<TcpServiceMessagesViewModel>();
+            services.AddTransient<TcpServiceMessagesViewModel>();
             services.AddSingleton<DependencyChecker>();
             services.AddSingleton<HttpServiceView>();
             services.AddSingleton<HttpServiceViewModel>();
@@ -90,6 +90,7 @@ namespace DesktopApplicationTemplate.UI
             // Load strongly typed settings
             services.Configure<AppSettings>(configuration.GetSection("AppSettings"));
             services.Configure<MqttServiceOptions>(configuration.GetSection("MqttService"));
+            services.Configure<TcpServiceOptions>(configuration.GetSection("TcpService"));
         }
 
         protected override async void OnStartup(StartupEventArgs e)
