@@ -1,9 +1,14 @@
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace DesktopApplicationTemplate.Tests
@@ -70,6 +75,69 @@ namespace DesktopApplicationTemplate.Tests
             {
                 ServicePersistence.FilePath = oldPath;
                 Directory.Delete(tempDir, true);
+            }
+
+            ConsoleTestLogger.LogPass();
+        }
+
+        [Fact]
+        [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
+        public void SaveAndLoad_PreservesTcpOptions()
+        {
+            var host = Host.CreateDefaultBuilder()
+                .ConfigureServices(s => s.Configure<TcpServiceOptions>(_ => { }))
+                .Build();
+            var setter = typeof(App).GetProperty("AppHost", BindingFlags.Static | BindingFlags.Public)!
+                .GetSetMethod(true)!;
+            setter.Invoke(null, new object[] { host });
+
+            var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(tempDir);
+            string oldPath = ServicePersistence.FilePath;
+            ServicePersistence.FilePath = Path.Combine(tempDir, "services.json");
+
+            try
+            {
+                var opt = host.Services.GetRequiredService<IOptions<TcpServiceOptions>>().Value;
+                opt.Host = "h";
+                opt.Port = 42;
+                opt.UseUdp = true;
+                opt.Mode = TcpServiceMode.Sending;
+
+                var services = new List<ServiceViewModel>
+                {
+                    new ServiceViewModel{DisplayName="TCP - One", ServiceType="TCP", IsActive=false, Order=0}
+                };
+
+                ServicePersistence.Save(services);
+
+                // mutate options to verify load restores
+                opt.Host = "changed";
+                opt.Port = 100;
+                opt.UseUdp = false;
+                opt.Mode = TcpServiceMode.Listening;
+
+                var loaded = ServicePersistence.Load();
+                var info = Assert.Single(loaded);
+                Assert.NotNull(info.TcpOptions);
+                Assert.Equal("h", info.TcpOptions!.Host);
+                Assert.Equal(42, info.TcpOptions.Port);
+                Assert.True(info.TcpOptions.UseUdp);
+                Assert.Equal(TcpServiceMode.Sending, info.TcpOptions.Mode);
+
+                // global options restored
+                Assert.Equal("h", opt.Host);
+                Assert.Equal(42, opt.Port);
+                Assert.True(opt.UseUdp);
+                Assert.Equal(TcpServiceMode.Sending, opt.Mode);
+            }
+            finally
+            {
+                ServicePersistence.FilePath = oldPath;
+                Directory.Delete(tempDir, true);
+                setter.Invoke(null, new object[] { null! });
+                host.Dispose();
             }
 
             ConsoleTestLogger.LogPass();

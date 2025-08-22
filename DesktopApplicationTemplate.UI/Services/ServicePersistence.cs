@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.UI.ViewModels;
+using Microsoft.Extensions.Options;
+using DesktopApplicationTemplate.UI;
 
 namespace DesktopApplicationTemplate.UI.Services
 {
@@ -18,6 +20,30 @@ namespace DesktopApplicationTemplate.UI.Services
             var index = 0;
             foreach (var s in services)
             {
+                TcpServiceOptions? tcp = null;
+                if (s.ServiceType == "TCP")
+                {
+                    try
+                    {
+                        var opt = App.AppHost?.Services.GetService(typeof(IOptions<TcpServiceOptions>)) as IOptions<TcpServiceOptions>;
+                        if (opt != null)
+                        {
+                            var value = opt.Value;
+                            tcp = new TcpServiceOptions
+                            {
+                                Host = value.Host,
+                                Port = value.Port,
+                                UseUdp = value.UseUdp,
+                                Mode = value.Mode
+                            };
+                        }
+                    }
+                    catch
+                    {
+                        // ignore missing options during tests or early startup
+                    }
+                }
+
                 data.Add(new ServiceInfo
                 {
                     DisplayName = s.DisplayName,
@@ -25,7 +51,8 @@ namespace DesktopApplicationTemplate.UI.Services
                     IsActive = s.IsActive,
                     Created = DateTime.Now,
                     Order = index++,
-                    AssociatedServices = new List<string>(s.AssociatedServices)
+                    AssociatedServices = new List<string>(s.AssociatedServices),
+                    TcpOptions = tcp
                 });
             }
 
@@ -70,6 +97,30 @@ namespace DesktopApplicationTemplate.UI.Services
             try
             {
                 var result = JsonSerializer.Deserialize<List<ServiceInfo>>(json) ?? new List<ServiceInfo>();
+
+                foreach (var info in result)
+                {
+                    if (info.ServiceType == "TCP" && info.TcpOptions != null)
+                    {
+                        try
+                        {
+                            var opt = App.AppHost?.Services.GetService(typeof(IOptions<TcpServiceOptions>)) as IOptions<TcpServiceOptions>;
+                            if (opt != null)
+                            {
+                                var value = opt.Value;
+                                value.Host = info.TcpOptions.Host;
+                                value.Port = info.TcpOptions.Port;
+                                value.UseUdp = info.TcpOptions.UseUdp;
+                                value.Mode = info.TcpOptions.Mode;
+                            }
+                        }
+                        catch
+                        {
+                            // ignore missing options during tests or early startup
+                        }
+                    }
+                }
+
                 logger?.Log($"Loaded {result.Count} services", LogLevel.Debug);
                 return result;
             }
@@ -89,5 +140,6 @@ namespace DesktopApplicationTemplate.UI.Services
         public DateTime Created { get; set; }
         public int Order { get; set; }
         public List<string> AssociatedServices { get; set; } = new();
+        public TcpServiceOptions? TcpOptions { get; set; }
     }
 }
