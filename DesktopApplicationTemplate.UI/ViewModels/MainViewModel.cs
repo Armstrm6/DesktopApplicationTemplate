@@ -43,6 +43,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public ObservableCollection<string> AssociatedServices { get; } = new();
 
+        /// <summary>
+        /// TCP-specific configuration for this service, if applicable.
+        /// </summary>
+        public TcpServiceOptions? TcpOptions { get; set; }
+
         public static Func<string, string, ServiceViewModel?>? ResolveService { get; set; }
 
 
@@ -294,7 +299,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     DisplayName = info.DisplayName,
                     ServiceType = info.ServiceType,
                     IsActive = info.IsActive,
-                    Order = info.Order
+                    Order = info.Order,
+                    TcpOptions = info.TcpOptions
                 };
                 foreach (var a in info.AssociatedServices ?? new List<string>())
                     svc.AssociatedServices.Add(a);
