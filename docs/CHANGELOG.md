@@ -48,6 +48,7 @@
 - MqttService tests now verify TLS and credential configuration alongside will messages and keep-alive options.
 - Tag subscriptions now allow per-topic QoS selection with forwarding to the MQTT client.
 - Subscribe/unsubscribe support for MQTT topics with QoS selection and visual feedback for subscription results.
+- View and view model for displaying TCP service messages with log-level filtering and log management commands.
 
 - File dialog service registered for TLS certificate selection in MQTT views.
 

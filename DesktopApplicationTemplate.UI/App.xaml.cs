@@ -52,6 +52,8 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<MainViewModel>();
             services.AddSingleton<TcpServiceView>();
             services.AddSingleton<TcpServiceViewModel>();
+            services.AddSingleton<TcpServiceMessagesView>();
+            services.AddSingleton<TcpServiceMessagesViewModel>();
             services.AddSingleton<DependencyChecker>();
             services.AddSingleton<HttpServiceView>();
             services.AddSingleton<HttpServiceViewModel>();

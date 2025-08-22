@@ -3,6 +3,15 @@ Purpose: Running log of what worked, what broke, and why.
 
 Remember to record environment limitations (e.g., missing tests or write restrictions) in each log entry.
 
+[2025-08-22 13:51] Topic: TCP service messages view
+Context: Added view and view model for displaying TCP messages with log filtering and navigation update.
+Observations: Introduced TcpServiceMessagesViewModel with observable collections and log-level controls; MainWindow now loads messages view for TCP services.
+Codex Limitations noticed: Linux environment lacks WPF runtime; rely on CI for visual validation.
+Effective Prompts / Instructions that worked: Followed design XML and AGENTS.md for MVVM structure.
+Decisions & Rationale: Separate messages display from configuration and surface logs immediately.
+Action Items: Monitor CI for WPF rendering and navigation.
+Related Commits/PRs: (this PR)
+
 [2025-08-22 13:45] Topic: TCP service creation navigation
 Context: Wired TCP selection through create service window.
 Observations: Page raises TcpSelected and window navigates to TCP view storing options.

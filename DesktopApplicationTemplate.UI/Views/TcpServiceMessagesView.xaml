@@ -1,0 +1,45 @@
+<Page x:Class="DesktopApplicationTemplate.UI.Views.TcpServiceMessagesView"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <DataGrid Grid.Row="0" ItemsSource="{Binding Messages}" AutoGenerateColumns="False" Margin="0,0,0,10">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Incoming Message" Binding="{Binding IncomingMessage}" Width="*"/>
+                <DataGridTextColumn Header="Incoming IP" Binding="{Binding IncomingIp}" Width="*"/>
+                <DataGridTextColumn Header="Outgoing Message" Binding="{Binding OutgoingMessage}" Width="*"/>
+                <DataGridTextColumn Header="Connected Service" Binding="{Binding ConnectedService}" Width="*"/>
+                <DataGridTextColumn Header="Outgoing Result" Binding="{Binding Result}" Width="*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <StackPanel Grid.Row="1" Orientation="Vertical">
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                <TextBlock Text="Log Level" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <ComboBox Width="150" SelectedValue="{Binding LogLevelFilter, Mode=TwoWay}">
+                    <ComboBoxItem Content="Debug"/>
+                    <ComboBoxItem Content="Warning"/>
+                    <ComboBoxItem Content="Error"/>
+                    <ComboBoxItem Content="Critical"/>
+                </ComboBox>
+                <Button Content="Export Log" Command="{Binding ExportLogCommand}" Margin="10,0,0,0" Width="100"/>
+                <Button Content="Clear Log" Command="{Binding ClearLogCommand}" Margin="10,0,0,0" Width="100"/>
+                <Button Content="Update Log" Command="{Binding RefreshLogCommand}" Margin="10,0,0,0" Width="100"/>
+            </StackPanel>
+            <ListBox ItemsSource="{Binding DisplayLogs}" Height="200">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Message}" Foreground="{Binding Color}"/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </StackPanel>
+    </Grid>
+</Page>

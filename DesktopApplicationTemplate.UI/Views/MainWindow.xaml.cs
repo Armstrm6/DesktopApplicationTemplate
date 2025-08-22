@@ -83,7 +83,7 @@ namespace DesktopApplicationTemplate.UI.Views
 
             svc.ServicePage = svc.ServiceType switch
             {
-                "TCP" => App.AppHost.Services.GetRequiredService<TcpServiceView>(),
+                "TCP" => App.AppHost.Services.GetRequiredService<TcpServiceMessagesView>(),
                 "HTTP" => App.AppHost.Services.GetRequiredService<HttpServiceView>(),
                 "File Observer" => App.AppHost.Services.GetRequiredService<FileObserverView>(),
                 "HID" => App.AppHost.Services.GetRequiredService<HidViews>(),
