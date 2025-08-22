@@ -30,4 +30,41 @@ public class TcpServiceMessagesViewModelTests
 
         vm.Logs.Should().BeEmpty();
     }
+
+    [Fact]
+    public void OpenAdvancedSettingsCommand_RaisesEvent()
+    {
+        var vm = new TcpServiceMessagesViewModel();
+        var raised = false;
+        vm.AdvancedSettingsRequested += (_, _) => raised = true;
+
+        vm.OpenAdvancedSettingsCommand.Execute(null);
+
+        raised.Should().BeTrue();
+    }
+
+    [Fact]
+    public void UpdateScript_SetsScriptContent()
+    {
+        var vm = new TcpServiceMessagesViewModel();
+
+        vm.UpdateScript("print('hi')");
+
+        vm.ScriptContent.Should().Be("print('hi')");
+    }
+
+    [Fact]
+    public void UpdateNetworkSettings_SetsProperties()
+    {
+        var vm = new TcpServiceMessagesViewModel();
+
+        vm.UpdateNetworkSettings("1.1.1.1", "1000", "2.2.2.2", "3.3.3.3", "2000", true);
+
+        vm.ComputerIp.Should().Be("1.1.1.1");
+        vm.ListeningPort.Should().Be("1000");
+        vm.ServerIp.Should().Be("2.2.2.2");
+        vm.ServerGateway.Should().Be("3.3.3.3");
+        vm.ServerPort.Should().Be("2000");
+        vm.IsUdp.Should().BeTrue();
+    }
 }

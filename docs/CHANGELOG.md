@@ -49,6 +49,7 @@
 - Tag subscriptions now allow per-topic QoS selection with forwarding to the MQTT client.
 - Subscribe/unsubscribe support for MQTT topics with QoS selection and visual feedback for subscription results.
 - View and view model for displaying TCP service messages with log-level filtering and log management commands.
+- TCP messages view can navigate to advanced settings and reflects script and network configuration updates.
 
 - File dialog service registered for TLS certificate selection in MQTT views.
 

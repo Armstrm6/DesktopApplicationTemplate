@@ -1,9 +1,11 @@
+using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Models;
+using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Models;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
@@ -49,11 +51,64 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         /// <summary>Command to refresh log display.</summary>
         public ICommand RefreshLogCommand { get; }
 
+        /// <summary>Command to open advanced TCP settings.</summary>
+        public ICommand OpenAdvancedSettingsCommand { get; }
+
+        /// <summary>Raised when the advanced settings view should open.</summary>
+        public event EventHandler? AdvancedSettingsRequested;
+
+        /// <summary>Current script content.</summary>
+        public string ScriptContent { get; private set; } = string.Empty;
+
+        /// <summary>Computer IP for incoming connections.</summary>
+        public string ComputerIp { get; private set; } = string.Empty;
+
+        /// <summary>Listening port for the server.</summary>
+        public string ListeningPort { get; private set; } = string.Empty;
+
+        /// <summary>Destination server IP.</summary>
+        public string ServerIp { get; private set; } = string.Empty;
+
+        /// <summary>Gateway for the destination server.</summary>
+        public string ServerGateway { get; private set; } = string.Empty;
+
+        /// <summary>Destination server port.</summary>
+        public string ServerPort { get; private set; } = string.Empty;
+
+        /// <summary>Whether UDP mode is enabled.</summary>
+        public bool IsUdp { get; private set; }
+
         public TcpServiceMessagesViewModel()
         {
             ClearLogCommand = new RelayCommand(ClearLogs);
             ExportLogCommand = new RelayCommand(ExportLogs);
             RefreshLogCommand = new RelayCommand(() => OnPropertyChanged(nameof(DisplayLogs)));
+            OpenAdvancedSettingsCommand = new RelayCommand(() => AdvancedSettingsRequested?.Invoke(this, EventArgs.Empty));
+        }
+
+        /// <summary>Updates the stored script content.</summary>
+        /// <param name="script">New script text.</param>
+        public void UpdateScript(string script)
+        {
+            ScriptContent = script ?? string.Empty;
+            OnPropertyChanged(nameof(ScriptContent));
+        }
+
+        /// <summary>Updates network and scripting settings.</summary>
+        public void UpdateNetworkSettings(string computerIp, string listeningPort, string serverIp, string serverGateway, string serverPort, bool isUdp)
+        {
+            ComputerIp = computerIp ?? string.Empty;
+            ListeningPort = listeningPort ?? string.Empty;
+            ServerIp = serverIp ?? string.Empty;
+            ServerGateway = serverGateway ?? string.Empty;
+            ServerPort = serverPort ?? string.Empty;
+            IsUdp = isUdp;
+            OnPropertyChanged(nameof(ComputerIp));
+            OnPropertyChanged(nameof(ListeningPort));
+            OnPropertyChanged(nameof(ServerIp));
+            OnPropertyChanged(nameof(ServerGateway));
+            OnPropertyChanged(nameof(ServerPort));
+            OnPropertyChanged(nameof(IsUdp));
         }
 
         private void ClearLogs()
