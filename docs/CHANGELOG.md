@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 ### Added
+- Finalized TCP service creation with integrated message viewer for configuring endpoints and inspecting traffic.
 - Introduced TCP service creation and message viewer enabling configuration and inspection of TCP endpoint traffic.
 - Registered transient TCP view models and bound `TcpServiceOptions` configuration.
 - TCP service creation flow integrated into selection window with option persistence.
