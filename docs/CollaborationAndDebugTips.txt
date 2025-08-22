@@ -1081,3 +1081,11 @@ Effective Prompts / Instructions that worked: user request to register TCP view 
 Decisions & Rationale: use Configure to bind TcpServiceOptions and register view models as transient.
 Action Items: rely on CI for Windows-specific validation.
 Related Commits/PRs: (this PR)
+[2025-08-22 15:36] Topic: TCP service options persistence
+Context: Persisting TCP configuration alongside service metadata.
+Observations: Serializing TcpServiceOptions in ServicePersistence retains host, port, UDP flag, and mode per service.
+Codex Limitations noticed: pwsh unavailable, appended entry manually.
+Effective Prompts / Instructions that worked: user request to serialize TcpServiceOptions and associate when loading.
+Decisions & Rationale: copy options from DI into ServiceInfo and restore them during load.
+Action Items: add tests and changelog entry.
+Related Commits/PRs: (this PR)
