@@ -151,6 +151,24 @@ namespace DesktopApplicationTemplate.UI.Views
                 {
                     AddMqttService(window.CreatedServiceName, window.MqttOptions ?? new MqttServiceOptions());
                 }
+                else if (window.CreatedServiceType == "TCP")
+                {
+                    var svc = new ServiceViewModel
+                    {
+                        DisplayName = $"TCP - {window.CreatedServiceName}",
+                        ServiceType = "TCP",
+                        IsActive = false,
+                        TcpOptions = window.TcpOptions
+                    };
+                    svc.SetColorsByType();
+                    svc.LogAdded += _viewModel.OnServiceLogAdded;
+                    svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
+                    GetOrCreateServicePage(svc);
+                    _viewModel.Services.Add(svc);
+                    _logger?.LogInformation("Service {Name} added", svc.DisplayName);
+                    _viewModel.SelectedService = svc;
+                    ServiceList.ScrollIntoView(svc);
+                }
                 else if (!string.IsNullOrWhiteSpace(window.CreatedServiceType))
                 {
                     var svc = new ServiceViewModel

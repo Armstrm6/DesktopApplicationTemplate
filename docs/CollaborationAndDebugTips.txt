@@ -1097,3 +1097,11 @@ Effective Prompts / Instructions that worked: review design guidelines
 Decisions & Rationale: aligned with MVVM
 Action Items: verify layout
 Related Commits/PRs: (this PR)
+[2025-08-22 17:48] Topic: TCP options persistence
+Context: Persisted per-service TCP settings through ServicePersistence.
+Observations: Added TcpOptions property to ServiceViewModel and serialized/deserialized options.
+Codex Limitations noticed: Linux container lacks WindowsDesktop runtime; tests rely on CI.
+Effective Prompts / Instructions that worked: specify per-service options persistence.
+Decisions & Rationale: Store TcpServiceOptions per service for accurate reloads.
+Action Items: Monitor CI for Windows-specific behavior.
+Related Commits/PRs: (this PR)

@@ -21,27 +21,15 @@ namespace DesktopApplicationTemplate.UI.Services
             foreach (var s in services)
             {
                 TcpServiceOptions? tcp = null;
-                if (s.ServiceType == "TCP")
+                if (s.ServiceType == "TCP" && s.TcpOptions != null)
                 {
-                    try
+                    tcp = new TcpServiceOptions
                     {
-                        var opt = App.AppHost?.Services.GetService(typeof(IOptions<TcpServiceOptions>)) as IOptions<TcpServiceOptions>;
-                        if (opt != null)
-                        {
-                            var value = opt.Value;
-                            tcp = new TcpServiceOptions
-                            {
-                                Host = value.Host,
-                                Port = value.Port,
-                                UseUdp = value.UseUdp,
-                                Mode = value.Mode
-                            };
-                        }
-                    }
-                    catch
-                    {
-                        // ignore missing options during tests or early startup
-                    }
+                        Host = s.TcpOptions.Host,
+                        Port = s.TcpOptions.Port,
+                        UseUdp = s.TcpOptions.UseUdp,
+                        Mode = s.TcpOptions.Mode
+                    };
                 }
 
                 data.Add(new ServiceInfo

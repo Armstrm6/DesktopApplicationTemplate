@@ -100,14 +100,23 @@ namespace DesktopApplicationTemplate.Tests
             try
             {
                 var opt = host.Services.GetRequiredService<IOptions<TcpServiceOptions>>().Value;
-                opt.Host = "h";
-                opt.Port = 42;
-                opt.UseUdp = true;
-                opt.Mode = TcpServiceMode.Sending;
 
                 var services = new List<ServiceViewModel>
                 {
-                    new ServiceViewModel{DisplayName="TCP - One", ServiceType="TCP", IsActive=false, Order=0}
+                    new ServiceViewModel
+                    {
+                        DisplayName="TCP - One",
+                        ServiceType="TCP",
+                        IsActive=false,
+                        Order=0,
+                        TcpOptions = new TcpServiceOptions
+                        {
+                            Host = "h",
+                            Port = 42,
+                            UseUdp = true,
+                            Mode = TcpServiceMode.Sending
+                        }
+                    }
                 };
 
                 ServicePersistence.Save(services);
