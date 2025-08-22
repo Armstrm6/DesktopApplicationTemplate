@@ -20,15 +20,24 @@ public class DiContainerTests
         services.AddSingleton<SaveConfirmationHelper>();
         services.AddSingleton<MqttService>();
         services.AddSingleton<MqttTagSubscriptionsViewModel>();
+        services.AddTransient<TcpCreateServiceViewModel>();
+        services.AddTransient<TcpServiceMessagesViewModel>();
         services.Configure<MqttServiceOptions>(o =>
         {
             o.Host = "localhost";
             o.Port = 1883;
             o.ClientId = "client";
         });
+        services.Configure<TcpServiceOptions>(o =>
+        {
+            o.Host = "localhost";
+            o.Port = 5000;
+            o.Mode = TcpServiceMode.Listening;
+        });
 
         using var provider = services.BuildServiceProvider();
-        var vm = provider.GetRequiredService<MqttTagSubscriptionsViewModel>();
-        Assert.NotNull(vm);
+        Assert.NotNull(provider.GetRequiredService<MqttTagSubscriptionsViewModel>());
+        Assert.NotNull(provider.GetRequiredService<TcpCreateServiceViewModel>());
+        Assert.NotNull(provider.GetRequiredService<TcpServiceMessagesViewModel>());
     }
 }
