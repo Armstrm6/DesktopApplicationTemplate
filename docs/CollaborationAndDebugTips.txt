@@ -1089,3 +1089,11 @@ Effective Prompts / Instructions that worked: user request to serialize TcpServi
 Decisions & Rationale: copy options from DI into ServiceInfo and restore them during load.
 Action Items: add tests and changelog entry.
 Related Commits/PRs: (this PR)
+[2025-08-22 15:55] Topic: Design integration for TCP messaging
+Context: (summarize the scenario)
+Observations: Outlined design steps for integrating TCP service creation and message viewer.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: review design guidelines
+Decisions & Rationale: aligned with MVVM
+Action Items: verify layout
+Related Commits/PRs: (this PR)
