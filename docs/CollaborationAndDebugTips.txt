@@ -3,6 +3,15 @@ Purpose: Running log of what worked, what broke, and why.
 
 Remember to record environment limitations (e.g., missing tests or write restrictions) in each log entry.
 
+[2025-08-22 13:45] Topic: TCP service creation navigation
+Context: Wired TCP selection through create service window.
+Observations: Page raises TcpSelected and window navigates to TCP view storing options.
+Codex Limitations noticed: Linux container lacks WPF runtime; tests rely on CI.
+Effective Prompts / Instructions that worked: user request to extend service creation.
+Decisions & Rationale: Mirror MQTT flow for navigation and option persistence.
+Action Items: Monitor CI for integration.
+Related Commits/PRs: (this PR)
+
 [2025-08-22 13:39] Topic: TCP service creation view
 Context: Added TCP create view model, view, options, DI registrations, and tests.
 Observations: View model mirrors MQTT pattern and raises create/cancel events.

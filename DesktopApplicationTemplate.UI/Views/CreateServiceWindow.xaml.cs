@@ -11,6 +11,7 @@ namespace DesktopApplicationTemplate.UI.Views
         public string CreatedServiceName { get; private set; } = string.Empty;
         public string CreatedServiceType { get; private set; } = string.Empty;
         public MqttServiceOptions? MqttOptions { get; private set; }
+        public TcpServiceOptions? TcpOptions { get; private set; }
 
         private readonly IServiceProvider _services;
         private readonly CreateServicePage _page;
@@ -28,6 +29,7 @@ namespace DesktopApplicationTemplate.UI.Views
             };
             _page.Cancelled += () => DialogResult = false;
             _page.MqttSelected += NavigateToMqtt;
+            _page.TcpSelected += NavigateToTcp;
             ContentFrame.Content = _page;
         }
 
@@ -44,6 +46,23 @@ namespace DesktopApplicationTemplate.UI.Views
             };
             vm.Cancelled += () => ContentFrame.Content = _page;
             var view = ActivatorUtilities.CreateInstance<MqttCreateServiceView>(_services, vm);
+            ContentFrame.Content = view;
+        }
+
+        private void NavigateToTcp(string defaultName)
+        {
+            var vm = _services.GetRequiredService<TcpCreateServiceViewModel>();
+            vm.ServiceName = defaultName;
+            vm.ServiceCreated += (name, options) =>
+            {
+                CreatedServiceName = name;
+                CreatedServiceType = "TCP";
+                TcpOptions = options;
+                DialogResult = true;
+            };
+            vm.Cancelled += () => ContentFrame.Content = _page;
+            var view = _services.GetRequiredService<TcpCreateServiceView>();
+            view.DataContext = vm;
             ContentFrame.Content = view;
         }
     }

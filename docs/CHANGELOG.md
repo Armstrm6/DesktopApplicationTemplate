@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 ### Added
+- TCP service creation flow integrated into selection window with option persistence.
 - TCP service creation view and view model with configurable options and unit tests.
 - CSV creator now supports selecting an output directory and nested folder patterns when naming files.
 - WebSocket path configuration with TLS disabled when using WebSockets.
