@@ -10,6 +10,7 @@ namespace DesktopApplicationTemplate.UI.Views
         private readonly CreateServiceViewModel _viewModel;
         public event Action<string, string>? ServiceCreated;
         public event Action<string>? MqttSelected;
+        public event Action<string>? TcpSelected;
         public event Action? Cancelled;
 
         public CreateServicePage(CreateServiceViewModel viewModel)
@@ -27,6 +28,11 @@ namespace DesktopApplicationTemplate.UI.Views
                 if (meta.Type == "MQTT")
                 {
                     MqttSelected?.Invoke(name);
+                    return;
+                }
+                if (meta.Type == "TCP")
+                {
+                    TcpSelected?.Invoke(name);
                     return;
                 }
                 ServiceCreated?.Invoke(name, meta.Type);
