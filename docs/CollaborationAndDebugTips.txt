@@ -3,6 +3,15 @@ Purpose: Running log of what worked, what broke, and why.
 
 Remember to record environment limitations (e.g., missing tests or write restrictions) in each log entry.
 
+[2025-08-22 13:57] Topic: TCP message navigation
+Context: Added command to open TCP advanced settings and synced messages with script/network changes.
+Observations: Messages view model raises navigation events and tracks latest configuration.
+Codex Limitations noticed: Linux environment lacks WPF runtime; navigation untested locally.
+Effective Prompts / Instructions that worked: User request to expose navigation command and update view models.
+Decisions & Rationale: Use event-driven navigation and injection to decouple views.
+Action Items: Verify navigation on Windows CI.
+Related Commits/PRs: (this PR)
+
 [2025-08-22 13:51] Topic: TCP service messages view
 Context: Added view and view model for displaying TCP messages with log filtering and navigation update.
 Observations: Introduced TcpServiceMessagesViewModel with observable collections and log-level controls; MainWindow now loads messages view for TCP services.

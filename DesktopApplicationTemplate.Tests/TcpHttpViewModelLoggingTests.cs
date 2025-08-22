@@ -19,7 +19,7 @@ namespace DesktopApplicationTemplate.Tests
         {
             var logger = new Mock<ILoggingService>();
             var helper = new SaveConfirmationHelper(logger.Object);
-            var vm = new TcpServiceViewModel(helper) { Logger = logger.Object };
+            var vm = new TcpServiceViewModel(helper, new TcpServiceMessagesViewModel()) { Logger = logger.Object };
             vm.ComputerIp = "127.0.0.1";
             vm.ListeningPort = "5000";
 

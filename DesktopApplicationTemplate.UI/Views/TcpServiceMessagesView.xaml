@@ -32,6 +32,7 @@
                 <Button Content="Export Log" Command="{Binding ExportLogCommand}" Margin="10,0,0,0" Width="100"/>
                 <Button Content="Clear Log" Command="{Binding ClearLogCommand}" Margin="10,0,0,0" Width="100"/>
                 <Button Content="Update Log" Command="{Binding RefreshLogCommand}" Margin="10,0,0,0" Width="100"/>
+                <Button Content="Advanced Settings" Command="{Binding OpenAdvancedSettingsCommand}" Margin="10,0,0,0" Width="150"/>
             </StackPanel>
             <ListBox ItemsSource="{Binding DisplayLogs}" Height="200">
                 <ListBox.ItemTemplate>

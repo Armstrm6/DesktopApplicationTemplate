@@ -109,6 +109,24 @@ namespace DesktopApplicationTemplate.UI.Views
                 {
                     navm.UpdateNetworkConfiguration(_viewModel.NetworkConfig.CurrentConfiguration);
                 }
+
+                if (svc.ServiceType == "TCP" && svc.ServicePage.DataContext is TcpServiceMessagesViewModel tcpVm)
+                {
+                    tcpVm.AdvancedSettingsRequested += (_, _) =>
+                    {
+                        var settingsView = App.AppHost.Services.GetRequiredService<TcpServiceView>();
+                        if (settingsView.DataContext is TcpServiceViewModel tvm)
+                        {
+                            tvm.RequestClose += (_, _) =>
+                            {
+                                if (svc.ServicePage != null)
+                                    ShowPage(svc.ServicePage);
+                                _viewModel.SaveServices();
+                            };
+                        }
+                        ShowPage(settingsView);
+                    };
+                }
             }
 
             return svc.ServicePage;

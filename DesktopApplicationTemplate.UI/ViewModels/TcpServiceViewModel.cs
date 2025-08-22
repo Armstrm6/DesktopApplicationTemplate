@@ -12,6 +12,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 {
 public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, INetworkAwareViewModel
     {
+        private readonly TcpServiceMessagesViewModel _messagesViewModel;
+
         private string _statusMessage = string.Empty;
         private bool _isServerRunning;
 
@@ -41,6 +43,7 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
                     ServerIpEnabled = true;
                 }
                 OnPropertyChanged();
+                UpdateMessageViewModelNetworkSettings();
             }
         }
 
@@ -82,6 +85,7 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
                     ClearErrors(nameof(ComputerIp));
                 }
                 OnPropertyChanged();
+                UpdateMessageViewModelNetworkSettings();
             }
         }
 
@@ -101,6 +105,7 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
                     ClearErrors(nameof(ListeningPort));
                 }
                 OnPropertyChanged();
+                UpdateMessageViewModelNetworkSettings();
             }
         }
 
@@ -120,6 +125,7 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
                     ClearErrors(nameof(ServerIp));
                 }
                 OnPropertyChanged();
+                UpdateMessageViewModelNetworkSettings();
             }
         }
 
@@ -139,6 +145,7 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
                     ClearErrors(nameof(ServerGateway));
                 }
                 OnPropertyChanged();
+                UpdateMessageViewModelNetworkSettings();
             }
         }
 
@@ -158,13 +165,19 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
                     ClearErrors(nameof(ServerPort));
                 }
                 OnPropertyChanged();
+                UpdateMessageViewModelNetworkSettings();
             }
         }
 
         public string ScriptContent
         {
             get => _scriptContent;
-            set { _scriptContent = value; OnPropertyChanged(); }
+            set
+            {
+                _scriptContent = value;
+                OnPropertyChanged();
+                _messagesViewModel.UpdateScript(_scriptContent);
+            }
         }
 
         public string SelectedLanguage
@@ -215,15 +228,17 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
 
         public ICommand SaveCommand { get; }
 
-        public TcpServiceViewModel(SaveConfirmationHelper saveHelper)
+        public TcpServiceViewModel(SaveConfirmationHelper saveHelper, TcpServiceMessagesViewModel messagesViewModel)
         {
             _saveHelper = saveHelper;
+            _messagesViewModel = messagesViewModel ?? throw new ArgumentNullException(nameof(messagesViewModel));
             StatusMessage = "Chappie is initializing...";
             IsServerRunning = false;
             SaveCommand = new RelayCommand(Save);
             ToggleServerCommand = new RelayCommand(ToggleServer);
             TestScriptCommand = new AsyncRelayCommand(TestScriptAsync);
             SetDefaultTemplate();
+            UpdateMessageViewModelNetworkSettings();
         }
 
         private void SetDefaultTemplate()
@@ -231,6 +246,7 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
             ScriptContent = SelectedLanguage == "Python"
                 ? "def process(message):\n    # message is the incoming string\n    return message"
                 : "string Process(string message)\n{\n    // message is the incoming string\n    return message;\n}";
+            _messagesViewModel.UpdateScript(ScriptContent);
         }
 
         private void ToggleServer()
@@ -283,12 +299,24 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
             }
         }
 
-        private void Save() => _saveHelper.Show();
+        public event EventHandler? RequestClose;
+
+        private void Save()
+        {
+            _saveHelper.Show();
+            RequestClose?.Invoke(this, EventArgs.Empty);
+        }
 
         public void UpdateNetworkConfiguration(NetworkConfiguration configuration)
         {
             ComputerIp = configuration.IpAddress;
             ServerGateway = configuration.Gateway;
+            UpdateMessageViewModelNetworkSettings();
+        }
+
+        private void UpdateMessageViewModelNetworkSettings()
+        {
+            _messagesViewModel.UpdateNetworkSettings(ComputerIp, ListeningPort, ServerIp, ServerGateway, ServerPort, IsUdp);
         }
 
         // OnPropertyChanged inherited from ViewModelBase
