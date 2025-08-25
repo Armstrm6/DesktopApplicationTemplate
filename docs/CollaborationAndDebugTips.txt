@@ -1138,3 +1138,11 @@ Effective Prompts / Instructions that worked: Followed MVVM guidelines and DI re
 Decisions & Rationale: Provide basic and advanced configuration flows to mirror other service creation patterns.
 Action Items: Run tests and monitor CI results.
 Related Commits/PRs: (this PR)
+[2025-08-25 19:40] Topic: FTP server edit UI
+Context: Added view and view model for editing existing FTP server settings.
+Observations: Supports loading current options, launching advanced configuration, and saving or canceling changes with tests.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; rely on CI for WPF execution.
+Effective Prompts / Instructions that worked: Following MVVM structure and DI registration guidance.
+Decisions & Rationale: Provide editing workflow to adjust server configuration after creation.
+Action Items: Run tests and monitor CI.
+Related Commits/PRs: (this PR)
