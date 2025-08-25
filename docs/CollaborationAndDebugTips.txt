@@ -1146,3 +1146,12 @@ Effective Prompts / Instructions that worked: Following MVVM structure and DI re
 Decisions & Rationale: Provide editing workflow to adjust server configuration after creation.
 Action Items: Run tests and monitor CI.
 Related Commits/PRs: (this PR)
+[2025-08-25 19:46] Topic: FTP server transfer view
+Context: Added view and view model to display FTP server transfers and status.
+Observations: Transfer events populate collections for uploads and downloads.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; rely on CI.
+Effective Prompts / Instructions that worked: Hook transfer events from IFtpServerService.
+Decisions & Rationale: Use observable collections to surface transfers and log start/stop events.
+Action Items: Run tests in CI.
+Related Commits/PRs: (this PR)
+

@@ -4,11 +4,14 @@ using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Service.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MQTTnet;
+using FubarDev.FtpServer;
+using FubarDev.FtpServer.FileSystem.DotNet;
 using System.IO;
 using System.Windows;
 
@@ -69,6 +72,12 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<MqttService>();
             services.AddSingleton<FTPServiceView>();
             services.AddSingleton<FtpServiceViewModel>();
+            services.AddSingleton<FtpServerView>();
+            services.AddSingleton<FtpServerViewViewModel>();
+            services.AddFtpServer(builder => builder
+                .UseDotNetFileSystem()
+                .EnableAnonymousAuthentication());
+            services.AddSingleton<IFtpServerService, FtpServerService>();
             services.AddSingleton<CsvViewerViewModel>();
             services.AddSingleton<CsvService>();
             services.AddSingleton<CsvServiceView>();
