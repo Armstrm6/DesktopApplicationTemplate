@@ -107,6 +107,7 @@ namespace DesktopApplicationTemplate.UI
             services.Configure<AppSettings>(configuration.GetSection("AppSettings"));
             services.Configure<MqttServiceOptions>(configuration.GetSection("MqttService"));
             services.Configure<TcpServiceOptions>(configuration.GetSection("TcpService"));
+            services.AddOptions<FtpServerOptions>().BindConfiguration("FtpServer");
         }
 
         protected override async void OnStartup(StartupEventArgs e)
