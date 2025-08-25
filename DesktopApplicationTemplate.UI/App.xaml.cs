@@ -7,6 +7,7 @@ using DesktopApplicationTemplate.Core.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using MQTTnet;
 using System.IO;
 using System.Windows;
@@ -128,6 +129,11 @@ namespace DesktopApplicationTemplate.UI
         {
             var vm = AppHost.Services.GetRequiredService<MainViewModel>();
             vm.SaveServices();
+
+            var logger = AppHost.Services.GetService<Microsoft.Extensions.Logging.ILogger<App>>();
+            logger?.LogInformation("Releasing keyboard state");
+            Helpers.KeyboardHelper.ReleaseKeys(System.Windows.Input.Key.R, System.Windows.Input.Key.D, System.Windows.Input.Key.Q);
+
             await AppHost.StopAsync();
             AppHost.Dispose();
             base.OnExit(e);

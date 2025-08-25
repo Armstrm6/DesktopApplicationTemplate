@@ -126,4 +126,5 @@
 - Eliminated duplicate Style assignments in `MqttEditConnectionView` to prevent XAML parse failures.
 - Cleaned up `CollaborationAndDebugTips.txt` by removing duplicate headers and restoring log structure.
 - CSV creator no longer adds columns for itself or other CSV services, preventing self-referencing entries.
+- Application now releases keyboard state on shutdown to prevent stuck R, D, and Q keys.
 

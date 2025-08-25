@@ -1113,3 +1113,11 @@ Effective Prompts / Instructions that worked:
 Decisions & Rationale: Aligned with MVVM design guidance
 Action Items: Review layout on next design pass
 Related Commits/PRs: (this PR)
+[2025-08-23 10:00] Topic: Keyboard state release
+Context: (summarize the scenario)
+Observations: Application releases R, D, and Q keys on shutdown to avoid stuck input.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; tests rely on CI.
+Effective Prompts / Instructions that worked: request to fix stuck keys and review AGENTS guidelines.
+Decisions & Rationale: Use P/Invoke to send key-up events for affected keys during app exit.
+Action Items: Monitor CI for Windows-specific input handling issues.
+Related Commits/PRs: (this PR)
