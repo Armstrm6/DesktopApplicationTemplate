@@ -31,16 +31,32 @@ namespace DesktopApplicationTemplate.Service.Services
         public async Task StartAsync(CancellationToken cancellationToken = default)
         {
             _logger.LogInformation(EventIds.Starting, "Starting FTP server");
-            await _host.StartAsync(cancellationToken).ConfigureAwait(false);
-            _logger.LogInformation(EventIds.Started, "FTP server started");
+            try
+            {
+                await _host.StartAsync(cancellationToken).ConfigureAwait(false);
+                _logger.LogInformation(EventIds.Started, "FTP server started");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(EventIds.StartFailed, ex, "FTP server failed to start");
+                throw;
+            }
         }
 
         /// <inheritdoc />
         public async Task StopAsync(CancellationToken cancellationToken = default)
         {
             _logger.LogInformation(EventIds.Stopping, "Stopping FTP server");
-            await _host.StopAsync(cancellationToken).ConfigureAwait(false);
-            _logger.LogInformation(EventIds.Stopped, "FTP server stopped");
+            try
+            {
+                await _host.StopAsync(cancellationToken).ConfigureAwait(false);
+                _logger.LogInformation(EventIds.Stopped, "FTP server stopped");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(EventIds.StopFailed, ex, "FTP server failed to stop");
+                throw;
+            }
         }
 
         internal void RaiseFileReceived(string path, long size)
@@ -68,6 +84,8 @@ namespace DesktopApplicationTemplate.Service.Services
             public static readonly EventId Stopped = new(1003, nameof(Stopped));
             public static readonly EventId FileReceived = new(1004, nameof(FileReceived));
             public static readonly EventId FileSent = new(1005, nameof(FileSent));
+            public static readonly EventId StartFailed = new(1006, nameof(StartFailed));
+            public static readonly EventId StopFailed = new(1007, nameof(StopFailed));
         }
     }
 }

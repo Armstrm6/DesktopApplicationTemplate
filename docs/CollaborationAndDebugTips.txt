@@ -1163,3 +1163,12 @@ Effective Prompts / Instructions that worked: Followed DI checklist and options 
 Decisions & Rationale: Used AddOptions to bind FtpServerOptions and created DI test for resolution.
 Action Items: Monitor CI for Windows-specific test execution.
 Related Commits/PRs: (this PR)
+
+[2025-08-25 20:09] Topic: FTP server test coverage
+Context: Added tests for FTP server service and view models covering start failures and invalid configuration paths.
+Observations: Service now logs failures and view models suppress events when validation errors exist.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; relied on CI for execution.
+Effective Prompts / Instructions that worked: Request to mock dependencies and validate edge cases.
+Decisions & Rationale: Improve reliability by logging errors and preventing invalid saves.
+Action Items: Monitor CI for Windows-specific behaviors.
+Related Commits/PRs: (this PR)

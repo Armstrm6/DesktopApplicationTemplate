@@ -62,5 +62,37 @@ public class FtpServerEditViewModelTests
         Assert.True(cancelled);
         ConsoleTestLogger.LogPass();
     }
+
+    [Fact]
+    [TestCategory("CodexSafe")]
+    [TestCategory("WindowsSafe")]
+    public void SettingInvalidPort_AddsError()
+    {
+        var options = new FtpServerOptions();
+        var vm = new FtpServerEditViewModel("ftp", options);
+        vm.Port = 0;
+        Assert.True(vm.HasErrors);
+        ConsoleTestLogger.LogPass();
+    }
+
+    [Fact]
+    [TestCategory("CodexSafe")]
+    [TestCategory("WindowsSafe")]
+    public void SaveCommand_DoesNotRaise_WhenInvalid()
+    {
+        var options = new FtpServerOptions();
+        var vm = new FtpServerEditViewModel("ftp", options)
+        {
+            Port = 0,
+            RootPath = "/tmp"
+        };
+        var raised = false;
+        vm.ServerUpdated += (_, _) => raised = true;
+
+        vm.SaveCommand.Execute(null);
+
+        Assert.False(raised);
+        ConsoleTestLogger.LogPass();
+    }
 }
 

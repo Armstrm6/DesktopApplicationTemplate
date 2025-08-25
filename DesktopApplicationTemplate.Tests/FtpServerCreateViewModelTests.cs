@@ -47,6 +47,37 @@ public class FtpServerCreateViewModelTests
     [Fact]
     [TestCategory("CodexSafe")]
     [TestCategory("WindowsSafe")]
+    public void SettingEmptyServiceName_AddsError()
+    {
+        var vm = new FtpServerCreateViewModel();
+        vm.ServiceName = string.Empty;
+        Assert.True(vm.HasErrors);
+        ConsoleTestLogger.LogPass();
+    }
+
+    [Fact]
+    [TestCategory("CodexSafe")]
+    [TestCategory("WindowsSafe")]
+    public void SaveCommand_DoesNotRaise_WhenInvalid()
+    {
+        var vm = new FtpServerCreateViewModel
+        {
+            ServiceName = string.Empty,
+            Port = 21,
+            RootPath = "/tmp"
+        };
+        var raised = false;
+        vm.ServerCreated += (_, _) => raised = true;
+
+        vm.SaveCommand.Execute(null);
+
+        Assert.False(raised);
+        ConsoleTestLogger.LogPass();
+    }
+
+    [Fact]
+    [TestCategory("CodexSafe")]
+    [TestCategory("WindowsSafe")]
     public void AdvancedCommand_RaisesRequested()
     {
         var vm = new FtpServerCreateViewModel();

@@ -47,4 +47,25 @@ public class FtpServerAdvancedConfigViewModelTests
         Assert.Equal("pass", saved.Password);
         ConsoleTestLogger.LogPass();
     }
+
+    [Fact]
+    [TestCategory("CodexSafe")]
+    [TestCategory("WindowsSafe")]
+    public void SaveCommand_DoesNotRaise_WhenInvalid()
+    {
+        var options = new FtpServerOptions();
+        var vm = new FtpServerAdvancedConfigViewModel(options)
+        {
+            AllowAnonymous = false,
+            Username = string.Empty,
+            Password = string.Empty
+        };
+        var raised = false;
+        vm.Saved += _ => raised = true;
+
+        vm.SaveCommand.Execute(null);
+
+        Assert.False(raised);
+        ConsoleTestLogger.LogPass();
+    }
 }
