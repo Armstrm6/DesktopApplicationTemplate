@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using DesktopApplicationTemplate.Core.Services;
@@ -25,6 +26,27 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
+        [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
+        public async Task StartAsync_LogsError_WhenHostThrows()
+        {
+            var host = new Mock<IFtpServerHost>();
+            var logger = new Mock<ILogger<FtpServerService>>();
+            host.Setup(h => h.StartAsync(It.IsAny<CancellationToken>())).ThrowsAsync(new InvalidOperationException());
+            var service = new FtpServerService(host.Object, logger.Object);
+
+            await Assert.ThrowsAsync<InvalidOperationException>(() => service.StartAsync(CancellationToken.None));
+            logger.Verify(l => l.Log(
+                LogLevel.Error,
+                FtpServerService.EventIds.StartFailed,
+                It.IsAny<It.IsAnyType>(),
+                It.IsAny<InvalidOperationException>(),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+                Times.Once);
+            ConsoleTestLogger.LogPass();
+        }
+
+        [Fact]
         public async Task StopAsync_StopsHost()
         {
             var host = new Mock<IFtpServerHost>();
@@ -34,6 +56,27 @@ namespace DesktopApplicationTemplate.Tests
             await service.StopAsync(CancellationToken.None);
 
             host.Verify(h => h.StopAsync(It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Fact]
+        [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
+        public async Task StopAsync_LogsError_WhenHostThrows()
+        {
+            var host = new Mock<IFtpServerHost>();
+            var logger = new Mock<ILogger<FtpServerService>>();
+            host.Setup(h => h.StopAsync(It.IsAny<CancellationToken>())).ThrowsAsync(new InvalidOperationException());
+            var service = new FtpServerService(host.Object, logger.Object);
+
+            await Assert.ThrowsAsync<InvalidOperationException>(() => service.StopAsync(CancellationToken.None));
+            logger.Verify(l => l.Log(
+                LogLevel.Error,
+                FtpServerService.EventIds.StopFailed,
+                It.IsAny<It.IsAnyType>(),
+                It.IsAny<InvalidOperationException>(),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+                Times.Once);
+            ConsoleTestLogger.LogPass();
         }
 
         [Fact]
