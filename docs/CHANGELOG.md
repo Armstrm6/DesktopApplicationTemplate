@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 ### Added
+- FTP server create and advanced configuration view models and views with validation and commands.
 - FTP server hosting service with start/stop methods, transfer events, and unit tests.
 - Finalized TCP service creation with integrated message viewer for configuring endpoints and inspecting traffic.
 - Introduced TCP service creation and message viewer enabling configuration and inspection of TCP endpoint traffic.
