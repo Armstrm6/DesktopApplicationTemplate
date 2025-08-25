@@ -13,6 +13,8 @@
     <PackageReference Include="Microsoft.Extensions.Logging.EventLog" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.0" />
     <PackageReference Include="FluentFTP" Version="53.0.1" />
+    <PackageReference Include="FubarDev.FtpServer" Version="6.1.0" />
+    <PackageReference Include="FubarDev.FtpServer.FileSystem.DotNet" Version="6.1.0" />
   </ItemGroup>
 
   <ItemGroup>

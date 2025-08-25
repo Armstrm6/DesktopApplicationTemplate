@@ -12,6 +12,15 @@ Decisions & Rationale: Use event-driven navigation and injection to decouple vie
 Action Items: Verify navigation on Windows CI.
 Related Commits/PRs: (this PR)
 
+[2025-08-25 19:26] Topic: FTP server service
+Context: Added service wrapping FubarDev FTP server with start/stop APIs and transfer events.
+Observations: Implemented IFtpServerService, registered with DI, and introduced unit tests for start/stop and event propagation.
+Codex Limitations noticed: Linux container lacks WindowsDesktop runtime; rely on CI for full test execution.
+Effective Prompts / Instructions that worked: Following AGENTS guidelines for DI and logging policy.
+Decisions & Rationale: Use IFtpServerHost from FubarDev to host FTP server and expose transfer events for observers.
+Action Items: Verify FTP server behavior on Windows via CI.
+Related Commits/PRs: (this PR)
+
 [2025-08-22 13:51] Topic: TCP service messages view
 Context: Added view and view model for displaying TCP messages with log filtering and navigation update.
 Observations: Introduced TcpServiceMessagesViewModel with observable collections and log-level controls; MainWindow now loads messages view for TCP services.

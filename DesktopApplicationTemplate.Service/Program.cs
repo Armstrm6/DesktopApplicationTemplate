@@ -5,6 +5,8 @@ using System.Linq;
 using System;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Service.Services;
+using FubarDev.FtpServer;
+using FubarDev.FtpServer.FileSystem.DotNet;
 
 namespace DesktopApplicationTemplate.Service
 {
@@ -28,6 +30,10 @@ namespace DesktopApplicationTemplate.Service
             {
                 services.AddHostedService<Worker>(); // register the background service
                 services.AddSingleton<ILoggingService, LoggingService>();
+                services.AddFtpServer(builder => builder
+                    .UseDotNetFileSystem()
+                    .EnableAnonymousAuthentication());
+                services.AddSingleton<IFtpServerService, FtpServerService>();
             });
         }
     }
