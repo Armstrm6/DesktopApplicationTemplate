@@ -132,3 +132,4 @@
 - CSV creator no longer adds columns for itself or other CSV services, preventing self-referencing entries.
 - Application now releases keyboard state on shutdown to prevent stuck R, D, and Q keys.
 
+- Registered FTP server service and view models in DI and bound FtpServer options from configuration.

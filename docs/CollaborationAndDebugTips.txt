@@ -1155,3 +1155,11 @@ Decisions & Rationale: Use observable collections to surface transfers and log s
 Action Items: Run tests in CI.
 Related Commits/PRs: (this PR)
 
+[2025-08-25 19:53] Topic: FTP server DI registration
+Context: Added DI registrations for FTP server service and view models and bound options from configuration.
+Observations: Runtime resolution confirmed via unit test.
+Codex Limitations noticed: PowerShell not available to run add-tip.ps1; appended entry manually.
+Effective Prompts / Instructions that worked: Followed DI checklist and options binding guidance.
+Decisions & Rationale: Used AddOptions to bind FtpServerOptions and created DI test for resolution.
+Action Items: Monitor CI for Windows-specific test execution.
+Related Commits/PRs: (this PR)
