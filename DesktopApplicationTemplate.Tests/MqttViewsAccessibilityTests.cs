@@ -32,7 +32,7 @@ namespace DesktopApplicationTemplate.Tests
                         new DesktopApplicationTemplate.UI.App();
                     var view = new MqttCreateServiceView(new MqttCreateServiceViewModel(), new Mock<ILoggingService>().Object);
                     var create = (Button)view.FindName("CreateButton");
-                    Assert.Equal("Create MQTT Connection", AutomationProperties.GetName(create));
+                    Assert.Equal("Create MQTT Service", AutomationProperties.GetName(create));
                 }
                 catch (Exception e) { ex = e; }
                 finally { Application.Current?.Shutdown(); }

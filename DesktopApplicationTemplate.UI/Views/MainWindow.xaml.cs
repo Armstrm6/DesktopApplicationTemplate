@@ -194,6 +194,15 @@ namespace DesktopApplicationTemplate.UI.Views
             vm.ServiceCreated += (name, options) => AddMqttService(name, options);
             vm.Cancelled += ShowCreateServiceSelectionPage;
             var view = ActivatorUtilities.CreateInstance<MqttCreateServiceView>(App.AppHost.Services, vm);
+            vm.AdvancedConfigRequested += opts =>
+            {
+                var advVm = ActivatorUtilities.CreateInstance<MqttAdvancedConfigViewModel>(App.AppHost.Services, opts);
+                var advView = App.AppHost.Services.GetRequiredService<MqttAdvancedConfigView>();
+                advView.DataContext = advVm;
+                advVm.Saved += _ => ShowPage(view);
+                advVm.BackRequested += () => ShowPage(view);
+                ShowPage(advView);
+            };
             ShowPage(view);
         }
 
@@ -612,18 +621,31 @@ namespace DesktopApplicationTemplate.UI.Views
             if (service.ServiceType == "MQTT")
             {
                 var tagPage = GetOrCreateServicePage(service);
-                var editView = App.AppHost.Services.GetRequiredService<MqttEditConnectionView>();
-                if (editView.DataContext is MqttEditConnectionViewModel vm)
+                var options = App.AppHost.Services.GetRequiredService<IOptions<MqttServiceOptions>>().Value;
+                var vm = ActivatorUtilities.CreateInstance<MqttEditServiceViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
+                var editView = App.AppHost.Services.GetRequiredService<MqttEditServiceView>();
+                editView.DataContext = vm;
+                vm.ServiceUpdated += (name, opts) =>
                 {
-                    var options = App.AppHost.Services.GetRequiredService<IOptions<MqttServiceOptions>>().Value;
-                    vm.Load(options);
-                    vm.RequestClose += (_, _) =>
-                    {
-                        if (tagPage != null)
-                            ShowPage(tagPage);
-                        _viewModel.SaveServices();
-                    };
-                }
+                    service.DisplayName = $"MQTT - {name}";
+                    if (tagPage != null)
+                        ShowPage(tagPage);
+                    _viewModel.SaveServices();
+                };
+                vm.Cancelled += () =>
+                {
+                    if (tagPage != null)
+                        ShowPage(tagPage);
+                };
+                vm.AdvancedConfigRequested += opts =>
+                {
+                    var advVm = ActivatorUtilities.CreateInstance<MqttAdvancedConfigViewModel>(App.AppHost.Services, opts);
+                    var advView = App.AppHost.Services.GetRequiredService<MqttAdvancedConfigView>();
+                    advView.DataContext = advVm;
+                    advVm.Saved += _ => ShowPage(editView);
+                    advVm.BackRequested += () => ShowPage(editView);
+                    ShowPage(advView);
+                };
                 ShowPage(editView);
             _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
             return;
@@ -731,7 +753,7 @@ namespace DesktopApplicationTemplate.UI.Views
             return;
         }
 
-        if (service.ServiceType == "File Observer"
+        if (service.ServiceType == "File Observer")
         {
             var foPage = GetOrCreateServicePage(service);
             var options = service.FileObserverOptions ?? new FileObserverServiceOptions();

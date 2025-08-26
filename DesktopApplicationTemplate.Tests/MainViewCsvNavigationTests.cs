@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Moq;
 using Xunit;
+using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.Helpers;
 
 namespace DesktopApplicationTemplate.Tests;

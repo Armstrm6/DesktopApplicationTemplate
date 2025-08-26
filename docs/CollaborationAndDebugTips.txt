@@ -1399,3 +1399,11 @@ Effective Prompts / Instructions that worked: User request to separate advanced 
 Decisions & Rationale: Extract advanced fields to dedicated view models to keep runtime view focused.
 Action Items: Monitor CI for UI behavior.
 Related Commits/PRs: (this PR)
+[2025-08-27 20:00] Topic: MQTT advanced config navigation
+Context: Split MQTT advanced settings into a separate view with create/edit workflows and tests.
+Observations: Navigation hooks show the advanced page and return on save or back; DI registers new views and view models.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; rely on CI for WPF execution.
+Effective Prompts / Instructions that worked: Follow MVVM patterns and update docs/tests per AGENTS guidance.
+Decisions & Rationale: Isolate advanced settings to keep primary forms focused and maintain consistency with other services.
+Action Items: Monitor CI for Windows-specific issues.
+Related Commits/PRs:

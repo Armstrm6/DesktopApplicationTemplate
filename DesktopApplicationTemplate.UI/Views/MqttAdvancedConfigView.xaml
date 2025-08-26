@@ -1,0 +1,57 @@
+<Page x:Class="DesktopApplicationTemplate.UI.Views.MqttAdvancedConfigView"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d">
+    <Grid Margin="20">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="Use TLS" Style="{StaticResource FormLabel}"/>
+        <CheckBox Grid.Row="0" Grid.Column="1" IsChecked="{Binding UseTls}" Style="{StaticResource FormField}"/>
+
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="Client Certificate" Style="{StaticResource FormLabel}"/>
+        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding ClientCertificatePath}" Style="{StaticResource FormField}"/>
+
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="Will Topic" Style="{StaticResource FormLabel}"/>
+        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding WillTopic}" Style="{StaticResource FormField}"/>
+
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="Will Payload" Style="{StaticResource FormLabel}"/>
+        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding WillPayload}" Style="{StaticResource FormField}"/>
+
+        <TextBlock Grid.Row="4" Grid.Column="0" Text="Will QoS" Style="{StaticResource FormLabel}"/>
+        <ComboBox Grid.Row="4" Grid.Column="1" ItemsSource="{Binding QoSLevels}" SelectedItem="{Binding WillQualityOfService}" Style="{StaticResource FormField}"/>
+
+        <TextBlock Grid.Row="5" Grid.Column="0" Text="Will Retain" Style="{StaticResource FormLabel}"/>
+        <CheckBox Grid.Row="5" Grid.Column="1" IsChecked="{Binding WillRetain}" Style="{StaticResource FormField}"/>
+
+        <TextBlock Grid.Row="6" Grid.Column="0" Text="Keep Alive" Style="{StaticResource FormLabel}"/>
+        <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding KeepAliveSeconds}" Style="{StaticResource FormField}"/>
+
+        <TextBlock Grid.Row="7" Grid.Column="0" Text="Clean Session" Style="{StaticResource FormLabel}"/>
+        <CheckBox Grid.Row="7" Grid.Column="1" IsChecked="{Binding CleanSession}" Style="{StaticResource FormField}"/>
+
+        <TextBlock Grid.Row="8" Grid.Column="0" Text="Reconnect Delay" Style="{StaticResource FormLabel}"/>
+        <TextBox Grid.Row="8" Grid.Column="1" Text="{Binding ReconnectDelaySeconds}" Style="{StaticResource FormField}"/>
+
+        <StackPanel Grid.Row="9" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+            <Button Content="Save" Width="100" Margin="5" Command="{Binding SaveCommand}" AutomationProperties.Name="Save MQTT Advanced Configuration"/>
+            <Button Content="Back" Width="100" Margin="5" Command="{Binding BackCommand}" AutomationProperties.Name="Back to MQTT Configuration"/>
+        </StackPanel>
+    </Grid>
+</Page>

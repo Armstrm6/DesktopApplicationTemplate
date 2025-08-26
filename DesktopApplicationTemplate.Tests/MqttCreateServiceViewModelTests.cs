@@ -19,6 +19,8 @@ public class MqttCreateServiceViewModelTests
         vm.Host = "host";
         vm.Port = 1234;
         vm.ClientId = "client";
+        vm.Username = "user";
+        vm.Password = "pass";
         MqttServiceOptions? received = null;
         string? name = null;
         vm.ServiceCreated += (n, o) => { name = n; received = o; };
@@ -57,15 +59,15 @@ public class MqttCreateServiceViewModelTests
         vm.ClientId = "client";
         vm.Username = "user";
         vm.Password = "pass";
-        vm.UseTls = true;
-        vm.ClientCertificatePath = tempCert;
-        vm.WillTopic = "wt";
-        vm.WillPayload = "wp";
-        vm.WillQualityOfService = MqttQualityOfServiceLevel.AtLeastOnce;
-        vm.WillRetain = true;
-        vm.KeepAliveSeconds = 15;
-        vm.CleanSession = false;
-        vm.ReconnectDelaySeconds = 5;
+        vm.Options.UseTls = true;
+        vm.Options.WillTopic = "wt";
+        vm.Options.WillPayload = "wp";
+        vm.Options.WillQualityOfService = MqttQualityOfServiceLevel.AtLeastOnce;
+        vm.Options.WillRetain = true;
+        vm.Options.KeepAliveSeconds = 15;
+        vm.Options.CleanSession = false;
+        vm.Options.ReconnectDelay = TimeSpan.FromSeconds(5);
+        vm.Options.ClientCertificate = File.ReadAllBytes(tempCert);
         MqttServiceOptions? received = null;
         vm.ServiceCreated += (_, o) => received = o;
 
@@ -101,9 +103,9 @@ public class MqttCreateServiceViewModelTests
         vm.ClientId = "client";
         vm.Username = "";
         vm.Password = " ";
-        vm.WillTopic = "";
-        vm.WillPayload = null;
-        vm.ReconnectDelaySeconds = -1;
+        vm.Options.WillTopic = "";
+        vm.Options.WillPayload = null;
+        vm.Options.ReconnectDelay = null;
         MqttServiceOptions? received = null;
         vm.ServiceCreated += (_, o) => received = o;
 
