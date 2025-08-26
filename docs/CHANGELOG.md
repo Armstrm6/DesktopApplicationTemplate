@@ -59,7 +59,7 @@
 - Subscribe/unsubscribe support for MQTT topics with QoS selection and visual feedback for subscription results.
 - View and view model for displaying TCP service messages with log-level filtering and log management commands.
 - TCP messages view can navigate to advanced settings and reflects script and network configuration updates.
-
+- Advanced configuration button in TCP service creation navigates to the full TCP settings editor.
 - File dialog service registered for TLS certificate selection in MQTT views.
 
 ### Changed

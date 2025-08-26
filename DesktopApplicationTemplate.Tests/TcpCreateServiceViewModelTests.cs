@@ -40,4 +40,24 @@ public class TcpCreateServiceViewModelTests
 
         Assert.True(cancelled);
     }
+
+    [Fact]
+    public void AdvancedConfigCommand_Raises_Event_WithOptions()
+    {
+        var vm = new TcpCreateServiceViewModel();
+        vm.Host = "host";
+        vm.Port = 123;
+        vm.UseUdp = true;
+        vm.Mode = TcpServiceMode.Sending;
+        TcpServiceOptions? received = null;
+        vm.AdvancedConfigRequested += o => received = o;
+
+        vm.AdvancedConfigCommand.Execute(null);
+
+        Assert.NotNull(received);
+        Assert.Equal("host", received!.Host);
+        Assert.Equal(123, received.Port);
+        Assert.True(received.UseUdp);
+        Assert.Equal(TcpServiceMode.Sending, received.Mode);
+    }
 }

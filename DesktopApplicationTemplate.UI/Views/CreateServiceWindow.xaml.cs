@@ -69,9 +69,32 @@ namespace DesktopApplicationTemplate.UI.Views
                 DialogResult = true;
                 Close();
             };
-            vm.Cancelled += () => ContentFrame.Content = _page;
             var view = _services.GetRequiredService<TcpCreateServiceView>();
             view.DataContext = vm;
+            vm.Cancelled += () => ContentFrame.Content = _page;
+            vm.AdvancedConfigRequested += opts =>
+            {
+                var advView = _services.GetRequiredService<TcpServiceView>();
+                var advVm = (TcpServiceViewModel)advView.DataContext;
+                advVm.ComputerIp = opts.Host;
+                advVm.ListeningPort = opts.Port.ToString();
+                advVm.IsUdp = opts.UseUdp;
+                advVm.SelectedMode = opts.Mode == TcpServiceMode.Listening ? "Listening" : "Sending";
+
+                EventHandler? handler = null;
+                handler = (_, __) =>
+                {
+                    opts.Host = advVm.ComputerIp;
+                    if (int.TryParse(advVm.ListeningPort, out var p))
+                        opts.Port = p;
+                    opts.UseUdp = advVm.IsUdp;
+                    opts.Mode = advVm.SelectedMode == "Listening" ? TcpServiceMode.Listening : TcpServiceMode.Sending;
+                    advVm.RequestClose -= handler;
+                    ContentFrame.Content = view;
+                };
+                advVm.RequestClose += handler;
+                ContentFrame.Content = advView;
+            };
             ContentFrame.Content = view;
         }
 
