@@ -168,6 +168,8 @@ namespace DesktopApplicationTemplate.UI.Views
                     _logger?.LogInformation("Service {Name} added", svc.DisplayName);
                     _viewModel.SelectedService = svc;
                     ServiceList.ScrollIntoView(svc);
+                    if (svc.ServicePage != null)
+                        ShowPage(svc.ServicePage);
                 }
                 else if (window.CreatedServiceType == "FTP Server" || window.CreatedServiceType == "FTP")
                 {
@@ -189,6 +191,8 @@ namespace DesktopApplicationTemplate.UI.Views
                     _logger?.LogInformation("Service {Name} added", svc.DisplayName);
                     _viewModel.SelectedService = svc;
                     ServiceList.ScrollIntoView(svc);
+                    if (svc.ServicePage != null)
+                        ShowPage(svc.ServicePage);
                 }
             }
         }

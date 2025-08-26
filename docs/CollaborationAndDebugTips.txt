@@ -1249,3 +1249,11 @@ Effective Prompts / Instructions that worked: Request to ensure service creation
 Decisions & Rationale: Invoke Close() after setting DialogResult on create or cancel events.
 Action Items: Rely on CI for full WPF validation.
 Related Commits/PRs: (this PR)
+[2025-08-26 15:35] Topic: Show page after service creation
+Context: Display newly created service pages automatically for TCP and generic services.
+Observations: Added ShowPage calls after ScrollIntoView so pages open immediately.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; relying on CI for WPF coverage.
+Effective Prompts / Instructions that worked: Direct request to show newly created service pages.
+Decisions & Rationale: Mirror MQTT and FTP workflows to keep service addition consistent.
+Action Items: Run tests and monitor CI.
+Related Commits/PRs: (this PR)
