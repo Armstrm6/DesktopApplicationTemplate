@@ -21,6 +21,7 @@ namespace DesktopApplicationTemplate.UI.Services
             foreach (var s in services)
             {
                 TcpServiceOptions? tcp = null;
+                FtpServerOptions? ftp = null;
                 if (s.ServiceType == "TCP" && s.TcpOptions != null)
                 {
                     tcp = new TcpServiceOptions
@@ -32,6 +33,18 @@ namespace DesktopApplicationTemplate.UI.Services
                     };
                 }
 
+                if (s.ServiceType == "FTP Server" && s.FtpOptions != null)
+                {
+                    ftp = new FtpServerOptions
+                    {
+                        Port = s.FtpOptions.Port,
+                        RootPath = s.FtpOptions.RootPath,
+                        AllowAnonymous = s.FtpOptions.AllowAnonymous,
+                        Username = s.FtpOptions.Username,
+                        Password = s.FtpOptions.Password
+                    };
+                }
+
                 data.Add(new ServiceInfo
                 {
                     DisplayName = s.DisplayName,
@@ -40,7 +53,8 @@ namespace DesktopApplicationTemplate.UI.Services
                     Created = DateTime.Now,
                     Order = index++,
                     AssociatedServices = new List<string>(s.AssociatedServices),
-                    TcpOptions = tcp
+                    TcpOptions = tcp,
+                    FtpOptions = ftp
                 });
             }
 
@@ -107,6 +121,26 @@ namespace DesktopApplicationTemplate.UI.Services
                             // ignore missing options during tests or early startup
                         }
                     }
+                    if (info.ServiceType == "FTP Server" && info.FtpOptions != null)
+                    {
+                        try
+                        {
+                            var opt = App.AppHost?.Services.GetService(typeof(IOptions<FtpServerOptions>)) as IOptions<FtpServerOptions>;
+                            if (opt != null)
+                            {
+                                var value = opt.Value;
+                                value.Port = info.FtpOptions.Port;
+                                value.RootPath = info.FtpOptions.RootPath;
+                                value.AllowAnonymous = info.FtpOptions.AllowAnonymous;
+                                value.Username = info.FtpOptions.Username;
+                                value.Password = info.FtpOptions.Password;
+                            }
+                        }
+                        catch
+                        {
+                            // ignore missing options during tests or early startup
+                        }
+                    }
                 }
 
                 logger?.Log($"Loaded {result.Count} services", LogLevel.Debug);
@@ -129,5 +163,6 @@ namespace DesktopApplicationTemplate.UI.Services
         public int Order { get; set; }
         public List<string> AssociatedServices { get; set; } = new();
         public TcpServiceOptions? TcpOptions { get; set; }
+        public FtpServerOptions? FtpOptions { get; set; }
     }
 }

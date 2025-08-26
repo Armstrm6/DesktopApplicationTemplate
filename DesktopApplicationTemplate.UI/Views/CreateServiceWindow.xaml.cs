@@ -12,6 +12,7 @@ namespace DesktopApplicationTemplate.UI.Views
         public string CreatedServiceType { get; private set; } = string.Empty;
         public MqttServiceOptions? MqttOptions { get; private set; }
         public TcpServiceOptions? TcpOptions { get; private set; }
+        public FtpServerOptions? FtpServerOptions { get; private set; }
 
         private readonly IServiceProvider _services;
         private readonly CreateServicePage _page;
@@ -30,6 +31,7 @@ namespace DesktopApplicationTemplate.UI.Views
             _page.Cancelled += () => DialogResult = false;
             _page.MqttSelected += NavigateToMqtt;
             _page.TcpSelected += NavigateToTcp;
+            _page.FtpServerSelected += NavigateToFtpServer;
             ContentFrame.Content = _page;
         }
 
@@ -63,6 +65,31 @@ namespace DesktopApplicationTemplate.UI.Views
             vm.Cancelled += () => ContentFrame.Content = _page;
             var view = _services.GetRequiredService<TcpCreateServiceView>();
             view.DataContext = vm;
+            ContentFrame.Content = view;
+        }
+
+        private void NavigateToFtpServer(string defaultName)
+        {
+            var vm = _services.GetRequiredService<FtpServerCreateViewModel>();
+            vm.ServiceName = defaultName;
+            var view = _services.GetRequiredService<FtpServerCreateView>();
+            view.DataContext = vm;
+            vm.ServerCreated += (name, options) =>
+            {
+                CreatedServiceName = name;
+                CreatedServiceType = "FTP Server";
+                FtpServerOptions = options;
+                DialogResult = true;
+            };
+            vm.AdvancedConfigRequested += opts =>
+            {
+                var advVm = ActivatorUtilities.CreateInstance<FtpServerAdvancedConfigViewModel>(_services, opts);
+                var advView = _services.GetRequiredService<FtpServerAdvancedConfigView>();
+                advView.DataContext = advVm;
+                advVm.Saved += _ => ContentFrame.Content = view;
+                advVm.Cancelled += () => ContentFrame.Content = view;
+                ContentFrame.Content = advView;
+            };
             ContentFrame.Content = view;
         }
     }

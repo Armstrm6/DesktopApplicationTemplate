@@ -48,6 +48,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         /// </summary>
         public TcpServiceOptions? TcpOptions { get; set; }
 
+        /// <summary>
+        /// FTP server-specific configuration for this service, if applicable.
+        /// </summary>
+        public FtpServerOptions? FtpOptions { get; set; }
+
         public static Func<string, string, ServiceViewModel?>? ResolveService { get; set; }
 
 
@@ -119,6 +124,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 "SCP" => (WpfBrushes.LightCyan, WpfBrushes.CadetBlue),
                 "MQTT" => (WpfBrushes.LightGoldenrodYellow, WpfBrushes.Goldenrod),
                 "FTP" => (WpfBrushes.LightSteelBlue, WpfBrushes.SteelBlue),
+                "FTP Server" => (WpfBrushes.LightSteelBlue, WpfBrushes.SteelBlue),
                 _ => (WpfBrushes.LightGray, WpfBrushes.Gray)
             };
             OnPropertyChanged(nameof(BackgroundColor));
@@ -300,7 +306,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     ServiceType = info.ServiceType,
                     IsActive = info.IsActive,
                     Order = info.Order,
-                    TcpOptions = info.TcpOptions
+                    TcpOptions = info.TcpOptions,
+                    FtpOptions = info.FtpOptions
                 };
                 foreach (var a in info.AssociatedServices ?? new List<string>())
                     svc.AssociatedServices.Add(a);

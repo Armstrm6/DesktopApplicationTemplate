@@ -11,6 +11,7 @@ namespace DesktopApplicationTemplate.UI.Views
         public event Action<string, string>? ServiceCreated;
         public event Action<string>? MqttSelected;
         public event Action<string>? TcpSelected;
+        public event Action<string>? FtpServerSelected;
         public event Action? Cancelled;
 
         public CreateServicePage(CreateServiceViewModel viewModel)
@@ -33,6 +34,11 @@ namespace DesktopApplicationTemplate.UI.Views
                 if (meta.Type == "TCP")
                 {
                     TcpSelected?.Invoke(name);
+                    return;
+                }
+                if (meta.Type == "FTP Server")
+                {
+                    FtpServerSelected?.Invoke(name);
                     return;
                 }
                 ServiceCreated?.Invoke(name, meta.Type);

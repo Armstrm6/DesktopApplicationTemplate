@@ -135,3 +135,4 @@
 
 - Registered FTP server service and view models in DI and bound FtpServer options from configuration.
 - Downgraded FubarDev FTP server packages to version 3.1.2 to resolve missing NuGet feeds.
+- FTP server create and edit windows now launch with advanced configuration access.

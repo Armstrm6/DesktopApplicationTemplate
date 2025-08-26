@@ -91,6 +91,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 "SCP" => App.AppHost.Services.GetRequiredService<SCPServiceView>(),
                 "MQTT" => App.AppHost.Services.GetRequiredService<MqttTagSubscriptionsView>(),
                 "FTP" => App.AppHost.Services.GetRequiredService<FTPServiceView>(),
+                "FTP Server" => App.AppHost.Services.GetRequiredService<FtpServerView>(),
                 "CSV Creator" => App.AppHost.Services.GetRequiredService<CsvServiceView>(),
                 _ => null
             };
@@ -164,6 +165,33 @@ namespace DesktopApplicationTemplate.UI.Views
                     svc.LogAdded += _viewModel.OnServiceLogAdded;
                     svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
                     GetOrCreateServicePage(svc);
+                    _viewModel.Services.Add(svc);
+                    _logger?.LogInformation("Service {Name} added", svc.DisplayName);
+                    _viewModel.SelectedService = svc;
+                    ServiceList.ScrollIntoView(svc);
+                }
+                else if (window.CreatedServiceType == "FTP Server")
+                {
+                    var svc = new ServiceViewModel
+                    {
+                        DisplayName = $"FTP Server - {window.CreatedServiceName}",
+                        ServiceType = "FTP Server",
+                        IsActive = false,
+                        FtpOptions = window.FtpServerOptions
+                    };
+                    svc.SetColorsByType();
+                    svc.LogAdded += _viewModel.OnServiceLogAdded;
+                    svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
+                    GetOrCreateServicePage(svc);
+                    var opt = App.AppHost.Services.GetRequiredService<IOptions<FtpServerOptions>>().Value;
+                    if (window.FtpServerOptions != null)
+                    {
+                        opt.Port = window.FtpServerOptions.Port;
+                        opt.RootPath = window.FtpServerOptions.RootPath;
+                        opt.AllowAnonymous = window.FtpServerOptions.AllowAnonymous;
+                        opt.Username = window.FtpServerOptions.Username;
+                        opt.Password = window.FtpServerOptions.Password;
+                    }
                     _viewModel.Services.Add(svc);
                     _logger?.LogInformation("Service {Name} added", svc.DisplayName);
                     _viewModel.SelectedService = svc;
@@ -280,6 +308,46 @@ namespace DesktopApplicationTemplate.UI.Views
                         _viewModel.SaveServices();
                     };
                 }
+                ShowPage(editView);
+                _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
+                return;
+            }
+
+            if (service.ServiceType == "FTP Server")
+            {
+                var page = GetOrCreateServicePage(service);
+                var options = service.FtpOptions ?? new FtpServerOptions();
+                var vm = ActivatorUtilities.CreateInstance<FtpServerEditViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
+                var editView = App.AppHost.Services.GetRequiredService<FtpServerEditView>();
+                editView.DataContext = vm;
+                vm.ServerUpdated += (name, opts) =>
+                {
+                    service.DisplayName = $"FTP Server - {name}";
+                    service.FtpOptions = opts;
+                    var opt = App.AppHost.Services.GetRequiredService<IOptions<FtpServerOptions>>().Value;
+                    opt.Port = opts.Port;
+                    opt.RootPath = opts.RootPath;
+                    opt.AllowAnonymous = opts.AllowAnonymous;
+                    opt.Username = opts.Username;
+                    opt.Password = opts.Password;
+                    if (page != null)
+                        ShowPage(page);
+                    _viewModel.SaveServices();
+                };
+                vm.Cancelled += () =>
+                {
+                    if (page != null)
+                        ShowPage(page);
+                };
+                vm.AdvancedConfigRequested += opts =>
+                {
+                    var advVm = ActivatorUtilities.CreateInstance<FtpServerAdvancedConfigViewModel>(App.AppHost.Services, opts);
+                    var advView = App.AppHost.Services.GetRequiredService<FtpServerAdvancedConfigView>();
+                    advView.DataContext = advVm;
+                    advVm.Saved += _ => ShowPage(editView);
+                    advVm.Cancelled += () => ShowPage(editView);
+                    ShowPage(advView);
+                };
                 ShowPage(editView);
                 _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
                 return;
