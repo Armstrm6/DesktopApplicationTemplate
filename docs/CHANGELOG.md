@@ -24,3 +24,4 @@
 
 ### Fixed
 - Corrected logo resource path so the image renders in the navigation bar.
+- Ensured Create Service window wraps service icons and properly creates FTP services.

@@ -68,3 +68,11 @@ Effective Prompts / Instructions that worked: n/a
 Decisions & Rationale: Prefer removing stale classes to reduce maintenance and confusion.
 Action Items: Monitor builds for any lingering references.
 Related Commits/PRs: (this PR)
+[2025-08-26 14:44] Topic: Create service window icon layout
+Context: FTP service icon didn't create the service and icons overflowed outside the window.
+Observations: Wrapping icons within a fixed-width panel keeps them visible and clicking FTP now closes the window as expected.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: Provided explicit WrapPanel width and icon template guidance.
+Decisions & Rationale: Added width-constrained WrapPanel and converter-based icons for consistent selection behavior.
+Action Items: none
+Related Commits/PRs: (this PR)
