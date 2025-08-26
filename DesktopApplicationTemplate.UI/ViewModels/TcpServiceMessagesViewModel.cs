@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -19,6 +20,15 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         /// <summary>Collection of TCP message rows.</summary>
         public ObservableCollection<TcpMessageRow> Messages { get; } = new();
+
+        /// <summary>Incoming data extracted from <see cref="Messages"/>.</summary>
+        public IEnumerable<string> IncomingData => Messages.Select(m => $"{m.IncomingIp}: {m.IncomingMessage}");
+
+        /// <summary>Script modifications extracted from <see cref="Messages"/>.</summary>
+        public IEnumerable<string> ScriptModifications => Messages.Select(m => m.OutgoingMessage);
+
+        /// <summary>Outgoing results extracted from <see cref="Messages"/>.</summary>
+        public IEnumerable<string> OutgoingResults => Messages.Select(m => $"{m.ConnectedService}: {m.Result}");
 
         /// <summary>Collection of log entries.</summary>
         public ObservableCollection<LogEntry> Logs { get; } = new();
@@ -80,6 +90,13 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public TcpServiceMessagesViewModel()
         {
+            Messages.CollectionChanged += (_, _) =>
+            {
+                OnPropertyChanged(nameof(IncomingData));
+                OnPropertyChanged(nameof(ScriptModifications));
+                OnPropertyChanged(nameof(OutgoingResults));
+            };
+
             ClearLogCommand = new RelayCommand(ClearLogs);
             ExportLogCommand = new RelayCommand(ExportLogs);
             RefreshLogCommand = new RelayCommand(() => OnPropertyChanged(nameof(DisplayLogs)));

@@ -1292,3 +1292,11 @@ Decisions & Rationale: Ensure advanced configuration and edit flows navigate cor
 Action Items: Monitor CI for Windows-specific issues.
 Related Commits/PRs: (this PR)
 
+[2025-08-26 16:29] Topic: TCP/FTP realtime
+Context: Grouped TCP message flow and enhanced FTP view with progress and client indicators.
+Observations: Grouped lists clarify data flow; FTP view shows progress bars and client counts.
+Codex Limitations noticed: pwsh not installed to run add-tip.ps1.
+Effective Prompts / Instructions that worked: Request for left-to-right panels and server activity details.
+Decisions & Rationale: Used computed collections and new service events to surface real-time information.
+Action Items: Monitor CI.
+Related Commits/PRs: 

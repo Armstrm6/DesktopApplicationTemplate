@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
@@ -16,6 +17,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private readonly AsyncRelayCommand _startCommand;
         private readonly AsyncRelayCommand _stopCommand;
         private bool _isServerRunning;
+        private int _connectedClients;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FtpServiceViewModel"/> class.
@@ -29,6 +31,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
             _ftpServerService.FileReceived += HandleFileReceived;
             _ftpServerService.FileSent += HandleFileSent;
+            _ftpServerService.TransferProgress += HandleTransferProgress;
+            _ftpServerService.ClientCountChanged += HandleClientCountChanged;
 
             _startCommand = new AsyncRelayCommand(StartAsync, () => !IsServerRunning);
             _stopCommand = new AsyncRelayCommand(StopAsync, () => IsServerRunning);
@@ -39,6 +43,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         /// <summary>Files downloaded from the server.</summary>
         public ObservableCollection<FtpTransferEventArgs> DownloadedFiles { get; } = new();
+
+        /// <summary>Active transfers with progress.</summary>
+        public ObservableCollection<FtpTransferProgressEventArgs> Transfers { get; } = new();
 
         /// <inheritdoc />
         public ILoggingService? Logger { get; set; }
@@ -62,6 +69,19 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         /// <summary>Human readable server status.</summary>
         public string ServerStatus => IsServerRunning ? "Running" : "Stopped";
 
+        /// <summary>Number of connected clients.</summary>
+        public int ConnectedClients
+        {
+            get => _connectedClients;
+            private set
+            {
+                if (_connectedClients == value)
+                    return;
+                _connectedClients = value;
+                OnPropertyChanged();
+            }
+        }
+
         /// <summary>Command to start the server.</summary>
         public ICommand StartServerCommand => _startCommand;
 
@@ -81,6 +101,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             Logger?.Log("Stopping FTP server", LogLevel.Debug);
             await _ftpServerService.StopAsync();
             IsServerRunning = false;
+            ConnectedClients = 0;
+            Transfers.Clear();
             Logger?.Log("FTP server stopped", LogLevel.Debug);
         }
 
@@ -98,6 +120,27 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 return;
             DownloadedFiles.Add(e);
             Logger?.Log($"File downloaded: {e.Path}", LogLevel.Debug);
+        }
+
+        private void HandleTransferProgress(object? sender, FtpTransferProgressEventArgs e)
+        {
+            if (e == null)
+                return;
+            var existing = Transfers.FirstOrDefault(t => t.Path == e.Path && t.IsUpload == e.IsUpload);
+            if (existing != null)
+            {
+                var index = Transfers.IndexOf(existing);
+                Transfers[index] = e;
+            }
+            else
+            {
+                Transfers.Add(e);
+            }
+        }
+
+        private void HandleClientCountChanged(object? sender, int count)
+        {
+            ConnectedClients = count;
         }
     }
 }
