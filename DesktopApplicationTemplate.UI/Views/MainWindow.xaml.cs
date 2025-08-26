@@ -171,32 +171,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 }
                 else if (window.CreatedServiceType == "FTP Server" || window.CreatedServiceType == "FTP")
                 {
-                    var svc = new ServiceViewModel
-                    {
-                        DisplayName = $"FTP Server - {window.CreatedServiceName}",
-                        ServiceType = "FTP Server",
-                        IsActive = false,
-                        FtpOptions = window.FtpServerOptions
-                    };
-                    svc.SetColorsByType();
-                    svc.LogAdded += _viewModel.OnServiceLogAdded;
-                    svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
-                    GetOrCreateServicePage(svc);
-                    var opt = App.AppHost.Services.GetRequiredService<IOptions<FtpServerOptions>>().Value;
-                    if (window.FtpServerOptions != null)
-                    {
-                        opt.Port = window.FtpServerOptions.Port;
-                        opt.RootPath = window.FtpServerOptions.RootPath;
-                        opt.AllowAnonymous = window.FtpServerOptions.AllowAnonymous;
-                        opt.Username = window.FtpServerOptions.Username;
-                        opt.Password = window.FtpServerOptions.Password;
-                    }
-                    _viewModel.Services.Add(svc);
-                    _logger?.LogInformation("Service {Name} added", svc.DisplayName);
-                    _viewModel.SelectedService = svc;
-                    ServiceList.ScrollIntoView(svc);
-                    if (svc.ServicePage != null)
-                        ShowPage(svc.ServicePage);
+                    AddFtpService(window.CreatedServiceName, window.FtpServerOptions ?? new FtpServerOptions());
                 }
                 else if (!string.IsNullOrWhiteSpace(window.CreatedServiceType))
                 {
@@ -288,6 +263,37 @@ namespace DesktopApplicationTemplate.UI.Views
 
             _viewModel.SaveServices();
             _logger?.LogDebug("AddService workflow completed");
+        }
+
+        internal void AddFtpService(string name, FtpServerOptions options)
+        {
+            var svc = new ServiceViewModel
+            {
+                DisplayName = $"FTP Server - {name}",
+                ServiceType = "FTP Server",
+                IsActive = false,
+                FtpOptions = options
+            };
+
+            svc.SetColorsByType();
+            svc.LogAdded += _viewModel.OnServiceLogAdded;
+            svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
+
+            var opt = App.AppHost.Services.GetRequiredService<IOptions<FtpServerOptions>>().Value;
+            opt.Port = options.Port;
+            opt.RootPath = options.RootPath;
+            opt.AllowAnonymous = options.AllowAnonymous;
+            opt.Username = options.Username;
+            opt.Password = options.Password;
+
+            GetOrCreateServicePage(svc);
+
+            _viewModel.Services.Add(svc);
+            _logger?.LogInformation("Service {Name} added", svc.DisplayName);
+            _viewModel.SelectedService = svc;
+            ServiceList.ScrollIntoView(svc);
+            if (svc.ServicePage != null)
+                ShowPage(svc.ServicePage);
         }
 
         private void OnEditRequested(ServiceViewModel service)
