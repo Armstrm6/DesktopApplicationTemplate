@@ -8,6 +8,7 @@ using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Views;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace DesktopApplicationTemplate.Tests;
@@ -53,7 +54,7 @@ public class CreateServiceNavigationTests
     }
 
     [Fact]
-    public void NavigateToFtpServer_SetsPropertiesAndOptions()
+    public void NavigateToFtpServer_PopulatesOptionsAndClosesWindow()
     {
         var vm = new FtpServerCreateViewModel();
         var view = new FtpServerCreateView();
@@ -62,26 +63,42 @@ public class CreateServiceNavigationTests
         services.AddSingleton(vm);
         services.AddSingleton(view);
         services.AddSingleton(advView);
+        services.AddLogging();
+        services.AddOptions<FtpServerOptions>().Configure(o =>
+        {
+            o.Port = 2121;
+            o.RootPath = "/tmp";
+            o.AllowAnonymous = true;
+            o.Username = "user";
+            o.Password = "pass";
+        });
         var provider = services.BuildServiceProvider();
 
         var windowThread = new Thread(() =>
         {
-            var window = new CreateServiceWindow(new CreateServiceViewModel(), provider);
+            var logger = provider.GetRequiredService<ILogger<CreateServiceWindow>>();
+            var window = new CreateServiceWindow(new CreateServiceViewModel(), provider, logger);
             var pageField = typeof(CreateServiceWindow).GetField("_page", BindingFlags.NonPublic | BindingFlags.Instance)!;
             var page = (CreateServicePage)pageField.GetValue(window)!;
             var button = new Button { DataContext = new CreateServiceViewModel.ServiceTypeMetadata("FTP Server", "FTP Server", string.Empty) };
             var click = typeof(CreateServicePage).GetMethod("ServiceType_Click", BindingFlags.Instance | BindingFlags.NonPublic)!;
             click.Invoke(page, new object[] { button, new RoutedEventArgs() });
 
-            var options = new FtpServerOptions { Port = 21, RootPath = "/tmp" };
+            vm.Options.Port.Should().Be(2121);
+            vm.Options.RootPath.Should().Be("/tmp");
+            vm.Options.AllowAnonymous.Should().BeTrue();
+            vm.Options.Username.Should().Be("user");
+            vm.Options.Password.Should().Be("pass");
+
             var evt = typeof(FtpServerCreateViewModel).GetField("ServerCreated", BindingFlags.Instance | BindingFlags.NonPublic);
             var del = (Action<string, FtpServerOptions>?)evt?.GetValue(vm);
-            del?.Invoke("Svc", options);
+            del?.Invoke("Svc", vm.Options);
 
             window.CreatedServiceType.Should().Be("FTP Server");
             window.CreatedServiceName.Should().Be("Svc");
-            window.FtpServerOptions.Should().Be(options);
+            window.FtpServerOptions.Should().Be(vm.Options);
             window.DialogResult.Should().BeTrue();
+            window.IsVisible.Should().BeFalse();
         });
         windowThread.SetApartmentState(ApartmentState.STA);
         windowThread.Start();
