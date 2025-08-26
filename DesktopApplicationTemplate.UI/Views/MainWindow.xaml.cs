@@ -143,58 +143,134 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private void OnAddServiceRequested()
         {
-            var window = App.AppHost.Services.GetRequiredService<CreateServiceWindow>();
-            window.Owner = this;
-            if (window.ShowDialog() == true)
+            ShowCreateServiceSelectionPage();
+        }
+
+        private void ShowCreateServiceSelectionPage()
+        {
+            var page = App.AppHost.Services.GetRequiredService<CreateServicePage>();
+            page.ServiceCreated += (name, type) =>
             {
-                if (window.CreatedServiceType == "MQTT")
+                var svc = new ServiceViewModel
                 {
-                    AddMqttService(window.CreatedServiceName, window.MqttOptions ?? new MqttServiceOptions());
-                }
-                else if (window.CreatedServiceType == "TCP")
+                    DisplayName = $"{type} - {name}",
+                    ServiceType = type,
+                    IsActive = false
+                };
+                svc.SetColorsByType();
+                svc.LogAdded += _viewModel.OnServiceLogAdded;
+                svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
+                GetOrCreateServicePage(svc);
+                _viewModel.Services.Add(svc);
+                _logger?.LogInformation("Service {Name} added", svc.DisplayName);
+                _viewModel.SelectedService = svc;
+                ServiceList.ScrollIntoView(svc);
+                if (svc.ServicePage != null)
+                    ShowPage(svc.ServicePage);
+                _viewModel.SaveServices();
+            };
+            page.MqttSelected += NavigateToMqtt;
+            page.TcpSelected += NavigateToTcp;
+            page.FtpServerSelected += NavigateToFtpServer;
+            page.Cancelled += ShowHome;
+            ShowPage(page);
+        }
+
+        private void NavigateToMqtt(string defaultName)
+        {
+            var vm = App.AppHost.Services.GetRequiredService<MqttCreateServiceViewModel>();
+            vm.ServiceName = defaultName;
+            vm.ServiceCreated += (name, options) => AddMqttService(name, options);
+            vm.Cancelled += ShowCreateServiceSelectionPage;
+            var view = ActivatorUtilities.CreateInstance<MqttCreateServiceView>(App.AppHost.Services, vm);
+            ShowPage(view);
+        }
+
+        private void NavigateToTcp(string defaultName)
+        {
+            var vm = App.AppHost.Services.GetRequiredService<TcpCreateServiceViewModel>();
+            vm.ServiceName = defaultName;
+            vm.ServiceCreated += (name, options) =>
+            {
+                var svc = new ServiceViewModel
                 {
-                    var svc = new ServiceViewModel
-                    {
-                        DisplayName = $"TCP - {window.CreatedServiceName}",
-                        ServiceType = "TCP",
-                        IsActive = false,
-                        TcpOptions = window.TcpOptions
-                    };
-                    svc.SetColorsByType();
-                    svc.LogAdded += _viewModel.OnServiceLogAdded;
-                    svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
-                    GetOrCreateServicePage(svc);
-                    _viewModel.Services.Add(svc);
-                    _logger?.LogInformation("Service {Name} added", svc.DisplayName);
-                    _viewModel.SelectedService = svc;
-                    ServiceList.ScrollIntoView(svc);
-                    if (svc.ServicePage != null)
-                        ShowPage(svc.ServicePage);
-                }
-                else if (window.CreatedServiceType == "FTP Server" || window.CreatedServiceType == "FTP")
+                    DisplayName = $"TCP - {name}",
+                    ServiceType = "TCP",
+                    IsActive = false,
+                    TcpOptions = options
+                };
+                svc.SetColorsByType();
+                svc.LogAdded += _viewModel.OnServiceLogAdded;
+                svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
+                GetOrCreateServicePage(svc);
+                _viewModel.Services.Add(svc);
+                _logger?.LogInformation("Service {Name} added", svc.DisplayName);
+                _viewModel.SelectedService = svc;
+                ServiceList.ScrollIntoView(svc);
+                if (svc.ServicePage != null)
+                    ShowPage(svc.ServicePage);
+                _viewModel.SaveServices();
+            };
+            vm.Cancelled += ShowCreateServiceSelectionPage;
+            var view = App.AppHost.Services.GetRequiredService<TcpCreateServiceView>();
+            view.DataContext = vm;
+            vm.AdvancedConfigRequested += opts =>
+            {
+                var advView = App.AppHost.Services.GetRequiredService<TcpServiceView>();
+                var advVm = (TcpServiceViewModel)advView.DataContext;
+                advVm.ComputerIp = opts.Host;
+                advVm.ListeningPort = opts.Port.ToString();
+                advVm.IsUdp = opts.UseUdp;
+                advVm.SelectedMode = opts.Mode == TcpServiceMode.Listening ? "Listening" : "Sending";
+
+                EventHandler? handler = null;
+                handler = (_, __) =>
                 {
-                    AddFtpService(window.CreatedServiceName, window.FtpServerOptions ?? new FtpServerOptions());
-                }
-                else if (!string.IsNullOrWhiteSpace(window.CreatedServiceType))
-                {
-                    var svc = new ServiceViewModel
-                    {
-                        DisplayName = $"{window.CreatedServiceType} - {window.CreatedServiceName}",
-                        ServiceType = window.CreatedServiceType,
-                        IsActive = false
-                    };
-                    svc.SetColorsByType();
-                    svc.LogAdded += _viewModel.OnServiceLogAdded;
-                    svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
-                    GetOrCreateServicePage(svc);
-                    _viewModel.Services.Add(svc);
-                    _logger?.LogInformation("Service {Name} added", svc.DisplayName);
-                    _viewModel.SelectedService = svc;
-                    ServiceList.ScrollIntoView(svc);
-                    if (svc.ServicePage != null)
-                        ShowPage(svc.ServicePage);
-                }
-            }
+                    opts.Host = advVm.ComputerIp;
+                    if (int.TryParse(advVm.ListeningPort, out var p))
+                        opts.Port = p;
+                    opts.UseUdp = advVm.IsUdp;
+                    opts.Mode = advVm.SelectedMode == "Listening" ? TcpServiceMode.Listening : TcpServiceMode.Sending;
+                    advVm.RequestClose -= handler;
+                    ShowPage(view);
+                };
+                advVm.RequestClose += handler;
+                ShowPage(advView);
+            };
+            ShowPage(view);
+        }
+
+        private void NavigateToFtpServer(string defaultName)
+        {
+            var vm = App.AppHost.Services.GetRequiredService<FtpServerCreateViewModel>();
+            vm.ServiceName = defaultName;
+
+            var opts = App.AppHost.Services.GetRequiredService<IOptions<FtpServerOptions>>().Value;
+            vm.Options.Port = opts.Port;
+            vm.Options.RootPath = opts.RootPath;
+            vm.Options.AllowAnonymous = opts.AllowAnonymous;
+            vm.Options.Username = opts.Username;
+            vm.Options.Password = opts.Password;
+
+            var view = App.AppHost.Services.GetRequiredService<FtpServerCreateView>();
+            view.DataContext = vm;
+            vm.ServerCreated += (name, options) =>
+            {
+                _logger?.LogInformation("FTP server {Name} created", name);
+                AddFtpService(name, options);
+                _viewModel.SaveServices();
+            };
+            vm.AdvancedConfigRequested += opts2 =>
+            {
+                var advVm = ActivatorUtilities.CreateInstance<FtpServerAdvancedConfigViewModel>(App.AppHost.Services, opts2);
+                var advView = App.AppHost.Services.GetRequiredService<FtpServerAdvancedConfigView>();
+                advView.DataContext = advVm;
+                advVm.Saved += _ => ShowPage(view);
+                advVm.Cancelled += () => ShowPage(view);
+                ShowPage(advView);
+            };
+            vm.Cancelled += ShowCreateServiceSelectionPage;
+            ShowPage(view);
         }
 
         private void AddMqttService(string name, MqttServiceOptions options)

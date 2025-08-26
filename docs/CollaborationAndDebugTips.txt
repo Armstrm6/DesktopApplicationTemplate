@@ -1308,3 +1308,11 @@ Effective Prompts / Instructions that worked: Request for left-to-right panels a
 Decisions & Rationale: Used computed collections and new service events to surface real-time information.
 Action Items: Monitor CI.
 Related Commits/PRs: 
+[2025-08-26 16:43] Topic: Remove CreateServiceWindow
+Context: Service creation now hosted within main view's content frame.
+Observations: Eliminates redundant window and ensures created services populate immediately.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; tests rely on CI.
+Effective Prompts / Instructions that worked: User request to embed create views.
+Decisions & Rationale: Replaced CreateServiceWindow navigation with in-frame page display.
+Action Items: Monitor CI for UI regressions.
+Related Commits/PRs: (this PR)

@@ -95,6 +95,7 @@
 - Service selection window wraps service icons within bounds using a fixed-width panel.
 
 ### Removed
+- Separate Create Service window; creation flows now display within the main view.
 - Placeholder "Desktop Template" text from the navigation bar.
 - Legacy GitHub workflows (`dotnet.yml`, `dotnet-desktop-ci.yml`, `ci.yml`).
 - Unused `RichTextLogger` service and installer `CustomControl1` control.

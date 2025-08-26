@@ -81,7 +81,6 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<CsvServiceView>();
             services.AddSingleton<SettingsViewModel>();
             services.AddTransient<SplashWindow>();
-            services.AddTransient<CreateServiceWindow>();
             services.AddTransient<CreateServicePage>();
             services.AddTransient<CreateServiceViewModel>();
             services.AddTransient<MqttCreateServiceView>();
