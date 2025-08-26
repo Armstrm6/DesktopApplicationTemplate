@@ -36,7 +36,7 @@ namespace DesktopApplicationTemplate.UI.Views
                     TcpSelected?.Invoke(name);
                     return;
                 }
-                if (meta.Type == "FTP Server")
+                if (meta.Type == "FTP" || meta.Type == "FTP Server")
                 {
                     FtpServerSelected?.Invoke(name);
                     return;

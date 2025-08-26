@@ -72,8 +72,6 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<MqttService>();
             services.AddSingleton<FTPServiceView>();
             services.AddSingleton<FtpServiceViewModel>();
-            services.AddSingleton<FtpServerView>();
-            services.AddSingleton<FtpServerViewViewModel>();
             services.AddFtpServer(builder => builder
                 .UseDotNetFileSystem()
                 .EnableAnonymousAuthentication());
