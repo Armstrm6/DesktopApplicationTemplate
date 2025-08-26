@@ -63,6 +63,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         /// </summary>
         public HidServiceOptions? HidOptions { get; set; }
 
+        /// <summary>
+        /// File Observer-specific configuration for this service, if applicable.
+        /// </summary>
+        public FileObserverServiceOptions? FileObserverOptions { get; set; }
+
         public static Func<string, string, ServiceViewModel?>? ResolveService { get; set; }
 
 

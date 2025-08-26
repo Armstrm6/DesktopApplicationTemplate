@@ -109,6 +109,12 @@ namespace DesktopApplicationTemplate.UI
             services.AddTransient<HidEditServiceViewModel>();
             services.AddTransient<HidAdvancedConfigView>();
             services.AddTransient<HidAdvancedConfigViewModel>();
+            services.AddTransient<FileObserverCreateServiceView>();
+            services.AddTransient<FileObserverCreateServiceViewModel>();
+            services.AddTransient<FileObserverEditServiceView>();
+            services.AddTransient<FileObserverEditServiceViewModel>();
+            services.AddTransient<FileObserverAdvancedConfigView>();
+            services.AddTransient<FileObserverAdvancedConfigViewModel>();
             services.AddTransient<SettingsPage>();
 
 
@@ -119,6 +125,7 @@ namespace DesktopApplicationTemplate.UI
             services.AddOptions<DesktopApplicationTemplate.UI.Services.FtpServerOptions>()
                 .BindConfiguration("FtpServer");
             services.AddOptions<HidServiceOptions>();
+            services.AddOptions<FileObserverServiceOptions>();
         }
 
         protected override async void OnStartup(StartupEventArgs e)

@@ -179,6 +179,7 @@ namespace DesktopApplicationTemplate.UI.Views
             page.FtpServerSelected += NavigateToFtpServer;
             page.HttpSelected += NavigateToHttp;
             page.HidSelected += NavigateToHid;
+            page.FileObserverSelected += NavigateToFileObserver;
             page.Cancelled += ShowHome;
             ShowPage(page);
         }
@@ -224,6 +225,45 @@ namespace DesktopApplicationTemplate.UI.Views
             {
                 var advVm = ActivatorUtilities.CreateInstance<HidAdvancedConfigViewModel>(App.AppHost.Services, opts);
                 var advView = App.AppHost.Services.GetRequiredService<HidAdvancedConfigView>();
+                advView.DataContext = advVm;
+                advVm.Saved += _ => ShowPage(view);
+                advVm.BackRequested += () => ShowPage(view);
+                ShowPage(advView);
+            };
+            ShowPage(view);
+        }
+
+        private void NavigateToFileObserver(string defaultName)
+        {
+            var vm = App.AppHost.Services.GetRequiredService<FileObserverCreateServiceViewModel>();
+            vm.ServiceName = defaultName;
+            vm.ServiceCreated += (name, options) =>
+            {
+                var svc = new ServiceViewModel
+                {
+                    DisplayName = $"File Observer - {name}",
+                    ServiceType = "File Observer",
+                    IsActive = false,
+                    FileObserverOptions = options
+                };
+                svc.SetColorsByType();
+                svc.LogAdded += _viewModel.OnServiceLogAdded;
+                svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
+                GetOrCreateServicePage(svc);
+                _viewModel.Services.Add(svc);
+                _logger?.LogInformation("Service {Name} added", svc.DisplayName);
+                _viewModel.SelectedService = svc;
+                ServiceList.ScrollIntoView(svc);
+                if (svc.ServicePage != null)
+                    ShowPage(svc.ServicePage);
+                _viewModel.SaveServices();
+            };
+            vm.Cancelled += ShowCreateServiceSelectionPage;
+            var view = ActivatorUtilities.CreateInstance<FileObserverCreateServiceView>(App.AppHost.Services, vm);
+            vm.AdvancedConfigRequested += opts =>
+            {
+                var advVm = ActivatorUtilities.CreateInstance<FileObserverAdvancedConfigViewModel>(App.AppHost.Services, opts);
+                var advView = App.AppHost.Services.GetRequiredService<FileObserverAdvancedConfigView>();
                 advView.DataContext = advVm;
                 advVm.Saved += _ => ShowPage(view);
                 advVm.BackRequested += () => ShowPage(view);
@@ -505,6 +545,40 @@ namespace DesktopApplicationTemplate.UI.Views
             {
                 var advVm = ActivatorUtilities.CreateInstance<HidAdvancedConfigViewModel>(App.AppHost.Services, opts);
                 var advView = App.AppHost.Services.GetRequiredService<HidAdvancedConfigView>();
+                advView.DataContext = advVm;
+                advVm.Saved += _ => ShowPage(editView);
+                advVm.BackRequested += () => ShowPage(editView);
+                ShowPage(advView);
+            };
+            ShowPage(editView);
+            _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
+            return;
+        }
+
+        if (service.ServiceType == "File Observer")
+        {
+            var foPage = GetOrCreateServicePage(service);
+            var options = service.FileObserverOptions ?? new FileObserverServiceOptions();
+            var vm = ActivatorUtilities.CreateInstance<FileObserverEditServiceViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
+            var editView = App.AppHost.Services.GetRequiredService<FileObserverEditServiceView>();
+            editView.DataContext = vm;
+            vm.ServiceUpdated += (name, opts) =>
+            {
+                service.DisplayName = $"File Observer - {name}";
+                service.FileObserverOptions = opts;
+                if (foPage != null)
+                    ShowPage(foPage);
+                _viewModel.SaveServices();
+            };
+            vm.Cancelled += () =>
+            {
+                if (foPage != null)
+                    ShowPage(foPage);
+            };
+            vm.AdvancedConfigRequested += opts =>
+            {
+                var advVm = ActivatorUtilities.CreateInstance<FileObserverAdvancedConfigViewModel>(App.AppHost.Services, opts);
+                var advView = App.AppHost.Services.GetRequiredService<FileObserverAdvancedConfigView>();
                 advView.DataContext = advVm;
                 advVm.Saved += _ => ShowPage(editView);
                 advVm.BackRequested += () => ShowPage(editView);

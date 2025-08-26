@@ -1357,3 +1357,12 @@ Effective Prompts / Instructions that worked: Follow MVVM/DI patterns and update
 Decisions & Rationale: Mirror existing service flows to maintain consistency and test navigation paths.
 Action Items: Monitor CI for Windows-specific behavior.
 Related Commits/PRs: (this PR)
+[2024-08-27 00:00] Topic: File Observer navigation
+Context: (summarize the scenario)
+Observations: Implemented File Observer create/edit/advanced views and navigation patterns.
+Codex Limitations noticed: PowerShell unavailable; could not run add-tip.ps1.
+Effective Prompts / Instructions that worked: Mirrored HID service patterns for consistency.
+Decisions & Rationale: Followed existing navigation and DI patterns to reduce risk.
+Action Items: Monitor integration with persistence layer in future.
+Related Commits/PRs: 
+
