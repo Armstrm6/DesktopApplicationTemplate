@@ -1189,3 +1189,11 @@ Effective Prompts / Instructions that worked: Error logs indicating missing pack
 Decisions & Rationale: Use latest available package to unblock builds.
 Action Items: Rely on CI for Windows-specific validation.
 Related Commits/PRs: (this PR)
+[2025-08-26 12:59] Topic: CS0136 variable conflict in MainWindow
+Context: Build failed due to nested 'page' variables in MainWindow edit workflow.
+Observations: Renamed inner variable to ftpPage and outer variable to servicePage to avoid shadowing.
+Codex Limitations noticed: Linux environment lacks Microsoft.WindowsDesktop runtime; tests aborted.
+Effective Prompts / Instructions that worked: User request to fix build error and AGENTS guidance to run tests.
+Decisions & Rationale: Use intention-revealing names and maintain edit workflow logic.
+Action Items: Monitor CI for full test run.
+Related Commits/PRs: (this PR)
