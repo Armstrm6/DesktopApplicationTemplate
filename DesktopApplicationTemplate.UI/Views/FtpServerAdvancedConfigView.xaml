@@ -19,10 +19,10 @@
         <CheckBox Grid.Row="0" Grid.ColumnSpan="2" Content="Allow Anonymous" IsChecked="{Binding AllowAnonymous}" Style="{StaticResource FormField}"/>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Text="Username" Style="{StaticResource FormLabel}"/>
-        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Username}" Style="{StaticResource FormField}"/>
+        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormField}"/>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Text="Password" Style="{StaticResource FormLabel}"/>
-        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Password}" Style="{StaticResource FormField}"/>
+        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Password, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormField}"/>
 
         <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
             <Button Content="Save" Width="100" Margin="5" Command="{Binding SaveCommand}" AutomationProperties.Name="Save FTP Advanced Options"/>
