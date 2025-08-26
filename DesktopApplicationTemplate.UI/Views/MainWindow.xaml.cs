@@ -315,7 +315,7 @@ namespace DesktopApplicationTemplate.UI.Views
 
             if (service.ServiceType == "FTP Server")
             {
-                var page = GetOrCreateServicePage(service);
+                var ftpPage = GetOrCreateServicePage(service);
                 var options = service.FtpOptions ?? new FtpServerOptions();
                 var vm = ActivatorUtilities.CreateInstance<FtpServerEditViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
                 var editView = App.AppHost.Services.GetRequiredService<FtpServerEditView>();
@@ -330,14 +330,14 @@ namespace DesktopApplicationTemplate.UI.Views
                     opt.AllowAnonymous = opts.AllowAnonymous;
                     opt.Username = opts.Username;
                     opt.Password = opts.Password;
-                    if (page != null)
-                        ShowPage(page);
+                    if (ftpPage != null)
+                        ShowPage(ftpPage);
                     _viewModel.SaveServices();
                 };
                 vm.Cancelled += () =>
                 {
-                    if (page != null)
-                        ShowPage(page);
+                    if (ftpPage != null)
+                        ShowPage(ftpPage);
                 };
                 vm.AdvancedConfigRequested += opts =>
                 {
@@ -353,10 +353,10 @@ namespace DesktopApplicationTemplate.UI.Views
                 return;
             }
 
-            var page = GetOrCreateServicePage(service);
-            if (page != null)
+            var servicePage = GetOrCreateServicePage(service);
+            if (servicePage != null)
             {
-                ShowPage(page);
+                ShowPage(servicePage);
                 _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
             }
         }
