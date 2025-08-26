@@ -1197,3 +1197,11 @@ Effective Prompts / Instructions that worked: User request to fix build error an
 Decisions & Rationale: Use intention-revealing names and maintain edit workflow logic.
 Action Items: Monitor CI for full test run.
 Related Commits/PRs: (this PR)
+[2025-08-26 13:20] Topic: FTP server view integration
+Context: Align FTP service creation and editing with updated server view.
+Observations: Mapped FTP selection to server setup, replaced legacy client view with start/stop controls and transfer lists.
+Codex Limitations noticed: Linux container lacks WindowsDesktop runtime; relied on CI for WPF validation.
+Effective Prompts / Instructions that worked: User request to surface FTP create and edit pages and update default view.
+Decisions & Rationale: Treat FTP as FTP Server, streamline DI registrations, and consolidate views.
+Action Items: Monitor CI for Windows-specific regressions.
+Related Commits/PRs:

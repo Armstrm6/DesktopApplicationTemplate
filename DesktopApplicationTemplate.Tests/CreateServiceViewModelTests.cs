@@ -14,7 +14,6 @@ namespace DesktopApplicationTemplate.Tests
         [InlineData("CSV Creator")]
         [InlineData("SCP")]
         [InlineData("MQTT")]
-        [InlineData("FTP")]
         [InlineData("FTP Server")]
         [TestCategory("CodexSafe")]
         [TestCategory("WindowsSafe")]

@@ -137,3 +137,4 @@
 - Downgraded FubarDev FTP server packages to version 3.1.2 to resolve missing NuGet feeds.
 - FTP server create and edit windows now launch with advanced configuration access.
 - Resolved variable naming conflict in MainWindow edit workflow preventing CS0136 build errors.
+- FTP server creation and edit workflows now display correctly and default to an updated FTP service view with start/stop commands.

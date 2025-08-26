@@ -17,7 +17,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             new("CSV Creator", "CSV Creator", "/Assets/DesktopTemplateLayout-Logo.png"),
             new("SCP", "SCP", "/Assets/DesktopTemplateLayout-Logo.png"),
             new("MQTT", "MQTT", "/Assets/DesktopTemplateLayout-Logo.png"),
-            new("FTP", "FTP", "/Assets/DesktopTemplateLayout-Logo.png"),
             new("FTP Server", "FTP Server", "/Assets/DesktopTemplateLayout-Logo.png")
         };
 

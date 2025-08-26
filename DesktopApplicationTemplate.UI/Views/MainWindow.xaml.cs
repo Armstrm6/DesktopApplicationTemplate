@@ -90,8 +90,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 "Heartbeat" => App.AppHost.Services.GetRequiredService<HeartbeatView>(),
                 "SCP" => App.AppHost.Services.GetRequiredService<SCPServiceView>(),
                 "MQTT" => App.AppHost.Services.GetRequiredService<MqttTagSubscriptionsView>(),
-                "FTP" => App.AppHost.Services.GetRequiredService<FTPServiceView>(),
-                "FTP Server" => App.AppHost.Services.GetRequiredService<FtpServerView>(),
+                "FTP Server" => App.AppHost.Services.GetRequiredService<FTPServiceView>(),
                 "CSV Creator" => App.AppHost.Services.GetRequiredService<CsvServiceView>(),
                 _ => null
             };

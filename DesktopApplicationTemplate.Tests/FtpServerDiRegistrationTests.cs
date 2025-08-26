@@ -42,11 +42,11 @@ public class FtpServerDiRegistrationTests
             .UseDotNetFileSystem()
             .EnableAnonymousAuthentication());
         services.AddSingleton<IFtpServerService, DesktopApplicationTemplate.Service.Services.FtpServerService>();
-        services.AddSingleton<FtpServerViewViewModel>();
+        services.AddSingleton<FtpServiceViewModel>();
 
         using var provider = services.BuildServiceProvider();
         provider.GetRequiredService<IFtpServerService>().Should().NotBeNull();
-        provider.GetRequiredService<FtpServerViewViewModel>().Should().NotBeNull();
+        provider.GetRequiredService<FtpServiceViewModel>().Should().NotBeNull();
 
         var options = provider
             .GetRequiredService<IOptions<DesktopApplicationTemplate.UI.Services.FtpServerOptions>>()
