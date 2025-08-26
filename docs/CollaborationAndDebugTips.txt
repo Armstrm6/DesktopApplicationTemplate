@@ -1172,6 +1172,7 @@ Effective Prompts / Instructions that worked: Request to mock dependencies and v
 Decisions & Rationale: Improve reliability by logging errors and preventing invalid saves.
 Action Items: Monitor CI for Windows-specific behaviors.
 Related Commits/PRs: (this PR)
+
 [2025-08-25 20:47] Topic: FTP server windows setup
 Context: Documenting how to initialize FTP server support and related windows.
 Observations: Running setup script enables FTP server creation/edit windows; ensure options are registered.
@@ -1179,4 +1180,12 @@ Codex Limitations noticed: Linux container lacks WindowsDesktop runtime; rely on
 Effective Prompts / Instructions that worked: Ask for DI registrations and window descriptions.
 Decisions & Rationale: Document process via tip entry to guide future configuration.
 Action Items: Run tests and review changelog.
+
+[2025-08-25 20:50] Topic: FubarDev package downgrade
+Context: Build failed because NuGet couldn't find FubarDev FTP Server 6.1.0.
+Observations: Switched references to 3.1.2 and qualified conflicting types; restore completes.
+Codex Limitations noticed: WindowsDesktop runtime missing; tests aborted after build.
+Effective Prompts / Instructions that worked: Error logs indicating missing package version.
+Decisions & Rationale: Use latest available package to unblock builds.
+Action Items: Rely on CI for Windows-specific validation.
 Related Commits/PRs: (this PR)
