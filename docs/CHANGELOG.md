@@ -102,6 +102,7 @@
 - Standalone `FilterWindow` in favor of inline filter popup.
 
 ### Fixed
+- Unsealed `FtpTransferEventArgs` to allow progress events to derive from it.
 - Newly created TCP and other services now display their pages after addition.
 - Corrected logo resource path so the image renders in the navigation bar.
  - Service creation and renaming now append numeric suffixes to avoid duplicate names.

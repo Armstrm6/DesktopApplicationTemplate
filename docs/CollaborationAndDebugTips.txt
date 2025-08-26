@@ -38,6 +38,14 @@ Effective Prompts / Instructions that worked: Following AGENTS guidelines for DI
 Decisions & Rationale: Use IFtpServerHost from FubarDev to host FTP server and expose transfer events for observers.
 Action Items: Verify FTP server behavior on Windows via CI.
 Related Commits/PRs: (this PR)
+[2025-08-26 16:33] Topic: FTP transfer progress inheritance
+Context: Build failed because FtpTransferProgressEventArgs attempted to derive from sealed FtpTransferEventArgs.
+Observations: Unsealed FtpTransferEventArgs so progress events compile and derive correctly.
+Codex Limitations noticed: `pwsh` not available for add-tip script; Linux environment lacks WindowsDesktop runtime so tests rely on CI.
+Effective Prompts / Instructions that worked: Direct request to fix sealed base class error.
+Decisions & Rationale: Remove sealed modifier to permit inheritance and compile progress events.
+Action Items: Run tests.
+Related Commits/PRs: (this PR)
 
 [2025-08-22 13:51] Topic: TCP service messages view
 Context: Added view and view model for displaying TCP messages with log filtering and navigation update.

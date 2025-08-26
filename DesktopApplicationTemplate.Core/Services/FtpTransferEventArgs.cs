@@ -5,7 +5,7 @@ namespace DesktopApplicationTemplate.Core.Services
     /// <summary>
     /// Provides information about an FTP file transfer.
     /// </summary>
-    public sealed class FtpTransferEventArgs : EventArgs
+    public class FtpTransferEventArgs : EventArgs
     {
         public FtpTransferEventArgs(string path, long size, bool isUpload)
         {
