@@ -12,6 +12,15 @@ Decisions & Rationale: Use event-driven navigation and injection to decouple vie
 Action Items: Verify navigation on Windows CI.
 Related Commits/PRs: (this PR)
 
+[2025-08-26 20:54] Topic: Service edit double-click tests
+Context: Ensured double-clicking a service item opens its edit view.
+Observations: Added navigation helpers tests for HTTP, HID, File Observer, Heartbeat, CSV Creator, and SCP services.
+Codex Limitations noticed: Linux environment cannot run WPF tests; rely on CI.
+Effective Prompts / Instructions that worked: Followed AGENTS guidelines and user request for double-click verification.
+Decisions & Rationale: Invoked double-click handler via reflection and registered service views in DI for accuracy.
+Action Items: Monitor CI for Windows-specific UI behavior.
+Related Commits/PRs:
+
 [2025-08-26 16:05] Topic: FTP server create navigation logging
 Context: Ensure FTP server creation preloads options and logs navigation to confirm the dialog closes after save.
 Observations: View model options seeded from configuration; logs surround view navigation and server creation closure.
