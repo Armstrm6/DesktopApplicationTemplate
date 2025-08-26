@@ -53,6 +53,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         /// </summary>
         public FtpServerOptions? FtpOptions { get; set; }
 
+        /// <summary>
+        /// HTTP-specific configuration for this service, if applicable.
+        /// </summary>
+        public HttpServiceOptions? HttpOptions { get; set; }
+
         public static Func<string, string, ServiceViewModel?>? ResolveService { get; set; }
 
 
@@ -306,7 +311,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     IsActive = info.IsActive,
                     Order = info.Order,
                     TcpOptions = info.TcpOptions,
-                    FtpOptions = info.FtpOptions
+                    FtpOptions = info.FtpOptions,
+                    HttpOptions = info.HttpOptions
                 };
                 foreach (var a in info.AssociatedServices ?? new List<string>())
                     svc.AssociatedServices.Add(a);
