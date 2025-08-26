@@ -72,6 +72,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         /// File Observer-specific configuration for this service, if applicable.
         /// </summary>
         public FileObserverServiceOptions? FileObserverOptions { get; set; }
+        /// <summary>
+        /// CSV creator-specific configuration for this service, if applicable.
+        /// </summary>
+        public CsvServiceOptions? CsvOptions { get; set; }
+
 
 
         public static Func<string, string, ServiceViewModel?>? ResolveService { get; set; }
@@ -328,7 +333,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     Order = info.Order,
                     TcpOptions = info.TcpOptions,
                     FtpOptions = info.FtpOptions,
-                    HttpOptions = info.HttpOptions
+                    HttpOptions = info.HttpOptions,
+                    CsvOptions = info.CsvOptions
                 };
                 foreach (var a in info.AssociatedServices ?? new List<string>())
                     svc.AssociatedServices.Add(a);

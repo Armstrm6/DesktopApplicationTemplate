@@ -89,6 +89,25 @@ public class CreateServicePageTests
     }
 
     [Fact]
+    public void ServiceType_Click_RaisesCsvSelected()
+    {
+        string? receivedName = null;
+        var thread = new Thread(() =>
+        {
+            var vm = new CreateServiceViewModel();
+            var page = new CreateServicePage(vm);
+            page.CsvSelected += name => receivedName = name;
+            var button = new Button { DataContext = new CreateServiceViewModel.ServiceTypeMetadata("CSV Creator", "CSV Creator", string.Empty) };
+            var method = typeof(CreateServicePage).GetMethod("ServiceType_Click", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            method.Invoke(page, new object[] { button, new RoutedEventArgs() });
+        });
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        thread.Join();
+        receivedName.Should().Be("CSV Creator1");
+    }
+
+    [Fact]
     public void ServiceType_Click_RaisesServiceCreated_ForHttp()
     {
         string? receivedName = null;

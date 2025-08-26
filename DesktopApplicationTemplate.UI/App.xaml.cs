@@ -121,6 +121,12 @@ namespace DesktopApplicationTemplate.UI
             services.AddTransient<FileObserverEditServiceViewModel>();
             services.AddTransient<FileObserverAdvancedConfigView>();
             services.AddTransient<FileObserverAdvancedConfigViewModel>();
+            services.AddTransient<CsvCreateServiceView>();
+            services.AddTransient<CsvCreateServiceViewModel>();
+            services.AddTransient<CsvEditServiceView>();
+            services.AddTransient<CsvEditServiceViewModel>();
+            services.AddTransient<CsvAdvancedConfigView>();
+            services.AddTransient<CsvAdvancedConfigViewModel>();
             services.AddTransient<SettingsPage>();
 
 
@@ -133,6 +139,7 @@ namespace DesktopApplicationTemplate.UI
             services.AddOptions<HidServiceOptions>();
             services.AddOptions<HeartbeatServiceOptions>();
             services.AddOptions<FileObserverServiceOptions>();
+            services.AddOptions<CsvServiceOptions>();
         }
 
         protected override async void OnStartup(StartupEventArgs e)

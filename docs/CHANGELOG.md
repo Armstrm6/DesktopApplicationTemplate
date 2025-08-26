@@ -3,6 +3,7 @@
 ## [Unreleased]
 ### Added
 - HID service creation, edit, and advanced configuration views with navigation tests.
+- CSV service creation and edit views with advanced configuration and navigation tests.
 - Heartbeat service creation, edit, and advanced configuration views with navigation tests.
 - Save Configuration and Back buttons for advanced edit pages to enable saving and navigation.
 - TCP messages view now groups incoming data, script output, and results into left-to-right panels.

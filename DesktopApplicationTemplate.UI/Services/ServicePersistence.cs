@@ -21,6 +21,7 @@ namespace DesktopApplicationTemplate.UI.Services
             foreach (var s in services)
             {
                 TcpServiceOptions? tcp = null;
+                CsvServiceOptions? csv = null;
                 FtpServerOptions? ftp = null;
                 HttpServiceOptions? http = null;
                 if (s.ServiceType == "TCP" && s.TcpOptions != null)
@@ -56,6 +57,15 @@ namespace DesktopApplicationTemplate.UI.Services
                         ClientCertificatePath = s.HttpOptions.ClientCertificatePath
                     };
                 }
+                if (s.ServiceType == "CSV Creator" && s.CsvOptions != null)
+                {
+                    csv = new CsvServiceOptions
+                    {
+                        OutputPath = s.CsvOptions.OutputPath,
+                        Delimiter = s.CsvOptions.Delimiter,
+                        IncludeHeaders = s.CsvOptions.IncludeHeaders
+                    };
+                }
 
                 data.Add(new ServiceInfo
                 {
@@ -67,7 +77,8 @@ namespace DesktopApplicationTemplate.UI.Services
                     AssociatedServices = new List<string>(s.AssociatedServices),
                     TcpOptions = tcp,
                     FtpOptions = ftp,
-                    HttpOptions = http
+                    HttpOptions = http,
+                    CsvOptions = csv
                 });
             }
 
@@ -178,5 +189,6 @@ namespace DesktopApplicationTemplate.UI.Services
         public TcpServiceOptions? TcpOptions { get; set; }
         public FtpServerOptions? FtpOptions { get; set; }
         public HttpServiceOptions? HttpOptions { get; set; }
+        public CsvServiceOptions? CsvOptions { get; set; }
     }
 }
