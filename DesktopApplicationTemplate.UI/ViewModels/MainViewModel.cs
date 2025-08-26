@@ -64,9 +64,15 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public HidServiceOptions? HidOptions { get; set; }
 
         /// <summary>
+        /// Heartbeat-specific configuration for this service, if applicable.
+        /// </summary>
+        public HeartbeatServiceOptions? HeartbeatOptions { get; set; }
+
+        /// <summary>
         /// File Observer-specific configuration for this service, if applicable.
         /// </summary>
         public FileObserverServiceOptions? FileObserverOptions { get; set; }
+
 
         public static Func<string, string, ServiceViewModel?>? ResolveService { get; set; }
 

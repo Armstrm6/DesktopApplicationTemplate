@@ -11,6 +11,7 @@ namespace DesktopApplicationTemplate.UI.Views
         public event Action<string, string>? ServiceCreated;
         public event Action<string>? MqttSelected;
         public event Action<string>? TcpSelected;
+        public event Action<string>? HeartbeatSelected;
         public event Action<string>? FtpServerSelected;
         public event Action<string>? HttpSelected;
         public event Action<string>? HidSelected;
@@ -37,6 +38,11 @@ namespace DesktopApplicationTemplate.UI.Views
                 if (meta.Type == "TCP")
                 {
                     TcpSelected?.Invoke(name);
+                    return;
+                }
+                if (meta.Type == "Heartbeat")
+                {
+                    HeartbeatSelected?.Invoke(name);
                     return;
                 }
                 if (meta.Type == "FTP" || meta.Type == "FTP Server")

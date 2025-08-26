@@ -109,6 +109,12 @@ namespace DesktopApplicationTemplate.UI
             services.AddTransient<HidEditServiceViewModel>();
             services.AddTransient<HidAdvancedConfigView>();
             services.AddTransient<HidAdvancedConfigViewModel>();
+            services.AddTransient<HeartbeatCreateServiceView>();
+            services.AddTransient<HeartbeatCreateServiceViewModel>();
+            services.AddTransient<HeartbeatEditServiceView>();
+            services.AddTransient<HeartbeatEditServiceViewModel>();
+            services.AddTransient<HeartbeatAdvancedConfigView>();
+            services.AddTransient<HeartbeatAdvancedConfigViewModel>();
             services.AddTransient<FileObserverCreateServiceView>();
             services.AddTransient<FileObserverCreateServiceViewModel>();
             services.AddTransient<FileObserverEditServiceView>();
@@ -125,6 +131,7 @@ namespace DesktopApplicationTemplate.UI
             services.AddOptions<DesktopApplicationTemplate.UI.Services.FtpServerOptions>()
                 .BindConfiguration("FtpServer");
             services.AddOptions<HidServiceOptions>();
+            services.AddOptions<HeartbeatServiceOptions>();
             services.AddOptions<FileObserverServiceOptions>();
         }
 

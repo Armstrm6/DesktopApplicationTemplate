@@ -176,6 +176,7 @@ namespace DesktopApplicationTemplate.UI.Views
             };
             page.MqttSelected += NavigateToMqtt;
             page.TcpSelected += NavigateToTcp;
+            page.HeartbeatSelected += NavigateToHeartbeat;
             page.FtpServerSelected += NavigateToFtpServer;
             page.HttpSelected += NavigateToHttp;
             page.HidSelected += NavigateToHid;
@@ -225,6 +226,45 @@ namespace DesktopApplicationTemplate.UI.Views
             {
                 var advVm = ActivatorUtilities.CreateInstance<HidAdvancedConfigViewModel>(App.AppHost.Services, opts);
                 var advView = App.AppHost.Services.GetRequiredService<HidAdvancedConfigView>();
+                advView.DataContext = advVm;
+                advVm.Saved += _ => ShowPage(view);
+                advVm.BackRequested += () => ShowPage(view);
+                ShowPage(advView);
+            };
+            ShowPage(view);
+        }
+
+        private void NavigateToHeartbeat(string defaultName)
+        {
+            var vm = App.AppHost.Services.GetRequiredService<HeartbeatCreateServiceViewModel>();
+            vm.ServiceName = defaultName;
+            vm.ServiceCreated += (name, options) =>
+            {
+                var svc = new ServiceViewModel
+                {
+                    DisplayName = $"Heartbeat - {name}",
+                    ServiceType = "Heartbeat",
+                    IsActive = false,
+                    HeartbeatOptions = options
+                };
+                svc.SetColorsByType();
+                svc.LogAdded += _viewModel.OnServiceLogAdded;
+                svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
+                GetOrCreateServicePage(svc);
+                _viewModel.Services.Add(svc);
+                _logger?.LogInformation("Service {Name} added", svc.DisplayName);
+                _viewModel.SelectedService = svc;
+                ServiceList.ScrollIntoView(svc);
+                if (svc.ServicePage != null)
+                    ShowPage(svc.ServicePage);
+                _viewModel.SaveServices();
+            };
+            vm.Cancelled += ShowCreateServiceSelectionPage;
+            var view = ActivatorUtilities.CreateInstance<HeartbeatCreateServiceView>(App.AppHost.Services, vm);
+            vm.AdvancedConfigRequested += opts =>
+            {
+                var advVm = ActivatorUtilities.CreateInstance<HeartbeatAdvancedConfigViewModel>(App.AppHost.Services, opts);
+                var advView = App.AppHost.Services.GetRequiredService<HeartbeatAdvancedConfigView>();
                 advView.DataContext = advVm;
                 advVm.Saved += _ => ShowPage(view);
                 advVm.BackRequested += () => ShowPage(view);
@@ -517,6 +557,40 @@ namespace DesktopApplicationTemplate.UI.Views
                     };
                 }
                 ShowPage(editView);
+            _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
+            return;
+        }
+
+        if (service.ServiceType == "Heartbeat")
+        {
+            var hbPage = GetOrCreateServicePage(service);
+            var options = service.HeartbeatOptions ?? new HeartbeatServiceOptions();
+            var vm = ActivatorUtilities.CreateInstance<HeartbeatEditServiceViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
+            var editView = App.AppHost.Services.GetRequiredService<HeartbeatEditServiceView>();
+            editView.DataContext = vm;
+            vm.ServiceUpdated += (name, opts) =>
+            {
+                service.DisplayName = $"Heartbeat - {name}";
+                service.HeartbeatOptions = opts;
+                if (hbPage != null)
+                    ShowPage(hbPage);
+                _viewModel.SaveServices();
+            };
+            vm.Cancelled += () =>
+            {
+                if (hbPage != null)
+                    ShowPage(hbPage);
+            };
+            vm.AdvancedConfigRequested += opts =>
+            {
+                var advVm = ActivatorUtilities.CreateInstance<HeartbeatAdvancedConfigViewModel>(App.AppHost.Services, opts);
+                var advView = App.AppHost.Services.GetRequiredService<HeartbeatAdvancedConfigView>();
+                advView.DataContext = advVm;
+                advVm.Saved += _ => ShowPage(editView);
+                advVm.BackRequested += () => ShowPage(editView);
+                ShowPage(advView);
+            };
+            ShowPage(editView);
             _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
             return;
         }
