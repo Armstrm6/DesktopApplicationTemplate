@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 ### Added
+- Comprehensive FTP server support with hosting service, configuration views, and live transfer monitoring.
+- New FTP server windows for creating, editing, and tracking transfers.
 - FTP server create and advanced configuration view models and views with validation and commands.
 - FTP server edit view model and view enabling updates to server configuration.
 - FTP server hosting service with start/stop methods, transfer events, and unit tests.

@@ -5,6 +5,11 @@
 This repository contains a basic WPF UI application, a Windows Service and unit tests.
 
 See `CollaborationGuidelines.txt` for tips on working with the repository. A running log of past collaboration decisions lives in `docs/CollaborationAndDebugTips.txt`.
+## Basic usage
+1. Run `dotnet run --project DesktopApplicationTemplate.UI/DesktopApplicationTemplate.UI.csproj` to launch the UI.
+2. Use **Add Service** to configure components like FTP or TCP.
+3. Select a service to edit settings or open its related windows to monitor activity.
+
 
 ## Prerequisites
 
