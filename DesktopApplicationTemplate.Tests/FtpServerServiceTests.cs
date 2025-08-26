@@ -37,7 +37,7 @@ namespace DesktopApplicationTemplate.Tests
 
             await Assert.ThrowsAsync<InvalidOperationException>(() => service.StartAsync(CancellationToken.None));
             logger.Verify(l => l.Log(
-                LogLevel.Error,
+                Microsoft.Extensions.Logging.LogLevel.Error,
                 FtpServerService.EventIds.StartFailed,
                 It.IsAny<It.IsAnyType>(),
                 It.IsAny<InvalidOperationException>(),
@@ -70,7 +70,7 @@ namespace DesktopApplicationTemplate.Tests
 
             await Assert.ThrowsAsync<InvalidOperationException>(() => service.StopAsync(CancellationToken.None));
             logger.Verify(l => l.Log(
-                LogLevel.Error,
+                Microsoft.Extensions.Logging.LogLevel.Error,
                 FtpServerService.EventIds.StopFailed,
                 It.IsAny<It.IsAnyType>(),
                 It.IsAny<InvalidOperationException>(),

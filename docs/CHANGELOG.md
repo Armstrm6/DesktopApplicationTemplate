@@ -134,3 +134,4 @@
 - Application now releases keyboard state on shutdown to prevent stuck R, D, and Q keys.
 
 - Registered FTP server service and view models in DI and bound FtpServer options from configuration.
+- Downgraded FubarDev FTP server packages to version 3.1.2 to resolve missing NuGet feeds.

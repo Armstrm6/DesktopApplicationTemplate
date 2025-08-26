@@ -1172,3 +1172,11 @@ Effective Prompts / Instructions that worked: Request to mock dependencies and v
 Decisions & Rationale: Improve reliability by logging errors and preventing invalid saves.
 Action Items: Monitor CI for Windows-specific behaviors.
 Related Commits/PRs: (this PR)
+[2025-08-25 20:50] Topic: FubarDev package downgrade
+Context: Build failed because NuGet couldn't find FubarDev FTP Server 6.1.0.
+Observations: Switched references to 3.1.2 and qualified conflicting types; restore completes.
+Codex Limitations noticed: WindowsDesktop runtime missing; tests aborted after build.
+Effective Prompts / Instructions that worked: Error logs indicating missing package version.
+Decisions & Rationale: Use latest available package to unblock builds.
+Action Items: Rely on CI for Windows-specific validation.
+Related Commits/PRs: (this PR)
