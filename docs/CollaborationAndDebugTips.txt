@@ -1316,3 +1316,12 @@ Effective Prompts / Instructions that worked: User request to embed create views
 Decisions & Rationale: Replaced CreateServiceWindow navigation with in-frame page display.
 Action Items: Monitor CI for UI regressions.
 Related Commits/PRs: (this PR)
+[2025-08-26 16:49] Topic: FTP create cancellation
+Context: Added Cancel command and event to FtpServerCreateViewModel and view to resolve build error.
+Observations: Cancel button now returns to service selection via Cancelled event.
+Codex Limitations noticed: pwsh unavailable for add-tip script.
+Effective Prompts / Instructions that worked: follow MVVM pattern and logging guidelines.
+Decisions & Rationale: Align FTP create flow with other create view models.
+Action Items: Monitor CI for Windows-specific issues.
+Related Commits/PRs: (this PR)
+
