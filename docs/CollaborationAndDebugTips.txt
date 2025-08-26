@@ -1283,3 +1283,12 @@ Effective Prompts / Instructions that worked: Direct request to handle TCP edits
 Decisions & Rationale: Reused TcpServiceViewModel and SaveServices to store options.
 Action Items: Run tests and monitor CI.
 Related Commits/PRs: (this PR)
+[2025-08-26 16:14] Topic: TCP and FTP navigation tests
+Context: Added unit tests for TCP advanced button, TCP edit navigation, and FTP server advanced dialog.
+Observations: Tests verify advanced views open, options preload, and dialogs close.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; rely on CI for execution.
+Effective Prompts / Instructions that worked: direct request for navigation tests.
+Decisions & Rationale: Ensure advanced configuration and edit flows navigate correctly and persist options.
+Action Items: Monitor CI for Windows-specific issues.
+Related Commits/PRs: (this PR)
+
