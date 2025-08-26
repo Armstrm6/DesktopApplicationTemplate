@@ -178,6 +178,7 @@ namespace DesktopApplicationTemplate.UI.Views
             page.TcpSelected += NavigateToTcp;
             page.FtpServerSelected += NavigateToFtpServer;
             page.HttpSelected += NavigateToHttp;
+            page.HidSelected += NavigateToHid;
             page.Cancelled += ShowHome;
             ShowPage(page);
         }
@@ -189,6 +190,45 @@ namespace DesktopApplicationTemplate.UI.Views
             vm.ServiceCreated += (name, options) => AddMqttService(name, options);
             vm.Cancelled += ShowCreateServiceSelectionPage;
             var view = ActivatorUtilities.CreateInstance<MqttCreateServiceView>(App.AppHost.Services, vm);
+            ShowPage(view);
+        }
+
+        private void NavigateToHid(string defaultName)
+        {
+            var vm = App.AppHost.Services.GetRequiredService<HidCreateServiceViewModel>();
+            vm.ServiceName = defaultName;
+            vm.ServiceCreated += (name, options) =>
+            {
+                var svc = new ServiceViewModel
+                {
+                    DisplayName = $"HID - {name}",
+                    ServiceType = "HID",
+                    IsActive = false,
+                    HidOptions = options
+                };
+                svc.SetColorsByType();
+                svc.LogAdded += _viewModel.OnServiceLogAdded;
+                svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
+                GetOrCreateServicePage(svc);
+                _viewModel.Services.Add(svc);
+                _logger?.LogInformation("Service {Name} added", svc.DisplayName);
+                _viewModel.SelectedService = svc;
+                ServiceList.ScrollIntoView(svc);
+                if (svc.ServicePage != null)
+                    ShowPage(svc.ServicePage);
+                _viewModel.SaveServices();
+            };
+            vm.Cancelled += ShowCreateServiceSelectionPage;
+            var view = ActivatorUtilities.CreateInstance<HidCreateServiceView>(App.AppHost.Services, vm);
+            vm.AdvancedConfigRequested += opts =>
+            {
+                var advVm = ActivatorUtilities.CreateInstance<HidAdvancedConfigViewModel>(App.AppHost.Services, opts);
+                var advView = App.AppHost.Services.GetRequiredService<HidAdvancedConfigView>();
+                advView.DataContext = advVm;
+                advVm.Saved += _ => ShowPage(view);
+                advVm.BackRequested += () => ShowPage(view);
+                ShowPage(advView);
+            };
             ShowPage(view);
         }
 
@@ -437,9 +477,43 @@ namespace DesktopApplicationTemplate.UI.Views
                     };
                 }
                 ShowPage(editView);
-                _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
-                return;
-            }
+            _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
+            return;
+        }
+
+        if (service.ServiceType == "HID")
+        {
+            var hidPage = GetOrCreateServicePage(service);
+            var options = service.HidOptions ?? new HidServiceOptions();
+            var vm = ActivatorUtilities.CreateInstance<HidEditServiceViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
+            var editView = App.AppHost.Services.GetRequiredService<HidEditServiceView>();
+            editView.DataContext = vm;
+            vm.ServiceUpdated += (name, opts) =>
+            {
+                service.DisplayName = $"HID - {name}";
+                service.HidOptions = opts;
+                if (hidPage != null)
+                    ShowPage(hidPage);
+                _viewModel.SaveServices();
+            };
+            vm.Cancelled += () =>
+            {
+                if (hidPage != null)
+                    ShowPage(hidPage);
+            };
+            vm.AdvancedConfigRequested += opts =>
+            {
+                var advVm = ActivatorUtilities.CreateInstance<HidAdvancedConfigViewModel>(App.AppHost.Services, opts);
+                var advView = App.AppHost.Services.GetRequiredService<HidAdvancedConfigView>();
+                advView.DataContext = advVm;
+                advVm.Saved += _ => ShowPage(editView);
+                advVm.BackRequested += () => ShowPage(editView);
+                ShowPage(advView);
+            };
+            ShowPage(editView);
+            _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
+            return;
+        }
 
             if (service.ServiceType == "TCP")
             {

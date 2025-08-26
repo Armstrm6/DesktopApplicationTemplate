@@ -51,6 +51,25 @@ public class CreateServicePageTests
     }
 
     [Fact]
+    public void ServiceType_Click_RaisesHidSelected()
+    {
+        string? receivedName = null;
+        var thread = new Thread(() =>
+        {
+            var vm = new CreateServiceViewModel();
+            var page = new CreateServicePage(vm);
+            page.HidSelected += name => receivedName = name;
+            var button = new Button { DataContext = new CreateServiceViewModel.ServiceTypeMetadata("HID", "HID", string.Empty) };
+            var method = typeof(CreateServicePage).GetMethod("ServiceType_Click", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            method.Invoke(page, new object[] { button, new RoutedEventArgs() });
+        });
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        thread.Join();
+        receivedName.Should().Be("HID1");
+    }
+
+    [Fact]
     public void ServiceType_Click_RaisesServiceCreated_ForHttp()
     {
         string? receivedName = null;
