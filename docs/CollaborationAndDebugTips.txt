@@ -1416,3 +1416,11 @@ Effective Prompts / Instructions that worked: Follow MVVM patterns and update do
 Decisions & Rationale: Isolate advanced settings to keep primary forms focused and maintain consistency with other services.
 Action Items: Monitor CI for Windows-specific issues.
 Related Commits/PRs:
+[2025-08-26 21:05] Topic: HID data flow diagram
+Context: Added data flow diagram control to HID service view with incoming, processing, and outgoing bindings.
+Observations: View model exposes new observable properties and unit tests verify change notifications.
+Codex Limitations noticed: Linux environment lacks WPF runtime for full UI tests.
+Effective Prompts / Instructions that worked: Request to visualize data flow via shared control.
+Decisions & Rationale: Created reusable control with rounded-corner styles in Themes for consistency.
+Action Items: Extend data flow sections to remaining service views.
+Related Commits/PRs:

@@ -63,6 +63,30 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             set { _finalMessage = value; OnPropertyChanged(); }
         }
 
+        private string _incomingData = string.Empty;
+        /// <summary>Raw data received before processing.</summary>
+        public string IncomingData
+        {
+            get => _incomingData;
+            set { _incomingData = value; OnPropertyChanged(); }
+        }
+
+        private string _processingData = string.Empty;
+        /// <summary>Intermediate representation used during transformations.</summary>
+        public string ProcessingData
+        {
+            get => _processingData;
+            set { _processingData = value; OnPropertyChanged(); }
+        }
+
+        private string _outgoingData = string.Empty;
+        /// <summary>Resulting data after processing.</summary>
+        public string OutgoingData
+        {
+            get => _outgoingData;
+            set { _outgoingData = value; OnPropertyChanged(); }
+        }
+
         public ICommand BuildCommand { get; }
         public ICommand SaveCommand { get; }
 
@@ -78,7 +102,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private void BuildMessage()
         {
             Logger?.Log("Building HID message", LogLevel.Debug);
-            FinalMessage = string.Format(FormatTemplate ?? "{0}", MessageTemplate);
+            IncomingData = MessageTemplate;
+            ProcessingData = FormatTemplate ?? "{0}";
+            FinalMessage = string.Format(ProcessingData, IncomingData);
+            OutgoingData = FinalMessage;
             Logger?.Log($"Final HID message: {FinalMessage}", LogLevel.Debug);
             if (!string.IsNullOrWhiteSpace(AttachedService))
             {

@@ -37,5 +37,29 @@ namespace DesktopApplicationTemplate.Tests
 
             ConsoleTestLogger.LogPass();
         }
+
+        [Fact]
+        [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
+        public void DataFlowProperties_RaisePropertyChanged()
+        {
+            var logger = new Mock<ILoggingService>();
+            var helper = new SaveConfirmationHelper(logger.Object);
+            var vm = new HidViewModel(helper);
+
+            string? lastProperty = null;
+            vm.PropertyChanged += (_, e) => lastProperty = e.PropertyName;
+
+            vm.IncomingData = "in";
+            Assert.Equal("IncomingData", lastProperty);
+
+            vm.ProcessingData = "proc";
+            Assert.Equal("ProcessingData", lastProperty);
+
+            vm.OutgoingData = "out";
+            Assert.Equal("OutgoingData", lastProperty);
+
+            ConsoleTestLogger.LogPass();
+        }
     }
 }
