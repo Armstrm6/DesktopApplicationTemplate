@@ -4,7 +4,7 @@ using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.Service.Services;
+// Qualify service-layer types explicitly to avoid name clashes with UI services
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -77,7 +77,7 @@ namespace DesktopApplicationTemplate.UI
             services.AddFtpServer(builder => builder
                 .UseDotNetFileSystem()
                 .EnableAnonymousAuthentication());
-            services.AddSingleton<IFtpServerService, FtpServerService>();
+            services.AddSingleton<IFtpServerService, DesktopApplicationTemplate.Service.Services.FtpServerService>();
             services.AddSingleton<CsvViewerViewModel>();
             services.AddSingleton<CsvService>();
             services.AddSingleton<CsvServiceView>();
@@ -107,7 +107,8 @@ namespace DesktopApplicationTemplate.UI
             services.Configure<AppSettings>(configuration.GetSection("AppSettings"));
             services.Configure<MqttServiceOptions>(configuration.GetSection("MqttService"));
             services.Configure<TcpServiceOptions>(configuration.GetSection("TcpService"));
-            services.AddOptions<FtpServerOptions>().BindConfiguration("FtpServer");
+            services.AddOptions<DesktopApplicationTemplate.UI.Services.FtpServerOptions>()
+                .BindConfiguration("FtpServer");
         }
 
         protected override async void OnStartup(StartupEventArgs e)
