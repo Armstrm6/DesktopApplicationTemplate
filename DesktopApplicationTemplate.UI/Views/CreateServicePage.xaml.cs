@@ -19,18 +19,15 @@ namespace DesktopApplicationTemplate.UI.Views
             DataContext = _viewModel;
         }
 
-        private void Create_Click(object sender, RoutedEventArgs e)
+        private void ServiceButton_Click(object sender, RoutedEventArgs e)
         {
+            if (sender is not Button btn || btn.Tag is not string type)
+                return;
+
             var vm = (CreateServiceViewModel)DataContext;
+            vm.SelectedServiceType = type;
             CreatedServiceName = vm.ServiceName;
             CreatedServiceType = vm.SelectedServiceType;
-
-            if (string.IsNullOrWhiteSpace(CreatedServiceName) || string.IsNullOrWhiteSpace(CreatedServiceType))
-            {
-                System.Windows.MessageBox.Show("Please enter a name and select a type.", "Missing Info", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
             ServiceCreated?.Invoke(CreatedServiceName, CreatedServiceType);
         }
 
