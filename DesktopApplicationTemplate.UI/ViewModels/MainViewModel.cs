@@ -72,6 +72,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         /// File Observer-specific configuration for this service, if applicable.
         /// </summary>
         public FileObserverServiceOptions? FileObserverOptions { get; set; }
+
+        /// <summary>
+        /// SCP-specific configuration for this service, if applicable.
+        /// </summary>
+        public ScpServiceOptions? ScpOptions { get; set; }
         /// <summary>
         /// CSV creator-specific configuration for this service, if applicable.
         /// </summary>

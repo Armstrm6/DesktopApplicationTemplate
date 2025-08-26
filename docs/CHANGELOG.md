@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 ### Added
+- SCP service creation, edit, and advanced configuration views with navigation tests.
 - HID service creation, edit, and advanced configuration views with navigation tests.
 - CSV service creation and edit views with advanced configuration and navigation tests.
 - Heartbeat service creation, edit, and advanced configuration views with navigation tests.

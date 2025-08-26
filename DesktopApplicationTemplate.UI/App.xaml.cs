@@ -127,6 +127,12 @@ namespace DesktopApplicationTemplate.UI
             services.AddTransient<CsvEditServiceViewModel>();
             services.AddTransient<CsvAdvancedConfigView>();
             services.AddTransient<CsvAdvancedConfigViewModel>();
+            services.AddTransient<ScpCreateServiceView>();
+            services.AddTransient<ScpCreateServiceViewModel>();
+            services.AddTransient<ScpEditServiceView>();
+            services.AddTransient<ScpEditServiceViewModel>();
+            services.AddTransient<ScpAdvancedConfigView>();
+            services.AddTransient<ScpAdvancedConfigViewModel>();
             services.AddTransient<SettingsPage>();
 
 
@@ -140,6 +146,7 @@ namespace DesktopApplicationTemplate.UI
             services.AddOptions<HeartbeatServiceOptions>();
             services.AddOptions<FileObserverServiceOptions>();
             services.AddOptions<CsvServiceOptions>();
+            services.AddOptions<ScpServiceOptions>();
         }
 
         protected override async void OnStartup(StartupEventArgs e)

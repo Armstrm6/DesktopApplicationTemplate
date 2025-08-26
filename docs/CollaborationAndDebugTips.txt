@@ -1382,3 +1382,12 @@ Effective Prompts / Instructions that worked: User instructions to add CSV navig
 Decisions & Rationale: Followed existing service patterns for create/edit and advanced config to maintain consistency.
 Action Items: Verify navigation on Windows.
 Related Commits/PRs: (this PR)
+[2025-08-26 19:36] Topic: SCP service navigation
+Context: Added SCP create, edit, and advanced configuration flows with DI and tests.
+Observations: Navigation hooks and view models mirror other services; tests confirm create/edit routing.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; rely on CI.
+Effective Prompts / Instructions that worked: Follow existing service patterns and AGENTS guidelines.
+Decisions & Rationale: Align SCP workflow with other services for consistency.
+Action Items: Monitor CI for Windows-specific issues.
+Related Commits/PRs:
+
