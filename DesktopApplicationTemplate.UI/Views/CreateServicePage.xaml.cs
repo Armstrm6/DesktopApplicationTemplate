@@ -14,6 +14,7 @@ namespace DesktopApplicationTemplate.UI.Views
         public event Action<string>? FtpServerSelected;
         public event Action<string>? HttpSelected;
         public event Action<string>? HidSelected;
+        public event Action<string>? FileObserverSelected;
         public event Action? Cancelled;
 
         public CreateServicePage(CreateServiceViewModel viewModel)
@@ -51,6 +52,11 @@ namespace DesktopApplicationTemplate.UI.Views
                 if (meta.Type == "HID")
                 {
                     HidSelected?.Invoke(name);
+                    return;
+                }
+                if (meta.Type == "File Observer")
+                {
+                    FileObserverSelected?.Invoke(name);
                     return;
                 }
                 ServiceCreated?.Invoke(name, meta.Type);

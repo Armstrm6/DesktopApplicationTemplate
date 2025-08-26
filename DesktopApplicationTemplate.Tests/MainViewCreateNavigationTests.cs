@@ -162,4 +162,55 @@ public class MainViewCreateNavigationTests
         thread.Start();
         thread.Join();
     }
+
+    [Fact]
+    [TestCategory("CodexSafe")]
+    [TestCategory("WindowsSafe")]
+    public void NavigateToFileObserver_ShowsCreateView()
+    {
+        if (!OperatingSystem.IsWindows())
+            return;
+
+        var thread = new Thread(() =>
+        {
+            var logger = new LoggingService(new NullRichTextLogger());
+            var fileDialog = new Mock<IFileDialogService>();
+            var csvVm = new CsvViewerViewModel(fileDialog.Object);
+            var csvService = new CsvService(csvVm);
+            var netSvc = new Mock<INetworkConfigurationService>();
+            netSvc.Setup(s => s.GetConfigurationAsync(It.IsAny<CancellationToken>())).ReturnsAsync(new NetworkConfiguration());
+            var netVm = new NetworkConfigurationViewModel(netSvc.Object, logger);
+            var tempFile = Path.GetTempFileName();
+            File.WriteAllText(tempFile, string.Empty);
+            var mainVm = new MainViewModel(csvService, netVm, netSvc.Object, logger, tempFile);
+
+            var host = Host.CreateDefaultBuilder()
+                .ConfigureServices(s =>
+                {
+                    s.AddLogging();
+                    s.AddSingleton<ILoggingService>(logger);
+                    s.AddSingleton<SaveConfirmationHelper>();
+                    s.AddSingleton<FileObserverViewModel>();
+                    s.AddSingleton<FileObserverView>();
+                    s.AddTransient<FileObserverCreateServiceViewModel>();
+                    s.AddTransient<FileObserverCreateServiceView>();
+                    s.AddTransient<FileObserverAdvancedConfigViewModel>();
+                    s.AddTransient<FileObserverAdvancedConfigView>();
+                })
+                .Build();
+            var prop = typeof(App).GetProperty("AppHost");
+            var setter = prop!.GetSetMethod(true);
+            setter!.Invoke(null, new object[] { host });
+
+            var view = new MainView(mainVm);
+            var method = typeof(MainView).GetMethod("NavigateToFileObserver", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            method!.Invoke(view, new object[] { "Test" });
+
+            view.ContentFrame.Content.Should().BeOfType<FileObserverCreateServiceView>();
+            ConsoleTestLogger.LogPass();
+        });
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        thread.Join();
+    }
 }

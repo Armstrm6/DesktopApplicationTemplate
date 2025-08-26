@@ -158,3 +158,4 @@
 - Creating an FTP service now closes the selection window after saving.
 - Create service window now closes after service selection or cancellation, ensuring services are added and preventing blank windows.
 - FTP server creation view preloads options from configuration and logs navigation, ensuring the dialog closes after server creation.
+- Added File Observer create/edit/advanced configuration views with navigation and DI registration.
