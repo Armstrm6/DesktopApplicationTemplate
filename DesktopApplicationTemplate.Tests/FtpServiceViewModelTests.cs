@@ -38,4 +38,34 @@ public class FtpServiceViewModelTests
         Assert.Equal("/download.txt", vm.DownloadedFiles[0].Path);
         ConsoleTestLogger.LogPass();
     }
+
+    [Fact]
+    [TestCategory("CodexSafe")]
+    [TestCategory("WindowsSafe")]
+    public void TransferProgress_UpdatesTransfers()
+    {
+        var service = new Mock<IFtpServerService>();
+        var vm = new FtpServiceViewModel(service.Object);
+
+        var progress = new FtpTransferProgressEventArgs("/file.txt", 100, 50, true);
+        service.Raise(s => s.TransferProgress += null!, progress);
+
+        Assert.Single(vm.Transfers);
+        Assert.Equal(0.5, vm.Transfers[0].Progress);
+        ConsoleTestLogger.LogPass();
+    }
+
+    [Fact]
+    [TestCategory("CodexSafe")]
+    [TestCategory("WindowsSafe")]
+    public void ClientCountChanged_UpdatesProperty()
+    {
+        var service = new Mock<IFtpServerService>();
+        var vm = new FtpServiceViewModel(service.Object);
+
+        service.Raise(s => s.ClientCountChanged += null!, 3);
+
+        Assert.Equal(3, vm.ConnectedClients);
+        ConsoleTestLogger.LogPass();
+    }
 }

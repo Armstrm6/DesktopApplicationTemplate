@@ -67,4 +67,22 @@ public class TcpServiceMessagesViewModelTests
         vm.ServerPort.Should().Be("2000");
         vm.IsUdp.Should().BeTrue();
     }
+
+    [Fact]
+    public void MessageCollections_ExposeGroupedData()
+    {
+        var vm = new TcpServiceMessagesViewModel();
+        vm.Messages.Add(new TcpMessageRow
+        {
+            IncomingMessage = "in",
+            IncomingIp = "1.1.1.1",
+            OutgoingMessage = "out",
+            ConnectedService = "svc",
+            Result = "ok"
+        });
+
+        vm.IncomingData.Should().ContainSingle(d => d.Contains("in"));
+        vm.ScriptModifications.Should().ContainSingle("out");
+        vm.OutgoingResults.Should().ContainSingle(r => r.Contains("svc") && r.Contains("ok"));
+    }
 }

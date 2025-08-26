@@ -10,15 +10,28 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <DataGrid Grid.Row="0" ItemsSource="{Binding Messages}" AutoGenerateColumns="False" Margin="0,0,0,10">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Incoming Message" Binding="{Binding IncomingMessage}" Width="*"/>
-                <DataGridTextColumn Header="Incoming IP" Binding="{Binding IncomingIp}" Width="*"/>
-                <DataGridTextColumn Header="Outgoing Message" Binding="{Binding OutgoingMessage}" Width="*"/>
-                <DataGridTextColumn Header="Connected Service" Binding="{Binding ConnectedService}" Width="*"/>
-                <DataGridTextColumn Header="Outgoing Result" Binding="{Binding Result}" Width="*"/>
-            </DataGrid.Columns>
-        </DataGrid>
+        <Grid Grid.Row="0" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0">
+                <TextBlock Text="Incoming Data" FontWeight="Bold" Margin="0,0,0,5"/>
+                <ListBox ItemsSource="{Binding IncomingData}"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Margin="10,0">
+                <TextBlock Text="Script Modifications" FontWeight="Bold" Margin="0,0,0,5"/>
+                <ListBox ItemsSource="{Binding ScriptModifications}"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="2">
+                <TextBlock Text="Outgoing Results" FontWeight="Bold" Margin="0,0,0,5"/>
+                <ListBox ItemsSource="{Binding OutgoingResults}"/>
+            </StackPanel>
+        </Grid>
 
         <StackPanel Grid.Row="1" Orientation="Vertical">
             <StackPanel Orientation="Horizontal" Margin="0,0,0,5">

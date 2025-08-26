@@ -14,6 +14,7 @@ namespace DesktopApplicationTemplate.Service.Services
     {
         private readonly IFtpServerHost _host;
         private readonly ILogger<FtpServerService> _logger;
+        private int _connectedClients;
 
         public FtpServerService(IFtpServerHost host, ILogger<FtpServerService> logger)
         {
@@ -26,6 +27,15 @@ namespace DesktopApplicationTemplate.Service.Services
 
         /// <inheritdoc />
         public event EventHandler<FtpTransferEventArgs>? FileSent;
+
+        /// <inheritdoc />
+        public event EventHandler<FtpTransferProgressEventArgs>? TransferProgress;
+
+        /// <inheritdoc />
+        public event EventHandler<int>? ClientCountChanged;
+
+        /// <inheritdoc />
+        public int ConnectedClients => _connectedClients;
 
         /// <inheritdoc />
         public async Task StartAsync(CancellationToken cancellationToken = default)
@@ -73,6 +83,20 @@ namespace DesktopApplicationTemplate.Service.Services
             FileSent?.Invoke(this, args);
         }
 
+        internal void RaiseTransferProgress(string path, long size, long transferred, bool isUpload)
+        {
+            var args = new FtpTransferProgressEventArgs(path, size, transferred, isUpload);
+            _logger.LogInformation(EventIds.TransferProgress, "Progress {Path} {Transferred}/{Size}", path, transferred, size);
+            TransferProgress?.Invoke(this, args);
+        }
+
+        internal void RaiseClientCountChanged(int count)
+        {
+            _connectedClients = count;
+            _logger.LogInformation(EventIds.ClientCountChanged, "Client count {Count}", count);
+            ClientCountChanged?.Invoke(this, count);
+        }
+
         /// <summary>
         /// Event identifiers for <see cref="FtpServerService"/>.
         /// </summary>
@@ -86,6 +110,8 @@ namespace DesktopApplicationTemplate.Service.Services
             public static readonly EventId FileSent = new(1005, nameof(FileSent));
             public static readonly EventId StartFailed = new(1006, nameof(StartFailed));
             public static readonly EventId StopFailed = new(1007, nameof(StopFailed));
+            public static readonly EventId TransferProgress = new(1008, nameof(TransferProgress));
+            public static readonly EventId ClientCountChanged = new(1009, nameof(ClientCountChanged));
         }
     }
 }

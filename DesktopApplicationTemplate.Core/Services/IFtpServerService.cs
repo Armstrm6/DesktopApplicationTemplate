@@ -20,6 +20,21 @@ namespace DesktopApplicationTemplate.Core.Services
         event EventHandler<FtpTransferEventArgs> FileSent;
 
         /// <summary>
+        /// Raised as transfer progress updates.
+        /// </summary>
+        event EventHandler<FtpTransferProgressEventArgs> TransferProgress;
+
+        /// <summary>
+        /// Raised when the number of connected clients changes.
+        /// </summary>
+        event EventHandler<int> ClientCountChanged;
+
+        /// <summary>
+        /// Gets the current number of connected clients.
+        /// </summary>
+        int ConnectedClients { get; }
+
+        /// <summary>
         /// Starts the FTP server.
         /// </summary>
         /// <param name="cancellationToken">Token to observe cancellation requests.</param>

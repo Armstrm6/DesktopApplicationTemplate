@@ -110,5 +110,35 @@ namespace DesktopApplicationTemplate.Tests
             captured!.Path.Should().Be("test.txt");
             captured.IsUpload.Should().BeFalse();
         }
+
+        [Fact]
+        public void RaiseTransferProgress_TriggersEvent()
+        {
+            var host = new Mock<IFtpServerHost>();
+            var logger = new Mock<ILogger<FtpServerService>>();
+            var service = new FtpServerService(host.Object, logger.Object);
+            FtpTransferProgressEventArgs? captured = null;
+            service.TransferProgress += (_, e) => captured = e;
+
+            service.RaiseTransferProgress("file.txt", 100, 40, true);
+
+            captured.Should().NotBeNull();
+            captured!.BytesTransferred.Should().Be(40);
+        }
+
+        [Fact]
+        public void RaiseClientCountChanged_TriggersEvent()
+        {
+            var host = new Mock<IFtpServerHost>();
+            var logger = new Mock<ILogger<FtpServerService>>();
+            var service = new FtpServerService(host.Object, logger.Object);
+            int captured = -1;
+            service.ClientCountChanged += (_, c) => captured = c;
+
+            service.RaiseClientCountChanged(5);
+
+            captured.Should().Be(5);
+            service.ConnectedClients.Should().Be(5);
+        }
     }
 }
