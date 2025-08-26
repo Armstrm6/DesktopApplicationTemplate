@@ -58,6 +58,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         /// </summary>
         public HttpServiceOptions? HttpOptions { get; set; }
 
+        /// <summary>
+        /// HID-specific configuration for this service, if applicable.
+        /// </summary>
+        public HidServiceOptions? HidOptions { get; set; }
+
         public static Func<string, string, ServiceViewModel?>? ResolveService { get; set; }
 
 

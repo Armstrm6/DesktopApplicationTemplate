@@ -1349,3 +1349,11 @@ Effective Prompts / Instructions that worked: Followed MVVM and DI registration 
 Decisions & Rationale: Mirror TCP and FTP patterns to maintain consistent service workflows.
 Action Items: Monitor CI for Windows-specific issues.
 Related Commits/PRs:
+[2025-08-27 18:00] Topic: HID service navigation
+Context: Added HID create, edit, and advanced configuration flows with DI registration and tests.
+Observations: Navigation now routes HID services through dedicated views with back/advanced options.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; rely on CI for WPF verification.
+Effective Prompts / Instructions that worked: Follow MVVM/DI patterns and update docs/tests per AGENTS guidelines.
+Decisions & Rationale: Mirror existing service flows to maintain consistency and test navigation paths.
+Action Items: Monitor CI for Windows-specific behavior.
+Related Commits/PRs: (this PR)

@@ -103,6 +103,12 @@ namespace DesktopApplicationTemplate.UI
             services.AddTransient<MqttEditConnectionViewModel>();
             services.AddTransient<MqttTagSubscriptionsView>();
             services.AddTransient<MqttTagSubscriptionsViewModel>();
+            services.AddTransient<HidCreateServiceView>();
+            services.AddTransient<HidCreateServiceViewModel>();
+            services.AddTransient<HidEditServiceView>();
+            services.AddTransient<HidEditServiceViewModel>();
+            services.AddTransient<HidAdvancedConfigView>();
+            services.AddTransient<HidAdvancedConfigViewModel>();
             services.AddTransient<SettingsPage>();
 
 
@@ -112,6 +118,7 @@ namespace DesktopApplicationTemplate.UI
             services.Configure<TcpServiceOptions>(configuration.GetSection("TcpService"));
             services.AddOptions<DesktopApplicationTemplate.UI.Services.FtpServerOptions>()
                 .BindConfiguration("FtpServer");
+            services.AddOptions<HidServiceOptions>();
         }
 
         protected override async void OnStartup(StartupEventArgs e)
