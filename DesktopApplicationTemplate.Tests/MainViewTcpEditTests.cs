@@ -70,15 +70,15 @@ public class MainViewTcpEditTests
             var editMethod = typeof(MainView).GetMethod("OnEditRequested", BindingFlags.Instance | BindingFlags.NonPublic);
             editMethod!.Invoke(view, new object[] { service });
 
+            var helperSvc = host.Services.GetRequiredService<SaveConfirmationHelper>();
+            helperSvc.SaveConfirmationSuppressed = true;
             var tcpView = host.Services.GetRequiredService<TcpServiceView>();
             var vm = (TcpServiceViewModel)tcpView.DataContext;
             vm.ComputerIp = "127.0.0.1";
             vm.ListeningPort = "9000";
             vm.IsUdp = true;
             vm.SelectedMode = "Sending";
-            var eventField = typeof(TcpServiceViewModel).GetField("RequestClose", BindingFlags.Instance | BindingFlags.NonPublic);
-            var handler = (EventHandler?)eventField?.GetValue(vm);
-            handler?.Invoke(vm, EventArgs.Empty);
+            vm.SaveCommand.Execute(null);
 
             service.TcpOptions.Should().NotBeNull();
             service.TcpOptions!.Host.Should().Be("127.0.0.1");

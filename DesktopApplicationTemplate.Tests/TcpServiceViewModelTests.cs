@@ -15,7 +15,7 @@ public class TcpServiceViewModelTests
     public void SettingScriptContent_UpdatesMessagesViewModel()
     {
         var logger = new Mock<ILoggingService>();
-        var helper = new SaveConfirmationHelper(logger.Object);
+        var helper = new SaveConfirmationHelper(logger.Object) { SaveConfirmationSuppressed = true };
         var messages = new TcpServiceMessagesViewModel();
         var vm = new TcpServiceViewModel(helper, messages);
 
@@ -47,5 +47,39 @@ public class TcpServiceViewModelTests
         messages.ServerGateway.Should().Be("9.9.9.9");
         messages.ServerPort.Should().Be("2000");
         messages.IsUdp.Should().BeTrue();
+    }
+
+    [Fact]
+    [TestCategory("CodexSafe")]
+    [TestCategory("WindowsSafe")]
+    public void SaveCommand_RaisesSaved()
+    {
+        var logger = new Mock<ILoggingService>();
+        var helper = new SaveConfirmationHelper(logger.Object);
+        var messages = new TcpServiceMessagesViewModel();
+        var vm = new TcpServiceViewModel(helper, messages);
+        var raised = false;
+        vm.Saved += (_, _) => raised = true;
+
+        vm.SaveCommand.Execute(null);
+
+        raised.Should().BeTrue();
+    }
+
+    [Fact]
+    [TestCategory("CodexSafe")]
+    [TestCategory("WindowsSafe")]
+    public void BackCommand_RaisesBackRequested()
+    {
+        var logger = new Mock<ILoggingService>();
+        var helper = new SaveConfirmationHelper(logger.Object);
+        var messages = new TcpServiceMessagesViewModel();
+        var vm = new TcpServiceViewModel(helper, messages);
+        var raised = false;
+        vm.BackRequested += (_, _) => raised = true;
+
+        vm.BackCommand.Execute(null);
+
+        raised.Should().BeTrue();
     }
 }

@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 ### Added
+- Save Configuration and Back buttons for advanced edit pages to enable saving and navigation.
 - TCP messages view now groups incoming data, script output, and results into left-to-right panels.
 - FTP service view displays active transfer progress, connected client count, and status indicator.
 - Tests covering TCP advanced configuration navigation, TCP edit routing, and FTP server option preloading with dialog closure.

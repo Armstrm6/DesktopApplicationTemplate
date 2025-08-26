@@ -228,6 +228,11 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
 
         public ICommand SaveCommand { get; }
 
+        /// <summary>
+        /// Command to navigate back without saving.
+        /// </summary>
+        public ICommand BackCommand { get; }
+
         public TcpServiceViewModel(SaveConfirmationHelper saveHelper, TcpServiceMessagesViewModel messagesViewModel)
         {
             _saveHelper = saveHelper;
@@ -235,6 +240,7 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
             StatusMessage = "Chappie is initializing...";
             IsServerRunning = false;
             SaveCommand = new RelayCommand(Save);
+            BackCommand = new RelayCommand(Back);
             ToggleServerCommand = new RelayCommand(ToggleServer);
             TestScriptCommand = new AsyncRelayCommand(TestScriptAsync);
             SetDefaultTemplate();
@@ -299,11 +305,28 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
             }
         }
 
+        /// <summary>
+        /// Raised when the configuration is saved.
+        /// </summary>
+        public event EventHandler? Saved;
+
+        /// <summary>
+        /// Raised when navigation back is requested without saving.
+        /// </summary>
+        public event EventHandler? BackRequested;
+
         public event EventHandler? RequestClose;
 
         private void Save()
         {
             _saveHelper.Show();
+            Saved?.Invoke(this, EventArgs.Empty);
+            RequestClose?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void Back()
+        {
+            BackRequested?.Invoke(this, EventArgs.Empty);
             RequestClose?.Invoke(this, EventArgs.Empty);
         }
 

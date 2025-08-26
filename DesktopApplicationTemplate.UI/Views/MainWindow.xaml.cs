@@ -117,11 +117,16 @@ namespace DesktopApplicationTemplate.UI.Views
                         var settingsView = App.AppHost.Services.GetRequiredService<TcpServiceView>();
                         if (settingsView.DataContext is TcpServiceViewModel tvm)
                         {
-                            tvm.RequestClose += (_, _) =>
+                            tvm.Saved += (_, _) =>
                             {
                                 if (svc.ServicePage != null)
                                     ShowPage(svc.ServicePage);
                                 _viewModel.SaveServices();
+                            };
+                            tvm.BackRequested += (_, _) =>
+                            {
+                                if (svc.ServicePage != null)
+                                    ShowPage(svc.ServicePage);
                             };
                         }
                         ShowPage(settingsView);
@@ -222,18 +227,16 @@ namespace DesktopApplicationTemplate.UI.Views
                 advVm.IsUdp = opts.UseUdp;
                 advVm.SelectedMode = opts.Mode == TcpServiceMode.Listening ? "Listening" : "Sending";
 
-                EventHandler? handler = null;
-                handler = (_, __) =>
+                advVm.Saved += (_, __) =>
                 {
                     opts.Host = advVm.ComputerIp;
                     if (int.TryParse(advVm.ListeningPort, out var p))
                         opts.Port = p;
                     opts.UseUdp = advVm.IsUdp;
                     opts.Mode = advVm.SelectedMode == "Listening" ? TcpServiceMode.Listening : TcpServiceMode.Sending;
-                    advVm.RequestClose -= handler;
                     ShowPage(view);
                 };
-                advVm.RequestClose += handler;
+                advVm.BackRequested += (_, __) => ShowPage(view);
                 ShowPage(advView);
             };
             ShowPage(view);
@@ -264,7 +267,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 var advView = App.AppHost.Services.GetRequiredService<FtpServerAdvancedConfigView>();
                 advView.DataContext = advVm;
                 advVm.Saved += _ => ShowPage(view);
-                advVm.Cancelled += () => ShowPage(view);
+                advVm.BackRequested += () => ShowPage(view);
                 ShowPage(advView);
             };
             vm.Cancelled += ShowCreateServiceSelectionPage;
@@ -412,8 +415,7 @@ namespace DesktopApplicationTemplate.UI.Views
                         vm.IsUdp = opts.UseUdp;
                         vm.SelectedMode = opts.Mode == TcpServiceMode.Listening ? "Listening" : "Sending";
                     }
-                    EventHandler? handler = null;
-                    handler = (_, _) =>
+                    vm.Saved += (_, _) =>
                     {
                         service.TcpOptions ??= new TcpServiceOptions();
                         service.TcpOptions.Host = vm.ComputerIp;
@@ -421,12 +423,15 @@ namespace DesktopApplicationTemplate.UI.Views
                             service.TcpOptions.Port = p;
                         service.TcpOptions.UseUdp = vm.IsUdp;
                         service.TcpOptions.Mode = vm.SelectedMode == "Listening" ? TcpServiceMode.Listening : TcpServiceMode.Sending;
-                        vm.RequestClose -= handler;
                         if (tcpPage != null)
                             ShowPage(tcpPage);
                         _viewModel.SaveServices();
                     };
-                    vm.RequestClose += handler;
+                    vm.BackRequested += (_, _) =>
+                    {
+                        if (tcpPage != null)
+                            ShowPage(tcpPage);
+                    };
                 }
                 ShowPage(editView);
                 _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
@@ -465,7 +470,7 @@ namespace DesktopApplicationTemplate.UI.Views
                     var advView = App.AppHost.Services.GetRequiredService<FtpServerAdvancedConfigView>();
                     advView.DataContext = advVm;
                     advVm.Saved += _ => ShowPage(editView);
-                    advVm.Cancelled += () => ShowPage(editView);
+                    advVm.BackRequested += () => ShowPage(editView);
                     ShowPage(advView);
                 };
                 ShowPage(editView);
