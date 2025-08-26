@@ -1265,3 +1265,12 @@ Effective Prompts / Instructions that worked: Followed MVVM and DI guidelines, r
 Decisions & Rationale: Reused existing TcpServiceView and mapped options to and from create view.
 Action Items: Run tests; monitor CI for WPF coverage.
 Related Commits/PRs: (this PR)
+
+[2025-08-26 16:30] Topic: TCP edit workflow
+Context: Added edit path for TCP services to load configuration view and persist changes.
+Observations: Wired RequestClose to return to messages view and save updated options.
+Codex Limitations noticed: Linux environment lacks WPF runtime; rely on CI for full execution.
+Effective Prompts / Instructions that worked: Direct request to handle TCP edits similar to FTP workflow.
+Decisions & Rationale: Reused TcpServiceViewModel and SaveServices to store options.
+Action Items: Run tests and monitor CI.
+Related Commits/PRs: (this PR)

@@ -8,6 +8,7 @@
 - FTP server view displaying live upload and download lists with server status.
 - Expanded tests for FtpServerService and FTP server view models covering start failures and invalid configurations.
 - Finalized TCP service creation with integrated message viewer for configuring endpoints and inspecting traffic.
+- Editing TCP services now opens a dedicated configuration view and saves updated options.
 - Introduced TCP service creation and message viewer enabling configuration and inspection of TCP endpoint traffic.
 - Registered transient TCP view models and bound `TcpServiceOptions` configuration.
 - TCP service creation flow integrated into selection window with option persistence.

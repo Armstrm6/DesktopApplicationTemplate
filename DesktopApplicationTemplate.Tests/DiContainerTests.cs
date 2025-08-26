@@ -22,6 +22,7 @@ public class DiContainerTests
         services.AddSingleton<MqttTagSubscriptionsViewModel>();
         services.AddTransient<TcpCreateServiceViewModel>();
         services.AddTransient<TcpServiceMessagesViewModel>();
+        services.AddSingleton<TcpServiceViewModel>();
         services.Configure<MqttServiceOptions>(o =>
         {
             o.Host = "localhost";
@@ -39,5 +40,6 @@ public class DiContainerTests
         Assert.NotNull(provider.GetRequiredService<MqttTagSubscriptionsViewModel>());
         Assert.NotNull(provider.GetRequiredService<TcpCreateServiceViewModel>());
         Assert.NotNull(provider.GetRequiredService<TcpServiceMessagesViewModel>());
+        Assert.NotNull(provider.GetRequiredService<TcpServiceViewModel>());
     }
 }
