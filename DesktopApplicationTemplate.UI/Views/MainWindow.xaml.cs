@@ -177,6 +177,7 @@ namespace DesktopApplicationTemplate.UI.Views
             page.MqttSelected += NavigateToMqtt;
             page.TcpSelected += NavigateToTcp;
             page.FtpServerSelected += NavigateToFtpServer;
+            page.HttpSelected += NavigateToHttp;
             page.Cancelled += ShowHome;
             ShowPage(page);
         }
@@ -237,6 +238,45 @@ namespace DesktopApplicationTemplate.UI.Views
                     ShowPage(view);
                 };
                 advVm.BackRequested += (_, __) => ShowPage(view);
+                ShowPage(advView);
+            };
+            ShowPage(view);
+        }
+
+        private void NavigateToHttp(string defaultName)
+        {
+            var vm = App.AppHost.Services.GetRequiredService<HttpCreateServiceViewModel>();
+            vm.ServiceName = defaultName;
+            vm.ServiceCreated += (name, options) =>
+            {
+                var svc = new ServiceViewModel
+                {
+                    DisplayName = $"HTTP - {name}",
+                    ServiceType = "HTTP",
+                    IsActive = false,
+                    HttpOptions = options
+                };
+                svc.SetColorsByType();
+                svc.LogAdded += _viewModel.OnServiceLogAdded;
+                svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
+                GetOrCreateServicePage(svc);
+                _viewModel.Services.Add(svc);
+                _logger?.LogInformation("Service {Name} added", svc.DisplayName);
+                _viewModel.SelectedService = svc;
+                ServiceList.ScrollIntoView(svc);
+                if (svc.ServicePage != null)
+                    ShowPage(svc.ServicePage);
+                _viewModel.SaveServices();
+            };
+            vm.Cancelled += ShowCreateServiceSelectionPage;
+            var view = ActivatorUtilities.CreateInstance<HttpCreateServiceView>(App.AppHost.Services, vm);
+            vm.AdvancedConfigRequested += opts =>
+            {
+                var advVm = ActivatorUtilities.CreateInstance<HttpAdvancedConfigViewModel>(App.AppHost.Services, opts);
+                var advView = App.AppHost.Services.GetRequiredService<HttpAdvancedConfigView>();
+                advView.DataContext = advVm;
+                advVm.Saved += _ => ShowPage(view);
+                advVm.BackRequested += () => ShowPage(view);
                 ShowPage(advView);
             };
             ShowPage(view);
@@ -433,6 +473,40 @@ namespace DesktopApplicationTemplate.UI.Views
                             ShowPage(tcpPage);
                     };
                 }
+                ShowPage(editView);
+                _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
+                return;
+            }
+
+            if (service.ServiceType == "HTTP")
+            {
+                var httpPage = GetOrCreateServicePage(service);
+                var options = service.HttpOptions ?? new HttpServiceOptions();
+                var vm = ActivatorUtilities.CreateInstance<HttpEditServiceViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
+                var editView = App.AppHost.Services.GetRequiredService<HttpEditServiceView>();
+                editView.DataContext = vm;
+                vm.ServiceUpdated += (name, opts) =>
+                {
+                    service.DisplayName = $"HTTP - {name}";
+                    service.HttpOptions = opts;
+                    if (httpPage != null)
+                        ShowPage(httpPage);
+                    _viewModel.SaveServices();
+                };
+                vm.Cancelled += () =>
+                {
+                    if (httpPage != null)
+                        ShowPage(httpPage);
+                };
+                vm.AdvancedConfigRequested += opts =>
+                {
+                    var advVm = ActivatorUtilities.CreateInstance<HttpAdvancedConfigViewModel>(App.AppHost.Services, opts);
+                    var advView = App.AppHost.Services.GetRequiredService<HttpAdvancedConfigView>();
+                    advView.DataContext = advVm;
+                    advVm.Saved += _ => ShowPage(editView);
+                    advVm.BackRequested += () => ShowPage(editView);
+                    ShowPage(advView);
+                };
                 ShowPage(editView);
                 _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
                 return;

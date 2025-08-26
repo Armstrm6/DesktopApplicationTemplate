@@ -1341,3 +1341,11 @@ Effective Prompts / Instructions that worked: Follow MVVM guidelines and update 
 Decisions & Rationale: Introduced distinct commands and events for saving versus navigation.
 Action Items: Monitor CI for Windows-specific issues.
 Related Commits/PRs: (this PR)
+[2025-08-27 12:00] Topic: HTTP service navigation
+Context: Added HTTP service creation, edit, and advanced configuration views with navigation hooks.
+Observations: New view models handle advanced auth and certificate options; tests cover create, edit, and back flows.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; rely on CI for full WPF validation.
+Effective Prompts / Instructions that worked: Followed MVVM and DI registration guidelines.
+Decisions & Rationale: Mirror TCP and FTP patterns to maintain consistent service workflows.
+Action Items: Monitor CI for Windows-specific issues.
+Related Commits/PRs:

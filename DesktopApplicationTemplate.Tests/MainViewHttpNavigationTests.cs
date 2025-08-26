@@ -15,12 +15,12 @@ using Xunit;
 
 namespace DesktopApplicationTemplate.Tests;
 
-public class MainViewCreateNavigationTests
+public class MainViewHttpNavigationTests
 {
     [Fact]
     [TestCategory("CodexSafe")]
     [TestCategory("WindowsSafe")]
-    public void NavigateToTcp_ShowsCreateView()
+    public void NavigateToHttp_ShowsCreateView()
     {
         if (!OperatingSystem.IsWindows())
             return;
@@ -43,9 +43,10 @@ public class MainViewCreateNavigationTests
                 {
                     s.AddLogging();
                     s.AddSingleton<ILoggingService>(logger);
-                    s.AddTransient<TcpCreateServiceViewModel>();
-                    s.AddTransient<TcpCreateServiceView>();
-                    s.AddOptions<TcpServiceOptions>();
+                    s.AddTransient<HttpCreateServiceViewModel>();
+                    s.AddTransient<HttpCreateServiceView>();
+                    s.AddTransient<HttpAdvancedConfigViewModel>();
+                    s.AddTransient<HttpAdvancedConfigView>();
                 })
                 .Build();
             var prop = typeof(App).GetProperty("AppHost");
@@ -53,10 +54,10 @@ public class MainViewCreateNavigationTests
             setter!.Invoke(null, new object[] { host });
 
             var view = new MainView(mainVm);
-            var method = typeof(MainView).GetMethod("NavigateToTcp", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            var method = typeof(MainView).GetMethod("NavigateToHttp", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
             method!.Invoke(view, new object[] { "Test" });
 
-            view.ContentFrame.Content.Should().BeOfType<TcpCreateServiceView>();
+            view.ContentFrame.Content.Should().BeOfType<HttpCreateServiceView>();
             ConsoleTestLogger.LogPass();
         });
         thread.SetApartmentState(ApartmentState.STA);
@@ -67,7 +68,7 @@ public class MainViewCreateNavigationTests
     [Fact]
     [TestCategory("CodexSafe")]
     [TestCategory("WindowsSafe")]
-    public void NavigateToFtpServer_ShowsCreateView()
+    public void EditHttpService_ShowsEditView()
     {
         if (!OperatingSystem.IsWindows())
             return;
@@ -90,20 +91,30 @@ public class MainViewCreateNavigationTests
                 {
                     s.AddLogging();
                     s.AddSingleton<ILoggingService>(logger);
-                    s.AddTransient<FtpServerCreateViewModel>();
-                    s.AddTransient<FtpServerCreateView>();
-                    s.AddOptions<FtpServerOptions>();
+                    s.AddSingleton<HttpServiceViewModel>();
+                    s.AddSingleton<HttpServiceView>();
+                    s.AddTransient<HttpEditServiceViewModel>();
+                    s.AddTransient<HttpEditServiceView>();
+                    s.AddTransient<HttpAdvancedConfigViewModel>();
+                    s.AddTransient<HttpAdvancedConfigView>();
                 })
                 .Build();
             var prop = typeof(App).GetProperty("AppHost");
             var setter = prop!.GetSetMethod(true);
             setter!.Invoke(null, new object[] { host });
 
-            var view = new MainView(mainVm);
-            var method = typeof(MainView).GetMethod("NavigateToFtpServer", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-            method!.Invoke(view, new object[] { "Test" });
+            var service = new ServiceViewModel
+            {
+                DisplayName = "HTTP - Test",
+                ServiceType = "HTTP",
+                HttpOptions = new HttpServiceOptions { BaseUrl = "http://example" }
+            };
 
-            view.ContentFrame.Content.Should().BeOfType<FtpServerCreateView>();
+            var view = new MainView(mainVm);
+            var method = typeof(MainView).GetMethod("OnEditRequested", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            method!.Invoke(view, new object[] { service });
+
+            view.ContentFrame.Content.Should().BeOfType<HttpEditServiceView>();
             ConsoleTestLogger.LogPass();
         });
         thread.SetApartmentState(ApartmentState.STA);

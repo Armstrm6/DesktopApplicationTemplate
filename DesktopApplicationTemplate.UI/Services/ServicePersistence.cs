@@ -22,6 +22,7 @@ namespace DesktopApplicationTemplate.UI.Services
             {
                 TcpServiceOptions? tcp = null;
                 FtpServerOptions? ftp = null;
+                HttpServiceOptions? http = null;
                 if (s.ServiceType == "TCP" && s.TcpOptions != null)
                 {
                     tcp = new TcpServiceOptions
@@ -45,6 +46,17 @@ namespace DesktopApplicationTemplate.UI.Services
                     };
                 }
 
+                if (s.ServiceType == "HTTP" && s.HttpOptions != null)
+                {
+                    http = new HttpServiceOptions
+                    {
+                        BaseUrl = s.HttpOptions.BaseUrl,
+                        Username = s.HttpOptions.Username,
+                        Password = s.HttpOptions.Password,
+                        ClientCertificatePath = s.HttpOptions.ClientCertificatePath
+                    };
+                }
+
                 data.Add(new ServiceInfo
                 {
                     DisplayName = s.DisplayName,
@@ -54,7 +66,8 @@ namespace DesktopApplicationTemplate.UI.Services
                     Order = index++,
                     AssociatedServices = new List<string>(s.AssociatedServices),
                     TcpOptions = tcp,
-                    FtpOptions = ftp
+                    FtpOptions = ftp,
+                    HttpOptions = http
                 });
             }
 
@@ -164,5 +177,6 @@ namespace DesktopApplicationTemplate.UI.Services
         public List<string> AssociatedServices { get; set; } = new();
         public TcpServiceOptions? TcpOptions { get; set; }
         public FtpServerOptions? FtpOptions { get; set; }
+        public HttpServiceOptions? HttpOptions { get; set; }
     }
 }

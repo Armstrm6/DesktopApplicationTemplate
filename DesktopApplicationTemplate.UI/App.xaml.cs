@@ -93,6 +93,12 @@ namespace DesktopApplicationTemplate.UI
             services.AddTransient<FtpServerAdvancedConfigViewModel>();
             services.AddTransient<FtpServerEditView>();
             services.AddTransient<FtpServerEditViewModel>();
+            services.AddTransient<HttpCreateServiceView>();
+            services.AddTransient<HttpCreateServiceViewModel>();
+            services.AddTransient<HttpEditServiceView>();
+            services.AddTransient<HttpEditServiceViewModel>();
+            services.AddTransient<HttpAdvancedConfigView>();
+            services.AddTransient<HttpAdvancedConfigViewModel>();
             services.AddTransient<MqttEditConnectionView>();
             services.AddTransient<MqttEditConnectionViewModel>();
             services.AddTransient<MqttTagSubscriptionsView>();
