@@ -114,9 +114,52 @@ public class CreateServiceNavigationTests
             window.CreatedServiceType.Should().Be("TCP");
             window.CreatedServiceName.Should().Be("Svc");
             window.TcpOptions.Should().Be(options);
+            window.DialogResult.Should().BeTrue();
         });
         windowThread.SetApartmentState(ApartmentState.STA);
         windowThread.Start();
         windowThread.Join();
+    }
+
+    [Fact]
+    public void ServiceCreated_ClosesWindow()
+    {
+        var services = new ServiceCollection().BuildServiceProvider();
+
+        var thread = new Thread(() =>
+        {
+            var window = new CreateServiceWindow(new CreateServiceViewModel(), services);
+            var pageField = typeof(CreateServiceWindow).GetField("_page", BindingFlags.NonPublic | BindingFlags.Instance)!;
+            var page = (CreateServicePage)pageField.GetValue(window)!;
+            var button = new Button { DataContext = new CreateServiceViewModel.ServiceTypeMetadata("HTTP", "HTTP", string.Empty) };
+            var click = typeof(CreateServicePage).GetMethod("ServiceType_Click", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            click.Invoke(page, new object[] { button, new RoutedEventArgs() });
+
+            window.CreatedServiceType.Should().Be("HTTP");
+            window.DialogResult.Should().BeTrue();
+        });
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        thread.Join();
+    }
+
+    [Fact]
+    public void Cancel_Click_ClosesWindow()
+    {
+        var services = new ServiceCollection().BuildServiceProvider();
+
+        var thread = new Thread(() =>
+        {
+            var window = new CreateServiceWindow(new CreateServiceViewModel(), services);
+            var pageField = typeof(CreateServiceWindow).GetField("_page", BindingFlags.NonPublic | BindingFlags.Instance)!;
+            var page = (CreateServicePage)pageField.GetValue(window)!;
+            var cancel = typeof(CreateServicePage).GetMethod("Cancel_Click", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            cancel.Invoke(page, new object[] { new Button(), new RoutedEventArgs() });
+
+            window.DialogResult.Should().BeFalse();
+        });
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        thread.Join();
     }
 }

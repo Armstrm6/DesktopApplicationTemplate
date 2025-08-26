@@ -144,3 +144,4 @@
 - Selecting FTP service in the add services window no longer freezes the application; FTP options apply before view creation ensuring the service is added.
 - FTP server creation no longer freezes when selecting the service type; text fields update immediately so saving works without changing focus.
 - Creating an FTP service now closes the selection window after saving.
+- Create service window now closes after service selection or cancellation, ensuring services are added and preventing blank windows.

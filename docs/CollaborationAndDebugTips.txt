@@ -1241,3 +1241,11 @@ Effective Prompts / Instructions that worked: User request highlighted window cl
 Decisions & Rationale: Use fixed-width WrapPanel and close dialog upon FTP service creation to restore expected workflow.
 Action Items: Run tests and monitor CI.
 Related Commits/PRs:
+[2025-08-26 15:14] Topic: Create service window closure
+Context: Selection window remained open with blank content and services weren't added.
+Observations: Setting DialogResult without Close() left window displayed.
+Codex Limitations noticed: Required .NET SDK 8.0.404 unavailable; tests deferred to CI.
+Effective Prompts / Instructions that worked: Request to ensure service creation closes dialog.
+Decisions & Rationale: Invoke Close() after setting DialogResult on create or cancel events.
+Action Items: Rely on CI for full WPF validation.
+Related Commits/PRs: (this PR)
