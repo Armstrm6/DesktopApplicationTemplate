@@ -324,6 +324,41 @@ namespace DesktopApplicationTemplate.UI.Views
                 return;
             }
 
+            if (service.ServiceType == "TCP")
+            {
+                var tcpPage = GetOrCreateServicePage(service);
+                var editView = App.AppHost.Services.GetRequiredService<TcpServiceView>();
+                if (editView.DataContext is TcpServiceViewModel vm)
+                {
+                    var opts = service.TcpOptions;
+                    if (opts != null)
+                    {
+                        vm.ComputerIp = opts.Host;
+                        vm.ListeningPort = opts.Port.ToString();
+                        vm.IsUdp = opts.UseUdp;
+                        vm.SelectedMode = opts.Mode == TcpServiceMode.Listening ? "Listening" : "Sending";
+                    }
+                    EventHandler? handler = null;
+                    handler = (_, _) =>
+                    {
+                        service.TcpOptions ??= new TcpServiceOptions();
+                        service.TcpOptions.Host = vm.ComputerIp;
+                        if (int.TryParse(vm.ListeningPort, out var p))
+                            service.TcpOptions.Port = p;
+                        service.TcpOptions.UseUdp = vm.IsUdp;
+                        service.TcpOptions.Mode = vm.SelectedMode == "Listening" ? TcpServiceMode.Listening : TcpServiceMode.Sending;
+                        vm.RequestClose -= handler;
+                        if (tcpPage != null)
+                            ShowPage(tcpPage);
+                        _viewModel.SaveServices();
+                    };
+                    vm.RequestClose += handler;
+                }
+                ShowPage(editView);
+                _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
+                return;
+            }
+
             if (service.ServiceType == "FTP Server" || service.ServiceType == "FTP")
             {
                 var ftpPage = GetOrCreateServicePage(service);
