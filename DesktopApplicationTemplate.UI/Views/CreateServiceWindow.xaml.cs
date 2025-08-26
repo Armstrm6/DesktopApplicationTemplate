@@ -3,6 +3,9 @@ using System.Windows;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
@@ -16,11 +19,13 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private readonly IServiceProvider _services;
         private readonly CreateServicePage _page;
+        private readonly ILogger<CreateServiceWindow> _logger;
 
-        public CreateServiceWindow(CreateServiceViewModel viewModel, IServiceProvider services)
+        public CreateServiceWindow(CreateServiceViewModel viewModel, IServiceProvider services, ILogger<CreateServiceWindow>? logger = null)
         {
             InitializeComponent();
             _services = services ?? throw new ArgumentNullException(nameof(services));
+            _logger = logger ?? NullLogger<CreateServiceWindow>.Instance;
             _page = new CreateServicePage(viewModel);
             _page.ServiceCreated += (name, type) =>
             {
@@ -102,14 +107,24 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             var vm = _services.GetRequiredService<FtpServerCreateViewModel>();
             vm.ServiceName = defaultName;
+
+            var opts = _services.GetRequiredService<IOptions<FtpServerOptions>>().Value;
+            vm.Options.Port = opts.Port;
+            vm.Options.RootPath = opts.RootPath;
+            vm.Options.AllowAnonymous = opts.AllowAnonymous;
+            vm.Options.Username = opts.Username;
+            vm.Options.Password = opts.Password;
+
             var view = _services.GetRequiredService<FtpServerCreateView>();
             view.DataContext = vm;
             vm.ServerCreated += (name, options) =>
             {
+                _logger.LogInformation("FTP server {Name} created", name);
                 CreatedServiceName = name;
                 CreatedServiceType = "FTP Server";
                 FtpServerOptions = options;
                 DialogResult = true;
+                _logger.LogInformation("Closing create service window after FTP server creation");
                 Close();
             };
             vm.AdvancedConfigRequested += opts =>
@@ -121,7 +136,9 @@ namespace DesktopApplicationTemplate.UI.Views
                 advVm.Cancelled += () => ContentFrame.Content = view;
                 ContentFrame.Content = advView;
             };
+            _logger.LogInformation("Navigating to FTP server creation view");
             ContentFrame.Content = view;
+            _logger.LogInformation("FTP server creation view displayed");
         }
     }
 }

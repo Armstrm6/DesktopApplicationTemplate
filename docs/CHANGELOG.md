@@ -147,3 +147,4 @@
 - FTP server creation no longer freezes when selecting the service type; text fields update immediately so saving works without changing focus.
 - Creating an FTP service now closes the selection window after saving.
 - Create service window now closes after service selection or cancellation, ensuring services are added and preventing blank windows.
+- FTP server creation view preloads options from configuration and logs navigation, ensuring the dialog closes after server creation.

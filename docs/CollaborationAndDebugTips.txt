@@ -12,6 +12,15 @@ Decisions & Rationale: Use event-driven navigation and injection to decouple vie
 Action Items: Verify navigation on Windows CI.
 Related Commits/PRs: (this PR)
 
+[2025-08-26 16:05] Topic: FTP server create navigation logging
+Context: Ensure FTP server creation preloads options and logs navigation to confirm the dialog closes after save.
+Observations: View model options seeded from configuration; logs surround view navigation and server creation closure.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; rely on CI for full validation.
+Effective Prompts / Instructions that worked: User request to populate options and add logging.
+Decisions & Rationale: Inject logger and copy IOptions<FtpServerOptions> into the view model before loading the view.
+Action Items: Monitor CI for Windows-specific behavior.
+Related Commits/PRs: (this PR)
+
 [2025-08-26 10:00] Topic: FTP server creation flow
 Context: Ftp server create and edit windows failed to open from service selection or edit commands.
 Observations: Added dedicated navigation in CreateServiceWindow and MainWindow, enabling advanced configuration.
