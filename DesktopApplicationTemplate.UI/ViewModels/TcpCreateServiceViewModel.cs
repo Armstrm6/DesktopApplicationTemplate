@@ -20,6 +20,11 @@ public class TcpCreateServiceViewModel : ViewModelBase
     private TcpServiceMode _mode = TcpServiceMode.Listening;
 
     /// <summary>
+    /// Current advanced options.
+    /// </summary>
+    public TcpServiceOptions Options { get; } = new();
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="TcpCreateServiceViewModel"/> class.
     /// </summary>
     public TcpCreateServiceViewModel(ILoggingService? logger = null)
@@ -27,6 +32,7 @@ public class TcpCreateServiceViewModel : ViewModelBase
         Logger = logger;
         CreateCommand = new RelayCommand(Create);
         CancelCommand = new RelayCommand(Cancel);
+        AdvancedConfigCommand = new RelayCommand(OpenAdvancedConfig);
         Modes = Enum.GetValues(typeof(TcpServiceMode)).Cast<TcpServiceMode>().ToArray();
     }
 
@@ -49,6 +55,11 @@ public class TcpCreateServiceViewModel : ViewModelBase
     /// Command to cancel configuration.
     /// </summary>
     public ICommand CancelCommand { get; }
+
+    /// <summary>
+    /// Command to open advanced configuration.
+    /// </summary>
+    public ICommand AdvancedConfigCommand { get; }
 
     /// <summary>
     /// Available service modes.
@@ -103,23 +114,35 @@ public class TcpCreateServiceViewModel : ViewModelBase
         set { _mode = value; OnPropertyChanged(); }
     }
 
+    /// <summary>
+    /// Raised when advanced configuration is requested.
+    /// </summary>
+    public event Action<TcpServiceOptions>? AdvancedConfigRequested;
+
     private void Create()
     {
         Logger?.Log("TCP create options start", LogLevel.Debug);
-        var options = new TcpServiceOptions
-        {
-            Host = Host,
-            Port = Port,
-            UseUdp = UseUdp,
-            Mode = Mode
-        };
+        Options.Host = Host;
+        Options.Port = Port;
+        Options.UseUdp = UseUdp;
+        Options.Mode = Mode;
         Logger?.Log("TCP create options finished", LogLevel.Debug);
-        ServiceCreated?.Invoke(ServiceName, options);
+        ServiceCreated?.Invoke(ServiceName, Options);
     }
 
     private void Cancel()
     {
         Logger?.Log("TCP create options cancelled", LogLevel.Debug);
         Cancelled?.Invoke();
+    }
+
+    private void OpenAdvancedConfig()
+    {
+        Logger?.Log("Opening TCP advanced config", LogLevel.Debug);
+        Options.Host = Host;
+        Options.Port = Port;
+        Options.UseUdp = UseUdp;
+        Options.Mode = Mode;
+        AdvancedConfigRequested?.Invoke(Options);
     }
 }

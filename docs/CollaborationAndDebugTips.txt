@@ -1257,3 +1257,11 @@ Effective Prompts / Instructions that worked: Direct request to show newly creat
 Decisions & Rationale: Mirror MQTT and FTP workflows to keep service addition consistent.
 Action Items: Run tests and monitor CI.
 Related Commits/PRs: (this PR)
+[2025-08-26 15:44] Topic: TCP create advanced config
+Context: Exposed advanced TCP configuration from create view via new command and navigation.
+Observations: Added Advanced button and event to launch TcpServiceView for deeper options.
+Codex Limitations noticed: Linux environment lacks WPF runtime; rely on CI for verification.
+Effective Prompts / Instructions that worked: Followed MVVM and DI guidelines, referencing FTP advanced flow.
+Decisions & Rationale: Reused existing TcpServiceView and mapped options to and from create view.
+Action Items: Run tests; monitor CI for WPF coverage.
+Related Commits/PRs: (this PR)
