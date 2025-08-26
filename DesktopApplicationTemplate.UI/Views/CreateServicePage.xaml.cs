@@ -15,6 +15,7 @@ namespace DesktopApplicationTemplate.UI.Views
         public event Action<string>? FtpServerSelected;
         public event Action<string>? HttpSelected;
         public event Action<string>? HidSelected;
+        public event Action<string>? CsvSelected;
         public event Action<string>? FileObserverSelected;
         public event Action? Cancelled;
 
@@ -58,6 +59,11 @@ namespace DesktopApplicationTemplate.UI.Views
                 if (meta.Type == "HID")
                 {
                     HidSelected?.Invoke(name);
+                    return;
+                }
+                if (meta.Type == "CSV Creator")
+                {
+                    CsvSelected?.Invoke(name);
                     return;
                 }
                 if (meta.Type == "File Observer")

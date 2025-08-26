@@ -1374,3 +1374,11 @@ Effective Prompts / Instructions that worked: Followed MVVM/DI patterns and exis
 Decisions & Rationale: Mirror HID workflow for consistency.
 Action Items: Monitor CI for Windows-specific issues.
 Related Commits/PRs: (this PR)
+[2025-08-26 18:52] Topic: CSV service creation
+Context: Implemented CSV create/edit views with advanced options and navigation.
+Observations: Implemented CSV create/edit flow with advanced config navigation.
+Codex Limitations noticed: Linux environment lacks Windows UI runtime; navigation untested locally.
+Effective Prompts / Instructions that worked: User instructions to add CSV navigation and advanced configuration.
+Decisions & Rationale: Followed existing service patterns for create/edit and advanced config to maintain consistency.
+Action Items: Verify navigation on Windows.
+Related Commits/PRs: (this PR)
