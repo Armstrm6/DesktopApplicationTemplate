@@ -22,6 +22,7 @@ public class FtpServerCreateViewModel : ValidatableViewModelBase, ILoggingViewMo
     {
         Logger = logger;
         SaveCommand = new RelayCommand(Save);
+        CancelCommand = new RelayCommand(Cancel);
         AdvancedConfigCommand = new RelayCommand(OpenAdvancedConfig);
     }
 
@@ -38,6 +39,11 @@ public class FtpServerCreateViewModel : ValidatableViewModelBase, ILoggingViewMo
     public ICommand SaveCommand { get; }
 
     /// <summary>
+    /// Command for cancelling server creation.
+    /// </summary>
+    public ICommand CancelCommand { get; }
+
+    /// <summary>
     /// Command for launching the advanced configuration view.
     /// </summary>
     public ICommand AdvancedConfigCommand { get; }
@@ -46,6 +52,11 @@ public class FtpServerCreateViewModel : ValidatableViewModelBase, ILoggingViewMo
     /// Raised when the configuration is saved.
     /// </summary>
     public event Action<string, FtpServerOptions>? ServerCreated;
+
+    /// <summary>
+    /// Raised when creation is cancelled.
+    /// </summary>
+    public event Action? Cancelled;
 
     /// <summary>
     /// Raised when advanced configuration is requested.
@@ -112,6 +123,12 @@ public class FtpServerCreateViewModel : ValidatableViewModelBase, ILoggingViewMo
         Options.RootPath = RootPath;
         Logger?.Log("FTP server create options finished", LogLevel.Debug);
         ServerCreated?.Invoke(ServiceName, Options);
+    }
+
+    private void Cancel()
+    {
+        Logger?.Log("FTP server create options cancelled", LogLevel.Debug);
+        Cancelled?.Invoke();
     }
 
     private void OpenAdvancedConfig()

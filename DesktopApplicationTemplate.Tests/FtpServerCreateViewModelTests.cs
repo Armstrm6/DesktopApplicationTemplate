@@ -36,6 +36,21 @@ public class FtpServerCreateViewModelTests
     [Fact]
     [TestCategory("CodexSafe")]
     [TestCategory("WindowsSafe")]
+    public void CancelCommand_RaisesCancelled()
+    {
+        var vm = new FtpServerCreateViewModel();
+        var cancelled = false;
+        vm.Cancelled += () => cancelled = true;
+
+        vm.CancelCommand.Execute(null);
+
+        Assert.True(cancelled);
+        ConsoleTestLogger.LogPass();
+    }
+
+    [Fact]
+    [TestCategory("CodexSafe")]
+    [TestCategory("WindowsSafe")]
     public void SettingInvalidPort_AddsError()
     {
         var vm = new FtpServerCreateViewModel();
