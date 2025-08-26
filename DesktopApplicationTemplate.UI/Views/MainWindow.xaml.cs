@@ -212,8 +212,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 _viewModel.SaveServices();
             };
             vm.Cancelled += ShowCreateServiceSelectionPage;
-            var view = App.AppHost.Services.GetRequiredService<TcpCreateServiceView>();
-            view.DataContext = vm;
+            var view = ActivatorUtilities.CreateInstance<TcpCreateServiceView>(App.AppHost.Services, vm);
             vm.AdvancedConfigRequested += opts =>
             {
                 var advView = App.AppHost.Services.GetRequiredService<TcpServiceView>();
@@ -252,8 +251,7 @@ namespace DesktopApplicationTemplate.UI.Views
             vm.Options.Username = opts.Username;
             vm.Options.Password = opts.Password;
 
-            var view = App.AppHost.Services.GetRequiredService<FtpServerCreateView>();
-            view.DataContext = vm;
+            var view = ActivatorUtilities.CreateInstance<FtpServerCreateView>(App.AppHost.Services, vm);
             vm.ServerCreated += (name, options) =>
             {
                 _logger?.LogInformation("FTP server {Name} created", name);

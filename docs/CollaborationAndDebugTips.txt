@@ -1325,3 +1325,11 @@ Decisions & Rationale: Align FTP create flow with other create view models.
 Action Items: Monitor CI for Windows-specific issues.
 Related Commits/PRs: (this PR)
 
+[2025-08-26 17:14] Topic: TCP/FTP creation navigation
+Context: Ensure selecting TCP or FTP server opens configuration views before adding services.
+Observations: Added view constructors with DI, updated navigation to use ActivatorUtilities, and introduced navigation tests.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: request to route service selections through create views.
+Decisions & Rationale: Inject view models and logging via constructors to guarantee required fields and consistent setup.
+Action Items: Monitor CI.
+Related Commits/PRs: (this PR)
