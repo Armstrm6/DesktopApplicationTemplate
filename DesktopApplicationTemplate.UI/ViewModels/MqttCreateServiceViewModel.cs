@@ -1,12 +1,8 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Services;
-using MQTTnet.Protocol;
 
 namespace DesktopApplicationTemplate.UI.ViewModels;
 
@@ -21,15 +17,6 @@ public class MqttCreateServiceViewModel : ViewModelBase
     private string _clientId = string.Empty;
     private string? _username;
     private string? _password;
-    private bool _useTls;
-    private string? _clientCertificatePath;
-    private string? _willTopic;
-    private string? _willPayload;
-    private MqttQualityOfServiceLevel _willQualityOfService = MqttQualityOfServiceLevel.AtMostOnce;
-    private bool _willRetain;
-    private ushort _keepAliveSeconds = 60;
-    private bool _cleanSession = true;
-    private int _reconnectDelaySeconds;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MqttCreateServiceViewModel"/> class.
@@ -39,7 +26,7 @@ public class MqttCreateServiceViewModel : ViewModelBase
         Logger = logger;
         CreateCommand = new RelayCommand(Create);
         CancelCommand = new RelayCommand(Cancel);
-        QoSLevels = Enum.GetValues(typeof(MqttQualityOfServiceLevel)).Cast<MqttQualityOfServiceLevel>().ToArray();
+        AdvancedConfigCommand = new RelayCommand(OpenAdvancedConfig);
     }
 
     /// <summary>
@@ -53,6 +40,11 @@ public class MqttCreateServiceViewModel : ViewModelBase
     public event Action? Cancelled;
 
     /// <summary>
+    /// Raised when advanced configuration is requested.
+    /// </summary>
+    public event Action<MqttServiceOptions>? AdvancedConfigRequested;
+
+    /// <summary>
     /// Command to finalize service creation.
     /// </summary>
     public ICommand CreateCommand { get; }
@@ -63,9 +55,9 @@ public class MqttCreateServiceViewModel : ViewModelBase
     public ICommand CancelCommand { get; }
 
     /// <summary>
-    /// Available MQTT quality of service levels.
+    /// Command to open advanced configuration.
     /// </summary>
-    public IReadOnlyList<MqttQualityOfServiceLevel> QoSLevels { get; }
+    public ICommand AdvancedConfigCommand { get; }
 
     /// <inheritdoc />
     public ILoggingService? Logger { get; set; }
@@ -125,118 +117,36 @@ public class MqttCreateServiceViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Whether TLS should be used for the connection.
+    /// Current configuration options including advanced settings.
     /// </summary>
-    public bool UseTls
-    {
-        get => _useTls;
-        set { _useTls = value; OnPropertyChanged(); }
-    }
-
-    /// <summary>
-    /// Path to the client certificate used for TLS authentication.
-    /// </summary>
-    public string? ClientCertificatePath
-    {
-        get => _clientCertificatePath;
-        set { _clientCertificatePath = value; OnPropertyChanged(); }
-    }
-
-    /// <summary>
-    /// Will topic published on unexpected disconnect.
-    /// </summary>
-    public string? WillTopic
-    {
-        get => _willTopic;
-        set { _willTopic = value; OnPropertyChanged(); }
-    }
-
-    /// <summary>
-    /// Will message payload.
-    /// </summary>
-    public string? WillPayload
-    {
-        get => _willPayload;
-        set { _willPayload = value; OnPropertyChanged(); }
-    }
-
-    /// <summary>
-    /// Quality of service level for the will message.
-    /// </summary>
-    public MqttQualityOfServiceLevel WillQualityOfService
-    {
-        get => _willQualityOfService;
-        set { _willQualityOfService = value; OnPropertyChanged(); }
-    }
-
-    /// <summary>
-    /// Whether the will message should be retained.
-    /// </summary>
-    public bool WillRetain
-    {
-        get => _willRetain;
-        set { _willRetain = value; OnPropertyChanged(); }
-    }
-
-    /// <summary>
-    /// Keep alive interval in seconds.
-    /// </summary>
-    public ushort KeepAliveSeconds
-    {
-        get => _keepAliveSeconds;
-        set { _keepAliveSeconds = value; OnPropertyChanged(); }
-    }
-
-    /// <summary>
-    /// Whether a clean session should be used.
-    /// </summary>
-    public bool CleanSession
-    {
-        get => _cleanSession;
-        set { _cleanSession = value; OnPropertyChanged(); }
-    }
-
-    /// <summary>
-    /// Reconnect delay in seconds.
-    /// </summary>
-    public int ReconnectDelaySeconds
-    {
-        get => _reconnectDelaySeconds;
-        set { _reconnectDelaySeconds = value; OnPropertyChanged(); }
-    }
+    public MqttServiceOptions Options { get; } = new();
 
     private void Create()
     {
         Logger?.Log("MQTT create options start", LogLevel.Debug);
-        var options = new MqttServiceOptions
-        {
-            Host = Host,
-            Port = Port,
-            ClientId = ClientId,
-            Username = string.IsNullOrWhiteSpace(Username) ? null : Username,
-            Password = string.IsNullOrWhiteSpace(Password) ? null : Password,
-            UseTls = UseTls,
-            WillTopic = string.IsNullOrWhiteSpace(WillTopic) ? null : WillTopic,
-            WillPayload = string.IsNullOrWhiteSpace(WillPayload) ? null : WillPayload,
-            WillQualityOfService = WillQualityOfService,
-            WillRetain = WillRetain,
-            KeepAliveSeconds = KeepAliveSeconds,
-            CleanSession = CleanSession,
-            ReconnectDelay = ReconnectDelaySeconds > 0 ? TimeSpan.FromSeconds(ReconnectDelaySeconds) : null
-        };
-
-        if (!string.IsNullOrWhiteSpace(ClientCertificatePath) && File.Exists(ClientCertificatePath))
-        {
-            options.ClientCertificate = File.ReadAllBytes(ClientCertificatePath);
-        }
-
+        Options.Host = Host;
+        Options.Port = Port;
+        Options.ClientId = ClientId;
+        Options.Username = string.IsNullOrWhiteSpace(Username) ? null : Username;
+        Options.Password = string.IsNullOrWhiteSpace(Password) ? null : Password;
         Logger?.Log("MQTT create options finished", LogLevel.Debug);
-        ServiceCreated?.Invoke(ServiceName, options);
+        ServiceCreated?.Invoke(ServiceName, Options);
     }
 
     private void Cancel()
     {
         Logger?.Log("MQTT create options cancelled", LogLevel.Debug);
         Cancelled?.Invoke();
+    }
+
+    private void OpenAdvancedConfig()
+    {
+        Logger?.Log("Opening MQTT advanced config", LogLevel.Debug);
+        Options.Host = Host;
+        Options.Port = Port;
+        Options.ClientId = ClientId;
+        Options.Username = string.IsNullOrWhiteSpace(Username) ? null : Username;
+        Options.Password = string.IsNullOrWhiteSpace(Password) ? null : Password;
+        AdvancedConfigRequested?.Invoke(Options);
     }
 }
