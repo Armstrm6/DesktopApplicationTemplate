@@ -151,5 +151,81 @@ namespace DesktopApplicationTemplate.Tests
 
             ConsoleTestLogger.LogPass();
         }
+
+        [Fact]
+        [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
+        public void SaveAndLoad_PreservesFtpServerOptions()
+        {
+            var host = Host.CreateDefaultBuilder()
+                .ConfigureServices(s => s.Configure<FtpServerOptions>(_ => { }))
+                .Build();
+            var setter = typeof(App).GetProperty("AppHost", BindingFlags.Static | BindingFlags.Public)!
+                .GetSetMethod(true)!;
+            setter.Invoke(null, new object[] { host });
+
+            var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(tempDir);
+            string oldPath = ServicePersistence.FilePath;
+            ServicePersistence.FilePath = Path.Combine(tempDir, "services.json");
+
+            try
+            {
+                var opt = host.Services.GetRequiredService<IOptions<FtpServerOptions>>().Value;
+
+                var services = new List<ServiceViewModel>
+                {
+                    new ServiceViewModel
+                    {
+                        DisplayName = "FTP Server - One",
+                        ServiceType = "FTP Server",
+                        IsActive = false,
+                        Order = 0,
+                        FtpOptions = new FtpServerOptions
+                        {
+                            Port = 21,
+                            RootPath = "/srv",
+                            AllowAnonymous = true,
+                            Username = "u",
+                            Password = "p"
+                        }
+                    }
+                };
+
+                ServicePersistence.Save(services);
+
+                // mutate options to verify load restores
+                opt.Port = 100;
+                opt.RootPath = "changed";
+                opt.AllowAnonymous = false;
+                opt.Username = null;
+                opt.Password = null;
+
+                var loaded = ServicePersistence.Load();
+                var info = Assert.Single(loaded);
+                Assert.NotNull(info.FtpOptions);
+                Assert.Equal(21, info.FtpOptions!.Port);
+                Assert.Equal("/srv", info.FtpOptions.RootPath);
+                Assert.True(info.FtpOptions.AllowAnonymous);
+                Assert.Equal("u", info.FtpOptions.Username);
+                Assert.Equal("p", info.FtpOptions.Password);
+
+                // global options restored
+                Assert.Equal(21, opt.Port);
+                Assert.Equal("/srv", opt.RootPath);
+                Assert.True(opt.AllowAnonymous);
+                Assert.Equal("u", opt.Username);
+                Assert.Equal("p", opt.Password);
+            }
+            finally
+            {
+                ServicePersistence.FilePath = oldPath;
+                Directory.Delete(tempDir, true);
+                setter.Invoke(null, new object[] { null! });
+                host.Dispose();
+            }
+
+            ConsoleTestLogger.LogPass();
+        }
     }
 }

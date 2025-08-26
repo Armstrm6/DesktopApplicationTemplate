@@ -34,6 +34,59 @@ public class CreateServiceNavigationTests
     }
 
     [Fact]
+    public void ServiceType_Click_RaisesFtpServerSelected()
+    {
+        string? receivedName = null;
+        var thread = new Thread(() =>
+        {
+            var vm = new CreateServiceViewModel();
+            var page = new CreateServicePage(vm);
+            page.FtpServerSelected += name => receivedName = name;
+            var button = new Button { DataContext = new CreateServiceViewModel.ServiceTypeMetadata("FTP Server", "FTP Server", string.Empty) };
+            var method = typeof(CreateServicePage).GetMethod("ServiceType_Click", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            method.Invoke(page, new object[] { button, new RoutedEventArgs() });
+        });
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        thread.Join();
+        receivedName.Should().Be("FTP Server1");
+    }
+
+    [Fact]
+    public void NavigateToFtpServer_SetsPropertiesAndOptions()
+    {
+        var vm = new FtpServerCreateViewModel();
+        var view = new FtpServerCreateView();
+        var advView = new FtpServerAdvancedConfigView();
+        var services = new ServiceCollection();
+        services.AddSingleton(vm);
+        services.AddSingleton(view);
+        services.AddSingleton(advView);
+        var provider = services.BuildServiceProvider();
+
+        var windowThread = new Thread(() =>
+        {
+            var window = new CreateServiceWindow(new CreateServiceViewModel(), provider);
+            var pageField = typeof(CreateServiceWindow).GetField("_page", BindingFlags.NonPublic | BindingFlags.Instance)!;
+            var page = (CreateServicePage)pageField.GetValue(window)!;
+            var button = new Button { DataContext = new CreateServiceViewModel.ServiceTypeMetadata("FTP Server", "FTP Server", string.Empty) };
+            var click = typeof(CreateServicePage).GetMethod("ServiceType_Click", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            click.Invoke(page, new object[] { button, new RoutedEventArgs() });
+
+            var options = new FtpServerOptions { Port = 21, RootPath = "/tmp" };
+            var evt = typeof(FtpServerCreateViewModel).GetField("ServerCreated", BindingFlags.Instance | BindingFlags.NonPublic);
+            var del = (Action<string, FtpServerOptions>?)evt?.GetValue(vm);
+            del?.Invoke("Svc", options);
+
+            window.CreatedServiceType.Should().Be("FTP Server");
+            window.CreatedServiceName.Should().Be("Svc");
+            window.FtpServerOptions.Should().Be(options);
+        });
+        windowThread.SetApartmentState(ApartmentState.STA);
+        windowThread.Start();
+        windowThread.Join();
+    }
+    [Fact]
     public void NavigateToTcp_SetsPropertiesAndOptions()
     {
         var vm = new TcpCreateServiceViewModel();

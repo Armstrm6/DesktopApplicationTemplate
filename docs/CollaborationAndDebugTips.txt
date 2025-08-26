@@ -12,6 +12,15 @@ Decisions & Rationale: Use event-driven navigation and injection to decouple vie
 Action Items: Verify navigation on Windows CI.
 Related Commits/PRs: (this PR)
 
+[2025-08-26 10:00] Topic: FTP server creation flow
+Context: Ftp server create and edit windows failed to open from service selection or edit commands.
+Observations: Added dedicated navigation in CreateServiceWindow and MainWindow, enabling advanced configuration.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; rely on CI for verification.
+Effective Prompts / Instructions that worked: Follow AGENTS guidelines for DI and MVVM.
+Decisions & Rationale: Introduced explicit FTP Server service type with option persistence and edit workflow.
+Action Items: Monitor CI for Windows-specific UI issues.
+Related Commits/PRs: (this PR)
+
 [2025-08-25 19:26] Topic: FTP server service
 Context: Added service wrapping FubarDev FTP server with start/stop APIs and transfer events.
 Observations: Implemented IFtpServerService, registered with DI, and introduced unit tests for start/stop and event propagation.
