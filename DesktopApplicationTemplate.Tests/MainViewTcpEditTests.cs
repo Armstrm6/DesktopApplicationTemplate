@@ -43,6 +43,10 @@ public class MainViewTcpEditTests
                     s.AddSingleton<TcpServiceView>();
                     s.AddSingleton<TcpServiceMessagesViewModel>();
                     s.AddSingleton<TcpServiceMessagesView>();
+                    s.AddTransient<TcpEditServiceViewModel>();
+                    s.AddTransient<TcpEditServiceView>();
+                    s.AddTransient<TcpAdvancedConfigViewModel>();
+                    s.AddTransient<TcpAdvancedConfigView>();
                 })
                 .Build();
             var prop = typeof(App).GetProperty("AppHost");
@@ -70,14 +74,20 @@ public class MainViewTcpEditTests
             var editMethod = typeof(MainView).GetMethod("OnEditRequested", BindingFlags.Instance | BindingFlags.NonPublic);
             editMethod!.Invoke(view, new object[] { service });
 
-            var helperSvc = host.Services.GetRequiredService<SaveConfirmationHelper>();
-            helperSvc.SaveConfirmationSuppressed = true;
-            var tcpView = host.Services.GetRequiredService<TcpServiceView>();
-            var vm = (TcpServiceViewModel)tcpView.DataContext;
-            vm.ComputerIp = "127.0.0.1";
-            vm.ListeningPort = "9000";
-            vm.IsUdp = true;
-            vm.SelectedMode = "Sending";
+            view.ContentFrame.Content.Should().BeOfType<TcpEditServiceView>();
+            var editView = (TcpEditServiceView)view.ContentFrame.Content;
+            var vm = (TcpEditServiceViewModel)editView.DataContext;
+            vm.Host = "127.0.0.1";
+            vm.Port = 9000;
+            vm.AdvancedConfigCommand.Execute(null);
+
+            view.ContentFrame.Content.Should().BeOfType<TcpAdvancedConfigView>();
+            var advView = (TcpAdvancedConfigView)view.ContentFrame.Content;
+            var advVm = (TcpAdvancedConfigViewModel)advView.DataContext;
+            advVm.UseUdp = true;
+            advVm.Mode = TcpServiceMode.Sending;
+            advVm.SaveCommand.Execute(null);
+
             vm.SaveCommand.Execute(null);
 
             service.TcpOptions.Should().NotBeNull();

@@ -13,8 +13,8 @@ public class TcpCreateServiceViewModelTests
         vm.ServiceName = "svc";
         vm.Host = "host";
         vm.Port = 1234;
-        vm.UseUdp = true;
-        vm.Mode = TcpServiceMode.ReceiveAndSend;
+        vm.Options.UseUdp = true;
+        vm.Options.Mode = TcpServiceMode.ReceiveAndSend;
         TcpServiceOptions? received = null;
         string? name = null;
         vm.ServiceCreated += (n, o) => { name = n; received = o; };
@@ -47,8 +47,8 @@ public class TcpCreateServiceViewModelTests
         var vm = new TcpCreateServiceViewModel();
         vm.Host = "host";
         vm.Port = 123;
-        vm.UseUdp = true;
-        vm.Mode = TcpServiceMode.Sending;
+        vm.Options.UseUdp = true;
+        vm.Options.Mode = TcpServiceMode.Sending;
         TcpServiceOptions? received = null;
         vm.AdvancedConfigRequested += o => received = o;
 

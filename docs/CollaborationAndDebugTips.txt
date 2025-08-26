@@ -1391,3 +1391,11 @@ Decisions & Rationale: Align SCP workflow with other services for consistency.
 Action Items: Monitor CI for Windows-specific issues.
 Related Commits/PRs:
 
+[2025-08-26 19:46] Topic: TCP edit and advanced configuration views
+Context: Introduced dedicated edit and advanced configuration views for TCP services.
+Observations: Navigation now uses TcpEditServiceView and TcpAdvancedConfigView with back navigation tests.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; tests rely on CI.
+Effective Prompts / Instructions that worked: User request to separate advanced settings and preload options.
+Decisions & Rationale: Extract advanced fields to dedicated view models to keep runtime view focused.
+Action Items: Monitor CI for UI behavior.
+Related Commits/PRs: (this PR)

@@ -21,6 +21,8 @@ public class DiContainerTests
         services.AddSingleton<MqttService>();
         services.AddSingleton<MqttTagSubscriptionsViewModel>();
         services.AddTransient<TcpCreateServiceViewModel>();
+        services.AddTransient<TcpEditServiceViewModel>();
+        services.AddTransient<TcpAdvancedConfigViewModel>();
         services.AddTransient<TcpServiceMessagesViewModel>();
         services.AddSingleton<TcpServiceViewModel>();
         services.Configure<MqttServiceOptions>(o =>
@@ -39,6 +41,8 @@ public class DiContainerTests
         using var provider = services.BuildServiceProvider();
         Assert.NotNull(provider.GetRequiredService<MqttTagSubscriptionsViewModel>());
         Assert.NotNull(provider.GetRequiredService<TcpCreateServiceViewModel>());
+        Assert.NotNull(provider.GetRequiredService<TcpEditServiceViewModel>());
+        Assert.NotNull(provider.GetRequiredService<TcpAdvancedConfigViewModel>());
         Assert.NotNull(provider.GetRequiredService<TcpServiceMessagesViewModel>());
         Assert.NotNull(provider.GetRequiredService<TcpServiceViewModel>());
     }

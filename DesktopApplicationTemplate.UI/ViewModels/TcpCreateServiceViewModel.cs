@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Helpers;
@@ -16,8 +14,6 @@ public class TcpCreateServiceViewModel : ViewModelBase
     private string _serviceName = string.Empty;
     private string _host = string.Empty;
     private int _port = 0;
-    private bool _useUdp;
-    private TcpServiceMode _mode = TcpServiceMode.Listening;
 
     /// <summary>
     /// Current advanced options.
@@ -33,7 +29,6 @@ public class TcpCreateServiceViewModel : ViewModelBase
         CreateCommand = new RelayCommand(Create);
         CancelCommand = new RelayCommand(Cancel);
         AdvancedConfigCommand = new RelayCommand(OpenAdvancedConfig);
-        Modes = Enum.GetValues(typeof(TcpServiceMode)).Cast<TcpServiceMode>().ToArray();
     }
 
     /// <summary>
@@ -60,11 +55,6 @@ public class TcpCreateServiceViewModel : ViewModelBase
     /// Command to open advanced configuration.
     /// </summary>
     public ICommand AdvancedConfigCommand { get; }
-
-    /// <summary>
-    /// Available service modes.
-    /// </summary>
-    public IReadOnlyList<TcpServiceMode> Modes { get; }
 
     /// <inheritdoc />
     public ILoggingService? Logger { get; set; }
@@ -97,24 +87,6 @@ public class TcpCreateServiceViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Whether the service should use UDP instead of TCP.
-    /// </summary>
-    public bool UseUdp
-    {
-        get => _useUdp;
-        set { _useUdp = value; OnPropertyChanged(); }
-    }
-
-    /// <summary>
-    /// Operating mode for the service.
-    /// </summary>
-    public TcpServiceMode Mode
-    {
-        get => _mode;
-        set { _mode = value; OnPropertyChanged(); }
-    }
-
-    /// <summary>
     /// Raised when advanced configuration is requested.
     /// </summary>
     public event Action<TcpServiceOptions>? AdvancedConfigRequested;
@@ -124,8 +96,6 @@ public class TcpCreateServiceViewModel : ViewModelBase
         Logger?.Log("TCP create options start", LogLevel.Debug);
         Options.Host = Host;
         Options.Port = Port;
-        Options.UseUdp = UseUdp;
-        Options.Mode = Mode;
         Logger?.Log("TCP create options finished", LogLevel.Debug);
         ServiceCreated?.Invoke(ServiceName, Options);
     }
@@ -141,8 +111,6 @@ public class TcpCreateServiceViewModel : ViewModelBase
         Logger?.Log("Opening TCP advanced config", LogLevel.Debug);
         Options.Host = Host;
         Options.Port = Port;
-        Options.UseUdp = UseUdp;
-        Options.Mode = Mode;
         AdvancedConfigRequested?.Invoke(Options);
     }
 }
