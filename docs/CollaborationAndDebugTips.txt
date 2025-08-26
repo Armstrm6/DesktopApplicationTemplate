@@ -1205,3 +1205,11 @@ Effective Prompts / Instructions that worked: User request to surface FTP create
 Decisions & Rationale: Treat FTP as FTP Server, streamline DI registrations, and consolidate views.
 Action Items: Monitor CI for Windows-specific regressions.
 Related Commits/PRs:
+[2025-08-26 13:44] Topic: FTP type fallback
+Context: Existing services used "FTP" type causing navigation failures.
+Observations: Added alias handling so legacy "FTP" services resolve to FTP Server and display the default view.
+Codex Limitations noticed: Linux environment cannot run WPF; relied on tests and CI.
+Effective Prompts / Instructions that worked: Examine service type strings and update comparison logic.
+Decisions & Rationale: Map legacy type to new "FTP Server" to maintain backward compatibility.
+Action Items: Run tests and monitor CI for Windows-specific behavior.
+Related Commits/PRs:
