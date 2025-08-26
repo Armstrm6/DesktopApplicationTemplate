@@ -68,4 +68,20 @@ public class FtpServerAdvancedConfigViewModelTests
         Assert.False(raised);
         ConsoleTestLogger.LogPass();
     }
+
+    [Fact]
+    [TestCategory("CodexSafe")]
+    [TestCategory("WindowsSafe")]
+    public void BackCommand_RaisesBackRequested()
+    {
+        var options = new FtpServerOptions();
+        var vm = new FtpServerAdvancedConfigViewModel(options);
+        var raised = false;
+        vm.BackRequested += () => raised = true;
+
+        vm.BackCommand.Execute(null);
+
+        Assert.True(raised);
+        ConsoleTestLogger.LogPass();
+    }
 }

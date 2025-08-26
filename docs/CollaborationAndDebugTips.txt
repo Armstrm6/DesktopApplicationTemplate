@@ -1333,3 +1333,11 @@ Effective Prompts / Instructions that worked: request to route service selection
 Decisions & Rationale: Inject view models and logging via constructors to guarantee required fields and consistent setup.
 Action Items: Monitor CI.
 Related Commits/PRs: (this PR)
+[2025-08-26 17:32] Topic: Save/back buttons on advanced pages
+Context: Added Save Configuration and Back buttons to TCP and FTP advanced configuration pages.
+Observations: Users can save settings or navigate back without persisting changes.
+Codex Limitations noticed: Linux container lacks WindowsDesktop runtime; rely on CI for full validation.
+Effective Prompts / Instructions that worked: Follow MVVM guidelines and update tests.
+Decisions & Rationale: Introduced distinct commands and events for saving versus navigation.
+Action Items: Monitor CI for Windows-specific issues.
+Related Commits/PRs: (this PR)

@@ -27,7 +27,7 @@ public class FtpServerAdvancedConfigViewModel : ValidatableViewModelBase, ILoggi
         _password = options.Password;
         Logger = logger;
         SaveCommand = new RelayCommand(Save);
-        CancelCommand = new RelayCommand(Cancel);
+        BackCommand = new RelayCommand(Back);
     }
 
     /// <inheritdoc />
@@ -39,9 +39,9 @@ public class FtpServerAdvancedConfigViewModel : ValidatableViewModelBase, ILoggi
     public ICommand SaveCommand { get; }
 
     /// <summary>
-    /// Command to cancel the advanced configuration.
+    /// Command to navigate back without saving.
     /// </summary>
-    public ICommand CancelCommand { get; }
+    public ICommand BackCommand { get; }
 
     /// <summary>
     /// Raised when the configuration is saved.
@@ -49,9 +49,9 @@ public class FtpServerAdvancedConfigViewModel : ValidatableViewModelBase, ILoggi
     public event Action<FtpServerOptions>? Saved;
 
     /// <summary>
-    /// Raised when the configuration is cancelled.
+    /// Raised when navigation back is requested without saving.
     /// </summary>
-    public event Action? Cancelled;
+    public event Action? BackRequested;
 
     /// <summary>
     /// Allow anonymous connections.
@@ -122,10 +122,10 @@ public class FtpServerAdvancedConfigViewModel : ValidatableViewModelBase, ILoggi
         Saved?.Invoke(_options);
     }
 
-    private void Cancel()
+    private void Back()
     {
-        Logger?.Log("FTP advanced options cancelled", LogLevel.Debug);
-        Cancelled?.Invoke();
+        Logger?.Log("FTP advanced options back", LogLevel.Debug);
+        BackRequested?.Invoke();
     }
 
     private void ValidateCredentials()
