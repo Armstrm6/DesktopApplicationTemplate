@@ -1366,3 +1366,11 @@ Decisions & Rationale: Followed existing navigation and DI patterns to reduce ri
 Action Items: Monitor integration with persistence layer in future.
 Related Commits/PRs: 
 
+[2025-08-26 18:31] Topic: Heartbeat service navigation
+Context: Added Heartbeat create, edit, and advanced configuration flows with DI and tests.
+Observations: Navigation from create service page and edit workflow now display heartbeat-specific views.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; rely on CI.
+Effective Prompts / Instructions that worked: Followed MVVM/DI patterns and existing service examples.
+Decisions & Rationale: Mirror HID workflow for consistency.
+Action Items: Monitor CI for Windows-specific issues.
+Related Commits/PRs: (this PR)
