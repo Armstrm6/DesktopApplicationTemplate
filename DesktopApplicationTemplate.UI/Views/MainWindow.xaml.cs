@@ -182,6 +182,7 @@ namespace DesktopApplicationTemplate.UI.Views
             page.HidSelected += NavigateToHid;
             page.CsvSelected += NavigateToCsvCreator;
             page.FileObserverSelected += NavigateToFileObserver;
+            page.ScpSelected += NavigateToScp;
             page.Cancelled += ShowHome;
             ShowPage(page);
         }
@@ -227,6 +228,45 @@ namespace DesktopApplicationTemplate.UI.Views
             {
                 var advVm = ActivatorUtilities.CreateInstance<HidAdvancedConfigViewModel>(App.AppHost.Services, opts);
                 var advView = App.AppHost.Services.GetRequiredService<HidAdvancedConfigView>();
+                advView.DataContext = advVm;
+                advVm.Saved += _ => ShowPage(view);
+                advVm.BackRequested += () => ShowPage(view);
+                ShowPage(advView);
+            };
+            ShowPage(view);
+        }
+
+        private void NavigateToScp(string defaultName)
+        {
+            var vm = App.AppHost.Services.GetRequiredService<ScpCreateServiceViewModel>();
+            vm.ServiceName = defaultName;
+            vm.ServiceCreated += (name, options) =>
+            {
+                var svc = new ServiceViewModel
+                {
+                    DisplayName = $"SCP - {name}",
+                    ServiceType = "SCP",
+                    IsActive = false,
+                    ScpOptions = options
+                };
+                svc.SetColorsByType();
+                svc.LogAdded += _viewModel.OnServiceLogAdded;
+                svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
+                GetOrCreateServicePage(svc);
+                _viewModel.Services.Add(svc);
+                _logger?.LogInformation("Service {Name} added", svc.DisplayName);
+                _viewModel.SelectedService = svc;
+                ServiceList.ScrollIntoView(svc);
+                if (svc.ServicePage != null)
+                    ShowPage(svc.ServicePage);
+                _viewModel.SaveServices();
+            };
+            vm.Cancelled += ShowCreateServiceSelectionPage;
+            var view = ActivatorUtilities.CreateInstance<ScpCreateServiceView>(App.AppHost.Services, vm);
+            vm.AdvancedConfigRequested += opts =>
+            {
+                var advVm = ActivatorUtilities.CreateInstance<ScpAdvancedConfigViewModel>(App.AppHost.Services, opts);
+                var advView = App.AppHost.Services.GetRequiredService<ScpAdvancedConfigView>();
                 advView.DataContext = advVm;
                 advVm.Saved += _ => ShowPage(view);
                 advVm.BackRequested += () => ShowPage(view);
@@ -727,6 +767,40 @@ namespace DesktopApplicationTemplate.UI.Views
             {
                 var advVm = ActivatorUtilities.CreateInstance<FileObserverAdvancedConfigViewModel>(App.AppHost.Services, opts);
                 var advView = App.AppHost.Services.GetRequiredService<FileObserverAdvancedConfigView>();
+                advView.DataContext = advVm;
+                advVm.Saved += _ => ShowPage(editView);
+                advVm.BackRequested += () => ShowPage(editView);
+                ShowPage(advView);
+            };
+            ShowPage(editView);
+            _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
+            return;
+        }
+
+        if (service.ServiceType == "SCP")
+        {
+            var scpPage = GetOrCreateServicePage(service);
+            var options = service.ScpOptions ?? new ScpServiceOptions();
+            var vm = ActivatorUtilities.CreateInstance<ScpEditServiceViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
+            var editView = App.AppHost.Services.GetRequiredService<ScpEditServiceView>();
+            editView.DataContext = vm;
+            vm.ServiceUpdated += (name, opts) =>
+            {
+                service.DisplayName = $"SCP - {name}";
+                service.ScpOptions = opts;
+                if (scpPage != null)
+                    ShowPage(scpPage);
+                _viewModel.SaveServices();
+            };
+            vm.Cancelled += () =>
+            {
+                if (scpPage != null)
+                    ShowPage(scpPage);
+            };
+            vm.AdvancedConfigRequested += opts =>
+            {
+                var advVm = ActivatorUtilities.CreateInstance<ScpAdvancedConfigViewModel>(App.AppHost.Services, opts);
+                var advView = App.AppHost.Services.GetRequiredService<ScpAdvancedConfigView>();
                 advView.DataContext = advVm;
                 advVm.Saved += _ => ShowPage(editView);
                 advVm.BackRequested += () => ShowPage(editView);
