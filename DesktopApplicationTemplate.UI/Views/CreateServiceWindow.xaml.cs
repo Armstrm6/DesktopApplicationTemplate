@@ -27,8 +27,13 @@ namespace DesktopApplicationTemplate.UI.Views
                 CreatedServiceName = name;
                 CreatedServiceType = type;
                 DialogResult = true;
+                Close();
             };
-            _page.Cancelled += () => DialogResult = false;
+            _page.Cancelled += () =>
+            {
+                DialogResult = false;
+                Close();
+            };
             _page.MqttSelected += NavigateToMqtt;
             _page.TcpSelected += NavigateToTcp;
             _page.FtpServerSelected += NavigateToFtpServer;
@@ -45,6 +50,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 CreatedServiceType = "MQTT";
                 MqttOptions = options;
                 DialogResult = true;
+                Close();
             };
             vm.Cancelled += () => ContentFrame.Content = _page;
             var view = ActivatorUtilities.CreateInstance<MqttCreateServiceView>(_services, vm);
@@ -61,6 +67,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 CreatedServiceType = "TCP";
                 TcpOptions = options;
                 DialogResult = true;
+                Close();
             };
             vm.Cancelled += () => ContentFrame.Content = _page;
             var view = _services.GetRequiredService<TcpCreateServiceView>();
