@@ -88,6 +88,8 @@
 - Consolidated `MqttTagSubscriptionsViewModel` to a single subscription collection and unified topic properties.
 - Simplified `MqttTagSubscriptionsView` layout, removing duplicate controls and redundant namespace declarations.
 
+- Service selection window wraps service icons within bounds using a fixed-width panel.
+
 ### Removed
 - Placeholder "Desktop Template" text from the navigation bar.
 - Legacy GitHub workflows (`dotnet.yml`, `dotnet-desktop-ci.yml`, `ci.yml`).
@@ -141,3 +143,4 @@
 - Legacy "FTP" service type now resolves to FTP Server, restoring default page navigation.
 - Selecting FTP service in the add services window no longer freezes the application; FTP options apply before view creation ensuring the service is added.
 - FTP server creation no longer freezes when selecting the service type; text fields update immediately so saving works without changing focus.
+- Creating an FTP service now closes the selection window after saving.

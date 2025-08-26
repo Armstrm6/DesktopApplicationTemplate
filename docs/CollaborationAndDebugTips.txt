@@ -1233,3 +1233,11 @@ Decisions & Rationale: Update bindings for FTP server views to avoid perceived f
 Action Items: Monitor CI for Windows-specific behavior.
 Related Commits/PRs:
 
+[2025-08-26 15:04] Topic: FTP service selection window wrap
+Context: Ensured FTP service creation closes the window and icons stay within the create service page.
+Observations: Added WrapPanel width for icon wrapping and invoked Close() after FTP server creation.
+Codex Limitations noticed: pwsh not available for add-tip script.
+Effective Prompts / Instructions that worked: User request highlighted window closure and layout issue.
+Decisions & Rationale: Use fixed-width WrapPanel and close dialog upon FTP service creation to restore expected workflow.
+Action Items: Run tests and monitor CI.
+Related Commits/PRs:
