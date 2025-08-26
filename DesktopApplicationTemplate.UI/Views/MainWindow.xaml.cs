@@ -421,23 +421,11 @@ namespace DesktopApplicationTemplate.UI.Views
             var view = ActivatorUtilities.CreateInstance<TcpCreateServiceView>(App.AppHost.Services, vm);
             vm.AdvancedConfigRequested += opts =>
             {
-                var advView = App.AppHost.Services.GetRequiredService<TcpServiceView>();
-                var advVm = (TcpServiceViewModel)advView.DataContext;
-                advVm.ComputerIp = opts.Host;
-                advVm.ListeningPort = opts.Port.ToString();
-                advVm.IsUdp = opts.UseUdp;
-                advVm.SelectedMode = opts.Mode == TcpServiceMode.Listening ? "Listening" : "Sending";
-
-                advVm.Saved += (_, __) =>
-                {
-                    opts.Host = advVm.ComputerIp;
-                    if (int.TryParse(advVm.ListeningPort, out var p))
-                        opts.Port = p;
-                    opts.UseUdp = advVm.IsUdp;
-                    opts.Mode = advVm.SelectedMode == "Listening" ? TcpServiceMode.Listening : TcpServiceMode.Sending;
-                    ShowPage(view);
-                };
-                advVm.BackRequested += (_, __) => ShowPage(view);
+                var advVm = ActivatorUtilities.CreateInstance<TcpAdvancedConfigViewModel>(App.AppHost.Services, opts);
+                var advView = App.AppHost.Services.GetRequiredService<TcpAdvancedConfigView>();
+                advView.DataContext = advVm;
+                advVm.Saved += _ => ShowPage(view);
+                advVm.BackRequested += () => ShowPage(view);
                 ShowPage(advView);
             };
             ShowPage(view);
@@ -814,35 +802,32 @@ namespace DesktopApplicationTemplate.UI.Views
             if (service.ServiceType == "TCP")
             {
                 var tcpPage = GetOrCreateServicePage(service);
-                var editView = App.AppHost.Services.GetRequiredService<TcpServiceView>();
-                if (editView.DataContext is TcpServiceViewModel vm)
+                var options = service.TcpOptions ?? new TcpServiceOptions();
+                var vm = ActivatorUtilities.CreateInstance<TcpEditServiceViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
+                var editView = App.AppHost.Services.GetRequiredService<TcpEditServiceView>();
+                editView.DataContext = vm;
+                vm.ServiceUpdated += (name, opts) =>
                 {
-                    var opts = service.TcpOptions;
-                    if (opts != null)
-                    {
-                        vm.ComputerIp = opts.Host;
-                        vm.ListeningPort = opts.Port.ToString();
-                        vm.IsUdp = opts.UseUdp;
-                        vm.SelectedMode = opts.Mode == TcpServiceMode.Listening ? "Listening" : "Sending";
-                    }
-                    vm.Saved += (_, _) =>
-                    {
-                        service.TcpOptions ??= new TcpServiceOptions();
-                        service.TcpOptions.Host = vm.ComputerIp;
-                        if (int.TryParse(vm.ListeningPort, out var p))
-                            service.TcpOptions.Port = p;
-                        service.TcpOptions.UseUdp = vm.IsUdp;
-                        service.TcpOptions.Mode = vm.SelectedMode == "Listening" ? TcpServiceMode.Listening : TcpServiceMode.Sending;
-                        if (tcpPage != null)
-                            ShowPage(tcpPage);
-                        _viewModel.SaveServices();
-                    };
-                    vm.BackRequested += (_, _) =>
-                    {
-                        if (tcpPage != null)
-                            ShowPage(tcpPage);
-                    };
-                }
+                    service.DisplayName = $"TCP - {name}";
+                    service.TcpOptions = opts;
+                    if (tcpPage != null)
+                        ShowPage(tcpPage);
+                    _viewModel.SaveServices();
+                };
+                vm.Cancelled += () =>
+                {
+                    if (tcpPage != null)
+                        ShowPage(tcpPage);
+                };
+                vm.AdvancedConfigRequested += opts =>
+                {
+                    var advVm = ActivatorUtilities.CreateInstance<TcpAdvancedConfigViewModel>(App.AppHost.Services, opts);
+                    var advView = App.AppHost.Services.GetRequiredService<TcpAdvancedConfigView>();
+                    advView.DataContext = advVm;
+                    advVm.Saved += _ => ShowPage(editView);
+                    advVm.BackRequested += () => ShowPage(editView);
+                    ShowPage(advView);
+                };
                 ShowPage(editView);
                 _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
                 return;

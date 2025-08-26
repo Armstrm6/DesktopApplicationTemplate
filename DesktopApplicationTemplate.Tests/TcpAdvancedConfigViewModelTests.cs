@@ -1,0 +1,37 @@
+using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.UI.ViewModels;
+using Xunit;
+
+namespace DesktopApplicationTemplate.Tests;
+
+public class TcpAdvancedConfigViewModelTests
+{
+    [Fact]
+    public void SaveCommand_Raises_Saved_WithUpdatedOptions()
+    {
+        var options = new TcpServiceOptions { UseUdp = false, Mode = TcpServiceMode.Listening };
+        var vm = new TcpAdvancedConfigViewModel(options);
+        vm.UseUdp = true;
+        vm.Mode = TcpServiceMode.Sending;
+        TcpServiceOptions? received = null;
+        vm.Saved += o => received = o;
+
+        vm.SaveCommand.Execute(null);
+
+        Assert.NotNull(received);
+        Assert.True(received!.UseUdp);
+        Assert.Equal(TcpServiceMode.Sending, received.Mode);
+    }
+
+    [Fact]
+    public void BackCommand_Raises_BackRequested()
+    {
+        var vm = new TcpAdvancedConfigViewModel(new TcpServiceOptions());
+        var called = false;
+        vm.BackRequested += () => called = true;
+
+        vm.BackCommand.Execute(null);
+
+        Assert.True(called);
+    }
+}
