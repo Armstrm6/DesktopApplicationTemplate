@@ -138,3 +138,4 @@
 - FTP server create and edit windows now launch with advanced configuration access.
 - Resolved variable naming conflict in MainWindow edit workflow preventing CS0136 build errors.
 - FTP server creation and edit workflows now display correctly and default to an updated FTP service view with start/stop commands.
+- Legacy "FTP" service type now resolves to FTP Server, restoring default page navigation.

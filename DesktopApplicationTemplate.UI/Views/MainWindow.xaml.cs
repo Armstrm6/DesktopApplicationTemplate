@@ -90,7 +90,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 "Heartbeat" => App.AppHost.Services.GetRequiredService<HeartbeatView>(),
                 "SCP" => App.AppHost.Services.GetRequiredService<SCPServiceView>(),
                 "MQTT" => App.AppHost.Services.GetRequiredService<MqttTagSubscriptionsView>(),
-                "FTP Server" => App.AppHost.Services.GetRequiredService<FTPServiceView>(),
+                "FTP Server" or "FTP" => App.AppHost.Services.GetRequiredService<FTPServiceView>(),
                 "CSV Creator" => App.AppHost.Services.GetRequiredService<CsvServiceView>(),
                 _ => null
             };
@@ -169,7 +169,7 @@ namespace DesktopApplicationTemplate.UI.Views
                     _viewModel.SelectedService = svc;
                     ServiceList.ScrollIntoView(svc);
                 }
-                else if (window.CreatedServiceType == "FTP Server")
+                else if (window.CreatedServiceType == "FTP Server" || window.CreatedServiceType == "FTP")
                 {
                     var svc = new ServiceViewModel
                     {
@@ -195,6 +195,8 @@ namespace DesktopApplicationTemplate.UI.Views
                     _logger?.LogInformation("Service {Name} added", svc.DisplayName);
                     _viewModel.SelectedService = svc;
                     ServiceList.ScrollIntoView(svc);
+                    if (svc.ServicePage != null)
+                        ShowPage(svc.ServicePage);
                 }
                 else if (!string.IsNullOrWhiteSpace(window.CreatedServiceType))
                 {
@@ -312,7 +314,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 return;
             }
 
-            if (service.ServiceType == "FTP Server")
+            if (service.ServiceType == "FTP Server" || service.ServiceType == "FTP")
             {
                 var ftpPage = GetOrCreateServicePage(service);
                 var options = service.FtpOptions ?? new FtpServerOptions();

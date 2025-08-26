@@ -123,7 +123,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 "Heartbeat" => (WpfBrushes.LightPink, WpfBrushes.DeepPink),
                 "SCP" => (WpfBrushes.LightCyan, WpfBrushes.CadetBlue),
                 "MQTT" => (WpfBrushes.LightGoldenrodYellow, WpfBrushes.Goldenrod),
-                "FTP Server" => (WpfBrushes.LightSteelBlue, WpfBrushes.SteelBlue),
+                "FTP Server" or "FTP" => (WpfBrushes.LightSteelBlue, WpfBrushes.SteelBlue),
                 _ => (WpfBrushes.LightGray, WpfBrushes.Gray)
             };
             OnPropertyChanged(nameof(BackgroundColor));

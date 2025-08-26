@@ -33,7 +33,7 @@ namespace DesktopApplicationTemplate.UI.Services
                     };
                 }
 
-                if (s.ServiceType == "FTP Server" && s.FtpOptions != null)
+                if ((s.ServiceType == "FTP Server" || s.ServiceType == "FTP") && s.FtpOptions != null)
                 {
                     ftp = new FtpServerOptions
                     {
@@ -121,7 +121,7 @@ namespace DesktopApplicationTemplate.UI.Services
                             // ignore missing options during tests or early startup
                         }
                     }
-                    if (info.ServiceType == "FTP Server" && info.FtpOptions != null)
+                    if ((info.ServiceType == "FTP Server" || info.ServiceType == "FTP") && info.FtpOptions != null)
                     {
                         try
                         {
