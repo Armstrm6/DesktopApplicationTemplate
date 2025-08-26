@@ -99,6 +99,12 @@ namespace DesktopApplicationTemplate.UI
             services.AddTransient<HttpEditServiceViewModel>();
             services.AddTransient<HttpAdvancedConfigView>();
             services.AddTransient<HttpAdvancedConfigViewModel>();
+            services.AddTransient<FileObserverCreateServiceView>();
+            services.AddTransient<FileObserverCreateServiceViewModel>();
+            services.AddTransient<FileObserverEditServiceView>();
+            services.AddTransient<FileObserverEditServiceViewModel>();
+            services.AddTransient<FileObserverAdvancedConfigView>();
+            services.AddTransient<FileObserverAdvancedConfigViewModel>();
             services.AddTransient<MqttEditConnectionView>();
             services.AddTransient<MqttEditConnectionViewModel>();
             services.AddTransient<MqttTagSubscriptionsView>();
@@ -112,6 +118,7 @@ namespace DesktopApplicationTemplate.UI
             services.Configure<TcpServiceOptions>(configuration.GetSection("TcpService"));
             services.AddOptions<DesktopApplicationTemplate.UI.Services.FtpServerOptions>()
                 .BindConfiguration("FtpServer");
+            services.AddOptions<FileObserverOptions>();
         }
 
         protected override async void OnStartup(StartupEventArgs e)

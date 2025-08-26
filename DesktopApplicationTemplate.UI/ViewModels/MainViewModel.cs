@@ -58,6 +58,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         /// </summary>
         public HttpServiceOptions? HttpOptions { get; set; }
 
+        /// <summary>
+        /// File observer-specific configuration for this service, if applicable.
+        /// </summary>
+        public FileObserverOptions? FileObserverOptions { get; set; }
+
         public static Func<string, string, ServiceViewModel?>? ResolveService { get; set; }
 
 

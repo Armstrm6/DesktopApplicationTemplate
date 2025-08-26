@@ -1073,6 +1073,14 @@ Effective Prompts / Instructions that worked:
 Decisions & Rationale: Updated tests and logging to reflect new behavior
 Action Items:
 Related Commits/PRs:
+[2025-08-27 12:00] Topic: File observer navigation
+Context: Added create/edit/advanced view models with navigation and DI registrations.
+Observations: MainWindow now routes File Observer selection and edit requests correctly.
+Codex Limitations noticed: Linux environment lacks WPF runtime; navigation untested locally.
+Effective Prompts / Instructions that worked: Follow AGENTS guidelines for DI and MVVM.
+Decisions & Rationale: Mirror HTTP pattern to implement file observer workflows and keep services consistent.
+Action Items: Verify navigation on Windows CI.
+Related Commits/PRs: (this PR)
 
 [2025-08-21 13:39] Topic: CSV output directory selection
 Context: Added ability to browse for CSV output folders and support nested file patterns.
@@ -1349,3 +1357,11 @@ Effective Prompts / Instructions that worked: Followed MVVM and DI registration 
 Decisions & Rationale: Mirror TCP and FTP patterns to maintain consistent service workflows.
 Action Items: Monitor CI for Windows-specific issues.
 Related Commits/PRs:
+[2025-08-27 12:00] Topic: File observer navigation
+Context: Added create/edit/advanced view models with navigation and DI registrations.
+Observations: MainWindow now routes File Observer selection and edit requests correctly.
+Codex Limitations noticed: Linux environment lacks WPF runtime; navigation untested locally.
+Effective Prompts / Instructions that worked: Follow AGENTS guidelines for DI and MVVM.
+Decisions & Rationale: Mirror HTTP pattern to implement file observer workflows and keep services consistent.
+Action Items: Verify navigation on Windows CI.
+Related Commits/PRs: (this PR)

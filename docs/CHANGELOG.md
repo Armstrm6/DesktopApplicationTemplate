@@ -6,6 +6,7 @@
 - TCP messages view now groups incoming data, script output, and results into left-to-right panels.
 - FTP service view displays active transfer progress, connected client count, and status indicator.
 - HTTP service creation and edit views with advanced configuration for authentication and TLS certificate paths.
+- File observer create/edit/advanced configuration view models and views with navigation and service registration.
 - Tests covering TCP advanced configuration navigation, TCP edit routing, and FTP server option preloading with dialog closure.
 - FTP server create and advanced configuration view models and views with validation and commands.
 - FTP server edit view model and view enabling updates to server configuration.
