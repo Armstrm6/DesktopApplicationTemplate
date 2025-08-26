@@ -80,6 +80,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 CreatedServiceType = "FTP Server";
                 FtpServerOptions = options;
                 DialogResult = true;
+                Close();
             };
             vm.AdvancedConfigRequested += opts =>
             {

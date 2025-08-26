@@ -16,7 +16,7 @@
         <ItemsControl Grid.Row="1" ItemsSource="{Binding ServiceTypes}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <WrapPanel HorizontalAlignment="Center"/>
+                    <WrapPanel Width="400" />
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
@@ -30,7 +30,7 @@
                                     </Border>
                                 </ControlTemplate>
                             </Button.Template>
-                            <Image Source="{Binding IconPath}" Width="40" Height="40"/>
+                            <TextBlock Text="{Binding Icon}" FontSize="40" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Button>
                         <TextBlock Text="{Binding DisplayText}" HorizontalAlignment="Center" Margin="0,5,0,0"/>
                     </StackPanel>

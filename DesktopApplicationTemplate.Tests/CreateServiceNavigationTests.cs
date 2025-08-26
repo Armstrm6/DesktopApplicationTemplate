@@ -81,6 +81,7 @@ public class CreateServiceNavigationTests
             window.CreatedServiceType.Should().Be("FTP Server");
             window.CreatedServiceName.Should().Be("Svc");
             window.FtpServerOptions.Should().Be(options);
+            window.DialogResult.Should().BeTrue();
         });
         windowThread.SetApartmentState(ApartmentState.STA);
         windowThread.Start();
