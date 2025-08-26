@@ -1213,6 +1213,7 @@ Effective Prompts / Instructions that worked: Examine service type strings and u
 Decisions & Rationale: Map legacy type to new "FTP Server" to maintain backward compatibility.
 Action Items: Run tests and monitor CI for Windows-specific behavior.
 Related Commits/PRs:
+
 [2025-08-26 14:02] Topic: FTP service selection freeze
 Context: Selecting FTP in the add services window locked the UI without creating a service.
 Observations: Options were applied after page creation, causing the FTP view to initialize with invalid defaults.
@@ -1221,3 +1222,14 @@ Effective Prompts / Instructions that worked: Review add-service workflow and re
 Decisions & Rationale: Apply FTP options before creating the service page and expose an AddFtpService helper for reuse and testing.
 Action Items: Monitor CI for Windows-specific behavior.
 Related Commits/PRs: (this PR)
+
+
+[2025-08-26 14:05] Topic: FTP service creation freeze
+Context: Selecting FTP service in Add Service window failed to create service because text fields didn't update before save.
+Observations: Setting UpdateSourceTrigger=PropertyChanged on FTP server text boxes allows immediate validation and creation.
+Codex Limitations noticed: Linux environment lacks WPF runtime; relied on reasoning without full UI testing.
+Effective Prompts / Instructions that worked: Review binding defaults and ensure text updates without losing focus.
+Decisions & Rationale: Update bindings for FTP server views to avoid perceived freezes during service creation.
+Action Items: Monitor CI for Windows-specific behavior.
+Related Commits/PRs:
+
