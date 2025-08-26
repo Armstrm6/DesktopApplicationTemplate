@@ -1,0 +1,95 @@
+using System;
+using System.Reflection;
+using System.Threading;
+using System.Windows;
+using System.Windows.Controls;
+using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI.Views;
+using FluentAssertions;
+using Xunit;
+
+namespace DesktopApplicationTemplate.Tests;
+
+public class CreateServicePageTests
+{
+    [Fact]
+    public void ServiceType_Click_RaisesTcpSelected()
+    {
+        string? receivedName = null;
+        var thread = new Thread(() =>
+        {
+            var vm = new CreateServiceViewModel();
+            var page = new CreateServicePage(vm);
+            page.TcpSelected += name => receivedName = name;
+            var button = new Button { DataContext = new CreateServiceViewModel.ServiceTypeMetadata("TCP", "TCP", string.Empty) };
+            var method = typeof(CreateServicePage).GetMethod("ServiceType_Click", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            method.Invoke(page, new object[] { button, new RoutedEventArgs() });
+        });
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        thread.Join();
+        receivedName.Should().Be("TCP1");
+    }
+
+    [Fact]
+    public void ServiceType_Click_RaisesFtpServerSelected()
+    {
+        string? receivedName = null;
+        var thread = new Thread(() =>
+        {
+            var vm = new CreateServiceViewModel();
+            var page = new CreateServicePage(vm);
+            page.FtpServerSelected += name => receivedName = name;
+            var button = new Button { DataContext = new CreateServiceViewModel.ServiceTypeMetadata("FTP Server", "FTP Server", string.Empty) };
+            var method = typeof(CreateServicePage).GetMethod("ServiceType_Click", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            method.Invoke(page, new object[] { button, new RoutedEventArgs() });
+        });
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        thread.Join();
+        receivedName.Should().Be("FTP Server1");
+    }
+
+    [Fact]
+    public void ServiceType_Click_RaisesServiceCreated_ForHttp()
+    {
+        string? receivedName = null;
+        string? receivedType = null;
+        var thread = new Thread(() =>
+        {
+            var vm = new CreateServiceViewModel();
+            var page = new CreateServicePage(vm);
+            page.ServiceCreated += (name, type) =>
+            {
+                receivedName = name;
+                receivedType = type;
+            };
+            var button = new Button { DataContext = new CreateServiceViewModel.ServiceTypeMetadata("HTTP", "HTTP", string.Empty) };
+            var method = typeof(CreateServicePage).GetMethod("ServiceType_Click", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            method.Invoke(page, new object[] { button, new RoutedEventArgs() });
+        });
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        thread.Join();
+        receivedName.Should().Be("HTTP1");
+        receivedType.Should().Be("HTTP");
+    }
+
+    [Fact]
+    public void Cancel_Click_RaisesCancelled()
+    {
+        bool cancelled = false;
+        var thread = new Thread(() =>
+        {
+            var vm = new CreateServiceViewModel();
+            var page = new CreateServicePage(vm);
+            page.Cancelled += () => cancelled = true;
+            var method = typeof(CreateServicePage).GetMethod("Cancel_Click", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            method.Invoke(page, new object[] { new Button(), new RoutedEventArgs() });
+        });
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        thread.Join();
+        cancelled.Should().BeTrue();
+    }
+}
