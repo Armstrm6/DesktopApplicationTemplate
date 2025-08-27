@@ -127,6 +127,9 @@
 - Logging minimum level changes now re-filter existing log entries without reloading from disk.
 - Added tests confirming service persistence handles cyclical references and logging config changes.
 
+#### Changed
+- Removed custom `ILoggingService` and service registrations in favor of `Microsoft.Extensions.Logging` with console and debug providers.
+
 ### Documentation & CI
 #### Added
 - Section on working in restricted environments and reminder to log limitations in collaboration docs.
