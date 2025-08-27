@@ -8,7 +8,7 @@ namespace DesktopApplicationTemplate.Tests;
 
 public class FtpServerEditViewTests
 {
-    [Fact]
+    [WpfFact]
     public void Constructor_SetsDataContext()
     {
         FtpServerEditView? view = null;
@@ -24,7 +24,7 @@ public class FtpServerEditViewTests
         view!.DataContext.Should().BeOfType<FtpServerEditViewModel>();
     }
 
-    [Fact]
+    [WpfFact]
     public void Constructor_Throws_When_ViewModelNull()
     {
         Exception? ex = null;

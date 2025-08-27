@@ -14,7 +14,7 @@ namespace DesktopApplicationTemplate.Tests
 {
     public class SettingsPageNavigationTests
     {
-        [Fact]
+        [WpfFact]
         public void NavigateBack_ReturnsToHomePage()
         {
             if (!OperatingSystem.IsWindows())

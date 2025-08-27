@@ -17,7 +17,7 @@ namespace DesktopApplicationTemplate.Tests;
 
 public class MainViewTcpNavigationTests
 {
-    [Fact]
+    [WpfFact]
     public void CreateTcpService_Advanced_Back_ReturnsToCreateView()
     {
         if (!OperatingSystem.IsWindows())

@@ -20,7 +20,7 @@ namespace DesktopApplicationTemplate.Tests;
 
 public class MainViewHidNavigationTests
 {
-    [Fact]
+    [WpfFact]
     public void EditHidService_ShowsEditView()
     {
         if (!OperatingSystem.IsWindows())
@@ -76,7 +76,7 @@ public class MainViewHidNavigationTests
         thread.Join();
     }
 
-    [Fact]
+    [WpfFact]
     public void DoubleClickHidService_OpensEditView()
     {
         if (!OperatingSystem.IsWindows())

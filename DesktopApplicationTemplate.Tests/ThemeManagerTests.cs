@@ -7,7 +7,7 @@ namespace DesktopApplicationTemplate.Tests
 {
     public class ThemeManagerTests
     {
-        [Fact]
+        [WpfFact]
         public void ApplyTheme_LoadsResourceDictionary()
         {
             if (!OperatingSystem.IsWindows())

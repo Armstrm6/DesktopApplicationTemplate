@@ -12,7 +12,7 @@ namespace DesktopApplicationTemplate.Tests;
 
 public class FtpServerAdvancedConfigViewTests
 {
-    [Fact]
+    [WpfFact]
     public void Initialize_SetsDataContext_AndLogger()
     {
         FtpServerAdvancedConfigView? view = null;
@@ -33,7 +33,7 @@ public class FtpServerAdvancedConfigViewTests
         vm!.Logger.Should().BeSameAs(logger);
     }
 
-    [Fact]
+    [WpfFact]
     public void Initialize_Throws_When_ViewModelNull()
     {
         Exception? ex = null;
