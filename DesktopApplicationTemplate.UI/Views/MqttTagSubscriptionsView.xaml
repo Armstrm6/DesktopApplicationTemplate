@@ -5,7 +5,7 @@
       xmlns:mqtt="clr-namespace:MQTTnet.Protocol;assembly=MQTTnet"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-      xmlns:sys="clr-namespace:System;assembly=mscorlib"
+      xmlns:sys="clr-namespace:System;assembly=System.Runtime"
       mc:Ignorable="d">
     <Page.Resources>
         <ObjectDataProvider x:Key="QoSValues" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
