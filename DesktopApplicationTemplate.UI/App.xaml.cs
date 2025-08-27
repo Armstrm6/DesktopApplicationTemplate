@@ -49,6 +49,7 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<INetworkConfigurationService, NetworkConfigurationService>();
             services.AddSingleton<NetworkConfigurationViewModel>();
             services.AddSingleton<IRichTextLogger, NullRichTextLogger>();
+            services.AddSingleton<ILoggingService, LoggingService>();
             services.AddSingleton<IMessageRoutingService, MessageRoutingService>();
             services.AddSingleton<IFileDialogService, FileDialogService>();
             services.AddSingleton<IFileSearchService, DesktopApplicationTemplate.Service.Services.FileSearchService>();

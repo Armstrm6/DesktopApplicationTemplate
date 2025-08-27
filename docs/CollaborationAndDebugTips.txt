@@ -87,3 +87,11 @@ Effective Prompts / Instructions that worked: User request to fix logging build 
 Decisions & Rationale: Centralize logging for reuse and simplify DI by removing constructor parameters.
 Action Items: none
 Related Commits/PRs: 
+[2025-08-27 04:34] Topic: Logging service DI
+Context: Save confirmation dialog failed because ILoggingService was not registered.
+Observations: Added LoggingService to DI, added tests verifying SaveConfirmationHelper resolves only when logger is registered.
+Codex Limitations noticed: pwsh unavailable for add-tip script.
+Effective Prompts / Instructions that worked: Use DI registration guidelines and error message from runtime.
+Decisions & Rationale: Register logging service to satisfy helper dependency and avoid runtime exceptions.
+Action Items: Run tests.
+Related Commits/PRs:
