@@ -1,7 +1,7 @@
 using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Views;
-using DesktopApplicationTemplate.Core.Services;
 using System;
 using System.IO;
 using System.Linq;
@@ -195,8 +195,7 @@ namespace DesktopApplicationTemplate.Tests
         [WpfFact]
         public void CsvServiceView_LoadsInto_ContentFrame()
         {
-            if (!OperatingSystem.IsWindows())
-                return;
+            Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
             Exception? ex = null;
             var thread = new Thread(() =>

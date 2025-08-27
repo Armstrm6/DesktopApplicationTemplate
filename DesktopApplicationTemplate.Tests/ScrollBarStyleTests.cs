@@ -13,8 +13,7 @@ namespace DesktopApplicationTemplate.Tests
         [WpfFact]
         public void LightTheme_ScrollBarStyle_HasReducedWidth()
         {
-            if (!OperatingSystem.IsWindows())
-                return;
+            Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
             Exception? ex = null;
             var thread = new Thread(() =>

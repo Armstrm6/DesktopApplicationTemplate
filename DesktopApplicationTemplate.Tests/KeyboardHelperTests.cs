@@ -6,11 +6,10 @@ namespace DesktopApplicationTemplate.Tests;
 
 public class KeyboardHelperTests
 {
-    [Fact]
+    [SkippableFact]
     public void ReleaseKeys_DoesNotThrow()
     {
-        if (!OperatingSystem.IsWindows())
-            return;
+        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
         FluentActions.Invoking(() => KeyboardHelper.ReleaseKeys(Key.A))
             .Should().NotThrow();

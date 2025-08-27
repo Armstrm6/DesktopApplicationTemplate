@@ -1,11 +1,10 @@
 using System;
 using System.IO;
 using System.Threading;
-using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Services;
-using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Views;
-using DesktopApplicationTemplate.UI.Models;
+using DesktopApplicationTemplate.Core.Models;
 using DesktopApplicationTemplate.UI;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;

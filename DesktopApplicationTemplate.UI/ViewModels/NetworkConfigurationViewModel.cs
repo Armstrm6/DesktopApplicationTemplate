@@ -1,8 +1,8 @@
 using System.Threading.Tasks;
 using System.Windows.Input;
-using DesktopApplicationTemplate.UI.Models;
-using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Core.Models;
 using DesktopApplicationTemplate.UI.Helpers;
+using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.Core.Services;
 
 namespace DesktopApplicationTemplate.UI.ViewModels

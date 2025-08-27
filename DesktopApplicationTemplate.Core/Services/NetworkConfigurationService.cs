@@ -3,13 +3,12 @@ using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Runtime.Versioning;
 using System.Threading;
 using System.Threading.Tasks;
-using DesktopApplicationTemplate.UI.Models;
+using DesktopApplicationTemplate.Core.Models;
 using Microsoft.Extensions.Logging;
 
-namespace DesktopApplicationTemplate.UI.Services
+namespace DesktopApplicationTemplate.Core.Services
 {
     public class NetworkConfigurationService : INetworkConfigurationService
     {
@@ -68,7 +67,7 @@ namespace DesktopApplicationTemplate.UI.Services
             }
             else
             {
-                var prefix = SubnetToCidr(configuration.SubnetMask);
+                var prefix = NetworkUtilities.SubnetToCidr(configuration.SubnetMask);
                 await _processRunner.RunAsync("ip", $"addr add {configuration.IpAddress}/{prefix} dev eth0", cancellationToken).ConfigureAwait(false);
                 await _processRunner.RunAsync("ip", $"route add default via {configuration.Gateway} dev eth0", cancellationToken).ConfigureAwait(false);
                 await _processRunner.RunAsync("sh", $"-c \"echo nameserver {configuration.DnsPrimary} > /etc/resolv.conf\"", cancellationToken).ConfigureAwait(false);
@@ -80,17 +79,5 @@ namespace DesktopApplicationTemplate.UI.Services
             ConfigurationChanged?.Invoke(this, configuration);
         }
 
-        private static int SubnetToCidr(string subnetMask)
-        {
-            if (string.IsNullOrWhiteSpace(subnetMask))
-                return 0;
-            var bytes = IPAddress.Parse(subnetMask).GetAddressBytes();
-            int count = 0;
-            foreach (var b in bytes)
-            {
-                count += Convert.ToString(b, 2).Count(c => c == '1');
-            }
-            return count;
-        }
     }
 }

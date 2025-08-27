@@ -1,4 +1,4 @@
-using DesktopApplicationTemplate.UI.Models;
+using DesktopApplicationTemplate.Core.Models;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {

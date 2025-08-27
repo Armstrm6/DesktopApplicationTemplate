@@ -1,6 +1,7 @@
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Services;
-using DesktopApplicationTemplate.UI.Models;
+using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;

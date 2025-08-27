@@ -1,9 +1,10 @@
 using System;
 using System.IO;
 using System.Threading;
-using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Core.Models;
+using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI;
@@ -23,8 +24,7 @@ public class MainViewFileObserverNavigationTests
     [WpfFact]
     public void EditFileObserverService_ShowsEditView()
     {
-        if (!OperatingSystem.IsWindows())
-            return;
+        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
         var thread = new Thread(() =>
         {
@@ -80,8 +80,7 @@ public class MainViewFileObserverNavigationTests
     [WpfFact]
     public void DoubleClickFileObserverService_OpensEditView()
     {
-        if (!OperatingSystem.IsWindows())
-            return;
+        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
         var thread = new Thread(() =>
         {

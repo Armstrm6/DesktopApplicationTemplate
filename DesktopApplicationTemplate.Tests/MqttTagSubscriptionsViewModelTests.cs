@@ -38,19 +38,19 @@ public class MqttTagSubscriptionsViewModelTests
         return (vm, client, service);
     }
 
-    [Fact]
+    [SkippableFact]
     public async Task ConnectAsync_InvokesClient()
     {
-        if (!OperatingSystem.IsWindows()) return;
+        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
         var (vm, client, _) = CreateViewModel();
         await vm.ConnectAsync();
         client.Verify(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    [Fact]
+    [SkippableFact]
     public async Task ConnectAsync_RaisesEditRequested_OnInvalidOptions()
     {
-        if (!OperatingSystem.IsWindows()) return;
+        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
         var client = new Mock<IMqttClient>();
         client.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new ArgumentException("Host cannot be null or whitespace."));
@@ -63,10 +63,10 @@ public class MqttTagSubscriptionsViewModelTests
         Assert.True(raised);
     }
 
-    [Fact]
+    [SkippableFact]
     public async Task AddTopicAsync_SubscribesAndAdds()
     {
-        if (!OperatingSystem.IsWindows()) return;
+        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
         var (vm, client, _) = CreateViewModel();
         vm.NewTopic = "t";
         vm.NewQoS = MqttQualityOfServiceLevel.AtLeastOnce;
@@ -78,10 +78,10 @@ public class MqttTagSubscriptionsViewModelTests
         Assert.Contains(vm.SubscriptionResults, r => r.Topic == "t" && r.IsSuccess);
     }
 
-    [Fact]
+    [SkippableFact]
     public async Task RemoveTopicAsync_UnsubscribesAndRemoves()
     {
-        if (!OperatingSystem.IsWindows()) return;
+        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
         var (vm, client, service) = CreateViewModel();
         var sub = new TagSubscription("t");
         service.UpdateTagSubscription(sub);
@@ -93,10 +93,10 @@ public class MqttTagSubscriptionsViewModelTests
         Assert.Null(vm.SelectedSubscription);
     }
 
-    [Fact]
+    [SkippableFact]
     public async Task PublishTestMessageAsync_Publishes_WhenValid()
     {
-        if (!OperatingSystem.IsWindows()) return;
+        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
         var (vm, client, _) = CreateViewModel();
         var sub = new TagSubscription("t") { OutgoingMessage = "m" };
         vm.Subscriptions.Add(sub);
@@ -105,10 +105,10 @@ public class MqttTagSubscriptionsViewModelTests
         client.Verify(c => c.PublishAsync(It.Is<MQTTnet.MqttApplicationMessage>(m => m.Topic == "t"), It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    [Fact]
+    [SkippableFact]
     public async Task TestTagEndpointCommand_Publishes_WhenValid()
     {
-        if (!OperatingSystem.IsWindows()) return;
+        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
         var (vm, client, _) = CreateViewModel();
         var sub = new TagSubscription("tag") { Endpoint = "e", OutgoingMessage = "m" };
         await ((AsyncRelayCommand<TagSubscription>)vm.TestTagEndpointCommand).ExecuteAsync(sub);
