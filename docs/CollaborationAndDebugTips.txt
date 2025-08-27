@@ -79,3 +79,11 @@ Effective Prompts / Instructions that worked: Use `AddConsole()` and `AddDebug()
 Decisions & Rationale: Start with infrastructure pieces before addressing individual view models.
 Action Items: Migrate remaining classes to `ILogger<T>` and update tests.
 Related Commits/PRs:
+[2025-08-27 04:25] Topic: Logging interface restoration
+Context: Introduced core logging abstractions and refactored edit view models to support DI.
+Observations: Added ILoggingService, LogLevel enum, moved LogEntry to core, and implemented Load methods on TCP and SCP edit view models.
+Codex Limitations noticed: PowerShell unavailable; appended tip manually.
+Effective Prompts / Instructions that worked: User request to fix logging build errors and target .NET 8.0.404.
+Decisions & Rationale: Centralize logging for reuse and simplify DI by removing constructor parameters.
+Action Items: none
+Related Commits/PRs: 

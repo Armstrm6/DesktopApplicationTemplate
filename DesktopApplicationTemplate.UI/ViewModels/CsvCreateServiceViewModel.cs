@@ -28,9 +28,6 @@ public class CsvCreateServiceViewModel : ServiceCreateViewModelBase<CsvServiceOp
         _screen.AdvancedConfigRequested += o => AdvancedConfigRequested?.Invoke(o);
     }
 
-    /// <inheritdoc />
-    public ILoggingService? Logger { get; set; }
-
     /// <summary>
     /// Raised when the service is created.
     /// </summary>

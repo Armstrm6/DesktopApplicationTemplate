@@ -36,9 +36,6 @@ public class HttpCreateServiceViewModel : ServiceCreateViewModelBase<HttpService
     /// </summary>
     public event Action<HttpServiceOptions>? AdvancedConfigRequested;
 
-    /// <inheritdoc />
-    public ILoggingService? Logger { get; set; }
-
     /// <summary>
     /// Command to open advanced configuration.
     /// </summary>

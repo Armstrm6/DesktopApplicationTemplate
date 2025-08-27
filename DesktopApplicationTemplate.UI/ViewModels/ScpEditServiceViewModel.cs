@@ -9,25 +9,32 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// </summary>
 public class ScpEditServiceViewModel : ServiceEditViewModelBase<ScpServiceOptions>
 {
-    private readonly ScpServiceOptions _options;
-    private string _serviceName;
-    private string _host;
-    private string _port;
-    private string _username;
-    private string _password;
+    private ScpServiceOptions _options = new();
+    private string _serviceName = string.Empty;
+    private string _host = string.Empty;
+    private string _port = string.Empty;
+    private string _username = string.Empty;
+    private string _password = string.Empty;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ScpEditServiceViewModel"/> class.
     /// </summary>
-    public ScpEditServiceViewModel(string serviceName, ScpServiceOptions options, ILoggingService? logger = null)
+    public ScpEditServiceViewModel(ILoggingService? logger = null)
         : base(logger)
+    {
+    }
+
+    /// <summary>
+    /// Loads the supplied options into the view model.
+    /// </summary>
+    public void Load(string serviceName, ScpServiceOptions options)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
         _serviceName = serviceName ?? throw new ArgumentNullException(nameof(serviceName));
-        _host = options.Host;
-        _port = options.Port.ToString();
-        _username = options.Username;
-        _password = options.Password;
+        Host = _options.Host;
+        Port = _options.Port.ToString();
+        Username = _options.Username;
+        Password = _options.Password;
     }
 
     /// <summary>
