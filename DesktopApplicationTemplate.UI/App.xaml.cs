@@ -4,7 +4,7 @@ using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.Core.Models;
-using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.UI.Models;
 // Qualify service-layer types explicitly to avoid name clashes with UI services
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
