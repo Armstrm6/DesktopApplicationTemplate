@@ -111,6 +111,8 @@
 - Standalone `FilterWindow` in favor of inline filter popup.
 
 ### Fixed
+- Registered the WPF pack URI scheme so BubblyWindow resources load without invalid URI errors.
+- Restored TCP configuration options when loading persisted services.
 - Opening service edit pages no longer fails with unresolved `System.String` DI errors by decoupling view models from view constructors.
 - Editing any service no longer fails with unresolved string dependencies; edit and advanced views now receive their view models via `ActivatorUtilities`.
 - Selecting TCP or FTP server from the add service page now opens their configuration views prior to creation.

@@ -1483,3 +1483,11 @@ Decisions & Rationale: Ensure persistence writes succeed regardless of path and 
 Action Items: Rely on CI for Windows-specific validation.
 Related Commits/PRs: (this PR)
 
+[2025-08-27 02:50] Topic: TCP option restore and pack URI
+Context: Fix global TCP option restoration and register pack URI scheme.
+Observations: Tests expected persisted TCP options to repopulate DI and pack URIs failed to parse without scheme registration.
+Codex Limitations noticed: dotnet SDK unavailable; relied on reasoning without running tests.
+Effective Prompts / Instructions that worked: Review AGENTS and clone options to restore DI state.
+Decisions & Rationale: Used GetRequiredService to ensure TCP options restored and module initializer to register pack scheme.
+Action Items: Verify on Windows that BubblyWindowStyle loads and TCP options persist.
+Related Commits/PRs: (this PR)
