@@ -167,3 +167,4 @@
 - FTP server creation view preloads options from configuration and logs navigation, ensuring the dialog closes after server creation.
 - Added File Observer create/edit/advanced configuration views with navigation and DI registration.
 - MQTT service creation and edit views now separate advanced configuration into a dedicated page with navigation tests.
+- Corrected SCP advanced configuration handler by removing duplicate variable declarations and updated XAML System namespace references to use System.Runtime, resolving build errors.

@@ -1441,3 +1441,12 @@ Effective Prompts / Instructions that worked: Followed AGENTS guidelines for DI 
 Decisions & Rationale: Use ActivatorUtilities to supply runtime parameters and logging while allowing DI for remaining services.
 Action Items: Monitor CI for Windows-specific issues.
 Related Commits/PRs: (this PR)
+
+[2025-08-27 01:50] Topic: SCP advanced config build errors
+Context: Main window contained duplicate variable declarations and XAML referenced mscorlib causing System.Object build failures.
+Observations: Removed duplicate advVm/advView declarations and switched XAML sys namespace to System.Runtime.
+Codex Limitations noticed: Unit tests failed to compile due to read-only ClickCount, full WPF validation requires CI.
+Effective Prompts / Instructions that worked: Search for duplicate variable names and follow AGENTS guidelines to update docs.
+Decisions & Rationale: Clean redundant declarations and modernize System namespace references for .NET 8 compatibility.
+Action Items: Monitor CI for remaining test issues.
+Related Commits/PRs: (this PR)

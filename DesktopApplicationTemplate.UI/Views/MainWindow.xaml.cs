@@ -808,11 +808,9 @@ namespace DesktopApplicationTemplate.UI.Views
             };
             vm.AdvancedConfigRequested += opts =>
             {
-            var advVm = ActivatorUtilities.CreateInstance<ScpAdvancedConfigViewModel>(App.AppHost.Services, opts);
-            var advView = App.AppHost.Services.GetRequiredService<ScpAdvancedConfigView>();
-            advView.Initialize(advVm);
                 var advVm = ActivatorUtilities.CreateInstance<ScpAdvancedConfigViewModel>(App.AppHost.Services, opts);
-                var advView = ActivatorUtilities.CreateInstance<ScpAdvancedConfigView>(App.AppHost.Services, advVm);
+                var advView = App.AppHost.Services.GetRequiredService<ScpAdvancedConfigView>();
+                advView.Initialize(advVm);
                 advVm.Saved += _ => ShowPage(editView);
                 advVm.BackRequested += () => ShowPage(editView);
                 ShowPage(advView);
