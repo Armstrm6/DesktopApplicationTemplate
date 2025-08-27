@@ -1,9 +1,15 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using System.Windows;
 using DesktopApplicationTemplate.UI.Helpers;
+using DesktopApplicationTemplate.Core.Services;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -79,13 +85,15 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public ICommand SaveCommand { get; }
 
         private readonly SaveConfirmationHelper _saveHelper;
+        private readonly IFileSearchService _fileSearchService;
 
-        public FileObserverViewModel(SaveConfirmationHelper saveHelper)
+        public FileObserverViewModel(SaveConfirmationHelper saveHelper, IFileSearchService fileSearchService)
         {
-            _saveHelper = saveHelper;
+            _saveHelper = saveHelper ?? throw new ArgumentNullException(nameof(saveHelper));
+            _fileSearchService = fileSearchService ?? throw new ArgumentNullException(nameof(fileSearchService));
             AddObserverCommand = new RelayCommand(AddObserver);
             RemoveObserverCommand = new RelayCommand(RemoveObserver);
-            BrowseCommand = new RelayCommand(BrowseFilePath);
+            BrowseCommand = new AsyncRelayCommand(BrowseFilePathAsync);
             SaveCommand = new RelayCommand(Save);
 
             Observers.Add(new FileObserver { Name = "Observer1" });
@@ -123,12 +131,26 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
         }
 
-        private void BrowseFilePath()
+        private async Task BrowseFilePathAsync()
         {
             var dialog = new Microsoft.Win32.OpenFileDialog();
             if (dialog.ShowDialog() == true)
             {
                 FilePath = dialog.FileName;
+
+                var directory = Path.GetDirectoryName(FilePath);
+                if (!string.IsNullOrEmpty(directory))
+                {
+                    try
+                    {
+                        var files = await _fileSearchService.GetFilesAsync(directory, "*", CancellationToken.None).ConfigureAwait(false);
+                        ImageNames = string.Join(",", files.Select(Path.GetFileName));
+                    }
+                    catch
+                    {
+                        ImageNames = string.Empty;
+                    }
+                }
             }
         }
 

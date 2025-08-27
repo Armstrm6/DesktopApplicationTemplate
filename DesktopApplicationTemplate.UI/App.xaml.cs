@@ -51,6 +51,7 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<ILoggingService, LoggingService>();
             services.AddSingleton<IMessageRoutingService, MessageRoutingService>();
             services.AddSingleton<IFileDialogService, FileDialogService>();
+            services.AddSingleton<IFileSearchService, DesktopApplicationTemplate.Service.Services.FileSearchService>();
             services.AddSingleton<SaveConfirmationHelper>();
             services.AddSingleton<CloseConfirmationHelper>();
             services.AddSingleton<MainViewModel>();
@@ -101,12 +102,12 @@ namespace DesktopApplicationTemplate.UI
             services.AddTransient<TcpAdvancedConfigViewModel>();
             services.AddTransient<FtpServerCreateView>();
             services.AddTransient<FtpServerCreateViewModel>();
-            services.AddTransient<ServiceCreateViewModelBase<FtpServerOptions>, FtpServerCreateViewModel>();
+            services.AddTransient<ServiceCreateViewModelBase<DesktopApplicationTemplate.UI.Services.FtpServerOptions>, FtpServerCreateViewModel>();
             services.AddTransient<FtpServerAdvancedConfigView>();
             services.AddTransient<FtpServerAdvancedConfigViewModel>();
             services.AddTransient<FtpServerEditView>();
             services.AddTransient<FtpServerEditViewModel>();
-            services.AddTransient<ServiceEditViewModelBase<FtpServerOptions>, FtpServerEditViewModel>();
+            services.AddTransient<ServiceEditViewModelBase<DesktopApplicationTemplate.UI.Services.FtpServerOptions>, FtpServerEditViewModel>();
             services.AddTransient<HttpCreateServiceView>();
             services.AddTransient<HttpCreateServiceViewModel>();
             services.AddTransient<ServiceCreateViewModelBase<HttpServiceOptions>, HttpCreateServiceViewModel>();
