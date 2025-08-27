@@ -1499,3 +1499,12 @@ Effective Prompts / Instructions that worked: User request to fix build errors a
 Decisions & Rationale: Use supported URI APIs and null checks to prevent runtime issues; drop unused Windows service packages.
 Action Items: Validate on Windows CI.
 Related Commits/PRs: (this PR)
+
+[2025-08-27 02:46] Topic: FTP DI test configuration
+Context: FtpServer DI registration test failed due to missing IConfiguration.
+Observations: Added configuration to the service collection so options bind successfully.
+Codex Limitations noticed: Linux environment may lack WindowsDesktop runtime; full test suite requires CI.
+Effective Prompts / Instructions that worked: Register configuration singleton per DI guidelines.
+Decisions & Rationale: Ensure test service provider mimics production setup for option binding.
+Action Items: Execute tests; rely on CI for Windows-specific coverage.
+Related Commits/PRs: (this PR)

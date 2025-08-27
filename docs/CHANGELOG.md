@@ -112,6 +112,7 @@
 - Removed Windows service and EventLog package references from the UI project.
 
 ### Fixed
+- FTP DI registration test now registers configuration to avoid missing `IConfiguration` errors.
 - Registered the WPF pack URI scheme so BubblyWindow resources load without invalid URI errors.
 - Restored TCP configuration options when loading persisted services.
 - Replaced `UriParser.GetSyntax` usage with `IsKnownScheme` and guarded TCP option restoration to avoid null references.
