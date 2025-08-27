@@ -87,6 +87,29 @@ namespace DesktopApplicationTemplate.Tests
             ConsoleTestLogger.LogPass();
         }
 
+        [Fact]
+        [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
+        public void RecordExecutionTime_ComputesAverage()
+        {
+            var vm = new ServiceViewModel();
+            vm.RecordExecutionTime(TimeSpan.FromMilliseconds(100));
+            vm.RecordExecutionTime(TimeSpan.FromMilliseconds(50));
+
+            Assert.Equal(75, vm.AverageExecutionTimeMs);
+            ConsoleTestLogger.LogPass();
+        }
+
+        [Fact]
+        [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
+        public void RecordExecutionTime_Throws_When_Negative()
+        {
+            var vm = new ServiceViewModel();
+            Assert.Throws<ArgumentException>(() => vm.RecordExecutionTime(TimeSpan.FromMilliseconds(-1)));
+            ConsoleTestLogger.LogPass();
+        }
+
         private class StubNetworkService : INetworkConfigurationService
         {
             public event EventHandler<NetworkConfiguration>? ConfigurationChanged

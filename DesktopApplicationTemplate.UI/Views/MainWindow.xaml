@@ -5,10 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DesktopApplicationTemplate.UI.Views"
         xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
+        xmlns:sys="clr-namespace:System.Windows;assembly=PresentationFramework"
         mc:Ignorable="d"
         Title="MainView"
-        MinWidth="800" MinHeight="600"
-        SizeToContent="WidthAndHeight"
+        MinWidth="800" MinHeight="600" Height="600"
+        SizeToContent="Width"
+        MaxHeight="{Binding Source={x:Static sys:SystemParameters.WorkArea}, Path=Height}"
         Style="{DynamicResource BubblyWindowStyle}"
         Background="#99FFFF" BorderBrush="#80FF00" BorderThickness="13">
 
@@ -96,7 +98,10 @@
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" FontWeight="Bold"/>
+                                            <TextBlock VerticalAlignment="Center" FontWeight="Bold">
+                                                <Run Text="{Binding DisplayName}" />
+                                                <Run Text="{Binding AverageExecutionTimeMs, StringFormat= (Avg: {0:F0} ms), TargetNullValue=''}" />
+                                            </TextBlock>
                                             <ToggleButton Grid.Column="1" IsChecked="{Binding IsActive, Mode=TwoWay}" Style="{StaticResource ToggleSwitchStyle}"/>
                                         </Grid>
                                     </Border>

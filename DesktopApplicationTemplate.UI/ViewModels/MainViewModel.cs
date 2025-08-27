@@ -1,4 +1,5 @@
 using DesktopApplicationTemplate.Models;
+using System;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -42,6 +43,40 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         [JsonIgnore] public Page? ServicePage { get; set; }
 
         public ObservableCollection<string> AssociatedServices { get; } = new();
+
+        private double _totalExecutionTimeMs;
+        private int _executionCount;
+
+        /// <summary>
+        /// Gets the average execution time in milliseconds for operations performed by this service.
+        /// </summary>
+        public double? AverageExecutionTimeMs => _executionCount == 0 ? null : _totalExecutionTimeMs / _executionCount;
+
+        /// <summary>
+        /// Gets or sets the accumulated execution time in milliseconds.
+        /// </summary>
+        public double TotalExecutionTimeMs
+        {
+            get => _totalExecutionTimeMs;
+            set
+            {
+                _totalExecutionTimeMs = value;
+                OnPropertyChanged(nameof(AverageExecutionTimeMs));
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the number of execution samples recorded for this service.
+        /// </summary>
+        public int ExecutionCount
+        {
+            get => _executionCount;
+            set
+            {
+                _executionCount = value;
+                OnPropertyChanged(nameof(AverageExecutionTimeMs));
+            }
+        }
 
         /// <summary>
         /// TCP-specific configuration for this service, if applicable.
@@ -121,6 +156,21 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             {
                 HandleReference(message, color ?? WpfBrushes.Black, level);
             }
+        }
+
+        /// <summary>
+        /// Records a single execution duration for this service and updates the running average.
+        /// </summary>
+        /// <param name="duration">The execution duration to record.</param>
+        /// <exception cref="ArgumentException">Thrown when <paramref name="duration"/> is negative.</exception>
+        public void RecordExecutionTime(TimeSpan duration)
+        {
+            if (duration < TimeSpan.Zero)
+                throw new ArgumentException("Duration must be non-negative", nameof(duration));
+
+            _totalExecutionTimeMs += duration.TotalMilliseconds;
+            _executionCount++;
+            OnPropertyChanged(nameof(AverageExecutionTimeMs));
         }
 
         private void HandleReference(string message, WpfBrush color, LogLevel level)
@@ -339,7 +389,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     TcpOptions = info.TcpOptions,
                     FtpOptions = info.FtpOptions,
                     HttpOptions = info.HttpOptions,
-                    CsvOptions = info.CsvOptions
+                    CsvOptions = info.CsvOptions,
+                    TotalExecutionTimeMs = info.TotalExecutionTimeMs,
+                    ExecutionCount = info.ExecutionCount
                 };
                 foreach (var a in info.AssociatedServices ?? new List<string>())
                     svc.AssociatedServices.Add(a);

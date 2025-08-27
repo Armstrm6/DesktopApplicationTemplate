@@ -86,7 +86,7 @@ Codex Limitations noticed: PowerShell unavailable; appended tip manually.
 Effective Prompts / Instructions that worked: User request to fix logging build errors and target .NET 8.0.404.
 Decisions & Rationale: Centralize logging for reuse and simplify DI by removing constructor parameters.
 Action Items: none
-Related Commits/PRs: 
+Related Commits/PRs:
 [2025-08-27 04:34] Topic: Logging service DI
 Context: Save confirmation dialog failed because ILoggingService was not registered.
 Observations: Added LoggingService to DI, added tests verifying SaveConfirmationHelper resolves only when logger is registered.
@@ -94,4 +94,13 @@ Codex Limitations noticed: pwsh unavailable for add-tip script.
 Effective Prompts / Instructions that worked: Use DI registration guidelines and error message from runtime.
 Decisions & Rationale: Register logging service to satisfy helper dependency and avoid runtime exceptions.
 Action Items: Run tests.
+Related Commits/PRs:
+
+[2025-08-27 06:00] Topic: Main window bounds and service metrics
+Context: Limited main window height to the work area and displayed average execution time in the service list.
+Observations: Window no longer overlaps the taskbar; services show performance metrics beside their names.
+Codex Limitations noticed: Linux container lacks WPF runtime so tests rely on CI.
+Effective Prompts / Instructions that worked: User request to cap window size and reveal execution averages.
+Decisions & Rationale: Preserve screen real estate and provide quick insight into service performance.
+Action Items: Validate on Windows CI.
 Related Commits/PRs:
