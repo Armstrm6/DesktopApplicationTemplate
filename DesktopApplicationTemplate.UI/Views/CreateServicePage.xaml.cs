@@ -1,3 +1,4 @@
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using DesktopApplicationTemplate.UI.ViewModels;
@@ -7,9 +8,16 @@ namespace DesktopApplicationTemplate.UI.Views
     public partial class CreateServicePage : Page
     {
         private readonly CreateServiceViewModel _viewModel;
-        public string CreatedServiceName { get; private set; } = string.Empty;
-        public string CreatedServiceType { get; private set; } = string.Empty;
-        public event Action<string,string>? ServiceCreated;
+        public event Action<string, string>? ServiceCreated;
+        public event Action<string>? MqttSelected;
+        public event Action<string>? TcpSelected;
+        public event Action<string>? HeartbeatSelected;
+        public event Action<string>? FtpServerSelected;
+        public event Action<string>? HttpSelected;
+        public event Action<string>? HidSelected;
+        public event Action<string>? CsvSelected;
+        public event Action<string>? FileObserverSelected;
+        public event Action<string>? ScpSelected;
         public event Action? Cancelled;
 
         public CreateServicePage(CreateServiceViewModel viewModel)
@@ -19,19 +27,58 @@ namespace DesktopApplicationTemplate.UI.Views
             DataContext = _viewModel;
         }
 
-        private void Create_Click(object sender, RoutedEventArgs e)
+        private void ServiceType_Click(object sender, RoutedEventArgs e)
         {
-            var vm = (CreateServiceViewModel)DataContext;
-            CreatedServiceName = vm.ServiceName;
-            CreatedServiceType = vm.SelectedServiceType;
-
-            if (string.IsNullOrWhiteSpace(CreatedServiceName) || string.IsNullOrWhiteSpace(CreatedServiceType))
+            if (sender is Button button && button.DataContext is CreateServiceViewModel.ServiceTypeMetadata meta)
             {
-                System.Windows.MessageBox.Show("Please enter a name and select a type.", "Missing Info", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
+                var name = _viewModel.GenerateDefaultName(meta.Type);
+                if (meta.Type == "MQTT")
+                {
+                    MqttSelected?.Invoke(name);
+                    return;
+                }
+                if (meta.Type == "TCP")
+                {
+                    TcpSelected?.Invoke(name);
+                    return;
+                }
+                if (meta.Type == "Heartbeat")
+                {
+                    HeartbeatSelected?.Invoke(name);
+                    return;
+                }
+                if (meta.Type == "FTP" || meta.Type == "FTP Server")
+                {
+                    FtpServerSelected?.Invoke(name);
+                    return;
+                }
+                if (meta.Type == "HTTP")
+                {
+                    HttpSelected?.Invoke(name);
+                    return;
+                }
+                if (meta.Type == "HID")
+                {
+                    HidSelected?.Invoke(name);
+                    return;
+                }
+                if (meta.Type == "CSV Creator")
+                {
+                    CsvSelected?.Invoke(name);
+                    return;
+                }
+                if (meta.Type == "File Observer")
+                {
+                    FileObserverSelected?.Invoke(name);
+                    return;
+                }
+                if (meta.Type == "SCP")
+                {
+                    ScpSelected?.Invoke(name);
+                    return;
+                }
+                ServiceCreated?.Invoke(name, meta.Type);
             }
-
-            ServiceCreated?.Invoke(CreatedServiceName, CreatedServiceType);
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e)

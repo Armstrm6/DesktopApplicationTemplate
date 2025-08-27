@@ -1,12 +1,201 @@
 # Collaboration & Debug Tips (Codex <-> Matt)
 Purpose: Running log of what worked, what broke, and why.
 
+Remember to record environment limitations (e.g., missing tests or write restrictions) in each log entry.
+
+[2025-08-22 13:57] Topic: TCP message navigation
+Context: Added command to open TCP advanced settings and synced messages with script/network changes.
+Observations: Messages view model raises navigation events and tracks latest configuration.
+Codex Limitations noticed: Linux environment lacks WPF runtime; navigation untested locally.
+Effective Prompts / Instructions that worked: User request to expose navigation command and update view models.
+Decisions & Rationale: Use event-driven navigation and injection to decouple views.
+Action Items: Verify navigation on Windows CI.
+Related Commits/PRs: (this PR)
+[2025-08-27 02:13] Topic: DI load methods and TCP UDP fix
+Context: Resolved failing tests caused by DI requiring primitive parameters and UDP toggling clearing server IP.
+Observations: Added Load methods for TCP edit and SCP advanced view models, updated MainWindow to use DI-resolved instances, prevented UDP mode from overwriting ServerIp, and guarded ServicePersistence for missing files.
+Codex Limitations noticed: Linux container lacks Windows UI runtime; rely on CI for WPF validation.
+Effective Prompts / Instructions that worked: Follow AGENTS guidelines for DI and update documentation and tests accordingly.
+Decisions & Rationale: Introduce parameterless constructors to align with DI expectations and maintain network values when switching protocols.
+Action Items: Monitor CI for remaining WPF issues.
+Related Commits/PRs: (this PR)
+
+[2025-08-26 20:54] Topic: Service edit double-click tests
+Context: Ensured double-clicking a service item opens its edit view.
+Observations: Added navigation helpers tests for HTTP, HID, File Observer, Heartbeat, CSV Creator, and SCP services.
+Codex Limitations noticed: Linux environment cannot run WPF tests; rely on CI.
+Effective Prompts / Instructions that worked: Followed AGENTS guidelines and user request for double-click verification.
+Decisions & Rationale: Invoked double-click handler via reflection and registered service views in DI for accuracy.
+Action Items: Monitor CI for Windows-specific UI behavior.
+Related Commits/PRs:
+
+[2025-08-26 16:05] Topic: FTP server create navigation logging
+Context: Ensure FTP server creation preloads options and logs navigation to confirm the dialog closes after save.
+Observations: View model options seeded from configuration; logs surround view navigation and server creation closure.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; rely on CI for full validation.
+Effective Prompts / Instructions that worked: User request to populate options and add logging.
+Decisions & Rationale: Inject logger and copy IOptions<FtpServerOptions> into the view model before loading the view.
+Action Items: Monitor CI for Windows-specific behavior.
+Related Commits/PRs: (this PR)
+
+[2025-08-26 10:00] Topic: FTP server creation flow
+Context: Ftp server create and edit windows failed to open from service selection or edit commands.
+Observations: Added dedicated navigation in CreateServiceWindow and MainWindow, enabling advanced configuration.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; rely on CI for verification.
+Effective Prompts / Instructions that worked: Follow AGENTS guidelines for DI and MVVM.
+Decisions & Rationale: Introduced explicit FTP Server service type with option persistence and edit workflow.
+Action Items: Monitor CI for Windows-specific UI issues.
+Related Commits/PRs: (this PR)
+
+[2025-08-25 19:26] Topic: FTP server service
+Context: Added service wrapping FubarDev FTP server with start/stop APIs and transfer events.
+Observations: Implemented IFtpServerService, registered with DI, and introduced unit tests for start/stop and event propagation.
+Codex Limitations noticed: Linux container lacks WindowsDesktop runtime; rely on CI for full test execution.
+Effective Prompts / Instructions that worked: Following AGENTS guidelines for DI and logging policy.
+Decisions & Rationale: Use IFtpServerHost from FubarDev to host FTP server and expose transfer events for observers.
+Action Items: Verify FTP server behavior on Windows via CI.
+Related Commits/PRs: (this PR)
+[2025-08-26 16:33] Topic: FTP transfer progress inheritance
+Context: Build failed because FtpTransferProgressEventArgs attempted to derive from sealed FtpTransferEventArgs.
+Observations: Unsealed FtpTransferEventArgs so progress events compile and derive correctly.
+Codex Limitations noticed: `pwsh` not available for add-tip script; Linux environment lacks WindowsDesktop runtime so tests rely on CI.
+Effective Prompts / Instructions that worked: Direct request to fix sealed base class error.
+Decisions & Rationale: Remove sealed modifier to permit inheritance and compile progress events.
+Action Items: Run tests.
+Related Commits/PRs: (this PR)
+
+[2025-08-22 13:51] Topic: TCP service messages view
+Context: Added view and view model for displaying TCP messages with log filtering and navigation update.
+Observations: Introduced TcpServiceMessagesViewModel with observable collections and log-level controls; MainWindow now loads messages view for TCP services.
+Codex Limitations noticed: Linux environment lacks WPF runtime; rely on CI for visual validation.
+Effective Prompts / Instructions that worked: Followed design XML and AGENTS.md for MVVM structure.
+Decisions & Rationale: Separate messages display from configuration and surface logs immediately.
+Action Items: Monitor CI for WPF rendering and navigation.
+Related Commits/PRs: (this PR)
+
+[2025-08-22 13:45] Topic: TCP service creation navigation
+Context: Wired TCP selection through create service window.
+Observations: Page raises TcpSelected and window navigates to TCP view storing options.
+Codex Limitations noticed: Linux container lacks WPF runtime; tests rely on CI.
+Effective Prompts / Instructions that worked: user request to extend service creation.
+Decisions & Rationale: Mirror MQTT flow for navigation and option persistence.
+Action Items: Monitor CI for integration.
+Related Commits/PRs: (this PR)
+
+[2025-08-22 13:39] Topic: TCP service creation view
+Context: Added TCP create view model, view, options, DI registrations, and tests.
+Observations: View model mirrors MQTT pattern and raises create/cancel events.
+Codex Limitations noticed: Linux container lacks WPF runtime; tests rely on CI.
+Effective Prompts / Instructions that worked: user request for TCP create wizard.
+Decisions & Rationale: Reuse form styles and logging pattern for consistency.
+Action Items: run tests.
+Related Commits/PRs: (this PR)
+
+[2025-08-21 13:14] Topic: Fix duplicate XAML styles
+Context: Build error from multiple Style assignments in MQTT connection view.
+Observations: Consolidated styles with BasedOn to remove duplicate property settings.
+Codex Limitations noticed: dotnet CLI unavailable; tests not executed.
+Effective Prompts / Instructions that worked: reviewer warning about "Style" property duplicates.
+Decisions & Rationale: Use BasedOn to retain base styles while applying visibility triggers.
+Action Items: rely on CI for validation.
+Related Commits/PRs: (this PR)
+
+[2025-08-21 12:51] Topic: MQTT UX fixes
+Context: Added WebSocket path, subscribe toggle, and connection validation.
+Observations: Help window gains close button; CSV removal now clears file.
+Codex Limitations noticed: dotnet CLI unavailable; tests not executed.
+Effective Prompts / Instructions that worked: user bug reports about MQTT UI and service removal.
+Decisions & Rationale: improved UX and safety per guidelines.
+Action Items: rely on CI for verification.
+Related Commits/PRs: (this PR)
+
+[2025-08-20 18:51] Topic: Document read-only workflow
+Context: Added restricted-environment guidance and preamble about logging limitations.
+Observations: Guidelines now instruct contributors to review AGENTS/docs and note constraints.
+Codex Limitations noticed: dotnet CLI unavailable; tests could not run.
+Effective Prompts / Instructions that worked: User request to document read-only workflow.
+Decisions & Rationale: Promote transparency about environment constraints.
+Action Items: none
+Related Commits/PRs: (this PR)
+
+[2025-08-20 18:38] Topic: Codex architecture reference
+Context: Added "Architecture & Coding Standards" section to AGENTS.md.
+Observations: Section summarizes DI registration, testing, logging policies, and references Codex guidelines.
+Codex Limitations noticed: dotnet test aborted; missing Microsoft.WindowsDesktop.App on Linux.
+Effective Prompts / Instructions that worked: User request to reference Codex architecture standards.
+Decisions & Rationale: Provide quick reference to core Codex rules for contributors.
+Action Items: none
+Related Commits/PRs: (this PR)
+
+
+
+[2025-08-20 17:33] Topic: Environment precedence docs
+Context: Clarified AGENTS instructions about following environment directives.
+Observations: Added paragraph to note limitations when instructions conflict, such as read-only mode.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: User request to clarify environment precedence.
+Decisions & Rationale: Document conflict handling so steps are skipped instead of failing.
+Action Items: none
+Related Commits/PRs: (this PR)
+
+[2025-08-20 13:35] Topic: QoS ItemsSource binding
+Context: Clicking MQTT service crashed because QoS enum provider was assigned directly to ItemsSource.
+Observations: Binding through resource source and restoring send button accessibility prevents runtime ArgumentException.
+Codex Limitations noticed: Linux container lacks WPF runtime; rely on CI for view tests.
+Effective Prompts / Instructions that worked: User report highlighting ItemsSource exception.
+Decisions & Rationale: Use binding to resolve ObjectDataProvider data and set AutomationProperties for accessibility tests.
+Action Items: Verify Windows CI renders view without error.
+Related Commits/PRs: (this PR)
+
+
 [2025-08-13 17:00] Topic: Logging DI refactor
 Context: Introduced constructor injection for logging services and confirmation helpers.
 Observations: Simplifies testing and removes static logger state.
 Effective Prompts / Instructions that worked: n/a
 Decisions & Rationale: Use DI to share single logging service and helpers.
 Action Items: Monitor CI for Windows-specific behaviors.
+Related Commits/PRs: (this PR)
+
+[2025-08-23 18:00] Topic: MQTT ViewModel cleanup
+Context: Removed duplicate fields and unified topic subscription properties.
+Observations: View model now exposes a single subscriptions collection with NewTopic/NewQoS inputs and updated commands.
+Codex Limitations noticed: pwsh unavailable for add-tip script.
+Effective Prompts / Instructions that worked: Following user request to consolidate properties.
+Decisions & Rationale: Simplify state management and ensure commands reference consistent members.
+Action Items: Monitor CI for regression in MQTT subscription workflow.
+Related Commits/PRs: (this PR)
+[2025-08-19 16:11] Topic: AsyncRelayCommand namespace
+Context: Moved AsyncRelayCommand classes into Helpers namespace to match folder structure and updated tests.
+Observations: View models now import DesktopApplicationTemplate.UI.Helpers; tests compile without namespace ambiguity.
+Codex Limitations noticed: Linux environment still lacks WPF runtime, so rely on CI for test execution.
+Effective Prompts / Instructions that worked: Addressing review feedback on namespace alignment.
+Decisions & Rationale: Keeping helpers outside ViewModels clarifies intent and avoids circular dependencies.
+Action Items: Ensure future helper utilities live under Helpers namespace.
+Related Commits/PRs: (this PR)
+[2025-08-19 12:00] Topic: MQTT will options
+Context: Added will message and connection settings to MQTT view model and bound them in create/edit views.
+Observations: Properties validate ranges and log warnings; new views expose fields for user input.
+Codex Limitations noticed: Linux environment cannot run WPF tests; rely on CI.
+Effective Prompts / Instructions that worked: Following AGENTS instructions and user request for property mirroring.
+Decisions & Rationale: Mirror `MqttServiceOptions` in view model for consistency and user configurability.
+Action Items: Monitor CI for Windows-specific UI issues.
+Related Commits/PRs: (this PR)
+[2025-08-16 16:30] Topic: WPF reference cleanup
+Context: Build failed due to invalid `MouseDoubleClick` handler and ambiguous WinForms references.
+Observations: Removed WinForms usage, added WPF media imports, and integrated double-click logic into existing handler.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; tests aborted.
+Effective Prompts / Instructions that worked: Reviewing build errors and adjusting XAML and csproj references.
+Decisions & Rationale: Consolidate header events and avoid unused events to satisfy warnings-as-errors policy.
+Action Items: Rely on CI for full test execution.
+Related Commits/PRs: (this PR)
+
+[2025-08-16 15:50] Topic: Service count indicators
+Context: Display active service counts and ensure view model notifies on changes.
+Observations: TextBlock near add/remove buttons shows active/total services with bindings; unit test covers add/remove/activation.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: Reviewing AGENTS.md and following MVVM update steps.
+Decisions & Rationale: Expose service counts to UI for quick monitoring and raise PropertyChanged on all service state changes.
+Action Items: Rely on CI for Windows-specific validation.
 Related Commits/PRs: (this PR)
 
 [2025-08-15 00:00] Topic: MQTT service refactor
@@ -123,3 +312,1207 @@ Effective Prompts / Instructions that worked: request to wrap saves and add debu
 Decisions & Rationale: Removed internal logging from CsvService and added serialization guards producing dump files on overflow.
 Action Items: Use DebugSaveCommand for minimal reproduction and examine dump files if Environment.FailFast is triggered.
 Related Commits/PRs: (this PR)
+
+[2025-08-18 12:00] Topic: Window header double-click
+Context: Named navigation header and added drag and double-click handlers.
+Observations: Header drag restores window dragging; double-click toggles maximize state.
+Codex Limitations noticed: Linux environment lacks WPF runtime, so rely on CI for full validation.
+Effective Prompts / Instructions that worked: Direct request to wire header events and provide unit test.
+Decisions & Rationale: Provide familiar window management behavior through code-behind handlers.
+Action Items: Monitor CI for Windows-specific regressions.
+Related Commits/PRs: (this PR)
+
+[2025-08-18 17:30] Topic: Service creation bubble UI
+Context: Replaced text and combo selection with icon bubbles that auto-generate service names.
+Observations: Streamlines service creation and reduces user input errors.
+Codex Limitations noticed: Missing WindowsDesktop workload prevented local test execution.
+Effective Prompts / Instructions that worked: Following AGENTS.md to attempt tests and document changes.
+Decisions & Rationale: Expose service metadata from the view model for UI binding and name generation.
+Action Items: Rely on CI for cross-platform validation.
+Related Commits/PRs: (this PR)
+
+[2025-08-19 12:00] Topic: MQTT will options
+Context: Added will message and connection settings to MQTT view model and bound them in create/edit views.
+Observations: Properties validate ranges and log warnings; new views expose fields for user input.
+Codex Limitations noticed: Linux environment cannot run WPF tests; rely on CI.
+Effective Prompts / Instructions that worked: Following AGENTS instructions and user request for property mirroring.
+Decisions & Rationale: Mirror `MqttServiceOptions` in view model for consistency and user configurability.
+Action Items: Monitor CI for Windows-specific UI issues.
+Related Commits/PRs: (this PR)
+
+[2025-08-18 21:00] Topic: Service name uniqueness
+Context: Prevented duplicate service names during creation and rename operations.
+Observations: New services and renames auto-append numeric suffixes when collisions occur.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: request to handle duplicates via GenerateServiceName.
+Decisions & Rationale: Ensure consistent name uniqueness across sessions and persistence.
+Action Items: Monitor persistence for unexpected duplicate entries.
+Related Commits/PRs: (this PR)
+[2025-08-15 17:39] Topic: CSV service view integration
+Context: Moved CSV Creator from a pop-up window to an embedded page.
+Observations: CsvServiceView now loads within ContentFrame when the service is opened.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: Reusing existing window layout ensured quick conversion to a page.
+Decisions & Rationale: Align CSV Creator with other services to simplify navigation.
+Action Items: Monitor CI for UI test reliability.
+Related Commits/PRs: (this PR)
+[2025-08-15 17:51] Topic: Auto-start default
+Context: AppSettings and configuration files now default AutoStart to disabled.
+Observations: StartupService leaves auto-start disabled unless explicitly enabled.
+Codex Limitations noticed: PowerShell unavailable; tip appended manually.
+Effective Prompts / Instructions that worked: n/a
+Decisions & Rationale: Disable auto-start by default to prevent unintended application launches.
+Action Items: Rely on CI to validate registry updates on Windows.
+Related Commits/PRs: (this PR)
+
+[2025-08-15 18:40] Topic: SDK upgrade to 8.0.404
+Context: Pinned `global.json` to .NET SDK 8.0.404 to align with documentation.
+Observations: `dotnet --info` shows the required SDK is missing and tests cannot run.
+Codex Limitations noticed: Linux environment lacks .NET SDK 8.0.404 and WindowsDesktop support.
+Effective Prompts / Instructions that worked: Version update and verification steps.
+Decisions & Rationale: Ensure consistent SDK version across developers and CI.
+Action Items: Install .NET SDK 8.0.404 locally and validate tests on Windows CI.
+Related Commits/PRs: (this PR)
+
+[2025-08-19 00:00] Topic: Log reload behavior
+Context: Logging service now reloads previous session entries and respects minimum level changes.
+Observations: Replaying log file entries keeps UI history after restart.
+Codex Limitations noticed: None
+Effective Prompts / Instructions that worked: Specifying constructor loading and reload method.
+Decisions & Rationale: Read log file at startup and expose reload for level filter updates.
+Action Items: Monitor duplicate entries when reloading filters.
+Related Commits/PRs: (this PR)
+
+[2025-08-19 14:41] Topic: MQTT service creation view
+Context: Added dedicated view to configure MQTT options during service creation.
+Observations: Navigation within CreateServiceWindow collects broker settings and returns options to main window.
+Codex Limitations noticed: net8.0-windows tests cannot run on Linux.
+Effective Prompts / Instructions that worked: Following AGENTS instructions to add docs and tests.
+Decisions & Rationale: Capture MQTT settings before service addition for smoother workflow.
+Action Items: Rely on CI to validate WPF bindings.
+Related Commits/PRs: (this PR)
+
+[2025-08-15 20:40] Topic: Inline filter popup
+Context: Replaced separate filter window with popup-based FilterPanel triggered from main view.
+Observations: Users adjust service filters without leaving the main window.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; rely on CI for UI validation.
+Effective Prompts / Instructions that worked: Direct request to embed filters via Popup with StaysOpen=false.
+Decisions & Rationale: Use WPF Popup hosting FilterPanel to provide unobtrusive, in-place filtering.
+Action Items: Monitor CI for popup interaction regressions.
+Related Commits/PRs: (this PR)
+
+[2025-08-16 15:50] Topic: Service count indicators
+Context: Display active service counts and ensure view model notifies on changes.
+Observations: TextBlock near add/remove buttons shows active/total services with bindings; unit test covers add/remove/activation.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: Reviewing AGENTS.md and following MVVM update steps.
+Decisions & Rationale: Expose service counts to UI for quick monitoring and raise PropertyChanged on all service state changes.
+Action Items: Rely on CI for Windows-specific validation.
+Related Commits/PRs: (this PR)
+[2025-08-16 16:30] Topic: WPF reference cleanup
+Context: Build failed due to invalid `MouseDoubleClick` handler and ambiguous WinForms references.
+Observations: Removed WinForms usage, added WPF media imports, and integrated double-click logic into existing handler.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; tests aborted.
+Effective Prompts / Instructions that worked: Reviewing build errors and adjusting XAML and csproj references.
+Decisions & Rationale: Consolidate header events and avoid unused events to satisfy warnings-as-errors policy.
+Action Items: Rely on CI for full test execution.
+Related Commits/PRs: (this PR)
+[2025-08-16 20:55] Topic: Service count binding mode
+Context: App crashed on startup due to TwoWay binding on read-only service count properties.
+Observations: Set Run.Text bindings to Mode=OneWay to avoid InvalidOperationException.
+Codex Limitations noticed: Linux environment cannot run WPF for full verification.
+Effective Prompts / Instructions that worked: Error message pointing to CurrentActiveServices binding.
+Decisions & Rationale: Explicitly specify one-way bindings for read-only properties.
+Action Items: Rely on CI to validate on Windows.
+Related Commits/PRs: (this PR)
+
+[2025-08-19 10:00] Topic: MQTT will/reconnect options
+Context: Extended MQTT client to apply will message, QoS, retain flag, keep-alive, clean session, and reconnect delay with structured option logging.
+Observations: ConnectAsync now loops using ReconnectDelay after failures to improve resilience.
+Codex Limitations noticed: dotnet SDK missing; tests could not run locally.
+Effective Prompts / Instructions that worked: request to update MqttService.ConnectAsync.
+Decisions & Rationale: Honor retry delay and expose connection options for observability.
+Action Items: Rely on CI for verification of MQTT features.
+
+[2025-08-19 12:00] Topic: MQTT will options
+Context: Added will message and connection settings to MQTT view model and bound them in create/edit views.
+Observations: Properties validate ranges and log warnings; new views expose fields for user input.
+Codex Limitations noticed: Linux environment cannot run WPF tests; rely on CI.
+Effective Prompts / Instructions that worked: Following AGENTS instructions and user request for property mirroring.
+Decisions & Rationale: Mirror `MqttServiceOptions` in view model for consistency and user configurability.
+Action Items: Monitor CI for Windows-specific UI issues.
+
+[2025-08-19 14:40] Topic: MQTT tag subscriptions view
+Context: Added dedicated view and view model for managing MQTT topic subscriptions and test messages.
+Observations: New view displays topics on creation and connects service when activated.
+Codex Limitations noticed: Windows desktop tests cannot run in container.
+Effective Prompts / Instructions that worked: Followed AGENTS instructions and existing MQTT patterns.
+Decisions & Rationale: Replace basic MQTT view with subscription-focused view for clarity.
+Action Items: Verify on Windows via CI.
+Related Commits/PRs: (this PR)
+
+[2025-08-19 14:57] Topic: MqttCreateServiceView build error
+Context: Page contained both a StackPanel and ScrollViewer after merge, breaking build.
+Observations: Removing the StackPanel allowed Page to host a single ScrollViewer and compile.
+Codex Limitations noticed: `pwsh` not available to run add-tip script.
+Effective Prompts / Instructions that worked: Following merge instructions to ensure each Page has one child.
+Decisions & Rationale: Keep ScrollViewer with Grid as the sole content to maintain layout.
+Action Items: Monitor CI for other XAML compilation issues.
+Related Commits/PRs: (this PR)
+
+[2025-08-19 15:35] Topic: ViewModel and MQTT option tests
+Context: Added unit tests for MQTT create, subscription, and edit view models plus TLS/credential coverage in MQTT service tests.
+Observations: Tests cover validation, command behavior, and option mapping.
+Codex Limitations noticed: Linux container skips Windows-specific tests; rely on CI.
+Effective Prompts / Instructions that worked: Followed AGENTS guidance to update changelog and tips.
+Decisions & Rationale: Improve confidence in new view models and advanced connection options.
+Action Items: Run full test suite in CI.
+Related Commits/PRs: (this PR)
+
+[2025-08-19 15:10] Topic: Mqtt QoS enum namespace
+Context: Build failed because `MqttCreateServiceViewModel` lacked the `MQTTnet.Protocol` import.
+Observations: Adding the using directive restored `MqttQualityOfServiceLevel` references.
+Codex Limitations noticed: `dotnet test` exposed additional WPF compile errors on Linux.
+Effective Prompts / Instructions that worked: n/a
+Decisions & Rationale: Ensure files referencing MQTT enums include `MQTTnet.Protocol`.
+Action Items: Rely on CI for full Windows validation.
+Related Commits/PRs: (this PR)
+[2025-08-20 12:00] Topic: MQTT edit flow routing
+Context: Routed new MQTT services from creation through tag subscriptions and switched editing to a dedicated connection view.
+Observations: Removing legacy MQTT view resolved missing helper build errors.
+Codex Limitations noticed: dotnet CLI unavailable on container; relied on CI for validation.
+Effective Prompts / Instructions that worked: Following AGENTS instructions to update routing and persistence.
+Decisions & Rationale: Preserve existing event handlers while swapping views and save services after edits.
+Action Items: Ensure CI covers MQTT edit scenarios.
+Related Commits/PRs: (this PR)
+[2025-08-20 16:00] Topic: MQTT view registrations
+Context: Ensured new MQTT views and view models use transient lifetime and added file dialog helper to DI.
+Observations: Transient registration prevents state leakage; file picker service supports TLS certificate selection.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: Following AGENTS guidance and user request.
+Decisions & Rationale: Use transient lifetimes for views/view models and provide IFileDialogService for TLS cert browsing.
+Action Items: Monitor CI for DI regressions.
+Related Commits/PRs: (this PR)
+[2025-08-19 15:54] Topic: Tag subscription endpoint testing
+Context: Added per-tag endpoint field and test command in subscriptions view.
+Observations: Command publishes tag message to its endpoint via new row Test button.
+Codex Limitations noticed: Linux environment cannot render WPF; rely on CI.
+Effective Prompts / Instructions that worked: user request to expose TestTagEndpointCommand.
+Decisions & Rationale: Enable validating tag routing by publishing configured message to its endpoint.
+Action Items: Monitor CI for layout or command binding issues.
+Related Commits/PRs: (this PR)
+
+[2025-08-19 16:11] Topic: AsyncRelayCommand namespace
+Context: Moved AsyncRelayCommand classes into Helpers namespace to match folder structure and updated tests.
+Observations: View models now import DesktopApplicationTemplate.UI.Helpers; tests compile without namespace ambiguity.
+Codex Limitations noticed: Linux environment still lacks WPF runtime, so rely on CI for test execution.
+Effective Prompts / Instructions that worked: Addressing review feedback on namespace alignment.
+Decisions & Rationale: Keeping helpers outside ViewModels clarifies intent and avoids circular dependencies.
+Action Items: Ensure future helper utilities live under Helpers namespace.
+
+[2025-08-19 15:53] Topic: MQTT tag subscriptions layout
+Context: Reordered test-message controls above the topic list and aligned margins with design.
+Observations: Grid margin increased to 20 and Send button stack precedes topic list.
+Codex Limitations noticed: dotnet CLI unavailable; tests could not run locally.
+Effective Prompts / Instructions that worked: User request to adjust layout per design file.
+Decisions & Rationale: Match spacing conventions with 10px vertical gaps; rely on CI for layout verification.
+Action Items: Verify WPF layout on Windows via CI.
+[2025-08-19 15:53] Topic: MQTT service creation navigation
+Context: Replaced popup-based MQTT service creation with in-frame navigation and restored previous view on completion.
+Observations: Service creation now triggers an event that navigates the main frame to the create view.
+Codex Limitations noticed: pwsh unavailable for add-tip script; entry added manually.
+Effective Prompts / Instructions that worked: Followed AGENTS.md to update docs and tests.
+Decisions & Rationale: Used view model event to request navigation and added unit test to verify event raising.
+Action Items: Verify navigation restoration and service addition in future UI tests.
+[2025-08-23 12:00] Topic: Tag subscription styling
+Context: Added styling metadata to tag subscriptions and refreshed view model when tags change.
+Observations: View model listens to service updates to refresh colors/icons.
+Codex Limitations noticed: Linux environment cannot run WPF tests; rely on CI.
+Effective Prompts / Instructions that worked: Following AGENTS instructions for style binding and tests.
+Decisions & Rationale: Use TagSubscription model with INotifyPropertyChanged for styling updates.
+Action Items: Validate WPF styling on Windows CI.
+
+
+[2025-08-21 00:00] Topic: MQTT view layout refresh
+Context: Aligned MQTT create, edit, and subscription views with design spacing and shared form styles.
+Observations: Centralized label/input margins in a new Forms resource dictionary and added AutomationProperties names for accessibility tests.
+Codex Limitations noticed: Linux environment cannot run WPF tests; rely on CI.
+Effective Prompts / Instructions that worked: Referencing design XMLs and consolidating repeated styles.
+Decisions & Rationale: Use shared styles for consistency and validate key buttons via snapshot tests.
+Action Items: Monitor CI for any layout regressions on Windows.
+[2025-08-20 18:00] Topic: EditServiceCommand for MQTT
+Context: Added command-based editing for services and ensured MQTT edits load existing connection options.
+Observations: Generic RelayCommand enabled passing the service from context menus.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: Followed user request to prepopulate edit view model via options.
+Decisions & Rationale: Use event-driven navigation to decouple UI and view models.
+Action Items: Monitor CI for integration test stability.
+
+[2025-08-19 15:53] Topic: MQTT tag message persistence
+Context: Added per-tag outgoing message storage and bindings in subscriptions view.
+Observations: Editing a tag's test message now persists when switching selections.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: Followed AGENTS.md and user story steps.
+Decisions & Rationale: Bind textbox directly to selected tag's message and update command state on changes.
+Action Items: Verify Windows UI behavior via CI.
+[2025-08-19 15:54] Topic: MQTT tag QoS selection
+Context: Added per-topic QoS to MQTT tag subscriptions and forwarded levels through the service.
+Observations: TagSubscription now tracks QoS and view binds combo boxes per topic.
+Codex Limitations noticed: Linux container lacks dotnet; tests rely on CI.
+Effective Prompts / Instructions that worked: Followed AGENTS guidelines for logging and docs.
+Decisions & Rationale: Ensure QoS reaches MQTT client to honor broker delivery requirements.
+Action Items: Verify on Windows via CI.
+[2025-08-19 15:55] Topic: MQTT subscription result bubbles
+Context: Added Subscribe/Unsubscribe APIs, QoS-aware tag subscription model, and UI feedback bubbles.
+Observations: Async commands allow subscription attempts with success/failure notifications.
+Codex Limitations noticed: Linux environment cannot render WPF; rely on CI.
+Effective Prompts / Instructions that worked: Following request to capture results and update docs.
+Decisions & Rationale: Store per-topic QoS and message; visualize subscription outcomes for user clarity.
+Action Items: Monitor CI for UI styling discrepancies.
+Related Commits/PRs: (this PR)
+[2025-08-19 16:52] Topic: Mqtt subscriptions view cleanup
+Context: Removed redundant namespace and duplicate controls from MqttTagSubscriptionsView.
+Observations: Simplified grid with connection bar, subscription list, and test message bar. Build fails on Linux with MqttService.cs errors.
+Codex Limitations noticed: WPF project fails to build in Linux environment.
+Effective Prompts / Instructions that worked: Following user request to consolidate layout and bindings.
+Decisions & Rationale: Streamlined view to match cleaned view model and remove duplicate definitions.
+Action Items: Verify XAML on Windows CI.
+Related Commits/PRs: (this PR)
+[2025-08-19 19:20] Topic: NuGet package version alignment
+Context: (summarize the scenario)
+Observations: Pipeline failed restoring preview Microsoft.Extensions packages and tests hit duplicate variable names.
+Codex Limitations noticed: dotnet CLI unavailable; could not run tests locally.
+Effective Prompts / Instructions that worked: Request to debug pipeline and refactor tests.
+Decisions & Rationale: Align package versions with .NET 8 SDK to restore builds and clarify variable names.
+Action Items: Verify CI restores packages successfully.
+Related Commits/PRs: (this PR)
+[2025-08-20 17:23] Topic: Renamed collaboration tips file
+Context: Renamed root CollaborationAndDebugTips.txt to CollaborationGuidelines.txt while keeping docs/CollaborationAndDebugTips.txt as the log file.
+Observations: Updated references and added guidance in AGENTS.md.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: User request to rename and clarify docs.
+Decisions & Rationale: Separate static collaboration guidelines from the evolving log.
+Action Items: Monitor CI after documentation updates.
+Related Commits/PRs: (this PR)
+[2025-08-20 18:51] Topic: Document read-only workflow
+Context: Added restricted-environment guidance and preamble about logging limitations.
+Observations: Guidelines now instruct contributors to review AGENTS/docs and note constraints.
+Codex Limitations noticed: dotnet CLI unavailable; tests could not run.
+Effective Prompts / Instructions that worked: User request to document read-only workflow.
+Decisions & Rationale: Promote transparency about environment constraints.
+Action Items: none
+Related Commits/PRs: (this PR)
+
+[2025-08-20 18:38] Topic: Codex architecture reference
+Context: Added "Architecture & Coding Standards" section to AGENTS.md.
+Observations: Section summarizes DI registration, testing, logging policies, and references Codex guidelines.
+Codex Limitations noticed: dotnet test aborted; missing Microsoft.WindowsDesktop.App on Linux.
+Effective Prompts / Instructions that worked: User request to reference Codex architecture standards.
+Decisions & Rationale: Provide quick reference to core Codex rules for contributors.
+Action Items: none
+Related Commits/PRs: (this PR)
+
+# Collaboration & Debug Tips (Codex <-> Matt)
+Purpose: Running log of what worked, what broke, and why.
+
+Remember to record environment limitations (e.g., missing tests or write restrictions) in each log entry.
+
+[2025-08-20 17:33] Topic: Environment precedence docs
+Context: Clarified AGENTS instructions about following environment directives.
+Observations: Added paragraph to note limitations when instructions conflict, such as read-only mode.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: User request to clarify environment precedence.
+Decisions & Rationale: Document conflict handling so steps are skipped instead of failing.
+Action Items: none
+Related Commits/PRs: (this PR)
+
+[2025-08-20 13:35] Topic: QoS ItemsSource binding
+Context: Clicking MQTT service crashed because QoS enum provider was assigned directly to ItemsSource.
+Observations: Binding through resource source and restoring send button accessibility prevents runtime ArgumentException.
+Codex Limitations noticed: Linux container lacks WPF runtime; rely on CI for view tests.
+Effective Prompts / Instructions that worked: User report highlighting ItemsSource exception.
+Decisions & Rationale: Use binding to resolve ObjectDataProvider data and set AutomationProperties for accessibility tests.
+Action Items: Verify Windows CI renders view without error.
+Related Commits/PRs: (this PR)
+
+
+[2025-08-13 17:00] Topic: Logging DI refactor
+Context: Introduced constructor injection for logging services and confirmation helpers.
+Observations: Simplifies testing and removes static logger state.
+Effective Prompts / Instructions that worked: n/a
+Decisions & Rationale: Use DI to share single logging service and helpers.
+Action Items: Monitor CI for Windows-specific behaviors.
+Related Commits/PRs: (this PR)
+
+[2025-08-23 18:00] Topic: MQTT ViewModel cleanup
+Context: Removed duplicate fields and unified topic subscription properties.
+Observations: View model now exposes a single subscriptions collection with NewTopic/NewQoS inputs and updated commands.
+Codex Limitations noticed: pwsh unavailable for add-tip script.
+Effective Prompts / Instructions that worked: Following user request to consolidate properties.
+Decisions & Rationale: Simplify state management and ensure commands reference consistent members.
+Action Items: Monitor CI for regression in MQTT subscription workflow.
+Related Commits/PRs: (this PR)
+[2025-08-19 16:11] Topic: AsyncRelayCommand namespace
+Context: Moved AsyncRelayCommand classes into Helpers namespace to match folder structure and updated tests.
+Observations: View models now import DesktopApplicationTemplate.UI.Helpers; tests compile without namespace ambiguity.
+Codex Limitations noticed: Linux environment still lacks WPF runtime, so rely on CI for test execution.
+Effective Prompts / Instructions that worked: Addressing review feedback on namespace alignment.
+Decisions & Rationale: Keeping helpers outside ViewModels clarifies intent and avoids circular dependencies.
+Action Items: Ensure future helper utilities live under Helpers namespace.
+Related Commits/PRs: (this PR)
+[2025-08-19 12:00] Topic: MQTT will options
+Context: Added will message and connection settings to MQTT view model and bound them in create/edit views.
+Observations: Properties validate ranges and log warnings; new views expose fields for user input.
+Codex Limitations noticed: Linux environment cannot run WPF tests; rely on CI.
+Effective Prompts / Instructions that worked: Following AGENTS instructions and user request for property mirroring.
+Decisions & Rationale: Mirror `MqttServiceOptions` in view model for consistency and user configurability.
+Action Items: Monitor CI for Windows-specific UI issues.
+Related Commits/PRs: (this PR)
+[2025-08-16 16:30] Topic: WPF reference cleanup
+Context: Build failed due to invalid `MouseDoubleClick` handler and ambiguous WinForms references.
+Observations: Removed WinForms usage, added WPF media imports, and integrated double-click logic into existing handler.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; tests aborted.
+Effective Prompts / Instructions that worked: Reviewing build errors and adjusting XAML and csproj references.
+Decisions & Rationale: Consolidate header events and avoid unused events to satisfy warnings-as-errors policy.
+Action Items: Rely on CI for full test execution.
+Related Commits/PRs: (this PR)
+
+[2025-08-16 15:50] Topic: Service count indicators
+Context: Display active service counts and ensure view model notifies on changes.
+Observations: TextBlock near add/remove buttons shows active/total services with bindings; unit test covers add/remove/activation.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: Reviewing AGENTS.md and following MVVM update steps.
+Decisions & Rationale: Expose service counts to UI for quick monitoring and raise PropertyChanged on all service state changes.
+Action Items: Rely on CI for Windows-specific validation.
+Related Commits/PRs: (this PR)
+
+[2025-08-15 00:00] Topic: MQTT service refactor
+Context: Simplified MQTT client by unifying constructors and publish APIs.
+Observations: Connect now disconnects before reconnecting and raises connection state events.
+Effective Prompts / Instructions that worked: n/a
+Decisions & Rationale: Reduce surface area and ensure consistent token resolution across publishes.
+Action Items: Monitor CI for MQTT regressions.
+Related Commits/PRs: (this PR)
+
+[2025-08-13 20:41] Topic: WPF workload in CI
+Context: GitHub Actions failed because the `windowsdesktop` workload is no longer recognized.
+Observations: Replacing it with the `wpf` workload restores pipeline compatibility.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: verifying commands against GitHub runners.
+Decisions & Rationale: Use the `wpf` workload across build, test, quality, and packaging jobs.
+Action Items: Monitor CI for workload availability changes.
+Related Commits/PRs: (this PR)
+
+[2025-08-13 17:40] Topic: Navigation bar logo
+Context: Replaced placeholder text with application logo in main window.
+Observations: Logo displays brand and cleans up header.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: n/a
+Decisions & Rationale: Use embedded image resource for branding.
+Action Items: none
+Related Commits/PRs: (this PR)
+
+[2025-08-13 17:52] Topic: Logo resource path fix
+Context: Navigation bar logo failed to render because image path was relative to the view folder.
+Observations: Using a root-relative path loads the embedded image correctly.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: Providing exact asset location.
+Decisions & Rationale: Use root-relative resource paths for WPF assets.
+Action Items: Ensure future asset references include leading slash.
+Related Commits/PRs: (this PR)
+
+
+[2025-08-13 18:30] Topic: CI workflow and remote testing
+Context: Centralized CI pipeline runs on `feature/**` and `bugfix/**` branches with optional `/test` comment triggers.
+Observations: Single workflow handles build, test, quality, and packaging; remote runs compensate for missing WindowsDesktop support locally.
+Codex Limitations noticed: `dotnet test` for `net8.0-windows` projects fails on Linux.
+Effective Prompts / Instructions that worked: Configuring branch patterns and comment triggers.
+Decisions & Rationale: Rely on GitHub-hosted runners for validation and keep AGENTS instructions to review docs.
+Action Items: Monitor CI for workload changes and enforce branch protection requiring CI success.
+Related Commits/PRs: (this PR)
+
+[2025-08-13 19:01] Topic: Async command refactor
+Context: Introduced AsyncRelayCommand and async script evaluation to prevent UI blocking.
+Observations: Async command simplifies long-running actions and avoids deadlocks.
+Codex Limitations noticed: PowerShell unavailable; tip appended manually.
+Effective Prompts / Instructions that worked: n/a
+Decisions & Rationale: Use AsyncRelayCommand for operations needing await without blocking.
+Action Items: Monitor for unhandled exceptions in async commands.
+Related Commits/PRs: (this PR)
+
+[2025-08-13 19:42] Topic: Remove unused classes
+Context: Cleaned up obsolete logging and template control types.
+Observations: Deleting `RichTextLogger` and installer `CustomControl1` simplified the codebase with no build impact.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: n/a
+Decisions & Rationale: Prefer removing stale classes to reduce maintenance and confusion.
+Action Items: Monitor builds for any lingering references.
+Related Commits/PRs: (this PR)
+
+[2025-08-16 18:00] Topic: MQTT enhancements
+Context: Consolidated MQTT updates: options-based configuration, tokenized endpoint/message publishing, endpoint UI with tooltips, and message routing service.
+Observations: Shared options instance simplifies updates and cleanly disconnects before reconnecting. Tests require WindowsDesktop runtime.
+Effective Prompts / Instructions that worked: Following AGENTS.md to attempt tests and update docs.
+Decisions & Rationale: Centralize configuration via IOptions and route messages through a dedicated service.
+Action Items: Validate MQTT behavior via CI test runs.
+Related Commits/PRs: (this PR)
+
+[2025-08-16 20:00] Topic: Configuration save guard
+Context: Prevented stack overflow when saving empty CSV configuration and ensured main window sizes to content.
+Observations: Cloning configuration before serialization avoids recursion; sizing to content keeps controls visible.
+Effective Prompts / Instructions that worked: Using `ReferenceHandler.IgnoreCycles` and snapshotting configuration data.
+Decisions & Rationale: Detach event references and ignore cycles to ensure safe persistence.
+Action Items: Rely on CI to validate serialization and UI sizing.
+Related Commits/PRs: (this PR)
+
+[2025-08-17 00:00] Topic: Dependency checks and instruction review
+Context: Build failed because `FluentAssertions` was used without a package reference and AGENTS.md wasn't consulted.
+Observations: Missing dependencies cause compile errors; instructions files provide required setup details.
+Codex Limitations noticed: `net8.0-windows` tests cannot execute on Linux; rely on CI after package restores.
+Effective Prompts / Instructions that worked: Reviewing AGENTS and project files before committing.
+Decisions & Rationale: Verify `.csproj` files for needed packages and read AGENTS instructions before coding.
+Action Items: Add package references when introducing new libraries and document dependency checks in changelog.
+Related Commits/PRs: (this PR)
+[2025-08-14 19:14] Topic: Reference-safe configuration saves
+Context: Avoided stack overflow during configuration persistence by guarding JSON serialization.
+Observations: Used ReferenceHandler.IgnoreCycles for settings and service persistence to prevent recursive writes when CSV configuration updates.
+Codex Limitations noticed: PowerShell unavailable; appended entry manually.
+Effective Prompts / Instructions that worked: n/a
+Decisions & Rationale: Standardize cycle-safe JSON options across services.
+Action Items: Monitor CI for serialization regressions.
+Related Commits/PRs: (this PR)
+
+
+[2025-08-17 12:00] Topic: CSV file naming and key handling
+Context: Adjusted CSV service file naming to respect `{index}` placeholder and confirmed main window only responds to Escape key.
+Observations: Incrementing index only when placeholder is present prevents runaway file creation; added regression tests for key handling and cyclic service persistence.
+Codex Limitations noticed: Linux environment lacks WPF runtime, preventing full test execution.
+Effective Prompts / Instructions that worked: Reviewing AGENTS instructions and prior changelog before editing.
+Decisions & Rationale: Follow placeholder presence to advance index and ensure keyboard events remain scoped to Escape.
+Action Items: Rely on CI to execute Windows-specific tests.
+Related Commits/PRs: (this PR)
+
+[2025-08-17 18:00] Topic: CSV logging recursion
+Context: Stack overflow occurred when CSV service logged its own writes.
+Observations: Logging within CsvService re-entered LoggingService and triggered infinite RecordLog loops.
+Codex Limitations noticed: cannot catch StackOverflowException reliably; rely on snapshot then fail fast.
+Effective Prompts / Instructions that worked: request to wrap saves and add debug command.
+Decisions & Rationale: Removed internal logging from CsvService and added serialization guards producing dump files on overflow.
+Action Items: Use DebugSaveCommand for minimal reproduction and examine dump files if Environment.FailFast is triggered.
+Related Commits/PRs: (this PR)
+
+[2025-08-18 12:00] Topic: Window header double-click
+Context: Named navigation header and added drag and double-click handlers.
+Observations: Header drag restores window dragging; double-click toggles maximize state.
+Codex Limitations noticed: Linux environment lacks WPF runtime, so rely on CI for full validation.
+Effective Prompts / Instructions that worked: Direct request to wire header events and provide unit test.
+Decisions & Rationale: Provide familiar window management behavior through code-behind handlers.
+Action Items: Monitor CI for Windows-specific regressions.
+Related Commits/PRs: (this PR)
+
+[2025-08-18 17:30] Topic: Service creation bubble UI
+Context: Replaced text and combo selection with icon bubbles that auto-generate service names.
+Observations: Streamlines service creation and reduces user input errors.
+Codex Limitations noticed: Missing WindowsDesktop workload prevented local test execution.
+Effective Prompts / Instructions that worked: Following AGENTS.md to attempt tests and document changes.
+Decisions & Rationale: Expose service metadata from the view model for UI binding and name generation.
+Action Items: Rely on CI for cross-platform validation.
+Related Commits/PRs: (this PR)
+
+[2025-08-19 12:00] Topic: MQTT will options
+Context: Added will message and connection settings to MQTT view model and bound them in create/edit views.
+Observations: Properties validate ranges and log warnings; new views expose fields for user input.
+Codex Limitations noticed: Linux environment cannot run WPF tests; rely on CI.
+Effective Prompts / Instructions that worked: Following AGENTS instructions and user request for property mirroring.
+Decisions & Rationale: Mirror `MqttServiceOptions` in view model for consistency and user configurability.
+Action Items: Monitor CI for Windows-specific UI issues.
+Related Commits/PRs: (this PR)
+
+[2025-08-18 21:00] Topic: Service name uniqueness
+Context: Prevented duplicate service names during creation and rename operations.
+Observations: New services and renames auto-append numeric suffixes when collisions occur.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: request to handle duplicates via GenerateServiceName.
+Decisions & Rationale: Ensure consistent name uniqueness across sessions and persistence.
+Action Items: Monitor persistence for unexpected duplicate entries.
+Related Commits/PRs: (this PR)
+[2025-08-15 17:39] Topic: CSV service view integration
+Context: Moved CSV Creator from a pop-up window to an embedded page.
+Observations: CsvServiceView now loads within ContentFrame when the service is opened.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: Reusing existing window layout ensured quick conversion to a page.
+Decisions & Rationale: Align CSV Creator with other services to simplify navigation.
+Action Items: Monitor CI for UI test reliability.
+Related Commits/PRs: (this PR)
+[2025-08-15 17:51] Topic: Auto-start default
+Context: AppSettings and configuration files now default AutoStart to disabled.
+Observations: StartupService leaves auto-start disabled unless explicitly enabled.
+Codex Limitations noticed: PowerShell unavailable; tip appended manually.
+Effective Prompts / Instructions that worked: n/a
+Decisions & Rationale: Disable auto-start by default to prevent unintended application launches.
+Action Items: Rely on CI to validate registry updates on Windows.
+Related Commits/PRs: (this PR)
+
+[2025-08-15 18:40] Topic: SDK upgrade to 8.0.404
+Context: Pinned `global.json` to .NET SDK 8.0.404 to align with documentation.
+Observations: `dotnet --info` shows the required SDK is missing and tests cannot run.
+Codex Limitations noticed: Linux environment lacks .NET SDK 8.0.404 and WindowsDesktop support.
+Effective Prompts / Instructions that worked: Version update and verification steps.
+Decisions & Rationale: Ensure consistent SDK version across developers and CI.
+Action Items: Install .NET SDK 8.0.404 locally and validate tests on Windows CI.
+Related Commits/PRs: (this PR)
+
+[2025-08-19 00:00] Topic: Log reload behavior
+Context: Logging service now reloads previous session entries and respects minimum level changes.
+Observations: Replaying log file entries keeps UI history after restart.
+Codex Limitations noticed: None
+Effective Prompts / Instructions that worked: Specifying constructor loading and reload method.
+Decisions & Rationale: Read log file at startup and expose reload for level filter updates.
+Action Items: Monitor duplicate entries when reloading filters.
+Related Commits/PRs: (this PR)
+
+[2025-08-19 14:41] Topic: MQTT service creation view
+Context: Added dedicated view to configure MQTT options during service creation.
+Observations: Navigation within CreateServiceWindow collects broker settings and returns options to main window.
+Codex Limitations noticed: net8.0-windows tests cannot run on Linux.
+Effective Prompts / Instructions that worked: Following AGENTS instructions to add docs and tests.
+Decisions & Rationale: Capture MQTT settings before service addition for smoother workflow.
+Action Items: Rely on CI to validate WPF bindings.
+Related Commits/PRs: (this PR)
+
+[2025-08-15 20:40] Topic: Inline filter popup
+Context: Replaced separate filter window with popup-based FilterPanel triggered from main view.
+Observations: Users adjust service filters without leaving the main window.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; rely on CI for UI validation.
+Effective Prompts / Instructions that worked: Direct request to embed filters via Popup with StaysOpen=false.
+Decisions & Rationale: Use WPF Popup hosting FilterPanel to provide unobtrusive, in-place filtering.
+Action Items: Monitor CI for popup interaction regressions.
+Related Commits/PRs: (this PR)
+
+[2025-08-16 15:50] Topic: Service count indicators
+Context: Display active service counts and ensure view model notifies on changes.
+Observations: TextBlock near add/remove buttons shows active/total services with bindings; unit test covers add/remove/activation.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: Reviewing AGENTS.md and following MVVM update steps.
+Decisions & Rationale: Expose service counts to UI for quick monitoring and raise PropertyChanged on all service state changes.
+Action Items: Rely on CI for Windows-specific validation.
+Related Commits/PRs: (this PR)
+[2025-08-16 16:30] Topic: WPF reference cleanup
+Context: Build failed due to invalid `MouseDoubleClick` handler and ambiguous WinForms references.
+Observations: Removed WinForms usage, added WPF media imports, and integrated double-click logic into existing handler.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; tests aborted.
+Effective Prompts / Instructions that worked: Reviewing build errors and adjusting XAML and csproj references.
+Decisions & Rationale: Consolidate header events and avoid unused events to satisfy warnings-as-errors policy.
+Action Items: Rely on CI for full test execution.
+Related Commits/PRs: (this PR)
+[2025-08-16 20:55] Topic: Service count binding mode
+Context: App crashed on startup due to TwoWay binding on read-only service count properties.
+Observations: Set Run.Text bindings to Mode=OneWay to avoid InvalidOperationException.
+Codex Limitations noticed: Linux environment cannot run WPF for full verification.
+Effective Prompts / Instructions that worked: Error message pointing to CurrentActiveServices binding.
+Decisions & Rationale: Explicitly specify one-way bindings for read-only properties.
+Action Items: Rely on CI to validate on Windows.
+Related Commits/PRs: (this PR)
+
+[2025-08-19 10:00] Topic: MQTT will/reconnect options
+Context: Extended MQTT client to apply will message, QoS, retain flag, keep-alive, clean session, and reconnect delay with structured option logging.
+Observations: ConnectAsync now loops using ReconnectDelay after failures to improve resilience.
+Codex Limitations noticed: dotnet SDK missing; tests could not run locally.
+Effective Prompts / Instructions that worked: request to update MqttService.ConnectAsync.
+Decisions & Rationale: Honor retry delay and expose connection options for observability.
+Action Items: Rely on CI for verification of MQTT features.
+
+[2025-08-19 12:00] Topic: MQTT will options
+Context: Added will message and connection settings to MQTT view model and bound them in create/edit views.
+Observations: Properties validate ranges and log warnings; new views expose fields for user input.
+Codex Limitations noticed: Linux environment cannot run WPF tests; rely on CI.
+Effective Prompts / Instructions that worked: Following AGENTS instructions and user request for property mirroring.
+Decisions & Rationale: Mirror `MqttServiceOptions` in view model for consistency and user configurability.
+Action Items: Monitor CI for Windows-specific UI issues.
+
+[2025-08-19 14:40] Topic: MQTT tag subscriptions view
+Context: Added dedicated view and view model for managing MQTT topic subscriptions and test messages.
+Observations: New view displays topics on creation and connects service when activated.
+Codex Limitations noticed: Windows desktop tests cannot run in container.
+Effective Prompts / Instructions that worked: Followed AGENTS instructions and existing MQTT patterns.
+Decisions & Rationale: Replace basic MQTT view with subscription-focused view for clarity.
+Action Items: Verify on Windows via CI.
+Related Commits/PRs: (this PR)
+
+[2025-08-19 14:57] Topic: MqttCreateServiceView build error
+Context: Page contained both a StackPanel and ScrollViewer after merge, breaking build.
+Observations: Removing the StackPanel allowed Page to host a single ScrollViewer and compile.
+Codex Limitations noticed: `pwsh` not available to run add-tip script.
+Effective Prompts / Instructions that worked: Following merge instructions to ensure each Page has one child.
+Decisions & Rationale: Keep ScrollViewer with Grid as the sole content to maintain layout.
+Action Items: Monitor CI for other XAML compilation issues.
+Related Commits/PRs: (this PR)
+
+[2025-08-19 15:35] Topic: ViewModel and MQTT option tests
+Context: Added unit tests for MQTT create, subscription, and edit view models plus TLS/credential coverage in MQTT service tests.
+Observations: Tests cover validation, command behavior, and option mapping.
+Codex Limitations noticed: Linux container skips Windows-specific tests; rely on CI.
+Effective Prompts / Instructions that worked: Followed AGENTS guidance to update changelog and tips.
+Decisions & Rationale: Improve confidence in new view models and advanced connection options.
+Action Items: Run full test suite in CI.
+Related Commits/PRs: (this PR)
+
+[2025-08-19 15:10] Topic: Mqtt QoS enum namespace
+Context: Build failed because `MqttCreateServiceViewModel` lacked the `MQTTnet.Protocol` import.
+Observations: Adding the using directive restored `MqttQualityOfServiceLevel` references.
+Codex Limitations noticed: `dotnet test` exposed additional WPF compile errors on Linux.
+Effective Prompts / Instructions that worked: n/a
+Decisions & Rationale: Ensure files referencing MQTT enums include `MQTTnet.Protocol`.
+Action Items: Rely on CI for full Windows validation.
+Related Commits/PRs: (this PR)
+[2025-08-20 12:00] Topic: MQTT edit flow routing
+Context: Routed new MQTT services from creation through tag subscriptions and switched editing to a dedicated connection view.
+Observations: Removing legacy MQTT view resolved missing helper build errors.
+Codex Limitations noticed: dotnet CLI unavailable on container; relied on CI for validation.
+Effective Prompts / Instructions that worked: Following AGENTS instructions to update routing and persistence.
+Decisions & Rationale: Preserve existing event handlers while swapping views and save services after edits.
+Action Items: Ensure CI covers MQTT edit scenarios.
+Related Commits/PRs: (this PR)
+[2025-08-20 16:00] Topic: MQTT view registrations
+Context: Ensured new MQTT views and view models use transient lifetime and added file dialog helper to DI.
+Observations: Transient registration prevents state leakage; file picker service supports TLS certificate selection.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: Following AGENTS guidance and user request.
+Decisions & Rationale: Use transient lifetimes for views/view models and provide IFileDialogService for TLS cert browsing.
+Action Items: Monitor CI for DI regressions.
+Related Commits/PRs: (this PR)
+[2025-08-19 15:54] Topic: Tag subscription endpoint testing
+Context: Added per-tag endpoint field and test command in subscriptions view.
+Observations: Command publishes tag message to its endpoint via new row Test button.
+Codex Limitations noticed: Linux environment cannot render WPF; rely on CI.
+Effective Prompts / Instructions that worked: user request to expose TestTagEndpointCommand.
+Decisions & Rationale: Enable validating tag routing by publishing configured message to its endpoint.
+Action Items: Monitor CI for layout or command binding issues.
+Related Commits/PRs: (this PR)
+
+[2025-08-19 16:11] Topic: AsyncRelayCommand namespace
+Context: Moved AsyncRelayCommand classes into Helpers namespace to match folder structure and updated tests.
+Observations: View models now import DesktopApplicationTemplate.UI.Helpers; tests compile without namespace ambiguity.
+Codex Limitations noticed: Linux environment still lacks WPF runtime, so rely on CI for test execution.
+Effective Prompts / Instructions that worked: Addressing review feedback on namespace alignment.
+Decisions & Rationale: Keeping helpers outside ViewModels clarifies intent and avoids circular dependencies.
+Action Items: Ensure future helper utilities live under Helpers namespace.
+
+[2025-08-19 15:53] Topic: MQTT tag subscriptions layout
+Context: Reordered test-message controls above the topic list and aligned margins with design.
+Observations: Grid margin increased to 20 and Send button stack precedes topic list.
+Codex Limitations noticed: dotnet CLI unavailable; tests could not run locally.
+Effective Prompts / Instructions that worked: User request to adjust layout per design file.
+Decisions & Rationale: Match spacing conventions with 10px vertical gaps; rely on CI for layout verification.
+Action Items: Verify WPF layout on Windows via CI.
+[2025-08-19 15:53] Topic: MQTT service creation navigation
+Context: Replaced popup-based MQTT service creation with in-frame navigation and restored previous view on completion.
+Observations: Service creation now triggers an event that navigates the main frame to the create view.
+Codex Limitations noticed: pwsh unavailable for add-tip script; entry added manually.
+Effective Prompts / Instructions that worked: Followed AGENTS.md to update docs and tests.
+Decisions & Rationale: Used view model event to request navigation and added unit test to verify event raising.
+Action Items: Verify navigation restoration and service addition in future UI tests.
+[2025-08-23 12:00] Topic: Tag subscription styling
+Context: Added styling metadata to tag subscriptions and refreshed view model when tags change.
+Observations: View model listens to service updates to refresh colors/icons.
+Codex Limitations noticed: Linux environment cannot run WPF tests; rely on CI.
+Effective Prompts / Instructions that worked: Following AGENTS instructions for style binding and tests.
+Decisions & Rationale: Use TagSubscription model with INotifyPropertyChanged for styling updates.
+Action Items: Validate WPF styling on Windows CI.
+
+
+[2025-08-21 00:00] Topic: MQTT view layout refresh
+Context: Aligned MQTT create, edit, and subscription views with design spacing and shared form styles.
+Observations: Centralized label/input margins in a new Forms resource dictionary and added AutomationProperties names for accessibility tests.
+Codex Limitations noticed: Linux environment cannot run WPF tests; rely on CI.
+Effective Prompts / Instructions that worked: Referencing design XMLs and consolidating repeated styles.
+Decisions & Rationale: Use shared styles for consistency and validate key buttons via snapshot tests.
+Action Items: Monitor CI for any layout regressions on Windows.
+[2025-08-20 18:00] Topic: EditServiceCommand for MQTT
+Context: Added command-based editing for services and ensured MQTT edits load existing connection options.
+Observations: Generic RelayCommand enabled passing the service from context menus.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: Followed user request to prepopulate edit view model via options.
+Decisions & Rationale: Use event-driven navigation to decouple UI and view models.
+Action Items: Monitor CI for integration test stability.
+
+[2025-08-19 15:53] Topic: MQTT tag message persistence
+Context: Added per-tag outgoing message storage and bindings in subscriptions view.
+Observations: Editing a tag's test message now persists when switching selections.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: Followed AGENTS.md and user story steps.
+Decisions & Rationale: Bind textbox directly to selected tag's message and update command state on changes.
+Action Items: Verify Windows UI behavior via CI.
+[2025-08-19 15:54] Topic: MQTT tag QoS selection
+Context: Added per-topic QoS to MQTT tag subscriptions and forwarded levels through the service.
+Observations: TagSubscription now tracks QoS and view binds combo boxes per topic.
+Codex Limitations noticed: Linux container lacks dotnet; tests rely on CI.
+Effective Prompts / Instructions that worked: Followed AGENTS guidelines for logging and docs.
+Decisions & Rationale: Ensure QoS reaches MQTT client to honor broker delivery requirements.
+Action Items: Verify on Windows via CI.
+[2025-08-19 15:55] Topic: MQTT subscription result bubbles
+Context: Added Subscribe/Unsubscribe APIs, QoS-aware tag subscription model, and UI feedback bubbles.
+Observations: Async commands allow subscription attempts with success/failure notifications.
+Codex Limitations noticed: Linux environment cannot render WPF; rely on CI.
+Effective Prompts / Instructions that worked: Following request to capture results and update docs.
+Decisions & Rationale: Store per-topic QoS and message; visualize subscription outcomes for user clarity.
+Action Items: Monitor CI for UI styling discrepancies.
+Related Commits/PRs: (this PR)
+[2025-08-19 16:52] Topic: Mqtt subscriptions view cleanup
+Context: Removed redundant namespace and duplicate controls from MqttTagSubscriptionsView.
+Observations: Simplified grid with connection bar, subscription list, and test message bar. Build fails on Linux with MqttService.cs errors.
+Codex Limitations noticed: WPF project fails to build in Linux environment.
+Effective Prompts / Instructions that worked: Following user request to consolidate layout and bindings.
+Decisions & Rationale: Streamlined view to match cleaned view model and remove duplicate definitions.
+Action Items: Verify XAML on Windows CI.
+Related Commits/PRs: (this PR)
+[2025-08-19 19:20] Topic: NuGet package version alignment
+Context: (summarize the scenario)
+Observations: Pipeline failed restoring preview Microsoft.Extensions packages and tests hit duplicate variable names.
+Codex Limitations noticed: dotnet CLI unavailable; could not run tests locally.
+Effective Prompts / Instructions that worked: Request to debug pipeline and refactor tests.
+Decisions & Rationale: Align package versions with .NET 8 SDK to restore builds and clarify variable names.
+Action Items: Verify CI restores packages successfully.
+Related Commits/PRs: (this PR)
+[2025-08-20 17:23] Topic: Renamed collaboration tips file
+Context: Renamed root CollaborationAndDebugTips.txt to CollaborationGuidelines.txt while keeping docs/CollaborationAndDebugTips.txt as the log file.
+Observations: Updated references and added guidance in AGENTS.md.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: User request to rename and clarify docs.
+Decisions & Rationale: Separate static collaboration guidelines from the evolving log.
+Action Items: Monitor CI after documentation updates.
+Related Commits/PRs: (this PR)
+[2025-08-21 13:06] Topic: Service creation flow
+Context: (summarize the scenario)
+Observations: Add service button now opens selection window and CSV logs rotate instead of deleting files.
+Codex Limitations noticed: pwsh not available to run add-tip script
+Effective Prompts / Instructions that worked:
+Decisions & Rationale: Updated tests and logging to reflect new behavior
+Action Items:
+Related Commits/PRs:
+
+[2025-08-21 13:39] Topic: CSV output directory selection
+Context: Added ability to browse for CSV output folders and support nested file patterns.
+Observations: View model now stores an output directory and service ensures directories exist when writing files.
+Codex Limitations noticed: dotnet CLI may lack WPF runtime; rely on CI for full test execution.
+Effective Prompts / Instructions that worked: User request to select output directory and create folder structures.
+Decisions & Rationale: Use IFileDialogService for folder browsing and create directories before writing.
+Action Items: Monitor CI for Windows-specific issues.
+Related Commits/PRs: (this PR)
+[2025-08-21 14:25] Topic: CSV service column exclusion
+Context: Avoid self-referencing in CSV logs.
+Observations: CsvService now skips names containing "CSV" and MainViewModel ignores CSV services when managing columns.
+Codex Limitations noticed: pwsh unavailable for add-tip script; WindowsDesktop runtime missing for tests.
+Effective Prompts / Instructions that worked: User request to exclude CSV services from CSV output.
+Decisions & Rationale: Guard against CSV-related service names before creating or removing columns.
+Action Items: Rely on CI for full test execution.
+Related Commits/PRs: (this PR)
+
+[2025-08-21 13:38] Topic: Hostname validation for network services
+Context: Tests failed because hostnames were rejected by IP-only validation.
+Observations: Expanded validation to allow domain names and updated MQTT edit tests for connection state handling.
+Codex Limitations noticed: pwsh unavailable for add-tip script.
+Effective Prompts / Instructions that worked: user provided failing test output highlighting host requirement.
+Decisions & Rationale: Ensure host validation accepts both IP addresses and domain names to prevent false errors.
+Action Items: run tests.
+Related Commits/PRs: (this PR)
+[2025-08-21 14:11] Topic: Skip CI for dev pull requests
+Context: Pipeline ran unnecessarily on PRs targeting dev.
+Observations: Removed dev branch from pull_request trigger to bypass checks and build steps for dev PRs.
+Codex Limitations noticed: pwsh and dotnet CLI unavailable; tests not executed.
+Effective Prompts / Instructions that worked: user request to disable CI for dev pull requests.
+Decisions & Rationale: Excluding dev from pull_request triggers avoids redundant builds.
+Action Items: rely on CI for validation on other branches.
+Related Commits/PRs: (this PR)
+
+[2025-08-22 15:29] Topic: TCP DI options
+Context: Registered transient TCP view models and bound TcpServiceOptions to configuration.
+Observations: DI container updated; added tests ensuring options binding.
+Codex Limitations noticed: pwsh unavailable for add-tip script.
+Effective Prompts / Instructions that worked: user request to register TCP view models and options.
+Decisions & Rationale: use Configure to bind TcpServiceOptions and register view models as transient.
+Action Items: rely on CI for Windows-specific validation.
+Related Commits/PRs: (this PR)
+[2025-08-22 15:36] Topic: TCP service options persistence
+Context: Persisting TCP configuration alongside service metadata.
+Observations: Serializing TcpServiceOptions in ServicePersistence retains host, port, UDP flag, and mode per service.
+Codex Limitations noticed: pwsh unavailable, appended entry manually.
+Effective Prompts / Instructions that worked: user request to serialize TcpServiceOptions and associate when loading.
+Decisions & Rationale: copy options from DI into ServiceInfo and restore them during load.
+Action Items: add tests and changelog entry.
+Related Commits/PRs: (this PR)
+[2025-08-22 15:55] Topic: Design integration for TCP messaging
+Context: (summarize the scenario)
+Observations: Outlined design steps for integrating TCP service creation and message viewer.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: review design guidelines
+Decisions & Rationale: aligned with MVVM
+Action Items: verify layout
+Related Commits/PRs: (this PR)
+[2025-08-22 17:48] Topic: TCP options persistence
+Context: Persisted per-service TCP settings through ServicePersistence.
+Observations: Added TcpOptions property to ServiceViewModel and serialized/deserialized options.
+Codex Limitations noticed: Linux container lacks WindowsDesktop runtime; tests rely on CI.
+Effective Prompts / Instructions that worked: specify per-service options persistence.
+Decisions & Rationale: Store TcpServiceOptions per service for accurate reloads.
+Action Items: Monitor CI for Windows-specific behavior.
+Related Commits/PRs: (this PR)
+[2025-08-22 17:59] Topic: TCP design integration
+Context: (summarize the scenario)
+Observations: Outlined steps for integrating TCP service creation and message viewer.
+Codex Limitations noticed: 
+Effective Prompts / Instructions that worked: 
+Decisions & Rationale: Aligned with MVVM design guidance
+Action Items: Review layout on next design pass
+Related Commits/PRs: (this PR)
+[2025-08-23 10:00] Topic: Keyboard state release
+Context: (summarize the scenario)
+Observations: Application releases R, D, and Q keys on shutdown to avoid stuck input.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; tests rely on CI.
+Effective Prompts / Instructions that worked: request to fix stuck keys and review AGENTS guidelines.
+Decisions & Rationale: Use P/Invoke to send key-up events for affected keys during app exit.
+Action Items: Monitor CI for Windows-specific input handling issues.
+Related Commits/PRs: (this PR)
+[2025-08-25 19:32] Topic: FTP server create UI
+Context: Added view models and views for FTP server creation with advanced configuration.
+Observations: Introduced commands for advanced configuration and saving settings with validation and tests.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; relying on CI for WPF coverage.
+Effective Prompts / Instructions that worked: Followed MVVM guidelines and DI registration instructions.
+Decisions & Rationale: Provide basic and advanced configuration flows to mirror other service creation patterns.
+Action Items: Run tests and monitor CI results.
+Related Commits/PRs: (this PR)
+[2025-08-25 19:40] Topic: FTP server edit UI
+Context: Added view and view model for editing existing FTP server settings.
+Observations: Supports loading current options, launching advanced configuration, and saving or canceling changes with tests.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; rely on CI for WPF execution.
+Effective Prompts / Instructions that worked: Following MVVM structure and DI registration guidance.
+Decisions & Rationale: Provide editing workflow to adjust server configuration after creation.
+Action Items: Run tests and monitor CI.
+Related Commits/PRs: (this PR)
+[2025-08-25 19:46] Topic: FTP server transfer view
+Context: Added view and view model to display FTP server transfers and status.
+Observations: Transfer events populate collections for uploads and downloads.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; rely on CI.
+Effective Prompts / Instructions that worked: Hook transfer events from IFtpServerService.
+Decisions & Rationale: Use observable collections to surface transfers and log start/stop events.
+Action Items: Run tests in CI.
+Related Commits/PRs: (this PR)
+
+[2025-08-25 19:53] Topic: FTP server DI registration
+Context: Added DI registrations for FTP server service and view models and bound options from configuration.
+Observations: Runtime resolution confirmed via unit test.
+Codex Limitations noticed: PowerShell not available to run add-tip.ps1; appended entry manually.
+Effective Prompts / Instructions that worked: Followed DI checklist and options binding guidance.
+Decisions & Rationale: Used AddOptions to bind FtpServerOptions and created DI test for resolution.
+Action Items: Monitor CI for Windows-specific test execution.
+Related Commits/PRs: (this PR)
+
+[2025-08-25 20:09] Topic: FTP server test coverage
+Context: Added tests for FTP server service and view models covering start failures and invalid configuration paths.
+Observations: Service now logs failures and view models suppress events when validation errors exist.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; relied on CI for execution.
+Effective Prompts / Instructions that worked: Request to mock dependencies and validate edge cases.
+Decisions & Rationale: Improve reliability by logging errors and preventing invalid saves.
+Action Items: Monitor CI for Windows-specific behaviors.
+Related Commits/PRs: (this PR)
+[2025-08-25 20:50] Topic: FubarDev package downgrade
+Context: Build failed because NuGet couldn't find FubarDev FTP Server 6.1.0.
+Observations: Switched references to 3.1.2 and qualified conflicting types; restore completes.
+Codex Limitations noticed: WindowsDesktop runtime missing; tests aborted after build.
+Effective Prompts / Instructions that worked: Error logs indicating missing package version.
+Decisions & Rationale: Use latest available package to unblock builds.
+Action Items: Rely on CI for Windows-specific validation.
+Related Commits/PRs: (this PR)
+[2025-08-26 12:59] Topic: CS0136 variable conflict in MainWindow
+Context: Build failed due to nested 'page' variables in MainWindow edit workflow.
+Observations: Renamed inner variable to ftpPage and outer variable to servicePage to avoid shadowing.
+Codex Limitations noticed: Linux environment lacks Microsoft.WindowsDesktop runtime; tests aborted.
+Effective Prompts / Instructions that worked: User request to fix build error and AGENTS guidance to run tests.
+Decisions & Rationale: Use intention-revealing names and maintain edit workflow logic.
+Action Items: Monitor CI for full test run.
+Related Commits/PRs: (this PR)
+[2025-08-26 13:20] Topic: FTP server view integration
+Context: Align FTP service creation and editing with updated server view.
+Observations: Mapped FTP selection to server setup, replaced legacy client view with start/stop controls and transfer lists.
+Codex Limitations noticed: Linux container lacks WindowsDesktop runtime; relied on CI for WPF validation.
+Effective Prompts / Instructions that worked: User request to surface FTP create and edit pages and update default view.
+Decisions & Rationale: Treat FTP as FTP Server, streamline DI registrations, and consolidate views.
+Action Items: Monitor CI for Windows-specific regressions.
+Related Commits/PRs:
+[2025-08-26 13:44] Topic: FTP type fallback
+Context: Existing services used "FTP" type causing navigation failures.
+Observations: Added alias handling so legacy "FTP" services resolve to FTP Server and display the default view.
+Codex Limitations noticed: Linux environment cannot run WPF; relied on tests and CI.
+Effective Prompts / Instructions that worked: Examine service type strings and update comparison logic.
+Decisions & Rationale: Map legacy type to new "FTP Server" to maintain backward compatibility.
+Action Items: Run tests and monitor CI for Windows-specific behavior.
+Related Commits/PRs:
+
+[2025-08-26 14:02] Topic: FTP service selection freeze
+Context: Selecting FTP in the add services window locked the UI without creating a service.
+Observations: Options were applied after page creation, causing the FTP view to initialize with invalid defaults.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; rely on CI for WPF test execution.
+Effective Prompts / Instructions that worked: Review add-service workflow and reposition option assignment.
+Decisions & Rationale: Apply FTP options before creating the service page and expose an AddFtpService helper for reuse and testing.
+Action Items: Monitor CI for Windows-specific behavior.
+Related Commits/PRs: (this PR)
+
+
+[2025-08-26 14:05] Topic: FTP service creation freeze
+Context: Selecting FTP service in Add Service window failed to create service because text fields didn't update before save.
+Observations: Setting UpdateSourceTrigger=PropertyChanged on FTP server text boxes allows immediate validation and creation.
+Codex Limitations noticed: Linux environment lacks WPF runtime; relied on reasoning without full UI testing.
+Effective Prompts / Instructions that worked: Review binding defaults and ensure text updates without losing focus.
+Decisions & Rationale: Update bindings for FTP server views to avoid perceived freezes during service creation.
+Action Items: Monitor CI for Windows-specific behavior.
+Related Commits/PRs:
+
+[2025-08-26 15:04] Topic: FTP service selection window wrap
+Context: Ensured FTP service creation closes the window and icons stay within the create service page.
+Observations: Added WrapPanel width for icon wrapping and invoked Close() after FTP server creation.
+Codex Limitations noticed: pwsh not available for add-tip script.
+Effective Prompts / Instructions that worked: User request highlighted window closure and layout issue.
+Decisions & Rationale: Use fixed-width WrapPanel and close dialog upon FTP service creation to restore expected workflow.
+Action Items: Run tests and monitor CI.
+Related Commits/PRs:
+[2025-08-26 15:14] Topic: Create service window closure
+Context: Selection window remained open with blank content and services weren't added.
+Observations: Setting DialogResult without Close() left window displayed.
+Codex Limitations noticed: Required .NET SDK 8.0.404 unavailable; tests deferred to CI.
+Effective Prompts / Instructions that worked: Request to ensure service creation closes dialog.
+Decisions & Rationale: Invoke Close() after setting DialogResult on create or cancel events.
+Action Items: Rely on CI for full WPF validation.
+Related Commits/PRs: (this PR)
+[2025-08-26 15:35] Topic: Show page after service creation
+Context: Display newly created service pages automatically for TCP and generic services.
+Observations: Added ShowPage calls after ScrollIntoView so pages open immediately.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; relying on CI for WPF coverage.
+Effective Prompts / Instructions that worked: Direct request to show newly created service pages.
+Decisions & Rationale: Mirror MQTT and FTP workflows to keep service addition consistent.
+Action Items: Run tests and monitor CI.
+Related Commits/PRs: (this PR)
+[2025-08-26 15:44] Topic: TCP create advanced config
+Context: Exposed advanced TCP configuration from create view via new command and navigation.
+Observations: Added Advanced button and event to launch TcpServiceView for deeper options.
+Codex Limitations noticed: Linux environment lacks WPF runtime; rely on CI for verification.
+Effective Prompts / Instructions that worked: Followed MVVM and DI guidelines, referencing FTP advanced flow.
+Decisions & Rationale: Reused existing TcpServiceView and mapped options to and from create view.
+Action Items: Run tests; monitor CI for WPF coverage.
+Related Commits/PRs: (this PR)
+
+[2025-08-26 16:30] Topic: TCP edit workflow
+Context: Added edit path for TCP services to load configuration view and persist changes.
+Observations: Wired RequestClose to return to messages view and save updated options.
+Codex Limitations noticed: Linux environment lacks WPF runtime; rely on CI for full execution.
+Effective Prompts / Instructions that worked: Direct request to handle TCP edits similar to FTP workflow.
+Decisions & Rationale: Reused TcpServiceViewModel and SaveServices to store options.
+Action Items: Run tests and monitor CI.
+Related Commits/PRs: (this PR)
+[2025-08-26 16:14] Topic: TCP and FTP navigation tests
+Context: Added unit tests for TCP advanced button, TCP edit navigation, and FTP server advanced dialog.
+Observations: Tests verify advanced views open, options preload, and dialogs close.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; rely on CI for execution.
+Effective Prompts / Instructions that worked: direct request for navigation tests.
+Decisions & Rationale: Ensure advanced configuration and edit flows navigate correctly and persist options.
+Action Items: Monitor CI for Windows-specific issues.
+Related Commits/PRs: (this PR)
+
+[2025-08-26 16:29] Topic: TCP/FTP realtime
+Context: Grouped TCP message flow and enhanced FTP view with progress and client indicators.
+Observations: Grouped lists clarify data flow; FTP view shows progress bars and client counts.
+Codex Limitations noticed: pwsh not installed to run add-tip.ps1.
+Effective Prompts / Instructions that worked: Request for left-to-right panels and server activity details.
+Decisions & Rationale: Used computed collections and new service events to surface real-time information.
+Action Items: Monitor CI.
+Related Commits/PRs: 
+[2025-08-26 16:43] Topic: Remove CreateServiceWindow
+Context: Service creation now hosted within main view's content frame.
+Observations: Eliminates redundant window and ensures created services populate immediately.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; tests rely on CI.
+Effective Prompts / Instructions that worked: User request to embed create views.
+Decisions & Rationale: Replaced CreateServiceWindow navigation with in-frame page display.
+Action Items: Monitor CI for UI regressions.
+Related Commits/PRs: (this PR)
+[2025-08-26 16:49] Topic: FTP create cancellation
+Context: Added Cancel command and event to FtpServerCreateViewModel and view to resolve build error.
+Observations: Cancel button now returns to service selection via Cancelled event.
+Codex Limitations noticed: pwsh unavailable for add-tip script.
+Effective Prompts / Instructions that worked: follow MVVM pattern and logging guidelines.
+Decisions & Rationale: Align FTP create flow with other create view models.
+Action Items: Monitor CI for Windows-specific issues.
+Related Commits/PRs: (this PR)
+
+[2025-08-26 17:14] Topic: TCP/FTP creation navigation
+Context: Ensure selecting TCP or FTP server opens configuration views before adding services.
+Observations: Added view constructors with DI, updated navigation to use ActivatorUtilities, and introduced navigation tests.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: request to route service selections through create views.
+Decisions & Rationale: Inject view models and logging via constructors to guarantee required fields and consistent setup.
+Action Items: Monitor CI.
+Related Commits/PRs: (this PR)
+[2025-08-26 17:32] Topic: Save/back buttons on advanced pages
+Context: Added Save Configuration and Back buttons to TCP and FTP advanced configuration pages.
+Observations: Users can save settings or navigate back without persisting changes.
+Codex Limitations noticed: Linux container lacks WindowsDesktop runtime; rely on CI for full validation.
+Effective Prompts / Instructions that worked: Follow MVVM guidelines and update tests.
+Decisions & Rationale: Introduced distinct commands and events for saving versus navigation.
+Action Items: Monitor CI for Windows-specific issues.
+Related Commits/PRs: (this PR)
+[2025-08-27 12:00] Topic: HTTP service navigation
+Context: Added HTTP service creation, edit, and advanced configuration views with navigation hooks.
+Observations: New view models handle advanced auth and certificate options; tests cover create, edit, and back flows.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; rely on CI for full WPF validation.
+Effective Prompts / Instructions that worked: Followed MVVM and DI registration guidelines.
+Decisions & Rationale: Mirror TCP and FTP patterns to maintain consistent service workflows.
+Action Items: Monitor CI for Windows-specific issues.
+Related Commits/PRs:
+[2025-08-27 18:00] Topic: HID service navigation
+Context: Added HID create, edit, and advanced configuration flows with DI registration and tests.
+Observations: Navigation now routes HID services through dedicated views with back/advanced options.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; rely on CI for WPF verification.
+Effective Prompts / Instructions that worked: Follow MVVM/DI patterns and update docs/tests per AGENTS guidelines.
+Decisions & Rationale: Mirror existing service flows to maintain consistency and test navigation paths.
+Action Items: Monitor CI for Windows-specific behavior.
+Related Commits/PRs: (this PR)
+[2024-08-27 00:00] Topic: File Observer navigation
+Context: (summarize the scenario)
+Observations: Implemented File Observer create/edit/advanced views and navigation patterns.
+Codex Limitations noticed: PowerShell unavailable; could not run add-tip.ps1.
+Effective Prompts / Instructions that worked: Mirrored HID service patterns for consistency.
+Decisions & Rationale: Followed existing navigation and DI patterns to reduce risk.
+Action Items: Monitor integration with persistence layer in future.
+Related Commits/PRs: 
+
+[2025-08-26 18:31] Topic: Heartbeat service navigation
+Context: Added Heartbeat create, edit, and advanced configuration flows with DI and tests.
+Observations: Navigation from create service page and edit workflow now display heartbeat-specific views.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; rely on CI.
+Effective Prompts / Instructions that worked: Followed MVVM/DI patterns and existing service examples.
+Decisions & Rationale: Mirror HID workflow for consistency.
+Action Items: Monitor CI for Windows-specific issues.
+Related Commits/PRs: (this PR)
+[2025-08-26 18:52] Topic: CSV service creation
+Context: Implemented CSV create/edit views with advanced options and navigation.
+Observations: Implemented CSV create/edit flow with advanced config navigation.
+Codex Limitations noticed: Linux environment lacks Windows UI runtime; navigation untested locally.
+Effective Prompts / Instructions that worked: User instructions to add CSV navigation and advanced configuration.
+Decisions & Rationale: Followed existing service patterns for create/edit and advanced config to maintain consistency.
+Action Items: Verify navigation on Windows.
+Related Commits/PRs: (this PR)
+[2025-08-26 19:36] Topic: SCP service navigation
+Context: Added SCP create, edit, and advanced configuration flows with DI and tests.
+Observations: Navigation hooks and view models mirror other services; tests confirm create/edit routing.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; rely on CI.
+Effective Prompts / Instructions that worked: Follow existing service patterns and AGENTS guidelines.
+Decisions & Rationale: Align SCP workflow with other services for consistency.
+Action Items: Monitor CI for Windows-specific issues.
+Related Commits/PRs:
+
+[2025-08-26 19:46] Topic: TCP edit and advanced configuration views
+Context: Introduced dedicated edit and advanced configuration views for TCP services.
+Observations: Navigation now uses TcpEditServiceView and TcpAdvancedConfigView with back navigation tests.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; tests rely on CI.
+Effective Prompts / Instructions that worked: User request to separate advanced settings and preload options.
+Decisions & Rationale: Extract advanced fields to dedicated view models to keep runtime view focused.
+Action Items: Monitor CI for UI behavior.
+Related Commits/PRs: (this PR)
+[2025-08-27 20:00] Topic: MQTT advanced config navigation
+Context: Split MQTT advanced settings into a separate view with create/edit workflows and tests.
+Observations: Navigation hooks show the advanced page and return on save or back; DI registers new views and view models.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; rely on CI for WPF execution.
+Effective Prompts / Instructions that worked: Follow MVVM patterns and update docs/tests per AGENTS guidance.
+Decisions & Rationale: Isolate advanced settings to keep primary forms focused and maintain consistency with other services.
+Action Items: Monitor CI for Windows-specific issues.
+Related Commits/PRs:
+[2025-08-26 21:05] Topic: HID data flow diagram
+Context: Added data flow diagram control to HID service view with incoming, processing, and outgoing bindings.
+Observations: View model exposes new observable properties and unit tests verify change notifications.
+Codex Limitations noticed: Linux environment lacks WPF runtime for full UI tests.
+Effective Prompts / Instructions that worked: Request to visualize data flow via shared control.
+Decisions & Rationale: Created reusable control with rounded-corner styles in Themes for consistency.
+Action Items: Extend data flow sections to remaining service views.
+Related Commits/PRs:
+[2025-08-26 21:12] Topic: Edit view DI resolution
+Context: Opening service edit pages threw unresolved System.String errors due to view constructors requiring view models with parameters.
+Observations: Removed view-model constructor injection and initialized view models manually to allow ActivatorUtilities to supply required parameters.
+Codex Limitations noticed: Linux container cannot run WPF tests; rely on CI for full coverage.
+Effective Prompts / Instructions that worked: Review AGENTS guidelines and inspect DI registration patterns.
+Decisions & Rationale: Decoupling constructors from view models prevents DI from attempting to resolve unsupported primitives.
+Action Items: Monitor CI for any navigation regressions.
+Related Commits/PRs:
+
+[2025-08-26 21:11] Topic: Edit view DI fix
+Context: Double-clicking a service threw InvalidOperationException because edit views resolved view models without required parameters.
+Observations: Replaced GetRequiredService with ActivatorUtilities for edit and advanced views, injecting existing view models.
+Codex Limitations noticed: Linux container lacks WindowsDesktop runtime; tests rely on CI.
+Effective Prompts / Instructions that worked: Followed AGENTS guidelines for DI and doc updates.
+Decisions & Rationale: Use ActivatorUtilities to supply runtime parameters and logging while allowing DI for remaining services.
+Action Items: Monitor CI for Windows-specific issues.
+Related Commits/PRs: (this PR)
+
+[2025-08-27 01:50] Topic: SCP advanced config build errors
+Context: Main window contained duplicate variable declarations and XAML referenced mscorlib causing System.Object build failures.
+Observations: Removed duplicate advVm/advView declarations and switched XAML sys namespace to System.Runtime.
+Codex Limitations noticed: Unit tests failed to compile due to read-only ClickCount, full WPF validation requires CI.
+Effective Prompts / Instructions that worked: Search for duplicate variable names and follow AGENTS guidelines to update docs.
+Decisions & Rationale: Clean redundant declarations and modernize System namespace references for .NET 8 compatibility.
+Action Items: Monitor CI for remaining test issues.
+Related Commits/PRs: (this PR)
+[2025-08-27 02:40] Topic: Ftp edit view constructor
+Context: Build failed because FtpServerEditView lacked a view-model constructor and tests attempted to set read-only ClickCount.
+Observations: Added constructor with null guard and helper to set click count via reflection so tests compile.
+Codex Limitations noticed: No PowerShell available to run add-tip script; Linux container lacks full WPF runtime.
+Effective Prompts / Instructions that worked: Followed AGENTS and repo guidelines for DI and docs updates.
+Decisions & Rationale: Introduced constructor for DI compliance and centralized mouse event creation to remove invalid property sets.
+Action Items: Monitor CI for runtime behavior on Windows.
+Related Commits/PRs: (this PR)
+[2025-08-27 02:05] Topic: Test reliability fixes
+Context: Addressed unit test failures across MQTT, FTP, async command, and SCP DI components.
+Observations: Added host underscore validation, nullified blank MQTT will fields, replaced async void usage, and introduced ScpEditServiceViewModel.Load for DI compatibility.
+Codex Limitations noticed: Linux environment lacks Windows UI runtime; relied on logic inspection.
+Effective Prompts / Instructions that worked: Followed AGENTS guidance for async/await and DI-safe constructors.
+Decisions & Rationale: Ensure validators catch bad hosts and avoid async void to improve test determinism.
+Action Items: Verify on Windows CI.
+Related Commits/PRs: (this PR)
+[2025-08-27 02:22] Topic: Service persistence directory fix
+Context: Fixed unit tests failing due to missing service file paths and TCP options not restoring.
+Observations: Added directory creation in ServicePersistence.Save, switched Load to generic DI retrieval, and isolated tests by resetting ServicePersistence.FilePath.
+Codex Limitations noticed: dotnet CLI unavailable; unable to run tests locally.
+Effective Prompts / Instructions that worked: Followed AGENTS.md to update changelog and collaboration log.
+Decisions & Rationale: Ensure persistence writes succeed regardless of path and avoid cross-test interference.
+Action Items: Rely on CI for Windows-specific validation.
+Related Commits/PRs: (this PR)
+
+[2025-08-27 02:50] Topic: TCP option restore and pack URI
+Context: Fix global TCP option restoration and register pack URI scheme.
+Observations: Tests expected persisted TCP options to repopulate DI and pack URIs failed to parse without scheme registration.
+Codex Limitations noticed: dotnet SDK unavailable; relied on reasoning without running tests.
+Effective Prompts / Instructions that worked: Review AGENTS and clone options to restore DI state.
+Decisions & Rationale: Used GetRequiredService to ensure TCP options restored and module initializer to register pack scheme.
+Action Items: Verify on Windows that BubblyWindowStyle loads and TCP options persist.
+Related Commits/PRs: (this PR)
+[2025-08-27 02:41] Topic: UriParser and ServicePersistence fixes
+Context: Build failed due to unsupported UriParser.GetSyntax call and nullable TCP options.
+Observations: Switched to IsKnownScheme, guarded DI resolution for TCP options, and removed Windows service packages from UI.
+Codex Limitations noticed: Linux container lacks Microsoft.WindowsDesktop runtime; tests could not execute.
+Effective Prompts / Instructions that worked: User request to fix build errors and clean references.
+Decisions & Rationale: Use supported URI APIs and null checks to prevent runtime issues; drop unused Windows service packages.
+Action Items: Validate on Windows CI.
+Related Commits/PRs: (this PR)
+
+[2025-08-27 02:46] Topic: FTP DI test configuration
+Context: FtpServer DI registration test failed due to missing IConfiguration.
+Observations: Added configuration to the service collection so options bind successfully.
+Codex Limitations noticed: Linux environment may lack WindowsDesktop runtime; full test suite requires CI.
+Effective Prompts / Instructions that worked: Register configuration singleton per DI guidelines.
+Decisions & Rationale: Ensure test service provider mimics production setup for option binding.
+Action Items: Execute tests; rely on CI for Windows-specific coverage.
+Related Commits/PRs: (this PR)
+[2025-08-27 02:57] Topic: Test reliability improvements
+Context: Stabilized failing unit tests for service persistence, logging, and close confirmation.
+Observations: Reacquired DI options after load, polled asynchronous log writes, and disabled test parallelization for static settings usage.
+Codex Limitations noticed: Linux environment may not execute WPF UI tests fully; rely on CI for validation.
+Effective Prompts / Instructions that worked: Review AGENTS guidelines and update tests to avoid timing and threading issues.
+Decisions & Rationale: Ensure deterministic behavior by awaiting file writes and isolating static state modifications.
+Action Items: Run dotnet test with tests.runsettings; rely on CI for Windows-specific coverage.
+Related Commits/PRs:

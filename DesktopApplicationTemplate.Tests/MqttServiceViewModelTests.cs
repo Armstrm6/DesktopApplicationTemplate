@@ -11,6 +11,7 @@ using Moq;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Packets;
+using MQTTnet.Protocol;
 using Xunit;
 
 namespace DesktopApplicationTemplate.Tests;
@@ -22,13 +23,16 @@ public class MqttServiceViewModelTests
         Mock<IMessageRoutingService>? routingMock = null)
     {
         var logger = Mock.Of<ILoggingService>();
-        var options = Microsoft.Extensions.Options.Options.Create(new MqttServiceOptions());
+        var options = Microsoft.Extensions.Options.Options.Create(new MqttServiceOptions { Host = "h", Port = 1, ClientId = "id" });
         var routing = routingMock ?? new Mock<IMessageRoutingService>();
         var client = clientMock ?? new Mock<IMqttClient>();
         client.Setup(c => c.PublishAsync(It.IsAny<MqttApplicationMessage>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new MqttClientPublishResult(null, MqttClientPublishReasonCode.Success, null!, Array.Empty<MqttUserProperty>()));
-        client.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new MqttClientConnectResult());
+        if (clientMock is null)
+        {
+            client.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new MqttClientConnectResult());
+        }
         var service = new MqttService(client.Object, options, routing.Object, logger);
         var helper = new SaveConfirmationHelper(logger);
         return new MqttServiceViewModel(service, routing.Object, helper, options, logger);
@@ -85,6 +89,21 @@ public class MqttServiceViewModelTests
 
     [Fact]
     [TestCategory("WindowsSafe")]
+    public async Task ConnectAsync_InvalidOptions_RaisesEditRequested()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        var client = new Mock<IMqttClient>();
+        client.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new ArgumentException("Host cannot be null"));
+        var vm = CreateViewModel(client);
+        bool raised = false;
+        vm.EditConnectionRequested += (_, _) => raised = true;
+        await vm.ConnectAsync();
+        Assert.True(raised);
+    }
+
+    [Fact]
+    [TestCategory("WindowsSafe")]
     public async Task PublishSelectedAsync_ResolvesTokens()
     {
         if (!OperatingSystem.IsWindows()) return;
@@ -121,6 +140,36 @@ public class MqttServiceViewModelTests
         var vm = CreateViewModel();
         vm.Host = "invalid_host";
         Assert.Contains("Invalid host", vm.GetErrors(nameof(vm.Host)).Cast<string>());
+    }
+
+    [Fact]
+    [TestCategory("WindowsSafe")]
+    public void KeepAliveSecondsSetter_RejectsOutOfRange()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        var vm = CreateViewModel();
+        vm.KeepAliveSeconds = -1;
+        Assert.Contains("Keep alive must be 0-65535", vm.GetErrors(nameof(vm.KeepAliveSeconds)).Cast<string>());
+    }
+
+    [Fact]
+    [TestCategory("WindowsSafe")]
+    public void ReconnectDelaySetter_RejectsNegative()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        var vm = CreateViewModel();
+        vm.ReconnectDelay = -5;
+        Assert.Contains("Reconnect delay must be >= 0", vm.GetErrors(nameof(vm.ReconnectDelay)).Cast<string>());
+    }
+
+    [Fact]
+    [TestCategory("WindowsSafe")]
+    public void WillQualityOfServiceSetter_InvalidAddsError()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        var vm = CreateViewModel();
+        vm.WillQualityOfService = (MqttQualityOfServiceLevel)99;
+        Assert.Contains("Invalid QoS", vm.GetErrors(nameof(vm.WillQualityOfService)).Cast<string>());
     }
 }
 

@@ -7,6 +7,7 @@ using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.Services;
 using Microsoft.Extensions.Options;
+using MQTTnet.Protocol;
 
 namespace DesktopApplicationTemplate.UI.ViewModels;
 
@@ -51,7 +52,7 @@ public class MqttServiceViewModel : ValidatableViewModelBase, ILoggingViewModel,
         RemoveTopicCommand = new RelayCommand(RemoveTopic, () => SelectedTopic != null);
         AddMessageCommand = new RelayCommand(AddMessage);
         RemoveMessageCommand = new RelayCommand(RemoveSelectedMessage, () => SelectedMessage != null);
-        ConnectCommand = new AsyncRelayCommand(ConnectAsync);
+        ConnectCommand = new AsyncRelayCommand(() => ConnectAsync());
         PublishCommand = new AsyncRelayCommand(PublishSelectedAsync, () => SelectedMessage != null);
         SaveCommand = new RelayCommand(Save);
     }
@@ -79,7 +80,7 @@ public class MqttServiceViewModel : ValidatableViewModelBase, ILoggingViewModel,
         {
             if (_options.Host == value)
                 return;
-            if (!InputValidators.IsValidPartialIp(value))
+            if (!InputValidators.IsValidHost(value))
             {
                 AddError(nameof(Host), "Invalid host");
                 Logger?.Log("Invalid MQTT host entered", LogLevel.Warning);
@@ -187,6 +188,154 @@ public class MqttServiceViewModel : ValidatableViewModelBase, ILoggingViewModel,
     }
 
     /// <summary>
+    /// Topic published by the broker when the client disconnects unexpectedly.
+    /// </summary>
+    public string? WillTopic
+    {
+        get => _options.WillTopic;
+        set
+        {
+            if (_options.WillTopic == value)
+                return;
+            if (value is not null && string.IsNullOrWhiteSpace(value))
+            {
+                AddError(nameof(WillTopic), "Will topic cannot be empty");
+                Logger?.Log("Invalid MQTT will topic entered", LogLevel.Warning);
+                return;
+            }
+            ClearErrors(nameof(WillTopic));
+            DisconnectIfConnected();
+            _options.WillTopic = value;
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>
+    /// Payload published by the broker when the client disconnects unexpectedly.
+    /// </summary>
+    public string? WillPayload
+    {
+        get => _options.WillPayload;
+        set
+        {
+            if (_options.WillPayload == value)
+                return;
+            if (value is not null && string.IsNullOrWhiteSpace(value))
+            {
+                AddError(nameof(WillPayload), "Will payload cannot be empty");
+                Logger?.Log("Invalid MQTT will payload entered", LogLevel.Warning);
+                return;
+            }
+            ClearErrors(nameof(WillPayload));
+            DisconnectIfConnected();
+            _options.WillPayload = value;
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>
+    /// Quality of service level for the will message.
+    /// </summary>
+    public MqttQualityOfServiceLevel WillQualityOfService
+    {
+        get => _options.WillQualityOfService;
+        set
+        {
+            if (_options.WillQualityOfService == value)
+                return;
+            if (!Enum.IsDefined(typeof(MqttQualityOfServiceLevel), value))
+            {
+                AddError(nameof(WillQualityOfService), "Invalid QoS");
+                Logger?.Log("Invalid MQTT will QoS entered", LogLevel.Warning);
+                return;
+            }
+            ClearErrors(nameof(WillQualityOfService));
+            DisconnectIfConnected();
+            _options.WillQualityOfService = value;
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>
+    /// When true, the broker retains the will message.
+    /// </summary>
+    public bool WillRetain
+    {
+        get => _options.WillRetain;
+        set
+        {
+            if (_options.WillRetain == value)
+                return;
+            DisconnectIfConnected();
+            _options.WillRetain = value;
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>
+    /// Keep alive interval in seconds.
+    /// </summary>
+    public int KeepAliveSeconds
+    {
+        get => _options.KeepAliveSeconds;
+        set
+        {
+            if (_options.KeepAliveSeconds == value)
+                return;
+            if (value < 0 || value > ushort.MaxValue)
+            {
+                AddError(nameof(KeepAliveSeconds), "Keep alive must be 0-65535");
+                Logger?.Log("Invalid MQTT keep alive entered", LogLevel.Warning);
+                return;
+            }
+            ClearErrors(nameof(KeepAliveSeconds));
+            DisconnectIfConnected();
+            _options.KeepAliveSeconds = (ushort)value;
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>
+    /// Whether the client requests a clean session on connect.
+    /// </summary>
+    public bool CleanSession
+    {
+        get => _options.CleanSession;
+        set
+        {
+            if (_options.CleanSession == value)
+                return;
+            DisconnectIfConnected();
+            _options.CleanSession = value;
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>
+    /// Delay before attempting to reconnect after a disconnect.
+    /// </summary>
+    public int? ReconnectDelay
+    {
+        get => _options.ReconnectDelay.HasValue ? (int?)_options.ReconnectDelay.Value.TotalSeconds : null;
+        set
+        {
+            var current = _options.ReconnectDelay.HasValue ? (int?)_options.ReconnectDelay.Value.TotalSeconds : null;
+            if (current == value)
+                return;
+            if (value < 0)
+            {
+                AddError(nameof(ReconnectDelay), "Reconnect delay must be >= 0");
+                Logger?.Log("Invalid MQTT reconnect delay entered", LogLevel.Warning);
+                return;
+            }
+            ClearErrors(nameof(ReconnectDelay));
+            DisconnectIfConnected();
+            _options.ReconnectDelay = value.HasValue ? TimeSpan.FromSeconds(value.Value) : null;
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>
     /// Topics to subscribe to when connected.
     /// </summary>
     public ObservableCollection<string> Topics { get; }
@@ -264,17 +413,22 @@ public class MqttServiceViewModel : ValidatableViewModelBase, ILoggingViewModel,
     /// <summary>
     /// Command to connect to the broker.
     /// </summary>
-    public ICommand ConnectCommand { get; }
+        public ICommand ConnectCommand { get; }
 
     /// <summary>
     /// Command to publish the selected message.
     /// </summary>
-    public ICommand PublishCommand { get; }
+        public ICommand PublishCommand { get; }
 
     /// <summary>
     /// Command to trigger save confirmation.
     /// </summary>
     public ICommand SaveCommand { get; }
+
+    /// <summary>
+    /// Raised when connection settings require editing.
+    /// </summary>
+    public event EventHandler? EditConnectionRequested;
 
     private void AddTopic()
     {
@@ -312,12 +466,20 @@ public class MqttServiceViewModel : ValidatableViewModelBase, ILoggingViewModel,
     /// <summary>
     /// Connects to the broker.
     /// </summary>
-    public async Task ConnectAsync()
+        public async Task ConnectAsync(MqttServiceOptions? options = null)
     {
         Logger?.Log("MQTT connect start", LogLevel.Debug);
-        await _service.ConnectAsync().ConfigureAwait(false);
-        IsConnected = true;
-        Logger?.Log("MQTT connect finished", LogLevel.Debug);
+        try
+        {
+            await _service.ConnectAsync(options).ConfigureAwait(false);
+            IsConnected = true;
+            Logger?.Log("MQTT connect finished", LogLevel.Debug);
+        }
+        catch (ArgumentException ex)
+        {
+            Logger?.Log(ex.Message, LogLevel.Warning);
+            EditConnectionRequested?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     /// <summary>
@@ -329,8 +491,7 @@ public class MqttServiceViewModel : ValidatableViewModelBase, ILoggingViewModel,
             return;
         Logger?.Log("MQTT publish start", LogLevel.Debug);
         var topic = _routing.ResolveTokens(SelectedMessage.Endpoint);
-        var payload = _routing.ResolveTokens(SelectedMessage.Message);
-        await _service.PublishAsync(topic, payload).ConfigureAwait(false);
+        await _service.PublishAsync(topic, SelectedMessage.Message).ConfigureAwait(false);
         Logger?.Log("MQTT publish finished", LogLevel.Debug);
     }
 

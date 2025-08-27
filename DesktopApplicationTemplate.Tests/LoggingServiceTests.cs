@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Moq;
 using Xunit;
 
@@ -51,9 +52,17 @@ namespace DesktopApplicationTemplate.Tests
             var service = new LoggingService(uiLogger.Object, path);
 
             service.Log("file-test", LogLevel.Debug);
-            await Task.Delay(50);
 
-            var content = await File.ReadAllTextAsync(path);
+            var sw = Stopwatch.StartNew();
+            string content = string.Empty;
+            while (sw.Elapsed < TimeSpan.FromSeconds(1))
+            {
+                await Task.Delay(10);
+                content = await File.ReadAllTextAsync(path);
+                if (content.Contains("file-test"))
+                    break;
+            }
+
             Assert.Contains("file-test", content);
 
             try
@@ -87,6 +96,41 @@ namespace DesktopApplicationTemplate.Tests
                     entries.All(e => !e.Message.Contains("debug"))
                 ),
                 It.IsAny<CancellationToken>()), Times.Once);
+
+            ConsoleTestLogger.LogPass();
+        }
+
+        [Fact]
+        [TestCategory("WindowsSafe")]
+        public async Task Reload_ReplaysEntriesFromExistingFile()
+        {
+            var path = Path.GetTempFileName();
+            try
+            {
+                var first = new LoggingService(new Mock<IRichTextLogger>().Object, path);
+                first.Log("persisted", LogLevel.Error);
+                await Task.Delay(50);
+
+                var uiLogger = new Mock<IRichTextLogger>();
+                var second = new LoggingService(uiLogger.Object, path);
+                var entries = new List<LogEntry>();
+                second.LogAdded += e => entries.Add(e);
+
+                second.Reload();
+
+                Assert.Contains(entries, e => e.Message.Contains("persisted"));
+            }
+            finally
+            {
+                try
+                {
+                    if (File.Exists(path))
+                        File.Delete(path);
+                }
+                catch
+                {
+                }
+            }
 
             ConsoleTestLogger.LogPass();
         }

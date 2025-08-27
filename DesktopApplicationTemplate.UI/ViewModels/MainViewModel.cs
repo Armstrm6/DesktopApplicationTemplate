@@ -1,5 +1,4 @@
 using DesktopApplicationTemplate.Models;
-using DesktopApplicationTemplate.UI.Views;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -16,6 +15,7 @@ using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.Core.Services;
 using System.Text.Json.Serialization;
+using DesktopApplicationTemplate.UI;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -42,6 +42,47 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         [JsonIgnore] public Page? ServicePage { get; set; }
 
         public ObservableCollection<string> AssociatedServices { get; } = new();
+
+        /// <summary>
+        /// TCP-specific configuration for this service, if applicable.
+        /// </summary>
+        public TcpServiceOptions? TcpOptions { get; set; }
+
+        /// <summary>
+        /// FTP server-specific configuration for this service, if applicable.
+        /// </summary>
+        public FtpServerOptions? FtpOptions { get; set; }
+
+        /// <summary>
+        /// HTTP-specific configuration for this service, if applicable.
+        /// </summary>
+        public HttpServiceOptions? HttpOptions { get; set; }
+
+        /// <summary>
+        /// HID-specific configuration for this service, if applicable.
+        /// </summary>
+        public HidServiceOptions? HidOptions { get; set; }
+
+        /// <summary>
+        /// Heartbeat-specific configuration for this service, if applicable.
+        /// </summary>
+        public HeartbeatServiceOptions? HeartbeatOptions { get; set; }
+
+        /// <summary>
+        /// File Observer-specific configuration for this service, if applicable.
+        /// </summary>
+        public FileObserverServiceOptions? FileObserverOptions { get; set; }
+
+        /// <summary>
+        /// SCP-specific configuration for this service, if applicable.
+        /// </summary>
+        public ScpServiceOptions? ScpOptions { get; set; }
+        /// <summary>
+        /// CSV creator-specific configuration for this service, if applicable.
+        /// </summary>
+        public CsvServiceOptions? CsvOptions { get; set; }
+
+
 
         public static Func<string, string, ServiceViewModel?>? ResolveService { get; set; }
 
@@ -113,7 +154,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 "Heartbeat" => (WpfBrushes.LightPink, WpfBrushes.DeepPink),
                 "SCP" => (WpfBrushes.LightCyan, WpfBrushes.CadetBlue),
                 "MQTT" => (WpfBrushes.LightGoldenrodYellow, WpfBrushes.Goldenrod),
-                "FTP" => (WpfBrushes.LightSteelBlue, WpfBrushes.SteelBlue),
+                "FTP Server" or "FTP" => (WpfBrushes.LightSteelBlue, WpfBrushes.SteelBlue),
                 _ => (WpfBrushes.LightGray, WpfBrushes.Gray)
             };
             OnPropertyChanged(nameof(BackgroundColor));
@@ -132,10 +173,18 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public ServiceViewModel? SelectedService
         {
             get => _selectedService;
-            set { _selectedService = value; OnPropertyChanged(); OnPropertyChanged(nameof(DisplayLogs)); }
+            set
+            {
+                _selectedService = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(DisplayLogs));
+                (RemoveServiceCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                (EditServiceCommand as RelayCommand<ServiceViewModel?>)?.RaiseCanExecuteChanged();
+            }
         }
         public ICommand AddServiceCommand { get; }
         public ICommand RemoveServiceCommand { get; }
+        public ICommand EditServiceCommand { get; }
         public event Action<ServiceViewModel>? EditRequested;
         public int ServicesCreated => Services.Count;
         public int CurrentActiveServices => Services.Count(s => s.IsActive);
@@ -174,10 +223,15 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
             AddServiceCommand = new RelayCommand(AddService);
             RemoveServiceCommand = new RelayCommand(RemoveSelectedService, () => SelectedService != null);
+            EditServiceCommand = new RelayCommand<ServiceViewModel?>(EditService, svc => svc != null);
             FilteredServices = CollectionViewSource.GetDefaultView(Services);
             Filters.PropertyChanged += (_, __) => ApplyFilters();
             LoadServices();
             ApplyFilters();
+            if (_logger is LoggingService concreteLogger)
+            {
+                concreteLogger.Reload();
+            }
         }
 
         private void ApplyNetworkConfiguration(NetworkConfiguration config)
@@ -191,37 +245,20 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
         }
 
+        public event Action? AddServiceRequested;
+        private void EditService(ServiceViewModel? service)
+        {
+            var target = service ?? SelectedService;
+            if (target != null)
+            {
+                EditRequested?.Invoke(target);
+            }
+        }
+
         private void AddService()
         {
             _logger?.Log("AddService invoked", LogLevel.Debug);
-            var existing = Services.Select(s => s.DisplayName.Split(" - ").Last());
-            var vm = new CreateServiceViewModel(existing);
-            var popup = new CreateServiceWindow(vm); // Replace with DI if needed
-            if (popup.ShowDialog() == true)
-            {
-                string name = popup.CreatedServiceName;
-                if (string.IsNullOrWhiteSpace(name))
-                {
-                    name = GenerateServiceName(popup.CreatedServiceType);
-                }
-                var newService = new ServiceViewModel
-                {
-                    DisplayName = $"{popup.CreatedServiceType} - {name}",
-                    ServiceType = popup.CreatedServiceType,
-                    IsActive = false,
-                    Order = Services.Count
-                };
-                newService.SetColorsByType();
-                newService.LogAdded += OnServiceLogAdded;
-                newService.ActiveChanged += OnServiceActiveChanged;
-                newService.AddLog($"Default name '{name}' assigned", WpfBrushes.Gray);
-                newService.AddLog("Service created", WpfBrushes.Blue);
-                _csvService.EnsureColumnsForService(newService.DisplayName);
-                Services.Add(newService);
-                OnPropertyChanged(nameof(ServicesCreated));
-                OnPropertyChanged(nameof(CurrentActiveServices));
-                _logger?.Log($"Service {newService.DisplayName} created", LogLevel.Debug);
-            }
+            AddServiceRequested?.Invoke();
             _logger?.Log("AddService completed", LogLevel.Debug);
         }
 
@@ -247,7 +284,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 _logger?.Log($"Removing service {SelectedService.DisplayName}", LogLevel.Debug);
                 var index = Services.IndexOf(SelectedService);
                 SelectedService.AddLog("Service removed", WpfBrushes.Red);
-                _csvService.RemoveColumnsForService(SelectedService.DisplayName);
+                if (!SelectedService.ServiceType.Contains("CSV", StringComparison.OrdinalIgnoreCase))
+                    _csvService.RemoveColumnsForService(SelectedService.DisplayName);
                 SelectedService.LogAdded -= OnServiceLogAdded;
                 SelectedService.ActiveChanged -= OnServiceActiveChanged;
                 Services.Remove(SelectedService);
@@ -297,14 +335,19 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     DisplayName = info.DisplayName,
                     ServiceType = info.ServiceType,
                     IsActive = info.IsActive,
-                    Order = info.Order
+                    Order = info.Order,
+                    TcpOptions = info.TcpOptions,
+                    FtpOptions = info.FtpOptions,
+                    HttpOptions = info.HttpOptions,
+                    CsvOptions = info.CsvOptions
                 };
                 foreach (var a in info.AssociatedServices ?? new List<string>())
                     svc.AssociatedServices.Add(a);
                 svc.SetColorsByType();
                 svc.LogAdded += OnServiceLogAdded;
                 svc.ActiveChanged += OnServiceActiveChanged;
-                _csvService.EnsureColumnsForService(svc.DisplayName);
+                if (!svc.ServiceType.Contains("CSV", StringComparison.OrdinalIgnoreCase))
+                    _csvService.EnsureColumnsForService(svc.DisplayName);
                 Services.Add(svc);
                 _logger?.Log($"Loaded service {svc.DisplayName}", LogLevel.Debug);
             }
@@ -356,6 +399,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         internal void OnServiceActiveChanged(bool _)
         {
             OnPropertyChanged(nameof(CurrentActiveServices));
+            OnPropertyChanged(nameof(ServicesCreated));
         }
 
         public void ClearLogs()

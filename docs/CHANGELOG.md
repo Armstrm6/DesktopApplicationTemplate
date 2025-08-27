@@ -2,12 +2,45 @@
 
 ## [Unreleased]
 ### Added
+- HID service view now includes a data flow diagram showing incoming, processed, and outgoing data bound to the view model.
+- Navigation helpers for HTTP, HID, File Observer, Heartbeat, CSV Creator, and SCP services with tests ensuring double-click opens their edit views.
+- SCP service creation, edit, and advanced configuration views with navigation tests.
+- HID service creation, edit, and advanced configuration views with navigation tests.
+- CSV service creation and edit views with advanced configuration and navigation tests.
+- Heartbeat service creation, edit, and advanced configuration views with navigation tests.
+- Save Configuration and Back buttons for advanced edit pages to enable saving and navigation.
+- TCP messages view now groups incoming data, script output, and results into left-to-right panels.
+- FTP service view displays active transfer progress, connected client count, and status indicator.
+- HTTP service creation and edit views with advanced configuration for authentication and TLS certificate paths.
+- Tests covering TCP advanced configuration navigation, TCP edit routing, and FTP server option preloading with dialog closure.
+- FTP server create and advanced configuration view models and views with validation and commands.
+- FTP server edit view model and view enabling updates to server configuration.
+- FTP server hosting service with start/stop methods, transfer events, and unit tests.
+- FTP server view displaying live upload and download lists with server status.
+- Expanded tests for FtpServerService and FTP server view models covering start failures and invalid configurations.
+- Finalized TCP service creation with integrated message viewer for configuring endpoints and inspecting traffic.
+- Editing TCP services now uses a dedicated edit view with a separate advanced configuration view and navigation tests.
+- Introduced TCP service creation and message viewer enabling configuration and inspection of TCP endpoint traffic.
+- Registered transient TCP view models and bound `TcpServiceOptions` configuration.
+- TCP service creation flow integrated into selection window with option persistence.
+- TCP service creation view and view model with configurable options and unit tests.
+- Service persistence now saves and restores `TcpServiceOptions` for TCP services.
+- CSV creator now supports selecting an output directory and nested folder patterns when naming files.
+- WebSocket path configuration with TLS disabled when using WebSockets.
+- Connection edit window toggles subscribe/unsubscribe with color cues and highlights missing fields.
+- Help window now includes a close button.
+- Section on working in restricted environments and reminder to log limitations in collaboration docs.
+- Documented Codex architecture and coding standards in `AGENTS.md`.
+- Each MQTT tag subscription now retains its own outgoing test message, and the test message box binds to the selected tag's message.
+- Wizard-style MQTT service creation view capturing broker, credentials, TLS, and will message options.
 - Expanded MQTT service with option-based connections, TLS/WebSocket support, and structured logging.
+- MQTT connections now support will message configuration, QoS, retain flag, keep-alive period, clean session, and reconnect delay with retry and option logging.
 - Register `ILoggingService` and helper services with the DI container.
 - Refactored save/close confirmation helpers to use constructor injection.
 - Views now accept `ILoggingService` instances instead of creating loggers.
 - Updated unit tests to inject mock loggers.
 - Application logo displayed in the main window navigation bar.
+- Navigation bar `HeaderBar` now supports drag and toggles window state on double-click.
 - Consolidated GitHub Actions into a single `CI` workflow and introduced `AGENTS.md` with instructions to review collaboration docs.
 - Added `/test` comment workflow to run CI on demand.
 - Created `CONTRIBUTING.md` and PR template enforcing CI-only testing with a CI badge in the README.
@@ -22,25 +55,76 @@
 - Added `MessageRoutingService` to track latest messages per service and resolve `{ServiceName.Message}` tokens before MQTT publishing.
 - `MqttService` can now resolve message tokens and publish multiple messages per endpoint.
 - Introduced `MqttServiceOptions` for configuring MQTT connection parameters.
+- Unit tests covering default service name generation for all service types.
+- Integrated `CsvServiceView` page, embedding CSV Creator configuration within the main window.
+- Logging service loads existing log file on startup and can reload entries when the minimum level changes.
+- Tag subscriptions expose styling metadata (color/icon) and update UI when tag data changes.
+- Popup-based `FilterPanel` user control for in-place service filtering.
+- Active service counter displayed in the main window with real-time updates when services change.
+- MQTT view model now exposes will-message and connection options with validation and bindings in create/edit views.
+- Dedicated window for editing MQTT connection settings with update, cancel, and unsubscribe commands accessible from the topic subscription view.
+- MqttTagSubscriptionsView and view model for managing MQTT topic subscriptions displayed when adding new MQTT services.
+- Tag subscriptions now include per-tag endpoints with in-row test publishing.
+- xUnit tests for MQTT create, subscription, and connection edit view models covering validation, command behavior, and option mapping.
+- MqttService tests now verify TLS and credential configuration alongside will messages and keep-alive options.
+- Tag subscriptions now allow per-topic QoS selection with forwarding to the MQTT client.
+- Subscribe/unsubscribe support for MQTT topics with QoS selection and visual feedback for subscription results.
+- View and view model for displaying TCP service messages with log-level filtering and log management commands.
+- TCP messages view can navigate to advanced settings and reflects script and network configuration updates.
+- Advanced configuration button in TCP service creation navigates to the full TCP settings editor.
+- File dialog service registered for TLS certificate selection in MQTT views.
 
 ### Changed
+- Removing a service also deletes its columns from the CSV list and resets the output file.
+- Clarified environment instruction precedence in `AGENTS.md`.
+- Renamed root `CollaborationAndDebugTips.txt` to `CollaborationGuidelines.txt` and clarified distinction from `docs/CollaborationAndDebugTips.txt`.
+- Updated `global.json` to require the .NET 8 SDK version `8.0.404`.
+- Default `AutoStart` is now disabled and all environment configuration files set `"AutoStart": false`.
 - CI workflow now runs on pushes to `feature/**` and `bugfix/**` branches and supports manual triggers, ensuring tests execute on GitHub.
+- CI workflow skips checks for pull requests targeting the `dev` branch to speed up integration.
+- `MqttCreateServiceView`, `MqttTagSubscriptionsView`, and `MqttEditConnectionView` along with their view models are now registered as transient services.
 - `self-heal` workflow now monitors the unified `CI` pipeline.
+- MQTT create, edit, and subscription views now follow design spacing with shared form styles and accessibility names.
 - `TcpServiceViewModel` now evaluates scripts asynchronously and streamlined server toggle logging.
 - Refactored `MqttService` with a single options-based constructor, clean reconnect logic, and consolidated publish methods.
 - Extracted `IMessageRoutingService`, removed legacy `Route` API, and improved thread-safe message tracking with optional logging.
 - Simplified `MqttServiceViewModel` to use `MqttServiceOptions` for settings and delegate token resolution to `MessageRoutingService`.
 - `MqttService` and `MqttServiceViewModel` now consume `IOptions<MqttServiceOptions>` and the direct singleton registration was removed.
 - Added a DI container test ensuring the service provider builds with MQTT components.
+- Service creation now presents service types as icon bubbles and auto-generates default names upon selection.
+- Main window routes MQTT service creation through a dedicated create view and opens the tag subscriptions view after setup. Editing an existing MQTT service now uses the connection edit view and persists updated options.
+- Reordered test-message controls above the topic list in `MqttTagSubscriptionsView` and aligned margins with design guidance.
+- MQTT service creation now occurs within the main window frame and returns to the previous view after completion, removing the popup window dependency.
+- Service context menus invoke a new `EditServiceCommand`; editing an MQTT service opens the connection view with current options preloaded.
+- `ServiceViewModel` now holds `TcpServiceOptions` so each TCP service retains its own configuration when persisted.
+- Consolidated `MqttTagSubscriptionsViewModel` to a single subscription collection and unified topic properties.
+- Simplified `MqttTagSubscriptionsView` layout, removing duplicate controls and redundant namespace declarations.
+
+- Service selection window wraps service icons within bounds using a fixed-width panel.
 
 ### Removed
+- Separate Create Service window; creation flows now display within the main view.
 - Placeholder "Desktop Template" text from the navigation bar.
 - Legacy GitHub workflows (`dotnet.yml`, `dotnet-desktop-ci.yml`, `ci.yml`).
 - Unused `RichTextLogger` service and installer `CustomControl1` control.
 - `PublishTopic` and `PublishMessage` fields from `MqttServiceViewModel`.
+- Standalone `FilterWindow` in favor of inline filter popup.
+- Removed Windows service and EventLog package references from the UI project.
 
 ### Fixed
+- Service persistence and logging tests stabilized by reloading options, awaiting file writes, and running settings-related tests sequentially.
+- FTP DI registration test now registers configuration to avoid missing `IConfiguration` errors.
+- Registered the WPF pack URI scheme so BubblyWindow resources load without invalid URI errors.
+- Restored TCP configuration options when loading persisted services.
+- Replaced `UriParser.GetSyntax` usage with `IsKnownScheme` and guarded TCP option restoration to avoid null references.
+- Opening service edit pages no longer fails with unresolved `System.String` DI errors by decoupling view models from view constructors.
+- Editing any service no longer fails with unresolved string dependencies; edit and advanced views now receive their view models via `ActivatorUtilities`.
+- Selecting TCP or FTP server from the add service page now opens their configuration views prior to creation.
+- FTP server create view model exposes a cancel command and event to allow aborting server setup.
+- Unsealed `FtpTransferEventArgs` to allow progress events to derive from it.
+- Newly created TCP and other services now display their pages after addition.
 - Corrected logo resource path so the image renders in the navigation bar.
+ - Service creation and renaming now append numeric suffixes to avoid duplicate names.
 - Updated GitHub workflows to install the WPF workload instead of the deprecated windowsdesktop workload.
 - MQTT service now disconnects before reconnecting when settings change.
 - Removed obsolete MQTT options model that caused duplicate property definitions.
@@ -52,8 +136,52 @@
 - Removed obsolete `MQTTnet.Client.Publishing` import in MQTT view model tests to resolve missing namespace build errors.
 - Guarded CSV viewer configuration serialization to prevent stack overflow when saving empty data.
 - Main window sizes to content so UI elements are no longer clipped at the edges.
+- Service creation now prompts for a service type instead of defaulting to MQTT.
+- CSV logging rotates to a new indexed file when services are removed without deleting existing output.
+- Empty CSV configuration files no longer cause JSON parsing errors.
+- Logging minimum level changes now re-filter existing log entries without reloading from disk.
 - Added missing `FluentAssertions` package reference to the test project and documented dependency checks to avoid build failures.
 - Service and settings persistence now ignore reference cycles during JSON serialization to avoid stack overflow when saving configuration.
 - CSV service now increments file index only when `FileNamePattern` contains `{index}`.
 - Added tests confirming the main view ignores non-Escape key presses and service persistence handles cyclical references.
 - Eliminated recursive logging in CSV service to prevent stack overflow and added guards that capture configuration snapshots on save failures.
+- Removed invalid `MouseDoubleClick` XAML handler and cleaned up ambiguous WPF references causing build failures.
+- Host validation now accepts domain names for all services, preventing connection errors when using non-IP hosts.
+- Corrected service count bindings to use one-way mode, preventing runtime errors on read-only properties.
+- Resolved WPF build error by removing duplicate StackPanel from `MqttCreateServiceView` so the page hosts a single `ScrollViewer`.
+- Added missing `MQTTnet.Protocol` using in `MqttCreateServiceViewModel` to restore `MqttQualityOfServiceLevel` references.
+- Removed obsolete MQTT service view and dialog-based edit calls that broke build-time helper resolution.
+- Aligned `AsyncRelayCommand` namespace with Helpers folder.
+- Replaced preview Microsoft.Extensions.* package references with stable 8.0 versions and renamed test variables to eliminate duplicate declarations.
+- Addressed build failures by upgrading logging abstractions, exposing MQTT connect helpers, removing duplicate subscribe implementations, and initializing non-null fields.
+- Fixed ObjectDataProvider bindings in `MqttTagSubscriptionsView` to prevent runtime `ArgumentException` and restored send button accessibility metadata.
+- Eliminated duplicate Style assignments in `MqttEditConnectionView` to prevent XAML parse failures.
+- Cleaned up `CollaborationAndDebugTips.txt` by removing duplicate headers and restoring log structure.
+- CSV creator no longer adds columns for itself or other CSV services, preventing self-referencing entries.
+- Application now releases keyboard state on shutdown to prevent stuck R, D, and Q keys.
+- Service persistence now creates missing directories and restores TCP options to the DI container on load.
+
+- Registered FTP server service and view models in DI and bound FtpServer options from configuration.
+- Downgraded FubarDev FTP server packages to version 3.1.2 to resolve missing NuGet feeds.
+- FTP server create and edit windows now launch with advanced configuration access.
+- Resolved variable naming conflict in MainWindow edit workflow preventing CS0136 build errors.
+- FTP server creation and edit workflows now display correctly and default to an updated FTP service view with start/stop commands.
+- Legacy "FTP" service type now resolves to FTP Server, restoring default page navigation.
+- Selecting FTP service in the add services window no longer freezes the application; FTP options apply before view creation ensuring the service is added.
+- FTP server creation no longer freezes when selecting the service type; text fields update immediately so saving works without changing focus.
+- Creating an FTP service now closes the selection window after saving.
+- Create service window now closes after service selection or cancellation, ensuring services are added and preventing blank windows.
+- FTP server creation view preloads options from configuration and logs navigation, ensuring the dialog closes after server creation.
+- Added File Observer create/edit/advanced configuration views with navigation and DI registration.
+- MQTT service creation and edit views now separate advanced configuration into a dedicated page with navigation tests.
+- Corrected SCP advanced configuration handler by removing duplicate variable declarations and updated XAML System namespace references to use System.Runtime, resolving build errors.
+- Ftp server edit view now resolves through DI with a view-model constructor, and navigation tests set mouse click counts via reflection to compile under .NET 8.
+- AsyncRelayCommand no longer relies on async void, improving delegate execution in tests.
+- MQTT creation now converts blank will-topic and payload fields to null.
+- Host validation rejects underscores to prevent invalid host entries.
+- Scp edit view model loads existing options through a method, allowing DI to resolve without primitive parameters.
+- Corrected FTP client count test to raise events with expected sender and count arguments.
+- Resolved DI build errors for TCP and SCP edit workflows by introducing `Load` methods and removing primitive constructor dependencies.
+- UDP mode no longer clears the server IP, keeping `TcpServiceMessagesViewModel` synchronized.
+- Service persistence now handles missing service files without throwing exceptions.
+- Ftp server edit view checks for a null view model before initializing XAML, preventing parse exceptions.

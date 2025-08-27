@@ -19,16 +19,31 @@ public class DiContainerTests
         services.AddSingleton<IMessageRoutingService, MessageRoutingService>();
         services.AddSingleton<SaveConfirmationHelper>();
         services.AddSingleton<MqttService>();
-        services.AddSingleton<MqttServiceViewModel>();
+        services.AddSingleton<MqttTagSubscriptionsViewModel>();
+        services.AddTransient<TcpCreateServiceViewModel>();
+        services.AddTransient<TcpEditServiceViewModel>();
+        services.AddTransient<TcpAdvancedConfigViewModel>();
+        services.AddTransient<TcpServiceMessagesViewModel>();
+        services.AddSingleton<TcpServiceViewModel>();
         services.Configure<MqttServiceOptions>(o =>
         {
             o.Host = "localhost";
             o.Port = 1883;
             o.ClientId = "client";
         });
+        services.Configure<TcpServiceOptions>(o =>
+        {
+            o.Host = "localhost";
+            o.Port = 5000;
+            o.Mode = TcpServiceMode.Listening;
+        });
 
         using var provider = services.BuildServiceProvider();
-        var vm = provider.GetRequiredService<MqttServiceViewModel>();
-        Assert.NotNull(vm);
+        Assert.NotNull(provider.GetRequiredService<MqttTagSubscriptionsViewModel>());
+        Assert.NotNull(provider.GetRequiredService<TcpCreateServiceViewModel>());
+        Assert.NotNull(provider.GetRequiredService<TcpEditServiceViewModel>());
+        Assert.NotNull(provider.GetRequiredService<TcpAdvancedConfigViewModel>());
+        Assert.NotNull(provider.GetRequiredService<TcpServiceMessagesViewModel>());
+        Assert.NotNull(provider.GetRequiredService<TcpServiceViewModel>());
     }
 }

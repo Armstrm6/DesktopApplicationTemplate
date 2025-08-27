@@ -6,6 +6,9 @@ using System.IO;
 using System.Linq;
 using DesktopApplicationTemplate.Models;
 using Xunit;
+using MQTTnet.Client;
+using Microsoft.Extensions.Options;
+using MQTTnet;
 
 namespace DesktopApplicationTemplate.Tests
 {
@@ -17,7 +20,7 @@ namespace DesktopApplicationTemplate.Tests
         public void GenerateServiceName_IncrementsBasedOnExisting()
         {
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
-            var csv = new CsvService(new CsvViewerViewModel(configPath));
+            var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
             var network = new Mock<INetworkConfigurationService>();
             var networkVm = new NetworkConfigurationViewModel(network.Object);
             var vm = new MainViewModel(csv, networkVm, network.Object);
@@ -49,24 +52,31 @@ namespace DesktopApplicationTemplate.Tests
         {
             var logger = new Mock<ILoggingService>();
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
-            var csv = new CsvService(new CsvViewerViewModel(configPath));
+            var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
             var network = new Mock<INetworkConfigurationService>();
             var networkVm = new NetworkConfigurationViewModel(network.Object);
 
             var servicesPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "services.json");
             Directory.CreateDirectory(Path.GetDirectoryName(servicesPath)!);
-            var vm = new MainViewModel(csv, networkVm, network.Object, logger.Object, servicesPath);
-            var service = new ServiceViewModel { DisplayName = "HTTP - HTTP1", ServiceType = "HTTP" };
-            vm.Services.Add(service);
-            vm.SelectedService = service;
+            var oldPath = ServicePersistence.FilePath;
+            try
+            {
+                var vm = new MainViewModel(csv, networkVm, network.Object, logger.Object, servicesPath);
+                var service = new ServiceViewModel { DisplayName = "HTTP - HTTP1", ServiceType = "HTTP" };
+                vm.Services.Add(service);
+                vm.SelectedService = service;
 
-            vm.RemoveServiceCommand.Execute(null);
+                vm.RemoveServiceCommand.Execute(null);
 
-            if (File.Exists(servicesPath))
-                File.Delete(servicesPath);
-
-            logger.Verify(l => l.Log(It.Is<string>(m => m.Contains("Removing service")), It.IsAny<LogLevel>()), Times.Once);
-            logger.Verify(l => l.Log(It.Is<string>(m => m.Contains("Service removed")), It.IsAny<LogLevel>()), Times.Once);
+                logger.Verify(l => l.Log(It.Is<string>(m => m.Contains("Removing service")), It.IsAny<LogLevel>()), Times.Once);
+                logger.Verify(l => l.Log(It.Is<string>(m => m.Contains("Service removed")), It.IsAny<LogLevel>()), Times.Once);
+            }
+            finally
+            {
+                ServicePersistence.FilePath = oldPath;
+                var dir = Path.GetDirectoryName(servicesPath)!;
+                if (Directory.Exists(dir)) Directory.Delete(dir, true);
+            }
 
             ConsoleTestLogger.LogPass();
         }
@@ -77,7 +87,7 @@ namespace DesktopApplicationTemplate.Tests
         public void ClearLogs_RemovesEntries()
         {
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
-            var csv = new CsvService(new CsvViewerViewModel(configPath));
+            var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
             var network = new Mock<INetworkConfigurationService>();
             var networkVm = new NetworkConfigurationViewModel(network.Object);
             var vm = new MainViewModel(csv, networkVm, network.Object);
@@ -98,7 +108,7 @@ namespace DesktopApplicationTemplate.Tests
         public void ExportDisplayedLogs_WritesFile()
         {
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
-            var csv = new CsvService(new CsvViewerViewModel(configPath));
+            var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
             var network = new Mock<INetworkConfigurationService>();
             var networkVm = new NetworkConfigurationViewModel(network.Object);
             var vm = new MainViewModel(csv, networkVm, network.Object);
@@ -122,7 +132,7 @@ namespace DesktopApplicationTemplate.Tests
         public void RefreshLogs_RaisesPropertyChanged()
         {
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
-            var csv = new CsvService(new CsvViewerViewModel(configPath));
+            var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
             var network = new Mock<INetworkConfigurationService>();
             var networkVm = new NetworkConfigurationViewModel(network.Object);
             var vm = new MainViewModel(csv, networkVm, network.Object);
@@ -130,6 +140,128 @@ namespace DesktopApplicationTemplate.Tests
             vm.PropertyChanged += (s, e) => { if (e.PropertyName == "DisplayLogs") raised = true; };
 
             vm.RefreshLogs();
+
+            Assert.True(raised);
+            ConsoleTestLogger.LogPass();
+        }
+
+        [Fact]
+        [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
+        public void EditServiceCommand_LoadsCurrentMqttOptions()
+        {
+            var options = Options.Create(new MqttServiceOptions
+            {
+                Host = "existing",
+                Port = 1883,
+                ClientId = "client"
+            });
+            var client = new Mock<IMqttClient>();
+            client.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new MqttClientConnectResult());
+            var service = new MqttService(client.Object, options, Mock.Of<IMessageRoutingService>(), Mock.Of<ILoggingService>());
+
+            var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
+            var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
+            var network = new Mock<INetworkConfigurationService>();
+            var networkVm = new NetworkConfigurationViewModel(network.Object);
+            var vm = new MainViewModel(csv, networkVm, network.Object);
+            var svc = new ServiceViewModel { DisplayName = "MQTT - Test", ServiceType = "MQTT" };
+            vm.Services.Add(svc);
+
+            MqttEditConnectionViewModel? captured = null;
+            vm.EditRequested += _ => captured = new MqttEditConnectionViewModel(service, options);
+
+            vm.EditServiceCommand.Execute(svc);
+
+            Assert.NotNull(captured);
+            Assert.Equal("existing", captured!.Host);
+            Assert.Equal(1883, captured.Port);
+            Assert.Equal("client", captured.ClientId);
+            ConsoleTestLogger.LogPass();
+        }
+
+        private class TestMainViewModel : MainViewModel
+        {
+            public TestMainViewModel(CsvService csv, NetworkConfigurationViewModel networkConfig, INetworkConfigurationService networkService)
+                : base(csv, networkConfig, networkService)
+            {
+            }
+
+            public void AddServiceForTest(ServiceViewModel svc)
+            {
+                Services.Add(svc);
+                OnPropertyChanged(nameof(ServicesCreated));
+                OnPropertyChanged(nameof(CurrentActiveServices));
+            }
+        }
+
+        [Fact]
+        [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
+        public void ServiceCounts_Update_OnAddRemoveActivation()
+        {
+            var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
+            var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
+            var network = new Mock<INetworkConfigurationService>();
+            var networkVm = new NetworkConfigurationViewModel(network.Object);
+
+            var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var oldPath = ServicePersistence.FilePath;
+            ServicePersistence.FilePath = Path.Combine(tempDir, "services.json");
+            try
+            {
+                var vm = new TestMainViewModel(csv, networkVm, network.Object);
+                int createdChanges = 0;
+                int activeChanges = 0;
+                vm.PropertyChanged += (s, e) =>
+                {
+                    if (e.PropertyName == nameof(MainViewModel.ServicesCreated)) createdChanges++;
+                    if (e.PropertyName == nameof(MainViewModel.CurrentActiveServices)) activeChanges++;
+                };
+                var svc = new ServiceViewModel { DisplayName = "HTTP - HTTP1", ServiceType = "HTTP" };
+                svc.ActiveChanged += vm.OnServiceActiveChanged;
+                vm.AddServiceForTest(svc);
+
+                Assert.Equal(1, vm.ServicesCreated);
+                Assert.Equal(0, vm.CurrentActiveServices);
+
+                svc.IsActive = true;
+
+                Assert.Equal(1, vm.CurrentActiveServices);
+
+                vm.SelectedService = svc;
+                vm.RemoveServiceCommand.Execute(null);
+
+                Assert.Equal(0, vm.ServicesCreated);
+                Assert.Equal(0, vm.CurrentActiveServices);
+
+                Assert.Equal(3, createdChanges);
+                Assert.Equal(3, activeChanges);
+            }
+            finally
+            {
+                ServicePersistence.FilePath = oldPath;
+                if (Directory.Exists(tempDir)) Directory.Delete(tempDir, true);
+            }
+            ConsoleTestLogger.LogPass();
+        }
+
+        [Fact]
+        [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
+        public void AddServiceCommand_RaisesAddServiceRequested()
+        {
+            var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
+            var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
+            var network = new Mock<INetworkConfigurationService>();
+            var networkVm = new NetworkConfigurationViewModel(network.Object);
+            var vm = new MainViewModel(csv, networkVm, network.Object);
+
+            bool raised = false;
+            vm.AddServiceRequested += () => raised = true;
+
+            vm.AddServiceCommand.Execute(null);
 
             Assert.True(raised);
             ConsoleTestLogger.LogPass();

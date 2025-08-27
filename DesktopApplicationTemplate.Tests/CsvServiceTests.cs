@@ -1,8 +1,15 @@
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI.Views;
+using DesktopApplicationTemplate.Core.Services;
 using System;
 using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Windows;
+using System.Windows.Controls;
 using Xunit;
+using Moq;
 
 namespace DesktopApplicationTemplate.Tests
 {
@@ -14,7 +21,7 @@ namespace DesktopApplicationTemplate.Tests
         public void EnsureColumnsForService_AddsColumns()
         {
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()+".json");
-            var vm = new CsvViewerViewModel(configPath);
+            var vm = new CsvViewerViewModel(new StubFileDialogService(), configPath);
             var svc = new CsvService(vm);
 
             svc.EnsureColumnsForService("TestSvc");
@@ -27,10 +34,25 @@ namespace DesktopApplicationTemplate.Tests
         [Fact]
         [TestCategory("CodexSafe")]
         [TestCategory("WindowsSafe")]
+        public void EnsureColumnsForService_SkipsCsvServices()
+        {
+            var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()+".json");
+            var vm = new CsvViewerViewModel(new StubFileDialogService(), configPath);
+            var svc = new CsvService(vm);
+
+            svc.EnsureColumnsForService("CSV Creator");
+
+            Assert.Empty(vm.Configuration.Columns);
+            ConsoleTestLogger.LogPass();
+        }
+
+        [Fact]
+        [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
         public void RemoveColumnsForService_RemovesColumns()
         {
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()+".json");
-            var vm = new CsvViewerViewModel(configPath);
+            var vm = new CsvViewerViewModel(new StubFileDialogService(), configPath);
             var svc = new CsvService(vm);
 
             svc.EnsureColumnsForService("Svc");
@@ -45,10 +67,41 @@ namespace DesktopApplicationTemplate.Tests
         [Fact]
         [TestCategory("CodexSafe")]
         [TestCategory("WindowsSafe")]
+        public void RemoveColumnsForService_StartsNewFile()
+        {
+            var dir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(dir);
+            try
+            {
+                var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()+".json");
+                var vm = new CsvViewerViewModel(new StubFileDialogService(), configPath);
+                vm.Configuration.FileNamePattern = Path.Combine(dir, "out_{index}.csv");
+                var svc = new CsvService(vm);
+
+                svc.RecordLog("Svc", "one");
+                var existing = Directory.GetFiles(dir);
+
+                svc.RemoveColumnsForService("Svc");
+                svc.RecordLog("Svc2", "two");
+
+                var files = Directory.GetFiles(dir);
+                Assert.True(existing.All(f => File.Exists(f)));
+                Assert.True(files.Length > existing.Length);
+            }
+            finally
+            {
+                Directory.Delete(dir, true);
+            }
+            ConsoleTestLogger.LogPass();
+        }
+
+        [Fact]
+        [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
         public void RecordLog_WritesCsvRow()
         {
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()+".json");
-            var vm = new CsvViewerViewModel(configPath);
+            var vm = new CsvViewerViewModel(new StubFileDialogService(), configPath);
             string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()+".csv");
             vm.Configuration.FileNamePattern = path;
             var svc = new CsvService(vm);
@@ -71,7 +124,7 @@ namespace DesktopApplicationTemplate.Tests
             try
             {
                 var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()+".json");
-                var vm = new CsvViewerViewModel(configPath);
+                var vm = new CsvViewerViewModel(new StubFileDialogService(), configPath);
 
                 vm.Configuration.FileNamePattern = Path.Combine(tempDir, "output_{index}.csv");
                 var service = new CsvService(vm);
@@ -97,6 +150,36 @@ namespace DesktopApplicationTemplate.Tests
         [Fact]
         [TestCategory("CodexSafe")]
         [TestCategory("WindowsSafe")]
+        public void AppendRow_CreatesNestedDirectory()
+        {
+            var baseDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(baseDir);
+            try
+            {
+                var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()+".json");
+                var vm = new CsvViewerViewModel(new StubFileDialogService(), configPath);
+                vm.Configuration.OutputDirectory = baseDir;
+                vm.Configuration.FileNamePattern = Path.Combine("TCP1.message", "out_{index}.csv");
+                var service = new CsvService(vm);
+
+                service.AppendRow(new[] { "x", "y" });
+
+                var expectedDir = Path.Combine(baseDir, "TCP1.message");
+                Assert.True(Directory.Exists(expectedDir));
+                var files = Directory.GetFiles(expectedDir, "out_0.csv");
+                Assert.Single(files);
+            }
+            finally
+            {
+                Directory.Delete(baseDir, true);
+            }
+
+            ConsoleTestLogger.LogPass();
+        }
+
+        [Fact]
+        [TestCategory("CodexSafe")]
+        [TestCategory("WindowsSafe")]
         public void AppendRow_WithoutIndexPlaceholder_UsesSingleFile()
         {
             var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
@@ -104,7 +187,7 @@ namespace DesktopApplicationTemplate.Tests
             try
             {
                 var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()+".json");
-                var vm = new CsvViewerViewModel(configPath);
+                var vm = new CsvViewerViewModel(new StubFileDialogService(), configPath);
 
                 var filePath = Path.Combine(tempDir, "output.csv");
                 vm.Configuration.FileNamePattern = filePath;
@@ -122,6 +205,50 @@ namespace DesktopApplicationTemplate.Tests
                 Directory.Delete(tempDir, true);
             }
 
+            ConsoleTestLogger.LogPass();
+        }
+
+        [Fact]
+        [TestCategory("WindowsSafe")]
+        public void CsvServiceView_LoadsInto_ContentFrame()
+        {
+            if (!OperatingSystem.IsWindows())
+                return;
+
+            Exception? ex = null;
+            var thread = new Thread(() =>
+            {
+                try
+                {
+                    if (Application.Current == null)
+                        new DesktopApplicationTemplate.UI.App();
+
+                    var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
+                    var servicesPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "services.json");
+                    Directory.CreateDirectory(Path.GetDirectoryName(servicesPath)!);
+                    var network = new Mock<INetworkConfigurationService>();
+                    var networkVm = new NetworkConfigurationViewModel(network.Object);
+                    var mainVm = new MainViewModel(new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath)), networkVm, network.Object, null, servicesPath);
+                    var view = new MainView(mainVm);
+
+                    var svc = new ServiceViewModel { DisplayName = "CSV Creator - Test", ServiceType = "CSV Creator" };
+                    svc.SetColorsByType();
+
+                    var method = typeof(MainView).GetMethod("OpenServiceEditor", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    method?.Invoke(view, new object[] { svc });
+
+                    Assert.IsType<CsvServiceView>(view.ContentFrame.Content);
+                }
+                catch (Exception e) { ex = e; }
+                finally
+                {
+                    Application.Current?.Shutdown();
+                }
+            });
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.Start();
+            thread.Join();
+            if (ex != null) throw ex;
             ConsoleTestLogger.LogPass();
         }
     }

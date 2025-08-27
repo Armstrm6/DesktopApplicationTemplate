@@ -1,115 +1,147 @@
-using System.Runtime.CompilerServices;
+using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
-using DesktopApplicationTemplate.UI.Services;
-using DesktopApplicationTemplate.UI.Helpers;
-using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.Service.Services;
+using DesktopApplicationTemplate.UI.Helpers;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
-public class FtpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, INetworkAwareViewModel
+    /// <summary>
+    /// View model that tracks FTP server transfers and status.
+    /// </summary>
+    public class FtpServiceViewModel : ViewModelBase, ILoggingViewModel
     {
-        private string _host = string.Empty;
-        public string Host
-        {
-            get => _host;
-            set
-            {
-                _host = value;
-                if (!InputValidators.IsValidPartialIp(value))
-                {
-                    AddError(nameof(Host), "Invalid host or IP address");
-                    Logger?.Log("Invalid FTP host entered", LogLevel.Warning);
-                }
-                else
-                {
-                    ClearErrors(nameof(Host));
-                }
-                OnPropertyChanged();
-            }
-        }
-
-        private string _port = "21";
-        public string Port
-        {
-            get => _port;
-            set
-            {
-                _port = value;
-                if (!int.TryParse(value, out _))
-                {
-                    AddError(nameof(Port), "Port must be numeric");
-                    Logger?.Log("Invalid FTP port entered", LogLevel.Warning);
-                }
-                else
-                {
-                    ClearErrors(nameof(Port));
-                }
-                OnPropertyChanged();
-            }
-        }
-
-        private string _username = string.Empty;
-        public string Username { get => _username; set { _username = value; OnPropertyChanged(); } }
-
-        private string _password = string.Empty;
-        public string Password { get => _password; set { _password = value; OnPropertyChanged(); } }
-
-        private string _localPath = string.Empty;
-        public string LocalPath { get => _localPath; set { _localPath = value; OnPropertyChanged(); } }
-
-        private string _remotePath = string.Empty;
-        public string RemotePath { get => _remotePath; set { _remotePath = value; OnPropertyChanged(); } }
-
-        public ICommand BrowseCommand { get; }
-        public ICommand TransferCommand { get; }
-        public ICommand SaveCommand { get; }
-
-        public ILoggingService? Logger { get; set; }
+        private readonly IFtpServerService _ftpServerService;
+        private readonly AsyncRelayCommand _startCommand;
+        private readonly AsyncRelayCommand _stopCommand;
+        private bool _isServerRunning;
+        private int _connectedClients;
 
         /// <summary>
-        /// Optional service used for testing to avoid real network operations.
+        /// Initializes a new instance of the <see cref="FtpServiceViewModel"/> class.
         /// </summary>
-        public IFtpService? Service { get; set; }
-
-        private readonly IFileDialogService _fileDialog;
-        private readonly SaveConfirmationHelper _saveHelper;
-
-        public FtpServiceViewModel(SaveConfirmationHelper saveHelper, IFileDialogService? fileDialog = null)
+        /// <param name="ftpServerService">Service hosting the FTP server.</param>
+        /// <param name="logger">Optional logging service.</param>
+        public FtpServiceViewModel(IFtpServerService ftpServerService, ILoggingService? logger = null)
         {
-            _saveHelper = saveHelper;
-            _fileDialog = fileDialog ?? new FileDialogService();
-            BrowseCommand = new RelayCommand(Browse);
-            TransferCommand = new RelayCommand(async () => await TransferAsync());
-            SaveCommand = new RelayCommand(Save);
+            _ftpServerService = ftpServerService ?? throw new ArgumentNullException(nameof(ftpServerService));
+            Logger = logger;
+
+            _ftpServerService.FileReceived += HandleFileReceived;
+            _ftpServerService.FileSent += HandleFileSent;
+            _ftpServerService.TransferProgress += HandleTransferProgress;
+            _ftpServerService.ClientCountChanged += HandleClientCountChanged;
+
+            _startCommand = new AsyncRelayCommand(StartAsync, () => !IsServerRunning);
+            _stopCommand = new AsyncRelayCommand(StopAsync, () => IsServerRunning);
         }
 
-        private void Browse()
+        /// <summary>Files uploaded to the server.</summary>
+        public ObservableCollection<FtpTransferEventArgs> UploadedFiles { get; } = new();
+
+        /// <summary>Files downloaded from the server.</summary>
+        public ObservableCollection<FtpTransferEventArgs> DownloadedFiles { get; } = new();
+
+        /// <summary>Active transfers with progress.</summary>
+        public ObservableCollection<FtpTransferProgressEventArgs> Transfers { get; } = new();
+
+        /// <inheritdoc />
+        public ILoggingService? Logger { get; set; }
+
+        /// <summary>Indicates whether the server is running.</summary>
+        public bool IsServerRunning
         {
-            var path = _fileDialog.OpenFile();
-            if (path != null)
-                LocalPath = path;
+            get => _isServerRunning;
+            private set
+            {
+                if (_isServerRunning == value)
+                    return;
+                _isServerRunning = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(ServerStatus));
+                _startCommand.RaiseCanExecuteChanged();
+                _stopCommand.RaiseCanExecuteChanged();
+            }
         }
 
-        internal async Task TransferAsync()
+        /// <summary>Human readable server status.</summary>
+        public string ServerStatus => IsServerRunning ? "Running" : "Stopped";
+
+        /// <summary>Number of connected clients.</summary>
+        public int ConnectedClients
         {
-            if (string.IsNullOrWhiteSpace(LocalPath) || string.IsNullOrWhiteSpace(RemotePath))
+            get => _connectedClients;
+            private set
+            {
+                if (_connectedClients == value)
+                    return;
+                _connectedClients = value;
+                OnPropertyChanged();
+            }
+        }
+
+        /// <summary>Command to start the server.</summary>
+        public ICommand StartServerCommand => _startCommand;
+
+        /// <summary>Command to stop the server.</summary>
+        public ICommand StopServerCommand => _stopCommand;
+
+        private async Task StartAsync()
+        {
+            Logger?.Log("Starting FTP server", LogLevel.Debug);
+            await _ftpServerService.StartAsync();
+            IsServerRunning = true;
+            Logger?.Log("FTP server started", LogLevel.Debug);
+        }
+
+        private async Task StopAsync()
+        {
+            Logger?.Log("Stopping FTP server", LogLevel.Debug);
+            await _ftpServerService.StopAsync();
+            IsServerRunning = false;
+            ConnectedClients = 0;
+            Transfers.Clear();
+            Logger?.Log("FTP server stopped", LogLevel.Debug);
+        }
+
+        private void HandleFileReceived(object? sender, FtpTransferEventArgs e)
+        {
+            if (e == null)
                 return;
-            Logger?.Log("Starting FTP transfer", LogLevel.Debug);
-            var svc = Service ?? (IFtpService)new FtpService(Host, int.Parse(Port), Username, Password, Logger);
-            await svc.UploadAsync(LocalPath, RemotePath);
-            Logger?.Log("FTP upload complete", LogLevel.Debug);
-            Logger?.Log("Finished FTP transfer", LogLevel.Debug);
+            UploadedFiles.Add(e);
+            Logger?.Log($"File uploaded: {e.Path}", LogLevel.Debug);
         }
 
-        private void Save() => _saveHelper.Show();
-
-        public void UpdateNetworkConfiguration(NetworkConfiguration configuration)
+        private void HandleFileSent(object? sender, FtpTransferEventArgs e)
         {
-            Host = configuration.IpAddress;
+            if (e == null)
+                return;
+            DownloadedFiles.Add(e);
+            Logger?.Log($"File downloaded: {e.Path}", LogLevel.Debug);
         }
 
-        // OnPropertyChanged provided by ViewModelBase
+        private void HandleTransferProgress(object? sender, FtpTransferProgressEventArgs e)
+        {
+            if (e == null)
+                return;
+            var existing = Transfers.FirstOrDefault(t => t.Path == e.Path && t.IsUpload == e.IsUpload);
+            if (existing != null)
+            {
+                var index = Transfers.IndexOf(existing);
+                Transfers[index] = e;
+            }
+            else
+            {
+                Transfers.Add(e);
+            }
+        }
+
+        private void HandleClientCountChanged(object? sender, int count)
+        {
+            ConnectedClients = count;
+        }
     }
 }
+

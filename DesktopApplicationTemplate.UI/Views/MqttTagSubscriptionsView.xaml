@@ -1,0 +1,79 @@
+<Page x:Class="DesktopApplicationTemplate.UI.Views.MqttTagSubscriptionsView"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:models="clr-namespace:DesktopApplicationTemplate.UI.Models"
+      xmlns:mqtt="clr-namespace:MQTTnet.Protocol;assembly=MQTTnet"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+      mc:Ignorable="d">
+    <Page.Resources>
+        <ObjectDataProvider x:Key="QoSValues" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="mqtt:MqttQualityOfServiceLevel" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+    </Page.Resources>
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <!-- Connection bar -->
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+            <Button Content="Connect" Command="{Binding ConnectCommand}" Width="80" AutomationProperties.Name="Connect MQTT"/>
+            <TextBox Text="{Binding NewTopic}" Width="200" Margin="10,0,0,0" x:Name="NewTopicBox" ToolTip="Topic to subscribe"/>
+            <ComboBox Width="100" Margin="5,0,0,0"
+                      ItemsSource="{Binding Source={StaticResource QoSValues}}"
+                      SelectedItem="{Binding NewQoS}"/>
+            <Button Content="Add" Command="{Binding AddTopicCommand}" Width="50" Margin="5,0,0,0"/>
+            <Button Content="Remove" Command="{Binding RemoveTopicCommand}" Width="70" Margin="5,0,0,0"/>
+        </StackPanel>
+        <!-- Subscriptions list -->
+        <DataGrid Grid.Row="1"
+                  ItemsSource="{Binding Subscriptions}"
+                  SelectedItem="{Binding SelectedSubscription}"
+                  AutoGenerateColumns="False"
+                  HeadersVisibility="Column"
+                  CanUserAddRows="False">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Topic" Binding="{Binding Topic}" IsReadOnly="True"/>
+                <DataGridComboBoxColumn Header="QoS"
+                                        SelectedItemBinding="{Binding QoS}"
+                                        ItemsSource="{Binding Source={StaticResource QoSValues}}"/>
+                <DataGridTextColumn Header="Endpoint"
+                                    Binding="{Binding Endpoint, UpdateSourceTrigger=PropertyChanged}"/>
+                <DataGridTextColumn Header="Message"
+                                    Binding="{Binding OutgoingMessage, UpdateSourceTrigger=PropertyChanged}"/>
+                <DataGridTemplateColumn Header="Test">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate DataType="{x:Type models:TagSubscription}">
+                            <Button Content="Test" Width="50"
+                                    Command="{Binding DataContext.TestTagEndpointCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                    CommandParameter="{Binding}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+        <!-- Test message bar -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,10,0,0">
+            <TextBox Text="{Binding SelectedSubscription.OutgoingMessage, UpdateSourceTrigger=PropertyChanged}"
+                     Width="200"
+                     x:Name="TestMessageBox"
+                     ToolTip="Message to send"/>
+            <Button x:Name="SendButton"
+                    Content="Send"
+                    Command="{Binding PublishTestMessageCommand}"
+                    Width="60"
+                    Margin="5,0,0,0"
+                    AutomationProperties.Name="Send Test Message"/>
+            <Button Content="Test"
+                    Command="{Binding TestTagEndpointCommand}"
+                    CommandParameter="{Binding SelectedSubscription}"
+                    Width="60"
+                    Margin="5,0,0,0"/>
+        </StackPanel>
+    </Grid>
+</Page>

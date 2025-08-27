@@ -28,7 +28,10 @@
         </Grid.RowDefinitions>
 
         <!-- Navigation Bar -->
-        <Grid Grid.Row="0" Background="#00C2C2">
+        <Grid x:Name="HeaderBar"
+              Grid.Row="0"
+             Background="#00C2C2"
+             MouseLeftButtonDown="HeaderBar_MouseLeftButtonDown">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
@@ -54,9 +57,17 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,5">
+                    <TextBlock VerticalAlignment="Center" Margin="0,0,5,0">
+                        Active Services: <Run Text="{Binding CurrentActiveServices, Mode=OneWay}"/>/<Run Text="{Binding ServicesCreated, Mode=OneWay}"/>
+                    </TextBlock>
                     <Button Content="+" Width="30" Click="AddService_Click" Background="#E6E6E6" Foreground="#333333"/>
                     <Button Content="-" Width="30" Margin="5,0,0,0" Click="RemoveService_Click" Background="#E6E6E6" Foreground="#333333"/>
-                    <Button Content="☰" Width="30" Margin="5,0,0,0" Click="OpenFilter_Click" Background="#E6E6E6" Foreground="#333333"/>
+                    <Button x:Name="FilterButton" Content="☰" Width="30" Margin="5,0,0,0" Click="FilterButton_Click" Background="#E6E6E6" Foreground="#333333"/>
+                    <Popup x:Name="FilterPopup" PlacementTarget="{Binding ElementName=FilterButton}" Placement="Bottom" StaysOpen="False" DataContext="{Binding DataContext, ElementName=FilterButton}">
+                        <Border Background="White" CornerRadius="5" Padding="10">
+                            <local:FilterPanel DataContext="{Binding Filters}"/>
+                        </Border>
+                    </Popup>
                 </StackPanel>
                 <Border Grid.Row="1" Background="#E6E6E6" CornerRadius="3" Padding="5">
                     <ListBox x:Name="ServiceList" ItemsSource="{Binding FilteredServices}" SelectedItem="{Binding SelectedService}"
@@ -72,7 +83,9 @@
                                     <Border CornerRadius="8" BorderBrush="Gray" BorderThickness="1" Padding="5" Margin="2">
                                         <Border.ContextMenu>
                                             <ContextMenu>
-                                                <MenuItem Header="Edit Service" Click="EditServiceMenu_Click" />
+                                                <MenuItem Header="Edit Service"
+                                                          Command="{Binding DataContext.EditServiceCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                          CommandParameter="{Binding}" />
                                                 <MenuItem Header="Rename Service" Click="RenameServiceMenu_Click" />
                                                 <MenuItem Header="Delete Service" Click="DeleteServiceMenu_Click" />
                                                 <MenuItem Header="Change Color" Click="ChangeColorMenu_Click" />

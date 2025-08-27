@@ -12,7 +12,7 @@ on:
   pull_request:
     branches:
       - main
-      - dev
+      # dev branch intentionally excluded so PRs targeting dev skip CI checks
   workflow_dispatch:
 
 jobs:

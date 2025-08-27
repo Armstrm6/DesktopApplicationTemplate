@@ -1,0 +1,42 @@
+<UserControl x:Class="DesktopApplicationTemplate.UI.Views.FilterPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sys="clr-namespace:System;assembly=System.Runtime">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal" Margin="0,5">
+            <TextBlock Text="Name:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+            <TextBox Width="200" Text="{Binding NameFilter, UpdateSourceTrigger=PropertyChanged}"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,5">
+            <TextBlock Text="Type:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+            <ComboBox Width="200" SelectedItem="{Binding TypeFilter}">
+                <ComboBox.Items>
+                    <sys:String>All</sys:String>
+                    <sys:String>TCP</sys:String>
+                    <sys:String>HTTP</sys:String>
+                    <sys:String>File Observer</sys:String>
+                    <sys:String>HID</sys:String>
+                    <sys:String>Heartbeat</sys:String>
+                </ComboBox.Items>
+            </ComboBox>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,5">
+            <TextBlock Text="Status:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+            <ComboBox Width="200" SelectedItem="{Binding StatusFilter}">
+                <ComboBox.Items>
+                    <sys:String>All</sys:String>
+                    <sys:String>Active</sys:String>
+                    <sys:String>Inactive</sys:String>
+                </ComboBox.Items>
+            </ComboBox>
+        </StackPanel>
+    </Grid>
+</UserControl>

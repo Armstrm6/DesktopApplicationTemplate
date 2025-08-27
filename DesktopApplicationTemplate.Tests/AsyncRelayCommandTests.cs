@@ -1,4 +1,4 @@
-using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI.Helpers;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -18,8 +18,7 @@ namespace DesktopApplicationTemplate.Tests
                 invoked = true;
             });
 
-            command.Execute(null);
-            await Task.Delay(20);
+            await command.ExecuteAsync();
 
             Assert.True(invoked);
             ConsoleTestLogger.LogPass();

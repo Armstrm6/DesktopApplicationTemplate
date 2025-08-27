@@ -4,11 +4,15 @@
 
 This repository contains a basic WPF UI application, a Windows Service and unit tests.
 
+See `CollaborationGuidelines.txt` for tips on working with the repository. A running log of past collaboration decisions lives in `docs/CollaborationAndDebugTips.txt`.
+
 ## Prerequisites
 
 - [.NET 8 SDK](https://dotnet.microsoft.com/download) (8.0.404)
 - [Git LFS](https://git-lfs.com) for large binary assets
 - Windows OS is required to run the WPF UI and service projects.
+
+Ensure the 8.0.404 SDK is installed so the pinned `global.json` version resolves correctly.
 
 ### Git LFS
 

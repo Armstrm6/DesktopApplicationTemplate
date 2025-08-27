@@ -1,0 +1,59 @@
+<Page x:Class="DesktopApplicationTemplate.UI.Views.TcpServiceMessagesView"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0">
+                <TextBlock Text="Incoming Data" FontWeight="Bold" Margin="0,0,0,5"/>
+                <ListBox ItemsSource="{Binding IncomingData}"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Margin="10,0">
+                <TextBlock Text="Script Modifications" FontWeight="Bold" Margin="0,0,0,5"/>
+                <ListBox ItemsSource="{Binding ScriptModifications}"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="2">
+                <TextBlock Text="Outgoing Results" FontWeight="Bold" Margin="0,0,0,5"/>
+                <ListBox ItemsSource="{Binding OutgoingResults}"/>
+            </StackPanel>
+        </Grid>
+
+        <StackPanel Grid.Row="1" Orientation="Vertical">
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                <TextBlock Text="Log Level" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <ComboBox Width="150" SelectedValue="{Binding LogLevelFilter, Mode=TwoWay}">
+                    <ComboBoxItem Content="Debug"/>
+                    <ComboBoxItem Content="Warning"/>
+                    <ComboBoxItem Content="Error"/>
+                    <ComboBoxItem Content="Critical"/>
+                </ComboBox>
+                <Button Content="Export Log" Command="{Binding ExportLogCommand}" Margin="10,0,0,0" Width="100"/>
+                <Button Content="Clear Log" Command="{Binding ClearLogCommand}" Margin="10,0,0,0" Width="100"/>
+                <Button Content="Update Log" Command="{Binding RefreshLogCommand}" Margin="10,0,0,0" Width="100"/>
+                <Button Content="Advanced Settings" Command="{Binding OpenAdvancedSettingsCommand}" Margin="10,0,0,0" Width="150"/>
+            </StackPanel>
+            <ListBox ItemsSource="{Binding DisplayLogs}" Height="200">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Message}" Foreground="{Binding Color}"/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </StackPanel>
+    </Grid>
+</Page>

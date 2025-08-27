@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Windows.Input;
+using DesktopApplicationTemplate.UI.Services;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -17,12 +18,14 @@ namespace DesktopApplicationTemplate.UI.ViewModels
     public class CsvConfiguration
     {
         public string FileNamePattern { get; set; } = "output_{index}.csv";
+        public string OutputDirectory { get; set; } = string.Empty;
         public ObservableCollection<CsvColumnConfig> Columns { get; set; } = new();
     }
 
     public class CsvViewerViewModel : ViewModelBase
     {
         private readonly string _configPath;
+        private readonly IFileDialogService _fileDialog;
 
         public CsvConfiguration Configuration { get; private set; } = new();
         public CsvColumnConfig? SelectedColumn { get; set; }
@@ -31,20 +34,23 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public ICommand RemoveColumnCommand { get; }
         public ICommand SaveCommand { get; }
         public ICommand CloseCommand { get; }
+        public ICommand BrowseCommand { get; }
 #if DEBUG
         public ICommand DebugSaveCommand { get; }
 #endif
 
         public event Action? RequestClose;
 
-        public CsvViewerViewModel(string? configPath = null)
+        public CsvViewerViewModel(IFileDialogService fileDialog, string? configPath = null)
         {
+            _fileDialog = fileDialog;
             _configPath = configPath ?? "csv_config.json";
             Load();
             AddColumnCommand = new RelayCommand(() => Configuration.Columns.Add(new CsvColumnConfig()));
             RemoveColumnCommand = new RelayCommand(() => { if (SelectedColumn != null) Configuration.Columns.Remove(SelectedColumn); });
             SaveCommand = new RelayCommand(Save);
             CloseCommand = new RelayCommand(() => RequestClose?.Invoke());
+            BrowseCommand = new RelayCommand(BrowseDirectory);
 #if DEBUG
             DebugSaveCommand = new RelayCommand(() => Save());
 #endif
@@ -55,7 +61,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             if (System.IO.File.Exists(_configPath))
             {
                 var json = System.IO.File.ReadAllText(_configPath);
-                Configuration = JsonSerializer.Deserialize<CsvConfiguration>(json) ?? new CsvConfiguration();
+                if (!string.IsNullOrWhiteSpace(json))
+                {
+                    Configuration = JsonSerializer.Deserialize<CsvConfiguration>(json) ?? new CsvConfiguration();
+                }
             }
         }
 
@@ -69,6 +78,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 var snapshot = new CsvConfiguration
                 {
                     FileNamePattern = Configuration.FileNamePattern,
+                    OutputDirectory = Configuration.OutputDirectory,
                     Columns = new ObservableCollection<CsvColumnConfig>(Configuration.Columns.Select(c => new CsvColumnConfig
                     {
                         Name = c.Name,
@@ -98,6 +108,16 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 var temp = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "csv_config_dump.json");
                 System.IO.File.WriteAllText(temp, dump);
                 Environment.FailFast($"Stack overflow while saving CSV configuration. Dump written to {temp}");
+            }
+        }
+
+        private void BrowseDirectory()
+        {
+            var path = _fileDialog.SelectFolder();
+            if (!string.IsNullOrWhiteSpace(path))
+            {
+                Configuration.OutputDirectory = path;
+                OnPropertyChanged(nameof(Configuration));
             }
         }
 
