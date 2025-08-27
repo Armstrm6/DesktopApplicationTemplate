@@ -790,7 +790,8 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             var scpPage = GetOrCreateServicePage(service);
             var options = service.ScpOptions ?? new ScpServiceOptions();
-            var vm = ActivatorUtilities.CreateInstance<ScpEditServiceViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
+            var vm = App.AppHost.Services.GetRequiredService<ScpEditServiceViewModel>();
+            vm.Load(service.DisplayName.Split(" - ").Last(), options);
             var editView = App.AppHost.Services.GetRequiredService<ScpEditServiceView>();
             editView.Initialize(vm);
             vm.ServiceUpdated += (name, opts) =>

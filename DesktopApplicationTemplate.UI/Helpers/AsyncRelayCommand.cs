@@ -20,13 +20,16 @@ namespace DesktopApplicationTemplate.UI.Helpers
 
         public bool CanExecute(object? parameter) => _canExecute?.Invoke() ?? true;
 
-        public async void Execute(object? parameter) => await _execute();
+        public void Execute(object? parameter) => _ = ExecuteAsync(parameter);
 
         /// <summary>
         /// Executes the command asynchronously.
         /// </summary>
         /// <param name="parameter">Unused parameter for signature compatibility.</param>
-        public Task ExecuteAsync(object? parameter = null) => _execute();
+        public async Task ExecuteAsync(object? parameter = null)
+        {
+            await _execute().ConfigureAwait(false);
+        }
 
         public event EventHandler? CanExecuteChanged;
 
@@ -55,12 +58,15 @@ namespace DesktopApplicationTemplate.UI.Helpers
         public bool CanExecute(object? parameter) => _canExecute?.Invoke((T?)parameter) ?? true;
 
         /// <inheritdoc />
-        public async void Execute(object? parameter) => await ExecuteAsync((T?)parameter);
+        public void Execute(object? parameter) => _ = ExecuteAsync((T?)parameter);
 
         /// <summary>
         /// Executes the command asynchronously with the provided parameter.
         /// </summary>
-        public Task ExecuteAsync(T? parameter) => _execute(parameter);
+        public async Task ExecuteAsync(T? parameter)
+        {
+            await _execute(parameter).ConfigureAwait(false);
+        }
 
         /// <inheritdoc />
         public event EventHandler? CanExecuteChanged;
