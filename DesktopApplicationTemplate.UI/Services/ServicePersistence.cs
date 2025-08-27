@@ -119,7 +119,16 @@ namespace DesktopApplicationTemplate.UI.Services
                 logger?.Log("Services file not found", LogLevel.Warning);
                 return new List<ServiceInfo>();
             }
-            var json = File.ReadAllText(FilePath);
+            string json;
+            try
+            {
+                json = File.ReadAllText(FilePath);
+            }
+            catch (FileNotFoundException)
+            {
+                logger?.Log("Services file not found", LogLevel.Warning);
+                return new List<ServiceInfo>();
+            }
             try
             {
                 var result = JsonSerializer.Deserialize<List<ServiceInfo>>(json) ?? new List<ServiceInfo>();

@@ -10,21 +10,31 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// </summary>
 public class ScpAdvancedConfigViewModel : ViewModelBase, ILoggingViewModel
 {
-    private readonly ScpServiceOptions _options;
-    private string _localPath;
-    private string _remotePath;
+    private ScpServiceOptions? _options;
+    private string _localPath = string.Empty;
+    private string _remotePath = string.Empty;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ScpAdvancedConfigViewModel"/> class.
     /// </summary>
-    public ScpAdvancedConfigViewModel(ScpServiceOptions options, ILoggingService? logger = null)
+    public ScpAdvancedConfigViewModel(ILoggingService? logger = null)
+    {
+        Logger = logger;
+        SaveCommand = new RelayCommand(Save);
+        BackCommand = new RelayCommand(Back);
+    }
+
+    /// <summary>
+    /// Loads existing options into the view model.
+    /// </summary>
+    /// <param name="options">Options to edit.</param>
+    public void Load(ScpServiceOptions options)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
         _localPath = options.LocalPath;
         _remotePath = options.RemotePath;
-        Logger = logger;
-        SaveCommand = new RelayCommand(Save);
-        BackCommand = new RelayCommand(Back);
+        OnPropertyChanged(nameof(LocalPath));
+        OnPropertyChanged(nameof(RemotePath));
     }
 
     /// <inheritdoc />
@@ -71,6 +81,7 @@ public class ScpAdvancedConfigViewModel : ViewModelBase, ILoggingViewModel
     private void Save()
     {
         Logger?.Log("SCP advanced options start", LogLevel.Debug);
+        if (_options is null) throw new InvalidOperationException("Options not loaded");
         _options.LocalPath = LocalPath;
         _options.RemotePath = RemotePath;
         Logger?.Log("SCP advanced options finished", LogLevel.Debug);

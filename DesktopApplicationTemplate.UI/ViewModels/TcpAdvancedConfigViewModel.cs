@@ -10,21 +10,30 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// </summary>
 public class TcpAdvancedConfigViewModel : ViewModelBase, ILoggingViewModel
 {
-    private readonly TcpServiceOptions _options;
+    private TcpServiceOptions? _options;
     private bool _useUdp;
     private TcpServiceMode _mode;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TcpAdvancedConfigViewModel"/> class.
     /// </summary>
-    public TcpAdvancedConfigViewModel(TcpServiceOptions options, ILoggingService? logger = null)
+    public TcpAdvancedConfigViewModel(ILoggingService? logger = null)
+    {
+        Logger = logger;
+        SaveCommand = new RelayCommand(Save);
+        BackCommand = new RelayCommand(Back);
+    }
+
+    /// <summary>
+    /// Loads existing options into the view model.
+    /// </summary>
+    public void Load(TcpServiceOptions options)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
         _useUdp = options.UseUdp;
         _mode = options.Mode;
-        Logger = logger;
-        SaveCommand = new RelayCommand(Save);
-        BackCommand = new RelayCommand(Back);
+        OnPropertyChanged(nameof(UseUdp));
+        OnPropertyChanged(nameof(Mode));
     }
 
     /// <inheritdoc />
@@ -76,6 +85,7 @@ public class TcpAdvancedConfigViewModel : ViewModelBase, ILoggingViewModel
     private void Save()
     {
         Logger?.Log("TCP advanced options start", LogLevel.Debug);
+        if (_options is null) throw new InvalidOperationException("Options not loaded");
         _options.UseUdp = UseUdp;
         _options.Mode = Mode;
         Logger?.Log("TCP advanced options finished", LogLevel.Debug);

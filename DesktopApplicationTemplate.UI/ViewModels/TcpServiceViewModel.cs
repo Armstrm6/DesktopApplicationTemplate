@@ -33,15 +33,7 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
             set
             {
                 _isUdp = value;
-                if (_isUdp)
-                {
-                    ServerIp = "0.0.0.0";
-                    ServerIpEnabled = false;
-                }
-                else
-                {
-                    ServerIpEnabled = true;
-                }
+                ServerIpEnabled = !_isUdp;
                 OnPropertyChanged();
                 UpdateMessageViewModelNetworkSettings();
             }

@@ -174,3 +174,7 @@
 - Host validation rejects underscores to prevent invalid host entries.
 - Scp edit view model loads existing options through a method, allowing DI to resolve without primitive parameters.
 - Corrected FTP client count test to raise events with expected sender and count arguments.
+- Resolved DI build errors for TCP and SCP edit workflows by introducing `Load` methods and removing primitive constructor dependencies.
+- UDP mode no longer clears the server IP, keeping `TcpServiceMessagesViewModel` synchronized.
+- Service persistence now handles missing service files without throwing exceptions.
+- Ftp server edit view checks for a null view model before initializing XAML, preventing parse exceptions.

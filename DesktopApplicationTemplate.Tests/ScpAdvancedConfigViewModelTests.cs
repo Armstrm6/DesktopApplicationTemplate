@@ -11,7 +11,8 @@ public class ScpAdvancedConfigViewModelTests
     public void BackCommand_RaisesBackRequested()
     {
         var options = new ScpServiceOptions();
-        var vm = new ScpAdvancedConfigViewModel(options);
+        var vm = new ScpAdvancedConfigViewModel();
+        vm.Load(options);
         var raised = false;
         vm.BackRequested += () => raised = true;
         vm.BackCommand.Execute(null);

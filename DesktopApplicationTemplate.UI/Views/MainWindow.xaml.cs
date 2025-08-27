@@ -274,7 +274,8 @@ namespace DesktopApplicationTemplate.UI.Views
             var view = ActivatorUtilities.CreateInstance<ScpCreateServiceView>(App.AppHost.Services, vm);
             vm.AdvancedConfigRequested += opts =>
             {
-                var advVm = ActivatorUtilities.CreateInstance<ScpAdvancedConfigViewModel>(App.AppHost.Services, opts);
+                var advVm = App.AppHost.Services.GetRequiredService<ScpAdvancedConfigViewModel>();
+                advVm.Load(opts);
                 var advView = App.AppHost.Services.GetRequiredService<ScpAdvancedConfigView>();
                 advView.Initialize(advVm);
                 advVm.Saved += _ => ShowPage(view);
@@ -430,7 +431,8 @@ namespace DesktopApplicationTemplate.UI.Views
             var view = ActivatorUtilities.CreateInstance<TcpCreateServiceView>(App.AppHost.Services, vm);
             vm.AdvancedConfigRequested += opts =>
             {
-                var advVm = ActivatorUtilities.CreateInstance<TcpAdvancedConfigViewModel>(App.AppHost.Services, opts);
+                var advVm = App.AppHost.Services.GetRequiredService<TcpAdvancedConfigViewModel>();
+                advVm.Load(opts);
                 var advView = App.AppHost.Services.GetRequiredService<TcpAdvancedConfigView>();
                 advView.Initialize(advVm);
                 advVm.Saved += _ => ShowPage(view);
@@ -809,7 +811,8 @@ namespace DesktopApplicationTemplate.UI.Views
             };
             vm.AdvancedConfigRequested += opts =>
             {
-                var advVm = ActivatorUtilities.CreateInstance<ScpAdvancedConfigViewModel>(App.AppHost.Services, opts);
+                var advVm = App.AppHost.Services.GetRequiredService<ScpAdvancedConfigViewModel>();
+                advVm.Load(opts);
                 var advView = App.AppHost.Services.GetRequiredService<ScpAdvancedConfigView>();
                 advView.Initialize(advVm);
                 advVm.Saved += _ => ShowPage(editView);
@@ -825,7 +828,8 @@ namespace DesktopApplicationTemplate.UI.Views
             {
                 var tcpPage = GetOrCreateServicePage(service);
                 var options = service.TcpOptions ?? new TcpServiceOptions();
-                var vm = ActivatorUtilities.CreateInstance<TcpEditServiceViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
+                var vm = App.AppHost.Services.GetRequiredService<TcpEditServiceViewModel>();
+                vm.Load(service.DisplayName.Split(" - ").Last(), options);
                 var editView = App.AppHost.Services.GetRequiredService<TcpEditServiceView>();
                 editView.Initialize(vm);
 
@@ -844,7 +848,8 @@ namespace DesktopApplicationTemplate.UI.Views
                 };
                 vm.AdvancedConfigRequested += opts =>
                 {
-                    var advVm = ActivatorUtilities.CreateInstance<TcpAdvancedConfigViewModel>(App.AppHost.Services, opts);
+                    var advVm = App.AppHost.Services.GetRequiredService<TcpAdvancedConfigViewModel>();
+                    advVm.Load(opts);
                     var advView = App.AppHost.Services.GetRequiredService<TcpAdvancedConfigView>();
                     advView.Initialize(advVm);
                     advVm.Saved += _ => ShowPage(editView);

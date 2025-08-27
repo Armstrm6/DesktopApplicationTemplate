@@ -10,7 +10,8 @@ public class TcpEditServiceViewModelTests
     public void SaveCommand_Raises_ServiceUpdated()
     {
         var options = new TcpServiceOptions { Host = "h", Port = 1, UseUdp = false, Mode = TcpServiceMode.Listening };
-        var vm = new TcpEditServiceViewModel("svc", options);
+        var vm = new TcpEditServiceViewModel();
+        vm.Load("svc", options);
         vm.Host = "new";
         vm.Port = 2;
         vm.Options.UseUdp = true;
