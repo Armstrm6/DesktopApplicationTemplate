@@ -121,3 +121,12 @@ Effective Prompts / Instructions that worked: Align view initialization with exi
 Decisions & Rationale: Use logger-injected constructor and separate Initialize method to match other services and avoid extraneous constructor arguments.
 Action Items: Rely on CI for full test execution.
 Related Commits/PRs:
+
+[2025-08-27 07:00] Topic: MQTT field tooltips
+Context: Added tooltips to MQTT create and edit views to indicate expected text input.
+Observations: Tooltips mirror field labels so users know what to enter.
+Codex Limitations noticed: Linux container lacks WPF runtime; relied on CI for validation.
+Effective Prompts / Instructions that worked: User request to insert text guidance.
+Decisions & Rationale: Use `ToolTip` attributes for immediate user feedback without altering bindings.
+Action Items: Extend tooltips to remaining service views.
+Related Commits/PRs:

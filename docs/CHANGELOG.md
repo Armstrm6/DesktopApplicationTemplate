@@ -33,6 +33,7 @@
 - MQTT create, edit, and subscription views follow design spacing with shared form styles and accessibility names.
 - Service creation flows now display within the main view, removing the separate Create Service window and placeholder navigation text.
 - Main window height constrained to the work area to prevent overlapping the taskbar.
+- MQTT create and edit views include tooltips on text fields to clarify expected input.
 
 #### Fixed
 - TCP and SCP edit workflows now load existing options via `Load` methods, enabling DI-friendly construction.
