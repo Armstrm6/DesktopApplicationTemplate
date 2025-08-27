@@ -158,8 +158,8 @@
 - CI workflow runs on pushes to `feature/**` and `bugfix/**` branches, supports manual triggers, and skips checks for pull requests targeting `dev`.
 - Updated GitHub workflows to install the WPF workload instead of the deprecated `windowsdesktop` workload.
 - Reorganized collaboration log into topic-based blocks and added logging guidelines.
-- Removed obsolete `CodexSafe` test category trait and `TestCategoryAttribute` helper.
-- Setup script no longer runs the Codex test project.
+- Removed Codex-specific tests and categories, eliminating the `CodexSafe` trait and custom `TestCategoryAttribute`.
+- Setup script now runs only the primary test suite after removing the Codex test project.
 
 #### Fixed
 - Added missing `FluentAssertions` package reference to the test project and documented dependency checks to avoid build failures.
