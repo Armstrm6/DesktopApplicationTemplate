@@ -6,6 +6,7 @@
       xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:behaviors="clr-namespace:DesktopApplicationTemplate.UI.Behaviors"
       mc:Ignorable="d" Background="#f3f3f3">
 
     <Page.Resources>
@@ -31,7 +32,8 @@
         <StackPanel Orientation="Horizontal" Margin="0 0 0 10">
             <ComboBox Width="100" ItemsSource="{Binding Methods}" SelectedItem="{Binding SelectedMethod}" />
             <Grid Width="400" Margin="10 0">
-                <TextBox Text="{Binding Url, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" Name="UrlTextBox"/>
+                <TextBox Text="{Binding Url, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" Name="UrlTextBox"
+                         behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
                 <TextBlock Text="http://127.0.0.1/api"
                IsHitTestVisible="False"
                Foreground="Gray"
@@ -61,14 +63,16 @@
             </Grid.ColumnDefinitions>
 
             <Grid Grid.Column="0">
-                <TextBox Text="{Binding RequestBody}" x:Name="RequestBodyBox" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" />
+                <TextBox Text="{Binding RequestBody}" x:Name="RequestBodyBox" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"
+                         behaviors:TextBoxHintBehavior.AutoToolTip="True" />
                 <TextBlock Text="Request Body" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0"
                            VerticalAlignment="Center"
                            Visibility="{Binding Text, ElementName=RequestBodyBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
             </Grid>
             <StackPanel Grid.Column="1">
                 <Grid>
-                    <TextBox Text="{Binding ResponseBody}" x:Name="ResponseBodyBox" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" IsReadOnly="True" Height="120"/>
+                    <TextBox Text="{Binding ResponseBody}" x:Name="ResponseBodyBox" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" IsReadOnly="True" Height="120"
+                             behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
                     <TextBlock Text="Response Body" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0"
                                VerticalAlignment="Center"
                                Visibility="{Binding Text, ElementName=ResponseBodyBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>

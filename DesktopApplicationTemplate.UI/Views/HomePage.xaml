@@ -4,6 +4,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
+      xmlns:behaviors="clr-namespace:DesktopApplicationTemplate.UI.Behaviors"
       mc:Ignorable="d">
     <Page.Resources>
         <helpers:LogListToStringConverter x:Key="LogListToStringConverter" />
@@ -29,6 +30,7 @@
             </ItemsControl.ItemTemplate>
         </ItemsControl>
         <TextBox Text="{Binding DisplayLogs, Mode=OneWay, Converter={StaticResource LogListToStringConverter}}"
-                 IsReadOnly="True" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+                 IsReadOnly="True" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"
+                 behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
     </StackPanel>
 </Page>

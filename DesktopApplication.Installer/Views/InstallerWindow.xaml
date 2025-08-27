@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DesktopApplication.Installer.Views"
+        xmlns:behaviors="clr-namespace:DesktopApplicationTemplate.UI.Behaviors;assembly=DesktopApplicationTemplate.UI"
         mc:Ignorable="d"
         Title="Application Installer" Height="300" Width="500"
         WindowStartupLocation="CenterScreen"
@@ -41,7 +42,8 @@
             </Grid.ColumnDefinitions>
 
             <TextBlock Text="Install Location:" Grid.Row="0" VerticalAlignment="Center" />
-            <TextBox Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding InstallPath, UpdateSourceTrigger=PropertyChanged}"/>
+            <TextBox Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding InstallPath, UpdateSourceTrigger=PropertyChanged}"
+                     behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
             <Button Grid.Row="0" Grid.Column="1" Content="Browse..." Padding="10,2" Margin="5,0,0,0" Command="{Binding BrowseCommand}" />
 
             <CheckBox Grid.Row="2" Content="Allow firewall access" IsChecked="{Binding AddFirewallRule}" />

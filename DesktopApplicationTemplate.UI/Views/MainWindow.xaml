@@ -144,15 +144,15 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="IP Address:" Grid.Row="0" Grid.Column="0" Margin="0,5"/>
-                                <TextBox Text="{Binding NetworkConfig.IpAddress}" Grid.Row="0" Grid.Column="1" Margin="5,5" IsEnabled="False" Background="#EDEDED"/>
+                                <TextBox Text="{Binding NetworkConfig.IpAddress}" Grid.Row="0" Grid.Column="1" Margin="5,5" IsEnabled="False" Background="#EDEDED" behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
                                 <TextBlock Text="Subnet:" Grid.Row="1" Grid.Column="0" Margin="0,5"/>
-                                <TextBox Text="{Binding NetworkConfig.SubnetMask}" Grid.Row="1" Grid.Column="1" Margin="5,5" IsEnabled="False" Background="#EDEDED"/>
+                                <TextBox Text="{Binding NetworkConfig.SubnetMask}" Grid.Row="1" Grid.Column="1" Margin="5,5" IsEnabled="False" Background="#EDEDED" behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
                                 <TextBlock Text="Gateway:" Grid.Row="2" Grid.Column="0" Margin="0,5"/>
-                                <TextBox Text="{Binding NetworkConfig.Gateway}" Grid.Row="2" Grid.Column="1" Margin="5,5" IsEnabled="False" Background="#EDEDED"/>
+                                <TextBox Text="{Binding NetworkConfig.Gateway}" Grid.Row="2" Grid.Column="1" Margin="5,5" IsEnabled="False" Background="#EDEDED" behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
                                 <TextBlock Text="DNS 1:" Grid.Row="3" Grid.Column="0" Margin="0,5"/>
-                                <TextBox Text="{Binding NetworkConfig.DnsPrimary}" Grid.Row="3" Grid.Column="1" Margin="5,5" IsEnabled="False" Background="#EDEDED"/>
+                                <TextBox Text="{Binding NetworkConfig.DnsPrimary}" Grid.Row="3" Grid.Column="1" Margin="5,5" IsEnabled="False" Background="#EDEDED" behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
                                 <TextBlock Text="DNS 2:" Grid.Row="4" Grid.Column="0" Margin="0,5"/>
-                                <TextBox Text="{Binding NetworkConfig.DnsSecondary}" Grid.Row="4" Grid.Column="1" Margin="5,5" IsEnabled="False" Background="#EDEDED"/>
+                                <TextBox Text="{Binding NetworkConfig.DnsSecondary}" Grid.Row="4" Grid.Column="1" Margin="5,5" IsEnabled="False" Background="#EDEDED" behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
                             </Grid>
                         </Grid>
                     </Border>

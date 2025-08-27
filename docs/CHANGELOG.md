@@ -25,6 +25,7 @@
 - Active service counter displayed in the main window with real-time updates.
 - Help window includes a close button.
 - Average execution time displayed next to each service name in the service list.
+- Text inputs now automatically display tooltips derived from bound property names, guiding expected user input.
 
 #### Changed
 - Service selection window wraps service icons within bounds using a fixed-width panel.

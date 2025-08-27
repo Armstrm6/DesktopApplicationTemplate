@@ -4,7 +4,8 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
-      mc:Ignorable="d"
+      xmlns:behaviors="clr-namespace:DesktopApplicationTemplate.UI.Behaviors"
+        mc:Ignorable="d"
       Title="Chappie Desktop Application" d:DesignWidth="682.857">
     <Page.Resources>
         <helpers:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter" />
@@ -36,13 +37,15 @@
             <!-- LEFT SIDE -->
             <StackPanel Grid.Column="0" Margin="10">
                 <Grid Margin="0,0,0,5">
-                    <TextBox Text="{Binding ComputerIp, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" x:Name="ComputerIpBox"/>
+                    <TextBox Text="{Binding ComputerIp, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" x:Name="ComputerIpBox"
+                             behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
                     <TextBlock Text="Computer IP (e.g. 192.168.1.50)" IsHitTestVisible="False" Foreground="Gray" VerticalAlignment="Center"
                                Margin="5,0,0,0"
                                Visibility="{Binding Text, ElementName=ComputerIpBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
                 </Grid>
                 <Grid Margin="0,0,0,5">
-                    <TextBox Text="{Binding ListeningPort, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" x:Name="ListenPortBox"/>
+                    <TextBox Text="{Binding ListeningPort, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" x:Name="ListenPortBox"
+                             behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
                     <TextBlock Text="Listening Port" IsHitTestVisible="False" Foreground="Gray" VerticalAlignment="Center"
                                Margin="5,0,0,0"
                                Visibility="{Binding Text, ElementName=ListenPortBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
@@ -50,19 +53,22 @@
                 <CheckBox Content="UDP" IsChecked="{Binding IsUdp}" Margin="0,0,0,5"/>
                 <ComboBox ItemsSource="{Binding Modes}" SelectedItem="{Binding SelectedMode}" Width="120" Margin="0,0,0,5"/>
                 <Grid Margin="0,0,0,5">
-                    <TextBox Text="{Binding ServerIp, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" x:Name="ServerIpBox" IsEnabled="{Binding ServerIpEnabled}"/>
+                    <TextBox Text="{Binding ServerIp, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" x:Name="ServerIpBox" IsEnabled="{Binding ServerIpEnabled}"
+                             behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
                     <TextBlock Text="Server IP (e.g. 192.168.1.200)" IsHitTestVisible="False" Foreground="Gray" VerticalAlignment="Center"
                                Margin="5,0,0,0"
                                Visibility="{Binding Text, ElementName=ServerIpBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
                 </Grid>
                 <Grid Margin="0,0,0,5">
-                    <TextBox Text="{Binding ServerGateway, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" x:Name="ServerGatewayBox"/>
+                    <TextBox Text="{Binding ServerGateway, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" x:Name="ServerGatewayBox"
+                             behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
                     <TextBlock Text="Gateway (e.g. 192.168.1.1)" IsHitTestVisible="False" Foreground="Gray" VerticalAlignment="Center"
                                Margin="5,0,0,0"
                                Visibility="{Binding Text, ElementName=ServerGatewayBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
                 </Grid>
                 <Grid Margin="0,0,0,10">
-                    <TextBox Text="{Binding ServerPort, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" x:Name="ServerPortBox"/>
+                    <TextBox Text="{Binding ServerPort, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" x:Name="ServerPortBox"
+                             behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
                     <TextBlock Text="Server Port" IsHitTestVisible="False" Foreground="Gray" VerticalAlignment="Center"
                                Margin="5,0,0,0"
                                Visibility="{Binding Text, ElementName=ServerPortBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
@@ -74,10 +80,12 @@
                     <ComboBox Width="100" ItemsSource="{Binding ScriptLanguages}" SelectedItem="{Binding SelectedLanguage}"/>
                 </StackPanel>
                 <TextBlock Text="Script" FontWeight="Bold" Margin="0,0,0,5"/>
-                <TextBox Height="160" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" Text="{Binding ScriptContent}"/>
+                <TextBox Height="160" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" Text="{Binding ScriptContent}"
+                         behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
                 <Button Content="Open Editor" Margin="0,5,0,5" Click="OpenEditor_Click" Width="100"/>
                 <TextBlock Text="Test Message" FontWeight="Bold" Margin="0,5,0,0"/>
-                <TextBox Text="{Binding TestMessage}" Margin="0,0,0,5"/>
+                <TextBox Text="{Binding TestMessage}" Margin="0,0,0,5"
+                         behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
                     <Button Content="Test Script" Command="{Binding TestScriptCommand}"/>
                     <Button Content="Help" Width="80" Margin="5,0,0,0" Click="Help_Click"/>

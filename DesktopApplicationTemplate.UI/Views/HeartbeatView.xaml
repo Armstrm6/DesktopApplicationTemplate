@@ -4,6 +4,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
+      xmlns:behaviors="clr-namespace:DesktopApplicationTemplate.UI.Behaviors"
       mc:Ignorable="d">
     <Page.Resources>
         <helpers:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter" />
@@ -16,7 +17,8 @@
         <StackPanel Margin="0,50,0,0">
             <TextBlock Text="Heartbeat Message" FontWeight="Bold" Margin="0,0,0,5"/>
             <Grid Width="300">
-                <TextBox Text="{Binding BaseMessage, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" x:Name="BaseMessageBox"/>
+                <TextBox Text="{Binding BaseMessage, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" x:Name="BaseMessageBox"
+                         behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
                 <TextBlock Text="Base message" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0"
                            VerticalAlignment="Center"
                            Visibility="{Binding Text, ElementName=BaseMessageBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
@@ -28,7 +30,8 @@
                 <Button Content="Help" Width="80" Margin="5,0,0,0" Click="Help_Click"/>
             </StackPanel>
             <TextBlock Text="Final Message:" Margin="0,10,0,0"/>
-            <TextBox Text="{Binding FinalMessage}" IsReadOnly="True" Width="300"/>
+            <TextBox Text="{Binding FinalMessage}" IsReadOnly="True" Width="300"
+                     behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
         </StackPanel>
 
         <StackPanel Grid.Row="1" HorizontalAlignment="Right" Margin="0,10,0,0">
