@@ -138,6 +138,7 @@
 - Consolidated GitHub Actions into a single `CI` workflow with collaboration instructions in `AGENTS.md`.
 - CI workflow runs on pushes to `feature/**` and `bugfix/**` branches, supports manual triggers, and skips checks for pull requests targeting `dev`.
 - Updated GitHub workflows to install the WPF workload instead of the deprecated `windowsdesktop` workload.
+- Reorganized collaboration log into topic-based blocks and added logging guidelines.
 
 #### Fixed
 - Added missing `FluentAssertions` package reference to the test project and documented dependency checks to avoid build failures.
