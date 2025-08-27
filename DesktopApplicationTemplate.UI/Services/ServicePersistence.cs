@@ -143,20 +143,23 @@ namespace DesktopApplicationTemplate.UI.Services
                 {
                     if (info.ServiceType == "TCP" && info.TcpOptions != null)
                     {
-                        try
+                        if (App.AppHost?.Services is IServiceProvider services)
                         {
-                            var value = App.AppHost?.Services
-                                .GetRequiredService<IOptions<TcpServiceOptions>>()
-                                .Value;
+                            try
+                            {
+                                var value = services
+                                    .GetRequiredService<IOptions<TcpServiceOptions>>()
+                                    .Value;
 
-                            value.Host = info.TcpOptions.Host;
-                            value.Port = info.TcpOptions.Port;
-                            value.UseUdp = info.TcpOptions.UseUdp;
-                            value.Mode = info.TcpOptions.Mode;
-                        }
-                        catch (InvalidOperationException)
-                        {
-                            // ignore missing options during tests or early startup
+                                value.Host = info.TcpOptions.Host;
+                                value.Port = info.TcpOptions.Port;
+                                value.UseUdp = info.TcpOptions.UseUdp;
+                                value.Mode = info.TcpOptions.Mode;
+                            }
+                            catch (InvalidOperationException)
+                            {
+                                // ignore missing options during tests or early startup
+                            }
                         }
                     }
                     if ((info.ServiceType == "FTP Server" || info.ServiceType == "FTP") && info.FtpOptions != null)

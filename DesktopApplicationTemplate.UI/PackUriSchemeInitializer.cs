@@ -12,7 +12,7 @@ namespace DesktopApplicationTemplate.UI
         [ModuleInitializer]
         internal static void Initialize()
         {
-            if (UriParser.GetSyntax("pack") is null)
+            if (!UriParser.IsKnownScheme("pack"))
             {
                 UriParser.Register(new GenericUriParser(GenericUriParserOptions.GenericAuthority), "pack", -1);
             }
