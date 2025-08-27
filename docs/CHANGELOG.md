@@ -59,6 +59,7 @@
 - FTP server edit view checks for a `null` view model before initializing XAML, preventing parse exceptions.
 - Variable naming conflicts resolved in main window edit workflow to prevent build errors.
 - FTP server creation no longer freezes when selecting the service type and closes the selection window after saving.
+- Advanced configuration view injects logging via DI and initializes with a view model, resolving constructor instantiation errors.
 
 ### TCP Service
 #### Added
