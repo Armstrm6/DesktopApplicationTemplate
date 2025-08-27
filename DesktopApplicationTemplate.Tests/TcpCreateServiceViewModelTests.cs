@@ -7,7 +7,7 @@ namespace DesktopApplicationTemplate.Tests;
 public class TcpCreateServiceViewModelTests
 {
     [Fact]
-    public void CreateCommand_Raises_ServiceCreated()
+    public void SaveCommand_Raises_ServiceCreated()
     {
         var vm = new TcpCreateServiceViewModel();
         vm.ServiceName = "svc";
@@ -19,7 +19,7 @@ public class TcpCreateServiceViewModelTests
         string? name = null;
         vm.ServiceCreated += (n, o) => { name = n; received = o; };
 
-        vm.CreateCommand.Execute(null);
+        vm.SaveCommand.Execute(null);
 
         Assert.Equal("svc", name);
         Assert.NotNull(received);

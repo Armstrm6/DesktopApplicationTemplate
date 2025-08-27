@@ -1524,3 +1524,11 @@ Effective Prompts / Instructions that worked: Followed AGENTS guidelines for DI,
 Decisions & Rationale: Centralize validation and screen events for consistency across services.
 Action Items: Run dotnet test and monitor CI for Windows-specific results.
 Related Commits/PRs:
+[2025-08-27 03:46] Topic: Service view model bases
+Context: Added generic create/edit base view models and refactored service view models to inherit them.
+Observations: DI registrations updated to resolve new generic types with shared save/cancel/advanced commands.
+Codex Limitations noticed: pwsh unavailable for add-tip script.
+Effective Prompts / Instructions that worked: Followed AGENTS guidelines for DI and tests.
+Decisions & Rationale: Consolidated command logic to reduce duplication.
+Action Items: Verify WPF behaviors on Windows.
+Related Commits/PRs: 

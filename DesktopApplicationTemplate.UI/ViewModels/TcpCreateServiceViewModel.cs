@@ -1,7 +1,5 @@
 using System;
-using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Services;
 
 namespace DesktopApplicationTemplate.UI.ViewModels;
@@ -9,7 +7,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// <summary>
 /// View model for configuring a new TCP service before creation.
 /// </summary>
-public class TcpCreateServiceViewModel : ViewModelBase
+public class TcpCreateServiceViewModel : ServiceCreateViewModelBase<TcpServiceOptions>
 {
     private string _serviceName = string.Empty;
     private string _host = string.Empty;
@@ -24,11 +22,8 @@ public class TcpCreateServiceViewModel : ViewModelBase
     /// Initializes a new instance of the <see cref="TcpCreateServiceViewModel"/> class.
     /// </summary>
     public TcpCreateServiceViewModel(ILoggingService? logger = null)
+        : base(logger)
     {
-        Logger = logger;
-        CreateCommand = new RelayCommand(Create);
-        CancelCommand = new RelayCommand(Cancel);
-        AdvancedConfigCommand = new RelayCommand(OpenAdvancedConfig);
     }
 
     /// <summary>
@@ -41,23 +36,6 @@ public class TcpCreateServiceViewModel : ViewModelBase
     /// </summary>
     public event Action? Cancelled;
 
-    /// <summary>
-    /// Command to finalize service creation.
-    /// </summary>
-    public ICommand CreateCommand { get; }
-
-    /// <summary>
-    /// Command to cancel configuration.
-    /// </summary>
-    public ICommand CancelCommand { get; }
-
-    /// <summary>
-    /// Command to open advanced configuration.
-    /// </summary>
-    public ICommand AdvancedConfigCommand { get; }
-
-    /// <inheritdoc />
-    public ILoggingService? Logger { get; set; }
 
     /// <summary>
     /// Name of the service to create.
@@ -91,7 +69,8 @@ public class TcpCreateServiceViewModel : ViewModelBase
     /// </summary>
     public event Action<TcpServiceOptions>? AdvancedConfigRequested;
 
-    private void Create()
+    /// <inheritdoc />
+    protected override void OnSave()
     {
         Logger?.Log("TCP create options start", LogLevel.Debug);
         Options.Host = Host;
@@ -100,13 +79,15 @@ public class TcpCreateServiceViewModel : ViewModelBase
         ServiceCreated?.Invoke(ServiceName, Options);
     }
 
-    private void Cancel()
+    /// <inheritdoc />
+    protected override void OnCancel()
     {
         Logger?.Log("TCP create options cancelled", LogLevel.Debug);
         Cancelled?.Invoke();
     }
 
-    private void OpenAdvancedConfig()
+    /// <inheritdoc />
+    protected override void OnAdvancedConfig()
     {
         Logger?.Log("Opening TCP advanced config", LogLevel.Debug);
         Options.Host = Host;

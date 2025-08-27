@@ -1,7 +1,5 @@
 using System;
-using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Services;
 
 namespace DesktopApplicationTemplate.UI.ViewModels;
@@ -9,7 +7,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// <summary>
 /// View model for creating an FTP server.
 /// </summary>
-public class FtpServerCreateViewModel : ValidatableViewModelBase, ILoggingViewModel
+public class FtpServerCreateViewModel : ServiceCreateViewModelBase<FtpServerOptions>
 {
     private readonly IServiceRule _rule;
     private readonly IServiceScreen<FtpServerOptions> _screen;
@@ -21,26 +19,10 @@ public class FtpServerCreateViewModel : ValidatableViewModelBase, ILoggingViewMo
     /// Initializes a new instance of the <see cref="FtpServerCreateViewModel"/> class.
     /// </summary>
     public FtpServerCreateViewModel(IServiceRule rule, IServiceScreen<FtpServerOptions> screen, ILoggingService? logger = null)
+        : base(logger)
     {
         _rule = rule ?? throw new ArgumentNullException(nameof(rule));
         _screen = screen ?? throw new ArgumentNullException(nameof(screen));
-        Logger = logger;
-
-        SaveCommand = new RelayCommand(() =>
-        {
-            if (HasErrors)
-                return;
-            Options.Port = Port;
-            Options.RootPath = RootPath;
-            _screen.Save(ServiceName, Options);
-        });
-        CancelCommand = new RelayCommand(() => _screen.Cancel());
-        AdvancedConfigCommand = new RelayCommand(() =>
-        {
-            Options.Port = Port;
-            Options.RootPath = RootPath;
-            _screen.OpenAdvanced(Options);
-        });
 
         _screen.Saved += (n, o) => ServerCreated?.Invoke(n, o);
         _screen.Cancelled += () => Cancelled?.Invoke();
@@ -51,23 +33,6 @@ public class FtpServerCreateViewModel : ValidatableViewModelBase, ILoggingViewMo
     /// Current advanced options.
     /// </summary>
     public FtpServerOptions Options { get; } = new();
-
-    /// <inheritdoc />
-    public ILoggingService? Logger { get; set; }
-    /// <summary>
-    /// Command for saving the server configuration.
-    /// </summary>
-    public ICommand SaveCommand { get; }
-
-    /// <summary>
-    /// Command for cancelling server creation.
-    /// </summary>
-    public ICommand CancelCommand { get; }
-
-    /// <summary>
-    /// Command for launching the advanced configuration view.
-    /// </summary>
-    public ICommand AdvancedConfigCommand { get; }
 
     /// <summary>
     /// Raised when the configuration is saved.
@@ -136,5 +101,26 @@ public class FtpServerCreateViewModel : ValidatableViewModelBase, ILoggingViewMo
                 ClearErrors(nameof(RootPath));
             OnPropertyChanged();
         }
+    }
+
+    /// <inheritdoc />
+    protected override void OnSave()
+    {
+        if (HasErrors)
+            return;
+        Options.Port = Port;
+        Options.RootPath = RootPath;
+        _screen.Save(ServiceName, Options);
+    }
+
+    /// <inheritdoc />
+    protected override void OnCancel() => _screen.Cancel();
+
+    /// <inheritdoc />
+    protected override void OnAdvancedConfig()
+    {
+        Options.Port = Port;
+        Options.RootPath = RootPath;
+        _screen.OpenAdvanced(Options);
     }
 }

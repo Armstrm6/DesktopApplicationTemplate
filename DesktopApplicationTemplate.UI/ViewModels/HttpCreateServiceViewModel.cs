@@ -1,7 +1,6 @@
 using System;
 using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Services;
 
 namespace DesktopApplicationTemplate.UI.ViewModels;
@@ -9,7 +8,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// <summary>
 /// View model for configuring a new HTTP service.
 /// </summary>
-public class HttpCreateServiceViewModel : ViewModelBase, ILoggingViewModel
+public class HttpCreateServiceViewModel : ServiceCreateViewModelBase<HttpServiceOptions>
 {
     private string _serviceName = string.Empty;
     private string _baseUrl = string.Empty;
@@ -18,11 +17,8 @@ public class HttpCreateServiceViewModel : ViewModelBase, ILoggingViewModel
     /// Initializes a new instance of the <see cref="HttpCreateServiceViewModel"/> class.
     /// </summary>
     public HttpCreateServiceViewModel(ILoggingService? logger = null)
+        : base(logger)
     {
-        Logger = logger;
-        CreateCommand = new RelayCommand(Create);
-        CancelCommand = new RelayCommand(Cancel);
-        OpenAdvancedConfigCommand = new RelayCommand(OpenAdvancedConfig);
     }
 
     /// <summary>
@@ -44,19 +40,9 @@ public class HttpCreateServiceViewModel : ViewModelBase, ILoggingViewModel
     public ILoggingService? Logger { get; set; }
 
     /// <summary>
-    /// Command for creating the service.
-    /// </summary>
-    public ICommand CreateCommand { get; }
-
-    /// <summary>
-    /// Command for cancelling creation.
-    /// </summary>
-    public ICommand CancelCommand { get; }
-
-    /// <summary>
     /// Command to open advanced configuration.
     /// </summary>
-    public ICommand OpenAdvancedConfigCommand { get; }
+    public ICommand OpenAdvancedConfigCommand => AdvancedConfigCommand;
 
     /// <summary>
     /// Name of the service.
@@ -81,7 +67,8 @@ public class HttpCreateServiceViewModel : ViewModelBase, ILoggingViewModel
     /// </summary>
     public HttpServiceOptions Options { get; } = new();
 
-    private void Create()
+    /// <inheritdoc />
+    protected override void OnSave()
     {
         Logger?.Log("HTTP create options start", LogLevel.Debug);
         Options.BaseUrl = BaseUrl;
@@ -89,13 +76,15 @@ public class HttpCreateServiceViewModel : ViewModelBase, ILoggingViewModel
         ServiceCreated?.Invoke(ServiceName, Options);
     }
 
-    private void Cancel()
+    /// <inheritdoc />
+    protected override void OnCancel()
     {
         Logger?.Log("HTTP create cancelled", LogLevel.Debug);
         Cancelled?.Invoke();
     }
 
-    private void OpenAdvancedConfig()
+    /// <inheritdoc />
+    protected override void OnAdvancedConfig()
     {
         Logger?.Log("Opening HTTP advanced config", LogLevel.Debug);
         Options.BaseUrl = BaseUrl;

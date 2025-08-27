@@ -1,5 +1,4 @@
 using System;
-using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Services;
 
@@ -8,7 +7,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// <summary>
 /// View model for creating a new CSV creator service.
 /// </summary>
-public class CsvCreateServiceViewModel : ValidatableViewModelBase, ILoggingViewModel
+public class CsvCreateServiceViewModel : ServiceCreateViewModelBase<CsvServiceOptions>
 {
     private readonly IServiceRule _rule;
     private readonly IServiceScreen<CsvServiceOptions> _screen;
@@ -19,24 +18,10 @@ public class CsvCreateServiceViewModel : ValidatableViewModelBase, ILoggingViewM
     /// Initializes a new instance of the <see cref="CsvCreateServiceViewModel"/> class.
     /// </summary>
     public CsvCreateServiceViewModel(IServiceRule rule, IServiceScreen<CsvServiceOptions> screen, ILoggingService? logger = null)
+        : base(logger)
     {
         _rule = rule ?? throw new ArgumentNullException(nameof(rule));
         _screen = screen ?? throw new ArgumentNullException(nameof(screen));
-        Logger = logger;
-
-        CreateCommand = new RelayCommand(() =>
-        {
-            if (HasErrors)
-                return;
-            Options.OutputPath = OutputPath;
-            _screen.Save(ServiceName, Options);
-        });
-        CancelCommand = new RelayCommand(() => _screen.Cancel());
-        AdvancedConfigCommand = new RelayCommand(() =>
-        {
-            Options.OutputPath = OutputPath;
-            _screen.OpenAdvanced(Options);
-        });
 
         _screen.Saved += (n, o) => ServiceCreated?.Invoke(n, o);
         _screen.Cancelled += () => Cancelled?.Invoke();
@@ -60,21 +45,6 @@ public class CsvCreateServiceViewModel : ValidatableViewModelBase, ILoggingViewM
     /// Raised when advanced configuration is requested.
     /// </summary>
     public event Action<CsvServiceOptions>? AdvancedConfigRequested;
-
-    /// <summary>
-    /// Command to create the service.
-    /// </summary>
-    public ICommand CreateCommand { get; }
-
-    /// <summary>
-    /// Command to cancel creation.
-    /// </summary>
-    public ICommand CancelCommand { get; }
-
-    /// <summary>
-    /// Command to open advanced configuration.
-    /// </summary>
-    public ICommand AdvancedConfigCommand { get; }
 
     /// <summary>
     /// Name of the service.
@@ -116,4 +86,23 @@ public class CsvCreateServiceViewModel : ValidatableViewModelBase, ILoggingViewM
     /// Current configuration options.
     /// </summary>
     public CsvServiceOptions Options { get; } = new();
+
+    /// <inheritdoc />
+    protected override void OnSave()
+    {
+        if (HasErrors)
+            return;
+        Options.OutputPath = OutputPath;
+        _screen.Save(ServiceName, Options);
+    }
+
+    /// <inheritdoc />
+    protected override void OnCancel() => _screen.Cancel();
+
+    /// <inheritdoc />
+    protected override void OnAdvancedConfig()
+    {
+        Options.OutputPath = OutputPath;
+        _screen.OpenAdvanced(Options);
+    }
 }

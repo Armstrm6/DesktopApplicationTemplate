@@ -12,7 +12,7 @@ namespace DesktopApplicationTemplate.Tests;
 public class MqttCreateServiceViewModelTests
 {
     [Fact]
-    public void CreateCommand_Raises_ServiceCreated()
+    public void SaveCommand_Raises_ServiceCreated()
     {
         var vm = new MqttCreateServiceViewModel();
         vm.ServiceName = "svc";
@@ -25,7 +25,7 @@ public class MqttCreateServiceViewModelTests
         string? name = null;
         vm.ServiceCreated += (n, o) => { name = n; received = o; };
 
-        vm.CreateCommand.Execute(null);
+        vm.SaveCommand.Execute(null);
 
         Assert.Equal("svc", name);
         Assert.NotNull(received);
@@ -48,7 +48,7 @@ public class MqttCreateServiceViewModelTests
 
     [Fact]
     [TestCategory("CodexSafe")]
-    public void CreateCommand_BuildsOptionsWithAdvancedSettings()
+    public void SaveCommand_BuildsOptionsWithAdvancedSettings()
     {
         var tempCert = Path.GetTempFileName();
         File.WriteAllBytes(tempCert, new byte[] { 1, 2, 3 });
@@ -71,7 +71,7 @@ public class MqttCreateServiceViewModelTests
         MqttServiceOptions? received = null;
         vm.ServiceCreated += (_, o) => received = o;
 
-        vm.CreateCommand.Execute(null);
+        vm.SaveCommand.Execute(null);
 
         File.Delete(tempCert);
         Assert.NotNull(received);
@@ -94,7 +94,7 @@ public class MqttCreateServiceViewModelTests
 
     [Fact]
     [TestCategory("CodexSafe")]
-    public void CreateCommand_ConvertsBlankFieldsToNull()
+    public void SaveCommand_ConvertsBlankFieldsToNull()
     {
         var vm = new MqttCreateServiceViewModel();
         vm.ServiceName = "svc";
@@ -109,7 +109,7 @@ public class MqttCreateServiceViewModelTests
         MqttServiceOptions? received = null;
         vm.ServiceCreated += (_, o) => received = o;
 
-        vm.CreateCommand.Execute(null);
+        vm.SaveCommand.Execute(null);
 
         Assert.NotNull(received);
         Assert.Null(received!.Username);

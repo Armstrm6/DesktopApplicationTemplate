@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Services;
 
@@ -9,7 +8,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// <summary>
 /// View model for creating a new HID service.
 /// </summary>
-public class HidCreateServiceViewModel : ViewModelBase, ILoggingViewModel
+public class HidCreateServiceViewModel : ServiceCreateViewModelBase<HidServiceOptions>
 {
     private string _serviceName = string.Empty;
     private string _messageTemplate = string.Empty;
@@ -20,16 +19,10 @@ public class HidCreateServiceViewModel : ViewModelBase, ILoggingViewModel
     /// Initializes a new instance of the <see cref="HidCreateServiceViewModel"/> class.
     /// </summary>
     public HidCreateServiceViewModel(ILoggingService? logger = null)
+        : base(logger)
     {
-        Logger = logger;
-        CreateCommand = new RelayCommand(Create);
-        CancelCommand = new RelayCommand(Cancel);
-        AdvancedConfigCommand = new RelayCommand(OpenAdvancedConfig);
         UsbProtocols = new[] { "2.0", "3.0" };
     }
-
-    /// <inheritdoc />
-    public ILoggingService? Logger { get; set; }
 
     /// <summary>
     /// Raised when the configuration is saved.
@@ -45,21 +38,6 @@ public class HidCreateServiceViewModel : ViewModelBase, ILoggingViewModel
     /// Raised when advanced configuration is requested.
     /// </summary>
     public event Action<HidServiceOptions>? AdvancedConfigRequested;
-
-    /// <summary>
-    /// Command to create the service.
-    /// </summary>
-    public ICommand CreateCommand { get; }
-
-    /// <summary>
-    /// Command to cancel creation.
-    /// </summary>
-    public ICommand CancelCommand { get; }
-
-    /// <summary>
-    /// Command to open advanced configuration.
-    /// </summary>
-    public ICommand AdvancedConfigCommand { get; }
 
     /// <summary>
     /// Available USB protocol options.
@@ -106,8 +84,9 @@ public class HidCreateServiceViewModel : ViewModelBase, ILoggingViewModel
     /// Current configuration options.
     /// </summary>
     public HidServiceOptions Options { get; } = new();
-
-    private void Create()
+    
+    /// <inheritdoc />
+    protected override void OnSave()
     {
         Logger?.Log("HID create options start", LogLevel.Debug);
         Options.MessageTemplate = MessageTemplate;
@@ -117,13 +96,15 @@ public class HidCreateServiceViewModel : ViewModelBase, ILoggingViewModel
         ServiceCreated?.Invoke(ServiceName, Options);
     }
 
-    private void Cancel()
+    /// <inheritdoc />
+    protected override void OnCancel()
     {
         Logger?.Log("HID create cancelled", LogLevel.Debug);
         Cancelled?.Invoke();
     }
 
-    private void OpenAdvancedConfig()
+    /// <inheritdoc />
+    protected override void OnAdvancedConfig()
     {
         Logger?.Log("Opening HID advanced config", LogLevel.Debug);
         Options.MessageTemplate = MessageTemplate;
