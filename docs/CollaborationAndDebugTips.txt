@@ -70,3 +70,12 @@ Effective Prompts / Instructions that worked: Review build errors and follow DI 
 Decisions & Rationale: Improve FTP UX and ensure DI-friendly constructors.
 Action Items: Monitor CI for regressions.
 Related Commits/PRs: b6b4e9d, 5787356, ca07bb8
+
+[2025-08-27 05:30] Topic: Logging refactor
+Context: Began removing legacy `ILoggingService` in favor of built-in logging providers.
+Observations: Initial DI cleanup and configuration in `Program.cs` complete; remaining view models still reference old interface.
+Codex Limitations noticed: Extensive references make full migration time-consuming.
+Effective Prompts / Instructions that worked: Use `AddConsole()` and `AddDebug()` for provider setup.
+Decisions & Rationale: Start with infrastructure pieces before addressing individual view models.
+Action Items: Migrate remaining classes to `ILogger<T>` and update tests.
+Related Commits/PRs:

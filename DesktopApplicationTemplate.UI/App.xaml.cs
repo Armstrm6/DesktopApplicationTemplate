@@ -25,6 +25,7 @@ namespace DesktopApplicationTemplate.UI
         public App()
         {
             AppHost = Host.CreateDefaultBuilder()
+                .ConfigureLogging(builder => builder.AddConsole().AddDebug())
                 .ConfigureAppConfiguration((context, config) =>
                 {
                     var env = context.HostingEnvironment.EnvironmentName ?? "Production";
@@ -48,7 +49,6 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<INetworkConfigurationService, NetworkConfigurationService>();
             services.AddSingleton<NetworkConfigurationViewModel>();
             services.AddSingleton<IRichTextLogger, NullRichTextLogger>();
-            services.AddSingleton<ILoggingService, LoggingService>();
             services.AddSingleton<IMessageRoutingService, MessageRoutingService>();
             services.AddSingleton<IFileDialogService, FileDialogService>();
             services.AddSingleton<IFileSearchService, DesktopApplicationTemplate.Service.Services.FileSearchService>();

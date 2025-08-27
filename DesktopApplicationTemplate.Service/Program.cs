@@ -20,7 +20,8 @@ namespace DesktopApplicationTemplate.Service
         public static IHostBuilder CreateHostBuilder(string[] args)
         {
             bool runAsService = !args.Contains("--console");
-            var builder = Host.CreateDefaultBuilder(args);
+            var builder = Host.CreateDefaultBuilder(args)
+                .ConfigureLogging(logging => logging.AddConsole().AddDebug());
             if (runAsService && OperatingSystem.IsWindows())
             {
                 builder = builder.UseWindowsService(); // Enables Windows Service behavior
@@ -29,7 +30,6 @@ namespace DesktopApplicationTemplate.Service
             return builder.ConfigureServices((hostContext, services) =>
             {
                 services.AddHostedService<Worker>(); // register the background service
-                services.AddSingleton<ILoggingService, LoggingService>();
                 services.AddSingleton<IServiceRule, ServiceRule>();
                 services.AddTransient(typeof(IServiceScreen<>), typeof(ServiceScreen<>));
                 services.AddSingleton<IFileSearchService, FileSearchService>();
