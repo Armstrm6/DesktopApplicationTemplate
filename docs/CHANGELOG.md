@@ -40,6 +40,7 @@
 - TCP and SCP edit workflows now load existing options via `Load` methods, enabling DI-friendly construction.
 - Service list averages use one-way bindings to avoid runtime parse exceptions.
 - Main window declares behaviors namespace to prevent XAML parse errors.
+- Forms theme explicitly references the UI assembly for `TextBoxHintBehavior` to avoid missing type errors.
 
 ### HID Service
 #### Added
