@@ -177,3 +177,12 @@ Effective Prompts / Instructions that worked: User request to handle missing TCP
 Decisions & Rationale: Avoid InvalidOperationException during startup by checking for registered options.
 Action Items: Rely on CI for test coverage.
 Related Commits/PRs: f37e904
+[2025-09-06 09:00] Topic: Test parallelization attribute
+Context: Added assembly-level attribute to disable xUnit parallelization.
+Observations: Installed .NET SDK but WindowsDesktop runtime is unavailable; tests abort.
+Codex Limitations noticed: Missing WindowsDesktop runtime in container.
+Effective Prompts / Instructions that worked: Root instructions to run tests sequentially.
+Decisions & Rationale: Use CollectionBehavior attribute to enforce sequential execution.
+Action Items: Rely on CI for Windows execution.
+Related Commits/PRs:
+
