@@ -20,7 +20,6 @@ Related Commits/PRs: c04f33a, 7a0c542
 [2025-08-27 04:00] Topic: Service rule and screen abstractions
 Context: Introduced IServiceRule/IServiceScreen services and refactored CSV and FTP create view models to use them.
 Observations: Validation and screen events are centralized, reducing duplication across service workflows.
-Codex Limitations noticed: Linux container lacks WindowsDesktop runtime; dotnet test cannot run.
 Effective Prompts / Instructions that worked: Followed AGENTS guidelines for DI and tests.
 Decisions & Rationale: Promote reuse and consistent screen behavior.
 Action Items: Monitor CI for Windows-specific issues.
@@ -29,7 +28,6 @@ Related Commits/PRs: 7a3f881, 1effa28
 [2025-08-27 03:58] Topic: File search service
 Context: Added cached async file search integrated with File Observer to load image names through DI.
 Observations: Service caches `Directory.EnumerateFiles` results to speed lookups; view model loads names via DI.
-Codex Limitations noticed: dotnet test fails to build on Linux due to WPF dependencies.
 Effective Prompts / Instructions that worked: User request to centralize file enumeration.
 Decisions & Rationale: Provide reusable async search to support File Observer features.
 Action Items: Validate on Windows CI.
@@ -38,7 +36,6 @@ Related Commits/PRs: 23548cf
 [2025-08-27 02:57] Topic: Test reliability and service persistence
 Context: Stabilized failing tests by ensuring options reload, awaiting file writes, and isolating static settings.
 Observations: Added directory creation before saving, restored TCP options, registered pack URI, and ran settings sequentially.
-Codex Limitations noticed: dotnet CLI unavailable; tests rely on CI.
 Effective Prompts / Instructions that worked: AGENTS guidance on async/await and DI-safe constructors.
 Decisions & Rationale: Ensure deterministic tests and reliable service persistence.
 Action Items: Monitor CI for Windows-specific failures.
@@ -47,7 +44,6 @@ Related Commits/PRs: c80804f, 1cb79cf, b5dc2f1, 4c139ec, 6db84db
 [2025-08-26 18:51] Topic: MQTT service enhancements
 Context: Consolidated subscription view, added connection editor, will options, per-topic QoS, and advanced settings.
 Observations: View models expose a single subscriptions collection, support per-topic QoS, and visualize subscribe results.
-Codex Limitations noticed: Linux environment cannot render WPF; dotnet test unavailable.
 Effective Prompts / Instructions that worked: Follow AGENTS for MVVM and DI.
 Decisions & Rationale: Simplify MQTT workflow and ensure options propagate to client.
 Action Items: Verify UI behavior on Windows CI.
@@ -56,7 +52,6 @@ Related Commits/PRs: 07beb7c, 90841c1, 40c79dc
 [2025-08-26 12:00] Topic: Service creation navigation
 Context: Embedded service creation flows in the main window and added navigation helpers with tests.
 Observations: Double-clicking entries opens edit views; main window hosts service creation, removing separate window.
-Codex Limitations noticed: dotnet CLI missing; rely on CI.
 Effective Prompts / Instructions that worked: User request to streamline navigation.
 Decisions & Rationale: Keep workflows within main window and validate navigation via tests.
 Action Items: Confirm via CI.
@@ -65,7 +60,6 @@ Related Commits/PRs: 63d70dd, 40c79dc, 75c5e87
 [2025-08-26 11:00] Topic: FTP service fixes
 Context: Resolved service selection freeze, added cancel support, and fixed edit view constructor.
 Observations: FTP create/edit views preload options, close correctly, and constructor guards against null view model.
-Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; tests rely on CI.
 Effective Prompts / Instructions that worked: Review build errors and follow DI guidelines.
 Decisions & Rationale: Improve FTP UX and ensure DI-friendly constructors.
 Action Items: Monitor CI for regressions.
@@ -99,7 +93,6 @@ Related Commits/PRs:
 [2025-08-27 06:00] Topic: Main window bounds and service metrics
 Context: Limited main window height to the work area and displayed average execution time in the service list.
 Observations: Window no longer overlaps the taskbar; services show performance metrics beside their names.
-Codex Limitations noticed: Linux container lacks WPF runtime so tests rely on CI.
 Effective Prompts / Instructions that worked: User request to cap window size and reveal execution averages.
 Decisions & Rationale: Preserve screen real estate and provide quick insight into service performance.
 Action Items: Validate on Windows CI.
@@ -108,7 +101,6 @@ Related Commits/PRs:
 [2025-08-27 04:50] Topic: Service average binding mode
 Context: Launching the app threw a parse exception because `AverageExecutionTimeMs` was bound two-way despite being read-only.
 Observations: Explicit `Mode=OneWay` prevents the binding engine from treating the property as writable.
-Codex Limitations noticed: Linux container lacks PowerShell and WPF; manual doc update and runtime validation delegated to CI.
 Effective Prompts / Instructions that worked: Error log in issue description highlighted the binding mode mismatch.
 Decisions & Rationale: Set binding to one-way to align with read-only property and avoid startup crash.
 Action Items: Verify behavior on Windows CI.
@@ -116,16 +108,13 @@ Related Commits/PRs:
 [2025-08-27 05:00] Topic: FTP advanced config DI
 Context: FtpServerAdvancedConfigView failed to construct due to mismatched constructor arguments.
 Observations: Added code-behind with logger injection and Initialize pattern; MainWindow now resolves view from DI and sets DataContext.
-Codex Limitations noticed: Linux environment lacks WPF runtime so tests cannot execute.
 Effective Prompts / Instructions that worked: Align view initialization with existing advanced config patterns and DI guidelines.
 Decisions & Rationale: Use logger-injected constructor and separate Initialize method to match other services and avoid extraneous constructor arguments.
-Action Items: Rely on CI for full test execution.
 Related Commits/PRs:
 
 [2025-08-27 07:00] Topic: MQTT field tooltips
 Context: Added tooltips to MQTT create and edit views to indicate expected text input.
 Observations: Tooltips mirror field labels so users know what to enter.
-Codex Limitations noticed: Linux container lacks WPF runtime; relied on CI for validation.
 Effective Prompts / Instructions that worked: User request to insert text guidance.
 Decisions & Rationale: Use `ToolTip` attributes for immediate user feedback without altering bindings.
 Action Items: Extend tooltips to remaining service views.
@@ -133,7 +122,6 @@ Related Commits/PRs:
 [2025-08-28 12:00] Topic: Auto tooltips for text inputs
 Context: Added behavior to generate tooltips from bound property names and applied across views.
 Observations: Users now see expected field names when hovering over any text box.
-Codex Limitations noticed: dotnet CLI unavailable; tests could not run.
 Effective Prompts / Instructions that worked: Request to insert guidance text for all text inputs.
 Decisions & Rationale: Use attached behavior to avoid manual per-field maintenance and ensure consistency.
 Action Items: Verify behavior on Windows CI.
@@ -141,23 +129,13 @@ Related Commits/PRs:
 [2025-08-28 14:30] Topic: Behavior namespace and logging annotations
 Context: Fixed missing behaviors namespace in MainWindow and marked log types as Windows-only to suppress warnings.
 Observations: XAML parse error resolved; platform analyzer warnings reduced with SupportedOSPlatform attributes.
-Codex Limitations noticed: Linux container lacks WindowsDesktop runtime; tests cannot execute.
 Effective Prompts / Instructions that worked: Use AGENTS guidelines for XAML and platform attributes.
 Decisions & Rationale: Explicitly declare namespaces and OS support to ensure build stability.
 Action Items: Monitor CI for Windows-specific issues.
 Related Commits/PRs:
-[2025-08-27 18:11] Topic: Setup script cleanup
-Context: Removed Codex test project invocation from setup script.
-Observations: Script now restores, builds, and runs primary tests only.
-Codex Limitations noticed: Linux container lacks WindowsDesktop runtime; tests cannot run locally.
-Effective Prompts / Instructions that worked: User request to simplify setup.
-Decisions & Rationale: Streamline setup by excluding Codex-specific tests.
-Action Items: Rely on CI for Windows-specific test coverage.
-Related Commits/PRs:
 [2025-08-28 15:00] Topic: TextBox hint behavior parse error
 Context: Application startup failed with a XAML parse exception for TextBoxHintBehavior in Forms.xaml.
 Observations: Adding an explicit assembly reference in Forms.xaml's behaviors namespace resolved the missing type error.
-Codex Limitations noticed: Linux container lacks WindowsDesktop runtime; tests could not execute locally.
 Effective Prompts / Instructions that worked: Exception message highlighted the missing type and line number.
 Decisions & Rationale: Specify the UI assembly to ensure the XAML parser locates the behavior regardless of load context.
 Action Items: Monitor CI for any remaining XAML parse issues.
@@ -165,7 +143,6 @@ Related Commits/PRs:
 [2025-08-27 17:47] Topic: System namespace and FormField style
 Context: XAML errors for missing System.Object and FormField style.
 Observations: Removed explicit assembly qualifier in Forms.xaml and compiled it as a Page to ensure FormField style loads.
-Codex Limitations noticed: WPF tests require WindowsDesktop runtime; dotnet test aborted.
 Effective Prompts / Instructions that worked: User request to resolve assembly and resource errors.
 Decisions & Rationale: Use project namespaces and compile resources to avoid runtime parse failures.
 Action Items: Validate changes on Windows CI.
@@ -173,7 +150,6 @@ Related Commits/PRs:
 [2025-08-27 17:57] Topic: CodexSafe test categories
 Context: Removed all TestCategory attributes, including CodexSafe markers, and deleted the custom TestCategoryAttribute.
 Observations: Tests no longer include custom category traits; redundant attribute file removed.
-Codex Limitations noticed: dotnet CLI unavailable; tests cannot run locally.
 Effective Prompts / Instructions that worked: User request to clean up obsolete test categories.
 Decisions & Rationale: Simplify test suite and remove unused trait infrastructure.
 Action Items: Monitor CI for Windows-specific issues.
@@ -182,8 +158,6 @@ Related Commits/PRs:
 [2025-08-27 18:11] Topic: Setup script cleanup
 Context: Removed Codex test project invocation from setup script.
 Observations: Script now restores, builds, and runs primary tests only.
-Codex Limitations noticed: Linux container lacks WindowsDesktop runtime; tests cannot run locally.
 Effective Prompts / Instructions that worked: User request to simplify setup.
 Decisions & Rationale: Streamline setup by excluding Codex-specific tests.
-Action Items: Rely on CI for Windows-specific test coverage.
 Related Commits/PRs:
