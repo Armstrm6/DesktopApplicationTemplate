@@ -161,3 +161,11 @@ Observations: Script now restores, builds, and runs primary tests only.
 Effective Prompts / Instructions that worked: User request to simplify setup.
 Decisions & Rationale: Streamline setup by excluding Codex-specific tests.
 Related Commits/PRs:
+[2025-08-27 18:28] Topic: DesktopApplicationTemplate.Tests.Codex cleanup
+Context: Confirmed solution and filesystem contain no DesktopApplicationTemplate.Tests.Codex entries.
+Observations: No deletions required; tests could not run because dotnet CLI is unavailable.
+Codex Limitations noticed: Missing .NET SDK; unable to build or run tests.
+Effective Prompts / Instructions that worked: `rg` and `find` searches for Codex entries.
+Decisions & Rationale: No action needed beyond verification.
+Action Items: Rely on CI for test execution.
+Related Commits/PRs:
