@@ -1424,6 +1424,15 @@ Effective Prompts / Instructions that worked: Request to visualize data flow via
 Decisions & Rationale: Created reusable control with rounded-corner styles in Themes for consistency.
 Action Items: Extend data flow sections to remaining service views.
 Related Commits/PRs:
+[2025-08-26 21:12] Topic: Edit view DI resolution
+Context: Opening service edit pages threw unresolved System.String errors due to view constructors requiring view models with parameters.
+Observations: Removed view-model constructor injection and initialized view models manually to allow ActivatorUtilities to supply required parameters.
+Codex Limitations noticed: Linux container cannot run WPF tests; rely on CI for full coverage.
+Effective Prompts / Instructions that worked: Review AGENTS guidelines and inspect DI registration patterns.
+Decisions & Rationale: Decoupling constructors from view models prevents DI from attempting to resolve unsupported primitives.
+Action Items: Monitor CI for any navigation regressions.
+Related Commits/PRs:
+
 [2025-08-26 21:11] Topic: Edit view DI fix
 Context: Double-clicking a service threw InvalidOperationException because edit views resolved view models without required parameters.
 Observations: Replaced GetRequiredService with ActivatorUtilities for edit and advanced views, injecting existing view models.

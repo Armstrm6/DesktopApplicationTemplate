@@ -6,10 +6,17 @@ namespace DesktopApplicationTemplate.UI.Views;
 
 public partial class HeartbeatAdvancedConfigView : Page
 {
-    public HeartbeatAdvancedConfigView(HeartbeatAdvancedConfigViewModel vm, ILoggingService logger)
+    private readonly ILoggingService _logger;
+
+    public HeartbeatAdvancedConfigView(ILoggingService logger)
     {
         InitializeComponent();
+        _logger = logger;
+    }
+
+    public void Initialize(HeartbeatAdvancedConfigViewModel vm)
+    {
         DataContext = vm;
-        vm.Logger = logger;
+        vm.Logger = _logger;
     }
 }

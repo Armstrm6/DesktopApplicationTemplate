@@ -6,10 +6,17 @@ namespace DesktopApplicationTemplate.UI.Views;
 
 public partial class CsvEditServiceView : Page
 {
-    public CsvEditServiceView(CsvEditServiceViewModel vm, ILoggingService logger)
+    private readonly ILoggingService _logger;
+
+    public CsvEditServiceView(ILoggingService logger)
     {
         InitializeComponent();
+        _logger = logger;
+    }
+
+    public void Initialize(CsvEditServiceViewModel vm)
+    {
         DataContext = vm;
-        vm.Logger = logger;
+        vm.Logger = _logger;
     }
 }

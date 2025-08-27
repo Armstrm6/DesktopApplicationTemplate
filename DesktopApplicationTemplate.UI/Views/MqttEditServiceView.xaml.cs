@@ -6,10 +6,17 @@ namespace DesktopApplicationTemplate.UI.Views;
 
 public partial class MqttEditServiceView : Page
 {
-    public MqttEditServiceView(MqttEditServiceViewModel vm, ILoggingService logger)
+    private readonly ILoggingService _logger;
+
+    public MqttEditServiceView(ILoggingService logger)
     {
         InitializeComponent();
+        _logger = logger;
+    }
+
+    public void Initialize(MqttEditServiceViewModel vm)
+    {
         DataContext = vm;
-        vm.Logger = logger;
+        vm.Logger = _logger;
     }
 }

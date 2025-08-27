@@ -6,10 +6,17 @@ namespace DesktopApplicationTemplate.UI.Views;
 
 public partial class FileObserverEditServiceView : Page
 {
-    public FileObserverEditServiceView(FileObserverEditServiceViewModel vm, ILoggingService logger)
+    private readonly ILoggingService _logger;
+
+    public FileObserverEditServiceView(ILoggingService logger)
     {
         InitializeComponent();
+        _logger = logger;
+    }
+
+    public void Initialize(FileObserverEditServiceViewModel vm)
+    {
         DataContext = vm;
-        vm.Logger = logger;
+        vm.Logger = _logger;
     }
 }

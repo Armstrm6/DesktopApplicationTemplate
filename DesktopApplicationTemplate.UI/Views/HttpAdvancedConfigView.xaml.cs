@@ -6,10 +6,17 @@ namespace DesktopApplicationTemplate.UI.Views;
 
 public partial class HttpAdvancedConfigView : Page
 {
-    public HttpAdvancedConfigView(HttpAdvancedConfigViewModel vm, ILoggingService logger)
+    private readonly ILoggingService _logger;
+
+    public HttpAdvancedConfigView(ILoggingService logger)
     {
         InitializeComponent();
+        _logger = logger;
+    }
+
+    public void Initialize(HttpAdvancedConfigViewModel vm)
+    {
         DataContext = vm;
-        vm.Logger = logger;
+        vm.Logger = _logger;
     }
 }

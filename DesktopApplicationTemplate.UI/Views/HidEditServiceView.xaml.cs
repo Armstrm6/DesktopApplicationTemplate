@@ -6,10 +6,17 @@ namespace DesktopApplicationTemplate.UI.Views;
 
 public partial class HidEditServiceView : Page
 {
-    public HidEditServiceView(HidEditServiceViewModel vm, ILoggingService logger)
+    private readonly ILoggingService _logger;
+
+    public HidEditServiceView(ILoggingService logger)
     {
         InitializeComponent();
+        _logger = logger;
+    }
+
+    public void Initialize(HidEditServiceViewModel vm)
+    {
         DataContext = vm;
-        vm.Logger = logger;
+        vm.Logger = _logger;
     }
 }

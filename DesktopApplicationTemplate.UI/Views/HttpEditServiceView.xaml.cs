@@ -6,10 +6,17 @@ namespace DesktopApplicationTemplate.UI.Views;
 
 public partial class HttpEditServiceView : Page
 {
-    public HttpEditServiceView(HttpEditServiceViewModel vm, ILoggingService logger)
+    private readonly ILoggingService _logger;
+
+    public HttpEditServiceView(ILoggingService logger)
     {
         InitializeComponent();
+        _logger = logger;
+    }
+
+    public void Initialize(HttpEditServiceViewModel vm)
+    {
         DataContext = vm;
-        vm.Logger = logger;
+        vm.Logger = _logger;
     }
 }

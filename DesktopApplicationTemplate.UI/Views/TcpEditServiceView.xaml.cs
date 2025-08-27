@@ -6,10 +6,17 @@ namespace DesktopApplicationTemplate.UI.Views;
 
 public partial class TcpEditServiceView : Page
 {
-    public TcpEditServiceView(TcpEditServiceViewModel vm, ILoggingService logger)
+    private readonly ILoggingService _logger;
+
+    public TcpEditServiceView(ILoggingService logger)
     {
         InitializeComponent();
+        _logger = logger;
+    }
+
+    public void Initialize(TcpEditServiceViewModel vm)
+    {
         DataContext = vm;
-        vm.Logger = logger;
+        vm.Logger = _logger;
     }
 }
