@@ -1491,3 +1491,11 @@ Effective Prompts / Instructions that worked: Review AGENTS and clone options to
 Decisions & Rationale: Used GetRequiredService to ensure TCP options restored and module initializer to register pack scheme.
 Action Items: Verify on Windows that BubblyWindowStyle loads and TCP options persist.
 Related Commits/PRs: (this PR)
+[2025-08-27 02:41] Topic: UriParser and ServicePersistence fixes
+Context: Build failed due to unsupported UriParser.GetSyntax call and nullable TCP options.
+Observations: Switched to IsKnownScheme, guarded DI resolution for TCP options, and removed Windows service packages from UI.
+Codex Limitations noticed: Linux container lacks Microsoft.WindowsDesktop runtime; tests could not execute.
+Effective Prompts / Instructions that worked: User request to fix build errors and clean references.
+Decisions & Rationale: Use supported URI APIs and null checks to prevent runtime issues; drop unused Windows service packages.
+Action Items: Validate on Windows CI.
+Related Commits/PRs: (this PR)

@@ -109,10 +109,12 @@
 - Unused `RichTextLogger` service and installer `CustomControl1` control.
 - `PublishTopic` and `PublishMessage` fields from `MqttServiceViewModel`.
 - Standalone `FilterWindow` in favor of inline filter popup.
+- Removed Windows service and EventLog package references from the UI project.
 
 ### Fixed
 - Registered the WPF pack URI scheme so BubblyWindow resources load without invalid URI errors.
 - Restored TCP configuration options when loading persisted services.
+- Replaced `UriParser.GetSyntax` usage with `IsKnownScheme` and guarded TCP option restoration to avoid null references.
 - Opening service edit pages no longer fails with unresolved `System.String` DI errors by decoupling view models from view constructors.
 - Editing any service no longer fails with unresolved string dependencies; edit and advanced views now receive their view models via `ActivatorUtilities`.
 - Selecting TCP or FTP server from the add service page now opens their configuration views prior to creation.
