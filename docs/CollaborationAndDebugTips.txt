@@ -1432,3 +1432,12 @@ Effective Prompts / Instructions that worked: Review AGENTS guidelines and inspe
 Decisions & Rationale: Decoupling constructors from view models prevents DI from attempting to resolve unsupported primitives.
 Action Items: Monitor CI for any navigation regressions.
 Related Commits/PRs:
+
+[2025-08-26 21:11] Topic: Edit view DI fix
+Context: Double-clicking a service threw InvalidOperationException because edit views resolved view models without required parameters.
+Observations: Replaced GetRequiredService with ActivatorUtilities for edit and advanced views, injecting existing view models.
+Codex Limitations noticed: Linux container lacks WindowsDesktop runtime; tests rely on CI.
+Effective Prompts / Instructions that worked: Followed AGENTS guidelines for DI and doc updates.
+Decisions & Rationale: Use ActivatorUtilities to supply runtime parameters and logging while allowing DI for remaining services.
+Action Items: Monitor CI for Windows-specific issues.
+Related Commits/PRs: (this PR)

@@ -112,6 +112,7 @@
 
 ### Fixed
 - Opening service edit pages no longer fails with unresolved `System.String` DI errors by decoupling view models from view constructors.
+- Editing any service no longer fails with unresolved string dependencies; edit and advanced views now receive their view models via `ActivatorUtilities`.
 - Selecting TCP or FTP server from the add service page now opens their configuration views prior to creation.
 - FTP server create view model exposes a cancel command and event to allow aborting server setup.
 - Unsealed `FtpTransferEventArgs` to allow progress events to derive from it.
