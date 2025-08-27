@@ -104,6 +104,7 @@
 - `MqttCreateServiceView` no longer hosts duplicate `StackPanel` elements, resolving build errors.
 - Added missing `MQTTnet.Protocol` using to restore `MqttQualityOfServiceLevel` references.
 - Host validation now accepts domain names and rejects underscores.
+- Restored `MqttEndpointMessage` namespace in MQTT service view model to fix build errors.
 
 ### CSV Service
 #### Added
@@ -164,4 +165,5 @@
 
 #### Fixed
 - Added missing `FluentAssertions` package reference to the test project and documented dependency checks to avoid build failures.
+- Removed duplicate using directives and missing namespace references that prevented solution builds.
 

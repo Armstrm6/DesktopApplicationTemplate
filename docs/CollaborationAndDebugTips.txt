@@ -212,3 +212,11 @@ Decisions & Rationale: Target net8.0-windows with UseWPF and add Microsoft.Exten
 Action Items: Rely on CI for verification.
 Related Commits/PRs:
 
+[2025-09-08 12:00] Topic: Build error fixes
+Context: Removed duplicate using directives and added missing namespaces to resolve build failures.
+Observations: Solution now builds, but tests abort due to missing Microsoft.WindowsDesktop runtime.
+Codex Limitations noticed: WindowsDesktop runtime unavailable in container.
+Effective Prompts / Instructions that worked: Compiler errors highlighting missing types and namespace conflicts.
+Decisions & Rationale: Clean up using statements and import model namespaces to restore compilation.
+Action Items: Rely on CI for Windows-specific test execution.
+Related Commits/PRs:

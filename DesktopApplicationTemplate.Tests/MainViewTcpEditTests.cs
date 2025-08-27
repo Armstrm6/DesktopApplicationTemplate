@@ -14,6 +14,8 @@ using Microsoft.Extensions.Hosting;
 using Moq;
 using Xunit;
 using System.Reflection;
+using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI.Models;
 
 namespace DesktopApplicationTemplate.Tests;
 

@@ -14,6 +14,7 @@ using DesktopApplicationTemplate.Core.Models;
 using DesktopApplicationTemplate.UI.Helpers;
 using System.Windows.Controls;
 using System.Windows.Input;
+using DesktopApplicationTemplate.UI.ViewModels;
 
 namespace DesktopApplicationTemplate.Tests;
 
