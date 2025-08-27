@@ -104,3 +104,12 @@ Effective Prompts / Instructions that worked: User request to cap window size an
 Decisions & Rationale: Preserve screen real estate and provide quick insight into service performance.
 Action Items: Validate on Windows CI.
 Related Commits/PRs:
+
+[2025-08-27 04:50] Topic: Service average binding mode
+Context: Launching the app threw a parse exception because `AverageExecutionTimeMs` was bound two-way despite being read-only.
+Observations: Explicit `Mode=OneWay` prevents the binding engine from treating the property as writable.
+Codex Limitations noticed: Linux container lacks PowerShell and WPF; manual doc update and runtime validation delegated to CI.
+Effective Prompts / Instructions that worked: Error log in issue description highlighted the binding mode mismatch.
+Decisions & Rationale: Set binding to one-way to align with read-only property and avoid startup crash.
+Action Items: Verify behavior on Windows CI.
+Related Commits/PRs:

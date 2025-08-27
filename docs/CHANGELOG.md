@@ -36,6 +36,7 @@
 
 #### Fixed
 - TCP and SCP edit workflows now load existing options via `Load` methods, enabling DI-friendly construction.
+- Service list averages use one-way bindings to avoid runtime parse exceptions.
 
 ### HID Service
 #### Added

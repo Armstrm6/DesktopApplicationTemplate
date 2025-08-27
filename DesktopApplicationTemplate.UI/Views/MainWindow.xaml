@@ -100,7 +100,7 @@
                                             </Grid.ColumnDefinitions>
                                             <TextBlock VerticalAlignment="Center" FontWeight="Bold">
                                                 <Run Text="{Binding DisplayName}" />
-                                                <Run Text="{Binding AverageExecutionTimeMs, StringFormat= (Avg: {0:F0} ms), TargetNullValue=''}" />
+                                                <Run Text="{Binding AverageExecutionTimeMs, Mode=OneWay, StringFormat= (Avg: {0:F0} ms), TargetNullValue=''}" />
                                             </TextBlock>
                                             <ToggleButton Grid.Column="1" IsChecked="{Binding IsActive, Mode=TwoWay}" Style="{StaticResource ToggleSwitchStyle}"/>
                                         </Grid>
