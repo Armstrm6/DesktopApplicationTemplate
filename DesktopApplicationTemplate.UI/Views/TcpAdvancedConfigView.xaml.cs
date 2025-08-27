@@ -6,10 +6,17 @@ namespace DesktopApplicationTemplate.UI.Views;
 
 public partial class TcpAdvancedConfigView : Page
 {
-    public TcpAdvancedConfigView(TcpAdvancedConfigViewModel vm, ILoggingService logger)
+    private readonly ILoggingService _logger;
+
+    public TcpAdvancedConfigView(ILoggingService logger)
     {
         InitializeComponent();
+        _logger = logger;
+    }
+
+    public void Initialize(TcpAdvancedConfigViewModel vm)
+    {
         DataContext = vm;
-        vm.Logger = logger;
+        vm.Logger = _logger;
     }
 }

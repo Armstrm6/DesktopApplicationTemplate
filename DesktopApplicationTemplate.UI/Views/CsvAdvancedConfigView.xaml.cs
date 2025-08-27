@@ -6,10 +6,17 @@ namespace DesktopApplicationTemplate.UI.Views;
 
 public partial class CsvAdvancedConfigView : Page
 {
-    public CsvAdvancedConfigView(CsvAdvancedConfigViewModel vm, ILoggingService logger)
+    private readonly ILoggingService _logger;
+
+    public CsvAdvancedConfigView(ILoggingService logger)
     {
         InitializeComponent();
+        _logger = logger;
+    }
+
+    public void Initialize(CsvAdvancedConfigViewModel vm)
+    {
         DataContext = vm;
-        vm.Logger = logger;
+        vm.Logger = _logger;
     }
 }

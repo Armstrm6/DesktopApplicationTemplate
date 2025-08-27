@@ -6,10 +6,17 @@ namespace DesktopApplicationTemplate.UI.Views;
 
 public partial class FileObserverAdvancedConfigView : Page
 {
-    public FileObserverAdvancedConfigView(FileObserverAdvancedConfigViewModel vm, ILoggingService logger)
+    private readonly ILoggingService _logger;
+
+    public FileObserverAdvancedConfigView(ILoggingService logger)
     {
         InitializeComponent();
+        _logger = logger;
+    }
+
+    public void Initialize(FileObserverAdvancedConfigViewModel vm)
+    {
         DataContext = vm;
-        vm.Logger = logger;
+        vm.Logger = _logger;
     }
 }

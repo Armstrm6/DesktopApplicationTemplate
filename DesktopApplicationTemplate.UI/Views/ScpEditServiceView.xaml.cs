@@ -6,10 +6,17 @@ namespace DesktopApplicationTemplate.UI.Views;
 
 public partial class ScpEditServiceView : Page
 {
-    public ScpEditServiceView(ScpEditServiceViewModel vm, ILoggingService logger)
+    private readonly ILoggingService _logger;
+
+    public ScpEditServiceView(ILoggingService logger)
     {
         InitializeComponent();
+        _logger = logger;
+    }
+
+    public void Initialize(ScpEditServiceViewModel vm)
+    {
         DataContext = vm;
-        vm.Logger = logger;
+        vm.Logger = _logger;
     }
 }

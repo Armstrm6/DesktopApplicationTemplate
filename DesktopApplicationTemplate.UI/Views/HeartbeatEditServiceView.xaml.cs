@@ -6,10 +6,17 @@ namespace DesktopApplicationTemplate.UI.Views;
 
 public partial class HeartbeatEditServiceView : Page
 {
-    public HeartbeatEditServiceView(HeartbeatEditServiceViewModel vm, ILoggingService logger)
+    private readonly ILoggingService _logger;
+
+    public HeartbeatEditServiceView(ILoggingService logger)
     {
         InitializeComponent();
+        _logger = logger;
+    }
+
+    public void Initialize(HeartbeatEditServiceViewModel vm)
+    {
         DataContext = vm;
-        vm.Logger = logger;
+        vm.Logger = _logger;
     }
 }
