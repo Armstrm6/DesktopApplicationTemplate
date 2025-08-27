@@ -1508,3 +1508,11 @@ Effective Prompts / Instructions that worked: Register configuration singleton p
 Decisions & Rationale: Ensure test service provider mimics production setup for option binding.
 Action Items: Execute tests; rely on CI for Windows-specific coverage.
 Related Commits/PRs: (this PR)
+[2025-08-27 02:57] Topic: Test reliability improvements
+Context: Stabilized failing unit tests for service persistence, logging, and close confirmation.
+Observations: Reacquired DI options after load, polled asynchronous log writes, and disabled test parallelization for static settings usage.
+Codex Limitations noticed: Linux environment may not execute WPF UI tests fully; rely on CI for validation.
+Effective Prompts / Instructions that worked: Review AGENTS guidelines and update tests to avoid timing and threading issues.
+Decisions & Rationale: Ensure deterministic behavior by awaiting file writes and isolating static state modifications.
+Action Items: Run dotnet test with tests.runsettings; rely on CI for Windows-specific coverage.
+Related Commits/PRs:

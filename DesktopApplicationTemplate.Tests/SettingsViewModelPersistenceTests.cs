@@ -4,6 +4,7 @@ using DesktopApplicationTemplate.UI.ViewModels;
 
 namespace DesktopApplicationTemplate.Tests
 {
+    [Collection("NonParallel")]
     public class SettingsViewModelPersistenceTests
     {
         [Fact]

@@ -1,23 +1,25 @@
 using DesktopApplicationTemplate.UI.Helpers;
-using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.Core.Services;
 using Moq;
 using Xunit;
 
 namespace DesktopApplicationTemplate.Tests
 {
+    [Collection("NonParallel")]
     public class CloseConfirmationHelperTests
     {
         [Fact]
         [TestCategory("WindowsSafe")]
         public void Show_ReturnsTrue_WhenSuppressed()
         {
-            SettingsViewModel.CloseConfirmationSuppressed = true;
             var logger = new Mock<ILoggingService>();
-            var helper = new CloseConfirmationHelper(logger.Object);
+            var helper = new CloseConfirmationHelper(logger.Object)
+            {
+                CloseConfirmationSuppressed = true
+            };
             var result = helper.Show();
             Assert.True(result);
-            SettingsViewModel.CloseConfirmationSuppressed = false;
+            helper.CloseConfirmationSuppressed = false;
             ConsoleTestLogger.LogPass();
         }
     }

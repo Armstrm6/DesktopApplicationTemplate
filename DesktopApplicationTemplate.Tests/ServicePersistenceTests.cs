@@ -136,10 +136,11 @@ namespace DesktopApplicationTemplate.Tests
                 Assert.Equal(TcpServiceMode.Sending, info.TcpOptions.Mode);
 
                 // global options restored
-                Assert.Equal("h", opt.Host);
-                Assert.Equal(42, opt.Port);
-                Assert.True(opt.UseUdp);
-                Assert.Equal(TcpServiceMode.Sending, opt.Mode);
+                var restored = host.Services.GetRequiredService<IOptions<TcpServiceOptions>>().Value;
+                Assert.Equal("h", restored.Host);
+                Assert.Equal(42, restored.Port);
+                Assert.True(restored.UseUdp);
+                Assert.Equal(TcpServiceMode.Sending, restored.Mode);
             }
             finally
             {
@@ -211,11 +212,12 @@ namespace DesktopApplicationTemplate.Tests
                 Assert.Equal("p", info.FtpOptions.Password);
 
                 // global options restored
-                Assert.Equal(21, opt.Port);
-                Assert.Equal("/srv", opt.RootPath);
-                Assert.True(opt.AllowAnonymous);
-                Assert.Equal("u", opt.Username);
-                Assert.Equal("p", opt.Password);
+                var restoredFtp = host.Services.GetRequiredService<IOptions<FtpServerOptions>>().Value;
+                Assert.Equal(21, restoredFtp.Port);
+                Assert.Equal("/srv", restoredFtp.RootPath);
+                Assert.True(restoredFtp.AllowAnonymous);
+                Assert.Equal("u", restoredFtp.Username);
+                Assert.Equal("p", restoredFtp.Password);
             }
             finally
             {
@@ -287,11 +289,12 @@ namespace DesktopApplicationTemplate.Tests
                 Assert.Equal("p", info.FtpOptions.Password);
 
                 // global options restored
-                Assert.Equal(21, opt.Port);
-                Assert.Equal("/srv", opt.RootPath);
-                Assert.True(opt.AllowAnonymous);
-                Assert.Equal("u", opt.Username);
-                Assert.Equal("p", opt.Password);
+                var restoredLegacy = host.Services.GetRequiredService<IOptions<FtpServerOptions>>().Value;
+                Assert.Equal(21, restoredLegacy.Port);
+                Assert.Equal("/srv", restoredLegacy.RootPath);
+                Assert.True(restoredLegacy.AllowAnonymous);
+                Assert.Equal("u", restoredLegacy.Username);
+                Assert.Equal("p", restoredLegacy.Password);
             }
             finally
             {
