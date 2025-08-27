@@ -11,6 +11,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// </summary>
 public class FtpServerCreateViewModel : ValidatableViewModelBase, ILoggingViewModel
 {
+    private readonly IServiceRule _rule;
+    private readonly IServiceScreen<FtpServerOptions> _screen;
     private string _serviceName = string.Empty;
     private int _port = 21;
     private string _rootPath = string.Empty;
@@ -18,12 +20,31 @@ public class FtpServerCreateViewModel : ValidatableViewModelBase, ILoggingViewMo
     /// <summary>
     /// Initializes a new instance of the <see cref="FtpServerCreateViewModel"/> class.
     /// </summary>
-    public FtpServerCreateViewModel(ILoggingService? logger = null)
+    public FtpServerCreateViewModel(IServiceRule rule, IServiceScreen<FtpServerOptions> screen, ILoggingService? logger = null)
     {
+        _rule = rule ?? throw new ArgumentNullException(nameof(rule));
+        _screen = screen ?? throw new ArgumentNullException(nameof(screen));
         Logger = logger;
-        SaveCommand = new RelayCommand(Save);
-        CancelCommand = new RelayCommand(Cancel);
-        AdvancedConfigCommand = new RelayCommand(OpenAdvancedConfig);
+
+        SaveCommand = new RelayCommand(() =>
+        {
+            if (HasErrors)
+                return;
+            Options.Port = Port;
+            Options.RootPath = RootPath;
+            _screen.Save(ServiceName, Options);
+        });
+        CancelCommand = new RelayCommand(() => _screen.Cancel());
+        AdvancedConfigCommand = new RelayCommand(() =>
+        {
+            Options.Port = Port;
+            Options.RootPath = RootPath;
+            _screen.OpenAdvanced(Options);
+        });
+
+        _screen.Saved += (n, o) => ServerCreated?.Invoke(n, o);
+        _screen.Cancelled += () => Cancelled?.Invoke();
+        _screen.AdvancedConfigRequested += o => AdvancedConfigRequested?.Invoke(o);
     }
 
     /// <summary>
@@ -72,8 +93,9 @@ public class FtpServerCreateViewModel : ValidatableViewModelBase, ILoggingViewMo
         set
         {
             _serviceName = value;
-            if (string.IsNullOrWhiteSpace(value))
-                AddError(nameof(ServiceName), "Service name is required");
+            var error = _rule.ValidateRequired(value, "Service name");
+            if (error is not null)
+                AddError(nameof(ServiceName), error);
             else
                 ClearErrors(nameof(ServiceName));
             OnPropertyChanged();
@@ -89,8 +111,9 @@ public class FtpServerCreateViewModel : ValidatableViewModelBase, ILoggingViewMo
         set
         {
             _port = value;
-            if (value < 1 || value > 65535)
-                AddError(nameof(Port), "Port must be between 1 and 65535");
+            var error = _rule.ValidatePort(value);
+            if (error is not null)
+                AddError(nameof(Port), error);
             else
                 ClearErrors(nameof(Port));
             OnPropertyChanged();
@@ -106,34 +129,12 @@ public class FtpServerCreateViewModel : ValidatableViewModelBase, ILoggingViewMo
         set
         {
             _rootPath = value;
-            if (string.IsNullOrWhiteSpace(value))
-                AddError(nameof(RootPath), "Root path is required");
+            var error = _rule.ValidateRequired(value, "Root path");
+            if (error is not null)
+                AddError(nameof(RootPath), error);
             else
                 ClearErrors(nameof(RootPath));
             OnPropertyChanged();
         }
-    }
-
-    private void Save()
-    {
-        if (HasErrors)
-            return;
-        Logger?.Log("FTP server create options start", LogLevel.Debug);
-        Options.Port = Port;
-        Options.RootPath = RootPath;
-        Logger?.Log("FTP server create options finished", LogLevel.Debug);
-        ServerCreated?.Invoke(ServiceName, Options);
-    }
-
-    private void Cancel()
-    {
-        Logger?.Log("FTP server create options cancelled", LogLevel.Debug);
-        Cancelled?.Invoke();
-    }
-
-    private void OpenAdvancedConfig()
-    {
-        Logger?.Log("Opening FTP server advanced config", LogLevel.Debug);
-        AdvancedConfigRequested?.Invoke(Options);
     }
 }

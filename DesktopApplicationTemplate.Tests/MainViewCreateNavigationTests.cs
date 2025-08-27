@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Threading;
 using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Service.Services;
 using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
@@ -91,6 +92,8 @@ public class MainViewCreateNavigationTests
                 {
                     s.AddLogging();
                     s.AddSingleton<ILoggingService>(logger);
+                    s.AddSingleton<IServiceRule, ServiceRule>();
+                    s.AddTransient(typeof(IServiceScreen<FtpServerOptions>), typeof(ServiceScreen<FtpServerOptions>));
                     s.AddTransient<FtpServerCreateViewModel>();
                     s.AddTransient<FtpServerCreateView>();
                     s.AddOptions<FtpServerOptions>();

@@ -30,6 +30,8 @@ namespace DesktopApplicationTemplate.Service
             {
                 services.AddHostedService<Worker>(); // register the background service
                 services.AddSingleton<ILoggingService, LoggingService>();
+                services.AddSingleton<IServiceRule, ServiceRule>();
+                services.AddTransient(typeof(IServiceScreen<>), typeof(ServiceScreen<>));
                 services.AddFtpServer(builder => builder
                     .UseDotNetFileSystem()
                     .EnableAnonymousAuthentication());

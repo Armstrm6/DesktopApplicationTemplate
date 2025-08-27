@@ -1,6 +1,7 @@
+using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Service.Services;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
-using DesktopApplicationTemplate.Core.Services;
 using Moq;
 using Xunit;
 
@@ -14,7 +15,7 @@ public class FtpServerCreateViewModelTests
     public void SaveCommand_RaisesServerCreated()
     {
         var logger = new Mock<ILoggingService>();
-        var vm = new FtpServerCreateViewModel(logger.Object)
+        var vm = new FtpServerCreateViewModel(new ServiceRule(), new ServiceScreen<FtpServerOptions>(logger.Object), logger.Object)
         {
             ServiceName = "ftp",
             Port = 21,
@@ -38,7 +39,7 @@ public class FtpServerCreateViewModelTests
     [TestCategory("WindowsSafe")]
     public void CancelCommand_RaisesCancelled()
     {
-        var vm = new FtpServerCreateViewModel();
+        var vm = new FtpServerCreateViewModel(new ServiceRule(), new ServiceScreen<FtpServerOptions>());
         var cancelled = false;
         vm.Cancelled += () => cancelled = true;
 
@@ -53,7 +54,7 @@ public class FtpServerCreateViewModelTests
     [TestCategory("WindowsSafe")]
     public void SettingInvalidPort_AddsError()
     {
-        var vm = new FtpServerCreateViewModel();
+        var vm = new FtpServerCreateViewModel(new ServiceRule(), new ServiceScreen<FtpServerOptions>());
         vm.Port = 0;
         Assert.True(vm.HasErrors);
         ConsoleTestLogger.LogPass();
@@ -64,7 +65,7 @@ public class FtpServerCreateViewModelTests
     [TestCategory("WindowsSafe")]
     public void SettingEmptyServiceName_AddsError()
     {
-        var vm = new FtpServerCreateViewModel();
+        var vm = new FtpServerCreateViewModel(new ServiceRule(), new ServiceScreen<FtpServerOptions>());
         vm.ServiceName = string.Empty;
         Assert.True(vm.HasErrors);
         ConsoleTestLogger.LogPass();
@@ -75,7 +76,7 @@ public class FtpServerCreateViewModelTests
     [TestCategory("WindowsSafe")]
     public void SaveCommand_DoesNotRaise_WhenInvalid()
     {
-        var vm = new FtpServerCreateViewModel
+        var vm = new FtpServerCreateViewModel(new ServiceRule(), new ServiceScreen<FtpServerOptions>())
         {
             ServiceName = string.Empty,
             Port = 21,
@@ -95,7 +96,7 @@ public class FtpServerCreateViewModelTests
     [TestCategory("WindowsSafe")]
     public void AdvancedCommand_RaisesRequested()
     {
-        var vm = new FtpServerCreateViewModel();
+        var vm = new FtpServerCreateViewModel(new ServiceRule(), new ServiceScreen<FtpServerOptions>());
         var raised = false;
         vm.AdvancedConfigRequested += _ => raised = true;
 

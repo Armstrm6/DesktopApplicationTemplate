@@ -1516,3 +1516,11 @@ Effective Prompts / Instructions that worked: Review AGENTS guidelines and updat
 Decisions & Rationale: Ensure deterministic behavior by awaiting file writes and isolating static state modifications.
 Action Items: Run dotnet test with tests.runsettings; rely on CI for Windows-specific coverage.
 Related Commits/PRs:
+[2025-08-29 12:00] Topic: Service rule and screen abstractions
+Context: Introduced shared IServiceRule and IServiceScreen services with DI registration and refactored CSV/FTP create view models.
+Observations: Validation and command wiring now use reusable services, reducing duplicated logic.
+Codex Limitations noticed: Linux environment lacks WindowsDesktop runtime; rely on CI for full WPF test coverage.
+Effective Prompts / Instructions that worked: Followed AGENTS guidelines for DI, tests, and docs.
+Decisions & Rationale: Centralize validation and screen events for consistency across services.
+Action Items: Run dotnet test and monitor CI for Windows-specific results.
+Related Commits/PRs:
