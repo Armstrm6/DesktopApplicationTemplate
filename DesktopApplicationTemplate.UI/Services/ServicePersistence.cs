@@ -6,6 +6,7 @@ using System.Text.Json.Serialization;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.DependencyInjection;
 using DesktopApplicationTemplate.UI;
 
 namespace DesktopApplicationTemplate.UI.Services
@@ -93,6 +94,11 @@ namespace DesktopApplicationTemplate.UI.Services
             {
                 var json = JsonSerializer.Serialize(data, options);
                 logger?.Log($"Persisting services to {FilePath}", LogLevel.Debug);
+                var directory = Path.GetDirectoryName(FilePath);
+                if (!string.IsNullOrEmpty(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
                 using var fs = new FileStream(FilePath, FileMode.Create, FileAccess.Write, FileShare.None);
                 using var sw = new StreamWriter(fs);
                 sw.Write(json);
@@ -139,7 +145,7 @@ namespace DesktopApplicationTemplate.UI.Services
                     {
                         try
                         {
-                            var opt = App.AppHost?.Services.GetService(typeof(IOptions<TcpServiceOptions>)) as IOptions<TcpServiceOptions>;
+                            var opt = App.AppHost?.Services.GetService<IOptions<TcpServiceOptions>>();
                             if (opt != null)
                             {
                                 var value = opt.Value;
@@ -158,7 +164,7 @@ namespace DesktopApplicationTemplate.UI.Services
                     {
                         try
                         {
-                            var opt = App.AppHost?.Services.GetService(typeof(IOptions<FtpServerOptions>)) as IOptions<FtpServerOptions>;
+                            var opt = App.AppHost?.Services.GetService<IOptions<FtpServerOptions>>();
                             if (opt != null)
                             {
                                 var value = opt.Value;

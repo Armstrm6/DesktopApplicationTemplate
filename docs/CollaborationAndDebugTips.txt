@@ -1474,3 +1474,12 @@ Effective Prompts / Instructions that worked: Followed AGENTS guidance for async
 Decisions & Rationale: Ensure validators catch bad hosts and avoid async void to improve test determinism.
 Action Items: Verify on Windows CI.
 Related Commits/PRs: (this PR)
+[2025-08-27 02:22] Topic: Service persistence directory fix
+Context: Fixed unit tests failing due to missing service file paths and TCP options not restoring.
+Observations: Added directory creation in ServicePersistence.Save, switched Load to generic DI retrieval, and isolated tests by resetting ServicePersistence.FilePath.
+Codex Limitations noticed: dotnet CLI unavailable; unable to run tests locally.
+Effective Prompts / Instructions that worked: Followed AGENTS.md to update changelog and collaboration log.
+Decisions & Rationale: Ensure persistence writes succeed regardless of path and avoid cross-test interference.
+Action Items: Rely on CI for Windows-specific validation.
+Related Commits/PRs: (this PR)
+
