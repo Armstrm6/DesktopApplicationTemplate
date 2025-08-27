@@ -1540,3 +1540,12 @@ Effective Prompts / Instructions that worked:
 Decisions & Rationale: Centralized file enumeration via service to support reuse and caching.
 Action Items: Rely on CI to verify Windows-specific builds.
 Related Commits/PRs: (this PR)
+
+[2025-08-27 03:58] Topic: Changelog restructuring
+Context: Grouped changelog entries under feature headings and documented topic-per-entry style.
+Observations: CHANGELOG now organized by feature with Added/Changed/Fixed sections and header guidance.
+Codex Limitations noticed: PowerShell unavailable; appended tip manually.
+Effective Prompts / Instructions that worked: User request to restructure changelog and note convention.
+Decisions & Rationale: Improve readability and future contributions by enforcing one topic per entry.
+Action Items: Rely on CI for verification of documentation-only changes.
+Related Commits/PRs: (this PR)
