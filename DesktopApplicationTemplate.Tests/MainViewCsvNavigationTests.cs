@@ -1,9 +1,8 @@
 using System;
 using System.IO;
 using System.Threading;
-using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Services;
-using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI;
 using FluentAssertions;
@@ -11,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Moq;
 using Xunit;
-using DesktopApplicationTemplate.UI.Models;
+using DesktopApplicationTemplate.Core.Models;
 using DesktopApplicationTemplate.UI.Helpers;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -23,8 +22,7 @@ public class MainViewCsvNavigationTests
     [WpfFact]
     public void NavigateToCsvCreator_ShowsCreateView()
     {
-        if (!OperatingSystem.IsWindows())
-            return;
+        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
         var thread = new Thread(() =>
         {
@@ -70,8 +68,7 @@ public class MainViewCsvNavigationTests
     [WpfFact]
     public void DoubleClickCsvService_OpensEditView()
     {
-        if (!OperatingSystem.IsWindows())
-            return;
+        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
         var thread = new Thread(() =>
         {

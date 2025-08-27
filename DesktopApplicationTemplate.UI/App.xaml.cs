@@ -1,8 +1,9 @@
 ﻿using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Views;
-using DesktopApplicationTemplate.UI.Models;
+using DesktopApplicationTemplate.Core.Models;
 using DesktopApplicationTemplate.Core.Services;
 // Qualify service-layer types explicitly to avoid name clashes with UI services
 using Microsoft.Extensions.Configuration;

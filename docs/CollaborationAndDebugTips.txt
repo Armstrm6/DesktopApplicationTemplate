@@ -194,3 +194,11 @@ Effective Prompts / Instructions that worked: User request to replace Fact with 
 Decisions & Rationale: Provide reusable attributes so UI tests no longer manage threads manually.
 Action Items: Rely on CI for Windows-specific test execution.
 Related Commits/PRs:
+[2025-09-07 00:00] Topic: .NET SDK version mismatch
+Context: Attempted to run tests after moving network services to Core and adding skippable facts.
+Observations: Installed dotnet-sdk-8.0 (8.0.119) but global.json requires 8.0.404; `dotnet test` fails with SDK not found and Windows desktop runtime remains unavailable.
+Codex Limitations noticed: Missing required .NET SDK and WindowsDesktop runtime.
+Effective Prompts / Instructions that worked: `apt-get install dotnet-sdk-8.0` to install available SDK.
+Decisions & Rationale: Rely on CI for full test execution.
+Action Items: none
+Related Commits/PRs:

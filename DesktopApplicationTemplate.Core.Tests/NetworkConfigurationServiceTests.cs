@@ -1,7 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
-using DesktopApplicationTemplate.UI.Models;
-using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Core.Models;
+using DesktopApplicationTemplate.Core.Services;
 using Moq;
 using Xunit;
 

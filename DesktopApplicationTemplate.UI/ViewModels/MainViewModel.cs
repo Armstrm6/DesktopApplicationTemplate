@@ -13,8 +13,8 @@ using System.Text.RegularExpressions;
 using WpfBrush = System.Windows.Media.Brush;
 using WpfBrushes = System.Windows.Media.Brushes;
 using DesktopApplicationTemplate.UI.Services;
-using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Core.Models;
 using System.Text.Json.Serialization;
 using DesktopApplicationTemplate.UI;
 

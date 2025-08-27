@@ -1,9 +1,9 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using DesktopApplicationTemplate.UI.Models;
+using DesktopApplicationTemplate.Core.Models;
 
-namespace DesktopApplicationTemplate.UI.Services
+namespace DesktopApplicationTemplate.Core.Services
 {
     public interface INetworkConfigurationService
     {

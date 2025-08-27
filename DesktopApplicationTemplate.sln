@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DesktopApplicationTemplate.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DesktopApplicationTemplate.Core", "DesktopApplicationTemplate.Core\DesktopApplicationTemplate.Core.csproj", "{F217F400-6137-44C1-8E51-59DAE3564FD9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DesktopApplicationTemplate.Core.Tests", "DesktopApplicationTemplate.Core.Tests\DesktopApplicationTemplate.Core.Tests.csproj", "{8FDB41D9-C733-408E-AACB-2473AF8C41FE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{F217F400-6137-44C1-8E51-59DAE3564FD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F217F400-6137-44C1-8E51-59DAE3564FD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F217F400-6137-44C1-8E51-59DAE3564FD9}.Release|Any CPU.Build.0 = Release|Any CPU
+                {8FDB41D9-C733-408E-AACB-2473AF8C41FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                {8FDB41D9-C733-408E-AACB-2473AF8C41FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                {8FDB41D9-C733-408E-AACB-2473AF8C41FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                {8FDB41D9-C733-408E-AACB-2473AF8C41FE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

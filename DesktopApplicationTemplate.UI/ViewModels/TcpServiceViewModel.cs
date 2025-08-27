@@ -5,7 +5,7 @@ using System.Windows;
 using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Helpers;
-using DesktopApplicationTemplate.UI.Models;
+using DesktopApplicationTemplate.Core.Models;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 
 namespace DesktopApplicationTemplate.UI.ViewModels

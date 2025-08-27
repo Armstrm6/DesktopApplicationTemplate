@@ -1,6 +1,6 @@
 using System;
 
-namespace DesktopApplicationTemplate.UI.Models
+namespace DesktopApplicationTemplate.Core.Models
 {
     public class NetworkConfiguration
     {

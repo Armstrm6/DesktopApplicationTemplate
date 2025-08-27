@@ -1,7 +1,8 @@
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI.Services;
-using DesktopApplicationTemplate.UI.Models;
+using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Core.Models;
 using Moq;
 using System;
 using System.IO;
@@ -17,8 +18,7 @@ namespace DesktopApplicationTemplate.Tests
         [WpfFact]
         public void NavigateBack_ReturnsToHomePage()
         {
-            if (!OperatingSystem.IsWindows())
-                return;
+            Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
             Exception? ex = null;
             var thread = new Thread(() =>

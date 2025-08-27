@@ -1,6 +1,7 @@
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Core.Services;
 using System;
 using System.Linq;
 using System.Threading;
@@ -19,8 +20,7 @@ namespace DesktopApplicationTemplate.Tests
         [WpfFact]
         public void MainView_ServiceList_HasMaxHeight()
         {
-            if (!OperatingSystem.IsWindows())
-                return;
+            Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
             Exception? ex = null;
             var thread = new Thread(() =>
@@ -56,8 +56,7 @@ namespace DesktopApplicationTemplate.Tests
         [WpfFact]
         public void MainView_HasCloseCommandBinding()
         {
-            if (!OperatingSystem.IsWindows())
-                return;
+            Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
             Exception? ex = null;
             var thread = new Thread(() =>
@@ -93,8 +92,7 @@ namespace DesktopApplicationTemplate.Tests
         [WpfFact]
         public void MainView_HasMinimizeCommandBinding()
         {
-            if (!OperatingSystem.IsWindows())
-                return;
+            Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
             Exception? ex = null;
             var thread = new Thread(() =>
@@ -130,8 +128,7 @@ namespace DesktopApplicationTemplate.Tests
         [WpfFact]
         public void OpenServiceEditor_NonCsv_SetsContentFrame()
         {
-            if (!OperatingSystem.IsWindows())
-                return;
+            Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
             Exception? ex = null;
             var thread = new Thread(() =>
@@ -169,8 +166,7 @@ namespace DesktopApplicationTemplate.Tests
         [WpfFact]
         public void OpenServiceEditor_CsvCreator_ShowsWindow()
         {
-            if (!OperatingSystem.IsWindows())
-                return;
+            Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
             Exception? ex = null;
             var thread = new Thread(() =>
@@ -211,8 +207,7 @@ namespace DesktopApplicationTemplate.Tests
         [WpfFact]
         public void MainView_KeyDown_IgnoresNonEscape()
         {
-            if (!OperatingSystem.IsWindows())
-                return;
+            Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
             Exception? ex = null;
             var thread = new Thread(() =>
@@ -257,8 +252,7 @@ namespace DesktopApplicationTemplate.Tests
         [WpfFact]
         public void HeaderBar_DoubleClick_TogglesWindowState()
         {
-            if (!OperatingSystem.IsWindows())
-                return;
+            Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
             Exception? ex = null;
             var thread = new Thread(() =>
