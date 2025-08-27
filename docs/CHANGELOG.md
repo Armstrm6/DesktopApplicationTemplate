@@ -153,6 +153,7 @@
 - Cleaned up `CollaborationAndDebugTips.txt` by removing duplicate headers and restoring log structure.
 - CSV creator no longer adds columns for itself or other CSV services, preventing self-referencing entries.
 - Application now releases keyboard state on shutdown to prevent stuck R, D, and Q keys.
+- Service persistence now creates missing directories and restores TCP options to the DI container on load.
 
 - Registered FTP server service and view models in DI and bound FtpServer options from configuration.
 - Downgraded FubarDev FTP server packages to version 3.1.2 to resolve missing NuGet feeds.

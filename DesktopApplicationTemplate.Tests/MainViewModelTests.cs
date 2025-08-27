@@ -58,18 +58,25 @@ namespace DesktopApplicationTemplate.Tests
 
             var servicesPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "services.json");
             Directory.CreateDirectory(Path.GetDirectoryName(servicesPath)!);
-            var vm = new MainViewModel(csv, networkVm, network.Object, logger.Object, servicesPath);
-            var service = new ServiceViewModel { DisplayName = "HTTP - HTTP1", ServiceType = "HTTP" };
-            vm.Services.Add(service);
-            vm.SelectedService = service;
+            var oldPath = ServicePersistence.FilePath;
+            try
+            {
+                var vm = new MainViewModel(csv, networkVm, network.Object, logger.Object, servicesPath);
+                var service = new ServiceViewModel { DisplayName = "HTTP - HTTP1", ServiceType = "HTTP" };
+                vm.Services.Add(service);
+                vm.SelectedService = service;
 
-            vm.RemoveServiceCommand.Execute(null);
+                vm.RemoveServiceCommand.Execute(null);
 
-            if (File.Exists(servicesPath))
-                File.Delete(servicesPath);
-
-            logger.Verify(l => l.Log(It.Is<string>(m => m.Contains("Removing service")), It.IsAny<LogLevel>()), Times.Once);
-            logger.Verify(l => l.Log(It.Is<string>(m => m.Contains("Service removed")), It.IsAny<LogLevel>()), Times.Once);
+                logger.Verify(l => l.Log(It.Is<string>(m => m.Contains("Removing service")), It.IsAny<LogLevel>()), Times.Once);
+                logger.Verify(l => l.Log(It.Is<string>(m => m.Contains("Service removed")), It.IsAny<LogLevel>()), Times.Once);
+            }
+            finally
+            {
+                ServicePersistence.FilePath = oldPath;
+                var dir = Path.GetDirectoryName(servicesPath)!;
+                if (Directory.Exists(dir)) Directory.Delete(dir, true);
+            }
 
             ConsoleTestLogger.LogPass();
         }
@@ -198,33 +205,45 @@ namespace DesktopApplicationTemplate.Tests
             var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
             var network = new Mock<INetworkConfigurationService>();
             var networkVm = new NetworkConfigurationViewModel(network.Object);
-            var vm = new TestMainViewModel(csv, networkVm, network.Object);
-            int createdChanges = 0;
-            int activeChanges = 0;
-            vm.PropertyChanged += (s, e) =>
+
+            var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var oldPath = ServicePersistence.FilePath;
+            ServicePersistence.FilePath = Path.Combine(tempDir, "services.json");
+            try
             {
-                if (e.PropertyName == nameof(MainViewModel.ServicesCreated)) createdChanges++;
-                if (e.PropertyName == nameof(MainViewModel.CurrentActiveServices)) activeChanges++;
-            };
-            var svc = new ServiceViewModel { DisplayName = "HTTP - HTTP1", ServiceType = "HTTP" };
-            svc.ActiveChanged += vm.OnServiceActiveChanged;
-            vm.AddServiceForTest(svc);
+                var vm = new TestMainViewModel(csv, networkVm, network.Object);
+                int createdChanges = 0;
+                int activeChanges = 0;
+                vm.PropertyChanged += (s, e) =>
+                {
+                    if (e.PropertyName == nameof(MainViewModel.ServicesCreated)) createdChanges++;
+                    if (e.PropertyName == nameof(MainViewModel.CurrentActiveServices)) activeChanges++;
+                };
+                var svc = new ServiceViewModel { DisplayName = "HTTP - HTTP1", ServiceType = "HTTP" };
+                svc.ActiveChanged += vm.OnServiceActiveChanged;
+                vm.AddServiceForTest(svc);
 
-            Assert.Equal(1, vm.ServicesCreated);
-            Assert.Equal(0, vm.CurrentActiveServices);
+                Assert.Equal(1, vm.ServicesCreated);
+                Assert.Equal(0, vm.CurrentActiveServices);
 
-            svc.IsActive = true;
+                svc.IsActive = true;
 
-            Assert.Equal(1, vm.CurrentActiveServices);
+                Assert.Equal(1, vm.CurrentActiveServices);
 
-            vm.SelectedService = svc;
-            vm.RemoveServiceCommand.Execute(null);
+                vm.SelectedService = svc;
+                vm.RemoveServiceCommand.Execute(null);
 
-            Assert.Equal(0, vm.ServicesCreated);
-            Assert.Equal(0, vm.CurrentActiveServices);
+                Assert.Equal(0, vm.ServicesCreated);
+                Assert.Equal(0, vm.CurrentActiveServices);
 
-            Assert.Equal(3, createdChanges);
-            Assert.Equal(3, activeChanges);
+                Assert.Equal(3, createdChanges);
+                Assert.Equal(3, activeChanges);
+            }
+            finally
+            {
+                ServicePersistence.FilePath = oldPath;
+                if (Directory.Exists(tempDir)) Directory.Delete(tempDir, true);
+            }
             ConsoleTestLogger.LogPass();
         }
 
