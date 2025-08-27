@@ -159,6 +159,7 @@
 - Updated GitHub workflows to install the WPF workload instead of the deprecated `windowsdesktop` workload.
 - Reorganized collaboration log into topic-based blocks and added logging guidelines.
 - Removed obsolete `CodexSafe` test category trait and `TestCategoryAttribute` helper.
+- Setup script no longer runs the Codex test project.
 
 #### Fixed
 - Added missing `FluentAssertions` package reference to the test project and documented dependency checks to avoid build failures.

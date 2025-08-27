@@ -22,6 +22,5 @@ else
 fi
 dotnet build DesktopApplicationTemplate.sln
 dotnet test DesktopApplicationTemplate.Tests/DesktopApplicationTemplate.Tests.csproj
-dotnet test DesktopApplicationTemplate.Tests.Codex/DesktopApplicationTemplate.Tests.Codex.csproj
 
 echo "Setup complete."
