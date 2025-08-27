@@ -142,6 +142,7 @@
 - Moved `LogEntry` to core and restored logging event subscriptions, resolving missing reference build errors.
 - Registered `LoggingService` with the DI container to satisfy `SaveConfirmationHelper` and prevent runtime errors.
 - Marked log models and levels as Windows-specific to silence cross-platform analyzer warnings.
+- Added missing WPF framework and logging abstraction references to core and UI projects, resolving `System.Windows.Media` and `ILogger` build errors.
 
 #### Changed
 - Removed custom `ILoggingService` and service registrations in favor of `Microsoft.Extensions.Logging` with console and debug providers.

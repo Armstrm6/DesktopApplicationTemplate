@@ -202,3 +202,13 @@ Effective Prompts / Instructions that worked: `apt-get install dotnet-sdk-8.0` t
 Decisions & Rationale: Rely on CI for full test execution.
 Action Items: none
 Related Commits/PRs:
+
+[2025-09-07 10:30] Topic: Logging package references
+Context: Build errors for System.Windows.Media and ILogger due to missing WPF and logging assemblies.
+Observations: Core targeted net8.0 without WPF; UI lacked logging abstractions reference.
+Codex Limitations noticed: dotnet CLI not installed; unable to restore, build, or run tests.
+Effective Prompts / Instructions that worked: Compiler errors highlighted missing references.
+Decisions & Rationale: Target net8.0-windows with UseWPF and add Microsoft.Extensions.Logging.Abstractions to resolve errors.
+Action Items: Rely on CI for verification.
+Related Commits/PRs:
+
