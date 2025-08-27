@@ -79,7 +79,9 @@ namespace DesktopApplicationTemplate.UI.Services
                     TcpOptions = tcp,
                     FtpOptions = ftp,
                     HttpOptions = http,
-                    CsvOptions = csv
+                    CsvOptions = csv,
+                    TotalExecutionTimeMs = s.TotalExecutionTimeMs,
+                    ExecutionCount = s.ExecutionCount
                 });
             }
 
@@ -207,5 +209,7 @@ namespace DesktopApplicationTemplate.UI.Services
         public FtpServerOptions? FtpOptions { get; set; }
         public HttpServiceOptions? HttpOptions { get; set; }
         public CsvServiceOptions? CsvOptions { get; set; }
+        public double TotalExecutionTimeMs { get; set; }
+        public int ExecutionCount { get; set; }
     }
 }

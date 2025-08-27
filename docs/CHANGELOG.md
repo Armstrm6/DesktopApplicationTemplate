@@ -24,6 +24,7 @@
 - Popup-based `FilterPanel` user control for in-place service filtering.
 - Active service counter displayed in the main window with real-time updates.
 - Help window includes a close button.
+- Average execution time displayed next to each service name in the service list.
 
 #### Changed
 - Service selection window wraps service icons within bounds using a fixed-width panel.
@@ -31,6 +32,7 @@
 - Service context menus invoke `EditServiceCommand`; editing an MQTT service opens the connection view with current options preloaded.
 - MQTT create, edit, and subscription views follow design spacing with shared form styles and accessibility names.
 - Service creation flows now display within the main view, removing the separate Create Service window and placeholder navigation text.
+- Main window height constrained to the work area to prevent overlapping the taskbar.
 
 #### Fixed
 - TCP and SCP edit workflows now load existing options via `Load` methods, enabling DI-friendly construction.
