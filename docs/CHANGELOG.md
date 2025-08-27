@@ -131,6 +131,7 @@
 - Logging minimum level changes now re-filter existing log entries without reloading from disk.
 - Added tests confirming service persistence handles cyclical references and logging config changes.
 - Moved `LogEntry` to core and restored logging event subscriptions, resolving missing reference build errors.
+- Registered `LoggingService` with the DI container to satisfy `SaveConfirmationHelper` and prevent runtime errors.
 
 #### Changed
 - Removed custom `ILoggingService` and service registrations in favor of `Microsoft.Extensions.Logging` with console and debug providers.
