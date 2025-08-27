@@ -138,3 +138,11 @@ Effective Prompts / Instructions that worked: Request to insert guidance text fo
 Decisions & Rationale: Use attached behavior to avoid manual per-field maintenance and ensure consistency.
 Action Items: Verify behavior on Windows CI.
 Related Commits/PRs:
+[2025-08-28 14:30] Topic: Behavior namespace and logging annotations
+Context: Fixed missing behaviors namespace in MainWindow and marked log types as Windows-only to suppress warnings.
+Observations: XAML parse error resolved; platform analyzer warnings reduced with SupportedOSPlatform attributes.
+Codex Limitations noticed: Linux container lacks WindowsDesktop runtime; tests cannot execute.
+Effective Prompts / Instructions that worked: Use AGENTS guidelines for XAML and platform attributes.
+Decisions & Rationale: Explicitly declare namespaces and OS support to ensure build stability.
+Action Items: Monitor CI for Windows-specific issues.
+Related Commits/PRs:

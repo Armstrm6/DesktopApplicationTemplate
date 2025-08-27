@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:DesktopApplicationTemplate.UI.Views"
         xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
         xmlns:sys="clr-namespace:System.Windows;assembly=PresentationFramework"
+        xmlns:behaviors="clr-namespace:DesktopApplicationTemplate.UI.Behaviors"
         mc:Ignorable="d"
         Title="MainView"
         MinWidth="800" MinHeight="600" Height="600"

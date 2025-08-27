@@ -39,6 +39,7 @@
 #### Fixed
 - TCP and SCP edit workflows now load existing options via `Load` methods, enabling DI-friendly construction.
 - Service list averages use one-way bindings to avoid runtime parse exceptions.
+- Main window declares behaviors namespace to prevent XAML parse errors.
 
 ### HID Service
 #### Added
@@ -138,6 +139,7 @@
 - Added tests confirming service persistence handles cyclical references and logging config changes.
 - Moved `LogEntry` to core and restored logging event subscriptions, resolving missing reference build errors.
 - Registered `LoggingService` with the DI container to satisfy `SaveConfirmationHelper` and prevent runtime errors.
+- Marked log models and levels as Windows-specific to silence cross-platform analyzer warnings.
 
 #### Changed
 - Removed custom `ILoggingService` and service registrations in favor of `Microsoft.Extensions.Logging` with console and debug providers.
