@@ -169,3 +169,8 @@
 - MQTT service creation and edit views now separate advanced configuration into a dedicated page with navigation tests.
 - Corrected SCP advanced configuration handler by removing duplicate variable declarations and updated XAML System namespace references to use System.Runtime, resolving build errors.
 - Ftp server edit view now resolves through DI with a view-model constructor, and navigation tests set mouse click counts via reflection to compile under .NET 8.
+- AsyncRelayCommand no longer relies on async void, improving delegate execution in tests.
+- MQTT creation now converts blank will-topic and payload fields to null.
+- Host validation rejects underscores to prevent invalid host entries.
+- Scp edit view model loads existing options through a method, allowing DI to resolve without primitive parameters.
+- Corrected FTP client count test to raise events with expected sender and count arguments.

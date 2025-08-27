@@ -63,7 +63,8 @@ public class FtpServiceViewModelTests
         var service = new Mock<IFtpServerService>();
         var vm = new FtpServiceViewModel(service.Object);
 
-        service.Raise(s => s.ClientCountChanged += null!, 3);
+        // EventHandler<int> has both sender and count parameters, so provide both when raising
+        service.Raise(s => s.ClientCountChanged += null!, service.Object, 3);
 
         Assert.Equal(3, vm.ConnectedClients);
         ConsoleTestLogger.LogPass();

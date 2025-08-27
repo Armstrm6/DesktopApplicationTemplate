@@ -10,6 +10,8 @@ namespace DesktopApplicationTemplate.UI.Helpers
                 return true;
             if (System.Net.IPAddress.TryParse(value, out _))
                 return true;
+            if (value.Contains('_'))
+                return false;
             return System.Uri.CheckHostName(value) != System.UriHostNameType.Unknown;
         }
     }

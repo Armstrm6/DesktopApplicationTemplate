@@ -129,6 +129,8 @@ public class MqttCreateServiceViewModel : ViewModelBase
         Options.ClientId = ClientId;
         Options.Username = string.IsNullOrWhiteSpace(Username) ? null : Username;
         Options.Password = string.IsNullOrWhiteSpace(Password) ? null : Password;
+        Options.WillTopic = string.IsNullOrWhiteSpace(Options.WillTopic) ? null : Options.WillTopic;
+        Options.WillPayload = string.IsNullOrWhiteSpace(Options.WillPayload) ? null : Options.WillPayload;
         Logger?.Log("MQTT create options finished", LogLevel.Debug);
         ServiceCreated?.Invoke(ServiceName, Options);
     }
@@ -147,6 +149,8 @@ public class MqttCreateServiceViewModel : ViewModelBase
         Options.ClientId = ClientId;
         Options.Username = string.IsNullOrWhiteSpace(Username) ? null : Username;
         Options.Password = string.IsNullOrWhiteSpace(Password) ? null : Password;
+        Options.WillTopic = string.IsNullOrWhiteSpace(Options.WillTopic) ? null : Options.WillTopic;
+        Options.WillPayload = string.IsNullOrWhiteSpace(Options.WillPayload) ? null : Options.WillPayload;
         AdvancedConfigRequested?.Invoke(Options);
     }
 }

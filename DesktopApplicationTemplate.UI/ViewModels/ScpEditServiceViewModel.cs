@@ -13,9 +13,20 @@ public class ScpEditServiceViewModel : ScpCreateServiceViewModel
     /// <summary>
     /// Initializes a new instance of the <see cref="ScpEditServiceViewModel"/> class.
     /// </summary>
-    public ScpEditServiceViewModel(string serviceName, ScpServiceOptions options, ILoggingService? logger = null)
+    public ScpEditServiceViewModel(ILoggingService? logger = null)
         : base(logger)
     {
+    }
+
+    /// <summary>
+    /// Loads existing options into the view model for editing.
+    /// </summary>
+    /// <param name="serviceName">Existing service name.</param>
+    /// <param name="options">Current SCP options to edit.</param>
+    public void Load(string serviceName, ScpServiceOptions options)
+    {
+        if (options is null) throw new ArgumentNullException(nameof(options));
+
         ServiceName = serviceName;
         Host = options.Host;
         Port = options.Port.ToString();

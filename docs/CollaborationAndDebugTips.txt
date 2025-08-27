@@ -1458,3 +1458,11 @@ Effective Prompts / Instructions that worked: Followed AGENTS and repo guideline
 Decisions & Rationale: Introduced constructor for DI compliance and centralized mouse event creation to remove invalid property sets.
 Action Items: Monitor CI for runtime behavior on Windows.
 Related Commits/PRs: (this PR)
+[2025-08-27 02:05] Topic: Test reliability fixes
+Context: Addressed unit test failures across MQTT, FTP, async command, and SCP DI components.
+Observations: Added host underscore validation, nullified blank MQTT will fields, replaced async void usage, and introduced ScpEditServiceViewModel.Load for DI compatibility.
+Codex Limitations noticed: Linux environment lacks Windows UI runtime; relied on logic inspection.
+Effective Prompts / Instructions that worked: Followed AGENTS guidance for async/await and DI-safe constructors.
+Decisions & Rationale: Ensure validators catch bad hosts and avoid async void to improve test determinism.
+Action Items: Verify on Windows CI.
+Related Commits/PRs: (this PR)
