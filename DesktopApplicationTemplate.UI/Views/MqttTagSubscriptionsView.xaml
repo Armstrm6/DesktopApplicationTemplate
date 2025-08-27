@@ -3,9 +3,10 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:models="clr-namespace:DesktopApplicationTemplate.UI.Models"
       xmlns:mqtt="clr-namespace:MQTTnet.Protocol;assembly=MQTTnet"
-      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:d="http://schemas.microsoft.com/expression.blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+      xmlns:behaviors="clr-namespace:DesktopApplicationTemplate.UI.Behaviors"
       mc:Ignorable="d">
     <Page.Resources>
         <ObjectDataProvider x:Key="QoSValues" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
@@ -23,7 +24,8 @@
         <!-- Connection bar -->
         <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
             <Button Content="Connect" Command="{Binding ConnectCommand}" Width="80" AutomationProperties.Name="Connect MQTT"/>
-            <TextBox Text="{Binding NewTopic}" Width="200" Margin="10,0,0,0" x:Name="NewTopicBox" ToolTip="Topic to subscribe"/>
+            <TextBox Text="{Binding NewTopic}" Width="200" Margin="10,0,0,0" x:Name="NewTopicBox" ToolTip="Topic to subscribe"
+                     behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
             <ComboBox Width="100" Margin="5,0,0,0"
                       ItemsSource="{Binding Source={StaticResource QoSValues}}"
                       SelectedItem="{Binding NewQoS}"/>
@@ -62,7 +64,8 @@
             <TextBox Text="{Binding SelectedSubscription.OutgoingMessage, UpdateSourceTrigger=PropertyChanged}"
                      Width="200"
                      x:Name="TestMessageBox"
-                     ToolTip="Message to send"/>
+                     ToolTip="Message to send"
+                     behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
             <Button x:Name="SendButton"
                     Content="Send"
                     Command="{Binding PublishTestMessageCommand}"

@@ -130,3 +130,11 @@ Effective Prompts / Instructions that worked: User request to insert text guidan
 Decisions & Rationale: Use `ToolTip` attributes for immediate user feedback without altering bindings.
 Action Items: Extend tooltips to remaining service views.
 Related Commits/PRs:
+[2025-08-28 12:00] Topic: Auto tooltips for text inputs
+Context: Added behavior to generate tooltips from bound property names and applied across views.
+Observations: Users now see expected field names when hovering over any text box.
+Codex Limitations noticed: dotnet CLI unavailable; tests could not run.
+Effective Prompts / Instructions that worked: Request to insert guidance text for all text inputs.
+Decisions & Rationale: Use attached behavior to avoid manual per-field maintenance and ensure consistency.
+Action Items: Verify behavior on Windows CI.
+Related Commits/PRs:

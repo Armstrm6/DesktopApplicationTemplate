@@ -4,6 +4,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
+      xmlns:behaviors="clr-namespace:DesktopApplicationTemplate.UI.Behaviors"
       mc:Ignorable="d">
     <Page.Resources>
         <helpers:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter" />
@@ -17,13 +18,15 @@
         <StackPanel Margin="0 0 0 10">
             <StackPanel Orientation="Horizontal" Margin="0 0 0 10">
                 <TextBlock Text="Output Directory:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                <TextBox Text="{Binding Configuration.OutputDirectory}" Width="300"/>
+                <TextBox Text="{Binding Configuration.OutputDirectory}" Width="300"
+                         behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
                 <Button Content="Browse" Command="{Binding BrowseCommand}" Width="70" Margin="5,0,0,0"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="File Name Pattern:" VerticalAlignment="Center" Margin="0,0,5,0"/>
                 <Grid Width="300">
-                    <TextBox Text="{Binding Configuration.FileNamePattern}" x:Name="PatternBox"/>
+                    <TextBox Text="{Binding Configuration.FileNamePattern}" x:Name="PatternBox"
+                             behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
                     <TextBlock Text="e.g. *.csv" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0"
                                VerticalAlignment="Center"
                                Visibility="{Binding Text, ElementName=PatternBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
