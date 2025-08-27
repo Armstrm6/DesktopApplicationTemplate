@@ -168,3 +168,4 @@
 - Added File Observer create/edit/advanced configuration views with navigation and DI registration.
 - MQTT service creation and edit views now separate advanced configuration into a dedicated page with navigation tests.
 - Corrected SCP advanced configuration handler by removing duplicate variable declarations and updated XAML System namespace references to use System.Runtime, resolving build errors.
+- Ftp server edit view now resolves through DI with a view-model constructor, and navigation tests set mouse click counts via reflection to compile under .NET 8.

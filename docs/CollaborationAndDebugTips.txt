@@ -1450,3 +1450,11 @@ Effective Prompts / Instructions that worked: Search for duplicate variable name
 Decisions & Rationale: Clean redundant declarations and modernize System namespace references for .NET 8 compatibility.
 Action Items: Monitor CI for remaining test issues.
 Related Commits/PRs: (this PR)
+[2025-08-27 02:40] Topic: Ftp edit view constructor
+Context: Build failed because FtpServerEditView lacked a view-model constructor and tests attempted to set read-only ClickCount.
+Observations: Added constructor with null guard and helper to set click count via reflection so tests compile.
+Codex Limitations noticed: No PowerShell available to run add-tip script; Linux container lacks full WPF runtime.
+Effective Prompts / Instructions that worked: Followed AGENTS and repo guidelines for DI and docs updates.
+Decisions & Rationale: Introduced constructor for DI compliance and centralized mouse event creation to remove invalid property sets.
+Action Items: Monitor CI for runtime behavior on Windows.
+Related Commits/PRs: (this PR)
