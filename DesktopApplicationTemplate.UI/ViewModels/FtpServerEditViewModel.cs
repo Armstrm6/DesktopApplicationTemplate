@@ -1,7 +1,5 @@
 using System;
-using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Services;
 
 namespace DesktopApplicationTemplate.UI.ViewModels;
@@ -9,7 +7,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// <summary>
 /// View model for editing an existing FTP server configuration.
 /// </summary>
-public class FtpServerEditViewModel : ValidatableViewModelBase, ILoggingViewModel
+public class FtpServerEditViewModel : ServiceEditViewModelBase<FtpServerOptions>
 {
     private readonly FtpServerOptions _options;
     private string _serviceName;
@@ -20,34 +18,13 @@ public class FtpServerEditViewModel : ValidatableViewModelBase, ILoggingViewMode
     /// Initializes a new instance of the <see cref="FtpServerEditViewModel"/> class.
     /// </summary>
     public FtpServerEditViewModel(string serviceName, FtpServerOptions options, ILoggingService? logger = null)
+        : base(logger)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
         _serviceName = serviceName ?? throw new ArgumentNullException(nameof(serviceName));
         _port = options.Port;
         _rootPath = options.RootPath;
-        Logger = logger;
-        SaveCommand = new RelayCommand(Save);
-        CancelCommand = new RelayCommand(Cancel);
-        AdvancedConfigCommand = new RelayCommand(OpenAdvancedConfig);
     }
-
-    /// <inheritdoc />
-    public ILoggingService? Logger { get; set; }
-
-    /// <summary>
-    /// Command for saving the updated configuration.
-    /// </summary>
-    public ICommand SaveCommand { get; }
-
-    /// <summary>
-    /// Command for cancelling edits.
-    /// </summary>
-    public ICommand CancelCommand { get; }
-
-    /// <summary>
-    /// Command for launching the advanced configuration view.
-    /// </summary>
-    public ICommand AdvancedConfigCommand { get; }
 
     /// <summary>
     /// Raised when the configuration is saved.
@@ -115,7 +92,8 @@ public class FtpServerEditViewModel : ValidatableViewModelBase, ILoggingViewMode
         }
     }
 
-    private void Save()
+    /// <inheritdoc />
+    protected override void OnSave()
     {
         if (HasErrors)
             return;
@@ -126,13 +104,15 @@ public class FtpServerEditViewModel : ValidatableViewModelBase, ILoggingViewMode
         ServerUpdated?.Invoke(ServiceName, _options);
     }
 
-    private void Cancel()
+    /// <inheritdoc />
+    protected override void OnCancel()
     {
         Logger?.Log("FTP server edit options cancelled", LogLevel.Debug);
         Cancelled?.Invoke();
     }
 
-    private void OpenAdvancedConfig()
+    /// <inheritdoc />
+    protected override void OnAdvancedConfig()
     {
         Logger?.Log("Opening FTP server advanced config", LogLevel.Debug);
         AdvancedConfigRequested?.Invoke(_options);

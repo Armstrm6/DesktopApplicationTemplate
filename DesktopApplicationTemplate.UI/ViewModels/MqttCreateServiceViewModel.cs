@@ -1,7 +1,5 @@
 using System;
-using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Services;
 
 namespace DesktopApplicationTemplate.UI.ViewModels;
@@ -9,7 +7,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// <summary>
 /// View model for configuring a new MQTT service before creation.
 /// </summary>
-public class MqttCreateServiceViewModel : ViewModelBase
+public class MqttCreateServiceViewModel : ServiceCreateViewModelBase<MqttServiceOptions>
 {
     private string _serviceName = string.Empty;
     private string _host = string.Empty;
@@ -22,11 +20,8 @@ public class MqttCreateServiceViewModel : ViewModelBase
     /// Initializes a new instance of the <see cref="MqttCreateServiceViewModel"/> class.
     /// </summary>
     public MqttCreateServiceViewModel(ILoggingService? logger = null)
+        : base(logger)
     {
-        Logger = logger;
-        CreateCommand = new RelayCommand(Create);
-        CancelCommand = new RelayCommand(Cancel);
-        AdvancedConfigCommand = new RelayCommand(OpenAdvancedConfig);
     }
 
     /// <summary>
@@ -44,23 +39,6 @@ public class MqttCreateServiceViewModel : ViewModelBase
     /// </summary>
     public event Action<MqttServiceOptions>? AdvancedConfigRequested;
 
-    /// <summary>
-    /// Command to finalize service creation.
-    /// </summary>
-    public ICommand CreateCommand { get; }
-
-    /// <summary>
-    /// Command to cancel configuration.
-    /// </summary>
-    public ICommand CancelCommand { get; }
-
-    /// <summary>
-    /// Command to open advanced configuration.
-    /// </summary>
-    public ICommand AdvancedConfigCommand { get; }
-
-    /// <inheritdoc />
-    public ILoggingService? Logger { get; set; }
 
     /// <summary>
     /// Name of the service to create.
@@ -121,7 +99,8 @@ public class MqttCreateServiceViewModel : ViewModelBase
     /// </summary>
     public MqttServiceOptions Options { get; } = new();
 
-    private void Create()
+    /// <inheritdoc />
+    protected override void OnSave()
     {
         Logger?.Log("MQTT create options start", LogLevel.Debug);
         Options.Host = Host;
@@ -135,13 +114,15 @@ public class MqttCreateServiceViewModel : ViewModelBase
         ServiceCreated?.Invoke(ServiceName, Options);
     }
 
-    private void Cancel()
+    /// <inheritdoc />
+    protected override void OnCancel()
     {
         Logger?.Log("MQTT create options cancelled", LogLevel.Debug);
         Cancelled?.Invoke();
     }
 
-    private void OpenAdvancedConfig()
+    /// <inheritdoc />
+    protected override void OnAdvancedConfig()
     {
         Logger?.Log("Opening MQTT advanced config", LogLevel.Debug);
         Options.Host = Host;

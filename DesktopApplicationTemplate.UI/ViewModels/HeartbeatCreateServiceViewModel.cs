@@ -1,5 +1,4 @@
 using System;
-using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Services;
 
@@ -8,7 +7,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// <summary>
 /// View model for creating a new Heartbeat service.
 /// </summary>
-public class HeartbeatCreateServiceViewModel : ViewModelBase, ILoggingViewModel
+public class HeartbeatCreateServiceViewModel : ServiceCreateViewModelBase<HeartbeatServiceOptions>
 {
     private string _serviceName = string.Empty;
     private string _baseMessage = string.Empty;
@@ -17,15 +16,9 @@ public class HeartbeatCreateServiceViewModel : ViewModelBase, ILoggingViewModel
     /// Initializes a new instance of the <see cref="HeartbeatCreateServiceViewModel"/> class.
     /// </summary>
     public HeartbeatCreateServiceViewModel(ILoggingService? logger = null)
+        : base(logger)
     {
-        Logger = logger;
-        CreateCommand = new RelayCommand(Create);
-        CancelCommand = new RelayCommand(Cancel);
-        AdvancedConfigCommand = new RelayCommand(OpenAdvancedConfig);
     }
-
-    /// <inheritdoc />
-    public ILoggingService? Logger { get; set; }
 
     /// <summary>
     /// Raised when a new service configuration is saved.
@@ -41,21 +34,6 @@ public class HeartbeatCreateServiceViewModel : ViewModelBase, ILoggingViewModel
     /// Raised when advanced configuration is requested.
     /// </summary>
     public event Action<HeartbeatServiceOptions>? AdvancedConfigRequested;
-
-    /// <summary>
-    /// Command to create the service.
-    /// </summary>
-    public ICommand CreateCommand { get; }
-
-    /// <summary>
-    /// Command to cancel creation.
-    /// </summary>
-    public ICommand CancelCommand { get; }
-
-    /// <summary>
-    /// Command to open advanced configuration.
-    /// </summary>
-    public ICommand AdvancedConfigCommand { get; }
 
     /// <summary>
     /// Name of the service.
@@ -80,7 +58,8 @@ public class HeartbeatCreateServiceViewModel : ViewModelBase, ILoggingViewModel
     /// </summary>
     public HeartbeatServiceOptions Options { get; } = new();
 
-    private void Create()
+    /// <inheritdoc />
+    protected override void OnSave()
     {
         Logger?.Log("Heartbeat create options start", LogLevel.Debug);
         Options.BaseMessage = BaseMessage;
@@ -88,13 +67,15 @@ public class HeartbeatCreateServiceViewModel : ViewModelBase, ILoggingViewModel
         ServiceCreated?.Invoke(ServiceName, Options);
     }
 
-    private void Cancel()
+    /// <inheritdoc />
+    protected override void OnCancel()
     {
         Logger?.Log("Heartbeat create cancelled", LogLevel.Debug);
         Cancelled?.Invoke();
     }
 
-    private void OpenAdvancedConfig()
+    /// <inheritdoc />
+    protected override void OnAdvancedConfig()
     {
         Logger?.Log("Heartbeat advanced config requested", LogLevel.Debug);
         Options.BaseMessage = BaseMessage;

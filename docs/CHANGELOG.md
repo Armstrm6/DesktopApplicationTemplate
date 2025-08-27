@@ -3,6 +3,7 @@
 ## [Unreleased]
 ### Added
 - Reusable service rule and screen abstractions with DI registration and view model integration.
+- Generic `ServiceCreateViewModelBase<TOptions>` and `ServiceEditViewModelBase<TOptions>` consolidating save, cancel, and advanced configuration commands across service view models.
 - HID service view now includes a data flow diagram showing incoming, processed, and outgoing data bound to the view model.
 - Navigation helpers for HTTP, HID, File Observer, Heartbeat, CSV Creator, and SCP services with tests ensuring double-click opens their edit views.
 - SCP service creation, edit, and advanced configuration views with navigation tests.

@@ -9,7 +9,7 @@ namespace DesktopApplicationTemplate.Tests;
 public class CsvCreateServiceViewModelTests
 {
     [Fact]
-    public void CreateCommand_Raises_ServiceCreated()
+    public void SaveCommand_Raises_ServiceCreated()
     {
         var vm = new CsvCreateServiceViewModel(new ServiceRule(), new ServiceScreen<CsvServiceOptions>());
         vm.ServiceName = "svc";
@@ -18,7 +18,7 @@ public class CsvCreateServiceViewModelTests
         string? name = null;
         vm.ServiceCreated += (n, o) => { name = n; received = o; };
 
-        vm.CreateCommand.Execute(null);
+        vm.SaveCommand.Execute(null);
 
         Assert.Equal("svc", name);
         Assert.NotNull(received);

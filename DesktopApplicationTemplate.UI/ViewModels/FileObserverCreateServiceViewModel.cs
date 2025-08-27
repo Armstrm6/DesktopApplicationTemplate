@@ -1,5 +1,4 @@
 using System;
-using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Services;
 
@@ -8,7 +7,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// <summary>
 /// View model for creating a new File Observer service.
 /// </summary>
-public class FileObserverCreateServiceViewModel : ViewModelBase, ILoggingViewModel
+public class FileObserverCreateServiceViewModel : ServiceCreateViewModelBase<FileObserverServiceOptions>
 {
     private string _serviceName = string.Empty;
     private string _filePath = string.Empty;
@@ -17,15 +16,9 @@ public class FileObserverCreateServiceViewModel : ViewModelBase, ILoggingViewMod
     /// Initializes a new instance of the <see cref="FileObserverCreateServiceViewModel"/> class.
     /// </summary>
     public FileObserverCreateServiceViewModel(ILoggingService? logger = null)
+        : base(logger)
     {
-        Logger = logger;
-        CreateCommand = new RelayCommand(Create);
-        CancelCommand = new RelayCommand(Cancel);
-        AdvancedConfigCommand = new RelayCommand(OpenAdvancedConfig);
     }
-
-    /// <inheritdoc />
-    public ILoggingService? Logger { get; set; }
 
     /// <summary>
     /// Raised when the service is created.
@@ -41,21 +34,6 @@ public class FileObserverCreateServiceViewModel : ViewModelBase, ILoggingViewMod
     /// Raised when advanced configuration is requested.
     /// </summary>
     public event Action<FileObserverServiceOptions>? AdvancedConfigRequested;
-
-    /// <summary>
-    /// Command to create the service.
-    /// </summary>
-    public ICommand CreateCommand { get; }
-
-    /// <summary>
-    /// Command to cancel creation.
-    /// </summary>
-    public ICommand CancelCommand { get; }
-
-    /// <summary>
-    /// Command to open advanced configuration.
-    /// </summary>
-    public ICommand AdvancedConfigCommand { get; }
 
     /// <summary>
     /// Name of the service.
@@ -80,7 +58,8 @@ public class FileObserverCreateServiceViewModel : ViewModelBase, ILoggingViewMod
     /// </summary>
     public FileObserverServiceOptions Options { get; } = new();
 
-    private void Create()
+    /// <inheritdoc />
+    protected override void OnSave()
     {
         Logger?.Log("FileObserver create options start", LogLevel.Debug);
         Options.FilePath = FilePath;
@@ -88,13 +67,15 @@ public class FileObserverCreateServiceViewModel : ViewModelBase, ILoggingViewMod
         ServiceCreated?.Invoke(ServiceName, Options);
     }
 
-    private void Cancel()
+    /// <inheritdoc />
+    protected override void OnCancel()
     {
         Logger?.Log("FileObserver create cancelled", LogLevel.Debug);
         Cancelled?.Invoke();
     }
 
-    private void OpenAdvancedConfig()
+    /// <inheritdoc />
+    protected override void OnAdvancedConfig()
     {
         Logger?.Log("Opening FileObserver advanced config", LogLevel.Debug);
         Options.FilePath = FilePath;

@@ -1,5 +1,4 @@
 using System;
-using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Services;
 
@@ -8,7 +7,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// <summary>
 /// View model for creating a new SCP service.
 /// </summary>
-public class ScpCreateServiceViewModel : ViewModelBase, ILoggingViewModel
+public class ScpCreateServiceViewModel : ServiceCreateViewModelBase<ScpServiceOptions>
 {
     private string _serviceName = string.Empty;
     private string _host = string.Empty;
@@ -20,15 +19,9 @@ public class ScpCreateServiceViewModel : ViewModelBase, ILoggingViewModel
     /// Initializes a new instance of the <see cref="ScpCreateServiceViewModel"/> class.
     /// </summary>
     public ScpCreateServiceViewModel(ILoggingService? logger = null)
+        : base(logger)
     {
-        Logger = logger;
-        CreateCommand = new RelayCommand(Create);
-        CancelCommand = new RelayCommand(Cancel);
-        AdvancedConfigCommand = new RelayCommand(OpenAdvancedConfig);
     }
-
-    /// <inheritdoc />
-    public ILoggingService? Logger { get; set; }
 
     /// <summary>
     /// Raised when the service is created.
@@ -44,21 +37,6 @@ public class ScpCreateServiceViewModel : ViewModelBase, ILoggingViewModel
     /// Raised when advanced configuration is requested.
     /// </summary>
     public event Action<ScpServiceOptions>? AdvancedConfigRequested;
-
-    /// <summary>
-    /// Command to create the service.
-    /// </summary>
-    public ICommand CreateCommand { get; }
-
-    /// <summary>
-    /// Command to cancel creation.
-    /// </summary>
-    public ICommand CancelCommand { get; }
-
-    /// <summary>
-    /// Command to open advanced configuration.
-    /// </summary>
-    public ICommand AdvancedConfigCommand { get; }
 
     /// <summary>
     /// Name of the service.
@@ -110,7 +88,8 @@ public class ScpCreateServiceViewModel : ViewModelBase, ILoggingViewModel
     /// </summary>
     public ScpServiceOptions Options { get; } = new();
 
-    private void Create()
+    /// <inheritdoc />
+    protected override void OnSave()
     {
         Logger?.Log("SCP create options start", LogLevel.Debug);
         Options.Host = Host;
@@ -122,13 +101,15 @@ public class ScpCreateServiceViewModel : ViewModelBase, ILoggingViewModel
         ServiceCreated?.Invoke(ServiceName, Options);
     }
 
-    private void Cancel()
+    /// <inheritdoc />
+    protected override void OnCancel()
     {
         Logger?.Log("SCP create cancelled", LogLevel.Debug);
         Cancelled?.Invoke();
     }
 
-    private void OpenAdvancedConfig()
+    /// <inheritdoc />
+    protected override void OnAdvancedConfig()
     {
         Logger?.Log("Opening SCP advanced config", LogLevel.Debug);
         Options.Host = Host;

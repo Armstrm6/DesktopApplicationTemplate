@@ -29,7 +29,8 @@ public class ScpDiRegistrationTests
 
         using var provider = services.BuildServiceProvider();
         Assert.NotNull(provider.GetRequiredService<ScpCreateServiceViewModel>());
-        Assert.NotNull(provider.GetRequiredService<ScpEditServiceViewModel>());
+        var editVm = ActivatorUtilities.CreateInstance<ScpEditServiceViewModel>(provider, "svc", new ScpServiceOptions());
+        Assert.NotNull(editVm);
         Assert.NotNull(provider.GetRequiredService<ScpAdvancedConfigViewModel>());
     }
 }
