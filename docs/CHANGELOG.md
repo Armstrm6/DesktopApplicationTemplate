@@ -41,6 +41,7 @@
 - Service list averages use one-way bindings to avoid runtime parse exceptions.
 - Main window declares behaviors namespace to prevent XAML parse errors.
 - Forms theme explicitly references the UI assembly for `TextBoxHintBehavior` to avoid missing type errors.
+- System namespace references and form style resources compiled to eliminate XAML parse failures.
 
 ### HID Service
 #### Added
