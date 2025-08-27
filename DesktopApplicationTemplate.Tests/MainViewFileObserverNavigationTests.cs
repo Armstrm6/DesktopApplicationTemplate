@@ -126,11 +126,8 @@ public class MainViewFileObserverNavigationTests
 
             var view = new MainView(mainVm);
             var border = new Border { DataContext = service };
-            var args = new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left)
-            {
-                RoutedEvent = Border.MouseLeftButtonDownEvent,
-                ClickCount = 2
-            };
+            var args = MouseButtonEventArgsFactory.Create(MouseButton.Left, 2);
+            args.RoutedEvent = Border.MouseLeftButtonDownEvent;
             var method = typeof(MainView).GetMethod("ServiceItem_MouseLeftButtonDown", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
             method!.Invoke(view, new object[] { border, args });
 
