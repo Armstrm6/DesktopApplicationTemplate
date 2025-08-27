@@ -17,7 +17,6 @@ namespace DesktopApplicationTemplate.Tests
     public class MqttViewsAccessibilityTests
     {
         [Fact]
-        [TestCategory("WindowsSafe")]
         public void MqttCreateServiceView_ExposesNamedButtons()
         {
             if (!OperatingSystem.IsWindows())
@@ -45,7 +44,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("WindowsSafe")]
         public void MqttEditConnectionView_ExposesUpdateButton()
         {
             if (!OperatingSystem.IsWindows())
@@ -76,7 +74,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("WindowsSafe")]
         public void MqttTagSubscriptionsView_ExposesSendButton()
         {
             if (!OperatingSystem.IsWindows())

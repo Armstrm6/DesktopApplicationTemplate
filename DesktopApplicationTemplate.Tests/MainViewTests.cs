@@ -17,7 +17,6 @@ namespace DesktopApplicationTemplate.Tests
     public class MainViewTests
     {
         [Fact]
-        [TestCategory("WindowsSafe")]
         public void MainView_ServiceList_HasMaxHeight()
         {
             if (!OperatingSystem.IsWindows())
@@ -55,7 +54,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("WindowsSafe")]
         public void MainView_HasCloseCommandBinding()
         {
             if (!OperatingSystem.IsWindows())
@@ -93,7 +91,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("WindowsSafe")]
         public void MainView_HasMinimizeCommandBinding()
         {
             if (!OperatingSystem.IsWindows())
@@ -131,7 +128,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("WindowsSafe")]
         public void OpenServiceEditor_NonCsv_SetsContentFrame()
         {
             if (!OperatingSystem.IsWindows())
@@ -171,7 +167,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("WindowsSafe")]
         public void OpenServiceEditor_CsvCreator_ShowsWindow()
         {
             if (!OperatingSystem.IsWindows())
@@ -214,7 +209,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("WindowsSafe")]
         public void MainView_KeyDown_IgnoresNonEscape()
         {
             if (!OperatingSystem.IsWindows())
@@ -261,7 +255,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("WindowsSafe")]
         public void HeaderBar_DoubleClick_TogglesWindowState()
         {
             if (!OperatingSystem.IsWindows())

@@ -26,8 +26,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public async Task StartAsync_LogsError_WhenHostThrows()
         {
             var host = new Mock<IFtpServerHost>();
@@ -59,8 +57,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public async Task StopAsync_LogsError_WhenHostThrows()
         {
             var host = new Mock<IFtpServerHost>();

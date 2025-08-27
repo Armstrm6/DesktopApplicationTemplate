@@ -14,8 +14,6 @@ namespace DesktopApplicationTemplate.Tests
     public class ServiceViewModelTests
     {
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public void AddLog_ReferenceUpdatesAssociatedServices()
         {
             var a = new ServiceViewModel { DisplayName = "Heartbeat - A", ServiceType = "Heartbeat" };
@@ -34,8 +32,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public void GenerateServiceName_SkipsExistingNames()
         {
             var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
@@ -57,8 +53,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public void RenameService_AppendsNumericSuffix_WhenNameExists()
         {
             var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
@@ -88,8 +82,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public void RecordExecutionTime_ComputesAverage()
         {
             var vm = new ServiceViewModel();
@@ -101,8 +93,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public void RecordExecutionTime_Throws_When_Negative()
         {
             var vm = new ServiceViewModel();

@@ -7,8 +7,6 @@ namespace DesktopApplicationTemplate.Tests;
 public class HttpAdvancedConfigViewModelTests
 {
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void BackCommand_RaisesBackRequested()
     {
         var opts = new HttpServiceOptions();

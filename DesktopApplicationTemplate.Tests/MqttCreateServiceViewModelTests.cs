@@ -47,7 +47,6 @@ public class MqttCreateServiceViewModelTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
     public void SaveCommand_BuildsOptionsWithAdvancedSettings()
     {
         var tempCert = Path.GetTempFileName();
@@ -93,7 +92,6 @@ public class MqttCreateServiceViewModelTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
     public void SaveCommand_ConvertsBlankFieldsToNull()
     {
         var vm = new MqttCreateServiceViewModel();

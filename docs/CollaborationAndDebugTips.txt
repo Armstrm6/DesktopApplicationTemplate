@@ -162,3 +162,11 @@ Effective Prompts / Instructions that worked: User request to resolve assembly a
 Decisions & Rationale: Use project namespaces and compile resources to avoid runtime parse failures.
 Action Items: Validate changes on Windows CI.
 Related Commits/PRs:
+[2025-08-27 17:57] Topic: CodexSafe test categories
+Context: Removed all TestCategory attributes, including CodexSafe markers, and deleted the custom TestCategoryAttribute.
+Observations: Tests no longer include custom category traits; redundant attribute file removed.
+Codex Limitations noticed: dotnet CLI unavailable; tests cannot run locally.
+Effective Prompts / Instructions that worked: User request to clean up obsolete test categories.
+Decisions & Rationale: Simplify test suite and remove unused trait infrastructure.
+Action Items: Monitor CI for Windows-specific issues.
+Related Commits/PRs:

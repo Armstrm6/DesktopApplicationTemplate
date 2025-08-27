@@ -20,8 +20,6 @@ namespace DesktopApplicationTemplate.Tests;
 public class MainViewScpNavigationTests
 {
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void EditScpService_ShowsEditView()
     {
         if (!OperatingSystem.IsWindows())
@@ -78,8 +76,6 @@ public class MainViewScpNavigationTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void DoubleClickScpService_OpensEditView()
     {
         if (!OperatingSystem.IsWindows())

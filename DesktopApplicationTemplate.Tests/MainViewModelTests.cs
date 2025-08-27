@@ -15,8 +15,6 @@ namespace DesktopApplicationTemplate.Tests
     public class MainViewModelTests
     {
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public void GenerateServiceName_IncrementsBasedOnExisting()
         {
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
@@ -46,8 +44,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public void RemoveServiceCommand_LogsLifecycle()
         {
             var logger = new Mock<ILoggingService>();
@@ -82,8 +78,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public void ClearLogs_RemovesEntries()
         {
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
@@ -103,8 +97,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public void ExportDisplayedLogs_WritesFile()
         {
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
@@ -127,8 +119,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public void RefreshLogs_RaisesPropertyChanged()
         {
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
@@ -146,8 +136,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public void EditServiceCommand_LoadsCurrentMqttOptions()
         {
             var options = Options.Create(new MqttServiceOptions
@@ -197,8 +185,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public void ServiceCounts_Update_OnAddRemoveActivation()
         {
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
@@ -248,8 +234,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public void AddServiceCommand_RaisesAddServiceRequested()
         {
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");

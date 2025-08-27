@@ -10,8 +10,6 @@ namespace DesktopApplicationTemplate.Tests;
 public class TcpServiceViewModelTests
 {
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void SettingScriptContent_UpdatesMessagesViewModel()
     {
         var logger = new Mock<ILoggingService>();
@@ -25,8 +23,6 @@ public class TcpServiceViewModelTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void SettingNetworkProperties_UpdatesMessagesViewModel()
     {
         var logger = new Mock<ILoggingService>();
@@ -50,8 +46,6 @@ public class TcpServiceViewModelTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void SaveCommand_RaisesSaved()
     {
         var logger = new Mock<ILoggingService>();
@@ -67,8 +61,6 @@ public class TcpServiceViewModelTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void BackCommand_RaisesBackRequested()
     {
         var logger = new Mock<ILoggingService>();

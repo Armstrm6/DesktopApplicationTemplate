@@ -11,8 +11,6 @@ namespace DesktopApplicationTemplate.Tests;
 public class FileSearchServiceTests
 {
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public async Task GetFilesAsync_ReturnsMatchingFiles()
     {
         var dir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
@@ -35,8 +33,6 @@ public class FileSearchServiceTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public async Task GetFilesAsync_UsesCache()
     {
         var dir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());

@@ -9,7 +9,6 @@ namespace DesktopApplicationTemplate.Tests
     public class BubblyWindowStyleTests
     {
         [Fact]
-        [TestCategory("WindowsSafe")]
         public void BubblyWindowStyle_LoadsWithRoundedCorners()
         {
             if (!OperatingSystem.IsWindows())

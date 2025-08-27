@@ -8,8 +8,6 @@ namespace DesktopApplicationTemplate.Tests
     public class SettingsViewModelPersistenceTests
     {
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public void SaveAndLoad_PersistsFirstRunAndSuppression()
         {
             var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());

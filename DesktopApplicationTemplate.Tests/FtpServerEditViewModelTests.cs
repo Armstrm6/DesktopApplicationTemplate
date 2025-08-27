@@ -9,8 +9,6 @@ namespace DesktopApplicationTemplate.Tests;
 public class FtpServerEditViewModelTests
 {
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void Constructor_LoadsExistingSettings()
     {
         var options = new FtpServerOptions { Port = 22, RootPath = "/srv" };
@@ -22,8 +20,6 @@ public class FtpServerEditViewModelTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void SaveCommand_RaisesServerUpdated()
     {
         var logger = new Mock<ILoggingService>();
@@ -48,8 +44,6 @@ public class FtpServerEditViewModelTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void CancelCommand_RaisesCancelled()
     {
         var options = new FtpServerOptions();
@@ -64,8 +58,6 @@ public class FtpServerEditViewModelTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void SettingInvalidPort_AddsError()
     {
         var options = new FtpServerOptions();
@@ -76,8 +68,6 @@ public class FtpServerEditViewModelTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void SaveCommand_DoesNotRaise_WhenInvalid()
     {
         var options = new FtpServerOptions();

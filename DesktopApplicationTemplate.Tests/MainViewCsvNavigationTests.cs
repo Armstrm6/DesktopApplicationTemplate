@@ -21,8 +21,6 @@ namespace DesktopApplicationTemplate.Tests;
 public class MainViewCsvNavigationTests
 {
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void NavigateToCsvCreator_ShowsCreateView()
     {
         if (!OperatingSystem.IsWindows())
@@ -70,8 +68,6 @@ public class MainViewCsvNavigationTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void DoubleClickCsvService_OpensEditView()
     {
         if (!OperatingSystem.IsWindows())

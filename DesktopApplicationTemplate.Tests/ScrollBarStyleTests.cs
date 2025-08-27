@@ -11,7 +11,6 @@ namespace DesktopApplicationTemplate.Tests
     public class ScrollBarStyleTests
     {
         [Fact]
-        [TestCategory("WindowsSafe")]
         public void LightTheme_ScrollBarStyle_HasReducedWidth()
         {
             if (!OperatingSystem.IsWindows())

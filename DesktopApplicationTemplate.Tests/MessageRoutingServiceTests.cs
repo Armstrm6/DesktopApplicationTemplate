@@ -6,7 +6,6 @@ namespace DesktopApplicationTemplate.Tests
     public class MessageRoutingServiceTests
     {
         [Fact]
-        [TestCategory("CodexSafe")]
         public void UpdateMessage_PersistsAndReturnsLatest()
         {
             var routing = new MessageRoutingService();
@@ -21,7 +20,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("CodexSafe")]
         public void ResolveTokens_ReplacesWithLatestMessage()
         {
             var routing = new MessageRoutingService();
@@ -33,7 +31,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("CodexSafe")]
         public void ResolveTokens_ReturnsEmpty_WhenUnknown()
         {
             var routing = new MessageRoutingService();

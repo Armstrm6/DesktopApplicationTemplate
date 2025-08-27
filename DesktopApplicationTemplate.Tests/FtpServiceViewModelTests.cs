@@ -8,8 +8,6 @@ namespace DesktopApplicationTemplate.Tests;
 public class FtpServiceViewModelTests
 {
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void FileReceived_AddsToUploadedFiles()
     {
         var service = new Mock<IFtpServerService>();
@@ -24,8 +22,6 @@ public class FtpServiceViewModelTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void FileSent_AddsToDownloadedFiles()
     {
         var service = new Mock<IFtpServerService>();
@@ -40,8 +36,6 @@ public class FtpServiceViewModelTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void TransferProgress_UpdatesTransfers()
     {
         var service = new Mock<IFtpServerService>();
@@ -56,8 +50,6 @@ public class FtpServiceViewModelTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void ClientCountChanged_UpdatesProperty()
     {
         var service = new Mock<IFtpServerService>();

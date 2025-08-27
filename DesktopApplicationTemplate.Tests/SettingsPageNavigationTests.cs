@@ -15,7 +15,6 @@ namespace DesktopApplicationTemplate.Tests
     public class SettingsPageNavigationTests
     {
         [Fact]
-        [TestCategory("WindowsSafe")]
         public void NavigateBack_ReturnsToHomePage()
         {
             if (!OperatingSystem.IsWindows())

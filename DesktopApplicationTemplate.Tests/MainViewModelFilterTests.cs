@@ -13,8 +13,6 @@ namespace DesktopApplicationTemplate.Tests
     public class MainViewModelFilterTests
     {
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public void NameFilter_FiltersServices()
         {
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");

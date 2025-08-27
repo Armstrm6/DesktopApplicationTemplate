@@ -16,7 +16,6 @@ namespace DesktopApplicationTemplate.Tests
     public class LogLevelSelectionTests
     {
         [Fact]
-        [TestCategory("WindowsSafe")]
         public void HttpServiceView_LogLevelSelection_UpdatesLogger()
         {
             if (!OperatingSystem.IsWindows())

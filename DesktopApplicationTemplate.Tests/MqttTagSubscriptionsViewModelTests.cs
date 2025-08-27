@@ -39,7 +39,6 @@ public class MqttTagSubscriptionsViewModelTests
     }
 
     [Fact]
-    [TestCategory("WindowsSafe")]
     public async Task ConnectAsync_InvokesClient()
     {
         if (!OperatingSystem.IsWindows()) return;
@@ -49,7 +48,6 @@ public class MqttTagSubscriptionsViewModelTests
     }
 
     [Fact]
-    [TestCategory("WindowsSafe")]
     public async Task ConnectAsync_RaisesEditRequested_OnInvalidOptions()
     {
         if (!OperatingSystem.IsWindows()) return;
@@ -66,7 +64,6 @@ public class MqttTagSubscriptionsViewModelTests
     }
 
     [Fact]
-    [TestCategory("WindowsSafe")]
     public async Task AddTopicAsync_SubscribesAndAdds()
     {
         if (!OperatingSystem.IsWindows()) return;
@@ -82,7 +79,6 @@ public class MqttTagSubscriptionsViewModelTests
     }
 
     [Fact]
-    [TestCategory("WindowsSafe")]
     public async Task RemoveTopicAsync_UnsubscribesAndRemoves()
     {
         if (!OperatingSystem.IsWindows()) return;
@@ -98,7 +94,6 @@ public class MqttTagSubscriptionsViewModelTests
     }
 
     [Fact]
-    [TestCategory("WindowsSafe")]
     public async Task PublishTestMessageAsync_Publishes_WhenValid()
     {
         if (!OperatingSystem.IsWindows()) return;
@@ -111,7 +106,6 @@ public class MqttTagSubscriptionsViewModelTests
     }
 
     [Fact]
-    [TestCategory("WindowsSafe")]
     public async Task TestTagEndpointCommand_Publishes_WhenValid()
     {
         if (!OperatingSystem.IsWindows()) return;

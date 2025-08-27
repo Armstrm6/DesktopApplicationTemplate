@@ -10,8 +10,6 @@ namespace DesktopApplicationTemplate.Tests;
 public class ProgressWindowViewModelTests
 {
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public async Task StartAsync_LogsCompletion()
     {
         var temp = Path.Combine(Path.GetTempPath(), "installer_test" + Path.GetRandomFileName());

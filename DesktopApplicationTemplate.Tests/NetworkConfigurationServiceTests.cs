@@ -10,8 +10,6 @@ namespace DesktopApplicationTemplate.Tests
     public class NetworkConfigurationServiceTests
     {
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public async Task ApplyConfigurationAsync_InvokesProcessRunner()
         {
             var runner = new Mock<IProcessRunner>();

@@ -10,8 +10,6 @@ namespace DesktopApplicationTemplate.Tests;
 public class UninstallServiceTests
 {
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public async Task UninstallAsync_StopsServicesAndDeletesDirectory()
     {
         var temp = Path.Combine(Path.GetTempPath(), "uninstall_test" + Path.GetRandomFileName());

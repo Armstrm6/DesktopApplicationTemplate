@@ -18,8 +18,6 @@ namespace DesktopApplicationTemplate.Tests;
 public class MainViewTcpNavigationTests
 {
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void CreateTcpService_Advanced_Back_ReturnsToCreateView()
     {
         if (!OperatingSystem.IsWindows())

@@ -21,8 +21,6 @@ namespace DesktopApplicationTemplate.Tests;
 public class MainViewTcpEditTests
 {
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void EditTcpService_SavesUpdatedOptions()
     {
         var thread = new Thread(() =>

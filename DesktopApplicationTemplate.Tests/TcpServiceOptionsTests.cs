@@ -10,8 +10,6 @@ namespace DesktopApplicationTemplate.Tests;
 public class TcpServiceOptionsTests
 {
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void Defaults_AreReasonable()
     {
         var options = new TcpServiceOptions();
@@ -23,7 +21,6 @@ public class TcpServiceOptionsTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
     public void Bind_BindsValuesFromConfiguration()
     {
         var configDict = new Dictionary<string, string?>

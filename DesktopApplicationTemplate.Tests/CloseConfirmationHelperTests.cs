@@ -9,7 +9,6 @@ namespace DesktopApplicationTemplate.Tests
     public class CloseConfirmationHelperTests
     {
         [Fact]
-        [TestCategory("WindowsSafe")]
         public void Show_ReturnsTrue_WhenSuppressed()
         {
             var logger = new Mock<ILoggingService>();
