@@ -32,6 +32,9 @@
 - MQTT create, edit, and subscription views follow design spacing with shared form styles and accessibility names.
 - Service creation flows now display within the main view, removing the separate Create Service window and placeholder navigation text.
 
+#### Fixed
+- TCP and SCP edit workflows now load existing options via `Load` methods, enabling DI-friendly construction.
+
 ### HID Service
 #### Added
 - HID service view includes a data flow diagram showing incoming, processed, and outgoing data bound to the view model.
@@ -121,11 +124,13 @@
 ### Logging
 #### Added
 - Logging service loads existing log file on startup and reloads entries when the minimum level changes.
+- Core `ILoggingService` interface and `LogLevel` enum shared across projects.
 
 #### Fixed
 - Service persistence and logging tests stabilized by reloading options, awaiting file writes, and running settings-related tests sequentially.
 - Logging minimum level changes now re-filter existing log entries without reloading from disk.
 - Added tests confirming service persistence handles cyclical references and logging config changes.
+- Moved `LogEntry` to core and restored logging event subscriptions, resolving missing reference build errors.
 
 #### Changed
 - Removed custom `ILoggingService` and service registrations in favor of `Microsoft.Extensions.Logging` with console and debug providers.

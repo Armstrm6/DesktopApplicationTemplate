@@ -9,21 +9,28 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// </summary>
 public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOptions>
 {
-    private readonly TcpServiceOptions _options;
-    private string _serviceName;
-    private string _host;
+    private TcpServiceOptions _options = new();
+    private string _serviceName = string.Empty;
+    private string _host = string.Empty;
     private int _port;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TcpEditServiceViewModel"/> class.
     /// </summary>
-    public TcpEditServiceViewModel(string serviceName, TcpServiceOptions options, ILoggingService? logger = null)
+    public TcpEditServiceViewModel(ILoggingService? logger = null)
         : base(logger)
+    {
+    }
+
+    /// <summary>
+    /// Loads the provided options into the view model.
+    /// </summary>
+    public void Load(string serviceName, TcpServiceOptions options)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
         _serviceName = serviceName ?? throw new ArgumentNullException(nameof(serviceName));
-        _host = options.Host;
-        _port = options.Port;
+        Host = _options.Host;
+        Port = _options.Port;
     }
 
     /// <summary>
