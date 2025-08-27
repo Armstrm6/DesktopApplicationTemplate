@@ -1532,3 +1532,11 @@ Effective Prompts / Instructions that worked: Followed AGENTS guidelines for DI 
 Decisions & Rationale: Consolidated command logic to reduce duplication.
 Action Items: Verify WPF behaviors on Windows.
 Related Commits/PRs: 
+[2025-08-27 03:54] Topic: File search service
+Context: Introduced cached async file search and integrated into FileObserver.
+Observations: Added service with Directory.EnumerateFiles caching; view model now loads image names through DI.
+Codex Limitations noticed: dotnet test build fails on Linux due to WPF project compilation issues.
+Effective Prompts / Instructions that worked:
+Decisions & Rationale: Centralized file enumeration via service to support reuse and caching.
+Action Items: Rely on CI to verify Windows-specific builds.
+Related Commits/PRs: (this PR)

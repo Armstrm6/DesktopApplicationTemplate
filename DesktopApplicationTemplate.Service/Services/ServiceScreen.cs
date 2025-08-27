@@ -1,5 +1,4 @@
 using DesktopApplicationTemplate.Core.Services;
-using Microsoft.Extensions.Logging;
 
 namespace DesktopApplicationTemplate.Service.Services;
 

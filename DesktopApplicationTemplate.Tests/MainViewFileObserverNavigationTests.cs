@@ -47,6 +47,7 @@ public class MainViewFileObserverNavigationTests
                     s.AddLogging();
                     s.AddSingleton<ILoggingService>(logger);
                     s.AddSingleton<SaveConfirmationHelper>();
+                    s.AddSingleton<IFileSearchService>(new Mock<IFileSearchService>().Object);
                     s.AddSingleton<FileObserverViewModel>();
                     s.AddSingleton<FileObserverView>();
                     s.AddTransient<FileObserverEditServiceViewModel>();
@@ -105,6 +106,7 @@ public class MainViewFileObserverNavigationTests
                     s.AddLogging();
                     s.AddSingleton<ILoggingService>(logger);
                     s.AddSingleton<SaveConfirmationHelper>();
+                    s.AddSingleton<IFileSearchService>(new Mock<IFileSearchService>().Object);
                     s.AddSingleton<FileObserverViewModel>();
                     s.AddSingleton<FileObserverView>();
                     s.AddTransient<FileObserverEditServiceViewModel>();

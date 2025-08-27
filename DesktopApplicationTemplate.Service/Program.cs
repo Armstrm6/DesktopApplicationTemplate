@@ -32,6 +32,7 @@ namespace DesktopApplicationTemplate.Service
                 services.AddSingleton<ILoggingService, LoggingService>();
                 services.AddSingleton<IServiceRule, ServiceRule>();
                 services.AddTransient(typeof(IServiceScreen<>), typeof(ServiceScreen<>));
+                services.AddSingleton<IFileSearchService, FileSearchService>();
                 services.AddFtpServer(builder => builder
                     .UseDotNetFileSystem()
                     .EnableAnonymousAuthentication());
