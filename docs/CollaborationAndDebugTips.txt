@@ -154,3 +154,11 @@ Effective Prompts / Instructions that worked: Exception message highlighted the 
 Decisions & Rationale: Specify the UI assembly to ensure the XAML parser locates the behavior regardless of load context.
 Action Items: Monitor CI for any remaining XAML parse issues.
 Related Commits/PRs:
+[2025-08-27 17:47] Topic: System namespace and FormField style
+Context: XAML errors for missing System.Object and FormField style.
+Observations: Removed explicit assembly qualifier in Forms.xaml and compiled it as a Page to ensure FormField style loads.
+Codex Limitations noticed: WPF tests require WindowsDesktop runtime; dotnet test aborted.
+Effective Prompts / Instructions that worked: User request to resolve assembly and resource errors.
+Decisions & Rationale: Use project namespaces and compile resources to avoid runtime parse failures.
+Action Items: Validate changes on Windows CI.
+Related Commits/PRs:
