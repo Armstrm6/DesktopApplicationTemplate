@@ -33,6 +33,7 @@ public class FtpServerDiRegistrationTests
 
         var services = new ServiceCollection();
         services.AddLogging();
+        services.AddSingleton<IConfiguration>(configuration);
         services.AddSingleton<IRichTextLogger, NullRichTextLogger>();
         services.AddSingleton<ILoggingService, LoggingService>();
         services.AddSingleton<IMessageRoutingService, MessageRoutingService>();
