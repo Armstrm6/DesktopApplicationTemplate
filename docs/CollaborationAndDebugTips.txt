@@ -169,3 +169,11 @@ Effective Prompts / Instructions that worked: `rg` and `find` searches for Codex
 Decisions & Rationale: No action needed beyond verification.
 Action Items: Rely on CI for test execution.
 Related Commits/PRs:
+[2025-08-27 19:20] Topic: TCP options GetService fix
+Context: Replaced GetRequiredService with null-checked GetService and removed exception suppression in ServicePersistence.
+Observations: TCP options now update only when available via DI.
+Codex Limitations noticed: .NET SDK not installed; unable to run restore, build, or tests locally.
+Effective Prompts / Instructions that worked: User request to handle missing TCP options without throwing.
+Decisions & Rationale: Avoid InvalidOperationException during startup by checking for registered options.
+Action Items: Rely on CI for test coverage.
+Related Commits/PRs: f37e904
