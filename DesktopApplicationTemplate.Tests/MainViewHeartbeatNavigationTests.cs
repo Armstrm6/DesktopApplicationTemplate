@@ -20,7 +20,7 @@ namespace DesktopApplicationTemplate.Tests;
 
 public class MainViewHeartbeatNavigationTests
 {
-    [Fact]
+    [WpfFact]
     public void NavigateToHeartbeat_ShowsCreateView()
     {
         if (!OperatingSystem.IsWindows())
@@ -66,7 +66,7 @@ public class MainViewHeartbeatNavigationTests
         thread.Join();
     }
 
-    [Fact]
+    [WpfFact]
     public void EditHeartbeatService_ShowsEditView()
     {
         if (!OperatingSystem.IsWindows())
@@ -121,7 +121,7 @@ public class MainViewHeartbeatNavigationTests
         thread.Join();
     }
 
-    [Fact]
+    [WpfFact]
     public void DoubleClickHeartbeatService_OpensEditView()
     {
         if (!OperatingSystem.IsWindows())

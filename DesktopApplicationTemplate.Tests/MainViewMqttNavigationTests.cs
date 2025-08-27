@@ -17,7 +17,7 @@ namespace DesktopApplicationTemplate.Tests;
 
 public class MainViewMqttNavigationTests
 {
-    [Fact]
+    [WpfFact]
     public void CreateMqttService_Advanced_Back_ReturnsToCreateView()
     {
         if (!OperatingSystem.IsWindows())
@@ -73,7 +73,7 @@ public class MainViewMqttNavigationTests
         thread.Join();
     }
 
-    [Fact]
+    [WpfFact]
     public void EditMqttService_ShowsEditView()
     {
         if (!OperatingSystem.IsWindows())

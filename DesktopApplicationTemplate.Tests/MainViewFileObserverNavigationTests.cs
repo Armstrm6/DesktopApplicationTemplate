@@ -20,7 +20,7 @@ namespace DesktopApplicationTemplate.Tests;
 
 public class MainViewFileObserverNavigationTests
 {
-    [Fact]
+    [WpfFact]
     public void EditFileObserverService_ShowsEditView()
     {
         if (!OperatingSystem.IsWindows())
@@ -77,7 +77,7 @@ public class MainViewFileObserverNavigationTests
        thread.Join();
     }
 
-    [Fact]
+    [WpfFact]
     public void DoubleClickFileObserverService_OpensEditView()
     {
         if (!OperatingSystem.IsWindows())

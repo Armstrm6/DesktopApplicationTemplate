@@ -16,7 +16,7 @@ namespace DesktopApplicationTemplate.Tests
 {
     public class MqttViewsAccessibilityTests
     {
-        [Fact]
+        [WpfFact]
         public void MqttCreateServiceView_ExposesNamedButtons()
         {
             if (!OperatingSystem.IsWindows())
@@ -43,7 +43,7 @@ namespace DesktopApplicationTemplate.Tests
             ConsoleTestLogger.LogPass();
         }
 
-        [Fact]
+        [WpfFact]
         public void MqttEditConnectionView_ExposesUpdateButton()
         {
             if (!OperatingSystem.IsWindows())
@@ -73,7 +73,7 @@ namespace DesktopApplicationTemplate.Tests
             ConsoleTestLogger.LogPass();
         }
 
-        [Fact]
+        [WpfFact]
         public void MqttTagSubscriptionsView_ExposesSendButton()
         {
             if (!OperatingSystem.IsWindows())

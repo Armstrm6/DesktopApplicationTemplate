@@ -19,7 +19,7 @@ namespace DesktopApplicationTemplate.Tests;
 
 public class MainViewHttpNavigationTests
 {
-    [Fact]
+    [WpfFact]
     public void NavigateToHttp_ShowsCreateView()
     {
         if (!OperatingSystem.IsWindows())
@@ -65,7 +65,7 @@ public class MainViewHttpNavigationTests
         thread.Join();
     }
 
-    [Fact]
+    [WpfFact]
     public void EditHttpService_ShowsEditView()
     {
         if (!OperatingSystem.IsWindows())
@@ -120,7 +120,7 @@ public class MainViewHttpNavigationTests
         thread.Join();
     }
 
-    [Fact]
+    [WpfFact]
     public void DoubleClickHttpService_OpensEditView()
     {
         if (!OperatingSystem.IsWindows())

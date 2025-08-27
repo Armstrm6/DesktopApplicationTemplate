@@ -20,7 +20,7 @@ namespace DesktopApplicationTemplate.Tests;
 
 public class MainViewCsvNavigationTests
 {
-    [Fact]
+    [WpfFact]
     public void NavigateToCsvCreator_ShowsCreateView()
     {
         if (!OperatingSystem.IsWindows())
@@ -67,7 +67,7 @@ public class MainViewCsvNavigationTests
         thread.Join();
     }
 
-    [Fact]
+    [WpfFact]
     public void DoubleClickCsvService_OpensEditView()
     {
         if (!OperatingSystem.IsWindows())

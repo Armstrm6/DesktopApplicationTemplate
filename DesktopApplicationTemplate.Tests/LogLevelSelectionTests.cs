@@ -15,7 +15,7 @@ namespace DesktopApplicationTemplate.Tests
 {
     public class LogLevelSelectionTests
     {
-        [Fact]
+        [WpfFact]
         public void HttpServiceView_LogLevelSelection_UpdatesLogger()
         {
             if (!OperatingSystem.IsWindows())

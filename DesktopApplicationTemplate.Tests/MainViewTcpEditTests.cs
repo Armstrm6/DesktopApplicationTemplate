@@ -20,7 +20,7 @@ namespace DesktopApplicationTemplate.Tests;
 
 public class MainViewTcpEditTests
 {
-    [Fact]
+    [WpfFact]
     public void EditTcpService_SavesUpdatedOptions()
     {
         var thread = new Thread(() =>

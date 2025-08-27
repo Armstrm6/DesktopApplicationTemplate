@@ -19,7 +19,7 @@ namespace DesktopApplicationTemplate.Tests;
 
 public class MainViewScpNavigationTests
 {
-    [Fact]
+    [WpfFact]
     public void EditScpService_ShowsEditView()
     {
         if (!OperatingSystem.IsWindows())
@@ -75,7 +75,7 @@ public class MainViewScpNavigationTests
         thread.Join();
     }
 
-    [Fact]
+    [WpfFact]
     public void DoubleClickScpService_OpensEditView()
     {
         if (!OperatingSystem.IsWindows())

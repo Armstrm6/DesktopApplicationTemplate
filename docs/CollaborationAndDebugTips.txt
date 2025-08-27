@@ -186,3 +186,11 @@ Decisions & Rationale: Use CollectionBehavior attribute to enforce sequential ex
 Action Items: Rely on CI for Windows execution.
 Related Commits/PRs:
 
+[2025-08-27 21:16] Topic: WPF test attributes
+Context: Added custom WpfFact/WpfTheory to run UI tests on STA threads and updated existing WPF tests to use them.
+Observations: .NET SDK 8.0.404 installed successfully, but Microsoft.WindowsDesktop runtime is unavailable so tests abort.
+Codex Limitations noticed: Missing WindowsDesktop runtime prevents executing WPF tests on Linux.
+Effective Prompts / Instructions that worked: User request to replace Fact with WpfFact in UI tests.
+Decisions & Rationale: Provide reusable attributes so UI tests no longer manage threads manually.
+Action Items: Rely on CI for Windows-specific test execution.
+Related Commits/PRs:

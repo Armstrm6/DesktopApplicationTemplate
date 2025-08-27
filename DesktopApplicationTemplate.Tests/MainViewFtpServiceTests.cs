@@ -18,7 +18,7 @@ namespace DesktopApplicationTemplate.Tests;
 
 public class MainViewFtpServiceTests
 {
-    [Fact]
+    [WpfFact]
     public void AddFtpService_SetsOptionsAndAddsService()
     {
         var thread = new Thread(() =>
