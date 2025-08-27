@@ -145,17 +145,16 @@ namespace DesktopApplicationTemplate.UI.Services
                     {
                         try
                         {
-                            var opt = App.AppHost?.Services.GetService<IOptions<TcpServiceOptions>>();
-                            if (opt != null)
-                            {
-                                var value = opt.Value;
-                                value.Host = info.TcpOptions.Host;
-                                value.Port = info.TcpOptions.Port;
-                                value.UseUdp = info.TcpOptions.UseUdp;
-                                value.Mode = info.TcpOptions.Mode;
-                            }
+                            var value = App.AppHost?.Services
+                                .GetRequiredService<IOptions<TcpServiceOptions>>()
+                                .Value;
+
+                            value.Host = info.TcpOptions.Host;
+                            value.Port = info.TcpOptions.Port;
+                            value.UseUdp = info.TcpOptions.UseUdp;
+                            value.Mode = info.TcpOptions.Mode;
                         }
-                        catch
+                        catch (InvalidOperationException)
                         {
                             // ignore missing options during tests or early startup
                         }
