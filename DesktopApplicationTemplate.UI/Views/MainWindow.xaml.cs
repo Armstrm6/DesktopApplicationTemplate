@@ -197,8 +197,7 @@ namespace DesktopApplicationTemplate.UI.Views
             vm.AdvancedConfigRequested += opts =>
             {
                 var advVm = ActivatorUtilities.CreateInstance<MqttAdvancedConfigViewModel>(App.AppHost.Services, opts);
-                var advView = App.AppHost.Services.GetRequiredService<MqttAdvancedConfigView>();
-                advView.DataContext = advVm;
+                var advView = ActivatorUtilities.CreateInstance<MqttAdvancedConfigView>(App.AppHost.Services, advVm);
                 advVm.Saved += _ => ShowPage(view);
                 advVm.BackRequested += () => ShowPage(view);
                 ShowPage(advView);
@@ -236,8 +235,7 @@ namespace DesktopApplicationTemplate.UI.Views
             vm.AdvancedConfigRequested += opts =>
             {
                 var advVm = ActivatorUtilities.CreateInstance<HidAdvancedConfigViewModel>(App.AppHost.Services, opts);
-                var advView = App.AppHost.Services.GetRequiredService<HidAdvancedConfigView>();
-                advView.DataContext = advVm;
+                var advView = ActivatorUtilities.CreateInstance<HidAdvancedConfigView>(App.AppHost.Services, advVm);
                 advVm.Saved += _ => ShowPage(view);
                 advVm.BackRequested += () => ShowPage(view);
                 ShowPage(advView);
@@ -275,8 +273,7 @@ namespace DesktopApplicationTemplate.UI.Views
             vm.AdvancedConfigRequested += opts =>
             {
                 var advVm = ActivatorUtilities.CreateInstance<ScpAdvancedConfigViewModel>(App.AppHost.Services, opts);
-                var advView = App.AppHost.Services.GetRequiredService<ScpAdvancedConfigView>();
-                advView.DataContext = advVm;
+                var advView = ActivatorUtilities.CreateInstance<ScpAdvancedConfigView>(App.AppHost.Services, advVm);
                 advVm.Saved += _ => ShowPage(view);
                 advVm.BackRequested += () => ShowPage(view);
                 ShowPage(advView);
@@ -314,8 +311,7 @@ namespace DesktopApplicationTemplate.UI.Views
             vm.AdvancedConfigRequested += opts =>
             {
                 var advVm = ActivatorUtilities.CreateInstance<HeartbeatAdvancedConfigViewModel>(App.AppHost.Services, opts);
-                var advView = App.AppHost.Services.GetRequiredService<HeartbeatAdvancedConfigView>();
-                advView.DataContext = advVm;
+                var advView = ActivatorUtilities.CreateInstance<HeartbeatAdvancedConfigView>(App.AppHost.Services, advVm);
                 advVm.Saved += _ => ShowPage(view);
                 advVm.BackRequested += () => ShowPage(view);
                 ShowPage(advView);
@@ -353,8 +349,7 @@ namespace DesktopApplicationTemplate.UI.Views
             vm.AdvancedConfigRequested += opts =>
             {
                 var advVm = ActivatorUtilities.CreateInstance<FileObserverAdvancedConfigViewModel>(App.AppHost.Services, opts);
-                var advView = App.AppHost.Services.GetRequiredService<FileObserverAdvancedConfigView>();
-                advView.DataContext = advVm;
+                var advView = ActivatorUtilities.CreateInstance<FileObserverAdvancedConfigView>(App.AppHost.Services, advVm);
                 advVm.Saved += _ => ShowPage(view);
                 advVm.BackRequested += () => ShowPage(view);
                 ShowPage(advView);
@@ -392,8 +387,7 @@ namespace DesktopApplicationTemplate.UI.Views
             vm.AdvancedConfigRequested += opts =>
             {
                 var advVm = ActivatorUtilities.CreateInstance<CsvAdvancedConfigViewModel>(App.AppHost.Services, opts);
-                var advView = App.AppHost.Services.GetRequiredService<CsvAdvancedConfigView>();
-                advView.DataContext = advVm;
+                var advView = ActivatorUtilities.CreateInstance<CsvAdvancedConfigView>(App.AppHost.Services, advVm);
                 advVm.Saved += _ => ShowPage(view);
                 advVm.BackRequested += () => ShowPage(view);
                 ShowPage(advView);
@@ -431,8 +425,7 @@ namespace DesktopApplicationTemplate.UI.Views
             vm.AdvancedConfigRequested += opts =>
             {
                 var advVm = ActivatorUtilities.CreateInstance<TcpAdvancedConfigViewModel>(App.AppHost.Services, opts);
-                var advView = App.AppHost.Services.GetRequiredService<TcpAdvancedConfigView>();
-                advView.DataContext = advVm;
+                var advView = ActivatorUtilities.CreateInstance<TcpAdvancedConfigView>(App.AppHost.Services, advVm);
                 advVm.Saved += _ => ShowPage(view);
                 advVm.BackRequested += () => ShowPage(view);
                 ShowPage(advView);
@@ -470,8 +463,7 @@ namespace DesktopApplicationTemplate.UI.Views
             vm.AdvancedConfigRequested += opts =>
             {
                 var advVm = ActivatorUtilities.CreateInstance<HttpAdvancedConfigViewModel>(App.AppHost.Services, opts);
-                var advView = App.AppHost.Services.GetRequiredService<HttpAdvancedConfigView>();
-                advView.DataContext = advVm;
+                var advView = ActivatorUtilities.CreateInstance<HttpAdvancedConfigView>(App.AppHost.Services, advVm);
                 advVm.Saved += _ => ShowPage(view);
                 advVm.BackRequested += () => ShowPage(view);
                 ShowPage(advView);
@@ -501,8 +493,7 @@ namespace DesktopApplicationTemplate.UI.Views
             vm.AdvancedConfigRequested += opts2 =>
             {
                 var advVm = ActivatorUtilities.CreateInstance<FtpServerAdvancedConfigViewModel>(App.AppHost.Services, opts2);
-                var advView = App.AppHost.Services.GetRequiredService<FtpServerAdvancedConfigView>();
-                advView.DataContext = advVm;
+                var advView = ActivatorUtilities.CreateInstance<FtpServerAdvancedConfigView>(App.AppHost.Services, advVm);
                 advVm.Saved += _ => ShowPage(view);
                 advVm.BackRequested += () => ShowPage(view);
                 ShowPage(advView);
@@ -623,8 +614,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 var tagPage = GetOrCreateServicePage(service);
                 var options = App.AppHost.Services.GetRequiredService<IOptions<MqttServiceOptions>>().Value;
                 var vm = ActivatorUtilities.CreateInstance<MqttEditServiceViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
-                var editView = App.AppHost.Services.GetRequiredService<MqttEditServiceView>();
-                editView.DataContext = vm;
+                var editView = ActivatorUtilities.CreateInstance<MqttEditServiceView>(App.AppHost.Services, vm);
                 vm.ServiceUpdated += (name, opts) =>
                 {
                     service.DisplayName = $"MQTT - {name}";
@@ -640,8 +630,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 vm.AdvancedConfigRequested += opts =>
                 {
                     var advVm = ActivatorUtilities.CreateInstance<MqttAdvancedConfigViewModel>(App.AppHost.Services, opts);
-                    var advView = App.AppHost.Services.GetRequiredService<MqttAdvancedConfigView>();
-                    advView.DataContext = advVm;
+                    var advView = ActivatorUtilities.CreateInstance<MqttAdvancedConfigView>(App.AppHost.Services, advVm);
                     advVm.Saved += _ => ShowPage(editView);
                     advVm.BackRequested += () => ShowPage(editView);
                     ShowPage(advView);
@@ -656,8 +645,7 @@ namespace DesktopApplicationTemplate.UI.Views
             var hbPage = GetOrCreateServicePage(service);
             var options = service.HeartbeatOptions ?? new HeartbeatServiceOptions();
             var vm = ActivatorUtilities.CreateInstance<HeartbeatEditServiceViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
-            var editView = App.AppHost.Services.GetRequiredService<HeartbeatEditServiceView>();
-            editView.DataContext = vm;
+            var editView = ActivatorUtilities.CreateInstance<HeartbeatEditServiceView>(App.AppHost.Services, vm);
             vm.ServiceUpdated += (name, opts) =>
             {
                 service.DisplayName = $"Heartbeat - {name}";
@@ -674,8 +662,7 @@ namespace DesktopApplicationTemplate.UI.Views
             vm.AdvancedConfigRequested += opts =>
             {
                 var advVm = ActivatorUtilities.CreateInstance<HeartbeatAdvancedConfigViewModel>(App.AppHost.Services, opts);
-                var advView = App.AppHost.Services.GetRequiredService<HeartbeatAdvancedConfigView>();
-                advView.DataContext = advVm;
+                var advView = ActivatorUtilities.CreateInstance<HeartbeatAdvancedConfigView>(App.AppHost.Services, advVm);
                 advVm.Saved += _ => ShowPage(editView);
                 advVm.BackRequested += () => ShowPage(editView);
                 ShowPage(advView);
@@ -690,8 +677,7 @@ namespace DesktopApplicationTemplate.UI.Views
             var hidPage = GetOrCreateServicePage(service);
             var options = service.HidOptions ?? new HidServiceOptions();
             var vm = ActivatorUtilities.CreateInstance<HidEditServiceViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
-            var editView = App.AppHost.Services.GetRequiredService<HidEditServiceView>();
-            editView.DataContext = vm;
+            var editView = ActivatorUtilities.CreateInstance<HidEditServiceView>(App.AppHost.Services, vm);
             vm.ServiceUpdated += (name, opts) =>
             {
                 service.DisplayName = $"HID - {name}";
@@ -708,8 +694,7 @@ namespace DesktopApplicationTemplate.UI.Views
             vm.AdvancedConfigRequested += opts =>
             {
                 var advVm = ActivatorUtilities.CreateInstance<HidAdvancedConfigViewModel>(App.AppHost.Services, opts);
-                var advView = App.AppHost.Services.GetRequiredService<HidAdvancedConfigView>();
-                advView.DataContext = advVm;
+                var advView = ActivatorUtilities.CreateInstance<HidAdvancedConfigView>(App.AppHost.Services, advVm);
                 advVm.Saved += _ => ShowPage(editView);
                 advVm.BackRequested += () => ShowPage(editView);
                 ShowPage(advView);
@@ -724,8 +709,7 @@ namespace DesktopApplicationTemplate.UI.Views
             var csvPage = GetOrCreateServicePage(service);
             var options = service.CsvOptions ?? new CsvServiceOptions();
             var vm = ActivatorUtilities.CreateInstance<CsvEditServiceViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
-            var editView = App.AppHost.Services.GetRequiredService<CsvEditServiceView>();
-            editView.DataContext = vm;
+            var editView = ActivatorUtilities.CreateInstance<CsvEditServiceView>(App.AppHost.Services, vm);
             vm.ServiceUpdated += (name, opts) =>
             {
                 service.DisplayName = $"CSV Creator - {name}";
@@ -742,8 +726,7 @@ namespace DesktopApplicationTemplate.UI.Views
             vm.AdvancedConfigRequested += opts =>
             {
                 var advVm = ActivatorUtilities.CreateInstance<CsvAdvancedConfigViewModel>(App.AppHost.Services, opts);
-                var advView = App.AppHost.Services.GetRequiredService<CsvAdvancedConfigView>();
-                advView.DataContext = advVm;
+                var advView = ActivatorUtilities.CreateInstance<CsvAdvancedConfigView>(App.AppHost.Services, advVm);
                 advVm.Saved += _ => ShowPage(editView);
                 advVm.BackRequested += () => ShowPage(editView);
                 ShowPage(advView);
@@ -758,8 +741,7 @@ namespace DesktopApplicationTemplate.UI.Views
             var foPage = GetOrCreateServicePage(service);
             var options = service.FileObserverOptions ?? new FileObserverServiceOptions();
             var vm = ActivatorUtilities.CreateInstance<FileObserverEditServiceViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
-            var editView = App.AppHost.Services.GetRequiredService<FileObserverEditServiceView>();
-            editView.DataContext = vm;
+            var editView = ActivatorUtilities.CreateInstance<FileObserverEditServiceView>(App.AppHost.Services, vm);
             vm.ServiceUpdated += (name, opts) =>
             {
                 service.DisplayName = $"File Observer - {name}";
@@ -776,8 +758,7 @@ namespace DesktopApplicationTemplate.UI.Views
             vm.AdvancedConfigRequested += opts =>
             {
                 var advVm = ActivatorUtilities.CreateInstance<FileObserverAdvancedConfigViewModel>(App.AppHost.Services, opts);
-                var advView = App.AppHost.Services.GetRequiredService<FileObserverAdvancedConfigView>();
-                advView.DataContext = advVm;
+                var advView = ActivatorUtilities.CreateInstance<FileObserverAdvancedConfigView>(App.AppHost.Services, advVm);
                 advVm.Saved += _ => ShowPage(editView);
                 advVm.BackRequested += () => ShowPage(editView);
                 ShowPage(advView);
@@ -792,8 +773,7 @@ namespace DesktopApplicationTemplate.UI.Views
             var scpPage = GetOrCreateServicePage(service);
             var options = service.ScpOptions ?? new ScpServiceOptions();
             var vm = ActivatorUtilities.CreateInstance<ScpEditServiceViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
-            var editView = App.AppHost.Services.GetRequiredService<ScpEditServiceView>();
-            editView.DataContext = vm;
+            var editView = ActivatorUtilities.CreateInstance<ScpEditServiceView>(App.AppHost.Services, vm);
             vm.ServiceUpdated += (name, opts) =>
             {
                 service.DisplayName = $"SCP - {name}";
@@ -810,8 +790,7 @@ namespace DesktopApplicationTemplate.UI.Views
             vm.AdvancedConfigRequested += opts =>
             {
                 var advVm = ActivatorUtilities.CreateInstance<ScpAdvancedConfigViewModel>(App.AppHost.Services, opts);
-                var advView = App.AppHost.Services.GetRequiredService<ScpAdvancedConfigView>();
-                advView.DataContext = advVm;
+                var advView = ActivatorUtilities.CreateInstance<ScpAdvancedConfigView>(App.AppHost.Services, advVm);
                 advVm.Saved += _ => ShowPage(editView);
                 advVm.BackRequested += () => ShowPage(editView);
                 ShowPage(advView);
@@ -826,8 +805,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 var tcpPage = GetOrCreateServicePage(service);
                 var options = service.TcpOptions ?? new TcpServiceOptions();
                 var vm = ActivatorUtilities.CreateInstance<TcpEditServiceViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
-                var editView = App.AppHost.Services.GetRequiredService<TcpEditServiceView>();
-                editView.DataContext = vm;
+                var editView = ActivatorUtilities.CreateInstance<TcpEditServiceView>(App.AppHost.Services, vm);
                 vm.ServiceUpdated += (name, opts) =>
                 {
                     service.DisplayName = $"TCP - {name}";
@@ -844,8 +822,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 vm.AdvancedConfigRequested += opts =>
                 {
                     var advVm = ActivatorUtilities.CreateInstance<TcpAdvancedConfigViewModel>(App.AppHost.Services, opts);
-                    var advView = App.AppHost.Services.GetRequiredService<TcpAdvancedConfigView>();
-                    advView.DataContext = advVm;
+                    var advView = ActivatorUtilities.CreateInstance<TcpAdvancedConfigView>(App.AppHost.Services, advVm);
                     advVm.Saved += _ => ShowPage(editView);
                     advVm.BackRequested += () => ShowPage(editView);
                     ShowPage(advView);
@@ -860,8 +837,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 var httpPage = GetOrCreateServicePage(service);
                 var options = service.HttpOptions ?? new HttpServiceOptions();
                 var vm = ActivatorUtilities.CreateInstance<HttpEditServiceViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
-                var editView = App.AppHost.Services.GetRequiredService<HttpEditServiceView>();
-                editView.DataContext = vm;
+                var editView = ActivatorUtilities.CreateInstance<HttpEditServiceView>(App.AppHost.Services, vm);
                 vm.ServiceUpdated += (name, opts) =>
                 {
                     service.DisplayName = $"HTTP - {name}";
@@ -878,8 +854,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 vm.AdvancedConfigRequested += opts =>
                 {
                     var advVm = ActivatorUtilities.CreateInstance<HttpAdvancedConfigViewModel>(App.AppHost.Services, opts);
-                    var advView = App.AppHost.Services.GetRequiredService<HttpAdvancedConfigView>();
-                    advView.DataContext = advVm;
+                    var advView = ActivatorUtilities.CreateInstance<HttpAdvancedConfigView>(App.AppHost.Services, advVm);
                     advVm.Saved += _ => ShowPage(editView);
                     advVm.BackRequested += () => ShowPage(editView);
                     ShowPage(advView);
@@ -894,8 +869,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 var ftpPage = GetOrCreateServicePage(service);
                 var options = service.FtpOptions ?? new FtpServerOptions();
                 var vm = ActivatorUtilities.CreateInstance<FtpServerEditViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
-                var editView = App.AppHost.Services.GetRequiredService<FtpServerEditView>();
-                editView.DataContext = vm;
+                var editView = ActivatorUtilities.CreateInstance<FtpServerEditView>(App.AppHost.Services, vm);
                 vm.ServerUpdated += (name, opts) =>
                 {
                     service.DisplayName = $"FTP Server - {name}";
@@ -918,8 +892,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 vm.AdvancedConfigRequested += opts =>
                 {
                     var advVm = ActivatorUtilities.CreateInstance<FtpServerAdvancedConfigViewModel>(App.AppHost.Services, opts);
-                    var advView = App.AppHost.Services.GetRequiredService<FtpServerAdvancedConfigView>();
-                    advView.DataContext = advVm;
+                    var advView = ActivatorUtilities.CreateInstance<FtpServerAdvancedConfigView>(App.AppHost.Services, advVm);
                     advVm.Saved += _ => ShowPage(editView);
                     advVm.BackRequested += () => ShowPage(editView);
                     ShowPage(advView);
