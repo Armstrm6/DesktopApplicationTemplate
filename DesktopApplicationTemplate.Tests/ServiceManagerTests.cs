@@ -11,8 +11,6 @@ namespace DesktopApplicationTemplate.Tests
     public class ServiceManagerTests
     {
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public void Sync_StartsAndStopsServicesBasedOnFile()
         {
             var tempFile = Path.GetTempFileName();

@@ -39,7 +39,6 @@ public class MqttServiceViewModelTests
     }
 
     [Fact]
-    [TestCategory("WindowsSafe")]
     public void AddTopicCommand_AddsTopic()
     {
         if (!OperatingSystem.IsWindows()) return;
@@ -50,7 +49,6 @@ public class MqttServiceViewModelTests
     }
 
     [Fact]
-    [TestCategory("WindowsSafe")]
     public void AddMessageCommand_AddsPair()
     {
         if (!OperatingSystem.IsWindows()) return;
@@ -62,7 +60,6 @@ public class MqttServiceViewModelTests
     }
 
     [Fact]
-    [TestCategory("WindowsSafe")]
     public void RemoveMessageCommand_RemovesSelectedPair()
     {
         if (!OperatingSystem.IsWindows()) return;
@@ -74,7 +71,6 @@ public class MqttServiceViewModelTests
     }
 
     [Fact]
-    [TestCategory("WindowsSafe")]
     public async Task ConnectAsync_SetsIsConnected()
     {
         if (!OperatingSystem.IsWindows()) return;
@@ -88,7 +84,6 @@ public class MqttServiceViewModelTests
     }
 
     [Fact]
-    [TestCategory("WindowsSafe")]
     public async Task ConnectAsync_InvalidOptions_RaisesEditRequested()
     {
         if (!OperatingSystem.IsWindows()) return;
@@ -103,7 +98,6 @@ public class MqttServiceViewModelTests
     }
 
     [Fact]
-    [TestCategory("WindowsSafe")]
     public async Task PublishSelectedAsync_ResolvesTokens()
     {
         if (!OperatingSystem.IsWindows()) return;
@@ -123,7 +117,6 @@ public class MqttServiceViewModelTests
     }
 
     [Fact]
-    [TestCategory("WindowsSafe")]
     public void PortSetter_RejectsOutOfRange()
     {
         if (!OperatingSystem.IsWindows()) return;
@@ -133,7 +126,6 @@ public class MqttServiceViewModelTests
     }
 
     [Fact]
-    [TestCategory("WindowsSafe")]
     public void HostSetter_InvalidAddsError()
     {
         if (!OperatingSystem.IsWindows()) return;
@@ -143,7 +135,6 @@ public class MqttServiceViewModelTests
     }
 
     [Fact]
-    [TestCategory("WindowsSafe")]
     public void KeepAliveSecondsSetter_RejectsOutOfRange()
     {
         if (!OperatingSystem.IsWindows()) return;
@@ -153,7 +144,6 @@ public class MqttServiceViewModelTests
     }
 
     [Fact]
-    [TestCategory("WindowsSafe")]
     public void ReconnectDelaySetter_RejectsNegative()
     {
         if (!OperatingSystem.IsWindows()) return;
@@ -163,7 +153,6 @@ public class MqttServiceViewModelTests
     }
 
     [Fact]
-    [TestCategory("WindowsSafe")]
     public void WillQualityOfServiceSetter_InvalidAddsError()
     {
         if (!OperatingSystem.IsWindows()) return;

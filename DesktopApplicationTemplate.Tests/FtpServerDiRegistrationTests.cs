@@ -16,8 +16,6 @@ namespace DesktopApplicationTemplate.Tests;
 public class FtpServerDiRegistrationTests
 {
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void ServiceProvider_Resolves_FtpServerTypes()
     {
         var settings = new Dictionary<string, string?>

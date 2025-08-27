@@ -9,7 +9,6 @@ namespace DesktopApplicationTemplate.Tests;
 public class SaveConfirmationHelperDiTests
 {
     [Fact]
-    [TestCategory("CodexSafe")]
     public void SaveConfirmationHelper_Throws_WhenLoggerMissing()
     {
         var services = new ServiceCollection();
@@ -20,7 +19,6 @@ public class SaveConfirmationHelperDiTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
     public void SaveConfirmationHelper_Resolves_WhenLoggerRegistered()
     {
         var services = new ServiceCollection();

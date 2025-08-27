@@ -20,8 +20,6 @@ namespace DesktopApplicationTemplate.Tests;
 public class MainViewHttpNavigationTests
 {
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void NavigateToHttp_ShowsCreateView()
     {
         if (!OperatingSystem.IsWindows())
@@ -68,8 +66,6 @@ public class MainViewHttpNavigationTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void EditHttpService_ShowsEditView()
     {
         if (!OperatingSystem.IsWindows())
@@ -125,8 +121,6 @@ public class MainViewHttpNavigationTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void DoubleClickHttpService_OpensEditView()
     {
         if (!OperatingSystem.IsWindows())

@@ -13,8 +13,6 @@ namespace DesktopApplicationTemplate.Tests
     public class TcpHttpViewModelLoggingTests
     {
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public void TcpService_ToggleServer_LogsMessage()
         {
             var logger = new Mock<ILoggingService>();
@@ -31,8 +29,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public async Task HttpService_InvalidUrl_LogsWarning()
         {
             var logger = new Mock<ILoggingService>();
@@ -48,8 +44,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public async Task HttpService_SendRequest_LogsLifecycle()
         {
             var logger = new Mock<ILoggingService>();
@@ -74,8 +68,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public void HttpService_SetInvalidUrl_AddsError()
         {
             var logger = new Mock<ILoggingService>();

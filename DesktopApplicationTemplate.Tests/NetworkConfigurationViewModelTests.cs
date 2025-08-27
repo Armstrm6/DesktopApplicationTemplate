@@ -10,8 +10,6 @@ namespace DesktopApplicationTemplate.Tests
     public class NetworkConfigurationViewModelTests
     {
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public async Task LoadAndApplyConfiguration_UsesService()
         {
             var service = new Mock<INetworkConfigurationService>();

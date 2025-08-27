@@ -7,8 +7,6 @@ namespace DesktopApplicationTemplate.Tests
     public class AsyncRelayCommandTests
     {
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public async Task Execute_InvokesAsyncDelegate()
         {
             var invoked = false;
@@ -25,8 +23,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public void CanExecute_RespectsPredicate()
         {
             var command = new AsyncRelayCommand(() => Task.CompletedTask, () => false);

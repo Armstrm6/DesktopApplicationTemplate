@@ -6,8 +6,6 @@ namespace DesktopApplicationTemplate.Tests;
 public class MqttServiceOptionsTests
 {
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void Defaults_AreReasonable()
     {
         var options = new MqttServiceOptions();

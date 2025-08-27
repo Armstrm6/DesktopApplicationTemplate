@@ -18,8 +18,6 @@ namespace DesktopApplicationTemplate.Tests;
 public class MainViewMqttNavigationTests
 {
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void CreateMqttService_Advanced_Back_ReturnsToCreateView()
     {
         if (!OperatingSystem.IsWindows())
@@ -76,8 +74,6 @@ public class MainViewMqttNavigationTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void EditMqttService_ShowsEditView()
     {
         if (!OperatingSystem.IsWindows())

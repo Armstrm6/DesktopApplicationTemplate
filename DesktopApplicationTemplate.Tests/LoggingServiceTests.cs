@@ -20,7 +20,6 @@ namespace DesktopApplicationTemplate.Tests
     public class LoggingServiceTests
     {
         [Theory]
-        [TestCategory("WindowsSafe")]
         [InlineData(LogLevel.Debug)]
         [InlineData(LogLevel.Warning)]
         [InlineData(LogLevel.Error)]
@@ -44,7 +43,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("WindowsSafe")]
         public async Task Log_WritesMessageToFile()
         {
             var uiLogger = new Mock<IRichTextLogger>();
@@ -78,7 +76,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("WindowsSafe")]
         public void MinimumLevel_Change_FiltersExistingLogs()
         {
             var uiLogger = new Mock<IRichTextLogger>();
@@ -101,7 +98,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("WindowsSafe")]
         public async Task Reload_ReplaysEntriesFromExistingFile()
         {
             var path = Path.GetTempFileName();

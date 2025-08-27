@@ -21,8 +21,6 @@ namespace DesktopApplicationTemplate.Tests;
 public class MainViewHeartbeatNavigationTests
 {
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void NavigateToHeartbeat_ShowsCreateView()
     {
         if (!OperatingSystem.IsWindows())
@@ -69,8 +67,6 @@ public class MainViewHeartbeatNavigationTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void EditHeartbeatService_ShowsEditView()
     {
         if (!OperatingSystem.IsWindows())
@@ -126,8 +122,6 @@ public class MainViewHeartbeatNavigationTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void DoubleClickHeartbeatService_OpensEditView()
     {
         if (!OperatingSystem.IsWindows())

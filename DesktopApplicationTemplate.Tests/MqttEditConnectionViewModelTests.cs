@@ -28,7 +28,6 @@ public class MqttEditConnectionViewModelTests
     }
 
     [Fact]
-    [TestCategory("WindowsSafe")]
     public async Task UpdateAsync_ReconnectsWithUpdatedOptions()
     {
         if (!OperatingSystem.IsWindows()) return;
@@ -48,7 +47,6 @@ public class MqttEditConnectionViewModelTests
     }
 
     [Fact]
-    [TestCategory("WindowsSafe")]
     public async Task ToggleSubscriptionAsync_Disconnects()
     {
         if (!OperatingSystem.IsWindows()) return;
@@ -66,7 +64,6 @@ public class MqttEditConnectionViewModelTests
     }
 
     [Fact]
-    [TestCategory("WindowsSafe")]
     public void Cancel_DoesNotModifyOptions()
     {
         if (!OperatingSystem.IsWindows()) return;
@@ -85,7 +82,6 @@ public class MqttEditConnectionViewModelTests
     }
 
     [Fact]
-    [TestCategory("WindowsSafe")]
     public void Host_Invalid_AddsError()
     {
         if (!OperatingSystem.IsWindows()) return;
@@ -98,7 +94,6 @@ public class MqttEditConnectionViewModelTests
     }
 
     [Fact]
-    [TestCategory("WindowsSafe")]
     public void Port_Invalid_AddsError()
     {
         if (!OperatingSystem.IsWindows()) return;
@@ -111,7 +106,6 @@ public class MqttEditConnectionViewModelTests
     }
 
     [Fact]
-    [TestCategory("WindowsSafe")]
     public async Task UpdateAsync_UpdatesAllOptionsAndRaisesRequestClose()
     {
         if (!OperatingSystem.IsWindows()) return;
@@ -142,7 +136,6 @@ public class MqttEditConnectionViewModelTests
     }
 
     [Fact]
-    [TestCategory("WindowsSafe")]
     public void ConnectionType_WebSocket_DisablesTls()
     {
         if (!OperatingSystem.IsWindows()) return;
@@ -153,7 +146,6 @@ public class MqttEditConnectionViewModelTests
     }
 
     [Fact]
-    [TestCategory("WindowsSafe")]
     public void SubscriptionButtonText_ReflectsConnectionState()
     {
         if (!OperatingSystem.IsWindows()) return;

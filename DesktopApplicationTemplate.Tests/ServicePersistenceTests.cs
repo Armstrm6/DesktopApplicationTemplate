@@ -16,8 +16,6 @@ namespace DesktopApplicationTemplate.Tests
     public class ServicePersistenceTests
     {
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public void SaveAndLoad_RoundTripsServices()
         {
             var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
@@ -51,8 +49,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public void Save_WithCyclicalReferences_DoesNotOverflow()
         {
             var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
@@ -81,8 +77,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public void SaveAndLoad_PreservesTcpOptions()
         {
             var host = Host.CreateDefaultBuilder()
@@ -154,8 +148,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public void SaveAndLoad_PreservesFtpServerOptions()
         {
             var host = Host.CreateDefaultBuilder()
@@ -231,8 +223,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public void SaveAndLoad_PreservesLegacyFtpOptions()
         {
             var host = Host.CreateDefaultBuilder()

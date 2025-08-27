@@ -7,7 +7,6 @@ namespace DesktopApplicationTemplate.Tests;
 public class KeyboardHelperTests
 {
     [Fact]
-    [TestCategory("WindowsOnly")]
     public void ReleaseKeys_DoesNotThrow()
     {
         if (!OperatingSystem.IsWindows())

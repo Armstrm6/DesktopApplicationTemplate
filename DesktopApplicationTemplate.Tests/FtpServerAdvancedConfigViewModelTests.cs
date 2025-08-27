@@ -9,8 +9,6 @@ namespace DesktopApplicationTemplate.Tests;
 public class FtpServerAdvancedConfigViewModelTests
 {
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void RequiresCredentials_WhenNotAnonymous()
     {
         var options = new FtpServerOptions();
@@ -24,8 +22,6 @@ public class FtpServerAdvancedConfigViewModelTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void SaveCommand_RaisesSaved()
     {
         var logger = new Mock<ILoggingService>();
@@ -49,8 +45,6 @@ public class FtpServerAdvancedConfigViewModelTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void SaveCommand_DoesNotRaise_WhenInvalid()
     {
         var options = new FtpServerOptions();
@@ -70,8 +64,6 @@ public class FtpServerAdvancedConfigViewModelTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void BackCommand_RaisesBackRequested()
     {
         var options = new FtpServerOptions();

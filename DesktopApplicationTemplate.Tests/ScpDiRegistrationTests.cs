@@ -11,7 +11,6 @@ namespace DesktopApplicationTemplate.Tests;
 public class ScpDiRegistrationTests
 {
     [Fact]
-    [TestCategory("CodexSafe")]
     public void ServiceProvider_Resolves_ScpTypes()
     {
         var services = new ServiceCollection();

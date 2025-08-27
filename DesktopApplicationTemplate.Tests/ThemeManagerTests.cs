@@ -8,7 +8,6 @@ namespace DesktopApplicationTemplate.Tests
     public class ThemeManagerTests
     {
         [Fact]
-        [TestCategory("WindowsSafe")]
         public void ApplyTheme_LoadsResourceDictionary()
         {
             if (!OperatingSystem.IsWindows())

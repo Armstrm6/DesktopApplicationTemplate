@@ -21,8 +21,6 @@ namespace DesktopApplicationTemplate.Tests;
 public class MainViewHidNavigationTests
 {
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void EditHidService_ShowsEditView()
     {
         if (!OperatingSystem.IsWindows())
@@ -79,8 +77,6 @@ public class MainViewHidNavigationTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void DoubleClickHidService_OpensEditView()
     {
         if (!OperatingSystem.IsWindows())

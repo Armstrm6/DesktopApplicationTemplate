@@ -10,7 +10,6 @@ namespace DesktopApplicationTemplate.Tests;
 public class DiContainerTests
 {
     [Fact]
-    [TestCategory("CodexSafe")]
     public void ServiceProvider_BuildsSuccessfully()
     {
         var services = new ServiceCollection();

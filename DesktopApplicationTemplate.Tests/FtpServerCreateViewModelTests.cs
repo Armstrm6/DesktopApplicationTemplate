@@ -10,8 +10,6 @@ namespace DesktopApplicationTemplate.Tests;
 public class FtpServerCreateViewModelTests
 {
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void SaveCommand_RaisesServerCreated()
     {
         var logger = new Mock<ILoggingService>();
@@ -35,8 +33,6 @@ public class FtpServerCreateViewModelTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void CancelCommand_RaisesCancelled()
     {
         var vm = new FtpServerCreateViewModel(new ServiceRule(), new ServiceScreen<FtpServerOptions>());
@@ -50,8 +46,6 @@ public class FtpServerCreateViewModelTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void SettingInvalidPort_AddsError()
     {
         var vm = new FtpServerCreateViewModel(new ServiceRule(), new ServiceScreen<FtpServerOptions>());
@@ -61,8 +55,6 @@ public class FtpServerCreateViewModelTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void SettingEmptyServiceName_AddsError()
     {
         var vm = new FtpServerCreateViewModel(new ServiceRule(), new ServiceScreen<FtpServerOptions>());
@@ -72,8 +64,6 @@ public class FtpServerCreateViewModelTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void SaveCommand_DoesNotRaise_WhenInvalid()
     {
         var vm = new FtpServerCreateViewModel(new ServiceRule(), new ServiceScreen<FtpServerOptions>())
@@ -92,8 +82,6 @@ public class FtpServerCreateViewModelTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void AdvancedCommand_RaisesRequested()
     {
         var vm = new FtpServerCreateViewModel(new ServiceRule(), new ServiceScreen<FtpServerOptions>());

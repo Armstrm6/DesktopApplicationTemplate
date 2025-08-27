@@ -20,8 +20,6 @@ namespace DesktopApplicationTemplate.Tests;
 public class MainViewCreateNavigationTests
 {
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void NavigateToTcp_ShowsCreateView()
     {
         if (!OperatingSystem.IsWindows())
@@ -67,8 +65,6 @@ public class MainViewCreateNavigationTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void NavigateToFtpServer_ShowsCreateView()
     {
         if (!OperatingSystem.IsWindows())
@@ -116,8 +112,6 @@ public class MainViewCreateNavigationTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void NavigateToHid_ShowsCreateView()
     {
         if (!OperatingSystem.IsWindows())
@@ -167,8 +161,6 @@ public class MainViewCreateNavigationTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void NavigateToFileObserver_ShowsCreateView()
     {
         if (!OperatingSystem.IsWindows())
@@ -219,8 +211,6 @@ public class MainViewCreateNavigationTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void NavigateToScp_ShowsCreateView()
     {
         if (!OperatingSystem.IsWindows())

@@ -9,8 +9,6 @@ namespace DesktopApplicationTemplate.Tests
     public class HidViewModelTests
     {
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public void BuildMessage_FormatsAndForwards()
         {
             bool forwarded = false;
@@ -39,8 +37,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public void DataFlowProperties_RaisePropertyChanged()
         {
             var logger = new Mock<ILoggingService>();

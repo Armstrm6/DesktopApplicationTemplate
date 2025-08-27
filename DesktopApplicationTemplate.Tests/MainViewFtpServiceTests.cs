@@ -19,8 +19,6 @@ namespace DesktopApplicationTemplate.Tests;
 public class MainViewFtpServiceTests
 {
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void AddFtpService_SetsOptionsAndAddsService()
     {
         var thread = new Thread(() =>

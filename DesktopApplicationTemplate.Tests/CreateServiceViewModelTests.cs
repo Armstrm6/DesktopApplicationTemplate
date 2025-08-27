@@ -15,8 +15,6 @@ namespace DesktopApplicationTemplate.Tests
         [InlineData("SCP")]
         [InlineData("MQTT")]
         [InlineData("FTP Server")]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public void GenerateDefaultName_ReturnsIncrementedName(string type)
         {
             var existing = new[] { $"{type}1" };

@@ -19,8 +19,6 @@ namespace DesktopApplicationTemplate.Tests;
 public class MqttServiceTests
 {
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public async Task ConnectAsync_RaisesConnectionStateChanged()
     {
         var client = new Mock<IMqttClient>();
@@ -40,8 +38,6 @@ public class MqttServiceTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public async Task ConnectAsync_DisconnectsBeforeReconnect()
     {
         var client = new Mock<IMqttClient>();
@@ -62,7 +58,6 @@ public class MqttServiceTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
     public async Task ConnectAsync_AppliesWillAndKeepAliveOptions()
     {
         var client = new Mock<IMqttClient>();
@@ -96,7 +91,6 @@ public class MqttServiceTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
     public async Task ConnectAsync_Retries_When_Failure_And_ReconnectDelay_Set()
     {
         var client = new Mock<IMqttClient>();
@@ -113,7 +107,6 @@ public class MqttServiceTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
     public async Task ConnectAsync_AppliesTlsAndCredentials()
     {
         var client = new Mock<IMqttClient>();
@@ -145,7 +138,6 @@ public class MqttServiceTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
     public async Task SubscribeAsync_ForwardsQoS()
     {
         var client = new Mock<IMqttClient>();
@@ -162,7 +154,6 @@ public class MqttServiceTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
     public async Task PublishAsync_ResolvesTokensBeforeSending()
     {
         var client = new Mock<IMqttClient>();
@@ -180,7 +171,6 @@ public class MqttServiceTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
     public async Task PublishAsync_SendsMessagesToMultipleEndpoints()
     {
         var client = new Mock<IMqttClient>();

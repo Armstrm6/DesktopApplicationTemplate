@@ -11,8 +11,6 @@ namespace DesktopApplicationTemplate.Tests
     public class FtpServiceTests
     {
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public async Task UploadAsync_InvokesClientOperations()
         {
             var client = new Mock<FluentFTP.IAsyncFtpClient>();
@@ -35,8 +33,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public async Task UploadAsync_DisconnectsOnFailure()
         {
             var client = new Mock<FluentFTP.IAsyncFtpClient>();
@@ -57,8 +53,6 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public async Task UploadAsync_LogsStartAndFinish()
         {
             var client = new Mock<FluentFTP.IAsyncFtpClient>();
