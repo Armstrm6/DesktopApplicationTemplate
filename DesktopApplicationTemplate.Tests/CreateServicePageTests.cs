@@ -108,19 +108,14 @@ public class CreateServicePageTests
     }
 
     [Fact]
-    public void ServiceType_Click_RaisesServiceCreated_ForHttp()
+    public void ServiceType_Click_RaisesHttpSelected()
     {
         string? receivedName = null;
-        string? receivedType = null;
         var thread = new Thread(() =>
         {
             var vm = new CreateServiceViewModel();
             var page = new CreateServicePage(vm);
-            page.ServiceCreated += (name, type) =>
-            {
-                receivedName = name;
-                receivedType = type;
-            };
+            page.HttpSelected += name => receivedName = name;
             var button = new Button { DataContext = new CreateServiceViewModel.ServiceTypeMetadata("HTTP", "HTTP", string.Empty) };
             var method = typeof(CreateServicePage).GetMethod("ServiceType_Click", BindingFlags.Instance | BindingFlags.NonPublic)!;
             method.Invoke(page, new object[] { button, new RoutedEventArgs() });
@@ -129,7 +124,6 @@ public class CreateServicePageTests
         thread.Start();
         thread.Join();
         receivedName.Should().Be("HTTP1");
-        receivedType.Should().Be("HTTP");
     }
 
     [Fact]

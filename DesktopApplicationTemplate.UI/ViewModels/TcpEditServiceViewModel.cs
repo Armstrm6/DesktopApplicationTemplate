@@ -13,9 +13,20 @@ public class TcpEditServiceViewModel : TcpCreateServiceViewModel
     /// <summary>
     /// Initializes a new instance of the <see cref="TcpEditServiceViewModel"/> class.
     /// </summary>
-    public TcpEditServiceViewModel(string serviceName, TcpServiceOptions options, ILoggingService? logger = null)
+    public TcpEditServiceViewModel(ILoggingService? logger = null)
         : base(logger)
     {
+    }
+
+    /// <summary>
+    /// Loads existing options into the view model for editing.
+    /// </summary>
+    /// <param name="serviceName">Existing service name.</param>
+    /// <param name="options">Options to edit.</param>
+    public void Load(string serviceName, TcpServiceOptions options)
+    {
+        if (options is null) throw new ArgumentNullException(nameof(options));
+
         ServiceName = serviceName;
         Host = options.Host;
         Port = options.Port;

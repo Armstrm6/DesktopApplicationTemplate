@@ -11,6 +11,14 @@ Effective Prompts / Instructions that worked: User request to expose navigation 
 Decisions & Rationale: Use event-driven navigation and injection to decouple views.
 Action Items: Verify navigation on Windows CI.
 Related Commits/PRs: (this PR)
+[2025-08-27 02:13] Topic: DI load methods and TCP UDP fix
+Context: Resolved failing tests caused by DI requiring primitive parameters and UDP toggling clearing server IP.
+Observations: Added Load methods for TCP edit and SCP advanced view models, updated MainWindow to use DI-resolved instances, prevented UDP mode from overwriting ServerIp, and guarded ServicePersistence for missing files.
+Codex Limitations noticed: Linux container lacks Windows UI runtime; rely on CI for WPF validation.
+Effective Prompts / Instructions that worked: Follow AGENTS guidelines for DI and update documentation and tests accordingly.
+Decisions & Rationale: Introduce parameterless constructors to align with DI expectations and maintain network values when switching protocols.
+Action Items: Monitor CI for remaining WPF issues.
+Related Commits/PRs: (this PR)
 
 [2025-08-26 20:54] Topic: Service edit double-click tests
 Context: Ensured double-clicking a service item opens its edit view.

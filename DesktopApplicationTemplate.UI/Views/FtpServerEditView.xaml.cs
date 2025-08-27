@@ -11,7 +11,7 @@ public partial class FtpServerEditView : Page
 {
     public FtpServerEditView(FtpServerEditViewModel viewModel)
     {
-        InitializeComponent();
         DataContext = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
+        InitializeComponent();
     }
 }
