@@ -185,3 +185,4 @@
 - UDP mode no longer clears the server IP, keeping `TcpServiceMessagesViewModel` synchronized.
 - Service persistence now handles missing service files without throwing exceptions.
 - Ftp server edit view checks for a null view model before initializing XAML, preventing parse exceptions.
+

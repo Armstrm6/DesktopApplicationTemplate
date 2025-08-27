@@ -748,7 +748,6 @@ Effective Prompts / Instructions that worked: n/a
 Decisions & Rationale: Prefer removing stale classes to reduce maintenance and confusion.
 Action Items: Monitor builds for any lingering references.
 Related Commits/PRs: (this PR)
-
 [2025-08-16 18:00] Topic: MQTT enhancements
 Context: Consolidated MQTT updates: options-based configuration, tokenized endpoint/message publishing, endpoint UI with tooltips, and message routing service.
 Observations: Shared options instance simplifies updates and cleanly disconnects before reconnecting. Tests require WindowsDesktop runtime.
