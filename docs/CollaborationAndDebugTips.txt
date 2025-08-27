@@ -146,3 +146,11 @@ Effective Prompts / Instructions that worked: Use AGENTS guidelines for XAML and
 Decisions & Rationale: Explicitly declare namespaces and OS support to ensure build stability.
 Action Items: Monitor CI for Windows-specific issues.
 Related Commits/PRs:
+[2025-08-28 15:00] Topic: TextBox hint behavior parse error
+Context: Application startup failed with a XAML parse exception for TextBoxHintBehavior in Forms.xaml.
+Observations: Adding an explicit assembly reference in Forms.xaml's behaviors namespace resolved the missing type error.
+Codex Limitations noticed: Linux container lacks WindowsDesktop runtime; tests could not execute locally.
+Effective Prompts / Instructions that worked: Exception message highlighted the missing type and line number.
+Decisions & Rationale: Specify the UI assembly to ensure the XAML parser locates the behavior regardless of load context.
+Action Items: Monitor CI for any remaining XAML parse issues.
+Related Commits/PRs:
