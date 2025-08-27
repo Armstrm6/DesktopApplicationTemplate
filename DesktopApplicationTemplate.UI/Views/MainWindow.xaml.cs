@@ -503,7 +503,8 @@ namespace DesktopApplicationTemplate.UI.Views
             vm.AdvancedConfigRequested += opts2 =>
             {
                 var advVm = ActivatorUtilities.CreateInstance<FtpServerAdvancedConfigViewModel>(App.AppHost.Services, opts2);
-                var advView = ActivatorUtilities.CreateInstance<FtpServerAdvancedConfigView>(App.AppHost.Services, advVm);
+                var advView = App.AppHost.Services.GetRequiredService<FtpServerAdvancedConfigView>();
+                advView.Initialize(advVm);
                 advVm.Saved += _ => ShowPage(view);
                 advVm.BackRequested += () => ShowPage(view);
                 ShowPage(advView);
@@ -924,7 +925,8 @@ namespace DesktopApplicationTemplate.UI.Views
                 vm.AdvancedConfigRequested += opts =>
                 {
                     var advVm = ActivatorUtilities.CreateInstance<FtpServerAdvancedConfigViewModel>(App.AppHost.Services, opts);
-                    var advView = ActivatorUtilities.CreateInstance<FtpServerAdvancedConfigView>(App.AppHost.Services, advVm);
+                    var advView = App.AppHost.Services.GetRequiredService<FtpServerAdvancedConfigView>();
+                    advView.Initialize(advVm);
                     advVm.Saved += _ => ShowPage(editView);
                     advVm.BackRequested += () => ShowPage(editView);
                     ShowPage(advView);

@@ -113,3 +113,11 @@ Effective Prompts / Instructions that worked: Error log in issue description hig
 Decisions & Rationale: Set binding to one-way to align with read-only property and avoid startup crash.
 Action Items: Verify behavior on Windows CI.
 Related Commits/PRs:
+[2025-08-27 05:00] Topic: FTP advanced config DI
+Context: FtpServerAdvancedConfigView failed to construct due to mismatched constructor arguments.
+Observations: Added code-behind with logger injection and Initialize pattern; MainWindow now resolves view from DI and sets DataContext.
+Codex Limitations noticed: Linux environment lacks WPF runtime so tests cannot execute.
+Effective Prompts / Instructions that worked: Align view initialization with existing advanced config patterns and DI guidelines.
+Decisions & Rationale: Use logger-injected constructor and separate Initialize method to match other services and avoid extraneous constructor arguments.
+Action Items: Rely on CI for full test execution.
+Related Commits/PRs:
