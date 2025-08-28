@@ -357,3 +357,12 @@ Effective Prompts / Instructions that worked: User request to confirm UI build r
 Decisions & Rationale: Added assembly-qualified namespace to avoid XAML parse errors and will rely on CI for verification.
 Action Items: Rely on CI.
 Related Commits/PRs:
+
+[2025-09-23 10:00] Topic: ThemeManager test removal
+Context: ThemeManager UI test caused dispatcher access exceptions and failed locally.
+Observations: Removed the test and attempted `dotnet restore`, `dotnet build`, and `dotnet test` after installing SDK 8.0.404; build failed with missing `Microsoft.NETCore.App.Ref` assemblies.
+Codex Limitations noticed: Linux environment lacks required reference assemblies and WindowsDesktop runtime, so builds and tests cannot run.
+Effective Prompts / Instructions that worked: User request to temporarily remove failing test and repository guidance on documenting limitations.
+Decisions & Rationale: Delete unstable test and rely on CI for verification.
+Action Items: Rely on CI for Windows-specific validation.
+Related Commits/PRs:
