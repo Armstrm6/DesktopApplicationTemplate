@@ -42,7 +42,7 @@
 - TCP and SCP edit workflows now load existing options via `Load` methods, enabling DI-friendly construction.
 - Service list averages use one-way bindings to avoid runtime parse exceptions.
 - Main window declares behaviors namespace to prevent XAML parse errors.
-- Forms theme explicitly references the UI assembly for `TextBoxHintBehavior` to avoid missing type errors.
+- Forms theme uses project namespaces without assembly qualifiers and relies on SDK implicit page inclusion to load the `FormField` style without duplicate XAML item errors.
 - System namespace references and form style resources compiled to eliminate XAML parse failures.
 - Marked main window `ContentFrame` public so UI tests can inspect navigation.
 - Included `Forms.xaml` in theme resources with Page build action.

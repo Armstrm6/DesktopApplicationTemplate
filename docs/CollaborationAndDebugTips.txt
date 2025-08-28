@@ -154,6 +154,7 @@ Related Commits/PRs:
 [2025-08-27 17:47] Topic: System namespace and FormField style
 Context: XAML errors for missing System.Object and FormField style.
 Observations: Removed explicit assembly qualifier in Forms.xaml and compiled it as a Page to ensure FormField style loads.
+Additional Notes: Later removed the manual Page include since the SDK already includes XAML files implicitly, avoiding duplicate item errors.
 Effective Prompts / Instructions that worked: User request to resolve assembly and resource errors.
 Decisions & Rationale: Use project namespaces and compile resources to avoid runtime parse failures.
 Action Items: Validate changes on Windows CI.
