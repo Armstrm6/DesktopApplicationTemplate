@@ -80,7 +80,7 @@ Codex Limitations noticed: WindowsDesktop runtime unavailable, so test hosts for
 Effective Prompts / Instructions that worked: Repository guidelines to log environment constraints and rely on CI for verification.
 Decisions & Rationale: Highlight prerequisites and note that CI or a Windows host is required for full test execution.
 Action Items: Rely on CI for Windows-specific build and test.
-Notes: Documented convention to append updates within existing topic blocks and omit redundant timestamps. After adding `Forms.xaml`, `dotnet test --settings tests.runsettings` still aborts because the Microsoft.WindowsDesktop.App 8.0.0 runtime is missing and `dotnet workload install wpf` remains unrecognized on Linux.
+Notes: Documented convention to append updates within existing topic blocks and omit redundant timestamps. After adding `Forms.xaml`, `dotnet test --settings tests.runsettings` still aborts because the Microsoft.WindowsDesktop.App 8.0.0 runtime is missing and `dotnet workload install wpf` remains unrecognized on Linux. WPF projects require Windows or the WindowsDesktop runtime; without it, builds produce `InitializeComponent` and `NETSDK1100` errors.
 Related Commits/PRs:
 [2025-08-27 04:25] Topic: Logging interface restoration
 Context: Introduced core logging abstractions and refactored edit view models to support DI.
