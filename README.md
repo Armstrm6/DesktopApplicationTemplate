@@ -11,6 +11,11 @@ See `CollaborationGuidelines.txt` for tips on working with the repository. A run
 - [.NET 8 SDK](https://dotnet.microsoft.com/download) (8.0.404)
 - [Git LFS](https://git-lfs.com) for large binary assets
 - Windows OS is required to run the WPF UI and service projects.
+- WPF workload for the .NET SDK:
+
+  ```bash
+  dotnet workload install wpf
+  ```
 
 Ensure the 8.0.404 SDK is installed so the pinned `global.json` version resolves correctly.
 
@@ -32,13 +37,22 @@ repository root will automatically respect this setting.
 
 ## Initial setup
 
-After cloning the repository, run the setup script to configure the Git
-hooks and [Git LFS](https://git-lfs.com/). The script also restores
-dependencies, builds the solution, and executes the unit tests:
+After cloning the repository:
 
-```bash
-./setup.sh
-```
+- Install the WPF workload and run a full build and test cycle:
+
+  ```bash
+  dotnet workload install wpf
+  dotnet restore
+  dotnet build DesktopApplicationTemplate.sln
+  dotnet test --settings tests.runsettings
+  ```
+
+- Run the setup script to configure the Git hooks and [Git LFS](https://git-lfs.com/):
+
+  ```bash
+  ./setup.sh
+  ```
 
 Run the script any time the project dependencies or hooks need to be refreshed.
 
