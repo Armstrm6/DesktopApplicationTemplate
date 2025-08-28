@@ -336,3 +336,11 @@ Effective Prompts / Instructions that worked: Followed setup guidance to install
 Decisions & Rationale: Document limitations and rely on CI for Windows-specific build and test.
 Action Items: Rely on CI for successful build and test.
 Related Commits/PRs:
+[2025-09-16 10:00] Topic: WpfFact CA1416 guard
+Context: Build failed due to Windows-only `Thread.SetApartmentState` usage in WPF test case.
+Observations: Wrapped `SetApartmentState` call in `OperatingSystem.IsWindows` check; CA1416 no longer triggers but UI tests still fail to compile. `dotnet workload install wpf` remains unrecognized on Linux.
+Codex Limitations noticed: WPF workload and WindowsDesktop runtime unavailable; test builds fail with missing WPF members and packages.
+Effective Prompts / Instructions that worked: User request to guard Windows-specific API.
+Decisions & Rationale: Guard thread setup to silence analyzer while WindowsFact skips tests on non-Windows hosts.
+Action Items: Rely on CI for Windows build and test.
+Related Commits/PRs: e91c00d
