@@ -15,7 +15,7 @@
 - Renamed root `CollaborationAndDebugTips.txt` to `CollaborationGuidelines.txt` and clarified distinction from `docs/CollaborationAndDebugTips.txt`.
 - Updated `global.json` to require the .NET 8 SDK version `8.0.404`.
 - Disabled default `AutoStart` and set environment configuration files to `"AutoStart": false`.
-- Core library now multi-targets `net8.0` and `net8.0-windows`.
+- Core library targets `net8.0` to avoid Windows targeting pack restore errors.
 - Adjusted solution and project references so cross-platform assemblies depend only on the core while Windows projects also reference `DesktopApplicationTemplate.Windows`.
 
 ### Navigation & UI
@@ -44,6 +44,7 @@
 - Main window declares behaviors namespace to prevent XAML parse errors.
 - Forms theme explicitly references the UI assembly for `TextBoxHintBehavior` to avoid missing type errors.
 - System namespace references and form style resources compiled to eliminate XAML parse failures.
+- Marked main window `ContentFrame` public so UI tests can inspect navigation.
 
 ### HID Service
 #### Added
@@ -177,4 +178,5 @@
 - Added missing `FluentAssertions` package reference to the test project and documented dependency checks to avoid build failures.
 - Removed duplicate using directives and missing namespace references that prevented solution builds.
 - Guarded WPF test thread apartment configuration with an OS check to avoid CA1416 build errors on non-Windows hosts.
+- Added `StubFileDialogService` to test project and updated MQTT and FTP UI tests for API changes.
 

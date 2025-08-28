@@ -115,7 +115,7 @@
 
             <!-- Content and Logs Panel -->
             <Grid Grid.Column="1">
-                <Frame x:Name="ContentFrame" NavigationUIVisibility="Hidden" Visibility="Collapsed" />
+                <Frame x:Name="ContentFrame" x:FieldModifier="public" NavigationUIVisibility="Hidden" Visibility="Collapsed" />
 
                 <Grid x:Name="HomeContentGrid">
                     <Grid.RowDefinitions>

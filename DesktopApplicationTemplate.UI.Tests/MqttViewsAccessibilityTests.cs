@@ -53,7 +53,7 @@ namespace DesktopApplicationTemplate.Tests
                     if (Application.Current == null)
                         new DesktopApplicationTemplate.UI.App();
                     var options = Options.Create(new MqttServiceOptions { Host = "h", Port = 1, ClientId = "c" });
-                    var service = new MqttService(new Mock<IMqttClient>().Object, options, new Mock<IMessageRoutingService>().Object, new Mock<ILoggingService>().Object);
+                    var service = new MqttService(options, new Mock<IMessageRoutingService>().Object, new Mock<ILoggingService>().Object);
                     var vm = new MqttEditConnectionViewModel(service, options, new Mock<ILoggingService>().Object);
                     var view = new MqttEditConnectionView(vm);
                     var update = (Button)view.FindName("UpdateButton");
@@ -81,7 +81,7 @@ namespace DesktopApplicationTemplate.Tests
                     if (Application.Current == null)
                         new DesktopApplicationTemplate.UI.App();
                     var options = Options.Create(new MqttServiceOptions { Host = "h", Port = 1, ClientId = "c" });
-                    var service = new MqttService(new Mock<IMqttClient>().Object, options, new Mock<IMessageRoutingService>().Object, new Mock<ILoggingService>().Object);
+                    var service = new MqttService(options, new Mock<IMessageRoutingService>().Object, new Mock<ILoggingService>().Object);
                     var vm = new MqttTagSubscriptionsViewModel(service) { Logger = new Mock<ILoggingService>().Object };
                     var view = new MqttTagSubscriptionsView(vm, new Mock<ILoggingService>().Object);
                     var send = (Button)view.FindName("SendButton");
