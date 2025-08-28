@@ -73,6 +73,14 @@ Effective Prompts / Instructions that worked: Use `AddConsole()` and `AddDebug()
 Decisions & Rationale: Start with infrastructure pieces before addressing individual view models.
 Action Items: Migrate remaining classes to `ILogger<T>` and update tests.
 Related Commits/PRs:
+[2025-09-15 14:00] Topic: Platform-specific test execution
+Context: Documented SDK and WPF workload prerequisites and standard build/test commands.
+Observations: `dotnet restore`, `dotnet build DesktopApplicationTemplate.sln`, and `dotnet test --settings tests.runsettings` fail because the .NET SDK and WindowsDesktop runtime are missing on Linux.
+Codex Limitations noticed: `dotnet` CLI and WindowsDesktop runtime unavailable, so tests cannot run locally.
+Effective Prompts / Instructions that worked: Repository guidelines to log environment constraints and rely on CI for verification.
+Decisions & Rationale: Highlight prerequisites and note that CI or a Windows host is required for full test execution.
+Action Items: Rely on CI for Windows-specific build and test.
+Related Commits/PRs:
 [2025-08-27 04:25] Topic: Logging interface restoration
 Context: Introduced core logging abstractions and refactored edit view models to support DI.
 Observations: Added ILoggingService, LogLevel enum, moved LogEntry to core, and implemented Load methods on TCP and SCP edit view models.
@@ -310,4 +318,13 @@ Codex Limitations noticed: `dotnet` CLI and Windows desktop runtime unavailable 
 Effective Prompts / Instructions that worked: User request to centralize shared test helpers.
 Decisions & Rationale: Reduce duplication and simplify maintenance by sharing fixtures.
 Action Items: Rely on CI for test execution.
+Related Commits/PRs:
+
+[2025-09-15 14:00] Topic: Platform-specific test execution
+Context: Documented SDK and WPF workload prerequisites and standard build/test commands.
+Observations: `dotnet restore`, `dotnet build DesktopApplicationTemplate.sln`, and `dotnet test --settings tests.runsettings` fail because the .NET SDK and WindowsDesktop runtime are missing on Linux.
+Codex Limitations noticed: `dotnet` CLI and WindowsDesktop runtime unavailable, so tests cannot run locally.
+Effective Prompts / Instructions that worked: Repository guidelines to log environment constraints and rely on CI for verification.
+Decisions & Rationale: Highlight prerequisites and note that CI or a Windows host is required for full test execution.
+Action Items: Rely on CI for Windows-specific build and test.
 Related Commits/PRs:
