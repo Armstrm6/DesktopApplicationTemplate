@@ -237,3 +237,11 @@ Effective Prompts / Instructions that worked: User request to drop Windows-speci
 Decisions & Rationale: Update tests to target net8.0; rely on CI or future core refactor for full cross-platform support.
 Action Items: none
 Related Commits/PRs:
+[2025-09-10 00:00] Topic: WPF workload requirement
+Context: Documented need for WPF workload and full build/test cycle after installation.
+Observations: `dotnet workload install wpf` is not recognized on Linux; restore/build/test fail due to Windows-only dependencies.
+Codex Limitations noticed: Linux container lacks WPF workload and WindowsDesktop runtime.
+Effective Prompts / Instructions that worked: User request to clarify prerequisites and setup steps.
+Decisions & Rationale: Add README guidance for installing WPF workload and running `dotnet restore`, `dotnet build`, and `dotnet test`.
+Action Items: Rely on CI or Windows host for successful build and test.
+Related Commits/PRs:
