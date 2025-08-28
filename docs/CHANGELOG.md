@@ -159,6 +159,7 @@
 - `CONTRIBUTING.md` and PR template enforcing CI-only testing with a CI badge in the README.
 - `/test` comment workflow to run CI on demand.
 - Dedicated `DesktopApplicationTemplate.UI.Tests` project targeting `net8.0-windows` for WPF-specific tests.
+- `WindowsFact` and `WindowsTheory` attributes skipping tests on non-Windows hosts.
 
 #### Changed
 - Consolidated GitHub Actions into a single `CI` workflow with collaboration instructions in `AGENTS.md`.

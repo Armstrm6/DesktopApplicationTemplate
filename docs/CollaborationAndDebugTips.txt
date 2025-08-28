@@ -295,3 +295,11 @@ Effective Prompts / Instructions that worked: User request to isolate WPF tests 
 Decisions & Rationale: Separate UI tests to keep non-WPF tests independent and clarify responsibilities.
 Action Items: Rely on CI for WPF test execution.
 Related Commits/PRs:
+[2025-09-14 09:00] Topic: Windows-only test attributes
+Context: Added WindowsFact/WindowsTheory and updated WpfFact to inherit WindowsFact.
+Observations: Attributes skip on non-Windows hosts so UI tests rely on CI.
+Codex Limitations noticed: Linux container lacks Microsoft.WindowsDesktop runtime; build and test commands fail.
+Effective Prompts / Instructions that worked: User request to skip Windows-only tests.
+Decisions & Rationale: Inherit WpfFact from WindowsFact to avoid annotating each test.
+Action Items: Rely on CI for verification.
+Related Commits/PRs:

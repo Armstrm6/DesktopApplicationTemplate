@@ -19,7 +19,7 @@ namespace DesktopApplicationTemplate.Tests
 {
     public class LoggingServiceTests
     {
-        [WpfTheory]
+[WindowsTheory]
         [InlineData(LogLevel.Debug)]
         [InlineData(LogLevel.Warning)]
         [InlineData(LogLevel.Error)]
