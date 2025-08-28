@@ -360,3 +360,12 @@ Effective Prompts / Instructions that worked: Repository instruction to log envi
 Decisions & Rationale: Document limitation and rely on CI for Windows build and tests.
 Action Items: none
 Related Commits/PRs:
+[2025-09-17 09:00] Topic: AsyncRelayCommand build verification
+Context: Verified AsyncRelayCommand usages and attempted solution build and test.
+Observations: All files using AsyncRelayCommand already include DesktopApplicationTemplate.UI.Helpers and consuming projects reference DesktopApplicationTemplate.UI. Installed .NET SDK 8.0.404 but 'dotnet workload install wpf' reported 'Workload ID wpf is not recognized'; subsequent build and test commands failed with WPF control reference errors.
+Codex Limitations noticed: WPF workload unavailable on Linux; build/test fail due to missing WindowsDesktop dependencies.
+Effective Prompts / Instructions that worked: Repository instructions for dotnet installation and logging limitations.
+Decisions & Rationale: Confirmed references, documented environment constraints, and will rely on CI for Windows validation.
+Action Items: Rely on CI.
+Related Commits/PRs:
+
