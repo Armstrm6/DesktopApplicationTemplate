@@ -31,6 +31,11 @@ GitHub Workflow Notes
 - After all code updates, run `dotnet test` and include the output in the pull request.
 - Only committed code is evaluated, so ensure the working tree is clean before calling `make_pr`.
 
+Documentation Style
+-------------------
+- When updating `docs/CHANGELOG.md` or `docs/CollaborationAndDebugTips.txt`, find the existing topic and insert new notes within that block.
+- Add a timestamp only when starting a new topic to prevent redundant entries.
+
 Draw.io Integration
 -------------------
 - Store architecture diagrams as `.drawio` files in the `design` directory.

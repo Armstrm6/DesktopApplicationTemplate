@@ -80,6 +80,7 @@ Codex Limitations noticed: `dotnet` CLI and WindowsDesktop runtime unavailable, 
 Effective Prompts / Instructions that worked: Repository guidelines to log environment constraints and rely on CI for verification.
 Decisions & Rationale: Highlight prerequisites and note that CI or a Windows host is required for full test execution.
 Action Items: Rely on CI for Windows-specific build and test.
+Notes: Documented convention to append updates within existing topic blocks and omit redundant timestamps.
 Related Commits/PRs:
 [2025-08-27 04:25] Topic: Logging interface restoration
 Context: Introduced core logging abstractions and refactored edit view models to support DI.
@@ -320,14 +321,6 @@ Decisions & Rationale: Reduce duplication and simplify maintenance by sharing fi
 Action Items: Rely on CI for test execution.
 Related Commits/PRs:
 
-[2025-09-15 14:00] Topic: Platform-specific test execution
-Context: Documented SDK and WPF workload prerequisites and standard build/test commands.
-Observations: `dotnet restore`, `dotnet build DesktopApplicationTemplate.sln`, and `dotnet test --settings tests.runsettings` fail because the .NET SDK and WindowsDesktop runtime are missing on Linux.
-Codex Limitations noticed: `dotnet` CLI and WindowsDesktop runtime unavailable, so tests cannot run locally.
-Effective Prompts / Instructions that worked: Repository guidelines to log environment constraints and rely on CI for verification.
-Decisions & Rationale: Highlight prerequisites and note that CI or a Windows host is required for full test execution.
-Action Items: Rely on CI for Windows-specific build and test.
-Related Commits/PRs:
 [2025-08-28 15:35] Topic: dotnet restore/build on Linux
 Context: Installed .NET SDK 8.0.404 via script to run restore and build commands.
 Observations: `dotnet restore DesktopApplicationTemplate.Core` succeeded; `dotnet workload install wpf` reported "Workload ID wpf is not recognized"; `dotnet build DesktopApplicationTemplate.sln` failed with CA1416 for `Thread.SetApartmentState` in `WpfFactAttribute`.

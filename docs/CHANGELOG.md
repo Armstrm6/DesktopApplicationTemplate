@@ -168,6 +168,7 @@
 - CI workflow runs on pushes to `feature/**` and `bugfix/**` branches, supports manual triggers, and skips checks for pull requests targeting `dev`.
 - Updated GitHub workflows to install the WPF workload instead of the deprecated `windowsdesktop` workload.
 - Reorganized collaboration log into topic-based blocks and added logging guidelines.
+- Clarified that new notes should extend existing topic blocks without repeating timestamps.
 - Removed Codex-specific tests and categories, eliminating the `CodexSafe` trait and custom `TestCategoryAttribute`.
 - Setup script now runs only the primary test suite after removing the Codex test project.
 - Removed Windows desktop runtime checks from tests so they run when Visual Studio provides the runtime.
