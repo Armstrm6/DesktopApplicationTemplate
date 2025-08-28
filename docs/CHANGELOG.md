@@ -45,6 +45,7 @@
 - Forms theme explicitly references the UI assembly for `TextBoxHintBehavior` to avoid missing type errors.
 - System namespace references and form style resources compiled to eliminate XAML parse failures.
 - Marked main window `ContentFrame` public so UI tests can inspect navigation.
+- Included `Forms.xaml` in theme resources with Page build action.
 
 ### HID Service
 #### Added
