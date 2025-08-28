@@ -3,9 +3,11 @@ using DesktopApplicationTemplate.UI.Behaviors;
 using FluentAssertions;
 using Xunit;
 
+namespace DesktopApplicationTemplate.Tests;
+
 public class TextBoxHintBehaviorTests
 {
-    [Theory]
+    [WindowsTheory]
     [InlineData("ServiceName", "Service Name")]
     [InlineData("TcpIp", "Tcp Ip")]
     public void GetFriendlyName_Splits_CamelCase(string input, string expected)
@@ -13,7 +15,7 @@ public class TextBoxHintBehaviorTests
         TextBoxHintBehavior.GetFriendlyName(input).Should().Be(expected);
     }
 
-    [Fact]
+    [WindowsFact]
     public void GetFriendlyName_Throws_When_Null()
     {
         Action act = () => TextBoxHintBehavior.GetFriendlyName(null!);
