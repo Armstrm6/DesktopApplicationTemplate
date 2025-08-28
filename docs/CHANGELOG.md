@@ -44,6 +44,7 @@
 - Main window declares behaviors namespace to prevent XAML parse errors.
 - Forms theme explicitly references the UI assembly for `TextBoxHintBehavior` to avoid missing type errors.
 - System namespace references and form style resources compiled to eliminate XAML parse failures.
+- Marked main window `ContentFrame` public so UI tests can inspect navigation.
 
 ### HID Service
 #### Added
@@ -177,4 +178,5 @@
 - Added missing `FluentAssertions` package reference to the test project and documented dependency checks to avoid build failures.
 - Removed duplicate using directives and missing namespace references that prevented solution builds.
 - Guarded WPF test thread apartment configuration with an OS check to avoid CA1416 build errors on non-Windows hosts.
+- Added `StubFileDialogService` to test project and updated MQTT and FTP UI tests for API changes.
 
