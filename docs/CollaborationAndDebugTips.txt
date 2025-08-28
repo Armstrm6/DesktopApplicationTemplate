@@ -271,3 +271,12 @@ Effective Prompts / Instructions that worked: User request to remove WPF depende
 Decisions & Rationale: Use hex strings to represent colors for platform neutrality.
 Action Items: Rely on CI for full test execution.
 Related Commits/PRs:
+
+[2025-09-11 09:00] Topic: Project reference alignment
+Context: Added core dependency to `DesktopApplicationTemplate.Windows` and updated changelog to clarify project references.
+Observations: Non-Windows assemblies now depend solely on the cross-platform core; Windows projects reference both core and Windows library.
+Codex Limitations noticed: Installed dotnet-sdk-8.0 (8.0.119) but global.json requires 8.0.404; restore/build/test commands fail.
+Effective Prompts / Instructions that worked: Repository guidance on logging limitations and project reference adjustments.
+Decisions & Rationale: Tie Windows library to core to unify shared services.
+Action Items: Rely on CI for verification.
+Related Commits/PRs:

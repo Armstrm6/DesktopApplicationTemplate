@@ -5,4 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DesktopApplicationTemplate.Core\DesktopApplicationTemplate.Core.csproj" />
+  </ItemGroup>
 </Project>
