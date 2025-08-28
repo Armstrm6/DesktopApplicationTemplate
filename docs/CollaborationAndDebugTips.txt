@@ -229,3 +229,11 @@ Effective Prompts / Instructions that worked: User request to remove environment
 Decisions & Rationale: Allow tests to run on capable machines and rely on CI for verification.
 Action Items: Rely on CI for full test run.
 Related Commits/PRs:
+[2025-09-09 12:30] Topic: Core tests cross-platform compatibility
+Context: Changed test project to target net8.0 and removed UseWPF so it can run on non-Windows hosts.
+Observations: Installing .NET SDK 8.0.404 succeeded, but `dotnet restore` fails because the core library targets net8.0-windows.
+Codex Limitations noticed: Core project requires Windows-specific framework preventing local test execution.
+Effective Prompts / Instructions that worked: User request to drop Windows-specific framework from tests.
+Decisions & Rationale: Update tests to target net8.0; rely on CI or future core refactor for full cross-platform support.
+Action Items: none
+Related Commits/PRs:
