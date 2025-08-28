@@ -22,7 +22,6 @@ public class MainViewCreateNavigationTests
     [WpfFact]
     public void NavigateToTcp_ShowsCreateView()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
         var thread = new Thread(() =>
         {
@@ -66,7 +65,6 @@ public class MainViewCreateNavigationTests
     [WpfFact]
     public void NavigateToFtpServer_ShowsCreateView()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
         var thread = new Thread(() =>
         {
@@ -112,7 +110,6 @@ public class MainViewCreateNavigationTests
     [WpfFact]
     public void NavigateToHid_ShowsCreateView()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
         var thread = new Thread(() =>
         {
@@ -160,7 +157,6 @@ public class MainViewCreateNavigationTests
     [WpfFact]
     public void NavigateToFileObserver_ShowsCreateView()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
         var thread = new Thread(() =>
         {
@@ -209,7 +205,6 @@ public class MainViewCreateNavigationTests
     [WpfFact]
     public void NavigateToScp_ShowsCreateView()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
         var thread = new Thread(() =>
         {

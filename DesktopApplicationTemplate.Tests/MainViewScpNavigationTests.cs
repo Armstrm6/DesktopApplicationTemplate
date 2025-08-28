@@ -22,7 +22,6 @@ public class MainViewScpNavigationTests
     [WpfFact]
     public void EditScpService_ShowsEditView()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
         var thread = new Thread(() =>
         {
@@ -77,7 +76,6 @@ public class MainViewScpNavigationTests
     [WpfFact]
     public void DoubleClickScpService_OpensEditView()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
         var thread = new Thread(() =>
         {

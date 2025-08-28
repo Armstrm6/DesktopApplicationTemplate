@@ -23,7 +23,6 @@ public class MainViewFileObserverNavigationTests
     [WpfFact]
     public void EditFileObserverService_ShowsEditView()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
         var thread = new Thread(() =>
         {
@@ -79,7 +78,6 @@ public class MainViewFileObserverNavigationTests
     [WpfFact]
     public void DoubleClickFileObserverService_OpensEditView()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
         var thread = new Thread(() =>
         {

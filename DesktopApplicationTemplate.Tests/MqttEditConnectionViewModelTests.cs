@@ -27,10 +27,9 @@ public class MqttEditConnectionViewModelTests
         return new MqttEditConnectionViewModel(service, options, Mock.Of<ILoggingService>());
     }
 
-    [SkippableFact]
+    [Fact]
     public async Task UpdateAsync_ReconnectsWithUpdatedOptions()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
         var client = new Mock<IMqttClient>();
         client.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new MqttClientConnectResult());
@@ -46,10 +45,9 @@ public class MqttEditConnectionViewModelTests
         client.Verify(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    [SkippableFact]
+    [Fact]
     public async Task ToggleSubscriptionAsync_Disconnects()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
         var client = new Mock<IMqttClient>();
         client.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new MqttClientConnectResult());
@@ -63,10 +61,9 @@ public class MqttEditConnectionViewModelTests
         Assert.True(closed);
     }
 
-    [SkippableFact]
+    [Fact]
     public void Cancel_DoesNotModifyOptions()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
         var client = new Mock<IMqttClient>();
         client.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new MqttClientConnectResult());
@@ -81,10 +78,9 @@ public class MqttEditConnectionViewModelTests
         Assert.True(closed);
     }
 
-    [SkippableFact]
+    [Fact]
     public void Host_Invalid_AddsError()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
         var vm = CreateViewModel();
         var original = vm.Host;
         vm.Host = "bad host";
@@ -93,10 +89,9 @@ public class MqttEditConnectionViewModelTests
         Assert.Contains("Invalid host", vm.GetErrors(nameof(vm.Host)).Cast<string>());
     }
 
-    [SkippableFact]
+    [Fact]
     public void Port_Invalid_AddsError()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
         var vm = CreateViewModel();
         var original = vm.Port;
         vm.Port = 70000;
@@ -105,10 +100,9 @@ public class MqttEditConnectionViewModelTests
         Assert.Contains("Port must be 1-65535", vm.GetErrors(nameof(vm.Port)).Cast<string>());
     }
 
-    [SkippableFact]
+    [Fact]
     public async Task UpdateAsync_UpdatesAllOptionsAndRaisesRequestClose()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
         var client = new Mock<IMqttClient>();
         client.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new MqttClientConnectResult());
@@ -135,20 +129,18 @@ public class MqttEditConnectionViewModelTests
         Assert.True(closed);
     }
 
-    [SkippableFact]
+    [Fact]
     public void ConnectionType_WebSocket_DisablesTls()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
         var vm = CreateViewModel();
         vm.ConnectionType = MqttConnectionType.WebSocket;
         Assert.False(vm.IsTlsEnabled);
         Assert.False(vm.UseTls);
     }
 
-    [SkippableFact]
+    [Fact]
     public void SubscriptionButtonText_ReflectsConnectionState()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
         var vm = CreateViewModel();
         Assert.Equal("Subscribe", vm.SubscriptionButtonText);
         vm.GetType().GetProperty("IsConnected")!.SetValue(vm, true);

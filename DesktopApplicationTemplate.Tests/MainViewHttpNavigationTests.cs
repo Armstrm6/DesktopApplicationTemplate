@@ -22,7 +22,6 @@ public class MainViewHttpNavigationTests
     [WpfFact]
     public void NavigateToHttp_ShowsCreateView()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
         var thread = new Thread(() =>
         {
@@ -67,7 +66,6 @@ public class MainViewHttpNavigationTests
     [WpfFact]
     public void EditHttpService_ShowsEditView()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
         var thread = new Thread(() =>
         {
@@ -121,7 +119,6 @@ public class MainViewHttpNavigationTests
     [WpfFact]
     public void DoubleClickHttpService_OpensEditView()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
         var thread = new Thread(() =>
         {

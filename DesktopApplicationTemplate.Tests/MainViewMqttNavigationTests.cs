@@ -20,7 +20,6 @@ public class MainViewMqttNavigationTests
     [WpfFact]
     public void CreateMqttService_Advanced_Back_ReturnsToCreateView()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
         var thread = new Thread(() =>
         {
@@ -75,7 +74,6 @@ public class MainViewMqttNavigationTests
     [WpfFact]
     public void EditMqttService_ShowsEditView()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
         var thread = new Thread(() =>
         {

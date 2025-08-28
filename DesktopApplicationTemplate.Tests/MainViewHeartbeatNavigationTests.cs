@@ -23,7 +23,6 @@ public class MainViewHeartbeatNavigationTests
     [WpfFact]
     public void NavigateToHeartbeat_ShowsCreateView()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
         var thread = new Thread(() =>
         {
@@ -68,7 +67,6 @@ public class MainViewHeartbeatNavigationTests
     [WpfFact]
     public void EditHeartbeatService_ShowsEditView()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
         var thread = new Thread(() =>
         {
@@ -122,7 +120,6 @@ public class MainViewHeartbeatNavigationTests
     [WpfFact]
     public void DoubleClickHeartbeatService_OpensEditView()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
         var thread = new Thread(() =>
         {

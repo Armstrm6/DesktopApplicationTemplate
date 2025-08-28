@@ -18,7 +18,6 @@ namespace DesktopApplicationTemplate.Tests
         [WpfFact]
         public void HttpServiceView_LogLevelSelection_UpdatesLogger()
         {
-            Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
             Exception? ex = null;
             var thread = new Thread(() =>

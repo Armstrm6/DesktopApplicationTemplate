@@ -38,20 +38,18 @@ public class MqttServiceViewModelTests
         return new MqttServiceViewModel(service, routing.Object, helper, options, logger);
     }
 
-    [SkippableFact]
+    [Fact]
     public void AddTopicCommand_AddsTopic()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
         var vm = CreateViewModel();
         vm.NewTopic = "test/topic";
         vm.AddTopicCommand.Execute(null);
         Assert.Contains("test/topic", vm.Topics);
     }
 
-    [SkippableFact]
+    [Fact]
     public void AddMessageCommand_AddsPair()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
         var vm = CreateViewModel();
         vm.NewEndpoint = "endpoint";
         vm.NewMessage = "payload";
@@ -59,10 +57,9 @@ public class MqttServiceViewModelTests
         Assert.Single(vm.Messages);
     }
 
-    [SkippableFact]
+    [Fact]
     public void RemoveMessageCommand_RemovesSelectedPair()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
         var vm = CreateViewModel();
         vm.Messages.Add(new MqttEndpointMessage { Endpoint = "t", Message = "m" });
         vm.SelectedMessage = vm.Messages.First();
@@ -70,10 +67,9 @@ public class MqttServiceViewModelTests
         Assert.Empty(vm.Messages);
     }
 
-    [SkippableFact]
+    [Fact]
     public async Task ConnectAsync_SetsIsConnected()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
         var client = new Mock<IMqttClient>();
         client.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new MqttClientConnectResult());
@@ -83,10 +79,9 @@ public class MqttServiceViewModelTests
         client.Verify(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    [SkippableFact]
+    [Fact]
     public async Task ConnectAsync_InvalidOptions_RaisesEditRequested()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
         var client = new Mock<IMqttClient>();
         client.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new ArgumentException("Host cannot be null"));
@@ -97,10 +92,9 @@ public class MqttServiceViewModelTests
         Assert.True(raised);
     }
 
-    [SkippableFact]
+    [Fact]
     public async Task PublishSelectedAsync_ResolvesTokens()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
         var routing = new Mock<IMessageRoutingService>();
         routing.Setup(r => r.ResolveTokens("endpoint")).Returns("resolvedEndpoint");
         routing.Setup(r => r.ResolveTokens("payload")).Returns("resolvedPayload");
@@ -116,46 +110,41 @@ public class MqttServiceViewModelTests
         client.Verify(c => c.PublishAsync(It.Is<MqttApplicationMessage>(m => m.Topic == "resolvedEndpoint" && m.ConvertPayloadToString() == "resolvedPayload"), It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    [SkippableFact]
+    [Fact]
     public void PortSetter_RejectsOutOfRange()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
         var vm = CreateViewModel();
         vm.Port = 70000;
         Assert.Contains("Port must be 1-65535", vm.GetErrors(nameof(vm.Port)).Cast<string>());
     }
 
-    [SkippableFact]
+    [Fact]
     public void HostSetter_InvalidAddsError()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
         var vm = CreateViewModel();
         vm.Host = "invalid_host";
         Assert.Contains("Invalid host", vm.GetErrors(nameof(vm.Host)).Cast<string>());
     }
 
-    [SkippableFact]
+    [Fact]
     public void KeepAliveSecondsSetter_RejectsOutOfRange()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
         var vm = CreateViewModel();
         vm.KeepAliveSeconds = -1;
         Assert.Contains("Keep alive must be 0-65535", vm.GetErrors(nameof(vm.KeepAliveSeconds)).Cast<string>());
     }
 
-    [SkippableFact]
+    [Fact]
     public void ReconnectDelaySetter_RejectsNegative()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
         var vm = CreateViewModel();
         vm.ReconnectDelay = -5;
         Assert.Contains("Reconnect delay must be >= 0", vm.GetErrors(nameof(vm.ReconnectDelay)).Cast<string>());
     }
 
-    [SkippableFact]
+    [Fact]
     public void WillQualityOfServiceSetter_InvalidAddsError()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
         var vm = CreateViewModel();
         vm.WillQualityOfService = (MqttQualityOfServiceLevel)99;
         Assert.Contains("Invalid QoS", vm.GetErrors(nameof(vm.WillQualityOfService)).Cast<string>());

@@ -11,7 +11,6 @@ namespace DesktopApplicationTemplate.Tests
         [WpfFact]
         public void BubblyWindowStyle_LoadsWithRoundedCorners()
         {
-            Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
             Exception? capturedException = null;
             var thread = new Thread(() =>

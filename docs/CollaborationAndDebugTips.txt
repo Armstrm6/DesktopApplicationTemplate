@@ -220,3 +220,12 @@ Effective Prompts / Instructions that worked: Compiler errors highlighting missi
 Decisions & Rationale: Clean up using statements and import model namespaces to restore compilation.
 Action Items: Rely on CI for Windows-specific test execution.
 Related Commits/PRs:
+
+[2025-09-09 00:00] Topic: Windows runtime test skips removal
+Context: Removed Windows desktop runtime checks and SkippableFact attributes so tests run when Visual Studio provides the runtime.
+Observations: Tests still cannot execute in the container because the Microsoft.WindowsDesktop runtime is absent.
+Codex Limitations noticed: Missing WindowsDesktop runtime prevents local test execution.
+Effective Prompts / Instructions that worked: User request to remove environment check.
+Decisions & Rationale: Allow tests to run on capable machines and rely on CI for verification.
+Action Items: Rely on CI for full test run.
+Related Commits/PRs:

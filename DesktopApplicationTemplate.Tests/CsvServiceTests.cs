@@ -195,7 +195,6 @@ namespace DesktopApplicationTemplate.Tests
         [WpfFact]
         public void CsvServiceView_LoadsInto_ContentFrame()
         {
-            Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
             Exception? ex = null;
             var thread = new Thread(() =>
