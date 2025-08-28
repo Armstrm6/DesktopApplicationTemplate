@@ -245,3 +245,12 @@ Effective Prompts / Instructions that worked: User request to clarify prerequisi
 Decisions & Rationale: Add README guidance for installing WPF workload and running `dotnet restore`, `dotnet build`, and `dotnet test`.
 Action Items: Rely on CI or Windows host for successful build and test.
 Related Commits/PRs:
+
+[2025-09-10 08:00] Topic: Setup script OS detection
+Context: Added OS detection so the setup script installs the WPF workload only on Windows.
+Observations: Running on Linux skipped the workload; restore/build/test still fail due to missing Microsoft.WindowsDesktop runtime.
+Codex Limitations noticed: Linux container lacks WindowsDesktop runtime so tests cannot execute.
+Effective Prompts / Instructions that worked: User request to conditionally install the WPF workload while honoring `SKIP_WORKLOAD`.
+Decisions & Rationale: Use `$OSTYPE`/`dotnet --info` to determine OS and log when skipping; rely on CI for Windows validation.
+Action Items: Rely on CI for Windows-specific build and test.
+Related Commits/PRs:
