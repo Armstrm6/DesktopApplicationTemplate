@@ -56,13 +56,13 @@ namespace DesktopApplicationTemplate.UI.Services
             _ = WriteToFileAsync(entry.Message + Environment.NewLine);
         }
 
-        private static System.Windows.Media.Brush LevelToColor(LogLevel level) => level switch
+        private static string LevelToColor(LogLevel level) => level switch
         {
-            LogLevel.Debug => System.Windows.Media.Brushes.Black,
-            LogLevel.Warning => System.Windows.Media.Brushes.Orange,
-            LogLevel.Error => System.Windows.Media.Brushes.Red,
-            LogLevel.Critical => System.Windows.Media.Brushes.DarkRed,
-            _ => System.Windows.Media.Brushes.Black
+            LogLevel.Debug => "#000000",
+            LogLevel.Warning => "#FFA500",
+            LogLevel.Error => "#FF0000",
+            LogLevel.Critical => "#8B0000",
+            _ => "#000000"
         };
 
         public void Reload()
