@@ -1,5 +1,4 @@
-using System.Threading;
-using System.Windows.Controls;
+using System;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Views;
 using FluentAssertions;
@@ -11,39 +10,22 @@ public class FtpServerEditViewTests
     [WpfFact]
     public void Constructor_SetsDataContext()
     {
-        FtpServerEditView? view = null;
-        var thread = new Thread(() =>
-        {
-            var vm = new FtpServerEditViewModel("ftp", new());
-            view = new FtpServerEditView(vm);
-        });
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        thread.Join();
+        ApplicationResourceHelper.EnsureApplication();
 
-        view!.DataContext.Should().BeOfType<FtpServerEditViewModel>();
+        var vm = new FtpServerEditViewModel("ftp", new());
+        var view = new FtpServerEditView(vm);
+
+        view.DataContext.Should().BeOfType<FtpServerEditViewModel>();
     }
 
     [WpfFact]
     public void Constructor_Throws_When_ViewModelNull()
     {
-        Exception? ex = null;
-        var thread = new Thread(() =>
-        {
-            try
-            {
-                _ = new FtpServerEditView(null!);
-            }
-            catch (Exception e)
-            {
-                ex = e;
-            }
-        });
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        thread.Join();
+        ApplicationResourceHelper.EnsureApplication();
 
-        ex.Should().BeOfType<ArgumentNullException>()
-            .Which.ParamName.Should().Be("viewModel");
+        Action act = () => new FtpServerEditView(null!);
+
+        act.Should().Throw<ArgumentNullException>()
+            .And.ParamName.Should().Be("viewModel");
     }
 }

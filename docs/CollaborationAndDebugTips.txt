@@ -75,7 +75,7 @@ Action Items: Migrate remaining classes to `ILogger<T>` and update tests.
 Related Commits/PRs:
 [2025-09-15 14:00] Topic: Platform-specific test execution
 Context: Documented SDK and WPF workload prerequisites and standard build/test commands.
-Observations: With the .NET SDK 8.0.404 installed, `dotnet restore` and `dotnet build DesktopApplicationTemplate.sln` succeed, but `dotnet test --settings tests.runsettings --no-build` aborts because the Microsoft.WindowsDesktop.App 8.0.0 runtime is missing on Linux. Attempting `dotnet workload install wpf` reports "Workload ID wpf is not recognized". Subsequent test runs after updating ThemeManager tests fail with missing `xunit.abstractions` and WindowsDesktop runtime errors.
+Observations: Installed the .NET SDK 8.0.404 via script; `dotnet restore` and `dotnet build DesktopApplicationTemplate.sln` succeed, but `dotnet test --settings tests.runsettings --no-build` aborts because the Microsoft.WindowsDesktop.App 8.0.0 runtime and `xunit.abstractions` package are missing on Linux. The `dotnet workload install wpf` step was removed since WPF ships with the SDK.
 Codex Limitations noticed: WindowsDesktop runtime unavailable, so test hosts for `DesktopApplicationTemplate.Tests` and `DesktopApplicationTemplate.UI.Tests` fail to launch.
 Effective Prompts / Instructions that worked: Repository guidelines to log environment constraints and rely on CI for verification.
 Decisions & Rationale: Highlight prerequisites and note that CI or a Windows host is required for full test execution.
