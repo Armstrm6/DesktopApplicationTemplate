@@ -369,3 +369,11 @@ Decisions & Rationale: Confirmed references, documented environment constraints,
 Action Items: Rely on CI.
 Related Commits/PRs:
 
+[2025-09-20 10:00] Topic: Console test logger usings
+Context: Added global using statements for ConsoleTestLogger across test projects.
+Observations: dotnet SDK 8.0.404 required by global.json is unavailable; commands fall back to 8.0.119 and fail.
+Codex Limitations noticed: Missing .NET 8.0.404 SDK and WindowsDesktop runtime prevent building or running tests.
+Effective Prompts / Instructions that worked: Repository guidance on logging limitations and updating shared test utilities.
+Decisions & Rationale: Consolidate logger access with global usings while documenting environment constraints.
+Action Items: Rely on CI for verification.
+Related Commits/PRs:
