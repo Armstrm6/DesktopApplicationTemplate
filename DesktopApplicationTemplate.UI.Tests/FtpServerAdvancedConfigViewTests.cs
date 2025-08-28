@@ -8,7 +8,7 @@ using Moq;
 
 namespace DesktopApplicationTemplate.Tests;
 
-[Collection("Application")]
+[Collection("WpfTests")]
 public class FtpServerAdvancedConfigViewTests
 {
     [WpfFact]

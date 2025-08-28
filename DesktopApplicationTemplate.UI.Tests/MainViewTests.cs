@@ -15,6 +15,7 @@ using Moq;
 
 namespace DesktopApplicationTemplate.Tests
 {
+    [Collection("WpfTests")]
     public class MainViewTests
     {
         [WpfFact]

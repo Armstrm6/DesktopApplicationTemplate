@@ -5,7 +5,7 @@ using FluentAssertions;
 
 namespace DesktopApplicationTemplate.Tests;
 
-[Collection("Application")]
+[Collection("WpfTests")]
 public class FtpServerEditViewTests
 {
     [WpfFact]

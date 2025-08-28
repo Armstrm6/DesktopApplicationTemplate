@@ -14,6 +14,7 @@ using Xunit;
 
 namespace DesktopApplicationTemplate.Tests
 {
+    [Collection("WpfTests")]
     public class MqttViewsAccessibilityTests
     {
         [WpfFact]
