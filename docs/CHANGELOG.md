@@ -16,6 +16,7 @@
 - Updated `global.json` to require the .NET 8 SDK version `8.0.404`.
 - Disabled default `AutoStart` and set environment configuration files to `"AutoStart": false`.
 - Core library now multi-targets `net8.0` and `net8.0-windows`.
+- Adjusted solution and project references so cross-platform assemblies depend only on the core while Windows projects also reference `DesktopApplicationTemplate.Windows`.
 
 ### Navigation & UI
 #### Added
