@@ -380,7 +380,7 @@ Action Items: Rely on CI for WPF validation.
 Related Commits/PRs:
 [2025-09-22 10:00] Topic: TextBox hint behavior namespace
 Context: Verified TextBoxHintBehavior is public and ensured Forms.xaml references the behaviors namespace with assembly qualification.
-Observations: Attempted dotnet restore/build/test but dotnet CLI is unavailable in container.
+Observations: Verified Forms.xaml already contained the assembly-qualified behaviors namespace and attempted dotnet restore/build/test, but the dotnet CLI is unavailable in this container.
 Codex Limitations noticed: .NET SDK and WindowsDesktop runtime missing; build and tests cannot run.
 Effective Prompts / Instructions that worked: User request to confirm UI build references and behavior visibility.
 Decisions & Rationale: Added assembly-qualified namespace to avoid XAML parse errors and will rely on CI for verification.

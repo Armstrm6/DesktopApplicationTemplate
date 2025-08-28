@@ -36,8 +36,7 @@
     <Resource Include="Themes/ToggleSwitch.xaml" />
     <Resource Include="Themes/MqttTagSubscriptionsView.xaml" />
     <Resource Include="Themes/DataFlowDiagram.xaml" />
-    <Resource Include="Themes/Forms.xaml" />
-    <Page Include="Themes/Forms.xaml" />
+      <Page Include="Themes/Forms.xaml" />
   </ItemGroup>
 
   <ItemGroup>
