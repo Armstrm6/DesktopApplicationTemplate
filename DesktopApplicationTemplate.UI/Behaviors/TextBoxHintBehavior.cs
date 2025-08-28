@@ -99,6 +99,9 @@ public static class TextBoxHintBehavior
             throw new ArgumentNullException(nameof(propertyPath));
         }
 
-        return Regex.Replace(propertyPath, "(\\B[A-Z])", " $1");
+        var lastSegmentIndex = propertyPath.LastIndexOf('.');
+        var propertyName = lastSegmentIndex >= 0 ? propertyPath[(lastSegmentIndex + 1)..] : propertyPath;
+
+        return Regex.Replace(propertyName, "(\\B[A-Z])", " $1");
     }
 }

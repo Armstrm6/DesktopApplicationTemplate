@@ -352,3 +352,11 @@ Effective Prompts / Instructions that worked: Build command supplied by user ins
 Decisions & Rationale: Log the missing tooling and rely on CI for Windows-specific build and test.
 Action Items: Rely on CI for verification.
 Related Commits/PRs:
+[2025-08-28 15:48] Topic: WPF workload not recognized
+Context: Installed .NET SDK 8.0.404 and attempted to install WPF workload.
+Observations: `dotnet workload install wpf` reported "Workload ID wpf is not recognized"; solution build and tests failed with missing WPF-specific types.
+Codex Limitations noticed: Linux container lacks WPF workload and WindowsDesktop runtime.
+Effective Prompts / Instructions that worked: Repository instruction to log environment constraints.
+Decisions & Rationale: Document limitation and rely on CI for Windows build and tests.
+Action Items: none
+Related Commits/PRs:
