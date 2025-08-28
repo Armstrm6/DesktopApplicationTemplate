@@ -17,6 +17,7 @@ using DesktopApplicationTemplate.UI.Helpers;
 
 namespace DesktopApplicationTemplate.Tests;
 
+[Collection("WpfTests")]
 public class MainViewCreateNavigationTests
 {
     [WpfFact]

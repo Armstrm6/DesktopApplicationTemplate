@@ -5,6 +5,7 @@ using Xunit;
 
 namespace DesktopApplicationTemplate.Tests;
 
+[Collection("WpfTests")]
 public class TextBoxHintBehaviorTests
 {
     [WindowsTheory]

@@ -17,6 +17,7 @@ using System.Windows.Input;
 
 namespace DesktopApplicationTemplate.Tests;
 
+[Collection("WpfTests")]
 public class MainViewHttpNavigationTests
 {
     [WpfFact]

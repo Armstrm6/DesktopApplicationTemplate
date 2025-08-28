@@ -17,6 +17,7 @@ using Xunit;
 
 namespace DesktopApplicationTemplate.Tests
 {
+    [Collection("WpfTests")]
     public class LoggingServiceTests
     {
 [WindowsTheory]

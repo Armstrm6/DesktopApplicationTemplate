@@ -13,6 +13,7 @@ using Moq;
 
 namespace DesktopApplicationTemplate.Tests
 {
+    [Collection("WpfTests")]
     public class CsvServiceTests
     {
         [WpfFact]
