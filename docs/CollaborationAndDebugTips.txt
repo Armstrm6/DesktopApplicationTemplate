@@ -75,13 +75,13 @@ Action Items: Migrate remaining classes to `ILogger<T>` and update tests.
 Related Commits/PRs:
 [2025-09-15 14:00] Topic: Platform-specific test execution
 Context: Documented SDK and WPF workload prerequisites and standard build/test commands.
-Observations: Installed the .NET SDK 8.0.404 via script; `dotnet restore` and `dotnet build DesktopApplicationTemplate.sln` succeed, but `dotnet test --settings tests.runsettings --no-build` aborts because the Microsoft.WindowsDesktop.App 8.0.0 runtime and `xunit.abstractions` package are missing on Linux. The `dotnet workload install wpf` step was removed since WPF ships with the SDK.
-Codex Limitations noticed: WindowsDesktop runtime unavailable, so test hosts for `DesktopApplicationTemplate.Tests` and `DesktopApplicationTemplate.UI.Tests` fail to launch.
+Observations: Installed the .NET SDK 8.0.404 via script; `dotnet restore` and `dotnet build DesktopApplicationTemplate.sln` succeed, but `dotnet test --settings tests.runsettings --no-build` aborts because the Microsoft.WindowsDesktop.App 8.0.0 runtime and `xunit.abstractions` package are missing on Linux. The `dotnet workload install wpf` step was removed since WPF ships with the SDK. In the current container, the `dotnet` CLI itself is not available, so restore, build, and test commands cannot run.
+Codex Limitations noticed: WindowsDesktop runtime unavailable, so test hosts for `DesktopApplicationTemplate.Tests` and `DesktopApplicationTemplate.UI.Tests` fail to launch. The .NET SDK is also missing, preventing `dotnet` commands from executing.
 Effective Prompts / Instructions that worked: Repository guidelines to log environment constraints and rely on CI for verification.
 Decisions & Rationale: Highlight prerequisites and note that CI or a Windows host is required for full test execution.
 Action Items: Rely on CI for Windows-specific build and test.
 Notes: Documented convention to append updates within existing topic blocks and omit redundant timestamps. After adding `Forms.xaml`, `dotnet test --settings tests.runsettings` still aborts because the Microsoft.WindowsDesktop.App 8.0.0 runtime is missing and `dotnet workload install wpf` remains unrecognized on Linux. WPF projects require Windows or the WindowsDesktop runtime; without it, builds produce `InitializeComponent` and `NETSDK1100` errors.
-Related Commits/PRs:
+Related Commits/PRs: 8517691, 4c0dbb5
 [2025-08-27 04:25] Topic: Logging interface restoration
 Context: Introduced core logging abstractions and refactored edit view models to support DI.
 Observations: Added ILoggingService, LogLevel enum, moved LogEntry to core, and implemented Load methods on TCP and SCP edit view models.

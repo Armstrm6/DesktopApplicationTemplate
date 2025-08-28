@@ -10,7 +10,12 @@ public static class ApplicationResourceHelper
 
     public static void EnsureApplication()
     {
-        var app = Application.Current ?? new Application();
+        var app = Application.Current;
+
+        if (app is null)
+        {
+            return;
+        }
 
         if (!app.Resources.MergedDictionaries.Any(d => d.Source == FormsUri))
         {
