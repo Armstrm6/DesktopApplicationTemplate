@@ -377,3 +377,11 @@ Effective Prompts / Instructions that worked: Repository guidance on logging lim
 Decisions & Rationale: Consolidate logger access with global usings while documenting environment constraints.
 Action Items: Rely on CI for verification.
 Related Commits/PRs:
+[2025-09-21 12:00] Topic: Core targeting fix
+Context: Windows builds failed with NETSDK1005 due to net8.0-windows target in Core.
+Observations: Removing the windows target avoids missing targeting pack errors and allows dependent projects to compile.
+Codex Limitations noticed: Linux container lacks WindowsDesktop runtime so build/test still fail.
+Effective Prompts / Instructions that worked: User provided error list highlighting missing net8.0-windows assets.
+Decisions & Rationale: Target only net8.0 because Windows-specific code lives in the Windows library.
+Action Items: Rely on CI for WPF validation.
+Related Commits/PRs:
