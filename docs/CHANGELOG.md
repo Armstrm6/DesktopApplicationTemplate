@@ -180,4 +180,5 @@
 - Removed duplicate using directives and missing namespace references that prevented solution builds.
 - Guarded WPF test thread apartment configuration with an OS check to avoid CA1416 build errors on non-Windows hosts.
 - Added `StubFileDialogService` to test project and updated MQTT and FTP UI tests for API changes.
+- ThemeManager test executes on the current thread, removing manual thread usage.
 
