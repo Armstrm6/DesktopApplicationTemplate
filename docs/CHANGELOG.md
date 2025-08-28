@@ -160,6 +160,7 @@
 - `/test` comment workflow to run CI on demand.
 - Dedicated `DesktopApplicationTemplate.UI.Tests` project targeting `net8.0-windows` for WPF-specific tests.
 - `WindowsFact` and `WindowsTheory` attributes skipping tests on non-Windows hosts.
+- `TestCommon` library providing shared test helpers and fixtures referenced by all test projects.
 
 #### Changed
 - Consolidated GitHub Actions into a single `CI` workflow with collaboration instructions in `AGENTS.md`.

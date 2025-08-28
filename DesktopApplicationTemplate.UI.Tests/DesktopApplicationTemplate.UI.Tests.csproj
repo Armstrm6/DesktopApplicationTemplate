@@ -34,6 +34,7 @@
     <ProjectReference Include="..\DesktopApplication.Installer\DesktopApplication.Installer.csproj" />
     <ProjectReference Include="..\DesktopApplicationTemplate.Core\DesktopApplicationTemplate.Core.csproj" />
     <ProjectReference Include="..\DesktopApplicationTemplate.Windows\DesktopApplicationTemplate.Windows.csproj" />
+    <ProjectReference Include="..\TestCommon\TestCommon.csproj" />
   </ItemGroup>
 
 </Project>

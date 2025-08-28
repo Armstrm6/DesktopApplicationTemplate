@@ -8,7 +8,7 @@ using Xunit.Sdk;
 namespace DesktopApplicationTemplate.Tests;
 
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
-[XunitTestCaseDiscoverer("DesktopApplicationTemplate.Tests.WpfFactDiscoverer", "DesktopApplicationTemplate.UI.Tests")]
+[XunitTestCaseDiscoverer("DesktopApplicationTemplate.Tests.WpfFactDiscoverer", "TestCommon")]
 public sealed class WpfFactAttribute : WindowsFactAttribute { }
 
 internal sealed class WpfFactDiscoverer : IXunitTestCaseDiscoverer

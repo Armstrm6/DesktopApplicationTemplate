@@ -24,5 +24,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DesktopApplicationTemplate.Core\DesktopApplicationTemplate.Core.csproj" />
+    <ProjectReference Include="..\TestCommon\TestCommon.csproj" />
   </ItemGroup>
 </Project>

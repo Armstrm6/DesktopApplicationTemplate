@@ -303,3 +303,11 @@ Effective Prompts / Instructions that worked: User request to skip Windows-only 
 Decisions & Rationale: Inherit WpfFact from WindowsFact to avoid annotating each test.
 Action Items: Rely on CI for verification.
 Related Commits/PRs:
+[2025-09-15 10:00] Topic: Shared test utilities
+Context: Introduced TestCommon library for reusable fixtures and consolidated ConsoleTestLogger and Windows/Wpf test attributes.
+Observations: All test projects reference TestCommon to remove duplicated code; unable to run tests locally due to missing .NET SDK and WindowsDesktop runtime.
+Codex Limitations noticed: `dotnet` CLI and Windows desktop runtime unavailable in the container.
+Effective Prompts / Instructions that worked: User request to centralize shared test helpers.
+Decisions & Rationale: Reduce duplication and simplify maintenance by sharing fixtures.
+Action Items: Rely on CI for test execution.
+Related Commits/PRs:
