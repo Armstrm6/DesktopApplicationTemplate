@@ -8,11 +8,11 @@ using Xunit.Sdk;
 namespace DesktopApplicationTemplate.Tests;
 
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
-[XunitTestCaseDiscoverer("DesktopApplicationTemplate.Tests.WpfFactDiscoverer", "DesktopApplicationTemplate.Tests")]
+[XunitTestCaseDiscoverer("DesktopApplicationTemplate.Tests.WpfFactDiscoverer", "DesktopApplicationTemplate.UI.Tests")]
 public sealed class WpfFactAttribute : FactAttribute { }
 
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
-[XunitTestCaseDiscoverer("DesktopApplicationTemplate.Tests.WpfTheoryDiscoverer", "DesktopApplicationTemplate.Tests")]
+[XunitTestCaseDiscoverer("DesktopApplicationTemplate.Tests.WpfTheoryDiscoverer", "DesktopApplicationTemplate.UI.Tests")]
 public sealed class WpfTheoryAttribute : TheoryAttribute { }
 
 internal sealed class WpfFactDiscoverer : IXunitTestCaseDiscoverer
