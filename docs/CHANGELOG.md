@@ -163,6 +163,7 @@
 - Dedicated `DesktopApplicationTemplate.UI.Tests` project targeting `net8.0-windows` for WPF-specific tests.
 - `WindowsFact` and `WindowsTheory` attributes skipping tests on non-Windows hosts.
 - `TestCommon` library providing shared test helpers and fixtures referenced by all test projects.
+- Collaboration tips note that WPF projects require Windows or the WindowsDesktop runtime and fail with `InitializeComponent` and `NETSDK1100` errors if missing.
 
 #### Changed
 - Consolidated GitHub Actions into a single `CI` workflow with collaboration instructions in `AGENTS.md`.
