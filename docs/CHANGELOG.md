@@ -185,4 +185,5 @@
 - Added `StubFileDialogService` to test project and updated MQTT and FTP UI tests for API changes.
 - ThemeManager test executes on the current thread, removing manual thread usage.
 - FTP view tests use a helper to initialize `Application` resources, eliminating manual thread setup.
+- WPF UI tests share a single `Application` via collection fixture and disable parallelization to prevent multiple initializations.
 

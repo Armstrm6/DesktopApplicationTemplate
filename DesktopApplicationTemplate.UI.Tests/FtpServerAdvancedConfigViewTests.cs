@@ -8,13 +8,12 @@ using Moq;
 
 namespace DesktopApplicationTemplate.Tests;
 
+[Collection("Application")]
 public class FtpServerAdvancedConfigViewTests
 {
     [WpfFact]
     public void Initialize_SetsDataContext_AndLogger()
     {
-        ApplicationResourceHelper.EnsureApplication();
-
         var logger = new Mock<ILoggingService>().Object;
         var vm = new FtpServerAdvancedConfigViewModel(new FtpServerOptions());
         var view = new FtpServerAdvancedConfigView(logger);
@@ -28,8 +27,6 @@ public class FtpServerAdvancedConfigViewTests
     [WpfFact]
     public void Initialize_Throws_When_ViewModelNull()
     {
-        ApplicationResourceHelper.EnsureApplication();
-
         var view = new FtpServerAdvancedConfigView(new Mock<ILoggingService>().Object);
 
         Action act = () => view.Initialize(null!);
