@@ -23,7 +23,6 @@ public class MainViewHidNavigationTests
     [WpfFact]
     public void EditHidService_ShowsEditView()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
         var thread = new Thread(() =>
         {
@@ -78,7 +77,6 @@ public class MainViewHidNavigationTests
     [WpfFact]
     public void DoubleClickHidService_OpensEditView()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
         var thread = new Thread(() =>
         {

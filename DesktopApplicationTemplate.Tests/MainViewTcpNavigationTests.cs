@@ -20,7 +20,6 @@ public class MainViewTcpNavigationTests
     [WpfFact]
     public void CreateTcpService_Advanced_Back_ReturnsToCreateView()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
         var thread = new Thread(() =>
         {

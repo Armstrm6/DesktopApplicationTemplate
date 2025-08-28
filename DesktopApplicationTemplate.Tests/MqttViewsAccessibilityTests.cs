@@ -19,7 +19,6 @@ namespace DesktopApplicationTemplate.Tests
         [WpfFact]
         public void MqttCreateServiceView_ExposesNamedButtons()
         {
-            Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
             Exception? ex = null;
             var thread = new Thread(() =>
@@ -45,7 +44,6 @@ namespace DesktopApplicationTemplate.Tests
         [WpfFact]
         public void MqttEditConnectionView_ExposesUpdateButton()
         {
-            Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
             Exception? ex = null;
             var thread = new Thread(() =>
@@ -74,7 +72,6 @@ namespace DesktopApplicationTemplate.Tests
         [WpfFact]
         public void MqttTagSubscriptionsView_ExposesSendButton()
         {
-            Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
             Exception? ex = null;
             var thread = new Thread(() =>

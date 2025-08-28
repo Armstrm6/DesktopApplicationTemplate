@@ -162,6 +162,7 @@
 - Reorganized collaboration log into topic-based blocks and added logging guidelines.
 - Removed Codex-specific tests and categories, eliminating the `CodexSafe` trait and custom `TestCategoryAttribute`.
 - Setup script now runs only the primary test suite after removing the Codex test project.
+- Removed Windows desktop runtime checks from tests so they run when Visual Studio provides the runtime.
 
 #### Fixed
 - Added missing `FluentAssertions` package reference to the test project and documented dependency checks to avoid build failures.

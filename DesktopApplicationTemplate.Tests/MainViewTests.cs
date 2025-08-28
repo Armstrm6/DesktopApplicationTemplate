@@ -20,7 +20,6 @@ namespace DesktopApplicationTemplate.Tests
         [WpfFact]
         public void MainView_ServiceList_HasMaxHeight()
         {
-            Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
             Exception? ex = null;
             var thread = new Thread(() =>
@@ -56,7 +55,6 @@ namespace DesktopApplicationTemplate.Tests
         [WpfFact]
         public void MainView_HasCloseCommandBinding()
         {
-            Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
             Exception? ex = null;
             var thread = new Thread(() =>
@@ -92,7 +90,6 @@ namespace DesktopApplicationTemplate.Tests
         [WpfFact]
         public void MainView_HasMinimizeCommandBinding()
         {
-            Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
             Exception? ex = null;
             var thread = new Thread(() =>
@@ -128,7 +125,6 @@ namespace DesktopApplicationTemplate.Tests
         [WpfFact]
         public void OpenServiceEditor_NonCsv_SetsContentFrame()
         {
-            Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
             Exception? ex = null;
             var thread = new Thread(() =>
@@ -166,7 +162,6 @@ namespace DesktopApplicationTemplate.Tests
         [WpfFact]
         public void OpenServiceEditor_CsvCreator_ShowsWindow()
         {
-            Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
             Exception? ex = null;
             var thread = new Thread(() =>
@@ -207,7 +202,6 @@ namespace DesktopApplicationTemplate.Tests
         [WpfFact]
         public void MainView_KeyDown_IgnoresNonEscape()
         {
-            Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
             Exception? ex = null;
             var thread = new Thread(() =>
@@ -252,7 +246,6 @@ namespace DesktopApplicationTemplate.Tests
         [WpfFact]
         public void HeaderBar_DoubleClick_TogglesWindowState()
         {
-            Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
             Exception? ex = null;
             var thread = new Thread(() =>

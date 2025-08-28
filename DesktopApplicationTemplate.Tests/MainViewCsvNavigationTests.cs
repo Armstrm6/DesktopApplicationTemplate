@@ -23,7 +23,6 @@ public class MainViewCsvNavigationTests
     [WpfFact]
     public void NavigateToCsvCreator_ShowsCreateView()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
         var thread = new Thread(() =>
         {
@@ -69,7 +68,6 @@ public class MainViewCsvNavigationTests
     [WpfFact]
     public void DoubleClickCsvService_OpensEditView()
     {
-        Skip.IfNot(OperatingSystem.IsWindows(), "Requires Windows desktop runtime");
 
         var thread = new Thread(() =>
         {
