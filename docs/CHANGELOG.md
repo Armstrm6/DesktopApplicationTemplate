@@ -176,4 +176,5 @@
 #### Fixed
 - Added missing `FluentAssertions` package reference to the test project and documented dependency checks to avoid build failures.
 - Removed duplicate using directives and missing namespace references that prevented solution builds.
+- Guarded WPF test thread apartment configuration with an OS check to avoid CA1416 build errors on non-Windows hosts.
 

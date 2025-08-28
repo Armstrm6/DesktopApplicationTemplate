@@ -40,7 +40,10 @@ internal class WpfTestCase : XunitTestCase
                 .GetAwaiter().GetResult();
             tcs.SetResult(result);
         });
-        thread.SetApartmentState(ApartmentState.STA);
+        if (OperatingSystem.IsWindows())
+        {
+            thread.SetApartmentState(ApartmentState.STA);
+        }
         thread.Start();
         thread.Join();
         return tcs.Task;
