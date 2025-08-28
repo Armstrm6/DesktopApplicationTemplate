@@ -254,3 +254,11 @@ Effective Prompts / Instructions that worked: User request to conditionally inst
 Decisions & Rationale: Use `$OSTYPE`/`dotnet --info` to determine OS and log when skipping; rely on CI for Windows validation.
 Action Items: Rely on CI for Windows-specific build and test.
 Related Commits/PRs:
+[2025-09-10 12:30] Topic: WPF logging refactor
+Context: Moved `LogEntry`, `LogLevel`, and `ILoggingService` into a new `DesktopApplicationTemplate.Windows` project and retargeted core to `net8.0`.
+Observations: Core no longer requires WPF; UI and service apps reference the new Windows library.
+Codex Limitations noticed: Linux container lacks the Microsoft.WindowsDesktop runtime, so build and test commands cannot run locally.
+Effective Prompts / Instructions that worked: User request to isolate WPF-specific types from the core library.
+Decisions & Rationale: Introduced a dedicated Windows project while preserving existing namespaces to minimize code changes.
+Action Items: Rely on CI for verification.
+Related Commits/PRs:
