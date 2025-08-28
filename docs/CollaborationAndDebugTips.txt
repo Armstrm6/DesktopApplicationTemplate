@@ -74,14 +74,15 @@ Decisions & Rationale: Start with infrastructure pieces before addressing indivi
 Action Items: Migrate remaining classes to `ILogger<T>` and update tests.
 Related Commits/PRs:
 [2025-09-15 14:00] Topic: Platform-specific test execution
-Context: Documented SDK and WPF workload prerequisites and standard build/test commands.
-Observations: Installed the .NET SDK 8.0.404 via script; `dotnet restore` and `dotnet build DesktopApplicationTemplate.sln` succeed, but `dotnet test --settings tests.runsettings --no-build` aborts because the Microsoft.WindowsDesktop.App 8.0.0 runtime and `xunit.abstractions` package are missing on Linux. The `dotnet workload install wpf` step was removed since WPF ships with the SDK. In the current container, the `dotnet` CLI itself is not available, so restore, build, and test commands cannot run.
+Context: Documented SDK prerequisites and standard build/test commands.
+Observations: Installed the .NET SDK 8.0.404 via script; `dotnet restore` and `dotnet build DesktopApplicationTemplate.sln` succeed, but `dotnet test --settings tests.runsettings --no-build` aborts because the Microsoft.WindowsDesktop.App 8.0.0 runtime and `xunit.abstractions` package are missing on Linux. WPF ships with the Windows SDK so no additional workload installation is required. In the current container, the `dotnet` CLI itself is not available, so restore, build, and test commands cannot run.
 Codex Limitations noticed: WindowsDesktop runtime unavailable, so test hosts for `DesktopApplicationTemplate.Tests` and `DesktopApplicationTemplate.UI.Tests` fail to launch. The .NET SDK is also missing, preventing `dotnet` commands from executing.
 Effective Prompts / Instructions that worked: Repository guidelines to log environment constraints and rely on CI for verification.
 Decisions & Rationale: Highlight prerequisites and note that CI or a Windows host is required for full test execution.
 Action Items: Rely on CI for Windows-specific build and test.
-Notes: Documented convention to append updates within existing topic blocks and omit redundant timestamps. After adding `Forms.xaml`, `dotnet test --settings tests.runsettings` still aborts because the Microsoft.WindowsDesktop.App 8.0.0 runtime is missing and `dotnet workload install wpf` remains unrecognized on Linux. WPF projects require Windows or the WindowsDesktop runtime; without it, builds produce `InitializeComponent` and `NETSDK1100` errors.
+Notes: Documented convention to append updates within existing topic blocks and omit redundant timestamps. After adding `Forms.xaml`, `dotnet test --settings tests.runsettings` still aborts because the Microsoft.WindowsDesktop.App 8.0.0 runtime is missing and WPF workloads are unavailable on Linux. WPF projects require Windows or the WindowsDesktop runtime; without it, builds produce `InitializeComponent` and `NETSDK1100` errors.
 Additional Notes: Installed .NET SDK 8.0.404 via dotnet-install; `dotnet restore` now succeeds, but `dotnet build DesktopApplicationTemplate.sln` fails with NETSDK1022 for duplicate `Themes/Forms.xaml`, and WPF test projects cannot run. Rely on CI for verification.
+Clarification: WPF workload installation is no longer required; related setup checks have been removed.
 Related Commits/PRs: 8517691, 4c0dbb5
 [2025-08-27 04:25] Topic: Logging interface restoration
 Context: Introduced core logging abstractions and refactored edit view models to support DI.
@@ -247,23 +248,7 @@ Effective Prompts / Instructions that worked: User request to drop Windows-speci
 Decisions & Rationale: Update tests to target net8.0; rely on CI or future core refactor for full cross-platform support.
 Action Items: none
 Related Commits/PRs:
-[2025-09-10 00:00] Topic: WPF workload requirement
-Context: Documented need for WPF workload and full build/test cycle after installation.
-Observations: `dotnet workload install wpf` is not recognized on Linux; restore/build/test fail due to Windows-only dependencies.
-Codex Limitations noticed: Linux container lacks WPF workload and WindowsDesktop runtime.
-Effective Prompts / Instructions that worked: User request to clarify prerequisites and setup steps.
-Decisions & Rationale: Add README guidance for installing WPF workload and running `dotnet restore`, `dotnet build`, and `dotnet test`.
-Action Items: Rely on CI or Windows host for successful build and test.
-Related Commits/PRs:
 
-[2025-09-10 08:00] Topic: Setup script OS detection
-Context: Added OS detection so the setup script installs the WPF workload only on Windows.
-Observations: Running on Linux skipped the workload; restore/build/test still fail due to missing Microsoft.WindowsDesktop runtime.
-Codex Limitations noticed: Linux container lacks WindowsDesktop runtime so tests cannot execute.
-Effective Prompts / Instructions that worked: User request to conditionally install the WPF workload while honoring `SKIP_WORKLOAD`.
-Decisions & Rationale: Use `$OSTYPE`/`dotnet --info` to determine OS and log when skipping; rely on CI for Windows validation.
-Action Items: Rely on CI for Windows-specific build and test.
-Related Commits/PRs:
 [2025-09-10 12:30] Topic: WPF logging refactor
 Context: Moved `LogEntry`, `LogLevel`, and `ILoggingService` into a new `DesktopApplicationTemplate.Windows` project and retargeted core to `net8.0`.
 Observations: Core no longer requires WPF; UI and service apps reference the new Windows library.
@@ -322,17 +307,9 @@ Decisions & Rationale: Reduce duplication and simplify maintenance by sharing fi
 Action Items: Rely on CI for test execution.
 Related Commits/PRs: e6a90a3, ed1d219
 
-[2025-08-28 15:35] Topic: dotnet restore/build on Linux
-Context: Installed .NET SDK 8.0.404 via script to run restore and build commands.
-Observations: `dotnet restore DesktopApplicationTemplate.Core` succeeded; `dotnet workload install wpf` reported "Workload ID wpf is not recognized"; `dotnet build DesktopApplicationTemplate.sln` failed with CA1416 for `Thread.SetApartmentState` in `WpfFactAttribute`.
-Codex Limitations noticed: WPF workload unavailable on Linux and build fails due to Windows-only APIs.
-Effective Prompts / Instructions that worked: Followed setup guidance to install SDK and run restore/build.
-Decisions & Rationale: Document limitations and rely on CI for Windows-specific build and test.
-Action Items: Rely on CI for successful build and test.
-Related Commits/PRs:
 [2025-09-16 10:00] Topic: WpfFact CA1416 guard
 Context: Build failed due to Windows-only `Thread.SetApartmentState` usage in WPF test case.
-Observations: Wrapped `SetApartmentState` call in `OperatingSystem.IsWindows` check; CA1416 no longer triggers but UI tests still fail to compile. `dotnet workload install wpf` remains unrecognized on Linux.
+Observations: Wrapped `SetApartmentState` call in `OperatingSystem.IsWindows` check; CA1416 no longer triggers but UI tests still fail to compile because the WPF workload isn't available on Linux.
 Codex Limitations noticed: WPF workload and WindowsDesktop runtime unavailable; test builds fail with missing WPF members and packages.
 Effective Prompts / Instructions that worked: User request to guard Windows-specific API.
 Decisions & Rationale: Guard thread setup to silence analyzer while WindowsFact skips tests on non-Windows hosts.
@@ -346,17 +323,9 @@ Effective Prompts / Instructions that worked: Build command supplied by user ins
 Decisions & Rationale: Log the missing tooling and rely on CI for Windows-specific build and test.
 Action Items: Rely on CI for verification.
 Related Commits/PRs:
-[2025-08-28 15:48] Topic: WPF workload not recognized
-Context: Installed .NET SDK 8.0.404 and attempted to install WPF workload.
-Observations: `dotnet workload install wpf` reported "Workload ID wpf is not recognized"; solution build and tests failed with missing WPF-specific types.
-Codex Limitations noticed: Linux container lacks WPF workload and WindowsDesktop runtime.
-Effective Prompts / Instructions that worked: Repository instruction to log environment constraints.
-Decisions & Rationale: Document limitation and rely on CI for Windows build and tests.
-Action Items: none
-Related Commits/PRs:
 [2025-09-17 09:00] Topic: AsyncRelayCommand build verification
 Context: Verified AsyncRelayCommand usages and attempted solution build and test.
-Observations: All files using AsyncRelayCommand already include DesktopApplicationTemplate.UI.Helpers and consuming projects reference DesktopApplicationTemplate.UI. Installed .NET SDK 8.0.404 but 'dotnet workload install wpf' reported 'Workload ID wpf is not recognized'; subsequent build and test commands failed with WPF control reference errors.
+Observations: All files using AsyncRelayCommand already include DesktopApplicationTemplate.UI.Helpers and consuming projects reference DesktopApplicationTemplate.UI. Installing the .NET SDK 8.0.404 still left WPF components unavailable on Linux; subsequent build and test commands failed with WPF control reference errors.
 Codex Limitations noticed: WPF workload unavailable on Linux; build/test fail due to missing WindowsDesktop dependencies.
 Effective Prompts / Instructions that worked: Repository instructions for dotnet installation and logging limitations.
 Decisions & Rationale: Confirmed references, documented environment constraints, and will rely on CI for Windows validation.

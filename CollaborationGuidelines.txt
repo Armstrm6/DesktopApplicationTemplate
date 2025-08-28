@@ -4,11 +4,7 @@ Working with the ChatGPT Agent in DesktopApplicationTemplate
 Environment Setup
 -----------------
 - Install the .NET SDK version `8.0.404` (pinned via `global.json`).
-- Install the WPF workload:
-
-  ```bash
-  dotnet workload install wpf
-  ```
+- On Windows, the .NET SDK includes WPF by default; no additional workload installation is needed.
 
 - Standard commands for builds and tests:
 
