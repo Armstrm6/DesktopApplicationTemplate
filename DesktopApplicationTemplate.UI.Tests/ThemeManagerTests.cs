@@ -1,5 +1,4 @@
 using DesktopApplicationTemplate.UI.Services;
-using System.Threading;
 using System.Windows;
 using Xunit;
 
@@ -11,34 +10,19 @@ namespace DesktopApplicationTemplate.Tests
         public void ApplyTheme_LoadsResourceDictionary()
         {
 
-            Exception? ex = null;
-            var thread = new Thread(() =>
+            var app = Application.Current ?? new Application();
+            try
             {
-                try
-                {
-                    var app = System.Windows.Application.Current ?? new System.Windows.Application();
-
-                    ThemeManager.ApplyTheme(true);
-                    Assert.Contains(app.Resources.MergedDictionaries, d => d.Source?.OriginalString?.Contains("DarkTheme.xaml") == true);
-                    ThemeManager.ApplyTheme(false);
-                    Assert.Contains(app.Resources.MergedDictionaries, d => d.Source?.OriginalString?.Contains("LightTheme.xaml") == true);
-                }
-                catch (Exception e)
-                {
-                    ex = e;
-                }
-                finally
-                {
-                    // ensure application instance is cleaned up on the same thread it was created
-                    System.Windows.Application.Current?.Shutdown();
-                }
-            });
-            thread.SetApartmentState(ApartmentState.STA);
-            thread.Start();
-            thread.Join();
-            if (ex != null) throw ex;
-
-            ConsoleTestLogger.LogPass();
+                ThemeManager.ApplyTheme(true);
+                Assert.Contains(app.Resources.MergedDictionaries, d => d.Source?.OriginalString?.Contains("DarkTheme.xaml") == true);
+                ThemeManager.ApplyTheme(false);
+                Assert.Contains(app.Resources.MergedDictionaries, d => d.Source?.OriginalString?.Contains("LightTheme.xaml") == true);
+                ConsoleTestLogger.LogPass();
+            }
+            finally
+            {
+                app.Shutdown();
+            }
         }
     }
 }
