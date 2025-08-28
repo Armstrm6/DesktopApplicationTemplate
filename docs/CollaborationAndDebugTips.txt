@@ -262,3 +262,12 @@ Effective Prompts / Instructions that worked: User request to isolate WPF-specif
 Decisions & Rationale: Introduced a dedicated Windows project while preserving existing namespaces to minimize code changes.
 Action Items: Rely on CI for verification.
 Related Commits/PRs:
+
+[2025-09-10 17:00] Topic: Cross-platform log colors
+Context: Replaced `System.Windows.Media.Brush` usage with hex color strings in `LogEntry` and related services.
+Observations: Logging now avoids WPF types; UI converts hex strings back to brushes for display.
+Codex Limitations noticed: `dotnet` CLI missing; restore/build/test cannot run in container.
+Effective Prompts / Instructions that worked: User request to remove WPF dependencies and multi-target core project.
+Decisions & Rationale: Use hex strings to represent colors for platform neutrality.
+Action Items: Rely on CI for full test execution.
+Related Commits/PRs:

@@ -20,8 +20,8 @@ namespace DesktopApplicationTemplate.Models
         public string Message { get; set; } = string.Empty;
 
         /// <summary>
-        /// Display color for the entry.
+        /// Display color for the entry in a cross-platform format (e.g., "#FF0000").
         /// </summary>
-        public System.Windows.Media.Brush Color { get; set; } = System.Windows.Media.Brushes.Black;
+        public string Color { get; set; } = "#000000";
     }
 }

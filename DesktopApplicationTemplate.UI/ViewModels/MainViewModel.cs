@@ -149,7 +149,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public void AddLog(string message, WpfBrush? color = null, LogLevel level = LogLevel.Debug, bool checkReference = true)
         {
             var ts = DateTime.Now.ToString("MM.dd.yyyy - HH:mm:ss.fffffff");
-            var entry = new LogEntry { Message = $"{ts} {message}", Color = color ?? WpfBrushes.Black, Level = level };
+            var entry = new LogEntry { Message = $"{ts} {message}", Color = (color ?? WpfBrushes.Black).ToString(), Level = level };
             Logs.Insert(0, entry);
             LogAdded?.Invoke(this, entry);
             if (checkReference)

@@ -15,6 +15,7 @@
 - Renamed root `CollaborationAndDebugTips.txt` to `CollaborationGuidelines.txt` and clarified distinction from `docs/CollaborationAndDebugTips.txt`.
 - Updated `global.json` to require the .NET 8 SDK version `8.0.404`.
 - Disabled default `AutoStart` and set environment configuration files to `"AutoStart": false`.
+- Core library now multi-targets `net8.0` and `net8.0-windows`.
 
 ### Navigation & UI
 #### Added
@@ -148,6 +149,7 @@
 #### Changed
 - Removed custom `ILoggingService` and service registrations in favor of `Microsoft.Extensions.Logging` with console and debug providers.
 - Relocated `LogEntry`, `LogLevel`, and `ILoggingService` to a new `DesktopApplicationTemplate.Windows` library to remove WPF dependencies from the core project.
+- `LogEntry` now stores colors as hex strings instead of `System.Windows.Media.Brush`.
 
 ### Documentation & CI
 #### Added
