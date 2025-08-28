@@ -11,11 +11,7 @@ See `CollaborationGuidelines.txt` for tips on working with the repository. A run
 - [.NET 8 SDK](https://dotnet.microsoft.com/download) (8.0.404)
 - [Git LFS](https://git-lfs.com) for large binary assets
 - Windows OS is required to run the WPF UI and service projects.
-- WPF workload for the .NET SDK:
-
-  ```bash
-  dotnet workload install wpf
-  ```
+- WPF is included with the Windows .NET SDK; no separate workload installation is required on Windows.
 
 Ensure the 8.0.404 SDK is installed so the pinned `global.json` version resolves correctly.
 
@@ -39,10 +35,9 @@ repository root will automatically respect this setting.
 
 After cloning the repository:
 
-- Install the WPF workload and run a full build and test cycle:
+- Run a full build and test cycle:
 
   ```bash
-  dotnet workload install wpf
   dotnet restore
   dotnet build DesktopApplicationTemplate.sln
   dotnet test --settings tests.runsettings
