@@ -163,6 +163,7 @@
 - Removed Codex-specific tests and categories, eliminating the `CodexSafe` trait and custom `TestCategoryAttribute`.
 - Setup script now runs only the primary test suite after removing the Codex test project.
 - Removed Windows desktop runtime checks from tests so they run when Visual Studio provides the runtime.
+- Setup script detects the host OS and installs the WPF workload only on Windows, logging when skipped and honoring `SKIP_WORKLOAD`.
 
 #### Fixed
 - Added missing `FluentAssertions` package reference to the test project and documented dependency checks to avoid build failures.
