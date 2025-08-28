@@ -288,3 +288,10 @@ Effective Prompts / Instructions that worked: Followed setup guidance to documen
 Decisions & Rationale: Rely on CI for Windows-only test coverage.
 Action Items: none
 Related Commits/PRs:
+[2025-09-13 12:00] Topic: UI test project split
+Context: Created DesktopApplicationTemplate.UI.Tests and moved WPF-specific tests from the main test project.
+Observations: dotnet commands failed because the required 8.0.404 SDK and WindowsDesktop runtime are missing on Linux.
+Effective Prompts / Instructions that worked: User request to isolate WPF tests into a dedicated assembly.
+Decisions & Rationale: Separate UI tests to keep non-WPF tests independent and clarify responsibilities.
+Action Items: Rely on CI for WPF test execution.
+Related Commits/PRs:
