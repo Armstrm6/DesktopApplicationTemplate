@@ -344,3 +344,11 @@ Effective Prompts / Instructions that worked: User request to guard Windows-spec
 Decisions & Rationale: Guard thread setup to silence analyzer while WindowsFact skips tests on non-Windows hosts.
 Action Items: Rely on CI for Windows build and test.
 Related Commits/PRs: e91c00d
+[2025-08-28 15:44] Topic: UI project build on Linux
+Context: Attempted to build DesktopApplicationTemplate.UI project alone as requested.
+Observations: `dotnet build DesktopApplicationTemplate.UI/DesktopApplicationTemplate.UI.csproj` and `dotnet test --settings tests.runsettings` failed because the `dotnet` CLI is not installed.
+Codex Limitations noticed: .NET SDK and WindowsDesktop runtime are missing, so build and tests cannot run in the container.
+Effective Prompts / Instructions that worked: Build command supplied by user instructions.
+Decisions & Rationale: Log the missing tooling and rely on CI for Windows-specific build and test.
+Action Items: Rely on CI for verification.
+Related Commits/PRs:
