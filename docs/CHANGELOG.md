@@ -45,7 +45,7 @@
 - Main window declares behaviors namespace to prevent XAML parse errors.
 - Forms theme uses project namespaces without assembly qualifiers and relies on SDK implicit page inclusion to load the `FormField` style without duplicate XAML item errors.
 - System namespace references and form style resources compiled to eliminate XAML parse failures.
-- Marked main window `ContentFrame` public so UI tests can inspect navigation.
+- Marked main window `ContentFrame` public to allow navigation inspection.
 - Included `Forms.xaml` in theme resources with Page build action.
 - Installer window references `TextBoxHintBehavior.AutoToolTip` without design-time warnings.
 - Application startup tolerates a missing `MainView` service, preventing test crashes when the window isn't registered.
@@ -164,8 +164,6 @@
 - Documented architecture and coding standards in `AGENTS.md`.
 - `CONTRIBUTING.md` and PR template enforcing CI-only testing with a CI badge in the README.
 - `/test` comment workflow to run CI on demand.
-- Dedicated `DesktopApplicationTemplate.UI.Tests` project targeting `net8.0-windows` for WPF-specific tests.
-- `WindowsFact` and `WindowsTheory` attributes skipping tests on non-Windows hosts.
 - `TestCommon` library providing shared test helpers and fixtures referenced by all test projects.
 - Collaboration tips note that WPF projects require Windows or the WindowsDesktop runtime and fail with `InitializeComponent` and `NETSDK1100` errors if missing.
 
@@ -181,17 +179,12 @@
 - Removed Windows desktop runtime checks from tests so they run when Visual Studio provides the runtime.
 - Core unit test project targets cross-platform `net8.0` for broader compatibility.
 - Removed WPF workload installation steps; WPF ships with the Windows .NET SDK.
-- UI tests run on a dispatcher helper that captures unhandled dispatcher exceptions.
-- Temporarily removed ThemeManager UI test that triggered dispatcher access errors.
-- Migrated tests from `WpfFact`/`WpfTheory` to `WindowsFact`/`WindowsTheory` and dropped the WPF test collection fixture.
+- Removed `DesktopApplicationTemplate.UI.Tests` project and WPF-specific unit tests.
 
 #### Fixed
 - Added missing `FluentAssertions` package reference to the test project and documented dependency checks to avoid build failures.
 - Removed duplicate using directives and missing namespace references that prevented solution builds.
 - Guarded WPF test thread apartment configuration with an OS check to avoid CA1416 build errors on non-Windows hosts.
-- Added `StubFileDialogService` to test project and updated MQTT and FTP UI tests for API changes.
-- ThemeManager test executes on the current thread, removing manual thread usage.
-- FTP view tests use a helper to initialize `Application` resources, eliminating manual thread setup.
+- Added `StubFileDialogService` to test project to support file dialog operations.
 - Console test logger writes plain text messages to avoid Visual Studio RPC errors when expanding test results.
-- Dispatcher test helper pumps the message loop to prevent deadlocks in UI navigation tests.
 
