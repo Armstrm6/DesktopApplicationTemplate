@@ -203,8 +203,16 @@ namespace DesktopApplicationTemplate.UI
                 settings.Save();
             }
 
-            var mainWindow = AppHost.Services.GetRequiredService<MainView>();
-            mainWindow.Show();
+            var mainWindow = AppHost.Services.GetService<MainView>();
+            if (mainWindow is null)
+            {
+                var logger = AppHost.Services.GetService<ILogger<App>>();
+                logger?.LogWarning("MainView service missing; skipping window creation.");
+            }
+            else
+            {
+                mainWindow.Show();
+            }
 
             base.OnStartup(e);
         }
