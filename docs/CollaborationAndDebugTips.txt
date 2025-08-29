@@ -90,7 +90,8 @@ Current Attempt: `dotnet` CLI not found; unable to run restore, build, or tests 
 Newest Attempt: After ServiceManager updates, `dotnet restore`, `dotnet build`, and `dotnet test --settings tests.runsettings` all reported the `dotnet` command is missing; relying on CI.
 Another Attempt: After removing legacy WPF test fixtures, `dotnet` commands remain unavailable; continue relying on CI.
 Most Recent Attempt: `dotnet --version` still reports command not found; tests skipped and CI used for validation.
-Related Commits/PRs: 8517691, 4c0dbb5, 1b5b0ec
+Latest Attempt: After adjusting App startup to tolerate missing MainView registration, the `dotnet` CLI remains unavailable and tests could not run.
+Related Commits/PRs: 8517691, 4c0dbb5, 1b5b0ec, 739abbe
 [2025-08-27 04:25] Topic: Logging interface restoration
 Context: Introduced core logging abstractions and refactored edit view models to support DI.
 Observations: Added ILoggingService, LogLevel enum, moved LogEntry to core, and implemented Load methods on TCP and SCP edit view models.
