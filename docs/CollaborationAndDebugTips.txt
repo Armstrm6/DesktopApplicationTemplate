@@ -84,6 +84,7 @@ Notes: Documented convention to append updates within existing topic blocks and 
 Additional Notes: Installed .NET SDK 8.0.404 via dotnet-install; `dotnet restore` now succeeds, but `dotnet build DesktopApplicationTemplate.sln` fails with NETSDK1022 for duplicate `Themes/Forms.xaml`, and WPF test projects cannot run. Rely on CI for verification.
 Clarification: WPF workload installation is no longer required; related setup checks have been removed.
 Updated UI tests to remove collection fixtures; each test initializes Application via helper and assembly disables parallel execution.
+Latest Attempt: `dotnet restore` and `dotnet build` succeeded, but `dotnet test --settings tests.runsettings` aborted because the Microsoft.WindowsDesktop.App 8.0.0 runtime is missing.
 Related Commits/PRs: 8517691, 4c0dbb5
 [2025-08-27 04:25] Topic: Logging interface restoration
 Context: Introduced core logging abstractions and refactored edit view models to support DI.
@@ -200,10 +201,10 @@ Action Items: Rely on CI for Windows execution.
 Related Commits/PRs:
 
 [2025-08-27 21:16] Topic: WPF test attributes
-Context: Added custom WpfFact/WpfTheory to run UI tests on STA threads and updated existing WPF tests to use them.
+Context: Added custom WindowsFact/WindowsTheory to run UI tests on STA threads and updated existing WPF tests to use them.
 Observations: .NET SDK 8.0.404 installed successfully, but Microsoft.WindowsDesktop runtime is unavailable so tests abort.
 Codex Limitations noticed: Missing WindowsDesktop runtime prevents executing WPF tests on Linux.
-Effective Prompts / Instructions that worked: User request to replace Fact with WpfFact in UI tests.
+Effective Prompts / Instructions that worked: User request to replace Fact with WindowsFact in UI tests.
 Decisions & Rationale: Provide reusable attributes so UI tests no longer manage threads manually.
 Action Items: Rely on CI for Windows-specific test execution.
 Related Commits/PRs:
@@ -293,15 +294,15 @@ Decisions & Rationale: Separate UI tests to keep non-WPF tests independent and c
 Action Items: Rely on CI for WPF test execution.
 Related Commits/PRs:
 [2025-09-14 09:00] Topic: Windows-only test attributes
-Context: Added WindowsFact/WindowsTheory and updated WpfFact to inherit WindowsFact.
-Observations: Attributes skip on non-Windows hosts so UI tests rely on CI. Removed WpfFactAttribute; tests now use WindowsFact with manual STA threads when needed.
+Context: Added WindowsFact/WindowsTheory for UI tests on STA threads.
+Observations: Attributes skip on non-Windows hosts so UI tests rely on CI.
 Codex Limitations noticed: Linux container lacks Microsoft.WindowsDesktop runtime and the `dotnet` CLI; build and test commands fail.
 Effective Prompts / Instructions that worked: User request to skip Windows-only tests and simplify WPF fixtures.
-Decisions & Rationale: Inherit WpfFact from WindowsFact to avoid annotating each test and later remove WpfFact to reduce maintenance.
+Decisions & Rationale: Use WindowsFact to avoid annotating each test with platform checks.
 Action Items: Rely on CI for verification.
 Related Commits/PRs:
 [2025-09-15 10:00] Topic: Shared test utilities
-Context: Introduced TestCommon library for reusable fixtures and consolidated ConsoleTestLogger and Windows/Wpf test attributes.
+Context: Introduced TestCommon library for reusable fixtures and consolidated ConsoleTestLogger and Windows-specific test attributes.
 Observations: All test projects reference TestCommon to remove duplicated code and now skip it as a test project; tests still cannot run due to missing WindowsDesktop runtime.
 Codex Limitations noticed: Windows desktop runtime unavailable in the container.
 Effective Prompts / Instructions that worked: User request to centralize shared test helpers.
@@ -309,8 +310,8 @@ Decisions & Rationale: Reduce duplication and simplify maintenance by sharing fi
 Action Items: Rely on CI for test execution.
 Related Commits/PRs: e6a90a3, ed1d219
 
-[2025-09-16 10:00] Topic: WpfFact CA1416 guard
-Context: Build failed due to Windows-only `Thread.SetApartmentState` usage in WPF test case.
+[2025-09-16 10:00] Topic: WindowsFact CA1416 guard
+Context: Build failed due to Windows-only `Thread.SetApartmentState` usage in a WindowsFact test case.
 Observations: Wrapped `SetApartmentState` call in `OperatingSystem.IsWindows` check; CA1416 no longer triggers but UI tests still fail to compile because the WPF workload isn't available on Linux.
 Codex Limitations noticed: WPF workload and WindowsDesktop runtime unavailable; test builds fail with missing WPF members and packages.
 Effective Prompts / Instructions that worked: User request to guard Windows-specific API.
