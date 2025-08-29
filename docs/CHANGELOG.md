@@ -46,6 +46,7 @@
 - System namespace references and form style resources compiled to eliminate XAML parse failures.
 - Marked main window `ContentFrame` public so UI tests can inspect navigation.
 - Included `Forms.xaml` in theme resources with Page build action.
+- Installer window references `TextBoxHintBehavior.AutoToolTip` without design-time warnings.
 
 ### HID Service
 #### Added

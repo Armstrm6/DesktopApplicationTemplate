@@ -23,33 +23,35 @@ public static class TextBoxHintBehavior
             new PropertyMetadata(false, OnAutoToolTipChanged));
 
     /// <summary>
-    /// Gets the value of the <see cref="AutoToolTipProperty"/> for the specified object.
+    /// Gets the value of the <see cref="AutoToolTipProperty"/> for the specified text box.
     /// </summary>
-    /// <param name="obj">The dependency object.</param>
+    /// <param name="textBox">The text box.</param>
     /// <returns>The current value.</returns>
-    public static bool GetAutoToolTip(DependencyObject obj)
+    [AttachedPropertyBrowsableForType(typeof(TextBox))]
+    public static bool GetAutoToolTip(TextBox textBox)
     {
-        if (obj is null)
+        if (textBox is null)
         {
-            throw new ArgumentNullException(nameof(obj));
+            throw new ArgumentNullException(nameof(textBox));
         }
 
-        return (bool)obj.GetValue(AutoToolTipProperty);
+        return (bool)textBox.GetValue(AutoToolTipProperty);
     }
 
     /// <summary>
-    /// Sets the value of the <see cref="AutoToolTipProperty"/> for the specified object.
+    /// Sets the value of the <see cref="AutoToolTipProperty"/> for the specified text box.
     /// </summary>
-    /// <param name="obj">The dependency object.</param>
+    /// <param name="textBox">The text box.</param>
     /// <param name="value">The value to set.</param>
-    public static void SetAutoToolTip(DependencyObject obj, bool value)
+    [AttachedPropertyBrowsableForType(typeof(TextBox))]
+    public static void SetAutoToolTip(TextBox textBox, bool value)
     {
-        if (obj is null)
+        if (textBox is null)
         {
-            throw new ArgumentNullException(nameof(obj));
+            throw new ArgumentNullException(nameof(textBox));
         }
 
-        obj.SetValue(AutoToolTipProperty, value);
+        textBox.SetValue(AutoToolTipProperty, value);
     }
 
     private static void OnAutoToolTipChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
