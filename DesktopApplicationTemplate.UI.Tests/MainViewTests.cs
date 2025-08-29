@@ -75,7 +75,7 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [WindowsFact]
-        public void OpenServiceEditor_NonCsv_SetsContentFrame()
+        public void ShowService_NonCsv_SetsContentFrame()
         {
             ApplicationResourceHelper.RunOnDispatcher(() =>
             {
@@ -88,15 +88,17 @@ namespace DesktopApplicationTemplate.Tests
                 var view = new MainView(vm);
                 var svc = new ServiceViewModel { DisplayName = "TCP - Test", ServiceType = "TCP" };
                 svc.SetColorsByType();
-                var method = typeof(MainView).GetMethod("OpenServiceEditor", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                method?.Invoke(view, new object[] { svc });
+                var getPage = typeof(MainView).GetMethod("GetOrCreateServicePage", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var page = (Page?)getPage?.Invoke(view, new object[] { svc });
+                var showPage = typeof(MainView).GetMethod("ShowPage", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                showPage?.Invoke(view, new object[] { page! });
                 Assert.NotNull(view.ContentFrame.Content);
                 ConsoleTestLogger.LogPass();
             });
         }
 
         [WindowsFact]
-        public void OpenServiceEditor_CsvCreator_ShowsWindow()
+        public void ShowService_CsvCreator_LoadsView()
         {
             ApplicationResourceHelper.RunOnDispatcher(() =>
             {
@@ -110,10 +112,11 @@ namespace DesktopApplicationTemplate.Tests
                 var view = new MainView(vm);
                 var svc = new ServiceViewModel { DisplayName = "CSV - Test", ServiceType = "CSV Creator" };
                 svc.SetColorsByType();
-                System.Windows.Threading.Dispatcher.CurrentDispatcher.BeginInvoke(new Action(() => csvVm.CloseCommand.Execute(null)));
-                var method = typeof(MainView).GetMethod("OpenServiceEditor", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                method?.Invoke(view, new object[] { svc });
-                Assert.NotNull(view);
+                var getPage = typeof(MainView).GetMethod("GetOrCreateServicePage", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var page = (Page?)getPage?.Invoke(view, new object[] { svc });
+                var showPage = typeof(MainView).GetMethod("ShowPage", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                showPage?.Invoke(view, new object[] { page! });
+                Assert.IsType<CsvServiceView>(view.ContentFrame.Content);
                 ConsoleTestLogger.LogPass();
             });
         }
