@@ -18,7 +18,7 @@ namespace DesktopApplicationTemplate.Tests
     [Collection("WpfTests")]
     public class MainViewTests
     {
-        [WpfFact]
+        [WindowsFact]
         public void MainView_ServiceList_HasMaxHeight()
         {
 
@@ -53,7 +53,7 @@ namespace DesktopApplicationTemplate.Tests
             ConsoleTestLogger.LogPass();
         }
 
-        [WpfFact]
+        [WindowsFact]
         public void MainView_HasCloseCommandBinding()
         {
 
@@ -88,7 +88,7 @@ namespace DesktopApplicationTemplate.Tests
             ConsoleTestLogger.LogPass();
         }
 
-        [WpfFact]
+        [WindowsFact]
         public void MainView_HasMinimizeCommandBinding()
         {
 
@@ -123,7 +123,7 @@ namespace DesktopApplicationTemplate.Tests
             ConsoleTestLogger.LogPass();
         }
 
-        [WpfFact]
+        [WindowsFact]
         public void OpenServiceEditor_NonCsv_SetsContentFrame()
         {
 
@@ -160,7 +160,7 @@ namespace DesktopApplicationTemplate.Tests
             ConsoleTestLogger.LogPass();
         }
 
-        [WpfFact]
+        [WindowsFact]
         public void OpenServiceEditor_CsvCreator_ShowsWindow()
         {
 
@@ -200,7 +200,7 @@ namespace DesktopApplicationTemplate.Tests
             ConsoleTestLogger.LogPass();
         }
 
-        [WpfFact]
+        [WindowsFact]
         public void MainView_KeyDown_IgnoresNonEscape()
         {
 
@@ -244,7 +244,7 @@ namespace DesktopApplicationTemplate.Tests
             ConsoleTestLogger.LogPass();
         }
 
-        [WpfFact]
+        [WindowsFact]
         public void HeaderBar_DoubleClick_TogglesWindowState()
         {
 

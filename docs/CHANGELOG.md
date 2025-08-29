@@ -178,6 +178,7 @@
 - Core unit test project targets cross-platform `net8.0` for broader compatibility.
 - Removed WPF workload installation steps; WPF ships with the Windows .NET SDK.
 - Temporarily removed ThemeManager UI test that triggered dispatcher access errors.
+- Removed `WpfFactAttribute`; WPF tests now use `WindowsFactAttribute`.
 
 #### Fixed
 - Added missing `FluentAssertions` package reference to the test project and documented dependency checks to avoid build failures.

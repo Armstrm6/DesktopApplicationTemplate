@@ -21,7 +21,7 @@ namespace DesktopApplicationTemplate.Tests;
 [Collection("WpfTests")]
 public class MainViewCsvNavigationTests
 {
-    [WpfFact]
+    [WindowsFact]
     public void NavigateToCsvCreator_ShowsCreateView()
     {
 
@@ -66,7 +66,7 @@ public class MainViewCsvNavigationTests
         thread.Join();
     }
 
-    [WpfFact]
+    [WindowsFact]
     public void DoubleClickCsvService_OpensEditView()
     {
 

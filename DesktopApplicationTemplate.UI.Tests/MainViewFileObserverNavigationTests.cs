@@ -21,7 +21,7 @@ namespace DesktopApplicationTemplate.Tests;
 [Collection("WpfTests")]
 public class MainViewFileObserverNavigationTests
 {
-    [WpfFact]
+    [WindowsFact]
     public void EditFileObserverService_ShowsEditView()
     {
 
@@ -76,7 +76,7 @@ public class MainViewFileObserverNavigationTests
        thread.Join();
     }
 
-    [WpfFact]
+    [WindowsFact]
     public void DoubleClickFileObserverService_OpensEditView()
     {
 

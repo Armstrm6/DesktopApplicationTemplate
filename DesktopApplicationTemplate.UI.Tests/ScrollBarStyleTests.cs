@@ -11,7 +11,7 @@ namespace DesktopApplicationTemplate.Tests
     [Collection("WpfTests")]
     public class ScrollBarStyleTests
     {
-        [WpfFact]
+        [WindowsFact]
         public void LightTheme_ScrollBarStyle_HasReducedWidth()
         {
 

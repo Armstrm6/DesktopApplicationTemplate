@@ -21,7 +21,7 @@ namespace DesktopApplicationTemplate.Tests;
 [Collection("WpfTests")]
 public class MainViewHeartbeatNavigationTests
 {
-    [WpfFact]
+    [WindowsFact]
     public void NavigateToHeartbeat_ShowsCreateView()
     {
 
@@ -65,7 +65,7 @@ public class MainViewHeartbeatNavigationTests
         thread.Join();
     }
 
-    [WpfFact]
+    [WindowsFact]
     public void EditHeartbeatService_ShowsEditView()
     {
 
@@ -118,7 +118,7 @@ public class MainViewHeartbeatNavigationTests
         thread.Join();
     }
 
-    [WpfFact]
+    [WindowsFact]
     public void DoubleClickHeartbeatService_OpensEditView()
     {
 

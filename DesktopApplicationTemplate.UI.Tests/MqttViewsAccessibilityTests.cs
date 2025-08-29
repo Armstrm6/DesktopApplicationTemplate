@@ -17,7 +17,7 @@ namespace DesktopApplicationTemplate.Tests
     [Collection("WpfTests")]
     public class MqttViewsAccessibilityTests
     {
-        [WpfFact]
+        [WindowsFact]
         public void MqttCreateServiceView_ExposesNamedButtons()
         {
 
@@ -42,7 +42,7 @@ namespace DesktopApplicationTemplate.Tests
             ConsoleTestLogger.LogPass();
         }
 
-        [WpfFact]
+        [WindowsFact]
         public void MqttEditConnectionView_ExposesUpdateButton()
         {
 
@@ -70,7 +70,7 @@ namespace DesktopApplicationTemplate.Tests
             ConsoleTestLogger.LogPass();
         }
 
-        [WpfFact]
+        [WindowsFact]
         public void MqttTagSubscriptionsView_ExposesSendButton()
         {
 

@@ -18,7 +18,7 @@ namespace DesktopApplicationTemplate.Tests;
 [Collection("WpfTests")]
 public class MainViewTcpNavigationTests
 {
-    [WpfFact]
+    [WindowsFact]
     public void CreateTcpService_Advanced_Back_ReturnsToCreateView()
     {
 

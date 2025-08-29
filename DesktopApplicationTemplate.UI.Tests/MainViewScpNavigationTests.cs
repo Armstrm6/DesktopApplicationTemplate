@@ -20,7 +20,7 @@ namespace DesktopApplicationTemplate.Tests;
 [Collection("WpfTests")]
 public class MainViewScpNavigationTests
 {
-    [WpfFact]
+    [WindowsFact]
     public void EditScpService_ShowsEditView()
     {
 
@@ -74,7 +74,7 @@ public class MainViewScpNavigationTests
         thread.Join();
     }
 
-    [WpfFact]
+    [WindowsFact]
     public void DoubleClickScpService_OpensEditView()
     {
 
