@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Windows;
+using System.Windows.Threading;
 using DesktopApplicationTemplate.UI;
 
 namespace DesktopApplicationTemplate.Tests;
@@ -27,22 +28,35 @@ public static class ApplicationResourceHelper
     public static void RunOnDispatcher(Action action)
     {
         Exception? ex = null;
+        Exception? dispatcherEx = null;
         var thread = new Thread(() =>
         {
+            void Handler(object sender, DispatcherUnhandledExceptionEventArgs e)
+            {
+                dispatcherEx = e.Exception;
+                e.Handled = true;
+            }
+
             try
             {
                 EnsureApplication();
+                Application.Current!.DispatcherUnhandledException += Handler;
                 action();
             }
             catch (Exception e) { ex = e; }
             finally
             {
-                Application.Current?.Shutdown();
+                if (Application.Current != null)
+                {
+                    Application.Current.DispatcherUnhandledException -= Handler;
+                    Application.Current.Shutdown();
+                }
             }
         });
         thread.SetApartmentState(ApartmentState.STA);
         thread.Start();
         thread.Join();
+        if (dispatcherEx != null) throw dispatcherEx;
         if (ex != null) throw ex;
     }
 }

@@ -20,8 +20,7 @@ public class MainViewTcpNavigationTests
     [WindowsFact]
     public void CreateTcpService_Advanced_Back_ReturnsToCreateView()
     {
-
-        var thread = new Thread(() =>
+        ApplicationResourceHelper.RunOnDispatcher(() =>
         {
             var logger = new LoggingService(new NullRichTextLogger());
             var fileDialog = new Mock<IFileDialogService>();
@@ -66,8 +65,5 @@ public class MainViewTcpNavigationTests
             view.ContentFrame.Content.Should().BeOfType<TcpCreateServiceView>();
             ConsoleTestLogger.LogPass();
         });
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        thread.Join();
     }
 }

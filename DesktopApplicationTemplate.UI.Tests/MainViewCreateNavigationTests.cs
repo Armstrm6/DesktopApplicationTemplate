@@ -22,8 +22,7 @@ public class MainViewCreateNavigationTests
     [WindowsFact]
     public void NavigateToTcp_ShowsCreateView()
     {
-
-        var thread = new Thread(() =>
+        ApplicationResourceHelper.RunOnDispatcher(() =>
         {
             var logger = new LoggingService(new NullRichTextLogger());
             var fileDialog = new Mock<IFileDialogService>();
@@ -57,16 +56,12 @@ public class MainViewCreateNavigationTests
             view.ContentFrame.Content.Should().BeOfType<TcpCreateServiceView>();
             ConsoleTestLogger.LogPass();
         });
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        thread.Join();
     }
 
     [WindowsFact]
     public void NavigateToFtpServer_ShowsCreateView()
     {
-
-        var thread = new Thread(() =>
+        ApplicationResourceHelper.RunOnDispatcher(() =>
         {
             var logger = new LoggingService(new NullRichTextLogger());
             var fileDialog = new Mock<IFileDialogService>();
@@ -102,16 +97,12 @@ public class MainViewCreateNavigationTests
             view.ContentFrame.Content.Should().BeOfType<FtpServerCreateView>();
             ConsoleTestLogger.LogPass();
         });
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        thread.Join();
     }
 
     [WindowsFact]
     public void NavigateToHid_ShowsCreateView()
     {
-
-        var thread = new Thread(() =>
+        ApplicationResourceHelper.RunOnDispatcher(() =>
         {
             var logger = new LoggingService(new NullRichTextLogger());
             var fileDialog = new Mock<IFileDialogService>();
@@ -149,16 +140,12 @@ public class MainViewCreateNavigationTests
             view.ContentFrame.Content.Should().BeOfType<HidCreateServiceView>();
             ConsoleTestLogger.LogPass();
         });
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        thread.Join();
     }
 
     [WindowsFact]
     public void NavigateToFileObserver_ShowsCreateView()
     {
-
-        var thread = new Thread(() =>
+        ApplicationResourceHelper.RunOnDispatcher(() =>
         {
             var logger = new LoggingService(new NullRichTextLogger());
             var fileDialog = new Mock<IFileDialogService>();
@@ -197,16 +184,12 @@ public class MainViewCreateNavigationTests
             view.ContentFrame.Content.Should().BeOfType<FileObserverCreateServiceView>();
             ConsoleTestLogger.LogPass();
         });
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        thread.Join();
     }
 
     [WindowsFact]
     public void NavigateToScp_ShowsCreateView()
     {
-
-        var thread = new Thread(() =>
+        ApplicationResourceHelper.RunOnDispatcher(() =>
         {
             var logger = new LoggingService(new NullRichTextLogger());
             var fileDialog = new Mock<IFileDialogService>();
@@ -242,8 +225,5 @@ public class MainViewCreateNavigationTests
             view.ContentFrame.Content.Should().BeOfType<ScpCreateServiceView>();
             ConsoleTestLogger.LogPass();
         });
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        thread.Join();
     }
 }

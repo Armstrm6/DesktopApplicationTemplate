@@ -1,6 +1,5 @@
 using DesktopApplicationTemplate.UI;
 using System;
-using System.Threading;
 using System.Windows;
 using Xunit;
 
@@ -11,34 +10,18 @@ namespace DesktopApplicationTemplate.Tests
         [WindowsFact]
         public void BubblyWindowStyle_LoadsWithRoundedCorners()
         {
-
-            Exception? capturedException = null;
-            var thread = new Thread(() =>
+            ApplicationResourceHelper.RunOnDispatcher(() =>
             {
-                try
+                var resourceDictionary = new ResourceDictionary
                 {
-                    var resourceDictionary = new ResourceDictionary
-                    {
-                        Source = new Uri("pack://application:,,,/DesktopApplicationTemplate.UI;component/Themes/BubblyWindow.xaml")
-                    };
+                    Source = new Uri("pack://application:,,,/DesktopApplicationTemplate.UI;component/Themes/BubblyWindow.xaml")
+                };
 
-                    Assert.True(resourceDictionary.Contains("BubblyWindowStyle"));
-                    _ = (Style)resourceDictionary["BubblyWindowStyle"];
-                }
-                catch (Exception ex)
-                {
-                    capturedException = ex;
-                }
+                Assert.True(resourceDictionary.Contains("BubblyWindowStyle"));
+                _ = (Style)resourceDictionary["BubblyWindowStyle"];
+
+                ConsoleTestLogger.LogPass();
             });
-
-            thread.SetApartmentState(ApartmentState.STA);
-            thread.Start();
-            thread.Join();
-
-            if (capturedException != null)
-                throw capturedException;
-
-            ConsoleTestLogger.LogPass();
         }
     }
 }

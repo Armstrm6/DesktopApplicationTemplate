@@ -24,7 +24,7 @@ public class MainViewTcpEditTests
     [WindowsFact]
     public void EditTcpService_SavesUpdatedOptions()
     {
-        var thread = new Thread(() =>
+        ApplicationResourceHelper.RunOnDispatcher(() =>
         {
             var logger = new LoggingService(new NullRichTextLogger());
             var startup = new Mock<IStartupService>();
@@ -97,8 +97,5 @@ public class MainViewTcpEditTests
             File.ReadAllText(tempFile).Should().Contain("127.0.0.1");
             ConsoleTestLogger.LogPass();
         });
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        thread.Join();
     }
 }

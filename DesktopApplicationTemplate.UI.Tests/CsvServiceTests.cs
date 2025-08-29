@@ -195,41 +195,25 @@ namespace DesktopApplicationTemplate.Tests
         [WindowsFact]
         public void CsvServiceView_LoadsInto_ContentFrame()
         {
-
-            Exception? ex = null;
-            var thread = new Thread(() =>
+            ApplicationResourceHelper.RunOnDispatcher(() =>
             {
-                try
-                {
-                    ApplicationResourceHelper.EnsureApplication();
+                var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
+                var servicesPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "services.json");
+                Directory.CreateDirectory(Path.GetDirectoryName(servicesPath)!);
+                var network = new Mock<INetworkConfigurationService>();
+                var networkVm = new NetworkConfigurationViewModel(network.Object);
+                var mainVm = new MainViewModel(new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath)), networkVm, network.Object, null, servicesPath);
+                var view = new MainView(mainVm);
 
-                    var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
-                    var servicesPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "services.json");
-                    Directory.CreateDirectory(Path.GetDirectoryName(servicesPath)!);
-                    var network = new Mock<INetworkConfigurationService>();
-                    var networkVm = new NetworkConfigurationViewModel(network.Object);
-                    var mainVm = new MainViewModel(new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath)), networkVm, network.Object, null, servicesPath);
-                    var view = new MainView(mainVm);
+                var svc = new ServiceViewModel { DisplayName = "CSV Creator - Test", ServiceType = "CSV Creator" };
+                svc.SetColorsByType();
 
-                    var svc = new ServiceViewModel { DisplayName = "CSV Creator - Test", ServiceType = "CSV Creator" };
-                    svc.SetColorsByType();
+                var method = typeof(MainView).GetMethod("OpenServiceEditor", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                method?.Invoke(view, new object[] { svc });
 
-                    var method = typeof(MainView).GetMethod("OpenServiceEditor", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                    method?.Invoke(view, new object[] { svc });
-
-                    Assert.IsType<CsvServiceView>(view.ContentFrame.Content);
-                }
-                catch (Exception e) { ex = e; }
-                finally
-                {
-                    Application.Current?.Shutdown();
-                }
+                Assert.IsType<CsvServiceView>(view.ContentFrame.Content);
+                ConsoleTestLogger.LogPass();
             });
-            thread.SetApartmentState(ApartmentState.STA);
-            thread.Start();
-            thread.Join();
-            if (ex != null) throw ex;
-            ConsoleTestLogger.LogPass();
         }
     }
 }

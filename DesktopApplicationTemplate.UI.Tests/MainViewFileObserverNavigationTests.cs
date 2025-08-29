@@ -23,8 +23,7 @@ public class MainViewFileObserverNavigationTests
     [WindowsFact]
     public void EditFileObserverService_ShowsEditView()
     {
-
-        var thread = new Thread(() =>
+        ApplicationResourceHelper.RunOnDispatcher(() =>
         {
             var logger = new LoggingService(new NullRichTextLogger());
             var fileDialog = new Mock<IFileDialogService>();
@@ -70,16 +69,12 @@ public class MainViewFileObserverNavigationTests
             view.ContentFrame.Content.Should().BeOfType<FileObserverEditServiceView>();
             ConsoleTestLogger.LogPass();
         });
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-       thread.Join();
     }
 
     [WindowsFact]
     public void DoubleClickFileObserverService_OpensEditView()
     {
-
-        var thread = new Thread(() =>
+        ApplicationResourceHelper.RunOnDispatcher(() =>
         {
             var logger = new LoggingService(new NullRichTextLogger());
             var fileDialog = new Mock<IFileDialogService>();
@@ -128,8 +123,5 @@ public class MainViewFileObserverNavigationTests
             view.ContentFrame.Content.Should().BeOfType<FileObserverEditServiceView>();
             ConsoleTestLogger.LogPass();
         });
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        thread.Join();
     }
 }

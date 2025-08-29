@@ -178,6 +178,7 @@
 - Removed Windows desktop runtime checks from tests so they run when Visual Studio provides the runtime.
 - Core unit test project targets cross-platform `net8.0` for broader compatibility.
 - Removed WPF workload installation steps; WPF ships with the Windows .NET SDK.
+- UI tests run on a dispatcher helper that captures unhandled dispatcher exceptions.
 - Temporarily removed ThemeManager UI test that triggered dispatcher access errors.
 - Migrated tests from `WpfFact`/`WpfTheory` to `WindowsFact`/`WindowsTheory` and dropped the WPF test collection fixture.
 

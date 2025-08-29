@@ -23,8 +23,7 @@ public class MainViewCsvNavigationTests
     [WindowsFact]
     public void NavigateToCsvCreator_ShowsCreateView()
     {
-
-        var thread = new Thread(() =>
+        ApplicationResourceHelper.RunOnDispatcher(() =>
         {
             var logger = new LoggingService(new NullRichTextLogger());
             var fileDialog = new Mock<IFileDialogService>();
@@ -60,16 +59,12 @@ public class MainViewCsvNavigationTests
             view.ContentFrame.Content.Should().BeOfType<CsvCreateServiceView>();
             ConsoleTestLogger.LogPass();
         });
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        thread.Join();
     }
 
     [WindowsFact]
     public void DoubleClickCsvService_OpensEditView()
     {
-
-        var thread = new Thread(() =>
+        ApplicationResourceHelper.RunOnDispatcher(() =>
         {
             var logger = new LoggingService(new NullRichTextLogger());
             var fileDialog = new Mock<IFileDialogService>();
@@ -118,8 +113,5 @@ public class MainViewCsvNavigationTests
             view.ContentFrame.Content.Should().BeOfType<CsvEditServiceView>();
             ConsoleTestLogger.LogPass();
         });
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        thread.Join();
     }
 }
