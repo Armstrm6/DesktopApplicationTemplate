@@ -73,6 +73,7 @@ Effective Prompts / Instructions that worked: Use `AddConsole()` and `AddDebug()
 Decisions & Rationale: Start with infrastructure pieces before addressing individual view models.
 Action Items: Migrate remaining classes to `ILogger<T>` and update tests.
 Related Commits/PRs:
+
 [2025-09-15 14:00] Topic: Platform-specific test execution
 Context: Documented SDK prerequisites and standard build/test commands.
 Observations: Installed the .NET SDK 8.0.404 via script; `dotnet restore` and `dotnet build DesktopApplicationTemplate.sln` succeed, but `dotnet test --settings tests.runsettings --no-build` aborts because the Microsoft.WindowsDesktop.App 8.0.0 runtime and `xunit.abstractions` package are missing on Linux. WPF ships with the Windows SDK so no additional workload installation is required. In the current container, the `dotnet` CLI itself is not available, so restore, build, and test commands cannot run.
@@ -368,4 +369,12 @@ Codex Limitations noticed: Linux environment lacks required reference assemblies
 Effective Prompts / Instructions that worked: User request to temporarily remove failing test and repository guidance on documenting limitations.
 Decisions & Rationale: Delete unstable test and rely on CI for verification.
 Action Items: Rely on CI for Windows-specific validation.
+Related Commits/PRs:
+[2025-09-27 12:00] Topic: Dispatcher helper deadlock
+Context: UI navigation test for File Observer hung because dispatcher queue wasn't processed.
+Observations: Updated RunOnDispatcher to invoke actions asynchronously and run the message loop so queued work completes.
+Codex Limitations noticed: .NET SDK and WindowsDesktop runtime are unavailable; restore/build/test commands cannot run locally.
+Effective Prompts / Instructions that worked: User report of deadlock and AGENTS guidance on async patterns.
+Decisions & Rationale: Pump dispatcher and shut down after action to avoid deadlocks.
+Action Items: Rely on CI for verification.
 Related Commits/PRs:

@@ -208,8 +208,10 @@ namespace DesktopApplicationTemplate.Tests
                 var svc = new ServiceViewModel { DisplayName = "CSV Creator - Test", ServiceType = "CSV Creator" };
                 svc.SetColorsByType();
 
-                var method = typeof(MainView).GetMethod("OpenServiceEditor", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                method?.Invoke(view, new object[] { svc });
+                var getPage = typeof(MainView).GetMethod("GetOrCreateServicePage", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var page = (Page?)getPage?.Invoke(view, new object[] { svc });
+                var showPage = typeof(MainView).GetMethod("ShowPage", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                showPage?.Invoke(view, new object[] { page! });
 
                 Assert.IsType<CsvServiceView>(view.ContentFrame.Content);
                 ConsoleTestLogger.LogPass();
