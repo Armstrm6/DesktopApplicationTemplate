@@ -9,7 +9,7 @@ namespace DesktopApplicationTemplate.Tests
     [Collection("WpfTests")]
     public class BubblyWindowStyleTests
     {
-        [WpfFact]
+        [WindowsFact]
         public void BubblyWindowStyle_LoadsWithRoundedCorners()
         {
 

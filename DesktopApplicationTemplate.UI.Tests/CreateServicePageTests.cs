@@ -13,7 +13,7 @@ namespace DesktopApplicationTemplate.Tests;
 [Collection("WpfTests")]
 public class CreateServicePageTests
 {
-    [WpfFact]
+    [WindowsFact]
     public void ServiceType_Click_RaisesTcpSelected()
     {
         string? receivedName = null;
@@ -32,7 +32,7 @@ public class CreateServicePageTests
         receivedName.Should().Be("TCP1");
     }
 
-    [WpfFact]
+    [WindowsFact]
     public void ServiceType_Click_RaisesFtpServerSelected()
     {
         string? receivedName = null;
@@ -51,7 +51,7 @@ public class CreateServicePageTests
         receivedName.Should().Be("FTP Server1");
     }
 
-    [WpfFact]
+    [WindowsFact]
     public void ServiceType_Click_RaisesHeartbeatSelected()
     {
         string? receivedName = null;
@@ -70,7 +70,7 @@ public class CreateServicePageTests
         receivedName.Should().Be("Heartbeat1");
     }
 
-    [WpfFact]
+    [WindowsFact]
     public void ServiceType_Click_RaisesHidSelected()
     {
         string? receivedName = null;
@@ -89,7 +89,7 @@ public class CreateServicePageTests
         receivedName.Should().Be("HID1");
     }
 
-    [WpfFact]
+    [WindowsFact]
     public void ServiceType_Click_RaisesCsvSelected()
     {
         string? receivedName = null;
@@ -108,7 +108,7 @@ public class CreateServicePageTests
         receivedName.Should().Be("CSV Creator1");
     }
 
-    [WpfFact]
+    [WindowsFact]
     public void ServiceType_Click_RaisesHttpSelected()
     {
         string? receivedName = null;
@@ -127,7 +127,7 @@ public class CreateServicePageTests
         receivedName.Should().Be("HTTP1");
     }
 
-    [WpfFact]
+    [WindowsFact]
     public void Cancel_Click_RaisesCancelled()
     {
         bool cancelled = false;

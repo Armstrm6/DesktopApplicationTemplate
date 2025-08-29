@@ -16,7 +16,7 @@ namespace DesktopApplicationTemplate.Tests
     [Collection("WpfTests")]
     public class CsvServiceTests
     {
-        [WpfFact]
+        [WindowsFact]
         public void EnsureColumnsForService_AddsColumns()
         {
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()+".json");
@@ -30,7 +30,7 @@ namespace DesktopApplicationTemplate.Tests
             ConsoleTestLogger.LogPass();
         }
 
-        [WpfFact]
+        [WindowsFact]
         public void EnsureColumnsForService_SkipsCsvServices()
         {
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()+".json");
@@ -43,7 +43,7 @@ namespace DesktopApplicationTemplate.Tests
             ConsoleTestLogger.LogPass();
         }
 
-        [WpfFact]
+        [WindowsFact]
         public void RemoveColumnsForService_RemovesColumns()
         {
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()+".json");
@@ -59,7 +59,7 @@ namespace DesktopApplicationTemplate.Tests
             ConsoleTestLogger.LogPass();
         }
 
-        [WpfFact]
+        [WindowsFact]
         public void RemoveColumnsForService_StartsNewFile()
         {
             var dir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
@@ -88,7 +88,7 @@ namespace DesktopApplicationTemplate.Tests
             ConsoleTestLogger.LogPass();
         }
 
-        [WpfFact]
+        [WindowsFact]
         public void RecordLog_WritesCsvRow()
         {
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()+".json");
@@ -105,7 +105,7 @@ namespace DesktopApplicationTemplate.Tests
             ConsoleTestLogger.LogPass();
         }
 
-        [WpfFact]
+        [WindowsFact]
         public void AppendRow_CreatesIncrementingFiles()
         {
             var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
@@ -136,7 +136,7 @@ namespace DesktopApplicationTemplate.Tests
             ConsoleTestLogger.LogPass();
         }
 
-        [WpfFact]
+        [WindowsFact]
         public void AppendRow_CreatesNestedDirectory()
         {
             var baseDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
@@ -164,7 +164,7 @@ namespace DesktopApplicationTemplate.Tests
             ConsoleTestLogger.LogPass();
         }
 
-        [WpfFact]
+        [WindowsFact]
         public void AppendRow_WithoutIndexPlaceholder_UsesSingleFile()
         {
             var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
@@ -193,7 +193,7 @@ namespace DesktopApplicationTemplate.Tests
             ConsoleTestLogger.LogPass();
         }
 
-        [WpfFact]
+        [WindowsFact]
         public void CsvServiceView_LoadsInto_ContentFrame()
         {
 

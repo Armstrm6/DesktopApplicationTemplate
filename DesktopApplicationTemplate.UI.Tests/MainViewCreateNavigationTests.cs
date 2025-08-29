@@ -20,7 +20,7 @@ namespace DesktopApplicationTemplate.Tests;
 [Collection("WpfTests")]
 public class MainViewCreateNavigationTests
 {
-    [WpfFact]
+    [WindowsFact]
     public void NavigateToTcp_ShowsCreateView()
     {
 
@@ -63,7 +63,7 @@ public class MainViewCreateNavigationTests
         thread.Join();
     }
 
-    [WpfFact]
+    [WindowsFact]
     public void NavigateToFtpServer_ShowsCreateView()
     {
 
@@ -108,7 +108,7 @@ public class MainViewCreateNavigationTests
         thread.Join();
     }
 
-    [WpfFact]
+    [WindowsFact]
     public void NavigateToHid_ShowsCreateView()
     {
 
@@ -155,7 +155,7 @@ public class MainViewCreateNavigationTests
         thread.Join();
     }
 
-    [WpfFact]
+    [WindowsFact]
     public void NavigateToFileObserver_ShowsCreateView()
     {
 
@@ -203,7 +203,7 @@ public class MainViewCreateNavigationTests
         thread.Join();
     }
 
-    [WpfFact]
+    [WindowsFact]
     public void NavigateToScp_ShowsCreateView()
     {
 

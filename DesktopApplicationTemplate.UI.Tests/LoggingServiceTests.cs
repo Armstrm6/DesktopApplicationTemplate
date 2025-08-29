@@ -43,7 +43,7 @@ namespace DesktopApplicationTemplate.Tests
             ConsoleTestLogger.LogPass();
         }
 
-        [WpfFact]
+        [WindowsFact]
         public async Task Log_WritesMessageToFile()
         {
             var uiLogger = new Mock<IRichTextLogger>();
@@ -76,7 +76,7 @@ namespace DesktopApplicationTemplate.Tests
             ConsoleTestLogger.LogPass();
         }
 
-        [WpfFact]
+        [WindowsFact]
         public void MinimumLevel_Change_FiltersExistingLogs()
         {
             var uiLogger = new Mock<IRichTextLogger>();
@@ -98,7 +98,7 @@ namespace DesktopApplicationTemplate.Tests
             ConsoleTestLogger.LogPass();
         }
 
-        [WpfFact]
+        [WindowsFact]
         public async Task Reload_ReplaysEntriesFromExistingFile()
         {
             var path = Path.GetTempFileName();

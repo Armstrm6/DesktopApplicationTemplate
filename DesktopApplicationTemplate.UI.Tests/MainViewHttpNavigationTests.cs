@@ -20,7 +20,7 @@ namespace DesktopApplicationTemplate.Tests;
 [Collection("WpfTests")]
 public class MainViewHttpNavigationTests
 {
-    [WpfFact]
+    [WindowsFact]
     public void NavigateToHttp_ShowsCreateView()
     {
 
@@ -64,7 +64,7 @@ public class MainViewHttpNavigationTests
         thread.Join();
     }
 
-    [WpfFact]
+    [WindowsFact]
     public void EditHttpService_ShowsEditView()
     {
 
@@ -117,7 +117,7 @@ public class MainViewHttpNavigationTests
         thread.Join();
     }
 
-    [WpfFact]
+    [WindowsFact]
     public void DoubleClickHttpService_OpensEditView()
     {
 

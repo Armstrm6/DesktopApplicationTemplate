@@ -11,7 +11,7 @@ namespace DesktopApplicationTemplate.Tests;
 [Collection("WpfTests")]
 public class FtpServerAdvancedConfigViewTests
 {
-    [WpfFact]
+    [WindowsFact]
     public void Initialize_SetsDataContext_AndLogger()
     {
         var logger = new Mock<ILoggingService>().Object;
@@ -24,7 +24,7 @@ public class FtpServerAdvancedConfigViewTests
         vm.Logger.Should().BeSameAs(logger);
     }
 
-    [WpfFact]
+    [WindowsFact]
     public void Initialize_Throws_When_ViewModelNull()
     {
         var view = new FtpServerAdvancedConfigView(new Mock<ILoggingService>().Object);

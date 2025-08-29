@@ -7,7 +7,7 @@ namespace DesktopApplicationTemplate.Tests;
 [Collection("WpfTests")]
 public class KeyboardHelperTests
 {
-    [WpfFact]
+    [WindowsFact]
     public void ReleaseKeys_DoesNotThrow()
     {
 

@@ -16,7 +16,7 @@ namespace DesktopApplicationTemplate.Tests
     [Collection("WpfTests")]
     public class SettingsPageNavigationTests
     {
-        [WpfFact]
+        [WindowsFact]
         public void NavigateBack_ReturnsToHomePage()
         {
 

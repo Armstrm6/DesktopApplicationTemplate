@@ -21,7 +21,7 @@ namespace DesktopApplicationTemplate.Tests;
 [Collection("WpfTests")]
 public class MainViewHidNavigationTests
 {
-    [WpfFact]
+    [WindowsFact]
     public void EditHidService_ShowsEditView()
     {
 
@@ -75,7 +75,7 @@ public class MainViewHidNavigationTests
         thread.Join();
     }
 
-    [WpfFact]
+    [WindowsFact]
     public void DoubleClickHidService_OpensEditView()
     {
 
