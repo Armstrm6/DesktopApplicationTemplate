@@ -15,7 +15,6 @@ using Moq;
 
 namespace DesktopApplicationTemplate.Tests
 {
-    [Collection("WpfTests")]
     public class MainViewTests
     {
         [WindowsFact]
@@ -25,10 +24,9 @@ namespace DesktopApplicationTemplate.Tests
             Exception? ex = null;
             var thread = new Thread(() =>
             {
-                try
-                {
-                    if (System.Windows.Application.Current == null)
-                        new DesktopApplicationTemplate.UI.App();
+            try
+            {
+                ApplicationResourceHelper.EnsureApplication();
                     var configPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), System.Guid.NewGuid().ToString() + ".json");
 
                     var servicesPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "services.json");
@@ -60,10 +58,9 @@ namespace DesktopApplicationTemplate.Tests
             Exception? ex = null;
             var thread = new Thread(() =>
             {
-                try
-                {
-                    if (System.Windows.Application.Current == null)
-                        new DesktopApplicationTemplate.UI.App();
+            try
+            {
+                ApplicationResourceHelper.EnsureApplication();
                     var configPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), System.Guid.NewGuid().ToString() + ".json");
                     var servicesPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "services.json");
                     Directory.CreateDirectory(Path.GetDirectoryName(servicesPath)!);
@@ -95,10 +92,9 @@ namespace DesktopApplicationTemplate.Tests
             Exception? ex = null;
             var thread = new Thread(() =>
             {
-                try
-                {
-                    if (System.Windows.Application.Current == null)
-                        new DesktopApplicationTemplate.UI.App();
+            try
+            {
+                ApplicationResourceHelper.EnsureApplication();
                     var configPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), System.Guid.NewGuid().ToString() + ".json");
                     var servicesPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "services.json");
                     Directory.CreateDirectory(Path.GetDirectoryName(servicesPath)!);
@@ -130,10 +126,9 @@ namespace DesktopApplicationTemplate.Tests
             Exception? ex = null;
             var thread = new Thread(() =>
             {
-                try
-                {
-                    if (System.Windows.Application.Current == null)
-                        new DesktopApplicationTemplate.UI.App();
+            try
+            {
+                ApplicationResourceHelper.EnsureApplication();
                     var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
                     var servicesPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "services.json");
                     Directory.CreateDirectory(Path.GetDirectoryName(servicesPath)!);
@@ -167,10 +162,9 @@ namespace DesktopApplicationTemplate.Tests
             Exception? ex = null;
             var thread = new Thread(() =>
             {
-                try
-                {
-                    if (System.Windows.Application.Current == null)
-                        new DesktopApplicationTemplate.UI.App();
+            try
+            {
+                ApplicationResourceHelper.EnsureApplication();
                     var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
                     var servicesPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "services.json");
                     Directory.CreateDirectory(Path.GetDirectoryName(servicesPath)!);
@@ -207,10 +201,9 @@ namespace DesktopApplicationTemplate.Tests
             Exception? ex = null;
             var thread = new Thread(() =>
             {
-                try
-                {
-                    if (System.Windows.Application.Current == null)
-                        new DesktopApplicationTemplate.UI.App();
+            try
+            {
+                ApplicationResourceHelper.EnsureApplication();
                     var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
                     var servicesPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "services.json");
                     Directory.CreateDirectory(Path.GetDirectoryName(servicesPath)!);
@@ -251,10 +244,9 @@ namespace DesktopApplicationTemplate.Tests
             Exception? ex = null;
             var thread = new Thread(() =>
             {
-                try
-                {
-                    if (System.Windows.Application.Current == null)
-                        new DesktopApplicationTemplate.UI.App();
+            try
+            {
+                ApplicationResourceHelper.EnsureApplication();
                     var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
                     var servicesPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "services.json");
                     Directory.CreateDirectory(Path.GetDirectoryName(servicesPath)!);

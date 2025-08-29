@@ -19,7 +19,6 @@ using DesktopApplicationTemplate.UI.Models;
 
 namespace DesktopApplicationTemplate.Tests;
 
-[Collection("WpfTests")]
 public class MainViewTcpEditTests
 {
     [WindowsFact]

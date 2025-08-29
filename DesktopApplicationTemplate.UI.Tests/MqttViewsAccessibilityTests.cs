@@ -14,7 +14,6 @@ using Xunit;
 
 namespace DesktopApplicationTemplate.Tests
 {
-    [Collection("WpfTests")]
     public class MqttViewsAccessibilityTests
     {
         [WindowsFact]
@@ -26,8 +25,7 @@ namespace DesktopApplicationTemplate.Tests
             {
                 try
                 {
-                    if (Application.Current == null)
-                        new DesktopApplicationTemplate.UI.App();
+                    ApplicationResourceHelper.EnsureApplication();
                     var view = new MqttCreateServiceView(new MqttCreateServiceViewModel(), new Mock<ILoggingService>().Object);
                     var create = (Button)view.FindName("CreateButton");
                     Assert.Equal("Create MQTT Service", AutomationProperties.GetName(create));
@@ -51,8 +49,7 @@ namespace DesktopApplicationTemplate.Tests
             {
                 try
                 {
-                    if (Application.Current == null)
-                        new DesktopApplicationTemplate.UI.App();
+                    ApplicationResourceHelper.EnsureApplication();
                     var options = Options.Create(new MqttServiceOptions { Host = "h", Port = 1, ClientId = "c" });
                     var service = new MqttService(options, new Mock<IMessageRoutingService>().Object, new Mock<ILoggingService>().Object);
                     var vm = new MqttEditConnectionViewModel(service, options, new Mock<ILoggingService>().Object);
@@ -79,8 +76,7 @@ namespace DesktopApplicationTemplate.Tests
             {
                 try
                 {
-                    if (Application.Current == null)
-                        new DesktopApplicationTemplate.UI.App();
+                    ApplicationResourceHelper.EnsureApplication();
                     var options = Options.Create(new MqttServiceOptions { Host = "h", Port = 1, ClientId = "c" });
                     var service = new MqttService(options, new Mock<IMessageRoutingService>().Object, new Mock<ILoggingService>().Object);
                     var vm = new MqttTagSubscriptionsViewModel(service) { Logger = new Mock<ILoggingService>().Object };
