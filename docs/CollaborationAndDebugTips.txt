@@ -87,7 +87,8 @@ Clarification: WPF workload installation is no longer required; related setup ch
 Updated UI tests to remove collection fixtures; each test initializes Application via helper and assembly disables parallel execution.
 Latest Attempt: `dotnet restore` and `dotnet build` succeeded, but `dotnet test --settings tests.runsettings` aborted because the Microsoft.WindowsDesktop.App 8.0.0 runtime is missing.
 Current Attempt: `dotnet` CLI not found; unable to run restore, build, or tests locally. Rely on CI for verification.
-Related Commits/PRs: 8517691, 4c0dbb5
+Newest Attempt: After ServiceManager updates, `dotnet restore`, `dotnet build`, and `dotnet test --settings tests.runsettings` all reported the `dotnet` command is missing; relying on CI.
+Related Commits/PRs: 8517691, 4c0dbb5, 1b5b0ec
 [2025-08-27 04:25] Topic: Logging interface restoration
 Context: Introduced core logging abstractions and refactored edit view models to support DI.
 Observations: Added ILoggingService, LogLevel enum, moved LogEntry to core, and implemented Load methods on TCP and SCP edit view models.
