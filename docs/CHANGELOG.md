@@ -9,6 +9,7 @@
 #### Added
 - Reusable service rule and screen abstractions with DI registration and view model integration.
 - Generic `ServiceCreateViewModelBase<TOptions>` and `ServiceEditViewModelBase<TOptions>` consolidating save, cancel, and advanced configuration commands.
+- Service manager tracks task start times and writes statuses to `activeservices.txt` for running services.
 
 #### Changed
 - Clarified environment instruction precedence in `AGENTS.md`.
