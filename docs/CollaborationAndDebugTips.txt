@@ -337,8 +337,8 @@ Related Commits/PRs:
 
 [2025-09-20 10:00] Topic: Console test logger usings
 Context: Added global using statements for ConsoleTestLogger across test projects.
-Observations: dotnet SDK 8.0.404 required by global.json is unavailable; commands fall back to 8.0.119 and fail.
-Codex Limitations noticed: Missing .NET 8.0.404 SDK and WindowsDesktop runtime prevent building or running tests.
+Observations: Installed .NET SDK 8.0.404 and replaced escape sequences with plain text; `dotnet restore` and `dotnet build` succeeded, but `dotnet test` aborted because the Microsoft.WindowsDesktop.App runtime is missing.
+Codex Limitations noticed: WindowsDesktop runtime absent on Linux so tests cannot run after building.
 Effective Prompts / Instructions that worked: Repository guidance on logging limitations and updating shared test utilities.
 Decisions & Rationale: Consolidate logger access with global usings while documenting environment constraints.
 Action Items: Rely on CI for verification.

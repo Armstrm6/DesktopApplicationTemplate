@@ -9,7 +9,7 @@ public static class ConsoleTestLogger
     {
         var prevColor = Console.ForegroundColor;
         Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("\u001b[1m[Tests] " + testName + " PASSED\u001b[0m");
+        Console.WriteLine($"[Tests] {testName} PASSED");
         Console.ForegroundColor = prevColor;
     }
 }
