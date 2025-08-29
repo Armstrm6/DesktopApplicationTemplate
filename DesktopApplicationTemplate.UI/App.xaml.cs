@@ -203,18 +203,33 @@ namespace DesktopApplicationTemplate.UI
                 settings.Save();
             }
 
-            var mainWindow = AppHost.Services.GetRequiredService<MainView>();
-            mainWindow.Show();
+            var mainWindow = AppHost.Services.GetService<MainView>();
+            if (mainWindow is null)
+            {
+                var logger = AppHost.Services.GetService<ILogger<App>>();
+                logger?.LogWarning("MainView service missing; skipping window creation.");
+            }
+            else
+            {
+                mainWindow.Show();
+            }
 
             base.OnStartup(e);
         }
 
         protected override async void OnExit(ExitEventArgs e)
         {
-            var vm = AppHost.Services.GetRequiredService<MainViewModel>();
-            vm.SaveServices();
-
             var logger = AppHost.Services.GetService<Microsoft.Extensions.Logging.ILogger<App>>();
+            var vm = AppHost.Services.GetService<MainViewModel>();
+            if (vm is null)
+            {
+                logger?.LogWarning("MainViewModel service missing; skipping save.");
+            }
+            else
+            {
+                vm.SaveServices();
+            }
+
             logger?.LogInformation("Releasing keyboard state");
             Helpers.KeyboardHelper.ReleaseKeys(System.Windows.Input.Key.R, System.Windows.Input.Key.D, System.Windows.Input.Key.Q);
 

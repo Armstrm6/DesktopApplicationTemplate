@@ -48,6 +48,8 @@
 - Marked main window `ContentFrame` public so UI tests can inspect navigation.
 - Included `Forms.xaml` in theme resources with Page build action.
 - Installer window references `TextBoxHintBehavior.AutoToolTip` without design-time warnings.
+- Application startup tolerates a missing `MainView` service, preventing test crashes when the window isn't registered.
+- Application shutdown tolerates a missing `MainViewModel` service, preventing test crashes when it's not registered.
 
 ### HID Service
 #### Added
