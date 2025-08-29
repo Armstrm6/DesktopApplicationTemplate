@@ -85,6 +85,7 @@ Additional Notes: Installed .NET SDK 8.0.404 via dotnet-install; `dotnet restore
 Clarification: WPF workload installation is no longer required; related setup checks have been removed.
 Updated UI tests to remove collection fixtures; each test initializes Application via helper and assembly disables parallel execution.
 Latest Attempt: `dotnet restore` and `dotnet build` succeeded, but `dotnet test --settings tests.runsettings` aborted because the Microsoft.WindowsDesktop.App 8.0.0 runtime is missing.
+Current Attempt: `dotnet` CLI not found; unable to run restore, build, or tests locally. Rely on CI for verification.
 Related Commits/PRs: 8517691, 4c0dbb5
 [2025-08-27 04:25] Topic: Logging interface restoration
 Context: Introduced core logging abstractions and refactored edit view models to support DI.

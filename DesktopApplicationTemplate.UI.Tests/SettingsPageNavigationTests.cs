@@ -18,43 +18,27 @@ namespace DesktopApplicationTemplate.Tests
         [WindowsFact]
         public void NavigateBack_ReturnsToHomePage()
         {
-
-            Exception? ex = null;
-            var thread = new Thread(() =>
+            ApplicationResourceHelper.RunOnDispatcher(() =>
             {
-                try
-                {
-                    ApplicationResourceHelper.EnsureApplication();
+                var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
+                var servicesPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "services.json");
+                Directory.CreateDirectory(Path.GetDirectoryName(servicesPath)!);
 
-                    var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
-                    var servicesPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "services.json");
-                    Directory.CreateDirectory(Path.GetDirectoryName(servicesPath)!);
+                var networkSvc = new Mock<INetworkConfigurationService>();
+                networkSvc.Setup(s => s.GetConfigurationAsync(It.IsAny<CancellationToken>()))
+                          .ReturnsAsync(new NetworkConfiguration());
+                var networkVm = new NetworkConfigurationViewModel(networkSvc.Object);
 
-                    var networkSvc = new Mock<INetworkConfigurationService>();
-                    networkSvc.Setup(s => s.GetConfigurationAsync(It.IsAny<CancellationToken>()))
-                              .ReturnsAsync(new NetworkConfiguration());
-                    var networkVm = new NetworkConfigurationViewModel(networkSvc.Object);
+                var mainVm = new MainViewModel(new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath)), networkVm, networkSvc.Object, null, servicesPath);
+                var mainView = new MainView(mainVm);
+                var settingsPage = new SettingsPage(new SettingsViewModel(), networkVm);
+                mainView.ContentFrame.Content = settingsPage;
 
-                    var mainVm = new MainViewModel(new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath)), networkVm, networkSvc.Object, null, servicesPath);
-                    var mainView = new MainView(mainVm);
-                    var settingsPage = new SettingsPage(new SettingsViewModel(), networkVm);
-                    mainView.ContentFrame.Content = settingsPage;
+                settingsPage.NavigateBack();
 
-                    settingsPage.NavigateBack();
-
-                    Assert.Null(mainView.ContentFrame.Content);
-                }
-                catch (Exception e) { ex = e; }
-                finally
-                {
-                    System.Windows.Application.Current?.Shutdown();
-                }
+                Assert.Null(mainView.ContentFrame.Content);
+                ConsoleTestLogger.LogPass();
             });
-            thread.SetApartmentState(ApartmentState.STA);
-            thread.Start();
-            thread.Join();
-            if (ex != null) throw ex;
-            ConsoleTestLogger.LogPass();
         }
     }
 }

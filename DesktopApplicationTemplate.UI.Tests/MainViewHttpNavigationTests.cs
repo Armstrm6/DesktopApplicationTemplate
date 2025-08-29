@@ -22,8 +22,7 @@ public class MainViewHttpNavigationTests
     [WindowsFact]
     public void NavigateToHttp_ShowsCreateView()
     {
-
-        var thread = new Thread(() =>
+        ApplicationResourceHelper.RunOnDispatcher(() =>
         {
             var logger = new LoggingService(new NullRichTextLogger());
             var fileDialog = new Mock<IFileDialogService>();
@@ -58,16 +57,12 @@ public class MainViewHttpNavigationTests
             view.ContentFrame.Content.Should().BeOfType<HttpCreateServiceView>();
             ConsoleTestLogger.LogPass();
         });
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        thread.Join();
     }
 
     [WindowsFact]
     public void EditHttpService_ShowsEditView()
     {
-
-        var thread = new Thread(() =>
+        ApplicationResourceHelper.RunOnDispatcher(() =>
         {
             var logger = new LoggingService(new NullRichTextLogger());
             var fileDialog = new Mock<IFileDialogService>();
@@ -111,16 +106,12 @@ public class MainViewHttpNavigationTests
             view.ContentFrame.Content.Should().BeOfType<HttpEditServiceView>();
             ConsoleTestLogger.LogPass();
         });
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        thread.Join();
     }
 
     [WindowsFact]
     public void DoubleClickHttpService_OpensEditView()
     {
-
-        var thread = new Thread(() =>
+        ApplicationResourceHelper.RunOnDispatcher(() =>
         {
             var logger = new LoggingService(new NullRichTextLogger());
             var fileDialog = new Mock<IFileDialogService>();
@@ -167,8 +158,5 @@ public class MainViewHttpNavigationTests
             view.ContentFrame.Content.Should().BeOfType<HttpEditServiceView>();
             ConsoleTestLogger.LogPass();
         });
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        thread.Join();
     }
 }

@@ -20,8 +20,7 @@ public class MainViewMqttNavigationTests
     [WindowsFact]
     public void CreateMqttService_Advanced_Back_ReturnsToCreateView()
     {
-
-        var thread = new Thread(() =>
+        ApplicationResourceHelper.RunOnDispatcher(() =>
         {
             var logger = new LoggingService(new NullRichTextLogger());
             var fileDialog = new Mock<IFileDialogService>();
@@ -66,16 +65,12 @@ public class MainViewMqttNavigationTests
             view.ContentFrame.Content.Should().BeOfType<MqttCreateServiceView>();
             ConsoleTestLogger.LogPass();
         });
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        thread.Join();
     }
 
     [WindowsFact]
     public void EditMqttService_ShowsEditView()
     {
-
-        var thread = new Thread(() =>
+        ApplicationResourceHelper.RunOnDispatcher(() =>
         {
             var logger = new LoggingService(new NullRichTextLogger());
             var fileDialog = new Mock<IFileDialogService>();
@@ -124,8 +119,5 @@ public class MainViewMqttNavigationTests
             view.ContentFrame.Content.Should().BeOfType<MqttEditServiceView>();
             ConsoleTestLogger.LogPass();
         });
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        thread.Join();
     }
 }

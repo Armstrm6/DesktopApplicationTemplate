@@ -22,8 +22,7 @@ public class MainViewScpNavigationTests
     [WindowsFact]
     public void EditScpService_ShowsEditView()
     {
-
-        var thread = new Thread(() =>
+        ApplicationResourceHelper.RunOnDispatcher(() =>
         {
             var logger = new LoggingService(new NullRichTextLogger());
             var fileDialog = new Mock<IFileDialogService>();
@@ -68,16 +67,12 @@ public class MainViewScpNavigationTests
             view.ContentFrame.Content.Should().BeOfType<ScpEditServiceView>();
             ConsoleTestLogger.LogPass();
         });
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        thread.Join();
     }
 
     [WindowsFact]
     public void DoubleClickScpService_OpensEditView()
     {
-
-        var thread = new Thread(() =>
+        ApplicationResourceHelper.RunOnDispatcher(() =>
         {
             var logger = new LoggingService(new NullRichTextLogger());
             var fileDialog = new Mock<IFileDialogService>();
@@ -125,8 +120,5 @@ public class MainViewScpNavigationTests
             view.ContentFrame.Content.Should().BeOfType<ScpEditServiceView>();
             ConsoleTestLogger.LogPass();
         });
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        thread.Join();
     }
 }

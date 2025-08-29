@@ -23,8 +23,7 @@ public class MainViewHidNavigationTests
     [WindowsFact]
     public void EditHidService_ShowsEditView()
     {
-
-        var thread = new Thread(() =>
+        ApplicationResourceHelper.RunOnDispatcher(() =>
         {
             var logger = new LoggingService(new NullRichTextLogger());
             var fileDialog = new Mock<IFileDialogService>();
@@ -69,16 +68,12 @@ public class MainViewHidNavigationTests
             view.ContentFrame.Content.Should().BeOfType<HidEditServiceView>();
             ConsoleTestLogger.LogPass();
         });
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        thread.Join();
     }
 
     [WindowsFact]
     public void DoubleClickHidService_OpensEditView()
     {
-
-        var thread = new Thread(() =>
+        ApplicationResourceHelper.RunOnDispatcher(() =>
         {
             var logger = new LoggingService(new NullRichTextLogger());
             var fileDialog = new Mock<IFileDialogService>();
@@ -126,8 +121,5 @@ public class MainViewHidNavigationTests
             view.ContentFrame.Content.Should().BeOfType<HidEditServiceView>();
             ConsoleTestLogger.LogPass();
         });
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        thread.Join();
     }
 }

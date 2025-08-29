@@ -23,8 +23,7 @@ public class MainViewHeartbeatNavigationTests
     [WindowsFact]
     public void NavigateToHeartbeat_ShowsCreateView()
     {
-
-        var thread = new Thread(() =>
+        ApplicationResourceHelper.RunOnDispatcher(() =>
         {
             var logger = new LoggingService(new NullRichTextLogger());
             var fileDialog = new Mock<IFileDialogService>();
@@ -59,16 +58,12 @@ public class MainViewHeartbeatNavigationTests
             view.ContentFrame.Content.Should().BeOfType<HeartbeatCreateServiceView>();
             ConsoleTestLogger.LogPass();
         });
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        thread.Join();
     }
 
     [WindowsFact]
     public void EditHeartbeatService_ShowsEditView()
     {
-
-        var thread = new Thread(() =>
+        ApplicationResourceHelper.RunOnDispatcher(() =>
         {
             var logger = new LoggingService(new NullRichTextLogger());
             var fileDialog = new Mock<IFileDialogService>();
@@ -112,16 +107,12 @@ public class MainViewHeartbeatNavigationTests
             view.ContentFrame.Content.Should().BeOfType<HeartbeatEditServiceView>();
             ConsoleTestLogger.LogPass();
         });
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        thread.Join();
     }
 
     [WindowsFact]
     public void DoubleClickHeartbeatService_OpensEditView()
     {
-
-        var thread = new Thread(() =>
+        ApplicationResourceHelper.RunOnDispatcher(() =>
         {
             var logger = new LoggingService(new NullRichTextLogger());
             var fileDialog = new Mock<IFileDialogService>();
@@ -168,8 +159,5 @@ public class MainViewHeartbeatNavigationTests
             view.ContentFrame.Content.Should().BeOfType<HeartbeatEditServiceView>();
             ConsoleTestLogger.LogPass();
         });
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        thread.Join();
     }
 }
