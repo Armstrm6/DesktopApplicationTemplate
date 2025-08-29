@@ -83,6 +83,7 @@ Action Items: Rely on CI for Windows-specific build and test.
 Notes: Documented convention to append updates within existing topic blocks and omit redundant timestamps. After adding `Forms.xaml`, `dotnet test --settings tests.runsettings` still aborts because the Microsoft.WindowsDesktop.App 8.0.0 runtime is missing and WPF workloads are unavailable on Linux. WPF projects require Windows or the WindowsDesktop runtime; without it, builds produce `InitializeComponent` and `NETSDK1100` errors.
 Additional Notes: Installed .NET SDK 8.0.404 via dotnet-install; `dotnet restore` now succeeds, but `dotnet build DesktopApplicationTemplate.sln` fails with NETSDK1022 for duplicate `Themes/Forms.xaml`, and WPF test projects cannot run. Rely on CI for verification.
 Clarification: WPF workload installation is no longer required; related setup checks have been removed.
+Updated UI tests to remove collection fixtures; each test initializes Application via helper and assembly disables parallel execution.
 Related Commits/PRs: 8517691, 4c0dbb5
 [2025-08-27 04:25] Topic: Logging interface restoration
 Context: Introduced core logging abstractions and refactored edit view models to support DI.

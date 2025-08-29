@@ -6,7 +6,6 @@ using Xunit;
 
 namespace DesktopApplicationTemplate.Tests
 {
-    [Collection("WpfTests")]
     public class BubblyWindowStyleTests
     {
         [WindowsFact]

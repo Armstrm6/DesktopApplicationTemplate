@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using System.Threading;
+using System.Windows;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Views;
@@ -16,13 +16,12 @@ using DesktopApplicationTemplate.UI.ViewModels;
 
 namespace DesktopApplicationTemplate.Tests;
 
-[Collection("WpfTests")]
 public class MainViewFtpServiceTests
 {
     [WindowsFact]
     public void AddFtpService_SetsOptionsAndAddsService()
     {
-        var thread = new Thread(() =>
+        ApplicationResourceHelper.RunOnDispatcher(() =>
         {
             var logger = new Mock<ILoggingService>();
             var fileDialog = new Mock<IFileDialogService>();
@@ -64,8 +63,5 @@ public class MainViewFtpServiceTests
             bound.RootPath.Should().Be("/tmp");
             ConsoleTestLogger.LogPass();
         });
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        thread.Join();
     }
 }

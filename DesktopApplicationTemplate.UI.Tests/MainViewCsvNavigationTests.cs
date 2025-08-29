@@ -18,7 +18,6 @@ using DesktopApplicationTemplate.UI.ViewModels;
 
 namespace DesktopApplicationTemplate.Tests;
 
-[Collection("WpfTests")]
 public class MainViewCsvNavigationTests
 {
     [WindowsFact]

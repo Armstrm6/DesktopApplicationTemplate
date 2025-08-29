@@ -8,30 +8,33 @@ using Moq;
 
 namespace DesktopApplicationTemplate.Tests;
 
-[Collection("WpfTests")]
 public class FtpServerAdvancedConfigViewTests
 {
     [WindowsFact]
     public void Initialize_SetsDataContext_AndLogger()
     {
-        var logger = new Mock<ILoggingService>().Object;
-        var vm = new FtpServerAdvancedConfigViewModel(new FtpServerOptions());
-        var view = new FtpServerAdvancedConfigView(logger);
+        ApplicationResourceHelper.RunOnDispatcher(() =>
+        {
+            var logger = new Mock<ILoggingService>().Object;
+            var vm = new FtpServerAdvancedConfigViewModel(new FtpServerOptions());
+            var view = new FtpServerAdvancedConfigView(logger);
 
-        view.Initialize(vm);
+            view.Initialize(vm);
 
-        view.DataContext.Should().Be(vm);
-        vm.Logger.Should().BeSameAs(logger);
+            view.DataContext.Should().Be(vm);
+            vm.Logger.Should().BeSameAs(logger);
+        });
     }
 
     [WindowsFact]
     public void Initialize_Throws_When_ViewModelNull()
     {
-        var view = new FtpServerAdvancedConfigView(new Mock<ILoggingService>().Object);
-
-        Action act = () => view.Initialize(null!);
-
-        act.Should().Throw<ArgumentNullException>()
-            .And.ParamName.Should().Be("vm");
+        ApplicationResourceHelper.RunOnDispatcher(() =>
+        {
+            var view = new FtpServerAdvancedConfigView(new Mock<ILoggingService>().Object);
+            Action act = () => view.Initialize(null!);
+            act.Should().Throw<ArgumentNullException>()
+                .And.ParamName.Should().Be("vm");
+        });
     }
 }

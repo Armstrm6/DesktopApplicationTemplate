@@ -179,6 +179,7 @@
 - Removed WPF workload installation steps; WPF ships with the Windows .NET SDK.
 - Temporarily removed ThemeManager UI test that triggered dispatcher access errors.
 - Removed `WpfFactAttribute`; WPF tests now use `WindowsFactAttribute`.
+- Removed WPF test collection fixture; tests initialize `Application` individually and disable parallelization via assembly attribute.
 
 #### Fixed
 - Added missing `FluentAssertions` package reference to the test project and documented dependency checks to avoid build failures.
@@ -187,5 +188,4 @@
 - Added `StubFileDialogService` to test project and updated MQTT and FTP UI tests for API changes.
 - ThemeManager test executes on the current thread, removing manual thread usage.
 - FTP view tests use a helper to initialize `Application` resources, eliminating manual thread setup.
-- WPF UI tests share a single `Application` via collection fixture and disable parallelization to prevent multiple initializations.
 

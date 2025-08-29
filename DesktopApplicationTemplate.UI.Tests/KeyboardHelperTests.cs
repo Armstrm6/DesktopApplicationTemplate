@@ -4,7 +4,6 @@ using FluentAssertions;
 
 namespace DesktopApplicationTemplate.Tests;
 
-[Collection("WpfTests")]
 public class KeyboardHelperTests
 {
     [WindowsFact]

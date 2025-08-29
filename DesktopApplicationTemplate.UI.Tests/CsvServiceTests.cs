@@ -13,7 +13,6 @@ using Moq;
 
 namespace DesktopApplicationTemplate.Tests
 {
-    [Collection("WpfTests")]
     public class CsvServiceTests
     {
         [WindowsFact]
@@ -202,8 +201,7 @@ namespace DesktopApplicationTemplate.Tests
             {
                 try
                 {
-                    if (Application.Current == null)
-                        new DesktopApplicationTemplate.UI.App();
+                    ApplicationResourceHelper.EnsureApplication();
 
                     var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
                     var servicesPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "services.json");
