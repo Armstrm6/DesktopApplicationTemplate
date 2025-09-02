@@ -16,7 +16,6 @@ public class MqttAdvancedConfigViewModelTests
         File.WriteAllBytes(tempCert, new byte[] { 1, 2, 3 });
         var options = new MqttServiceOptions();
         var vm = new MqttAdvancedConfigViewModel(options);
-        vm.UseTls = true;
         vm.ClientCertificatePath = tempCert;
         vm.WillTopic = "topic";
         vm.WillPayload = "payload";
@@ -32,7 +31,6 @@ public class MqttAdvancedConfigViewModelTests
 
         File.Delete(tempCert);
         Assert.NotNull(received);
-        Assert.True(received!.UseTls);
         Assert.Equal("topic", received.WillTopic);
         Assert.Equal("payload", received.WillPayload);
         Assert.Equal(MqttQualityOfServiceLevel.AtLeastOnce, received.WillQualityOfService);

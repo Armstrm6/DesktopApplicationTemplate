@@ -130,14 +130,6 @@ public class MqttEditConnectionViewModelTests
     }
 
     [Fact]
-    public void ConnectionType_WebSocket_DisablesTls()
-    {
-        var vm = CreateViewModel();
-        vm.ConnectionType = MqttConnectionType.WebSocket;
-        Assert.False(vm.IsTlsEnabled);
-        Assert.False(vm.UseTls);
-    }
-
     [Fact]
     public void SubscriptionButtonText_ReflectsConnectionState()
     {

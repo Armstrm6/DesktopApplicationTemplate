@@ -16,7 +16,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 public class MqttAdvancedConfigViewModel : ViewModelBase
 {
     private readonly MqttServiceOptions _options;
-    private bool _useTls;
     private string? _clientCertificatePath;
     private string? _willTopic;
     private string? _willPayload;
@@ -32,7 +31,6 @@ public class MqttAdvancedConfigViewModel : ViewModelBase
     public MqttAdvancedConfigViewModel(MqttServiceOptions options, ILoggingService? logger = null)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
-        _useTls = options.UseTls;
         _willTopic = options.WillTopic;
         _willPayload = options.WillPayload;
         _willQualityOfService = options.WillQualityOfService;
@@ -73,15 +71,6 @@ public class MqttAdvancedConfigViewModel : ViewModelBase
     /// Raised when navigation back is requested.
     /// </summary>
     public event Action? BackRequested;
-
-    /// <summary>
-    /// Whether TLS should be used for the connection.
-    /// </summary>
-    public bool UseTls
-    {
-        get => _useTls;
-        set { _useTls = value; OnPropertyChanged(); }
-    }
 
     /// <summary>
     /// Path to the client certificate used for TLS authentication.
@@ -158,7 +147,6 @@ public class MqttAdvancedConfigViewModel : ViewModelBase
     private void Save()
     {
         Logger?.Log("MQTT advanced options start", LogLevel.Debug);
-        _options.UseTls = UseTls;
         _options.WillTopic = string.IsNullOrWhiteSpace(WillTopic) ? null : WillTopic;
         _options.WillPayload = string.IsNullOrWhiteSpace(WillPayload) ? null : WillPayload;
         _options.WillQualityOfService = WillQualityOfService;

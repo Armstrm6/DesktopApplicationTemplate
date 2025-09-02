@@ -111,12 +111,13 @@ public class MqttService
                 .WithWillRetain(opts.WillRetain);
         }
 
-        if (opts.ConnectionType == MqttConnectionType.WebSocket)
+        if (opts.ConnectionType == MqttConnectionType.WebSocket || opts.ConnectionType == MqttConnectionType.WebSocketTls)
         {
             var path = string.IsNullOrWhiteSpace(opts.WebSocketPath) ? string.Empty : opts.WebSocketPath;
+            var scheme = opts.ConnectionType == MqttConnectionType.WebSocketTls ? "wss" : "ws";
             builder = builder.WithWebSocketServer(o =>
             {
-                o.WithUri($"ws://{opts.Host}:{opts.Port}{path}");
+                o.WithUri($"{scheme}://{opts.Host}:{opts.Port}{path}");
             });
         }
         else
@@ -129,7 +130,7 @@ public class MqttService
             builder = builder.WithCredentials(opts.Username, opts.Password);
         }
 
-        if (opts.UseTls && opts.ConnectionType != MqttConnectionType.WebSocket)
+        if (opts.ConnectionType == MqttConnectionType.MqttTls || opts.ConnectionType == MqttConnectionType.WebSocketTls)
         {
             builder = builder.WithTlsOptions(o =>
             {

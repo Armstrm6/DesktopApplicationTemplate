@@ -173,22 +173,6 @@ public class MqttServiceViewModel : ValidatableViewModelBase, ILoggingViewModel,
     }
 
     /// <summary>
-    /// When true, TLS is used for the connection.
-    /// </summary>
-    public bool UseTls
-    {
-        get => _options.UseTls;
-        set
-        {
-            if (_options.UseTls == value)
-                return;
-            DisconnectIfConnected();
-            _options.UseTls = value;
-            OnPropertyChanged();
-        }
-    }
-
-    /// <summary>
     /// Topic published by the broker when the client disconnects unexpectedly.
     /// </summary>
     public string? WillTopic

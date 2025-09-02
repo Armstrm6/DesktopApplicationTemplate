@@ -538,7 +538,7 @@ namespace DesktopApplicationTemplate.UI.Views
             opt.ClientId = options.ClientId;
             opt.Username = options.Username;
             opt.Password = options.Password;
-            opt.UseTls = options.UseTls;
+            opt.ConnectionType = options.ConnectionType;
             opt.WillTopic = options.WillTopic;
             opt.WillPayload = options.WillPayload;
             opt.WillQualityOfService = options.WillQualityOfService;

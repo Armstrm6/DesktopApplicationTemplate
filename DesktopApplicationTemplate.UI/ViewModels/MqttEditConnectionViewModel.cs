@@ -22,7 +22,6 @@ public class MqttEditConnectionViewModel : ValidatableViewModelBase, ILoggingVie
     private string? _username;
     private string? _password;
     private MqttConnectionType _connectionType;
-    private bool _useTls;
     private string? _webSocketPath;
     private bool _isConnected;
 
@@ -130,21 +129,12 @@ public class MqttEditConnectionViewModel : ValidatableViewModelBase, ILoggingVie
     }
 
     /// <summary>
-    /// Connection type (TCP or WebSocket).
+    /// Connection type.
     /// </summary>
     public MqttConnectionType ConnectionType
     {
         get => _connectionType;
-        set { _connectionType = value; OnPropertyChanged(); UpdateTlsState(); }
-    }
-
-    /// <summary>
-    /// Whether TLS is used for the connection.
-    /// </summary>
-    public bool UseTls
-    {
-        get => _useTls;
-        set { _useTls = value; OnPropertyChanged(); }
+        set { _connectionType = value; OnPropertyChanged(); }
     }
 
     /// <summary>
@@ -155,11 +145,6 @@ public class MqttEditConnectionViewModel : ValidatableViewModelBase, ILoggingVie
         get => _webSocketPath;
         set { _webSocketPath = value; OnPropertyChanged(); }
     }
-
-    /// <summary>
-    /// Gets a value indicating whether TLS options are enabled.
-    /// </summary>
-    public bool IsTlsEnabled => ConnectionType == MqttConnectionType.Tcp;
 
     /// <summary>
     /// Gets or sets a value indicating whether the service is connected.
@@ -200,7 +185,6 @@ public class MqttEditConnectionViewModel : ValidatableViewModelBase, ILoggingVie
         _password = _options.Password;
         _connectionType = _options.ConnectionType;
         _webSocketPath = _options.WebSocketPath;
-        _useTls = _options.UseTls;
         OnPropertyChanged(nameof(Host));
         OnPropertyChanged(nameof(Port));
         OnPropertyChanged(nameof(ClientId));
@@ -208,8 +192,6 @@ public class MqttEditConnectionViewModel : ValidatableViewModelBase, ILoggingVie
         OnPropertyChanged(nameof(Password));
         OnPropertyChanged(nameof(ConnectionType));
         OnPropertyChanged(nameof(WebSocketPath));
-        OnPropertyChanged(nameof(UseTls));
-        UpdateTlsState();
     }
 
     /// <summary>
@@ -225,7 +207,6 @@ public class MqttEditConnectionViewModel : ValidatableViewModelBase, ILoggingVie
         _options.Password = _password;
         _options.ConnectionType = _connectionType;
         _options.WebSocketPath = _webSocketPath;
-        _options.UseTls = _useTls;
         await _service.ConnectAsync(_options).ConfigureAwait(false);
         Logger?.Log("MQTT connection update finished", LogLevel.Debug);
         RequestClose?.Invoke(this, EventArgs.Empty);
@@ -271,12 +252,4 @@ public class MqttEditConnectionViewModel : ValidatableViewModelBase, ILoggingVie
             AddError(nameof(ClientId), "Client Id required");
     }
 
-    private void UpdateTlsState()
-    {
-        if (_connectionType == MqttConnectionType.WebSocket)
-        {
-            UseTls = false;
-        }
-        OnPropertyChanged(nameof(IsTlsEnabled));
-    }
 }

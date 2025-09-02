@@ -19,7 +19,6 @@
                 <RowDefinition Height="Auto" /> <!-- Password -->
                 <RowDefinition Height="Auto" /> <!-- Connection Type -->
                 <RowDefinition Height="Auto" /> <!-- WebSocket Path -->
-                <RowDefinition Height="Auto" /> <!-- UseTls -->
                 <RowDefinition Height="Auto" /> <!-- Buttons -->
             </Grid.RowDefinitions>
 
@@ -40,8 +39,10 @@
 
             <TextBlock Grid.Row="5" Grid.Column="0" Text="Connection Type" Style="{StaticResource FormLabel}"/>
             <ComboBox Grid.Row="5" Grid.Column="1" SelectedValue="{Binding ConnectionType}" SelectedValuePath="Tag" Style="{StaticResource FormField}">
-                <ComboBoxItem Content="TCP" Tag="{x:Static svc:MqttConnectionType.Tcp}"/>
+                <ComboBoxItem Content="MQTT" Tag="{x:Static svc:MqttConnectionType.Mqtt}"/>
+                <ComboBoxItem Content="MQTT TLS" Tag="{x:Static svc:MqttConnectionType.MqttTls}"/>
                 <ComboBoxItem Content="WebSocket" Tag="{x:Static svc:MqttConnectionType.WebSocket}"/>
+                <ComboBoxItem Content="WebSocket TLS" Tag="{x:Static svc:MqttConnectionType.WebSocketTls}"/>
             </ComboBox>
 
             <TextBlock Grid.Row="6" Grid.Column="0" Text="WS Path">
@@ -50,6 +51,9 @@
                         <Setter Property="Visibility" Value="Collapsed" />
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding ConnectionType}" Value="WebSocket">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ConnectionType}" Value="WebSocketTls">
                                 <Setter Property="Visibility" Value="Visible" />
                             </DataTrigger>
                         </Style.Triggers>
@@ -64,14 +68,15 @@
                             <DataTrigger Binding="{Binding ConnectionType}" Value="WebSocket">
                                 <Setter Property="Visibility" Value="Visible" />
                             </DataTrigger>
+                            <DataTrigger Binding="{Binding ConnectionType}" Value="WebSocketTls">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </TextBox.Style>
             </TextBox>
-
-            <CheckBox Grid.Row="7" Grid.Column="1" Content="Use TLS" IsChecked="{Binding UseTls}" IsEnabled="{Binding IsTlsEnabled}" Style="{StaticResource FormField}"/>
-
-            <StackPanel Grid.Row="8" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+            
+            <StackPanel Grid.Row="7" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
                 <Button x:Name="SubscriptionButton" Content="{Binding SubscriptionButtonText}" Width="110" Margin="5" Command="{Binding ToggleSubscriptionCommand}" AutomationProperties.Name="{Binding SubscriptionButtonText}">
                     <Button.Style>
                         <Style TargetType="Button">

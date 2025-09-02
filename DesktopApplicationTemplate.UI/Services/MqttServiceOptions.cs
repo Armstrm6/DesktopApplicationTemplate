@@ -5,8 +5,10 @@ namespace DesktopApplicationTemplate.UI.Services
 {
     public enum MqttConnectionType
     {
-        Tcp,
-        WebSocket
+        Mqtt,
+        MqttTls,
+        WebSocket,
+        WebSocketTls
     }
 
     public class MqttServiceOptions
@@ -16,9 +18,8 @@ namespace DesktopApplicationTemplate.UI.Services
         public string ClientId { get; set; } = string.Empty;
         public string? Username { get; set; }
         public string? Password { get; set; }
-        public MqttConnectionType ConnectionType { get; set; } = MqttConnectionType.Tcp;
+        public MqttConnectionType ConnectionType { get; set; } = MqttConnectionType.Mqtt;
         public string? WebSocketPath { get; set; }
-        public bool UseTls { get; set; }
         public byte[]? ClientCertificate { get; set; }
         public string? WillTopic { get; set; }
         public string? WillPayload { get; set; }

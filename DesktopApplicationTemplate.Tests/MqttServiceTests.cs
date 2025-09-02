@@ -120,7 +120,7 @@ public class MqttServiceTests
             ClientId = "id",
             Username = "u",
             Password = "p",
-            UseTls = true,
+            ConnectionType = MqttConnectionType.MqttTls,
             ClientCertificate = cert
         });
         var service = new MqttService(client.Object, options, Mock.Of<IMessageRoutingService>(), Mock.Of<ILoggingService>());

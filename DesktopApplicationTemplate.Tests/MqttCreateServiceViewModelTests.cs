@@ -58,7 +58,7 @@ public class MqttCreateServiceViewModelTests
         vm.ClientId = "client";
         vm.Username = "user";
         vm.Password = "pass";
-        vm.Options.UseTls = true;
+        vm.Options.ConnectionType = MqttConnectionType.MqttTls;
         vm.Options.WillTopic = "wt";
         vm.Options.WillPayload = "wp";
         vm.Options.WillQualityOfService = MqttQualityOfServiceLevel.AtLeastOnce;
@@ -79,7 +79,7 @@ public class MqttCreateServiceViewModelTests
         Assert.Equal("client", received.ClientId);
         Assert.Equal("user", received.Username);
         Assert.Equal("pass", received.Password);
-        Assert.True(received.UseTls);
+        Assert.Equal(MqttConnectionType.MqttTls, received.ConnectionType);
         Assert.Equal("wt", received.WillTopic);
         Assert.Equal("wp", received.WillPayload);
         Assert.Equal(MqttQualityOfServiceLevel.AtLeastOnce, received.WillQualityOfService);
