@@ -93,6 +93,7 @@ Most Recent Attempt: `dotnet --version` still reports command not found; tests s
 Latest Attempt: After adjusting App startup to tolerate missing MainView registration, the `dotnet` CLI remains unavailable and tests could not run.
 Newest Attempt: After handling missing MainViewModel on exit, the `dotnet` CLI remains unavailable and tests could not run.
 Another Attempt: After expanding MQTT connection types, the `dotnet` CLI is still missing; restore, build, and test commands cannot execute.
+Latest Attempt: After updating MQTT topic subscription handling, the `dotnet` command remains unavailable; restore, build, and test cannot run and CI is required.
 Related Commits/PRs: 8517691, 4c0dbb5, 1b5b0ec, 739abbe, 4f74a36, ff70210
 [2025-08-27 04:25] Topic: Logging interface restoration
 Context: Introduced core logging abstractions and refactored edit view models to support DI.

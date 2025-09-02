@@ -38,7 +38,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
         SubscriptionResults = new ObservableCollection<SubscriptionResult>();
         _service.TagSubscriptionChanged += OnTagSubscriptionChanged;
 
-        _addTopicCommand = new AsyncRelayCommand(AddTopicAsync, CanAddTopic);
+        _addTopicCommand = new AsyncRelayCommand(AddTopicAsync, () => CanAddTopic);
         _removeTopicCommand = new AsyncRelayCommand(RemoveTopicAsync, () => SelectedSubscription != null);
         _publishTestMessageCommand = new AsyncRelayCommand(PublishTestMessageAsync, CanPublishTestMessage);
         ConnectCommand = new AsyncRelayCommand(ConnectAsync);
@@ -69,6 +69,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
             if (_newTopic == value) return;
             _newTopic = value;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(CanAddTopic));
             _addTopicCommand.RaiseCanExecuteChanged();
         }
     }
@@ -144,23 +145,31 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
     /// </summary>
     public event EventHandler? EditConnectionRequested;
 
-    private bool CanAddTopic() => !string.IsNullOrWhiteSpace(NewTopic);
+    /// <summary>
+    /// Gets a value indicating whether a topic can be added.
+    /// </summary>
+    public bool CanAddTopic => !string.IsNullOrWhiteSpace(NewTopic);
 
     private async Task AddTopicAsync()
     {
-        if (string.IsNullOrWhiteSpace(NewTopic))
+        if (!CanAddTopic)
             return;
+
+        var topic = NewTopic;
+        var sub = new TagSubscription(topic) { QoS = NewQoS };
+        Subscriptions.Add(sub);
 
         try
         {
-            await _service.SubscribeAsync(NewTopic, NewQoS).ConfigureAwait(false);
-            Subscriptions.Add(new TagSubscription(NewTopic) { QoS = NewQoS });
-            SubscriptionResults.Add(new SubscriptionResult(NewTopic, true, $"Subscribed to {NewTopic}"));
+            await _service.SubscribeAsync(topic, NewQoS).ConfigureAwait(false);
+            SubscriptionResults.Add(new SubscriptionResult(topic, true, $"Subscribed to {topic}"));
             NewTopic = string.Empty;
         }
         catch (Exception ex)
         {
-            SubscriptionResults.Add(new SubscriptionResult(NewTopic, false, ex.Message));
+            Logger?.Log($"MQTT subscribe failed for {topic}: {ex.Message}", LogLevel.Error);
+            SubscriptionResults.Add(new SubscriptionResult(topic, false, ex.Message));
+            Subscriptions.Remove(sub);
         }
     }
 

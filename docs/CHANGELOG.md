@@ -102,6 +102,7 @@
 - `MqttServiceViewModel` uses `MqttServiceOptions` for settings and delegates token resolution to `MessageRoutingService`.
 - `MessageRoutingService` tracks latest messages per service and resolves `{ServiceName.Message}` tokens before publishing.
 - `MqttTagSubscriptionsViewModel` consolidated to a single subscription collection with unified properties.
+- Topics now appear in the subscription list before broker subscribe and log errors when the call fails; the Add button disables when no topic is provided.
 - Removed obsolete MQTT options model and duplicate subscribe implementations.
 - MQTT service creation now occurs within the main window frame and returns after completion.
 - Expanded connection types to include MQTT/WebSocket variants with optional TLS and updated connection views.
