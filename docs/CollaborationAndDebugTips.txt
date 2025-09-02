@@ -384,6 +384,15 @@ Decisions & Rationale: Pump dispatcher and shut down after action to avoid deadl
 Action Items: Rely on CI for verification.
 Related Commits/PRs:
 
+[2025-09-27 13:00] Topic: File Observer browse command
+Context: Added folder selection support to File Observer service creation.
+Observations: Injected IFileDialogService and Browse command to update the path.
+Codex Limitations noticed: dotnet CLI missing; restore, build, and test commands could not run.
+Effective Prompts / Instructions that worked: User request to add Browse button.
+Decisions & Rationale: Enable users to pick directories when configuring the service.
+Action Items: Rely on CI for verification.
+Related Commits/PRs:
+
 [2025-08-29 16:00] Topic: UI test removal
 Context: Removed DesktopApplicationTemplate.UI.Tests project and WPF UI tests that hung due to initialization issues.
 Observations: Deleting UI tests leaves only data-focused tests; solution no longer references the UI test project.

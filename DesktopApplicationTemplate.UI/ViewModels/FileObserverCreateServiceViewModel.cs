@@ -1,5 +1,7 @@
 using System;
+using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Services;
 
 namespace DesktopApplicationTemplate.UI.ViewModels;
@@ -9,15 +11,18 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// </summary>
 public class FileObserverCreateServiceViewModel : ServiceCreateViewModelBase<FileObserverServiceOptions>
 {
+    private readonly IFileDialogService _fileDialog;
     private string _serviceName = string.Empty;
     private string _filePath = string.Empty;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FileObserverCreateServiceViewModel"/> class.
     /// </summary>
-    public FileObserverCreateServiceViewModel(ILoggingService? logger = null)
+    public FileObserverCreateServiceViewModel(IFileDialogService fileDialog, ILoggingService? logger = null)
         : base(logger)
     {
+        _fileDialog = fileDialog ?? throw new ArgumentNullException(nameof(fileDialog));
+        BrowseCommand = new RelayCommand(BrowseFolder);
     }
 
     /// <summary>
@@ -54,6 +59,11 @@ public class FileObserverCreateServiceViewModel : ServiceCreateViewModelBase<Fil
     }
 
     /// <summary>
+    /// Command to browse for a folder.
+    /// </summary>
+    public ICommand BrowseCommand { get; }
+
+    /// <summary>
     /// Current configuration options.
     /// </summary>
     public FileObserverServiceOptions Options { get; } = new();
@@ -80,5 +90,14 @@ public class FileObserverCreateServiceViewModel : ServiceCreateViewModelBase<Fil
         Logger?.Log("Opening FileObserver advanced config", LogLevel.Debug);
         Options.FilePath = FilePath;
         AdvancedConfigRequested?.Invoke(Options);
+    }
+
+    private void BrowseFolder()
+    {
+        var path = _fileDialog.SelectFolder();
+        if (!string.IsNullOrWhiteSpace(path))
+        {
+            FilePath = path;
+        }
     }
 }
