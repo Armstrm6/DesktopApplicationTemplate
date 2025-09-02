@@ -34,7 +34,7 @@ public class MqttTagSubscriptionsViewModelTests
         var options = Options.Create(new MqttServiceOptions { Host = "localhost", Port = 1883, ClientId = "client" });
         var routing = Mock.Of<IMessageRoutingService>();
         var service = new MqttService(client.Object, options, routing, logger);
-        var vm = new MqttTagSubscriptionsViewModel(service);
+        var vm = new MqttTagSubscriptionsViewModel(service, options);
         return (vm, client, service);
     }
 
@@ -43,6 +43,7 @@ public class MqttTagSubscriptionsViewModelTests
     {
         var (vm, client, _) = CreateViewModel();
         await vm.ConnectAsync();
+        Assert.True(vm.IsConnected);
         client.Verify(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -54,11 +55,12 @@ public class MqttTagSubscriptionsViewModelTests
             .ThrowsAsync(new ArgumentException("Host cannot be null or whitespace."));
         var options = Options.Create(new MqttServiceOptions());
         var service = new MqttService(client.Object, options, Mock.Of<IMessageRoutingService>(), Mock.Of<ILoggingService>());
-        var vm = new MqttTagSubscriptionsViewModel(service);
+        var vm = new MqttTagSubscriptionsViewModel(service, options);
         bool raised = false;
         vm.EditConnectionRequested += (_, _) => raised = true;
         await vm.ConnectAsync();
         Assert.True(raised);
+        Assert.False(vm.IsConnected);
     }
 
     [Fact]

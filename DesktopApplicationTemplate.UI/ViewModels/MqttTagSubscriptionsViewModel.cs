@@ -8,6 +8,7 @@ using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.Services;
+using Microsoft.Extensions.Options;
 using MQTTnet.Protocol;
 
 namespace DesktopApplicationTemplate.UI.ViewModels;
@@ -18,6 +19,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
     public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingViewModel
     {
     private readonly MqttService _service;
+    private readonly MqttServiceOptions _options;
     private readonly AsyncRelayCommand _addTopicCommand;
     private readonly AsyncRelayCommand _removeTopicCommand;
     private readonly AsyncRelayCommand _publishTestMessageCommand;
@@ -26,17 +28,21 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
     private TagSubscription? _selectedSubscription;
     private string _newTopic = string.Empty;
     private MqttQualityOfServiceLevel _newQoS = MqttQualityOfServiceLevel.AtMostOnce;
+    private bool _isConnected;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MqttTagSubscriptionsViewModel"/> class.
     /// </summary>
-    public MqttTagSubscriptionsViewModel(MqttService service)
+    public MqttTagSubscriptionsViewModel(MqttService service, IOptions<MqttServiceOptions> options)
     {
         _service = service ?? throw new ArgumentNullException(nameof(service));
+        _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
 
         Subscriptions = new ObservableCollection<TagSubscription>(_service.TagSubscriptions);
         SubscriptionResults = new ObservableCollection<SubscriptionResult>();
         _service.TagSubscriptionChanged += OnTagSubscriptionChanged;
+        _service.ConnectionStateChanged += (_, c) => IsConnected = c;
+        IsConnected = _service.IsConnected;
 
         _addTopicCommand = new AsyncRelayCommand(AddTopicAsync, () => CanAddTopic);
         _removeTopicCommand = new AsyncRelayCommand(RemoveTopicAsync, () => SelectedSubscription != null);
@@ -57,6 +63,15 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
     /// Gets the results of subscription attempts for UI feedback.
     /// </summary>
     public ObservableCollection<SubscriptionResult> SubscriptionResults { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether the service is connected.
+    /// </summary>
+    public bool IsConnected
+    {
+        get => _isConnected;
+        private set { _isConnected = value; OnPropertyChanged(); }
+    }
 
     /// <summary>
     /// Gets or sets the new topic to subscribe.
@@ -224,13 +239,20 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
         Logger?.Log("MQTT connect start", LogLevel.Debug);
         try
         {
-            await _service.ConnectAsync().ConfigureAwait(false);
+            await _service.ConnectAsync(_options).ConfigureAwait(false);
+            IsConnected = true;
             Logger?.Log("MQTT connect finished", LogLevel.Debug);
         }
         catch (ArgumentException ex)
         {
+            IsConnected = false;
             Logger?.Log(ex.Message, LogLevel.Warning);
             EditConnectionRequested?.Invoke(this, EventArgs.Empty);
+        }
+        catch (Exception ex)
+        {
+            IsConnected = false;
+            Logger?.Log($"MQTT connect failed: {ex.Message}", LogLevel.Error);
         }
     }
 

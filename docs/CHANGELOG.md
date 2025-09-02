@@ -96,12 +96,14 @@
 - UI for configuring MQTT endpoint–message pairs with placeholders, tooltips, per-tag outgoing test messages, and will-message support.
 - Tag subscriptions support per-topic endpoints, QoS selection, subscribe/unsubscribe commands, and visual feedback.
 - Dedicated window for editing MQTT connection settings with update, cancel, and unsubscribe commands.
+- Tag subscriptions view displays a connection status indicator.
 
 #### Changed
 - `MqttService` refactored with options-based constructor, clean reconnect logic, and consolidated publish methods.
 - `MqttServiceViewModel` uses `MqttServiceOptions` for settings and delegates token resolution to `MessageRoutingService`.
 - `MessageRoutingService` tracks latest messages per service and resolves `{ServiceName.Message}` tokens before publishing.
 - `MqttTagSubscriptionsViewModel` consolidated to a single subscription collection with unified properties.
+- `MqttTagSubscriptionsViewModel` passes updated options to `MqttService.ConnectAsync` and logs connection success or failure.
 - Topics now appear in the subscription list before broker subscribe and log errors when the call fails; the Add button disables when no topic is provided.
 - Removed obsolete MQTT options model and duplicate subscribe implementations.
 - MQTT service creation now occurs within the main window frame and returns after completion.

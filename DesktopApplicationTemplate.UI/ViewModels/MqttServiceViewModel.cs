@@ -456,7 +456,7 @@ public class MqttServiceViewModel : ValidatableViewModelBase, ILoggingViewModel,
         Logger?.Log("MQTT connect start", LogLevel.Debug);
         try
         {
-            await _service.ConnectAsync(options).ConfigureAwait(false);
+            await _service.ConnectAsync(options ?? _options).ConfigureAwait(false);
             IsConnected = true;
             Logger?.Log("MQTT connect finished", LogLevel.Debug);
         }
