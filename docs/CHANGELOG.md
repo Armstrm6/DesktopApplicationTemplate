@@ -138,6 +138,7 @@
 #### Added
 - File search service with async caching and DI integration for File Observer.
 - File Observer create, edit, and advanced configuration views with navigation and DI registration.
+- Browse button in File Observer create view to select folders via dialog.
 
 ### Logging
 #### Added
