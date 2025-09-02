@@ -97,6 +97,7 @@
 - Tag subscriptions support per-topic endpoints, QoS selection, subscribe/unsubscribe commands, and visual feedback.
 - Dedicated window for editing MQTT connection settings with update, cancel, and unsubscribe commands.
 - Tag subscriptions view displays a connection status indicator.
+- Tag subscriptions view shows log entries for connection events and errors.
 
 #### Changed
 - `MqttService` refactored with options-based constructor, clean reconnect logic, and consolidated publish methods.
@@ -108,6 +109,7 @@
 - Removed obsolete MQTT options model and duplicate subscribe implementations.
 - MQTT service creation now occurs within the main window frame and returns after completion.
 - Expanded connection types to include MQTT/WebSocket variants with optional TLS and updated connection views.
+- `MqttService` logs connection state changes and errors through the injected logging service.
 
 #### Fixed
 - MQTT service disconnects before reconnecting when settings change and converts blank will-topic/payload fields to `null`.

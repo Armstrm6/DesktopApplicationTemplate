@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.Services;
@@ -29,6 +30,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
     private string _newTopic = string.Empty;
     private MqttQualityOfServiceLevel _newQoS = MqttQualityOfServiceLevel.AtMostOnce;
     private bool _isConnected;
+    private ILoggingService? _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MqttTagSubscriptionsViewModel"/> class.
@@ -40,6 +42,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 
         Subscriptions = new ObservableCollection<TagSubscription>(_service.TagSubscriptions);
         SubscriptionResults = new ObservableCollection<SubscriptionResult>();
+        LogEntries = new ObservableCollection<LogEntry>();
         _service.TagSubscriptionChanged += OnTagSubscriptionChanged;
         _service.ConnectionStateChanged += (_, c) => IsConnected = c;
         IsConnected = _service.IsConnected;
@@ -52,7 +55,23 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
     }
 
     /// <inheritdoc />
-    public ILoggingService? Logger { get; set; }
+    public ILoggingService? Logger
+    {
+        get => _logger;
+        set
+        {
+            if (_logger == value)
+                return;
+
+            if (_logger is not null)
+                _logger.LogAdded -= OnLogAdded;
+
+            _logger = value;
+
+            if (_logger is not null)
+                _logger.LogAdded += OnLogAdded;
+        }
+    }
 
     /// <summary>
     /// Gets the current subscriptions.
@@ -63,6 +82,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
     /// Gets the results of subscription attempts for UI feedback.
     /// </summary>
     public ObservableCollection<SubscriptionResult> SubscriptionResults { get; }
+
+    /// <summary>
+    /// Gets log entries from the logger.
+    /// </summary>
+    public ObservableCollection<LogEntry> LogEntries { get; }
 
     /// <summary>
     /// Gets a value indicating whether the service is connected.
@@ -277,4 +301,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
             _publishTestMessageCommand.RaiseCanExecuteChanged();
         }
     }
+
+    private void OnLogAdded(LogEntry entry)
+        => LogEntries.Add(entry);
 }

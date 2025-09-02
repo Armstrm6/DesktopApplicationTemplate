@@ -22,6 +22,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <!-- Connection bar -->
         <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
@@ -85,5 +86,14 @@
                     Width="60"
                     Margin="5,0,0,0"/>
         </StackPanel>
+
+        <!-- Log entries -->
+        <ListBox Grid.Row="3" Margin="0,10,0,0" ItemsSource="{Binding LogEntries}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding Message}" Foreground="{Binding Color}"/>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
     </Grid>
 </Page>

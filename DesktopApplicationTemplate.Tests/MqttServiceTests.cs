@@ -28,12 +28,13 @@ public class MqttServiceTests
         var routing = new Mock<IMessageRoutingService>().Object;
         var logger = new Mock<ILoggingService>().Object;
         var service = new MqttService(client.Object, options, routing, logger);
-        bool raised = false;
-        service.ConnectionStateChanged += (_, c) => raised = c;
+        bool? state = null;
+        service.ConnectionStateChanged += (_, c) => state = c;
 
         await service.ConnectAsync();
+        client.Raise(c => c.ConnectedAsync += null!, (MqttClientConnectedEventArgs?)null);
 
-        Assert.True(raised);
+        Assert.True(state);
         ConsoleTestLogger.LogPass();
     }
 
@@ -190,6 +191,22 @@ public class MqttServiceTests
 
         client.Verify(c => c.PublishAsync(It.Is<MqttApplicationMessage>(m => m.Topic == "t1"), It.IsAny<CancellationToken>()), Times.Exactly(2));
         client.Verify(c => c.PublishAsync(It.Is<MqttApplicationMessage>(m => m.Topic == "t2"), It.IsAny<CancellationToken>()), Times.Once);
+        ConsoleTestLogger.LogPass();
+    }
+
+    [Fact]
+    public void DisconnectedEvent_RaisesConnectionStateChanged_AndLogs()
+    {
+        var client = new Mock<IMqttClient>();
+        var logger = new Mock<ILoggingService>();
+        var service = new MqttService(client.Object, Options.Create(new MqttServiceOptions()), Mock.Of<IMessageRoutingService>(), logger.Object);
+        bool? state = null;
+        service.ConnectionStateChanged += (_, c) => state = c;
+
+        client.Raise(c => c.DisconnectedAsync += null!, (MqttClientDisconnectedEventArgs?)null);
+
+        Assert.False(state);
+        logger.Verify(l => l.Log(It.Is<string>(s => s.Contains("MQTT disconnected")), LogLevel.Warning), Times.Once);
         ConsoleTestLogger.LogPass();
     }
 }

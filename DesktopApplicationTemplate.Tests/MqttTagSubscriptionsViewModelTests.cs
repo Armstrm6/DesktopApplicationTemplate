@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.Services;
@@ -109,5 +110,22 @@ public class MqttTagSubscriptionsViewModelTests
         var sub = new TagSubscription("tag") { Endpoint = "e", OutgoingMessage = "m" };
         await ((AsyncRelayCommand<TagSubscription>)vm.TestTagEndpointCommand).ExecuteAsync(sub);
         client.Verify(c => c.PublishAsync(It.Is<MQTTnet.MqttApplicationMessage>(m => m.Topic == "e"), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public void Logger_AppendsLogEntries_OnLogAdded()
+    {
+        var client = new Mock<IMqttClient>();
+        var logger = new Mock<ILoggingService>();
+        logger.Setup(l => l.Log(It.IsAny<string>(), It.IsAny<LogLevel>()))
+            .Callback<string, LogLevel>((msg, lvl) => logger.Raise(l => l.LogAdded += null!, new LogEntry { Message = msg, Level = lvl }));
+
+        var options = Options.Create(new MqttServiceOptions { Host = "h", Port = 1, ClientId = "id" });
+        var service = new MqttService(client.Object, options, Mock.Of<IMessageRoutingService>(), logger.Object);
+        var vm = new MqttTagSubscriptionsViewModel(service, options) { Logger = logger.Object };
+
+        logger.Object.Log("entry", LogLevel.Debug);
+
+        Assert.Contains(vm.LogEntries, e => e.Message == "entry" && e.Level == LogLevel.Debug);
     }
 }
