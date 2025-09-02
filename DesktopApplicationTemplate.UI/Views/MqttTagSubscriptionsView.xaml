@@ -7,6 +7,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:sys="clr-namespace:System;assembly=System.Runtime"
       xmlns:behaviors="clr-namespace:DesktopApplicationTemplate.UI.Behaviors"
+      xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
       mc:Ignorable="d">
     <Page.Resources>
         <ObjectDataProvider x:Key="QoSValues" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
@@ -14,6 +15,7 @@
                 <x:Type TypeName="mqtt:MqttQualityOfServiceLevel" />
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
+        <helpers:BooleanToBrushConverter x:Key="BoolToBrush" TrueBrush="Green" FalseBrush="Red" />
     </Page.Resources>
     <Grid Margin="20">
         <Grid.RowDefinitions>
@@ -24,6 +26,7 @@
         <!-- Connection bar -->
         <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
             <Button Content="Connect" Command="{Binding ConnectCommand}" Width="80" AutomationProperties.Name="Connect MQTT"/>
+            <Ellipse Width="10" Height="10" Margin="5,0,0,0" Fill="{Binding IsConnected, Converter={StaticResource BoolToBrush}}"/>
             <TextBox Text="{Binding NewTopic}" Width="200" Margin="10,0,0,0" x:Name="NewTopicBox" ToolTip="Topic to subscribe"
                      behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
             <ComboBox Width="100" Margin="5,0,0,0"
