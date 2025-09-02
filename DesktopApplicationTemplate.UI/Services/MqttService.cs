@@ -38,6 +38,28 @@ public class MqttService
         _routingService = routingService ?? throw new ArgumentNullException(nameof(routingService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
+
+        _client.ConnectedAsync += _ =>
+        {
+            _logger.Log("MQTT connected", LogLevel.Debug);
+            OnConnectionStateChanged(true);
+            return Task.CompletedTask;
+        };
+
+        _client.DisconnectedAsync += e =>
+        {
+            var message = e?.Exception != null ? $"MQTT disconnected: {e.Exception.Message}" : "MQTT disconnected";
+            _logger.Log(message, LogLevel.Warning);
+            OnConnectionStateChanged(false);
+            return Task.CompletedTask;
+        };
+
+        _client.ConnectingFailedAsync += e =>
+        {
+            var message = e?.Exception != null ? $"MQTT connection failed: {e.Exception.Message}" : "MQTT connection failed";
+            _logger.Log(message, LogLevel.Error);
+            return Task.CompletedTask;
+        };
     }
 
     /// <summary>
@@ -88,7 +110,6 @@ public class MqttService
         {
             _logger.Log("Disconnecting existing MQTT connection", LogLevel.Debug);
             await _client.DisconnectAsync(cancellationToken: token).ConfigureAwait(false);
-            OnConnectionStateChanged(false);
         }
 
         _logger.Log(
@@ -157,8 +178,6 @@ public class MqttService
             try
             {
                 await _client.ConnectAsync(mqttOptions, token).ConfigureAwait(false);
-                _logger.Log("MQTT connected", LogLevel.Debug);
-                OnConnectionStateChanged(true);
                 _logger.Log("MQTT connect finished", LogLevel.Debug);
                 break;
             }
@@ -285,7 +304,6 @@ public class MqttService
         if (_client.IsConnected)
         {
             await _client.DisconnectAsync(cancellationToken: token).ConfigureAwait(false);
-            OnConnectionStateChanged(false);
         }
     }
 }
