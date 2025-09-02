@@ -104,6 +104,7 @@
 - `MqttTagSubscriptionsViewModel` consolidated to a single subscription collection with unified properties.
 - Removed obsolete MQTT options model and duplicate subscribe implementations.
 - MQTT service creation now occurs within the main window frame and returns after completion.
+- Expanded connection types to include MQTT/WebSocket variants with optional TLS and updated connection views.
 
 #### Fixed
 - MQTT service disconnects before reconnecting when settings change and converts blank will-topic/payload fields to `null`.

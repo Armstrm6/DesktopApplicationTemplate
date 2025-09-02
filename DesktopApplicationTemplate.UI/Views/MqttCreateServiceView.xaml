@@ -3,6 +3,7 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:svc="clr-namespace:DesktopApplicationTemplate.UI.Services"
       mc:Ignorable="d">
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <Grid Margin="20">
@@ -17,6 +18,7 @@
                 <RowDefinition Height="Auto" /> <!-- ClientId -->
                 <RowDefinition Height="Auto" /> <!-- Username -->
                 <RowDefinition Height="Auto" /> <!-- Password -->
+                <RowDefinition Height="Auto" /> <!-- Connection Type -->
                 <RowDefinition Height="Auto" /> <!-- Buttons -->
             </Grid.RowDefinitions>
 
@@ -38,7 +40,15 @@
             <TextBlock Grid.Row="5" Grid.Column="0" Text="Password" Style="{StaticResource FormLabel}"/>
             <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding Password}" Style="{StaticResource FormField}" ToolTip="Password"/>
 
-            <StackPanel Grid.Row="6" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0" >
+            <TextBlock Grid.Row="6" Grid.Column="0" Text="Connection Type" Style="{StaticResource FormLabel}"/>
+            <ComboBox Grid.Row="6" Grid.Column="1" SelectedValue="{Binding Options.ConnectionType}" SelectedValuePath="Tag" Style="{StaticResource FormField}">
+                <ComboBoxItem Content="MQTT" Tag="{x:Static svc:MqttConnectionType.Mqtt}"/>
+                <ComboBoxItem Content="MQTT TLS" Tag="{x:Static svc:MqttConnectionType.MqttTls}"/>
+                <ComboBoxItem Content="WebSocket" Tag="{x:Static svc:MqttConnectionType.WebSocket}"/>
+                <ComboBoxItem Content="WebSocket TLS" Tag="{x:Static svc:MqttConnectionType.WebSocketTls}"/>
+            </ComboBox>
+
+            <StackPanel Grid.Row="7" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0" >
                 <Button Content="Advanced" Width="100" Margin="5" Command="{Binding AdvancedConfigCommand}" AutomationProperties.Name="Open MQTT Advanced Configuration"/>
                 <Button x:Name="CreateButton" Content="Create" Width="100" Margin="5" Command="{Binding CreateCommand}" AutomationProperties.Name="Create MQTT Service"/>
                 <Button x:Name="CancelButton" Content="Cancel" Width="100" Margin="5" Command="{Binding CancelCommand}" AutomationProperties.Name="Cancel MQTT Creation"/>
