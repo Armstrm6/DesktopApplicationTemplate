@@ -112,6 +112,7 @@ Latest Attempt: Installed SDK 8.0 via apt and dotnet-install to satisfy global.j
 Newest Attempt: After unifying service editor events, the `dotnet` command remains unavailable; build and tests deferred to CI.
 Another Attempt: After adding Service.Services using to FtpServerEditViewModelTests, `dotnet build DesktopApplicationTemplate.sln` and `dotnet test --settings tests.runsettings` failed because the `dotnet` command is missing; relying on CI.
 Newest Attempt: Installed .NET SDK 8.0.404 and ran `dotnet build DesktopApplicationTemplate.Tests/DesktopApplicationTemplate.Tests.csproj`; build failed with CS0108/CS0067 errors in generated WPF code and ServiceEditorViewModelBase, so CI will handle verification.
+Another Attempt: After adding a missing `DesktopApplicationTemplate.UI.Services` using to CsvServiceEditorViewModelTests, `dotnet build DesktopApplicationTemplate.Tests/DesktopApplicationTemplate.Tests.csproj` still fails with CS0108 errors in generated `CsvServiceEditorView.g.cs`; will rely on CI.
 Related Commits/PRs: 8517691, 4c0dbb5, 1b5b0ec, 739abbe, 4f74a36, ff70210, 272560a
 [2025-08-27 04:25] Topic: Logging interface restoration
 Context: Introduced core logging abstractions and refactored edit view models to support DI.
