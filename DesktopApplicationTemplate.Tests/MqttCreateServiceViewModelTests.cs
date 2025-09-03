@@ -15,7 +15,8 @@ public class MqttCreateServiceViewModelTests
     [Fact]
     public void SaveCommand_Raises_ServiceSaved()
     {
-        var vm = new MqttCreateServiceViewModel(new ServiceRule());
+        IServiceRule rule = new ServiceRule();
+        var vm = new MqttCreateServiceViewModel(rule);
         vm.ServiceName = "svc";
         vm.Host = "host";
         vm.Port = 1234;
@@ -38,7 +39,8 @@ public class MqttCreateServiceViewModelTests
     [Fact]
     public void CancelCommand_Raises_EditCancelled()
     {
-        var vm = new MqttCreateServiceViewModel(new ServiceRule());
+        IServiceRule rule = new ServiceRule();
+        var vm = new MqttCreateServiceViewModel(rule);
         var cancelled = false;
         vm.EditCancelled += () => cancelled = true;
 
@@ -52,7 +54,8 @@ public class MqttCreateServiceViewModelTests
     {
         var tempCert = Path.GetTempFileName();
         File.WriteAllBytes(tempCert, new byte[] { 1, 2, 3 });
-        var vm = new MqttCreateServiceViewModel(new ServiceRule());
+        IServiceRule rule = new ServiceRule();
+        var vm = new MqttCreateServiceViewModel(rule);
         vm.ServiceName = "svc";
         vm.Host = "host";
         vm.Port = 1234;
@@ -95,7 +98,8 @@ public class MqttCreateServiceViewModelTests
     [Fact]
     public void SaveCommand_ConvertsBlankFieldsToNull()
     {
-        var vm = new MqttCreateServiceViewModel(new ServiceRule());
+        IServiceRule rule = new ServiceRule();
+        var vm = new MqttCreateServiceViewModel(rule);
         vm.ServiceName = "svc";
         vm.Host = "host";
         vm.Port = 1883;
@@ -121,7 +125,8 @@ public class MqttCreateServiceViewModelTests
     [Fact]
     public void SettingEmptyServiceName_AddsError()
     {
-        var vm = new MqttCreateServiceViewModel(new ServiceRule());
+        IServiceRule rule = new ServiceRule();
+        var vm = new MqttCreateServiceViewModel(rule);
         vm.ServiceName = string.Empty;
         Assert.True(vm.HasErrors);
     }

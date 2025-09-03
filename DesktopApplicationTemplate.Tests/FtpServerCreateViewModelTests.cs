@@ -14,7 +14,9 @@ public class FtpServerCreateViewModelTests
     public void SaveCommand_RaisesServerSaved()
     {
         var logger = new Mock<ILoggingService>();
-        var vm = new FtpServerCreateViewModel(new ServiceRule(), new ServiceScreen<FtpServerOptions>(logger.Object), logger.Object)
+        IServiceRule rule = new ServiceRule();
+        IServiceScreen<FtpServerOptions> screen = new ServiceScreen<FtpServerOptions>(logger.Object);
+        var vm = new FtpServerCreateViewModel(rule, screen, logger.Object)
         {
             ServiceName = "ftp",
             Port = 21,
@@ -36,7 +38,9 @@ public class FtpServerCreateViewModelTests
     [Fact]
     public void CancelCommand_RaisesEditCancelled()
     {
-        var vm = new FtpServerCreateViewModel(new ServiceRule(), new ServiceScreen<FtpServerOptions>());
+        IServiceRule rule = new ServiceRule();
+        IServiceScreen<FtpServerOptions> screen = new ServiceScreen<FtpServerOptions>();
+        var vm = new FtpServerCreateViewModel(rule, screen);
         var cancelled = false;
         vm.EditCancelled += () => cancelled = true;
 
@@ -49,7 +53,9 @@ public class FtpServerCreateViewModelTests
     [Fact]
     public void SettingInvalidPort_AddsError()
     {
-        var vm = new FtpServerCreateViewModel(new ServiceRule(), new ServiceScreen<FtpServerOptions>());
+        IServiceRule rule = new ServiceRule();
+        IServiceScreen<FtpServerOptions> screen = new ServiceScreen<FtpServerOptions>();
+        var vm = new FtpServerCreateViewModel(rule, screen);
         vm.Port = 0;
         Assert.True(vm.HasErrors);
         ConsoleTestLogger.LogPass();
@@ -58,7 +64,9 @@ public class FtpServerCreateViewModelTests
     [Fact]
     public void SettingEmptyServiceName_AddsError()
     {
-        var vm = new FtpServerCreateViewModel(new ServiceRule(), new ServiceScreen<FtpServerOptions>());
+        IServiceRule rule = new ServiceRule();
+        IServiceScreen<FtpServerOptions> screen = new ServiceScreen<FtpServerOptions>();
+        var vm = new FtpServerCreateViewModel(rule, screen);
         vm.ServiceName = string.Empty;
         Assert.True(vm.HasErrors);
         ConsoleTestLogger.LogPass();
@@ -67,7 +75,9 @@ public class FtpServerCreateViewModelTests
     [Fact]
     public void SaveCommand_DoesNotRaise_WhenInvalid()
     {
-        var vm = new FtpServerCreateViewModel(new ServiceRule(), new ServiceScreen<FtpServerOptions>())
+        IServiceRule rule = new ServiceRule();
+        IServiceScreen<FtpServerOptions> screen = new ServiceScreen<FtpServerOptions>();
+        var vm = new FtpServerCreateViewModel(rule, screen)
         {
             ServiceName = string.Empty,
             Port = 21,
@@ -85,7 +95,9 @@ public class FtpServerCreateViewModelTests
     [Fact]
     public void AdvancedCommand_RaisesRequested()
     {
-        var vm = new FtpServerCreateViewModel(new ServiceRule(), new ServiceScreen<FtpServerOptions>());
+        IServiceRule rule = new ServiceRule();
+        IServiceScreen<FtpServerOptions> screen = new ServiceScreen<FtpServerOptions>();
+        var vm = new FtpServerCreateViewModel(rule, screen);
         var raised = false;
         vm.AdvancedConfigRequested += _ => raised = true;
 
@@ -101,6 +113,7 @@ public class FtpServerCreateViewModelTests
         var services = new ServiceCollection();
         services.AddSingleton<IServiceRule, ServiceRule>();
         services.AddSingleton(typeof(IServiceScreen<>), typeof(ServiceScreen<>));
+        services.AddSingleton<ILoggingService>(_ => new Mock<ILoggingService>().Object);
         services.AddTransient<FtpServerCreateViewModel>();
 
         using var provider = services.BuildServiceProvider();

@@ -11,7 +11,9 @@ public class CsvServiceEditorViewModelTests
     [Fact]
     public void SaveCommand_Raises_ServiceSaved()
     {
-        var vm = new CsvServiceEditorViewModel(new ServiceRule(), new ServiceScreen<CsvServiceOptions>());
+        IServiceRule rule = new ServiceRule();
+        IServiceScreen<CsvServiceOptions> screen = new ServiceScreen<CsvServiceOptions>();
+        var vm = new CsvServiceEditorViewModel(rule, screen);
         vm.ServiceName = "svc";
         vm.OutputPath = "path";
         string? name = null;
@@ -28,7 +30,9 @@ public class CsvServiceEditorViewModelTests
     [Fact]
     public void Load_Sets_Existing_Values_ForEdit()
     {
-        var vm = new CsvServiceEditorViewModel(new ServiceRule(), new ServiceScreen<CsvServiceOptions>());
+        IServiceRule rule = new ServiceRule();
+        IServiceScreen<CsvServiceOptions> screen = new ServiceScreen<CsvServiceOptions>();
+        var vm = new CsvServiceEditorViewModel(rule, screen);
         var options = new CsvServiceOptions { OutputPath = "p" };
 
         vm.Load("svc", options);
