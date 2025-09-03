@@ -11,7 +11,8 @@ public class TcpCreateServiceViewModelTests
     [Fact]
     public void SaveCommand_Raises_ServiceSaved()
     {
-        var vm = new TcpCreateServiceViewModel(new ServiceRule());
+        IServiceRule rule = new ServiceRule();
+        var vm = new TcpCreateServiceViewModel(rule);
         vm.ServiceName = "svc";
         vm.Host = "host";
         vm.Port = 1234;
@@ -34,7 +35,8 @@ public class TcpCreateServiceViewModelTests
     [Fact]
     public void CancelCommand_Raises_EditCancelled()
     {
-        var vm = new TcpCreateServiceViewModel(new ServiceRule());
+        IServiceRule rule = new ServiceRule();
+        var vm = new TcpCreateServiceViewModel(rule);
         var cancelled = false;
         vm.EditCancelled += () => cancelled = true;
 
@@ -46,7 +48,8 @@ public class TcpCreateServiceViewModelTests
     [Fact]
     public void AdvancedConfigCommand_Raises_Event_WithOptions()
     {
-        var vm = new TcpCreateServiceViewModel(new ServiceRule());
+        IServiceRule rule = new ServiceRule();
+        var vm = new TcpCreateServiceViewModel(rule);
         vm.Host = "host";
         vm.Port = 123;
         vm.Options.UseUdp = true;
@@ -66,7 +69,8 @@ public class TcpCreateServiceViewModelTests
     [Fact]
     public void SettingEmptyServiceName_AddsError()
     {
-        var vm = new TcpCreateServiceViewModel(new ServiceRule());
+        IServiceRule rule = new ServiceRule();
+        var vm = new TcpCreateServiceViewModel(rule);
         vm.ServiceName = string.Empty;
         Assert.True(vm.HasErrors);
     }

@@ -12,7 +12,8 @@ public class TcpEditServiceViewModelTests
     public void SaveCommand_Raises_ServiceSaved()
     {
         var options = new TcpServiceOptions { Host = "h", Port = 1, UseUdp = false, Mode = TcpServiceMode.Listening };
-        var vm = new TcpEditServiceViewModel(new ServiceRule());
+        IServiceRule rule = new ServiceRule();
+        var vm = new TcpEditServiceViewModel(rule);
         vm.Load("svc", options);
         vm.Host = "new";
         vm.Port = 2;
@@ -36,7 +37,8 @@ public class TcpEditServiceViewModelTests
     public void AdvancedConfigCommand_Raises_Event_WithUpdatedOptions()
     {
         var options = new TcpServiceOptions { Host = "h", Port = 1, UseUdp = false, Mode = TcpServiceMode.Listening };
-        var vm = new TcpEditServiceViewModel(new ServiceRule());
+        IServiceRule rule = new ServiceRule();
+        var vm = new TcpEditServiceViewModel(rule);
         vm.Load("svc", options);
         vm.Host = "new";
         vm.Port = 2;
@@ -57,7 +59,8 @@ public class TcpEditServiceViewModelTests
     [Fact]
     public void SettingEmptyServiceName_AddsError()
     {
-        var vm = new TcpEditServiceViewModel(new ServiceRule());
+        IServiceRule rule = new ServiceRule();
+        var vm = new TcpEditServiceViewModel(rule);
         vm.Load("svc", new TcpServiceOptions());
         vm.ServiceName = string.Empty;
         Assert.True(vm.HasErrors);
