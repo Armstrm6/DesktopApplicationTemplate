@@ -1,5 +1,4 @@
 using System;
-using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Services;
 
@@ -35,11 +34,6 @@ public class HttpCreateServiceViewModel : ServiceCreateViewModelBase<HttpService
     /// Raised when advanced configuration is requested.
     /// </summary>
     public event Action<HttpServiceOptions>? AdvancedConfigRequested;
-
-    /// <summary>
-    /// Command to open advanced configuration.
-    /// </summary>
-    public ICommand OpenAdvancedConfigCommand => AdvancedConfigCommand;
 
     /// <summary>
     /// Name of the service.

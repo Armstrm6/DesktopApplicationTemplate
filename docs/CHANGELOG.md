@@ -149,6 +149,9 @@
 #### Added
 - HTTP service creation and edit views with advanced configuration for authentication and TLS certificate paths.
 
+#### Changed
+- Exposed `AdvancedConfigCommand` directly in HTTP service creation and edit views, removing the redundant wrapper command.
+
 ### File Observer
 #### Added
 - File search service with async caching and DI integration for File Observer.
