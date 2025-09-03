@@ -125,6 +125,7 @@ namespace DesktopApplicationTemplate.UI.Views
                         var settingsView = App.AppHost.Services.GetRequiredService<TcpServiceView>();
                         if (settingsView.DataContext is TcpServiceViewModel tvm)
                         {
+                            tvm.Load(svc.TcpOptions ?? new TcpServiceOptions());
                             tvm.Saved += (_, _) =>
                             {
                                 if (svc.ServicePage != null)
