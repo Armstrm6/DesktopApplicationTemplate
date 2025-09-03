@@ -65,9 +65,9 @@ namespace DesktopApplicationTemplate.UI.Services
                 {
                     csv = new CsvServiceOptions
                     {
-                        OutputPath = s.CsvOptions.OutputPath,
-                        Delimiter = s.CsvOptions.Delimiter,
-                        IncludeHeaders = s.CsvOptions.IncludeHeaders
+                        OutputPath = s.CsvOptions?.OutputPath ?? string.Empty,
+                        Delimiter = s.CsvOptions?.Delimiter ?? ",",
+                        IncludeHeaders = s.CsvOptions?.IncludeHeaders ?? true
                     };
                 }
 
