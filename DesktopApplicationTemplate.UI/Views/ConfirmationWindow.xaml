@@ -1,7 +1,10 @@
-<Window x:Class="DesktopApplicationTemplate.UI.Views.SaveConfirmationWindow"
+<Window x:Class="DesktopApplicationTemplate.UI.Views.ConfirmationWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Save" Width="800" Height="600" WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        Title="Confirmation"
+        Width="800" Height="600"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
         Style="{DynamicResource BubblyWindowStyle}">
     <Window.Resources>
         <ResourceDictionary>
@@ -11,8 +14,11 @@
         </ResourceDictionary>
     </Window.Resources>
     <StackPanel Margin="20">
-        <TextBlock Text="Configuration saved." Margin="0,0,0,10"/>
+        <TextBlock x:Name="MessageTextBlock" TextWrapping="Wrap" Margin="0,0,0,10"/>
         <CheckBox x:Name="DontShowAgainCheckBox" Content="Don't show this pop-up again." Margin="0,0,0,10"/>
-        <Button Content="OK" Width="80" HorizontalAlignment="Right" Click="Ok_Click"/>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button x:Name="PositiveButton" Width="80" Margin="0,0,5,0" Click="Positive_Click"/>
+            <Button x:Name="NegativeButton" Width="80" Click="Negative_Click"/>
+        </StackPanel>
     </StackPanel>
 </Window>

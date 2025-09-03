@@ -35,7 +35,7 @@ namespace DesktopApplicationTemplate.UI.Helpers
                 return;
             }
 
-            var window = new SaveConfirmationWindow
+            var window = new ConfirmationWindow("Configuration saved.", "OK")
             {
                 Owner = Application.Current.MainWindow
             };
