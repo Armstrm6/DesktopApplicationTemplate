@@ -2,6 +2,7 @@ using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Service.Services;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
 
@@ -91,6 +92,21 @@ public class FtpServerCreateViewModelTests
         vm.AdvancedConfigCommand.Execute(null);
 
         Assert.True(raised);
+        ConsoleTestLogger.LogPass();
+    }
+
+    [Fact]
+    public void ServiceProvider_ResolvesFtpServerCreateViewModel()
+    {
+        var services = new ServiceCollection();
+        services.AddSingleton<IServiceRule, ServiceRule>();
+        services.AddSingleton(typeof(IServiceScreen<>), typeof(ServiceScreen<>));
+        services.AddTransient<FtpServerCreateViewModel>();
+
+        using var provider = services.BuildServiceProvider();
+        var vm = provider.GetService<FtpServerCreateViewModel>();
+
+        Assert.NotNull(vm);
         ConsoleTestLogger.LogPass();
     }
 }
