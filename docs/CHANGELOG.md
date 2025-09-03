@@ -151,6 +151,7 @@
 - CSV service increments file index only when `FileNamePattern` contains `{index}`.
 - Guarded CSV viewer configuration serialization to prevent stack overflow on empty data.
 - Eliminated recursive logging and added guards that capture configuration snapshots on save failures.
+- Guarded `CsvServiceOptions` property access against null references during service persistence.
 
 ### HTTP Service
 #### Added
