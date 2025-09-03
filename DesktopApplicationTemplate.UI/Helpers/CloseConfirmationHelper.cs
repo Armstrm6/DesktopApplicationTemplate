@@ -31,7 +31,10 @@ namespace DesktopApplicationTemplate.UI.Helpers
                 return true;
             }
 
-            var window = new CloseConfirmationWindow
+            var window = new ConfirmationWindow(
+                "Configuration won't be saved. Are you sure you want to leave?",
+                "Leave",
+                "Cancel")
             {
                 Owner = Application.Current.MainWindow
             };
