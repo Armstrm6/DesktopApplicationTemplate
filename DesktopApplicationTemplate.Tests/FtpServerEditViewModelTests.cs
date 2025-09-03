@@ -62,7 +62,7 @@ public class FtpServerEditViewModelTests
     public void SettingInvalidPort_AddsError()
     {
         var options = new FtpServerOptions();
-        var vm = new FtpServerEditViewModel("ftp", options);
+        var vm = new FtpServerEditViewModel(new ServiceRule(), "ftp", options);
         vm.Port = 0;
         Assert.True(vm.HasErrors);
         ConsoleTestLogger.LogPass();
