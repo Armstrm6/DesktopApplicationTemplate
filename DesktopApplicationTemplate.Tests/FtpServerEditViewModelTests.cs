@@ -1,6 +1,7 @@
+using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Service.Services;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
-using DesktopApplicationTemplate.Core.Services;
 using Moq;
 using Xunit;
 
