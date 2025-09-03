@@ -6,6 +6,7 @@ using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.Core.Models;
+using DesktopApplicationTemplate.UI.Services;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
@@ -55,7 +56,10 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
 
         private string _scriptContent = string.Empty;
         private string _selectedLanguage = "Python";
-        private string _testMessage = string.Empty;
+        private string _inputMessage = string.Empty;
+        private string _outputMessage = string.Empty;
+
+        private TcpServiceOptions _options = new();
 
         public ObservableCollection<string> ScriptLanguages { get; } = new() { "Python", "C#" };
 
@@ -178,12 +182,12 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
             set { _selectedLanguage = value; OnPropertyChanged(); SetDefaultTemplate(); }
         }
 
-        public string TestMessage
+        public string InputMessage
         {
-            get => _testMessage;
+            get => _inputMessage;
             set
             {
-                _testMessage = value;
+                _inputMessage = value;
                 OnPropertyChanged();
                 if (!string.IsNullOrWhiteSpace(value))
                 {
@@ -191,6 +195,12 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
                         Logger?.Log($"Received test message: {value}", LogLevel.Debug);
                 }
             }
+        }
+
+        public string OutputMessage
+        {
+            get => _outputMessage;
+            set { _outputMessage = value; OnPropertyChanged(); }
         }
 
         public ICommand ToggleServerCommand { get; }
@@ -239,6 +249,19 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
             UpdateMessageViewModelNetworkSettings();
         }
 
+        public void Load(TcpServiceOptions options)
+        {
+            _options = options ?? new TcpServiceOptions();
+            ComputerIp = options.Host;
+            ListeningPort = options.Port.ToString();
+            IsUdp = options.UseUdp;
+            SelectedMode = options.Mode.ToString();
+            ScriptContent = options.Script;
+            InputMessage = options.InputMessage;
+            OutputMessage = options.OutputMessage;
+            _messagesViewModel.UpdateScript(ScriptContent);
+        }
+
         private void SetDefaultTemplate()
         {
             ScriptContent = SelectedLanguage == "Python"
@@ -265,7 +288,7 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
 
         private async Task TestScriptAsync()
         {
-            if (string.IsNullOrWhiteSpace(TestMessage))
+            if (string.IsNullOrWhiteSpace(InputMessage))
             {
                 if (SettingsViewModel.TcpLoggingEnabled)
                     Logger?.Log("TestScript called with empty message", LogLevel.Warning);
@@ -279,10 +302,11 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
             {
                 if (SelectedLanguage == "C#")
                 {
-                    var script = $"{ScriptContent}\nProcess(\"{TestMessage}\");";
+                    var script = $"{ScriptContent}\nProcess(\"{InputMessage}\");";
                     var result = await CSharpScript.EvaluateAsync<string>(script);
                     if (SettingsViewModel.TcpLoggingEnabled)
                         Logger?.Log($"Script output: {result}", LogLevel.Debug);
+                    OutputMessage = result;
                     MessageBox.Show(result, "Test Result");
                 }
                 else if (SettingsViewModel.TcpLoggingEnabled)
@@ -311,6 +335,13 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
 
         private void Save()
         {
+            _options.Host = ComputerIp;
+            _options.Port = int.TryParse(ListeningPort, out var p) ? p : 0;
+            _options.UseUdp = IsUdp;
+            _options.Mode = Enum.TryParse<TcpServiceMode>(SelectedMode, out var m) ? m : TcpServiceMode.Listening;
+            _options.Script = ScriptContent;
+            _options.InputMessage = InputMessage;
+            _options.OutputMessage = OutputMessage;
             _saveHelper.Show();
             Saved?.Invoke(this, EventArgs.Empty);
             RequestClose?.Invoke(this, EventArgs.Empty);

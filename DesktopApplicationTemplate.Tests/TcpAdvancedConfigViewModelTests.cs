@@ -14,6 +14,8 @@ public class TcpAdvancedConfigViewModelTests
         vm.Load(options);
         vm.UseUdp = true;
         vm.Mode = TcpServiceMode.Sending;
+        vm.InputMessage = "hi";
+        vm.Script = "string Process(string message){ return message + \" there\"; }";
         TcpServiceOptions? received = null;
         vm.Saved += o => received = o;
 
@@ -22,6 +24,8 @@ public class TcpAdvancedConfigViewModelTests
         Assert.NotNull(received);
         Assert.True(received!.UseUdp);
         Assert.Equal(TcpServiceMode.Sending, received.Mode);
+        Assert.Equal("hi", received.InputMessage);
+        Assert.Equal("string Process(string message){ return message + \" there\"; }", received.Script);
     }
 
     [Fact]

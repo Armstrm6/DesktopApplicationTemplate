@@ -108,7 +108,10 @@ namespace DesktopApplicationTemplate.Tests
                             Host = "h",
                             Port = 42,
                             UseUdp = true,
-                            Mode = TcpServiceMode.Sending
+                            Mode = TcpServiceMode.Sending,
+                            InputMessage = "in",
+                            Script = "return message;",
+                            OutputMessage = "out"
                         }
                     }
                 };
@@ -120,6 +123,9 @@ namespace DesktopApplicationTemplate.Tests
                 opt.Port = 100;
                 opt.UseUdp = false;
                 opt.Mode = TcpServiceMode.Listening;
+                opt.InputMessage = "changed";
+                opt.Script = "changed";
+                opt.OutputMessage = "changed";
 
                 var loaded = ServicePersistence.Load();
                 var info = Assert.Single(loaded);
@@ -128,6 +134,9 @@ namespace DesktopApplicationTemplate.Tests
                 Assert.Equal(42, info.TcpOptions.Port);
                 Assert.True(info.TcpOptions.UseUdp);
                 Assert.Equal(TcpServiceMode.Sending, info.TcpOptions.Mode);
+                Assert.Equal("in", info.TcpOptions.InputMessage);
+                Assert.Equal("return message;", info.TcpOptions.Script);
+                Assert.Equal("out", info.TcpOptions.OutputMessage);
 
                 // global options restored
                 var restored = host.Services.GetRequiredService<IOptions<TcpServiceOptions>>().Value;
@@ -135,6 +144,9 @@ namespace DesktopApplicationTemplate.Tests
                 Assert.Equal(42, restored.Port);
                 Assert.True(restored.UseUdp);
                 Assert.Equal(TcpServiceMode.Sending, restored.Mode);
+                Assert.Equal("in", restored.InputMessage);
+                Assert.Equal("return message;", restored.Script);
+                Assert.Equal("out", restored.OutputMessage);
             }
             finally
             {

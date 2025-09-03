@@ -32,7 +32,10 @@ namespace DesktopApplicationTemplate.UI.Services
                         Host = s.TcpOptions.Host,
                         Port = s.TcpOptions.Port,
                         UseUdp = s.TcpOptions.UseUdp,
-                        Mode = s.TcpOptions.Mode
+                        Mode = s.TcpOptions.Mode,
+                        InputMessage = s.TcpOptions.InputMessage,
+                        Script = s.TcpOptions.Script,
+                        OutputMessage = s.TcpOptions.OutputMessage
                     };
                 }
 
@@ -153,6 +156,9 @@ namespace DesktopApplicationTemplate.UI.Services
                             value.Port = info.TcpOptions.Port;
                             value.UseUdp = info.TcpOptions.UseUdp;
                             value.Mode = info.TcpOptions.Mode;
+                            value.InputMessage = info.TcpOptions.InputMessage;
+                            value.Script = info.TcpOptions.Script;
+                            value.OutputMessage = info.TcpOptions.OutputMessage;
                         }
                     }
                     if ((info.ServiceType == "FTP Server" || info.ServiceType == "FTP") && info.FtpOptions != null)
