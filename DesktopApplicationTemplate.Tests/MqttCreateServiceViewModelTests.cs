@@ -13,7 +13,7 @@ namespace DesktopApplicationTemplate.Tests;
 public class MqttCreateServiceViewModelTests
 {
     [Fact]
-    public void SaveCommand_Raises_ServiceCreated()
+    public void SaveCommand_Raises_ServiceSaved()
     {
         var vm = new MqttCreateServiceViewModel(new ServiceRule());
         vm.ServiceName = "svc";
@@ -24,7 +24,7 @@ public class MqttCreateServiceViewModelTests
         vm.Password = "pass";
         MqttServiceOptions? received = null;
         string? name = null;
-        vm.ServiceCreated += (n, o) => { name = n; received = o; };
+        vm.ServiceSaved += (n, o) => { name = n; received = o; };
 
         vm.SaveCommand.Execute(null);
 
@@ -36,11 +36,11 @@ public class MqttCreateServiceViewModelTests
     }
 
     [Fact]
-    public void CancelCommand_Raises_Cancelled()
+    public void CancelCommand_Raises_EditCancelled()
     {
         var vm = new MqttCreateServiceViewModel(new ServiceRule());
         var cancelled = false;
-        vm.Cancelled += () => cancelled = true;
+        vm.EditCancelled += () => cancelled = true;
 
         vm.CancelCommand.Execute(null);
 
@@ -69,7 +69,7 @@ public class MqttCreateServiceViewModelTests
         vm.Options.ReconnectDelay = TimeSpan.FromSeconds(5);
         vm.Options.ClientCertificate = File.ReadAllBytes(tempCert);
         MqttServiceOptions? received = null;
-        vm.ServiceCreated += (_, o) => received = o;
+        vm.ServiceSaved += (_, o) => received = o;
 
         vm.SaveCommand.Execute(null);
 
@@ -106,7 +106,7 @@ public class MqttCreateServiceViewModelTests
         vm.Options.WillPayload = null;
         vm.Options.ReconnectDelay = null;
         MqttServiceOptions? received = null;
-        vm.ServiceCreated += (_, o) => received = o;
+        vm.ServiceSaved += (_, o) => received = o;
 
         vm.SaveCommand.Execute(null);
 

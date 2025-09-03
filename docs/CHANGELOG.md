@@ -18,6 +18,7 @@
 - Disabled default `AutoStart` and set environment configuration files to `"AutoStart": false`.
 - Core library targets `net8.0` to avoid Windows targeting pack restore errors.
 - Adjusted solution and project references so cross-platform assemblies depend only on the core while Windows projects also reference `DesktopApplicationTemplate.Windows`.
+- Replaced `ServiceCreated`/`ServiceUpdated` with unified `ServiceSaved` events and centralized `ServiceName` validation in `ServiceEditorViewModelBase`.
 
 ### Navigation & UI
 #### Added

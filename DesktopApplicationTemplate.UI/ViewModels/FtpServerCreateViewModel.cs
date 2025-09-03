@@ -9,9 +9,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// </summary>
 public class FtpServerCreateViewModel : ServiceCreateViewModelBase<FtpServerOptions>
 {
-    private readonly IServiceRule _rule;
     private readonly IServiceScreen<FtpServerOptions> _screen;
-    private string _serviceName = string.Empty;
     private int _port = 21;
     private string _rootPath = string.Empty;
 
@@ -19,53 +17,19 @@ public class FtpServerCreateViewModel : ServiceCreateViewModelBase<FtpServerOpti
     /// Initializes a new instance of the <see cref="FtpServerCreateViewModel"/> class.
     /// </summary>
     public FtpServerCreateViewModel(IServiceRule rule, IServiceScreen<FtpServerOptions> screen, ILoggingService? logger = null)
-        : base(logger)
+        : base(rule, logger)
     {
-        _rule = rule ?? throw new ArgumentNullException(nameof(rule));
         _screen = screen ?? throw new ArgumentNullException(nameof(screen));
 
-        _screen.Saved += (n, o) => ServerCreated?.Invoke(n, o);
-        _screen.Cancelled += () => Cancelled?.Invoke();
-        _screen.AdvancedConfigRequested += o => AdvancedConfigRequested?.Invoke(o);
+        _screen.ServiceSaved += (_, o) => RaiseServiceSaved(o);
+        _screen.EditCancelled += () => RaiseEditCancelled();
+        _screen.AdvancedConfigRequested += o => RaiseAdvancedConfigRequested(o);
     }
 
     /// <summary>
     /// Current advanced options.
     /// </summary>
     public FtpServerOptions Options { get; } = new();
-
-    /// <summary>
-    /// Raised when the configuration is saved.
-    /// </summary>
-    public event Action<string, FtpServerOptions>? ServerCreated;
-
-    /// <summary>
-    /// Raised when creation is cancelled.
-    /// </summary>
-    public event Action? Cancelled;
-
-    /// <summary>
-    /// Raised when advanced configuration is requested.
-    /// </summary>
-    public event Action<FtpServerOptions>? AdvancedConfigRequested;
-
-    /// <summary>
-    /// Display name for the server.
-    /// </summary>
-    public string ServiceName
-    {
-        get => _serviceName;
-        set
-        {
-            _serviceName = value;
-            var error = _rule.ValidateRequired(value, "Service name");
-            if (error is not null)
-                AddError(nameof(ServiceName), error);
-            else
-                ClearErrors(nameof(ServiceName));
-            OnPropertyChanged();
-        }
-    }
 
     /// <summary>
     /// Port to listen on.
@@ -76,7 +40,7 @@ public class FtpServerCreateViewModel : ServiceCreateViewModelBase<FtpServerOpti
         set
         {
             _port = value;
-            var error = _rule.ValidatePort(value);
+            var error = Rule.ValidatePort(value);
             if (error is not null)
                 AddError(nameof(Port), error);
             else
@@ -94,7 +58,7 @@ public class FtpServerCreateViewModel : ServiceCreateViewModelBase<FtpServerOpti
         set
         {
             _rootPath = value;
-            var error = _rule.ValidateRequired(value, "Root path");
+            var error = Rule.ValidateRequired(value, "Root path");
             if (error is not null)
                 AddError(nameof(RootPath), error);
             else

@@ -12,7 +12,7 @@ public class FtpServerEditViewModelTests
     public void Constructor_LoadsExistingSettings()
     {
         var options = new FtpServerOptions { Port = 22, RootPath = "/srv" };
-        var vm = new FtpServerEditViewModel("ftp", options);
+        var vm = new FtpServerEditViewModel(new ServiceRule(), "ftp", options);
         Assert.Equal("ftp", vm.ServiceName);
         Assert.Equal(22, vm.Port);
         Assert.Equal("/srv", vm.RootPath);
@@ -20,11 +20,11 @@ public class FtpServerEditViewModelTests
     }
 
     [Fact]
-    public void SaveCommand_RaisesServerUpdated()
+    public void SaveCommand_RaisesServerSaved()
     {
         var logger = new Mock<ILoggingService>();
         var options = new FtpServerOptions { Port = 21, RootPath = "/tmp" };
-        var vm = new FtpServerEditViewModel("ftp", options, logger.Object)
+        var vm = new FtpServerEditViewModel(new ServiceRule(), "ftp", options, logger.Object)
         {
             Port = 2121,
             RootPath = "/var",
@@ -32,7 +32,7 @@ public class FtpServerEditViewModelTests
         };
         string? name = null;
         FtpServerOptions? updated = null;
-        vm.ServerUpdated += (n, o) => { name = n; updated = o; };
+        vm.ServiceSaved += (n, o) => { name = n; updated = o; };
 
         vm.SaveCommand.Execute(null);
 
@@ -44,12 +44,12 @@ public class FtpServerEditViewModelTests
     }
 
     [Fact]
-    public void CancelCommand_RaisesCancelled()
+    public void CancelCommand_RaisesEditCancelled()
     {
         var options = new FtpServerOptions();
-        var vm = new FtpServerEditViewModel("ftp", options);
+        var vm = new FtpServerEditViewModel(new ServiceRule(), "ftp", options);
         var cancelled = false;
-        vm.Cancelled += () => cancelled = true;
+        vm.EditCancelled += () => cancelled = true;
 
         vm.CancelCommand.Execute(null);
 
@@ -71,13 +71,13 @@ public class FtpServerEditViewModelTests
     public void SaveCommand_DoesNotRaise_WhenInvalid()
     {
         var options = new FtpServerOptions();
-        var vm = new FtpServerEditViewModel("ftp", options)
+        var vm = new FtpServerEditViewModel(new ServiceRule(), "ftp", options)
         {
             Port = 0,
             RootPath = "/tmp"
         };
         var raised = false;
-        vm.ServerUpdated += (_, _) => raised = true;
+        vm.ServiceSaved += (_, _) => raised = true;
 
         vm.SaveCommand.Execute(null);
 

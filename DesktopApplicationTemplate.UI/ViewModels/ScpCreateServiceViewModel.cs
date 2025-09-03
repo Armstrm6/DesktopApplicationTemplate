@@ -9,8 +9,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// </summary>
 public class ScpCreateServiceViewModel : ServiceCreateViewModelBase<ScpServiceOptions>
 {
-    private readonly IServiceRule _rule;
-    private string _serviceName = string.Empty;
     private string _host = string.Empty;
     private string _port = "22";
     private string _username = string.Empty;
@@ -20,47 +18,8 @@ public class ScpCreateServiceViewModel : ServiceCreateViewModelBase<ScpServiceOp
     /// Initializes a new instance of the <see cref="ScpCreateServiceViewModel"/> class.
     /// </summary>
     public ScpCreateServiceViewModel(IServiceRule rule, ILoggingService? logger = null)
-        : base(logger)
+        : base(rule, logger)
     {
-        _rule = rule ?? throw new ArgumentNullException(nameof(rule));
-    }
-
-    /// <summary>
-    /// Raised when the service is created.
-    /// </summary>
-    public event Action<string, ScpServiceOptions>? ServiceCreated;
-
-    /// <summary>
-    /// Raised when creation is cancelled.
-    /// </summary>
-    public event Action? Cancelled;
-
-    /// <summary>
-    /// Raised when advanced configuration is requested.
-    /// </summary>
-    public event Action<ScpServiceOptions>? AdvancedConfigRequested;
-
-    /// <summary>
-    /// Name of the service.
-    /// </summary>
-    public string ServiceName
-    {
-        get => _serviceName;
-        set
-        {
-            _serviceName = value;
-            var error = _rule.ValidateRequired(value, "Service name");
-            if (error is not null)
-            {
-                AddError(nameof(ServiceName), error);
-                Logger?.Log(error, LogLevel.Warning);
-            }
-            else
-            {
-                ClearErrors(nameof(ServiceName));
-            }
-            OnPropertyChanged();
-        }
     }
 
     /// <summary>
@@ -72,7 +31,7 @@ public class ScpCreateServiceViewModel : ServiceCreateViewModelBase<ScpServiceOp
         set
         {
             _host = value;
-            var error = _rule.ValidateRequired(value, "Host");
+            var error = Rule.ValidateRequired(value, "Host");
             if (error is not null)
             {
                 AddError(nameof(Host), error);
@@ -97,7 +56,7 @@ public class ScpCreateServiceViewModel : ServiceCreateViewModelBase<ScpServiceOp
             _port = value;
             if (int.TryParse(value, out var port))
             {
-                var error = _rule.ValidatePort(port);
+                var error = Rule.ValidatePort(port);
                 if (error is not null)
                 {
                     AddError(nameof(Port), error);
@@ -127,7 +86,7 @@ public class ScpCreateServiceViewModel : ServiceCreateViewModelBase<ScpServiceOp
         set
         {
             _username = value;
-            var error = _rule.ValidateRequired(value, "Username");
+            var error = Rule.ValidateRequired(value, "Username");
             if (error is not null)
             {
                 AddError(nameof(Username), error);
@@ -150,7 +109,7 @@ public class ScpCreateServiceViewModel : ServiceCreateViewModelBase<ScpServiceOp
         set
         {
             _password = value;
-            var error = _rule.ValidateRequired(value, "Password");
+            var error = Rule.ValidateRequired(value, "Password");
             if (error is not null)
             {
                 AddError(nameof(Password), error);
@@ -184,14 +143,14 @@ public class ScpCreateServiceViewModel : ServiceCreateViewModelBase<ScpServiceOp
         Options.Username = Username;
         Options.Password = Password;
         Logger?.Log("SCP create options finished", LogLevel.Debug);
-        ServiceCreated?.Invoke(ServiceName, Options);
+        RaiseServiceSaved(Options);
     }
 
     /// <inheritdoc />
     protected override void OnCancel()
     {
         Logger?.Log("SCP create cancelled", LogLevel.Debug);
-        Cancelled?.Invoke();
+        RaiseEditCancelled();
     }
 
     /// <inheritdoc />
@@ -203,6 +162,6 @@ public class ScpCreateServiceViewModel : ServiceCreateViewModelBase<ScpServiceOp
             Options.Port = port;
         Options.Username = Username;
         Options.Password = Password;
-        AdvancedConfigRequested?.Invoke(Options);
+        RaiseAdvancedConfigRequested(Options);
     }
 }

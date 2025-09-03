@@ -9,9 +9,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// </summary>
 public class CsvServiceEditorViewModel : ServiceEditorViewModelBase<CsvServiceOptions>
 {
-    private readonly IServiceRule _rule;
     private readonly IServiceScreen<CsvServiceOptions> _screen;
-    private string _serviceName = string.Empty;
     private string _outputPath = string.Empty;
 
     /// <summary>
@@ -19,48 +17,14 @@ public class CsvServiceEditorViewModel : ServiceEditorViewModelBase<CsvServiceOp
     /// Defaults to create mode with Save button labeled "Create".
     /// </summary>
     public CsvServiceEditorViewModel(IServiceRule rule, IServiceScreen<CsvServiceOptions> screen, ILoggingService? logger = null)
-        : base(logger)
+        : base(rule, logger)
     {
-        _rule = rule ?? throw new ArgumentNullException(nameof(rule));
         _screen = screen ?? throw new ArgumentNullException(nameof(screen));
         SaveButtonText = "Create";
         Options = new();
-        _screen.Saved += (n, o) => ServiceSaved?.Invoke(n, o);
-        _screen.Cancelled += () => Cancelled?.Invoke();
-        _screen.AdvancedConfigRequested += o => AdvancedConfigRequested?.Invoke(o);
-    }
-
-    /// <summary>
-    /// Raised when the service is saved.
-    /// </summary>
-    public event Action<string, CsvServiceOptions>? ServiceSaved;
-
-    /// <summary>
-    /// Raised when editing is cancelled.
-    /// </summary>
-    public event Action? Cancelled;
-
-    /// <summary>
-    /// Raised when advanced configuration is requested.
-    /// </summary>
-    public event Action<CsvServiceOptions>? AdvancedConfigRequested;
-
-    /// <summary>
-    /// Name of the service.
-    /// </summary>
-    public string ServiceName
-    {
-        get => _serviceName;
-        set
-        {
-            _serviceName = value;
-            var error = _rule.ValidateRequired(value, "Service name");
-            if (error is not null)
-                AddError(nameof(ServiceName), error);
-            else
-                ClearErrors(nameof(ServiceName));
-            OnPropertyChanged();
-        }
+        _screen.ServiceSaved += (_, o) => RaiseServiceSaved(o);
+        _screen.EditCancelled += () => RaiseEditCancelled();
+        _screen.AdvancedConfigRequested += o => RaiseAdvancedConfigRequested(o);
     }
 
     /// <summary>
@@ -72,7 +36,7 @@ public class CsvServiceEditorViewModel : ServiceEditorViewModelBase<CsvServiceOp
         set
         {
             _outputPath = value;
-            var error = _rule.ValidateRequired(value, "Output path");
+            var error = Rule.ValidateRequired(value, "Output path");
             if (error is not null)
                 AddError(nameof(OutputPath), error);
             else
@@ -92,7 +56,7 @@ public class CsvServiceEditorViewModel : ServiceEditorViewModelBase<CsvServiceOp
     public void Load(string serviceName, CsvServiceOptions options)
     {
         SaveButtonText = "Save";
-        _serviceName = serviceName;
+        ServiceName = serviceName;
         _outputPath = options.OutputPath;
         Options = options;
         OnPropertyChanged(nameof(ServiceName));

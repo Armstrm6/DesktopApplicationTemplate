@@ -9,7 +9,7 @@ namespace DesktopApplicationTemplate.Tests;
 public class TcpEditServiceViewModelTests
 {
     [Fact]
-    public void SaveCommand_Raises_ServiceUpdated()
+    public void SaveCommand_Raises_ServiceSaved()
     {
         var options = new TcpServiceOptions { Host = "h", Port = 1, UseUdp = false, Mode = TcpServiceMode.Listening };
         var vm = new TcpEditServiceViewModel(new ServiceRule());
@@ -20,7 +20,7 @@ public class TcpEditServiceViewModelTests
         options.Mode = TcpServiceMode.Sending;
         string? name = null;
         TcpServiceOptions? received = null;
-        vm.ServiceUpdated += (n, o) => { name = n; received = o; };
+        vm.ServiceSaved += (n, o) => { name = n; received = o; };
 
         vm.SaveCommand.Execute(null);
 

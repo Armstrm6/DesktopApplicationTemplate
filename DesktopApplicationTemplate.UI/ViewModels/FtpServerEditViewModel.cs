@@ -10,53 +10,21 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 public class FtpServerEditViewModel : ServiceEditViewModelBase<FtpServerOptions>
 {
     private readonly FtpServerOptions _options;
-    private string _serviceName;
     private int _port;
     private string _rootPath;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FtpServerEditViewModel"/> class.
     /// </summary>
-    public FtpServerEditViewModel(string serviceName, FtpServerOptions options, ILoggingService? logger = null)
-        : base(logger)
+    public FtpServerEditViewModel(IServiceRule rule, string serviceName, FtpServerOptions options, ILoggingService? logger = null)
+        : base(rule, logger)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
-        _serviceName = serviceName ?? throw new ArgumentNullException(nameof(serviceName));
+        ServiceName = serviceName ?? throw new ArgumentNullException(nameof(serviceName));
         _port = options.Port;
         _rootPath = options.RootPath;
     }
 
-    /// <summary>
-    /// Raised when the configuration is saved.
-    /// </summary>
-    public event Action<string, FtpServerOptions>? ServerUpdated;
-
-    /// <summary>
-    /// Raised when editing is cancelled.
-    /// </summary>
-    public event Action? Cancelled;
-
-    /// <summary>
-    /// Raised when advanced configuration is requested.
-    /// </summary>
-    public event Action<FtpServerOptions>? AdvancedConfigRequested;
-
-    /// <summary>
-    /// Display name for the server.
-    /// </summary>
-    public string ServiceName
-    {
-        get => _serviceName;
-        set
-        {
-            _serviceName = value;
-            if (string.IsNullOrWhiteSpace(value))
-                AddError(nameof(ServiceName), "Service name is required");
-            else
-                ClearErrors(nameof(ServiceName));
-            OnPropertyChanged();
-        }
-    }
 
     /// <summary>
     /// Port to listen on.
@@ -101,21 +69,21 @@ public class FtpServerEditViewModel : ServiceEditViewModelBase<FtpServerOptions>
         _options.Port = Port;
         _options.RootPath = RootPath;
         Logger?.Log("FTP server edit options finished", LogLevel.Debug);
-        ServerUpdated?.Invoke(ServiceName, _options);
+        RaiseServiceSaved(_options);
     }
 
     /// <inheritdoc />
     protected override void OnCancel()
     {
         Logger?.Log("FTP server edit options cancelled", LogLevel.Debug);
-        Cancelled?.Invoke();
+        RaiseEditCancelled();
     }
 
     /// <inheritdoc />
     protected override void OnAdvancedConfig()
     {
         Logger?.Log("Opening FTP server advanced config", LogLevel.Debug);
-        AdvancedConfigRequested?.Invoke(_options);
+        RaiseAdvancedConfigRequested(_options);
     }
 }
 

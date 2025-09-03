@@ -202,8 +202,8 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             var vm = App.AppHost.Services.GetRequiredService<MqttCreateServiceViewModel>();
             vm.ServiceName = defaultName;
-            vm.ServiceCreated += (name, options) => AddMqttService(name, options);
-            vm.Cancelled += ShowCreateServiceSelectionPage;
+            vm.ServiceSaved += (name, options) => AddMqttService(name, options);
+            vm.EditCancelled += ShowCreateServiceSelectionPage;
             var view = ActivatorUtilities.CreateInstance<MqttCreateServiceView>(App.AppHost.Services, vm);
             vm.AdvancedConfigRequested += opts =>
             {
@@ -221,7 +221,7 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             var vm = App.AppHost.Services.GetRequiredService<HidCreateServiceViewModel>();
             vm.ServiceName = defaultName;
-            vm.ServiceCreated += (name, options) =>
+            vm.ServiceSaved += (name, options) =>
             {
                 var svc = new ServiceViewModel
                 {
@@ -242,7 +242,7 @@ namespace DesktopApplicationTemplate.UI.Views
                     ShowPage(svc.ServicePage);
                 _viewModel.SaveServices();
             };
-            vm.Cancelled += ShowCreateServiceSelectionPage;
+            vm.EditCancelled += ShowCreateServiceSelectionPage;
             var view = ActivatorUtilities.CreateInstance<HidCreateServiceView>(App.AppHost.Services, vm);
             vm.AdvancedConfigRequested += opts =>
             {
@@ -260,7 +260,7 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             var vm = App.AppHost.Services.GetRequiredService<ScpCreateServiceViewModel>();
             vm.ServiceName = defaultName;
-            vm.ServiceCreated += (name, options) =>
+            vm.ServiceSaved += (name, options) =>
             {
                 var svc = new ServiceViewModel
                 {
@@ -281,7 +281,7 @@ namespace DesktopApplicationTemplate.UI.Views
                     ShowPage(svc.ServicePage);
                 _viewModel.SaveServices();
             };
-            vm.Cancelled += ShowCreateServiceSelectionPage;
+            vm.EditCancelled += ShowCreateServiceSelectionPage;
             var view = ActivatorUtilities.CreateInstance<ScpCreateServiceView>(App.AppHost.Services, vm);
             vm.AdvancedConfigRequested += opts =>
             {
@@ -300,7 +300,7 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             var vm = App.AppHost.Services.GetRequiredService<HeartbeatCreateServiceViewModel>();
             vm.ServiceName = defaultName;
-            vm.ServiceCreated += (name, options) =>
+            vm.ServiceSaved += (name, options) =>
             {
                 var svc = new ServiceViewModel
                 {
@@ -321,7 +321,7 @@ namespace DesktopApplicationTemplate.UI.Views
                     ShowPage(svc.ServicePage);
                 _viewModel.SaveServices();
             };
-            vm.Cancelled += ShowCreateServiceSelectionPage;
+            vm.EditCancelled += ShowCreateServiceSelectionPage;
             var view = ActivatorUtilities.CreateInstance<HeartbeatCreateServiceView>(App.AppHost.Services, vm);
             vm.AdvancedConfigRequested += opts =>
             {
@@ -339,7 +339,7 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             var vm = App.AppHost.Services.GetRequiredService<FileObserverCreateServiceViewModel>();
             vm.ServiceName = defaultName;
-            vm.ServiceCreated += (name, options) =>
+            vm.ServiceSaved += (name, options) =>
             {
                 var svc = new ServiceViewModel
                 {
@@ -360,7 +360,7 @@ namespace DesktopApplicationTemplate.UI.Views
                     ShowPage(svc.ServicePage);
                 _viewModel.SaveServices();
             };
-            vm.Cancelled += ShowCreateServiceSelectionPage;
+            vm.EditCancelled += ShowCreateServiceSelectionPage;
             var view = ActivatorUtilities.CreateInstance<FileObserverCreateServiceView>(App.AppHost.Services, vm);
             vm.AdvancedConfigRequested += opts =>
             {
@@ -399,7 +399,7 @@ namespace DesktopApplicationTemplate.UI.Views
                     ShowPage(svc.ServicePage);
                 _viewModel.SaveServices();
             };
-            vm.Cancelled += ShowCreateServiceSelectionPage;
+            vm.EditCancelled += ShowCreateServiceSelectionPage;
             var view = App.AppHost.Services.GetRequiredService<CsvServiceEditorView>();
             view.Initialize(vm);
             vm.AdvancedConfigRequested += opts =>
@@ -418,7 +418,7 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             var vm = App.AppHost.Services.GetRequiredService<TcpCreateServiceViewModel>();
             vm.ServiceName = defaultName;
-            vm.ServiceCreated += (name, options) =>
+            vm.ServiceSaved += (name, options) =>
             {
                 var svc = new ServiceViewModel
                 {
@@ -439,7 +439,7 @@ namespace DesktopApplicationTemplate.UI.Views
                     ShowPage(svc.ServicePage);
                 _viewModel.SaveServices();
             };
-            vm.Cancelled += ShowCreateServiceSelectionPage;
+            vm.EditCancelled += ShowCreateServiceSelectionPage;
             var view = ActivatorUtilities.CreateInstance<TcpCreateServiceView>(App.AppHost.Services, vm);
             vm.AdvancedConfigRequested += opts =>
             {
@@ -458,7 +458,7 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             var vm = App.AppHost.Services.GetRequiredService<HttpCreateServiceViewModel>();
             vm.ServiceName = defaultName;
-            vm.ServiceCreated += (name, options) =>
+            vm.ServiceSaved += (name, options) =>
             {
                 var svc = new ServiceViewModel
                 {
@@ -479,7 +479,7 @@ namespace DesktopApplicationTemplate.UI.Views
                     ShowPage(svc.ServicePage);
                 _viewModel.SaveServices();
             };
-            vm.Cancelled += ShowCreateServiceSelectionPage;
+            vm.EditCancelled += ShowCreateServiceSelectionPage;
             var view = ActivatorUtilities.CreateInstance<HttpCreateServiceView>(App.AppHost.Services, vm);
             vm.AdvancedConfigRequested += opts =>
             {
@@ -506,7 +506,7 @@ namespace DesktopApplicationTemplate.UI.Views
             vm.Options.Password = opts.Password;
 
             var view = ActivatorUtilities.CreateInstance<FtpServerCreateView>(App.AppHost.Services, vm);
-            vm.ServerCreated += (name, options) =>
+            vm.ServiceSaved += (name, options) =>
             {
                 _logger?.LogInformation("FTP server {Name} created", name);
                 AddFtpService(name, options);
@@ -521,7 +521,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 advVm.BackRequested += () => ShowPage(view);
                 ShowPage(advView);
             };
-            vm.Cancelled += ShowCreateServiceSelectionPage;
+            vm.EditCancelled += ShowCreateServiceSelectionPage;
             ShowPage(view);
         }
 
@@ -639,14 +639,14 @@ namespace DesktopApplicationTemplate.UI.Views
                 var vm = ActivatorUtilities.CreateInstance<MqttEditServiceViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
                 var editView = App.AppHost.Services.GetRequiredService<MqttEditServiceView>();
                 editView.Initialize(vm);
-                vm.ServiceUpdated += (name, opts) =>
+                vm.ServiceSaved += (name, opts) =>
                 {
                     service.DisplayName = $"MQTT - {name}";
                     if (tagPage != null)
                         ShowPage(tagPage);
                     _viewModel.SaveServices();
                 };
-                vm.Cancelled += () =>
+                vm.EditCancelled += () =>
                 {
                     if (tagPage != null)
                         ShowPage(tagPage);
@@ -672,7 +672,7 @@ namespace DesktopApplicationTemplate.UI.Views
             var vm = ActivatorUtilities.CreateInstance<HeartbeatEditServiceViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
             var editView = App.AppHost.Services.GetRequiredService<HeartbeatEditServiceView>();
             editView.Initialize(vm);
-            vm.ServiceUpdated += (name, opts) =>
+            vm.ServiceSaved += (name, opts) =>
             {
                 service.DisplayName = $"Heartbeat - {name}";
                 service.HeartbeatOptions = opts;
@@ -680,7 +680,7 @@ namespace DesktopApplicationTemplate.UI.Views
                     ShowPage(hbPage);
                 _viewModel.SaveServices();
             };
-            vm.Cancelled += () =>
+            vm.EditCancelled += () =>
             {
                 if (hbPage != null)
                     ShowPage(hbPage);
@@ -706,7 +706,7 @@ namespace DesktopApplicationTemplate.UI.Views
             var vm = ActivatorUtilities.CreateInstance<HidEditServiceViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
             var editView = App.AppHost.Services.GetRequiredService<HidEditServiceView>();
             editView.Initialize(vm);
-            vm.ServiceUpdated += (name, opts) =>
+            vm.ServiceSaved += (name, opts) =>
             {
                 service.DisplayName = $"HID - {name}";
                 service.HidOptions = opts;
@@ -714,7 +714,7 @@ namespace DesktopApplicationTemplate.UI.Views
                     ShowPage(hidPage);
                 _viewModel.SaveServices();
             };
-            vm.Cancelled += () =>
+            vm.EditCancelled += () =>
             {
                 if (hidPage != null)
                     ShowPage(hidPage);
@@ -749,7 +749,7 @@ namespace DesktopApplicationTemplate.UI.Views
                     ShowPage(csvPage);
                 _viewModel.SaveServices();
             };
-            vm.Cancelled += () =>
+            vm.EditCancelled += () =>
             {
                 if (csvPage != null)
                     ShowPage(csvPage);
@@ -775,7 +775,7 @@ namespace DesktopApplicationTemplate.UI.Views
             var vm = ActivatorUtilities.CreateInstance<FileObserverEditServiceViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
             var editView = App.AppHost.Services.GetRequiredService<FileObserverEditServiceView>();
             editView.Initialize(vm);
-            vm.ServiceUpdated += (name, opts) =>
+            vm.ServiceSaved += (name, opts) =>
             {
                 service.DisplayName = $"File Observer - {name}";
                 service.FileObserverOptions = opts;
@@ -783,7 +783,7 @@ namespace DesktopApplicationTemplate.UI.Views
                     ShowPage(foPage);
                 _viewModel.SaveServices();
             };
-            vm.Cancelled += () =>
+            vm.EditCancelled += () =>
             {
                 if (foPage != null)
                     ShowPage(foPage);
@@ -810,7 +810,7 @@ namespace DesktopApplicationTemplate.UI.Views
             vm.Load(service.DisplayName.Split(" - ").Last(), options);
             var editView = App.AppHost.Services.GetRequiredService<ScpEditServiceView>();
             editView.Initialize(vm);
-            vm.ServiceUpdated += (name, opts) =>
+            vm.ServiceSaved += (name, opts) =>
             {
                 service.DisplayName = $"SCP - {name}";
                 service.ScpOptions = opts;
@@ -818,7 +818,7 @@ namespace DesktopApplicationTemplate.UI.Views
                     ShowPage(scpPage);
                 _viewModel.SaveServices();
             };
-            vm.Cancelled += () =>
+            vm.EditCancelled += () =>
             {
                 if (scpPage != null)
                     ShowPage(scpPage);
@@ -847,7 +847,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 var editView = App.AppHost.Services.GetRequiredService<TcpEditServiceView>();
                 editView.Initialize(vm);
 
-                vm.ServiceUpdated += (name, opts) =>
+                vm.ServiceSaved += (name, opts) =>
                 {
                     service.DisplayName = $"TCP - {name}";
                     service.TcpOptions = opts;
@@ -855,7 +855,7 @@ namespace DesktopApplicationTemplate.UI.Views
                         ShowPage(tcpPage);
                     _viewModel.SaveServices();
                 };
-                vm.Cancelled += () =>
+                vm.EditCancelled += () =>
                 {
                     if (tcpPage != null)
                         ShowPage(tcpPage);
@@ -882,7 +882,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 var vm = ActivatorUtilities.CreateInstance<HttpEditServiceViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
                 var editView = App.AppHost.Services.GetRequiredService<HttpEditServiceView>();
                 editView.Initialize(vm);
-                vm.ServiceUpdated += (name, opts) =>
+                vm.ServiceSaved += (name, opts) =>
                 {
                     service.DisplayName = $"HTTP - {name}";
                     service.HttpOptions = opts;
@@ -890,7 +890,7 @@ namespace DesktopApplicationTemplate.UI.Views
                         ShowPage(httpPage);
                     _viewModel.SaveServices();
                 };
-                vm.Cancelled += () =>
+                vm.EditCancelled += () =>
                 {
                     if (httpPage != null)
                         ShowPage(httpPage);
@@ -916,7 +916,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 var options = service.FtpOptions ?? new FtpServerOptions();
                 var vm = ActivatorUtilities.CreateInstance<FtpServerEditViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
                 var editView = ActivatorUtilities.CreateInstance<FtpServerEditView>(App.AppHost.Services, vm);
-                vm.ServerUpdated += (name, opts) =>
+                vm.ServiceSaved += (name, opts) =>
                 {
                     service.DisplayName = $"FTP Server - {name}";
                     service.FtpOptions = opts;
@@ -930,7 +930,7 @@ namespace DesktopApplicationTemplate.UI.Views
                         ShowPage(ftpPage);
                     _viewModel.SaveServices();
                 };
-                vm.Cancelled += () =>
+                vm.EditCancelled += () =>
                 {
                     if (ftpPage != null)
                         ShowPage(ftpPage);
