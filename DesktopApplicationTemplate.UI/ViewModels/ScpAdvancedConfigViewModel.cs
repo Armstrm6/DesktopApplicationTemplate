@@ -1,5 +1,4 @@
 using System;
-using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Services;
 
@@ -8,7 +7,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// <summary>
 /// View model for editing advanced SCP configuration.
 /// </summary>
-public class ScpAdvancedConfigViewModel : ViewModelBase, ILoggingViewModel
+public class ScpAdvancedConfigViewModel : AdvancedConfigViewModelBase<ScpServiceOptions>
 {
     private ScpServiceOptions? _options;
     private string _localPath = string.Empty;
@@ -18,10 +17,8 @@ public class ScpAdvancedConfigViewModel : ViewModelBase, ILoggingViewModel
     /// Initializes a new instance of the <see cref="ScpAdvancedConfigViewModel"/> class.
     /// </summary>
     public ScpAdvancedConfigViewModel(ILoggingService? logger = null)
+        : base(logger)
     {
-        Logger = logger;
-        SaveCommand = new RelayCommand(Save);
-        BackCommand = new RelayCommand(Back);
     }
 
     /// <summary>
@@ -36,29 +33,6 @@ public class ScpAdvancedConfigViewModel : ViewModelBase, ILoggingViewModel
         OnPropertyChanged(nameof(LocalPath));
         OnPropertyChanged(nameof(RemotePath));
     }
-
-    /// <inheritdoc />
-    public ILoggingService? Logger { get; set; }
-
-    /// <summary>
-    /// Command to save the configuration.
-    /// </summary>
-    public ICommand SaveCommand { get; }
-
-    /// <summary>
-    /// Command to navigate back without saving.
-    /// </summary>
-    public ICommand BackCommand { get; }
-
-    /// <summary>
-    /// Raised when the configuration is saved.
-    /// </summary>
-    public event Action<ScpServiceOptions>? Saved;
-
-    /// <summary>
-    /// Raised when navigation back is requested.
-    /// </summary>
-    public event Action? BackRequested;
 
     /// <summary>
     /// Local file path to upload.
@@ -78,19 +52,18 @@ public class ScpAdvancedConfigViewModel : ViewModelBase, ILoggingViewModel
         set { _remotePath = value; OnPropertyChanged(); }
     }
 
-    private void Save()
+    protected override ScpServiceOptions? OnSave()
     {
         Logger?.Log("SCP advanced options start", LogLevel.Debug);
         if (_options is null) throw new InvalidOperationException("Options not loaded");
         _options.LocalPath = LocalPath;
         _options.RemotePath = RemotePath;
         Logger?.Log("SCP advanced options finished", LogLevel.Debug);
-        Saved?.Invoke(_options);
+        return _options;
     }
 
-    private void Back()
+    protected override void OnBack()
     {
         Logger?.Log("SCP advanced options back", LogLevel.Debug);
-        BackRequested?.Invoke();
     }
 }

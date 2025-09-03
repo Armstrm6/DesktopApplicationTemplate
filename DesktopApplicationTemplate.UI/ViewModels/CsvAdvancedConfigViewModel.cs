@@ -1,5 +1,4 @@
 using System;
-using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Services;
 
@@ -8,7 +7,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// <summary>
 /// View model for editing advanced CSV creator configuration.
 /// </summary>
-public class CsvAdvancedConfigViewModel : ViewModelBase, ILoggingViewModel
+public class CsvAdvancedConfigViewModel : AdvancedConfigViewModelBase<CsvServiceOptions>
 {
     private readonly CsvServiceOptions _options;
     private string _delimiter;
@@ -18,37 +17,12 @@ public class CsvAdvancedConfigViewModel : ViewModelBase, ILoggingViewModel
     /// Initializes a new instance of the <see cref="CsvAdvancedConfigViewModel"/> class.
     /// </summary>
     public CsvAdvancedConfigViewModel(CsvServiceOptions options, ILoggingService? logger = null)
+        : base(logger)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
         _delimiter = options.Delimiter;
         _includeHeaders = options.IncludeHeaders;
-        Logger = logger;
-        SaveCommand = new RelayCommand(Save);
-        BackCommand = new RelayCommand(Back);
     }
-
-    /// <inheritdoc />
-    public ILoggingService? Logger { get; set; }
-
-    /// <summary>
-    /// Command to save the configuration.
-    /// </summary>
-    public ICommand SaveCommand { get; }
-
-    /// <summary>
-    /// Command to navigate back without saving.
-    /// </summary>
-    public ICommand BackCommand { get; }
-
-    /// <summary>
-    /// Raised when the configuration is saved.
-    /// </summary>
-    public event Action<CsvServiceOptions>? Saved;
-
-    /// <summary>
-    /// Raised when navigation back is requested.
-    /// </summary>
-    public event Action? BackRequested;
 
     /// <summary>
     /// Delimiter used between values.
@@ -68,18 +42,17 @@ public class CsvAdvancedConfigViewModel : ViewModelBase, ILoggingViewModel
         set { _includeHeaders = value; OnPropertyChanged(); }
     }
 
-    private void Save()
+    protected override CsvServiceOptions OnSave()
     {
         Logger?.Log("CSV advanced options start", LogLevel.Debug);
         _options.Delimiter = Delimiter;
         _options.IncludeHeaders = IncludeHeaders;
         Logger?.Log("CSV advanced options finished", LogLevel.Debug);
-        Saved?.Invoke(_options);
+        return _options;
     }
 
-    private void Back()
+    protected override void OnBack()
     {
         Logger?.Log("CSV advanced options back", LogLevel.Debug);
-        BackRequested?.Invoke();
     }
 }

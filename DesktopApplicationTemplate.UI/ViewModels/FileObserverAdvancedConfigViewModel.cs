@@ -1,5 +1,4 @@
 using System;
-using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Services;
 
@@ -8,7 +7,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// <summary>
 /// View model for editing advanced File Observer configuration.
 /// </summary>
-public class FileObserverAdvancedConfigViewModel : ValidatableViewModelBase, ILoggingViewModel
+public class FileObserverAdvancedConfigViewModel : AdvancedConfigViewModelBase<FileObserverServiceOptions>
 {
     private readonly FileObserverServiceOptions _options;
     private string _imageNames;
@@ -22,6 +21,7 @@ public class FileObserverAdvancedConfigViewModel : ValidatableViewModelBase, ILo
     /// Initializes a new instance of the <see cref="FileObserverAdvancedConfigViewModel"/> class.
     /// </summary>
     public FileObserverAdvancedConfigViewModel(FileObserverServiceOptions options, ILoggingService? logger = null)
+        : base(logger)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
         _imageNames = options.ImageNames;
@@ -30,33 +30,7 @@ public class FileObserverAdvancedConfigViewModel : ValidatableViewModelBase, ILo
         _xCount = options.XCount;
         _sendTcp = options.SendTcpCommand;
         _tcpCommand = options.TcpCommand;
-        Logger = logger;
-        SaveCommand = new RelayCommand(Save);
-        BackCommand = new RelayCommand(Back);
     }
-
-    /// <inheritdoc />
-    public ILoggingService? Logger { get; set; }
-
-    /// <summary>
-    /// Command to save the configuration.
-    /// </summary>
-    public ICommand SaveCommand { get; }
-
-    /// <summary>
-    /// Command to navigate back without saving.
-    /// </summary>
-    public ICommand BackCommand { get; }
-
-    /// <summary>
-    /// Raised when the configuration is saved.
-    /// </summary>
-    public event Action<FileObserverServiceOptions>? Saved;
-
-    /// <summary>
-    /// Raised when navigation back is requested.
-    /// </summary>
-    public event Action? BackRequested;
 
     /// <summary>
     /// Comma-separated list of image names.
@@ -112,7 +86,7 @@ public class FileObserverAdvancedConfigViewModel : ValidatableViewModelBase, ILo
         set { _tcpCommand = value; OnPropertyChanged(); }
     }
 
-    private void Save()
+    protected override FileObserverServiceOptions OnSave()
     {
         Logger?.Log("FileObserver advanced options start", LogLevel.Debug);
         _options.ImageNames = ImageNames;
@@ -122,12 +96,11 @@ public class FileObserverAdvancedConfigViewModel : ValidatableViewModelBase, ILo
         _options.SendTcpCommand = SendTcpCommand;
         _options.TcpCommand = TcpCommand;
         Logger?.Log("FileObserver advanced options finished", LogLevel.Debug);
-        Saved?.Invoke(_options);
+        return _options;
     }
 
-    private void Back()
+    protected override void OnBack()
     {
         Logger?.Log("FileObserver advanced options back", LogLevel.Debug);
-        BackRequested?.Invoke();
     }
 }

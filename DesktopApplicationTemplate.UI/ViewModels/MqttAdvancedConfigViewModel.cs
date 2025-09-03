@@ -2,9 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Services;
 using MQTTnet.Protocol;
 
@@ -13,7 +11,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// <summary>
 /// View model for editing advanced MQTT configuration.
 /// </summary>
-public class MqttAdvancedConfigViewModel : ViewModelBase
+public class MqttAdvancedConfigViewModel : AdvancedConfigViewModelBase<MqttServiceOptions>
 {
     private readonly MqttServiceOptions _options;
     private string? _clientCertificatePath;
@@ -29,6 +27,7 @@ public class MqttAdvancedConfigViewModel : ViewModelBase
     /// Initializes a new instance of the <see cref="MqttAdvancedConfigViewModel"/> class.
     /// </summary>
     public MqttAdvancedConfigViewModel(MqttServiceOptions options, ILoggingService? logger = null)
+        : base(logger)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
         _willTopic = options.WillTopic;
@@ -38,9 +37,6 @@ public class MqttAdvancedConfigViewModel : ViewModelBase
         _keepAliveSeconds = options.KeepAliveSeconds;
         _cleanSession = options.CleanSession;
         _reconnectDelaySeconds = options.ReconnectDelay?.Seconds ?? 0;
-        Logger = logger;
-        SaveCommand = new RelayCommand(Save);
-        BackCommand = new RelayCommand(Back);
         QoSLevels = Enum.GetValues(typeof(MqttQualityOfServiceLevel)).Cast<MqttQualityOfServiceLevel>().ToArray();
     }
 
@@ -48,29 +44,6 @@ public class MqttAdvancedConfigViewModel : ViewModelBase
     /// Available MQTT quality of service levels.
     /// </summary>
     public IReadOnlyList<MqttQualityOfServiceLevel> QoSLevels { get; }
-
-    /// <inheritdoc />
-    public ILoggingService? Logger { get; set; }
-
-    /// <summary>
-    /// Command to save the configuration.
-    /// </summary>
-    public ICommand SaveCommand { get; }
-
-    /// <summary>
-    /// Command to navigate back without saving.
-    /// </summary>
-    public ICommand BackCommand { get; }
-
-    /// <summary>
-    /// Raised when the configuration is saved.
-    /// </summary>
-    public event Action<MqttServiceOptions>? Saved;
-
-    /// <summary>
-    /// Raised when navigation back is requested.
-    /// </summary>
-    public event Action? BackRequested;
 
     /// <summary>
     /// Path to the client certificate used for TLS authentication.
@@ -144,7 +117,7 @@ public class MqttAdvancedConfigViewModel : ViewModelBase
         set { _reconnectDelaySeconds = value; OnPropertyChanged(); }
     }
 
-    private void Save()
+    protected override MqttServiceOptions OnSave()
     {
         Logger?.Log("MQTT advanced options start", LogLevel.Debug);
         _options.WillTopic = string.IsNullOrWhiteSpace(WillTopic) ? null : WillTopic;
@@ -163,12 +136,11 @@ public class MqttAdvancedConfigViewModel : ViewModelBase
             _options.ClientCertificate = null;
         }
         Logger?.Log("MQTT advanced options finished", LogLevel.Debug);
-        Saved?.Invoke(_options);
+        return _options;
     }
 
-    private void Back()
+    protected override void OnBack()
     {
         Logger?.Log("MQTT advanced options back", LogLevel.Debug);
-        BackRequested?.Invoke();
     }
 }

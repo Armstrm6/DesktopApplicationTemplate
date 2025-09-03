@@ -1,7 +1,5 @@
 using System;
-using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Services;
 
 namespace DesktopApplicationTemplate.UI.ViewModels;
@@ -9,7 +7,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// <summary>
 /// View model for editing advanced FTP server options.
 /// </summary>
-public class FtpServerAdvancedConfigViewModel : ValidatableViewModelBase, ILoggingViewModel
+public class FtpServerAdvancedConfigViewModel : AdvancedConfigViewModelBase<FtpServerOptions>
 {
     private readonly FtpServerOptions _options;
     private bool _allowAnonymous;
@@ -20,38 +18,13 @@ public class FtpServerAdvancedConfigViewModel : ValidatableViewModelBase, ILoggi
     /// Initializes a new instance of the <see cref="FtpServerAdvancedConfigViewModel"/> class.
     /// </summary>
     public FtpServerAdvancedConfigViewModel(FtpServerOptions options, ILoggingService? logger = null)
+        : base(logger)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
         _allowAnonymous = options.AllowAnonymous;
         _username = options.Username;
         _password = options.Password;
-        Logger = logger;
-        SaveCommand = new RelayCommand(Save);
-        BackCommand = new RelayCommand(Back);
     }
-
-    /// <inheritdoc />
-    public ILoggingService? Logger { get; set; }
-
-    /// <summary>
-    /// Command to save the advanced options.
-    /// </summary>
-    public ICommand SaveCommand { get; }
-
-    /// <summary>
-    /// Command to navigate back without saving.
-    /// </summary>
-    public ICommand BackCommand { get; }
-
-    /// <summary>
-    /// Raised when the configuration is saved.
-    /// </summary>
-    public event Action<FtpServerOptions>? Saved;
-
-    /// <summary>
-    /// Raised when navigation back is requested without saving.
-    /// </summary>
-    public event Action? BackRequested;
 
     /// <summary>
     /// Allow anonymous connections.
@@ -109,23 +82,22 @@ public class FtpServerAdvancedConfigViewModel : ValidatableViewModelBase, ILoggi
         }
     }
 
-    private void Save()
+    protected override FtpServerOptions? OnSave()
     {
         ValidateCredentials();
         if (HasErrors)
-            return;
+            return null;
         Logger?.Log("FTP advanced options start", LogLevel.Debug);
         _options.AllowAnonymous = AllowAnonymous;
         _options.Username = string.IsNullOrWhiteSpace(Username) ? null : Username;
         _options.Password = string.IsNullOrWhiteSpace(Password) ? null : Password;
         Logger?.Log("FTP advanced options finished", LogLevel.Debug);
-        Saved?.Invoke(_options);
+        return _options;
     }
 
-    private void Back()
+    protected override void OnBack()
     {
         Logger?.Log("FTP advanced options back", LogLevel.Debug);
-        BackRequested?.Invoke();
     }
 
     private void ValidateCredentials()
