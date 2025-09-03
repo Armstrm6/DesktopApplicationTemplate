@@ -87,6 +87,11 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
     protected override void OnCancel() => Cancelled?.Invoke();
 
     /// <inheritdoc />
-    protected override void OnAdvancedConfig() => AdvancedConfigRequested?.Invoke(_options);
+    protected override void OnAdvancedConfig()
+    {
+        _options.Host = Host;
+        _options.Port = Port;
+        AdvancedConfigRequested?.Invoke(_options);
+    }
 }
 
