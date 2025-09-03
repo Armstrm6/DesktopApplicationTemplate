@@ -1,6 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Services;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
@@ -10,7 +9,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// <summary>
 /// View model for editing advanced TCP configuration.
 /// </summary>
-public class TcpAdvancedConfigViewModel : ViewModelBase, ILoggingViewModel
+public class TcpAdvancedConfigViewModel : AdvancedConfigViewModelBase<TcpServiceOptions>
 {
     private TcpServiceOptions? _options;
     private bool _useUdp;
@@ -23,10 +22,8 @@ public class TcpAdvancedConfigViewModel : ViewModelBase, ILoggingViewModel
     /// Initializes a new instance of the <see cref="TcpAdvancedConfigViewModel"/> class.
     /// </summary>
     public TcpAdvancedConfigViewModel(ILoggingService? logger = null)
+        : base(logger)
     {
-        Logger = logger;
-        SaveCommand = new RelayCommand(Save);
-        BackCommand = new RelayCommand(Back);
     }
 
     /// <summary>
@@ -47,29 +44,6 @@ public class TcpAdvancedConfigViewModel : ViewModelBase, ILoggingViewModel
         OnPropertyChanged(nameof(OutputMessage));
         _ = EvaluateOutputAsync();
     }
-
-    /// <inheritdoc />
-    public ILoggingService? Logger { get; set; }
-
-    /// <summary>
-    /// Command to save the configuration.
-    /// </summary>
-    public ICommand SaveCommand { get; }
-
-    /// <summary>
-    /// Command to navigate back without saving.
-    /// </summary>
-    public ICommand BackCommand { get; }
-
-    /// <summary>
-    /// Raised when the configuration is saved.
-    /// </summary>
-    public event Action<TcpServiceOptions>? Saved;
-
-    /// <summary>
-    /// Raised when navigation back is requested.
-    /// </summary>
-    public event Action? BackRequested;
 
     /// <summary>
     /// Indicates whether UDP should be used instead of TCP.
@@ -131,7 +105,7 @@ public class TcpAdvancedConfigViewModel : ViewModelBase, ILoggingViewModel
     /// </summary>
     public TcpServiceMode[] Modes { get; } = (TcpServiceMode[])Enum.GetValues(typeof(TcpServiceMode));
 
-    private void Save()
+    protected override TcpServiceOptions? OnSave()
     {
         Logger?.Log("TCP advanced options start", LogLevel.Debug);
         if (_options is null) throw new InvalidOperationException("Options not loaded");
@@ -141,13 +115,12 @@ public class TcpAdvancedConfigViewModel : ViewModelBase, ILoggingViewModel
         _options.Script = Script;
         _options.OutputMessage = OutputMessage;
         Logger?.Log("TCP advanced options finished", LogLevel.Debug);
-        Saved?.Invoke(_options);
+        return _options;
     }
 
-    private void Back()
+    protected override void OnBack()
     {
         Logger?.Log("TCP advanced options back", LogLevel.Debug);
-        BackRequested?.Invoke();
     }
 
     private async Task EvaluateOutputAsync()

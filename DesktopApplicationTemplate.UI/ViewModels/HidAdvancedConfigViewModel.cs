@@ -1,5 +1,4 @@
 using System;
-using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Services;
 
@@ -8,7 +7,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// <summary>
 /// View model for editing advanced HID configuration.
 /// </summary>
-public class HidAdvancedConfigViewModel : ValidatableViewModelBase, ILoggingViewModel
+public class HidAdvancedConfigViewModel : AdvancedConfigViewModelBase<HidServiceOptions>
 {
     private readonly HidServiceOptions _options;
     private int _debounceTime;
@@ -18,37 +17,12 @@ public class HidAdvancedConfigViewModel : ValidatableViewModelBase, ILoggingView
     /// Initializes a new instance of the <see cref="HidAdvancedConfigViewModel"/> class.
     /// </summary>
     public HidAdvancedConfigViewModel(HidServiceOptions options, ILoggingService? logger = null)
+        : base(logger)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
         _debounceTime = options.DebounceTimeMs;
         _keyDownTime = options.KeyDownTimeMs;
-        Logger = logger;
-        SaveCommand = new RelayCommand(Save);
-        BackCommand = new RelayCommand(Back);
     }
-
-    /// <inheritdoc />
-    public ILoggingService? Logger { get; set; }
-
-    /// <summary>
-    /// Command to save the configuration.
-    /// </summary>
-    public ICommand SaveCommand { get; }
-
-    /// <summary>
-    /// Command to navigate back without saving.
-    /// </summary>
-    public ICommand BackCommand { get; }
-
-    /// <summary>
-    /// Raised when the configuration is saved.
-    /// </summary>
-    public event Action<HidServiceOptions>? Saved;
-
-    /// <summary>
-    /// Raised when navigation back is requested.
-    /// </summary>
-    public event Action? BackRequested;
 
     /// <summary>
     /// Debounce time in milliseconds.
@@ -68,18 +42,17 @@ public class HidAdvancedConfigViewModel : ValidatableViewModelBase, ILoggingView
         set { _keyDownTime = value; OnPropertyChanged(); }
     }
 
-    private void Save()
+    protected override HidServiceOptions OnSave()
     {
         Logger?.Log("HID advanced options start", LogLevel.Debug);
         _options.DebounceTimeMs = DebounceTimeMs;
         _options.KeyDownTimeMs = KeyDownTimeMs;
         Logger?.Log("HID advanced options finished", LogLevel.Debug);
-        Saved?.Invoke(_options);
+        return _options;
     }
 
-    private void Back()
+    protected override void OnBack()
     {
         Logger?.Log("HID advanced options back", LogLevel.Debug);
-        BackRequested?.Invoke();
     }
 }

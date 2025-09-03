@@ -1,5 +1,4 @@
 using System;
-using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Services;
 
@@ -8,7 +7,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// <summary>
 /// View model for editing advanced Heartbeat configuration.
 /// </summary>
-public class HeartbeatAdvancedConfigViewModel : ValidatableViewModelBase, ILoggingViewModel
+public class HeartbeatAdvancedConfigViewModel : AdvancedConfigViewModelBase<HeartbeatServiceOptions>
 {
     private readonly HeartbeatServiceOptions _options;
     private bool _includePing;
@@ -18,37 +17,12 @@ public class HeartbeatAdvancedConfigViewModel : ValidatableViewModelBase, ILoggi
     /// Initializes a new instance of the <see cref="HeartbeatAdvancedConfigViewModel"/> class.
     /// </summary>
     public HeartbeatAdvancedConfigViewModel(HeartbeatServiceOptions options, ILoggingService? logger = null)
+        : base(logger)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
         _includePing = options.IncludePing;
         _includeStatus = options.IncludeStatus;
-        Logger = logger;
-        SaveCommand = new RelayCommand(Save);
-        BackCommand = new RelayCommand(Back);
     }
-
-    /// <inheritdoc />
-    public ILoggingService? Logger { get; set; }
-
-    /// <summary>
-    /// Command to save the configuration.
-    /// </summary>
-    public ICommand SaveCommand { get; }
-
-    /// <summary>
-    /// Command to navigate back without saving.
-    /// </summary>
-    public ICommand BackCommand { get; }
-
-    /// <summary>
-    /// Raised when the configuration is saved.
-    /// </summary>
-    public event Action<HeartbeatServiceOptions>? Saved;
-
-    /// <summary>
-    /// Raised when navigation back is requested.
-    /// </summary>
-    public event Action? BackRequested;
 
     /// <summary>
     /// Whether to include a ping indicator in the heartbeat.
@@ -68,18 +42,17 @@ public class HeartbeatAdvancedConfigViewModel : ValidatableViewModelBase, ILoggi
         set { _includeStatus = value; OnPropertyChanged(); }
     }
 
-    private void Save()
+    protected override HeartbeatServiceOptions OnSave()
     {
         Logger?.Log("Heartbeat advanced options start", LogLevel.Debug);
         _options.IncludePing = IncludePing;
         _options.IncludeStatus = IncludeStatus;
         Logger?.Log("Heartbeat advanced options finished", LogLevel.Debug);
-        Saved?.Invoke(_options);
+        return _options;
     }
 
-    private void Back()
+    protected override void OnBack()
     {
         Logger?.Log("Heartbeat advanced options back", LogLevel.Debug);
-        BackRequested?.Invoke();
     }
 }
