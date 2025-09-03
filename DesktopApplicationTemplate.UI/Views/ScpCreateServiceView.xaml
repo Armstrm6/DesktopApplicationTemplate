@@ -20,19 +20,19 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Text="Service Name" Style="{StaticResource FormLabel}"/>
-        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ServiceName}" Style="{StaticResource FormField}"/>
+        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ServiceName, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormField}"/>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Text="Host" Style="{StaticResource FormLabel}"/>
-        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Host}" Style="{StaticResource FormField}"/>
+        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Host, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormField}"/>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Text="Port" Style="{StaticResource FormLabel}"/>
-        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Port}" Style="{StaticResource FormField}"/>
+        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Port, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormField}"/>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Text="Username" Style="{StaticResource FormLabel}"/>
-        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Username}" Style="{StaticResource FormField}"/>
+        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Username, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormField}"/>
 
         <TextBlock Grid.Row="4" Grid.Column="0" Text="Password" Style="{StaticResource FormLabel}"/>
-        <PasswordBox Grid.Row="4" Grid.Column="1" helpers:PasswordBoxAssistant.BindPassword="True" helpers:PasswordBoxAssistant.BoundPassword="{Binding Password}" Style="{StaticResource FormField}"/>
+        <PasswordBox Grid.Row="4" Grid.Column="1" helpers:PasswordBoxAssistant.BindPassword="True" helpers:PasswordBoxAssistant.BoundPassword="{Binding Password, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormField}"/>
 
         <StackPanel Grid.Row="5" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
             <Button Content="Advanced" Width="100" Margin="5" Command="{Binding AdvancedConfigCommand}" AutomationProperties.Name="Open SCP Advanced Configuration"/>
