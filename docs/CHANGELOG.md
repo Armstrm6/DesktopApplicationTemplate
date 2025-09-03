@@ -182,7 +182,7 @@
 
 #### Changed
 - Removed custom `ILoggingService` and service registrations in favor of `Microsoft.Extensions.Logging` with console and debug providers.
-- Relocated `LogEntry`, `LogLevel`, and `ILoggingService` to a new `DesktopApplicationTemplate.Windows` library to remove WPF dependencies from the core project.
+- Moved `ILoggingService`, `LogLevel`, and `LogEntry` into the core library so tests no longer depend on the Windows project.
 - `LogEntry` now stores colors as hex strings instead of `System.Windows.Media.Brush`.
 
 ### Documentation & CI
