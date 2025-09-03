@@ -3,7 +3,12 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:behaviors="clr-namespace:DesktopApplicationTemplate.UI.Behaviors"
+      xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
       mc:Ignorable="d">
+    <Page.Resources>
+        <helpers:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter" />
+    </Page.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <Grid Margin="20">
             <Grid.ColumnDefinitions>
@@ -18,13 +23,22 @@
             </Grid.RowDefinitions>
 
             <TextBlock Grid.Row="0" Grid.Column="0" Text="Service Name" Style="{StaticResource FormLabel}"/>
-            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ServiceName}" Style="{StaticResource FormField}"/>
+            <Grid Grid.Row="0" Grid.Column="1">
+                <TextBox x:Name="ServiceNameBox" Text="{Binding ServiceName}" Style="{StaticResource FormField}" behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
+                <TextBlock Text="My TCP Service" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0" VerticalAlignment="Center" Visibility="{Binding Text, ElementName=ServiceNameBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+            </Grid>
 
             <TextBlock Grid.Row="1" Grid.Column="0" Text="Host" Style="{StaticResource FormLabel}"/>
-            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Host}" Style="{StaticResource FormField}"/>
+            <Grid Grid.Row="1" Grid.Column="1">
+                <TextBox x:Name="HostBox" Text="{Binding Host}" Style="{StaticResource FormField}" behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
+                <TextBlock Text="192.168.1.10" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0" VerticalAlignment="Center" Visibility="{Binding Text, ElementName=HostBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+            </Grid>
 
             <TextBlock Grid.Row="2" Grid.Column="0" Text="Port" Style="{StaticResource FormLabel}"/>
-            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Port}" Style="{StaticResource FormField}"/>
+            <Grid Grid.Row="2" Grid.Column="1">
+                <TextBox x:Name="PortBox" Text="{Binding Port}" Style="{StaticResource FormField}" behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
+                <TextBlock Text="5020" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0" VerticalAlignment="Center" Visibility="{Binding Text, ElementName=PortBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+            </Grid>
 
             <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
                 <Button Content="Advanced" Width="100" Margin="5" Command="{Binding AdvancedConfigCommand}" AutomationProperties.Name="Open TCP Advanced Configuration"/>
