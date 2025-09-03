@@ -55,6 +55,7 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<IFileDialogService, FileDialogService>();
             services.AddSingleton<IFileSearchService, DesktopApplicationTemplate.Service.Services.FileSearchService>();
             services.AddSingleton<SaveConfirmationHelper>();
+            services.AddSingleton<IServiceRule, DesktopApplicationTemplate.Service.Services.ServiceRule>();
             services.AddSingleton<CloseConfirmationHelper>();
             services.AddSingleton<MainViewModel>();
             services.AddSingleton<TcpServiceView>();

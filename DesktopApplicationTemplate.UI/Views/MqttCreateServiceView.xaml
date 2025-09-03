@@ -23,16 +23,56 @@
             </Grid.RowDefinitions>
 
             <TextBlock Grid.Row="0" Grid.Column="0" Text="Service Name" Style="{StaticResource FormLabel}"/>
-            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ServiceName}" Style="{StaticResource FormField}" ToolTip="Service Name"/>
+            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ServiceName, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
+                <TextBox.Style>
+                    <Style TargetType="TextBox" BasedOn="{StaticResource FormField}">
+                        <Style.Triggers>
+                            <Trigger Property="Validation.HasError" Value="True">
+                                <Setter Property="ToolTip" Value="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Self}}"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBox.Style>
+            </TextBox>
 
             <TextBlock Grid.Row="1" Grid.Column="0" Text="Host" Style="{StaticResource FormLabel}"/>
-            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Host}" Style="{StaticResource FormField}" ToolTip="Host"/>
+            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Host, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
+                <TextBox.Style>
+                    <Style TargetType="TextBox" BasedOn="{StaticResource FormField}">
+                        <Style.Triggers>
+                            <Trigger Property="Validation.HasError" Value="True">
+                                <Setter Property="ToolTip" Value="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Self}}"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBox.Style>
+            </TextBox>
 
             <TextBlock Grid.Row="2" Grid.Column="0" Text="Port" Style="{StaticResource FormLabel}"/>
-            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Port}" Style="{StaticResource FormField}" ToolTip="Port"/>
+            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Port, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
+                <TextBox.Style>
+                    <Style TargetType="TextBox" BasedOn="{StaticResource FormField}">
+                        <Style.Triggers>
+                            <Trigger Property="Validation.HasError" Value="True">
+                                <Setter Property="ToolTip" Value="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Self}}"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBox.Style>
+            </TextBox>
 
             <TextBlock Grid.Row="3" Grid.Column="0" Text="Client Id" Style="{StaticResource FormLabel}"/>
-            <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding ClientId}" Style="{StaticResource FormField}" ToolTip="Client Id"/>
+            <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding ClientId, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
+                <TextBox.Style>
+                    <Style TargetType="TextBox" BasedOn="{StaticResource FormField}">
+                        <Style.Triggers>
+                            <Trigger Property="Validation.HasError" Value="True">
+                                <Setter Property="ToolTip" Value="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Self}}"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBox.Style>
+            </TextBox>
 
             <TextBlock Grid.Row="4" Grid.Column="0" Text="Username" Style="{StaticResource FormLabel}"/>
             <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Username}" Style="{StaticResource FormField}" ToolTip="Username"/>

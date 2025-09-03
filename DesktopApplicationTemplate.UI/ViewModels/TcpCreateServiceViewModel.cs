@@ -9,9 +9,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// </summary>
 public class TcpCreateServiceViewModel : ServiceCreateViewModelBase<TcpServiceOptions>
 {
+    private readonly IServiceRule _rule;
     private string _serviceName = string.Empty;
     private string _host = string.Empty;
-    private int _port = 0;
+    private int _port;
 
     /// <summary>
     /// Current advanced options.
@@ -21,9 +22,10 @@ public class TcpCreateServiceViewModel : ServiceCreateViewModelBase<TcpServiceOp
     /// <summary>
     /// Initializes a new instance of the <see cref="TcpCreateServiceViewModel"/> class.
     /// </summary>
-    public TcpCreateServiceViewModel(ILoggingService? logger = null)
+    public TcpCreateServiceViewModel(IServiceRule rule, ILoggingService? logger = null)
         : base(logger)
     {
+        _rule = rule ?? throw new ArgumentNullException(nameof(rule));
     }
 
     /// <summary>
@@ -43,7 +45,16 @@ public class TcpCreateServiceViewModel : ServiceCreateViewModelBase<TcpServiceOp
     public string ServiceName
     {
         get => _serviceName;
-        set { _serviceName = value; OnPropertyChanged(); }
+        set
+        {
+            _serviceName = value;
+            var error = _rule.ValidateRequired(value, "Service name");
+            if (error is not null)
+                AddError(nameof(ServiceName), error);
+            else
+                ClearErrors(nameof(ServiceName));
+            OnPropertyChanged();
+        }
     }
 
     /// <summary>
@@ -52,7 +63,16 @@ public class TcpCreateServiceViewModel : ServiceCreateViewModelBase<TcpServiceOp
     public string Host
     {
         get => _host;
-        set { _host = value; OnPropertyChanged(); }
+        set
+        {
+            _host = value;
+            var error = _rule.ValidateRequired(value, "Host");
+            if (error is not null)
+                AddError(nameof(Host), error);
+            else
+                ClearErrors(nameof(Host));
+            OnPropertyChanged();
+        }
     }
 
     /// <summary>
@@ -61,7 +81,16 @@ public class TcpCreateServiceViewModel : ServiceCreateViewModelBase<TcpServiceOp
     public int Port
     {
         get => _port;
-        set { _port = value; OnPropertyChanged(); }
+        set
+        {
+            _port = value;
+            var error = _rule.ValidatePort(value);
+            if (error is not null)
+                AddError(nameof(Port), error);
+            else
+                ClearErrors(nameof(Port));
+            OnPropertyChanged();
+        }
     }
 
     /// <summary>
@@ -72,6 +101,11 @@ public class TcpCreateServiceViewModel : ServiceCreateViewModelBase<TcpServiceOp
     /// <inheritdoc />
     protected override void OnSave()
     {
+        if (HasErrors)
+        {
+            Logger?.Log("TCP create validation failed", LogLevel.Warning);
+            return;
+        }
         Logger?.Log("TCP create options start", LogLevel.Debug);
         Options.Host = Host;
         Options.Port = Port;

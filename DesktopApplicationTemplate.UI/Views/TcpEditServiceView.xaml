@@ -24,19 +24,49 @@
 
             <TextBlock Grid.Row="0" Grid.Column="0" Text="Service Name" Style="{StaticResource FormLabel}"/>
             <Grid Grid.Row="0" Grid.Column="1">
-                <TextBox x:Name="ServiceNameBox" Text="{Binding ServiceName}" Style="{StaticResource FormField}" behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
+                <TextBox x:Name="ServiceNameBox" Text="{Binding ServiceName, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
+                    <TextBox.Style>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource FormField}">
+                            <Style.Triggers>
+                                <Trigger Property="Validation.HasError" Value="True">
+                                    <Setter Property="ToolTip" Value="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Self}}"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
                 <TextBlock Text="My TCP Service" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0" VerticalAlignment="Center" Visibility="{Binding Text, ElementName=ServiceNameBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
             </Grid>
 
             <TextBlock Grid.Row="1" Grid.Column="0" Text="Host" Style="{StaticResource FormLabel}"/>
             <Grid Grid.Row="1" Grid.Column="1">
-                <TextBox x:Name="HostBox" Text="{Binding Host}" Style="{StaticResource FormField}" behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
+                <TextBox x:Name="HostBox" Text="{Binding Host, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
+                    <TextBox.Style>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource FormField}">
+                            <Style.Triggers>
+                                <Trigger Property="Validation.HasError" Value="True">
+                                    <Setter Property="ToolTip" Value="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Self}}"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
                 <TextBlock Text="192.168.1.10" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0" VerticalAlignment="Center" Visibility="{Binding Text, ElementName=HostBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
             </Grid>
 
             <TextBlock Grid.Row="2" Grid.Column="0" Text="Port" Style="{StaticResource FormLabel}"/>
             <Grid Grid.Row="2" Grid.Column="1">
-                <TextBox x:Name="PortBox" Text="{Binding Port}" Style="{StaticResource FormField}" behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
+                <TextBox x:Name="PortBox" Text="{Binding Port, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
+                    <TextBox.Style>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource FormField}">
+                            <Style.Triggers>
+                                <Trigger Property="Validation.HasError" Value="True">
+                                    <Setter Property="ToolTip" Value="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Self}}"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
                 <TextBlock Text="5020" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0" VerticalAlignment="Center" Visibility="{Binding Text, ElementName=PortBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
             </Grid>
 
