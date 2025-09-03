@@ -5,6 +5,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:behaviors="clr-namespace:DesktopApplicationTemplate.UI.Behaviors"
       xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
+      xmlns:views="clr-namespace:DesktopApplicationTemplate.UI.Views"
       mc:Ignorable="d">
     <Page.Resources>
         <helpers:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter" />
@@ -70,11 +71,13 @@
                 <TextBlock Text="5020" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0" VerticalAlignment="Center" Visibility="{Binding Text, ElementName=PortBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
             </Grid>
 
-            <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
-                <Button Content="Advanced" Width="100" Margin="5" Command="{Binding AdvancedConfigCommand}" AutomationProperties.Name="Open TCP Advanced Configuration"/>
-                <Button Content="Save" Width="100" Margin="5" Command="{Binding SaveCommand}" AutomationProperties.Name="Save TCP Service"/>
-                <Button Content="Cancel" Width="100" Margin="5" Command="{Binding CancelCommand}" AutomationProperties.Name="Cancel TCP Edit"/>
-            </StackPanel>
+            <views:EditorButtonBar Grid.Row="3" Grid.ColumnSpan="2"
+                                   AdvancedConfigCommand="{Binding AdvancedConfigCommand}"
+                                   SaveCommand="{Binding SaveCommand}"
+                                   CancelCommand="{Binding CancelCommand}"
+                                   AdvancedAutomationName="Open TCP Advanced Configuration"
+                                   SaveAutomationName="Save TCP Service"
+                                   CancelAutomationName="Cancel TCP Edit" />
         </Grid>
     </ScrollViewer>
 </Page>

@@ -4,6 +4,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
+      xmlns:views="clr-namespace:DesktopApplicationTemplate.UI.Views"
       mc:Ignorable="d">
     <Grid Margin="20">
         <Grid.ColumnDefinitions>
@@ -34,10 +35,12 @@
         <TextBlock Grid.Row="4" Grid.Column="0" Text="Password" Style="{StaticResource FormLabel}"/>
         <PasswordBox Grid.Row="4" Grid.Column="1" helpers:PasswordBoxAssistant.BindPassword="True" helpers:PasswordBoxAssistant.BoundPassword="{Binding Password}" Style="{StaticResource FormField}"/>
 
-        <StackPanel Grid.Row="5" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
-            <Button Content="Advanced" Width="100" Margin="5" Command="{Binding AdvancedConfigCommand}" AutomationProperties.Name="Open SCP Advanced Configuration"/>
-            <Button Content="Save" Width="100" Margin="5" Command="{Binding SaveCommand}" AutomationProperties.Name="Save SCP Service"/>
-            <Button Content="Cancel" Width="100" Margin="5" Command="{Binding CancelCommand}" AutomationProperties.Name="Cancel SCP Edit"/>
-        </StackPanel>
+        <views:EditorButtonBar Grid.Row="5" Grid.ColumnSpan="2"
+                               AdvancedConfigCommand="{Binding AdvancedConfigCommand}"
+                               SaveCommand="{Binding SaveCommand}"
+                               CancelCommand="{Binding CancelCommand}"
+                               AdvancedAutomationName="Open SCP Advanced Configuration"
+                               SaveAutomationName="Save SCP Service"
+                               CancelAutomationName="Cancel SCP Edit" />
     </Grid>
 </Page>
