@@ -88,12 +88,14 @@
         </StackPanel>
 
         <!-- Log entries -->
-        <ListBox Grid.Row="3" Margin="0,10,0,0" ItemsSource="{Binding LogEntries}">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <TextBlock Text="{Binding Message}" Foreground="{Binding Color}"/>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+        <Expander Grid.Row="3" Margin="0,10,0,0" Header="Logs" IsExpanded="False">
+            <ListBox ItemsSource="{Binding LogEntries}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Message}" Foreground="{Binding Color}"/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Expander>
     </Grid>
 </Page>

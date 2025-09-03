@@ -96,6 +96,7 @@ Another Attempt: After expanding MQTT connection types, the `dotnet` CLI is stil
 Latest Attempt: After updating MQTT topic subscription handling, the `dotnet` command remains unavailable; restore, build, and test cannot run and CI is required.
 Recent Attempt: `dotnet` command still missing; unable to run restore, build, or tests locally and will rely on CI.
 Newest Attempt: After adding MQTT log view, `dotnet` CLI remains missing; relying on CI for build and test.
+Another Attempt: After embedding a collapsible MQTT log panel and wiring global log handling, the `dotnet` CLI remains unavailable; relying on CI for build and test.
 Related Commits/PRs: 8517691, 4c0dbb5, 1b5b0ec, 739abbe, 4f74a36, ff70210
 [2025-08-27 04:25] Topic: Logging interface restoration
 Context: Introduced core logging abstractions and refactored edit view models to support DI.
