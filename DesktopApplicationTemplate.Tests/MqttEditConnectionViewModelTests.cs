@@ -130,7 +130,6 @@ public class MqttEditConnectionViewModelTests
     }
 
     [Fact]
-    [Fact]
     public void SubscriptionButtonText_ReflectsConnectionState()
     {
         var vm = CreateViewModel();

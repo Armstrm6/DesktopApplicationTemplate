@@ -15,12 +15,14 @@ using DesktopApplicationTemplate.Models;
 using System.Windows.Input;
 using System.Windows.Controls.Primitives;
 using DesktopApplicationTemplate.UI;
+using System.Runtime.Versioning;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
+    [SupportedOSPlatform("windows")]
     public partial class MainView : Window
     {
         private readonly MainViewModel _viewModel;

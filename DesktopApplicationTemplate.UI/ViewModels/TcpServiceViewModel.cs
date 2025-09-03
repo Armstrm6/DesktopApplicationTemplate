@@ -252,13 +252,13 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
         public void Load(TcpServiceOptions options)
         {
             _options = options ?? new TcpServiceOptions();
-            ComputerIp = options.Host;
-            ListeningPort = options.Port.ToString();
-            IsUdp = options.UseUdp;
-            SelectedMode = options.Mode.ToString();
-            ScriptContent = options.Script;
-            InputMessage = options.InputMessage;
-            OutputMessage = options.OutputMessage;
+            ComputerIp = _options.Host;
+            ListeningPort = _options.Port.ToString();
+            IsUdp = _options.UseUdp;
+            SelectedMode = _options.Mode.ToString();
+            ScriptContent = _options.Script;
+            InputMessage = _options.InputMessage;
+            OutputMessage = _options.OutputMessage;
             _messagesViewModel.UpdateScript(ScriptContent);
         }
 
