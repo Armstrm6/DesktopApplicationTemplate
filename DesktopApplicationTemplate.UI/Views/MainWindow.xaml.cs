@@ -99,7 +99,11 @@ namespace DesktopApplicationTemplate.UI.Views
             {
                 if (svc.ServicePage.DataContext is ILoggingViewModel vm && vm.Logger is LoggingService logger)
                 {
-                    if (vm.Logger != null)
+                    if (svc.ServiceType == "MQTT")
+                    {
+                        logger.LogAdded += entry => _viewModel.OnServiceLogAdded(svc, entry);
+                    }
+                    else
                     {
                         logger.LogAdded += entry =>
                         {

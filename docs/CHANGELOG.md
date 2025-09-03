@@ -98,6 +98,7 @@
 - Dedicated window for editing MQTT connection settings with update, cancel, and unsubscribe commands.
 - Tag subscriptions view displays a connection status indicator.
 - Tag subscriptions view shows log entries for connection events and errors.
+- Tag subscriptions view hosts a collapsible log panel and forwards entries to the main log view.
 
 #### Changed
 - `MqttService` refactored with options-based constructor, clean reconnect logic, and consolidated publish methods.
