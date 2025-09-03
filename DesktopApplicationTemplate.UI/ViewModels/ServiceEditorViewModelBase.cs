@@ -90,18 +90,21 @@ public abstract class ServiceEditorViewModelBase<TOptions> : ValidatableViewMode
     /// Raises the <see cref="ServiceSaved"/> event with the provided options.
     /// </summary>
     /// <param name="options">Options to include with the event.</param>
-    protected void RaiseServiceSaved(TOptions options) => RaiseServiceSaved(options);
+    protected void RaiseServiceSaved(TOptions options) =>
+        ServiceSaved?.Invoke(ServiceName, options);
 
     /// <summary>
     /// Raises the <see cref="EditCancelled"/> event.
     /// </summary>
-    protected void RaiseEditCancelled() => RaiseEditCancelled();
+    protected void RaiseEditCancelled() =>
+        EditCancelled?.Invoke();
 
     /// <summary>
     /// Raises the <see cref="AdvancedConfigRequested"/> event with the provided options.
     /// </summary>
     /// <param name="options">Options to include with the event.</param>
-    protected void RaiseAdvancedConfigRequested(TOptions options) => RaiseAdvancedConfigRequested(options);
+    protected void RaiseAdvancedConfigRequested(TOptions options) =>
+        AdvancedConfigRequested?.Invoke(options);
 
     /// <summary>
     /// Handles save operations for the service.
