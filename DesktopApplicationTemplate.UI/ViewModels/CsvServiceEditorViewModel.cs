@@ -5,9 +5,9 @@ using DesktopApplicationTemplate.UI.Services;
 namespace DesktopApplicationTemplate.UI.ViewModels;
 
 /// <summary>
-/// View model for creating a new CSV creator service.
+/// View model for creating or editing a CSV creator service.
 /// </summary>
-public class CsvCreateServiceViewModel : ServiceCreateViewModelBase<CsvServiceOptions>
+public class CsvServiceEditorViewModel : ServiceEditorViewModelBase<CsvServiceOptions>
 {
     private readonly IServiceRule _rule;
     private readonly IServiceScreen<CsvServiceOptions> _screen;
@@ -15,26 +15,28 @@ public class CsvCreateServiceViewModel : ServiceCreateViewModelBase<CsvServiceOp
     private string _outputPath = string.Empty;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="CsvCreateServiceViewModel"/> class.
+    /// Initializes a new instance of the <see cref="CsvServiceEditorViewModel"/> class.
+    /// Defaults to create mode with Save button labeled "Create".
     /// </summary>
-    public CsvCreateServiceViewModel(IServiceRule rule, IServiceScreen<CsvServiceOptions> screen, ILoggingService? logger = null)
+    public CsvServiceEditorViewModel(IServiceRule rule, IServiceScreen<CsvServiceOptions> screen, ILoggingService? logger = null)
         : base(logger)
     {
         _rule = rule ?? throw new ArgumentNullException(nameof(rule));
         _screen = screen ?? throw new ArgumentNullException(nameof(screen));
-
-        _screen.Saved += (n, o) => ServiceCreated?.Invoke(n, o);
+        SaveButtonText = "Create";
+        Options = new();
+        _screen.Saved += (n, o) => ServiceSaved?.Invoke(n, o);
         _screen.Cancelled += () => Cancelled?.Invoke();
         _screen.AdvancedConfigRequested += o => AdvancedConfigRequested?.Invoke(o);
     }
 
     /// <summary>
-    /// Raised when the service is created.
+    /// Raised when the service is saved.
     /// </summary>
-    public event Action<string, CsvServiceOptions>? ServiceCreated;
+    public event Action<string, CsvServiceOptions>? ServiceSaved;
 
     /// <summary>
-    /// Raised when creation is cancelled.
+    /// Raised when editing is cancelled.
     /// </summary>
     public event Action? Cancelled;
 
@@ -82,7 +84,20 @@ public class CsvCreateServiceViewModel : ServiceCreateViewModelBase<CsvServiceOp
     /// <summary>
     /// Current configuration options.
     /// </summary>
-    public CsvServiceOptions Options { get; } = new();
+    public CsvServiceOptions Options { get; private set; }
+
+    /// <summary>
+    /// Loads existing options for edit workflows.
+    /// </summary>
+    public void Load(string serviceName, CsvServiceOptions options)
+    {
+        SaveButtonText = "Save";
+        _serviceName = serviceName;
+        _outputPath = options.OutputPath;
+        Options = options;
+        OnPropertyChanged(nameof(ServiceName));
+        OnPropertyChanged(nameof(OutputPath));
+    }
 
     /// <inheritdoc />
     protected override void OnSave()

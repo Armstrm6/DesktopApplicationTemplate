@@ -8,7 +8,7 @@
 ### Core Framework
 #### Added
 - Reusable service rule and screen abstractions with DI registration and view model integration.
-- Generic `ServiceCreateViewModelBase<TOptions>` and `ServiceEditViewModelBase<TOptions>` consolidating save, cancel, and advanced configuration commands.
+- Unified creation and edit workflows under `ServiceEditorViewModelBase<TOptions>` exposing `SaveCommand` and customizable `SaveButtonText`.
 - Service manager tracks task start times and writes statuses to `activeservices.txt` for running services.
 
 #### Changed
@@ -34,6 +34,7 @@
 - Service selection window wraps service icons within bounds using a fixed-width panel.
 - Main window routes MQTT service creation through a dedicated create view and opens the tag subscriptions view after setup.
 - Service context menus invoke `EditServiceCommand`; editing an MQTT service opens the connection view with current options preloaded.
+- CSV create and edit views consolidated into a shared editor with dynamic save button text.
 - MQTT create, edit, and subscription views follow design spacing with shared form styles and accessibility names.
 - Service creation flows now display within the main view, removing the separate Create Service window and placeholder navigation text.
 - Main window height constrained to the work area to prevent overlapping the taskbar.

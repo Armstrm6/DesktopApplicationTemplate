@@ -376,9 +376,9 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private void NavigateToCsvCreator(string defaultName)
         {
-            var vm = App.AppHost.Services.GetRequiredService<CsvCreateServiceViewModel>();
+            var vm = App.AppHost.Services.GetRequiredService<CsvServiceEditorViewModel>();
             vm.ServiceName = defaultName;
-            vm.ServiceCreated += (name, options) =>
+            vm.ServiceSaved += (name, options) =>
             {
                 var svc = new ServiceViewModel
                 {
@@ -400,7 +400,8 @@ namespace DesktopApplicationTemplate.UI.Views
                 _viewModel.SaveServices();
             };
             vm.Cancelled += ShowCreateServiceSelectionPage;
-            var view = ActivatorUtilities.CreateInstance<CsvCreateServiceView>(App.AppHost.Services, vm);
+            var view = App.AppHost.Services.GetRequiredService<CsvServiceEditorView>();
+            view.Initialize(vm);
             vm.AdvancedConfigRequested += opts =>
             {
                 var advVm = ActivatorUtilities.CreateInstance<CsvAdvancedConfigViewModel>(App.AppHost.Services, opts);
@@ -736,10 +737,11 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             var csvPage = GetOrCreateServicePage(service);
             var options = service.CsvOptions ?? new CsvServiceOptions();
-            var vm = ActivatorUtilities.CreateInstance<CsvEditServiceViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
-            var editView = App.AppHost.Services.GetRequiredService<CsvEditServiceView>();
+            var vm = App.AppHost.Services.GetRequiredService<CsvServiceEditorViewModel>();
+            vm.Load(service.DisplayName.Split(" - ").Last(), options);
+            var editView = App.AppHost.Services.GetRequiredService<CsvServiceEditorView>();
             editView.Initialize(vm);
-            vm.ServiceUpdated += (name, opts) =>
+            vm.ServiceSaved += (name, opts) =>
             {
                 service.DisplayName = $"CSV Creator - {name}";
                 service.CsvOptions = opts;
@@ -754,9 +756,9 @@ namespace DesktopApplicationTemplate.UI.Views
             };
             vm.AdvancedConfigRequested += opts =>
             {
-              var advVm = ActivatorUtilities.CreateInstance<CsvAdvancedConfigViewModel>(App.AppHost.Services, opts);
-              var advView = App.AppHost.Services.GetRequiredService<CsvAdvancedConfigView>();
-              advView.Initialize(advVm);
+                var advVm = ActivatorUtilities.CreateInstance<CsvAdvancedConfigViewModel>(App.AppHost.Services, opts);
+                var advView = App.AppHost.Services.GetRequiredService<CsvAdvancedConfigView>();
+                advView.Initialize(advVm);
                 advVm.Saved += _ => ShowPage(editView);
                 advVm.BackRequested += () => ShowPage(editView);
                 ShowPage(advView);

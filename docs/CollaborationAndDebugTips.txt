@@ -104,6 +104,7 @@ Another Attempt: After adding SCP service validation, the `dotnet` command is st
 Another Attempt: After injecting IServiceRule into create/edit view models and updating XAML validation, the `dotnet` CLI remains unavailable; relying on CI.
 Latest Attempt: After registering service screen for FTP options and adding DI resolution test, the `dotnet` command is still missing; relying on CI.
 Latest Attempt: Installed the .NET SDK 8.0.404; `dotnet restore` and `dotnet build` succeeded, but `dotnet test --settings tests.runsettings` failed because the Microsoft.WindowsDesktop.App 8.0.0 runtime is missing.
+Newest Attempt: After introducing shared ServiceEditorView, the `dotnet` command remains unavailable; relying on CI for verification.
 Related Commits/PRs: 8517691, 4c0dbb5, 1b5b0ec, 739abbe, 4f74a36, ff70210, 272560a
 [2025-08-27 04:25] Topic: Logging interface restoration
 Context: Introduced core logging abstractions and refactored edit view models to support DI.
