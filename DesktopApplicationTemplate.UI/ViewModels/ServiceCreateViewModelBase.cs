@@ -17,9 +17,11 @@ public abstract class ServiceCreateViewModelBase<TOptions> : ValidatableViewMode
     protected ServiceCreateViewModelBase(ILoggingService? logger = null)
     {
         Logger = logger;
-        SaveCommand = new RelayCommand(OnSave);
+        var saveCommand = new RelayCommand(OnSave, () => !HasErrors);
+        SaveCommand = saveCommand;
         CancelCommand = new RelayCommand(OnCancel);
         AdvancedConfigCommand = new RelayCommand(OnAdvancedConfig);
+        ErrorsChanged += (_, _) => saveCommand.RaiseCanExecuteChanged();
     }
 
     /// <inheritdoc />
@@ -29,6 +31,11 @@ public abstract class ServiceCreateViewModelBase<TOptions> : ValidatableViewMode
     /// Command executed to save the service.
     /// </summary>
     public ICommand SaveCommand { get; }
+
+    /// <summary>
+    /// Alias for <see cref="SaveCommand"/> used by XAML bindings.
+    /// </summary>
+    public ICommand CreateCommand => SaveCommand;
 
     /// <summary>
     /// Command executed to cancel creation.
