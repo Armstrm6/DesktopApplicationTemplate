@@ -75,6 +75,7 @@
 - Variable naming conflicts resolved in main window edit workflow to prevent build errors.
 - FTP server creation no longer freezes when selecting the service type and closes the selection window after saving.
 - Advanced configuration view injects logging via DI and initializes with a view model, resolving constructor instantiation errors.
+- Registered generic service screen in App startup so FTP create view model resolves via DI.
 
 ### TCP Service
 #### Added
