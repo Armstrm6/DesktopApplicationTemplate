@@ -52,6 +52,7 @@
 - Application startup tolerates a missing `MainView` service, preventing test crashes when the window isn't registered.
 - Application shutdown tolerates a missing `MainViewModel` service, preventing test crashes when it's not registered.
 - SCP service creation validates required fields and disables the Create command when inputs are invalid.
+- Marked main window as Windows-only to silence cross-platform analyzer warnings.
 
 ### HID Service
 #### Added
@@ -92,6 +93,7 @@
 #### Fixed
 - Replaced `UriParser.GetSyntax` usage with `IsKnownScheme` and guarded TCP option restoration to avoid null references.
 - Registered the WPF pack URI scheme so BubblyWindow resources load without invalid URI errors.
+- Loading TCP options no longer dereferences a null reference.
 
 ### MQTT Service
 #### Added
@@ -124,6 +126,7 @@
 - Added missing `MQTTnet.Protocol` using to restore `MqttQualityOfServiceLevel` references.
 - Host validation now accepts domain names and rejects underscores.
 - Restored `MqttEndpointMessage` namespace in MQTT service view model to fix build errors.
+- Logged connection failures through the disconnected handler and removed obsolete `ConnectingFailedAsync` usage.
 
 ### CSV Service
 #### Added

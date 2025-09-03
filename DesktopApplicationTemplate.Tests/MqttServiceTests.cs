@@ -32,7 +32,7 @@ public class MqttServiceTests
         service.ConnectionStateChanged += (_, c) => state = c;
 
         await service.ConnectAsync();
-        client.Raise(c => c.ConnectedAsync += null!, (MqttClientConnectedEventArgs?)null);
+        client.Raise(c => c.ConnectedAsync += null!, new MqttClientConnectedEventArgs(new MqttClientConnectResult()));
 
         Assert.True(state);
         ConsoleTestLogger.LogPass();
@@ -203,7 +203,15 @@ public class MqttServiceTests
         bool? state = null;
         service.ConnectionStateChanged += (_, c) => state = c;
 
-        client.Raise(c => c.DisconnectedAsync += null!, (MqttClientDisconnectedEventArgs?)null);
+        client.Raise(
+            c => c.DisconnectedAsync += null!,
+            new MqttClientDisconnectedEventArgs(
+                false,
+                new MqttClientConnectResult(),
+                MqttClientDisconnectReason.NormalDisconnection,
+                null,
+                new List<MqttUserProperty>(),
+                null));
 
         Assert.False(state);
         logger.Verify(l => l.Log(It.Is<string>(s => s.Contains("MQTT disconnected")), LogLevel.Warning), Times.Once);

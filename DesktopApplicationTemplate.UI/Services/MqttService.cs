@@ -48,16 +48,12 @@ public class MqttService
 
         _client.DisconnectedAsync += e =>
         {
-            var message = e?.Exception != null ? $"MQTT disconnected: {e.Exception.Message}" : "MQTT disconnected";
-            _logger.Log(message, LogLevel.Warning);
+            var wasConnected = e?.ClientWasConnected == true;
+            var prefix = wasConnected ? "MQTT disconnected" : "MQTT connection failed";
+            var message = e?.Exception != null ? $"{prefix}: {e.Exception.Message}" : prefix;
+            var level = wasConnected ? LogLevel.Warning : LogLevel.Error;
+            _logger.Log(message, level);
             OnConnectionStateChanged(false);
-            return Task.CompletedTask;
-        };
-
-        _client.ConnectingFailedAsync += e =>
-        {
-            var message = e?.Exception != null ? $"MQTT connection failed: {e.Exception.Message}" : "MQTT connection failed";
-            _logger.Log(message, LogLevel.Error);
             return Task.CompletedTask;
         };
     }
