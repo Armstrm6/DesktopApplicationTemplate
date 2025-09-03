@@ -9,6 +9,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// </summary>
 public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOptions>
 {
+    private readonly IServiceRule _rule;
     private TcpServiceOptions _options = new();
     private string _serviceName = string.Empty;
     private string _host = string.Empty;
@@ -17,9 +18,10 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
     /// <summary>
     /// Initializes a new instance of the <see cref="TcpEditServiceViewModel"/> class.
     /// </summary>
-    public TcpEditServiceViewModel(ILoggingService? logger = null)
+    public TcpEditServiceViewModel(IServiceRule rule, ILoggingService? logger = null)
         : base(logger)
     {
+        _rule = rule ?? throw new ArgumentNullException(nameof(rule));
     }
 
     /// <summary>
@@ -54,7 +56,16 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
     public string ServiceName
     {
         get => _serviceName;
-        set { _serviceName = value; OnPropertyChanged(); }
+        set
+        {
+            _serviceName = value;
+            var error = _rule.ValidateRequired(value, "Service name");
+            if (error is not null)
+                AddError(nameof(ServiceName), error);
+            else
+                ClearErrors(nameof(ServiceName));
+            OnPropertyChanged();
+        }
     }
 
     /// <summary>
@@ -63,7 +74,16 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
     public string Host
     {
         get => _host;
-        set { _host = value; OnPropertyChanged(); }
+        set
+        {
+            _host = value;
+            var error = _rule.ValidateRequired(value, "Host");
+            if (error is not null)
+                AddError(nameof(Host), error);
+            else
+                ClearErrors(nameof(Host));
+            OnPropertyChanged();
+        }
     }
 
     /// <summary>
@@ -72,12 +92,26 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
     public int Port
     {
         get => _port;
-        set { _port = value; OnPropertyChanged(); }
+        set
+        {
+            _port = value;
+            var error = _rule.ValidatePort(value);
+            if (error is not null)
+                AddError(nameof(Port), error);
+            else
+                ClearErrors(nameof(Port));
+            OnPropertyChanged();
+        }
     }
 
     /// <inheritdoc />
     protected override void OnSave()
     {
+        if (HasErrors)
+        {
+            Logger?.Log("TCP edit validation failed", LogLevel.Warning);
+            return;
+        }
         _options.Host = Host;
         _options.Port = Port;
         ServiceUpdated?.Invoke(ServiceName, _options);

@@ -17,10 +17,30 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Text="Service Name" Style="{StaticResource FormLabel}"/>
-        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ServiceName}" Style="{StaticResource FormField}"/>
+        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ServiceName, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
+            <TextBox.Style>
+                <Style TargetType="TextBox" BasedOn="{StaticResource FormField}">
+                    <Style.Triggers>
+                        <Trigger Property="Validation.HasError" Value="True">
+                            <Setter Property="ToolTip" Value="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Self}}"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBox.Style>
+        </TextBox>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Text="File Path" Style="{StaticResource FormLabel}"/>
-        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding FilePath}" Style="{StaticResource FormField}"/>
+        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding FilePath, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
+            <TextBox.Style>
+                <Style TargetType="TextBox" BasedOn="{StaticResource FormField}">
+                    <Style.Triggers>
+                        <Trigger Property="Validation.HasError" Value="True">
+                            <Setter Property="ToolTip" Value="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Self}}"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBox.Style>
+        </TextBox>
         <Button Grid.Row="1" Grid.Column="2" Content="Browse" Width="75" Margin="5,0,0,0" Command="{Binding BrowseCommand}"/>
 
         <StackPanel Grid.Row="2" Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">

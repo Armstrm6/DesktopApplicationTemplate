@@ -11,6 +11,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// </summary>
 public class FileObserverCreateServiceViewModel : ServiceCreateViewModelBase<FileObserverServiceOptions>
 {
+    private readonly IServiceRule _rule;
     private readonly IFileDialogService _fileDialog;
     private string _serviceName = string.Empty;
     private string _filePath = string.Empty;
@@ -18,9 +19,10 @@ public class FileObserverCreateServiceViewModel : ServiceCreateViewModelBase<Fil
     /// <summary>
     /// Initializes a new instance of the <see cref="FileObserverCreateServiceViewModel"/> class.
     /// </summary>
-    public FileObserverCreateServiceViewModel(IFileDialogService fileDialog, ILoggingService? logger = null)
+    public FileObserverCreateServiceViewModel(IServiceRule rule, IFileDialogService fileDialog, ILoggingService? logger = null)
         : base(logger)
     {
+        _rule = rule ?? throw new ArgumentNullException(nameof(rule));
         _fileDialog = fileDialog ?? throw new ArgumentNullException(nameof(fileDialog));
         BrowseCommand = new RelayCommand(BrowseFolder);
     }
@@ -46,7 +48,16 @@ public class FileObserverCreateServiceViewModel : ServiceCreateViewModelBase<Fil
     public string ServiceName
     {
         get => _serviceName;
-        set { _serviceName = value; OnPropertyChanged(); }
+        set
+        {
+            _serviceName = value;
+            var error = _rule.ValidateRequired(value, "Service name");
+            if (error is not null)
+                AddError(nameof(ServiceName), error);
+            else
+                ClearErrors(nameof(ServiceName));
+            OnPropertyChanged();
+        }
     }
 
     /// <summary>
@@ -55,7 +66,16 @@ public class FileObserverCreateServiceViewModel : ServiceCreateViewModelBase<Fil
     public string FilePath
     {
         get => _filePath;
-        set { _filePath = value; OnPropertyChanged(); }
+        set
+        {
+            _filePath = value;
+            var error = _rule.ValidateRequired(value, "File path");
+            if (error is not null)
+                AddError(nameof(FilePath), error);
+            else
+                ClearErrors(nameof(FilePath));
+            OnPropertyChanged();
+        }
     }
 
     /// <summary>
@@ -71,6 +91,11 @@ public class FileObserverCreateServiceViewModel : ServiceCreateViewModelBase<Fil
     /// <inheritdoc />
     protected override void OnSave()
     {
+        if (HasErrors)
+        {
+            Logger?.Log("FileObserver create validation failed", LogLevel.Warning);
+            return;
+        }
         Logger?.Log("FileObserver create options start", LogLevel.Debug);
         Options.FilePath = FilePath;
         Logger?.Log("FileObserver create options finished", LogLevel.Debug);

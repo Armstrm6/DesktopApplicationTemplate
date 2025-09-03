@@ -1,3 +1,5 @@
+using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Service.Services;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using Xunit;
@@ -9,7 +11,7 @@ public class TcpCreateServiceViewModelTests
     [Fact]
     public void SaveCommand_Raises_ServiceCreated()
     {
-        var vm = new TcpCreateServiceViewModel();
+        var vm = new TcpCreateServiceViewModel(new ServiceRule());
         vm.ServiceName = "svc";
         vm.Host = "host";
         vm.Port = 1234;
@@ -32,7 +34,7 @@ public class TcpCreateServiceViewModelTests
     [Fact]
     public void CancelCommand_Raises_Cancelled()
     {
-        var vm = new TcpCreateServiceViewModel();
+        var vm = new TcpCreateServiceViewModel(new ServiceRule());
         var cancelled = false;
         vm.Cancelled += () => cancelled = true;
 
@@ -44,7 +46,7 @@ public class TcpCreateServiceViewModelTests
     [Fact]
     public void AdvancedConfigCommand_Raises_Event_WithOptions()
     {
-        var vm = new TcpCreateServiceViewModel();
+        var vm = new TcpCreateServiceViewModel(new ServiceRule());
         vm.Host = "host";
         vm.Port = 123;
         vm.Options.UseUdp = true;
@@ -59,5 +61,13 @@ public class TcpCreateServiceViewModelTests
         Assert.Equal(123, received.Port);
         Assert.True(received.UseUdp);
         Assert.Equal(TcpServiceMode.Sending, received.Mode);
+    }
+
+    [Fact]
+    public void SettingEmptyServiceName_AddsError()
+    {
+        var vm = new TcpCreateServiceViewModel(new ServiceRule());
+        vm.ServiceName = string.Empty;
+        Assert.True(vm.HasErrors);
     }
 }

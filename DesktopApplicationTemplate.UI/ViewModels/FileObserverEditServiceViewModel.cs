@@ -9,6 +9,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// </summary>
 public class FileObserverEditServiceViewModel : ServiceEditViewModelBase<FileObserverServiceOptions>
 {
+    private readonly IServiceRule _rule;
     private readonly FileObserverServiceOptions _options;
     private string _serviceName;
     private string _filePath;
@@ -16,9 +17,10 @@ public class FileObserverEditServiceViewModel : ServiceEditViewModelBase<FileObs
     /// <summary>
     /// Initializes a new instance of the <see cref="FileObserverEditServiceViewModel"/> class.
     /// </summary>
-    public FileObserverEditServiceViewModel(string serviceName, FileObserverServiceOptions options, ILoggingService? logger = null)
+    public FileObserverEditServiceViewModel(IServiceRule rule, string serviceName, FileObserverServiceOptions options, ILoggingService? logger = null)
         : base(logger)
     {
+        _rule = rule ?? throw new ArgumentNullException(nameof(rule));
         _options = options ?? throw new ArgumentNullException(nameof(options));
         _serviceName = serviceName ?? throw new ArgumentNullException(nameof(serviceName));
         _filePath = options.FilePath;
@@ -45,7 +47,16 @@ public class FileObserverEditServiceViewModel : ServiceEditViewModelBase<FileObs
     public string ServiceName
     {
         get => _serviceName;
-        set { _serviceName = value; OnPropertyChanged(); }
+        set
+        {
+            _serviceName = value;
+            var error = _rule.ValidateRequired(value, "Service name");
+            if (error is not null)
+                AddError(nameof(ServiceName), error);
+            else
+                ClearErrors(nameof(ServiceName));
+            OnPropertyChanged();
+        }
     }
 
     /// <summary>
@@ -54,7 +65,16 @@ public class FileObserverEditServiceViewModel : ServiceEditViewModelBase<FileObs
     public string FilePath
     {
         get => _filePath;
-        set { _filePath = value; OnPropertyChanged(); }
+        set
+        {
+            _filePath = value;
+            var error = _rule.ValidateRequired(value, "File path");
+            if (error is not null)
+                AddError(nameof(FilePath), error);
+            else
+                ClearErrors(nameof(FilePath));
+            OnPropertyChanged();
+        }
     }
 
     /// <summary>
@@ -65,6 +85,11 @@ public class FileObserverEditServiceViewModel : ServiceEditViewModelBase<FileObs
     /// <inheritdoc />
     protected override void OnSave()
     {
+        if (HasErrors)
+        {
+            Logger?.Log("FileObserver edit validation failed", LogLevel.Warning);
+            return;
+        }
         _options.FilePath = FilePath;
         ServiceUpdated?.Invoke(ServiceName, _options);
     }

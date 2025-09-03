@@ -9,6 +9,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// </summary>
 public class MqttCreateServiceViewModel : ServiceCreateViewModelBase<MqttServiceOptions>
 {
+    private readonly IServiceRule _rule;
     private string _serviceName = string.Empty;
     private string _host = string.Empty;
     private int _port = 1883;
@@ -19,9 +20,10 @@ public class MqttCreateServiceViewModel : ServiceCreateViewModelBase<MqttService
     /// <summary>
     /// Initializes a new instance of the <see cref="MqttCreateServiceViewModel"/> class.
     /// </summary>
-    public MqttCreateServiceViewModel(ILoggingService? logger = null)
+    public MqttCreateServiceViewModel(IServiceRule rule, ILoggingService? logger = null)
         : base(logger)
     {
+        _rule = rule ?? throw new ArgumentNullException(nameof(rule));
     }
 
     /// <summary>
@@ -46,7 +48,16 @@ public class MqttCreateServiceViewModel : ServiceCreateViewModelBase<MqttService
     public string ServiceName
     {
         get => _serviceName;
-        set { _serviceName = value; OnPropertyChanged(); }
+        set
+        {
+            _serviceName = value;
+            var error = _rule.ValidateRequired(value, "Service name");
+            if (error is not null)
+                AddError(nameof(ServiceName), error);
+            else
+                ClearErrors(nameof(ServiceName));
+            OnPropertyChanged();
+        }
     }
 
     /// <summary>
@@ -55,7 +66,16 @@ public class MqttCreateServiceViewModel : ServiceCreateViewModelBase<MqttService
     public string Host
     {
         get => _host;
-        set { _host = value; OnPropertyChanged(); }
+        set
+        {
+            _host = value;
+            var error = _rule.ValidateRequired(value, "Host");
+            if (error is not null)
+                AddError(nameof(Host), error);
+            else
+                ClearErrors(nameof(Host));
+            OnPropertyChanged();
+        }
     }
 
     /// <summary>
@@ -64,7 +84,16 @@ public class MqttCreateServiceViewModel : ServiceCreateViewModelBase<MqttService
     public int Port
     {
         get => _port;
-        set { _port = value; OnPropertyChanged(); }
+        set
+        {
+            _port = value;
+            var error = _rule.ValidatePort(value);
+            if (error is not null)
+                AddError(nameof(Port), error);
+            else
+                ClearErrors(nameof(Port));
+            OnPropertyChanged();
+        }
     }
 
     /// <summary>
@@ -73,7 +102,16 @@ public class MqttCreateServiceViewModel : ServiceCreateViewModelBase<MqttService
     public string ClientId
     {
         get => _clientId;
-        set { _clientId = value; OnPropertyChanged(); }
+        set
+        {
+            _clientId = value;
+            var error = _rule.ValidateRequired(value, "Client Id");
+            if (error is not null)
+                AddError(nameof(ClientId), error);
+            else
+                ClearErrors(nameof(ClientId));
+            OnPropertyChanged();
+        }
     }
 
     /// <summary>
@@ -102,6 +140,11 @@ public class MqttCreateServiceViewModel : ServiceCreateViewModelBase<MqttService
     /// <inheritdoc />
     protected override void OnSave()
     {
+        if (HasErrors)
+        {
+            Logger?.Log("MQTT create validation failed", LogLevel.Warning);
+            return;
+        }
         Logger?.Log("MQTT create options start", LogLevel.Debug);
         Options.Host = Host;
         Options.Port = Port;

@@ -9,6 +9,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// </summary>
 public class MqttEditServiceViewModel : ServiceEditViewModelBase<MqttServiceOptions>
 {
+    private readonly IServiceRule _rule;
     private readonly MqttServiceOptions _options;
     private string _serviceName;
     private string _host;
@@ -20,9 +21,10 @@ public class MqttEditServiceViewModel : ServiceEditViewModelBase<MqttServiceOpti
     /// <summary>
     /// Initializes a new instance of the <see cref="MqttEditServiceViewModel"/> class.
     /// </summary>
-    public MqttEditServiceViewModel(string serviceName, MqttServiceOptions options, ILoggingService? logger = null)
+    public MqttEditServiceViewModel(IServiceRule rule, string serviceName, MqttServiceOptions options, ILoggingService? logger = null)
         : base(logger)
     {
+        _rule = rule ?? throw new ArgumentNullException(nameof(rule));
         _options = options ?? throw new ArgumentNullException(nameof(options));
         _serviceName = serviceName ?? throw new ArgumentNullException(nameof(serviceName));
         _host = options.Host;
@@ -53,7 +55,16 @@ public class MqttEditServiceViewModel : ServiceEditViewModelBase<MqttServiceOpti
     public string ServiceName
     {
         get => _serviceName;
-        set { _serviceName = value; OnPropertyChanged(); }
+        set
+        {
+            _serviceName = value;
+            var error = _rule.ValidateRequired(value, "Service name");
+            if (error is not null)
+                AddError(nameof(ServiceName), error);
+            else
+                ClearErrors(nameof(ServiceName));
+            OnPropertyChanged();
+        }
     }
 
     /// <summary>
@@ -62,7 +73,16 @@ public class MqttEditServiceViewModel : ServiceEditViewModelBase<MqttServiceOpti
     public string Host
     {
         get => _host;
-        set { _host = value; OnPropertyChanged(); }
+        set
+        {
+            _host = value;
+            var error = _rule.ValidateRequired(value, "Host");
+            if (error is not null)
+                AddError(nameof(Host), error);
+            else
+                ClearErrors(nameof(Host));
+            OnPropertyChanged();
+        }
     }
 
     /// <summary>
@@ -71,7 +91,16 @@ public class MqttEditServiceViewModel : ServiceEditViewModelBase<MqttServiceOpti
     public int Port
     {
         get => _port;
-        set { _port = value; OnPropertyChanged(); }
+        set
+        {
+            _port = value;
+            var error = _rule.ValidatePort(value);
+            if (error is not null)
+                AddError(nameof(Port), error);
+            else
+                ClearErrors(nameof(Port));
+            OnPropertyChanged();
+        }
     }
 
     /// <summary>
@@ -80,7 +109,16 @@ public class MqttEditServiceViewModel : ServiceEditViewModelBase<MqttServiceOpti
     public string ClientId
     {
         get => _clientId;
-        set { _clientId = value; OnPropertyChanged(); }
+        set
+        {
+            _clientId = value;
+            var error = _rule.ValidateRequired(value, "Client Id");
+            if (error is not null)
+                AddError(nameof(ClientId), error);
+            else
+                ClearErrors(nameof(ClientId));
+            OnPropertyChanged();
+        }
     }
 
     /// <summary>
@@ -104,6 +142,11 @@ public class MqttEditServiceViewModel : ServiceEditViewModelBase<MqttServiceOpti
     /// <inheritdoc />
     protected override void OnSave()
     {
+        if (HasErrors)
+        {
+            Logger?.Log("MQTT edit validation failed", LogLevel.Warning);
+            return;
+        }
         _options.Host = Host;
         _options.Port = Port;
         _options.ClientId = ClientId;

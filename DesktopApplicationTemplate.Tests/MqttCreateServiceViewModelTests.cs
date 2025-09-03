@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Service.Services;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using MQTTnet.Protocol;
@@ -14,7 +15,7 @@ public class MqttCreateServiceViewModelTests
     [Fact]
     public void SaveCommand_Raises_ServiceCreated()
     {
-        var vm = new MqttCreateServiceViewModel();
+        var vm = new MqttCreateServiceViewModel(new ServiceRule());
         vm.ServiceName = "svc";
         vm.Host = "host";
         vm.Port = 1234;
@@ -37,7 +38,7 @@ public class MqttCreateServiceViewModelTests
     [Fact]
     public void CancelCommand_Raises_Cancelled()
     {
-        var vm = new MqttCreateServiceViewModel();
+        var vm = new MqttCreateServiceViewModel(new ServiceRule());
         var cancelled = false;
         vm.Cancelled += () => cancelled = true;
 
@@ -51,7 +52,7 @@ public class MqttCreateServiceViewModelTests
     {
         var tempCert = Path.GetTempFileName();
         File.WriteAllBytes(tempCert, new byte[] { 1, 2, 3 });
-        var vm = new MqttCreateServiceViewModel();
+        var vm = new MqttCreateServiceViewModel(new ServiceRule());
         vm.ServiceName = "svc";
         vm.Host = "host";
         vm.Port = 1234;
@@ -94,7 +95,7 @@ public class MqttCreateServiceViewModelTests
     [Fact]
     public void SaveCommand_ConvertsBlankFieldsToNull()
     {
-        var vm = new MqttCreateServiceViewModel();
+        var vm = new MqttCreateServiceViewModel(new ServiceRule());
         vm.ServiceName = "svc";
         vm.Host = "host";
         vm.Port = 1883;
@@ -115,5 +116,13 @@ public class MqttCreateServiceViewModelTests
         Assert.Null(received.WillTopic);
         Assert.Null(received.WillPayload);
         Assert.Null(received.ReconnectDelay);
+    }
+
+    [Fact]
+    public void SettingEmptyServiceName_AddsError()
+    {
+        var vm = new MqttCreateServiceViewModel(new ServiceRule());
+        vm.ServiceName = string.Empty;
+        Assert.True(vm.HasErrors);
     }
 }

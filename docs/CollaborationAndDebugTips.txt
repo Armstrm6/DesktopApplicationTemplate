@@ -101,6 +101,7 @@ Another Attempt: After updating TcpEditServiceViewModel advanced config and inst
 Another Attempt: After adding TCP view placeholders, the `dotnet` command is still missing; restore, build, and tests cannot run locally, so CI will verify.
 Another Attempt: After extending TCP advanced configuration with script fields, the `dotnet` CLI remains unavailable; relying on CI.
 Another Attempt: After adding SCP service validation, the `dotnet` command is still missing; will rely on CI.
+Another Attempt: After injecting IServiceRule into create/edit view models and updating XAML validation, the `dotnet` CLI remains unavailable; relying on CI.
 Related Commits/PRs: 8517691, 4c0dbb5, 1b5b0ec, 739abbe, 4f74a36, ff70210, 272560a
 [2025-08-27 04:25] Topic: Logging interface restoration
 Context: Introduced core logging abstractions and refactored edit view models to support DI.
