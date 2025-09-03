@@ -20,6 +20,9 @@
 - Adjusted solution and project references so cross-platform assemblies depend only on the core while Windows projects also reference `DesktopApplicationTemplate.Windows`.
 - Replaced `ServiceCreated`/`ServiceUpdated` with unified `ServiceSaved` events and centralized `ServiceName` validation in `ServiceEditorViewModelBase`.
 
+#### Fixed
+- Event raising helpers in `ServiceEditorViewModelBase` invoked themselves recursively; now invoke events directly.
+
 ### Navigation & UI
 #### Added
 - Navigation helpers for HTTP, HID, File Observer, Heartbeat, CSV Creator, and SCP services with tests ensuring double-click opens edit views.
