@@ -10,43 +10,19 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 public class HttpEditServiceViewModel : ServiceEditViewModelBase<HttpServiceOptions>
 {
     private readonly HttpServiceOptions _options;
-    private string _serviceName;
     private string _baseUrl;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="HttpEditServiceViewModel"/> class.
     /// </summary>
-    public HttpEditServiceViewModel(string serviceName, HttpServiceOptions options, ILoggingService? logger = null)
-        : base(logger)
+    public HttpEditServiceViewModel(IServiceRule rule, string serviceName, HttpServiceOptions options, ILoggingService? logger = null)
+        : base(rule, logger)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
-        _serviceName = serviceName ?? throw new ArgumentNullException(nameof(serviceName));
+        ServiceName = serviceName ?? throw new ArgumentNullException(nameof(serviceName));
         _baseUrl = options.BaseUrl;
     }
 
-    /// <summary>
-    /// Raised when the configuration is saved.
-    /// </summary>
-    public event Action<string, HttpServiceOptions>? ServiceUpdated;
-
-    /// <summary>
-    /// Raised when editing is cancelled.
-    /// </summary>
-    public event Action? Cancelled;
-
-    /// <summary>
-    /// Raised when advanced configuration is requested.
-    /// </summary>
-    public event Action<HttpServiceOptions>? AdvancedConfigRequested;
-
-    /// <summary>
-    /// Name of the service.
-    /// </summary>
-    public string ServiceName
-    {
-        get => _serviceName;
-        set { _serviceName = value; OnPropertyChanged(); }
-    }
 
     /// <summary>
     /// Base URL for requests.
@@ -66,13 +42,13 @@ public class HttpEditServiceViewModel : ServiceEditViewModelBase<HttpServiceOpti
     protected override void OnSave()
     {
         _options.BaseUrl = BaseUrl;
-        ServiceUpdated?.Invoke(ServiceName, _options);
+        RaiseServiceSaved(_options);
     }
 
     /// <inheritdoc />
-    protected override void OnCancel() => Cancelled?.Invoke();
+    protected override void OnCancel() => RaiseEditCancelled();
 
     /// <inheritdoc />
-    protected override void OnAdvancedConfig() => AdvancedConfigRequested?.Invoke(_options);
+    protected override void OnAdvancedConfig() => RaiseAdvancedConfigRequested(_options);
 }
 

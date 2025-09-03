@@ -9,8 +9,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// </summary>
 public class MqttCreateServiceViewModel : ServiceCreateViewModelBase<MqttServiceOptions>
 {
-    private readonly IServiceRule _rule;
-    private string _serviceName = string.Empty;
     private string _host = string.Empty;
     private int _port = 1883;
     private string _clientId = string.Empty;
@@ -21,43 +19,8 @@ public class MqttCreateServiceViewModel : ServiceCreateViewModelBase<MqttService
     /// Initializes a new instance of the <see cref="MqttCreateServiceViewModel"/> class.
     /// </summary>
     public MqttCreateServiceViewModel(IServiceRule rule, ILoggingService? logger = null)
-        : base(logger)
+        : base(rule, logger)
     {
-        _rule = rule ?? throw new ArgumentNullException(nameof(rule));
-    }
-
-    /// <summary>
-    /// Raised when the user finishes configuring the service.
-    /// </summary>
-    public event Action<string, MqttServiceOptions>? ServiceCreated;
-
-    /// <summary>
-    /// Raised when the user cancels configuration.
-    /// </summary>
-    public event Action? Cancelled;
-
-    /// <summary>
-    /// Raised when advanced configuration is requested.
-    /// </summary>
-    public event Action<MqttServiceOptions>? AdvancedConfigRequested;
-
-
-    /// <summary>
-    /// Name of the service to create.
-    /// </summary>
-    public string ServiceName
-    {
-        get => _serviceName;
-        set
-        {
-            _serviceName = value;
-            var error = _rule.ValidateRequired(value, "Service name");
-            if (error is not null)
-                AddError(nameof(ServiceName), error);
-            else
-                ClearErrors(nameof(ServiceName));
-            OnPropertyChanged();
-        }
     }
 
     /// <summary>
@@ -69,7 +32,7 @@ public class MqttCreateServiceViewModel : ServiceCreateViewModelBase<MqttService
         set
         {
             _host = value;
-            var error = _rule.ValidateRequired(value, "Host");
+            var error = Rule.ValidateRequired(value, "Host");
             if (error is not null)
                 AddError(nameof(Host), error);
             else
@@ -87,7 +50,7 @@ public class MqttCreateServiceViewModel : ServiceCreateViewModelBase<MqttService
         set
         {
             _port = value;
-            var error = _rule.ValidatePort(value);
+            var error = Rule.ValidatePort(value);
             if (error is not null)
                 AddError(nameof(Port), error);
             else
@@ -105,7 +68,7 @@ public class MqttCreateServiceViewModel : ServiceCreateViewModelBase<MqttService
         set
         {
             _clientId = value;
-            var error = _rule.ValidateRequired(value, "Client Id");
+            var error = Rule.ValidateRequired(value, "Client Id");
             if (error is not null)
                 AddError(nameof(ClientId), error);
             else
@@ -154,14 +117,14 @@ public class MqttCreateServiceViewModel : ServiceCreateViewModelBase<MqttService
         Options.WillTopic = string.IsNullOrWhiteSpace(Options.WillTopic) ? null : Options.WillTopic;
         Options.WillPayload = string.IsNullOrWhiteSpace(Options.WillPayload) ? null : Options.WillPayload;
         Logger?.Log("MQTT create options finished", LogLevel.Debug);
-        ServiceCreated?.Invoke(ServiceName, Options);
+        RaiseServiceSaved(Options);
     }
 
     /// <inheritdoc />
     protected override void OnCancel()
     {
         Logger?.Log("MQTT create options cancelled", LogLevel.Debug);
-        Cancelled?.Invoke();
+        RaiseEditCancelled();
     }
 
     /// <inheritdoc />
@@ -175,6 +138,6 @@ public class MqttCreateServiceViewModel : ServiceCreateViewModelBase<MqttService
         Options.Password = string.IsNullOrWhiteSpace(Password) ? null : Password;
         Options.WillTopic = string.IsNullOrWhiteSpace(Options.WillTopic) ? null : Options.WillTopic;
         Options.WillPayload = string.IsNullOrWhiteSpace(Options.WillPayload) ? null : Options.WillPayload;
-        AdvancedConfigRequested?.Invoke(Options);
+        RaiseAdvancedConfigRequested(Options);
     }
 }

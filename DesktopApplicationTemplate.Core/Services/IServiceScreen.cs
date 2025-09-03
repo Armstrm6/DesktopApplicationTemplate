@@ -11,12 +11,12 @@ public interface IServiceScreen<TOptions>
     /// <summary>
     /// Raised when the user requests to save the service.
     /// </summary>
-    event Action<string, TOptions> Saved;
+    event Action<string, TOptions> ServiceSaved;
 
     /// <summary>
     /// Raised when the user cancels the operation.
     /// </summary>
-    event Action Cancelled;
+    event Action EditCancelled;
 
     /// <summary>
     /// Raised when advanced configuration is requested.

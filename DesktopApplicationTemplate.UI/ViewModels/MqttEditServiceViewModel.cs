@@ -9,9 +9,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// </summary>
 public class MqttEditServiceViewModel : ServiceEditViewModelBase<MqttServiceOptions>
 {
-    private readonly IServiceRule _rule;
     private readonly MqttServiceOptions _options;
-    private string _serviceName;
     private string _host;
     private int _port;
     private string _clientId;
@@ -22,11 +20,10 @@ public class MqttEditServiceViewModel : ServiceEditViewModelBase<MqttServiceOpti
     /// Initializes a new instance of the <see cref="MqttEditServiceViewModel"/> class.
     /// </summary>
     public MqttEditServiceViewModel(IServiceRule rule, string serviceName, MqttServiceOptions options, ILoggingService? logger = null)
-        : base(logger)
+        : base(rule, logger)
     {
-        _rule = rule ?? throw new ArgumentNullException(nameof(rule));
         _options = options ?? throw new ArgumentNullException(nameof(options));
-        _serviceName = serviceName ?? throw new ArgumentNullException(nameof(serviceName));
+        ServiceName = serviceName ?? throw new ArgumentNullException(nameof(serviceName));
         _host = options.Host;
         _port = options.Port;
         _clientId = options.ClientId;
@@ -34,38 +31,6 @@ public class MqttEditServiceViewModel : ServiceEditViewModelBase<MqttServiceOpti
         _password = options.Password;
     }
 
-    /// <summary>
-    /// Raised when the configuration is saved.
-    /// </summary>
-    public event Action<string, MqttServiceOptions>? ServiceUpdated;
-
-    /// <summary>
-    /// Raised when editing is cancelled.
-    /// </summary>
-    public event Action? Cancelled;
-
-    /// <summary>
-    /// Raised when advanced configuration is requested.
-    /// </summary>
-    public event Action<MqttServiceOptions>? AdvancedConfigRequested;
-
-    /// <summary>
-    /// Name of the service.
-    /// </summary>
-    public string ServiceName
-    {
-        get => _serviceName;
-        set
-        {
-            _serviceName = value;
-            var error = _rule.ValidateRequired(value, "Service name");
-            if (error is not null)
-                AddError(nameof(ServiceName), error);
-            else
-                ClearErrors(nameof(ServiceName));
-            OnPropertyChanged();
-        }
-    }
 
     /// <summary>
     /// MQTT broker host.
@@ -76,7 +41,7 @@ public class MqttEditServiceViewModel : ServiceEditViewModelBase<MqttServiceOpti
         set
         {
             _host = value;
-            var error = _rule.ValidateRequired(value, "Host");
+            var error = Rule.ValidateRequired(value, "Host");
             if (error is not null)
                 AddError(nameof(Host), error);
             else
@@ -94,7 +59,7 @@ public class MqttEditServiceViewModel : ServiceEditViewModelBase<MqttServiceOpti
         set
         {
             _port = value;
-            var error = _rule.ValidatePort(value);
+            var error = Rule.ValidatePort(value);
             if (error is not null)
                 AddError(nameof(Port), error);
             else
@@ -112,7 +77,7 @@ public class MqttEditServiceViewModel : ServiceEditViewModelBase<MqttServiceOpti
         set
         {
             _clientId = value;
-            var error = _rule.ValidateRequired(value, "Client Id");
+            var error = Rule.ValidateRequired(value, "Client Id");
             if (error is not null)
                 AddError(nameof(ClientId), error);
             else
@@ -152,13 +117,13 @@ public class MqttEditServiceViewModel : ServiceEditViewModelBase<MqttServiceOpti
         _options.ClientId = ClientId;
         _options.Username = string.IsNullOrWhiteSpace(Username) ? null : Username;
         _options.Password = string.IsNullOrWhiteSpace(Password) ? null : Password;
-        ServiceUpdated?.Invoke(ServiceName, _options);
+        RaiseServiceSaved(_options);
     }
 
     /// <inheritdoc />
-    protected override void OnCancel() => Cancelled?.Invoke();
+    protected override void OnCancel() => RaiseEditCancelled();
 
     /// <inheritdoc />
-    protected override void OnAdvancedConfig() => AdvancedConfigRequested?.Invoke(_options);
+    protected override void OnAdvancedConfig() => RaiseAdvancedConfigRequested(_options);
 }
 

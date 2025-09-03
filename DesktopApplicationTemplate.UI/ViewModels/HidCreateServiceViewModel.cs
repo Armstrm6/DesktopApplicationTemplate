@@ -10,7 +10,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// </summary>
 public class HidCreateServiceViewModel : ServiceCreateViewModelBase<HidServiceOptions>
 {
-    private string _serviceName = string.Empty;
     private string _messageTemplate = string.Empty;
     private string _selectedUsbProtocol = "2.0";
     private string _attachedService = string.Empty;
@@ -18,40 +17,16 @@ public class HidCreateServiceViewModel : ServiceCreateViewModelBase<HidServiceOp
     /// <summary>
     /// Initializes a new instance of the <see cref="HidCreateServiceViewModel"/> class.
     /// </summary>
-    public HidCreateServiceViewModel(ILoggingService? logger = null)
-        : base(logger)
+    public HidCreateServiceViewModel(IServiceRule rule, ILoggingService? logger = null)
+        : base(rule, logger)
     {
         UsbProtocols = new[] { "2.0", "3.0" };
     }
 
     /// <summary>
-    /// Raised when the configuration is saved.
-    /// </summary>
-    public event Action<string, HidServiceOptions>? ServiceCreated;
-
-    /// <summary>
-    /// Raised when creation is cancelled.
-    /// </summary>
-    public event Action? Cancelled;
-
-    /// <summary>
-    /// Raised when advanced configuration is requested.
-    /// </summary>
-    public event Action<HidServiceOptions>? AdvancedConfigRequested;
-
-    /// <summary>
     /// Available USB protocol options.
     /// </summary>
     public IReadOnlyList<string> UsbProtocols { get; }
-
-    /// <summary>
-    /// Name of the service.
-    /// </summary>
-    public string ServiceName
-    {
-        get => _serviceName;
-        set { _serviceName = value; OnPropertyChanged(); }
-    }
 
     /// <summary>
     /// Message template for the HID service.
@@ -93,14 +68,14 @@ public class HidCreateServiceViewModel : ServiceCreateViewModelBase<HidServiceOp
         Options.UsbProtocol = SelectedUsbProtocol;
         Options.AttachedService = AttachedService;
         Logger?.Log("HID create options finished", LogLevel.Debug);
-        ServiceCreated?.Invoke(ServiceName, Options);
+        RaiseServiceSaved(Options);
     }
 
     /// <inheritdoc />
     protected override void OnCancel()
     {
         Logger?.Log("HID create cancelled", LogLevel.Debug);
-        Cancelled?.Invoke();
+        RaiseEditCancelled();
     }
 
     /// <inheritdoc />
@@ -110,6 +85,6 @@ public class HidCreateServiceViewModel : ServiceCreateViewModelBase<HidServiceOp
         Options.MessageTemplate = MessageTemplate;
         Options.UsbProtocol = SelectedUsbProtocol;
         Options.AttachedService = AttachedService;
-        AdvancedConfigRequested?.Invoke(Options);
+        RaiseAdvancedConfigRequested(Options);
     }
 }

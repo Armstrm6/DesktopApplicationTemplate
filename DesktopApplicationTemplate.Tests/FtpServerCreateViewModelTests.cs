@@ -11,7 +11,7 @@ namespace DesktopApplicationTemplate.Tests;
 public class FtpServerCreateViewModelTests
 {
     [Fact]
-    public void SaveCommand_RaisesServerCreated()
+    public void SaveCommand_RaisesServerSaved()
     {
         var logger = new Mock<ILoggingService>();
         var vm = new FtpServerCreateViewModel(new ServiceRule(), new ServiceScreen<FtpServerOptions>(logger.Object), logger.Object)
@@ -22,7 +22,7 @@ public class FtpServerCreateViewModelTests
         };
         string? name = null;
         FtpServerOptions? options = null;
-        vm.ServerCreated += (n, o) => { name = n; options = o; };
+        vm.ServiceSaved += (n, o) => { name = n; options = o; };
 
         vm.SaveCommand.Execute(null);
 
@@ -34,11 +34,11 @@ public class FtpServerCreateViewModelTests
     }
 
     [Fact]
-    public void CancelCommand_RaisesCancelled()
+    public void CancelCommand_RaisesEditCancelled()
     {
         var vm = new FtpServerCreateViewModel(new ServiceRule(), new ServiceScreen<FtpServerOptions>());
         var cancelled = false;
-        vm.Cancelled += () => cancelled = true;
+        vm.EditCancelled += () => cancelled = true;
 
         vm.CancelCommand.Execute(null);
 
@@ -74,7 +74,7 @@ public class FtpServerCreateViewModelTests
             RootPath = "/tmp"
         };
         var raised = false;
-        vm.ServerCreated += (_, _) => raised = true;
+        vm.ServiceSaved += (_, _) => raised = true;
 
         vm.SaveCommand.Execute(null);
 

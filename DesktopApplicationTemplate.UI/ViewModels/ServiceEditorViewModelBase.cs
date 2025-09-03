@@ -1,3 +1,4 @@
+using System;
 using System.Windows.Input;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.Core.Services;
@@ -10,8 +11,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// <typeparam name="TOptions">Type of options managed by the service.</typeparam>
 public abstract class ServiceEditorViewModelBase<TOptions> : ValidatableViewModelBase, ILoggingViewModel
 {
-    protected ServiceEditorViewModelBase(ILoggingService? logger = null)
+    private string _serviceName = string.Empty;
+
+    protected ServiceEditorViewModelBase(IServiceRule rule, ILoggingService? logger = null)
     {
+        Rule = rule ?? throw new ArgumentNullException(nameof(rule));
         Logger = logger;
         var saveCommand = new RelayCommand(OnSave, () => !HasErrors);
         SaveCommand = saveCommand;
@@ -23,6 +27,29 @@ public abstract class ServiceEditorViewModelBase<TOptions> : ValidatableViewMode
 
     /// <inheritdoc />
     public ILoggingService? Logger { get; set; }
+
+    /// <summary>
+    /// Provides validation helpers for derived classes.
+    /// </summary>
+    protected IServiceRule Rule { get; }
+
+    /// <summary>
+    /// Name of the service being edited or created.
+    /// </summary>
+    public string ServiceName
+    {
+        get => _serviceName;
+        set
+        {
+            _serviceName = value;
+            var error = Rule.ValidateRequired(value, "Service name");
+            if (error is not null)
+                AddError(nameof(ServiceName), error);
+            else
+                ClearErrors(nameof(ServiceName));
+            OnPropertyChanged();
+        }
+    }
 
     /// <summary>
     /// Command executed to save or create the service.
@@ -43,6 +70,38 @@ public abstract class ServiceEditorViewModelBase<TOptions> : ValidatableViewMode
     /// Text displayed on the save button.
     /// </summary>
     public string SaveButtonText { get; protected set; }
+
+    /// <summary>
+    /// Raised when the service is saved.
+    /// </summary>
+    public event Action<string, TOptions>? ServiceSaved;
+
+    /// <summary>
+    /// Raised when editing is cancelled.
+    /// </summary>
+    public event Action? EditCancelled;
+
+    /// <summary>
+    /// Raised when advanced configuration is requested.
+    /// </summary>
+    public event Action<TOptions>? AdvancedConfigRequested;
+
+    /// <summary>
+    /// Raises the <see cref="ServiceSaved"/> event with the provided options.
+    /// </summary>
+    /// <param name="options">Options to include with the event.</param>
+    protected void RaiseServiceSaved(TOptions options) => RaiseServiceSaved(options);
+
+    /// <summary>
+    /// Raises the <see cref="EditCancelled"/> event.
+    /// </summary>
+    protected void RaiseEditCancelled() => RaiseEditCancelled();
+
+    /// <summary>
+    /// Raises the <see cref="AdvancedConfigRequested"/> event with the provided options.
+    /// </summary>
+    /// <param name="options">Options to include with the event.</param>
+    protected void RaiseAdvancedConfigRequested(TOptions options) => RaiseAdvancedConfigRequested(options);
 
     /// <summary>
     /// Handles save operations for the service.

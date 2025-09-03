@@ -9,7 +9,7 @@ namespace DesktopApplicationTemplate.Tests;
 public class TcpCreateServiceViewModelTests
 {
     [Fact]
-    public void SaveCommand_Raises_ServiceCreated()
+    public void SaveCommand_Raises_ServiceSaved()
     {
         var vm = new TcpCreateServiceViewModel(new ServiceRule());
         vm.ServiceName = "svc";
@@ -19,7 +19,7 @@ public class TcpCreateServiceViewModelTests
         vm.Options.Mode = TcpServiceMode.ReceiveAndSend;
         TcpServiceOptions? received = null;
         string? name = null;
-        vm.ServiceCreated += (n, o) => { name = n; received = o; };
+        vm.ServiceSaved += (n, o) => { name = n; received = o; };
 
         vm.SaveCommand.Execute(null);
 
@@ -32,11 +32,11 @@ public class TcpCreateServiceViewModelTests
     }
 
     [Fact]
-    public void CancelCommand_Raises_Cancelled()
+    public void CancelCommand_Raises_EditCancelled()
     {
         var vm = new TcpCreateServiceViewModel(new ServiceRule());
         var cancelled = false;
-        vm.Cancelled += () => cancelled = true;
+        vm.EditCancelled += () => cancelled = true;
 
         vm.CancelCommand.Execute(null);
 

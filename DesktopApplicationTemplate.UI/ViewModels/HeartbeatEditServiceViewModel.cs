@@ -10,43 +10,19 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 public class HeartbeatEditServiceViewModel : ServiceEditViewModelBase<HeartbeatServiceOptions>
 {
     private readonly HeartbeatServiceOptions _options;
-    private string _serviceName;
     private string _baseMessage;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="HeartbeatEditServiceViewModel"/> class.
     /// </summary>
-    public HeartbeatEditServiceViewModel(string serviceName, HeartbeatServiceOptions options, ILoggingService? logger = null)
-        : base(logger)
+    public HeartbeatEditServiceViewModel(IServiceRule rule, string serviceName, HeartbeatServiceOptions options, ILoggingService? logger = null)
+        : base(rule, logger)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
-        _serviceName = serviceName ?? throw new ArgumentNullException(nameof(serviceName));
+        ServiceName = serviceName ?? throw new ArgumentNullException(nameof(serviceName));
         _baseMessage = options.BaseMessage;
     }
 
-    /// <summary>
-    /// Raised when the configuration is saved.
-    /// </summary>
-    public event Action<string, HeartbeatServiceOptions>? ServiceUpdated;
-
-    /// <summary>
-    /// Raised when editing is cancelled.
-    /// </summary>
-    public event Action? Cancelled;
-
-    /// <summary>
-    /// Raised when advanced configuration is requested.
-    /// </summary>
-    public event Action<HeartbeatServiceOptions>? AdvancedConfigRequested;
-
-    /// <summary>
-    /// Name of the service.
-    /// </summary>
-    public string ServiceName
-    {
-        get => _serviceName;
-        set { _serviceName = value; OnPropertyChanged(); }
-    }
 
     /// <summary>
     /// Base message for the heartbeat.
@@ -61,13 +37,13 @@ public class HeartbeatEditServiceViewModel : ServiceEditViewModelBase<HeartbeatS
     protected override void OnSave()
     {
         _options.BaseMessage = BaseMessage;
-        ServiceUpdated?.Invoke(ServiceName, _options);
+        RaiseServiceSaved(_options);
     }
 
     /// <inheritdoc />
-    protected override void OnCancel() => Cancelled?.Invoke();
+    protected override void OnCancel() => RaiseEditCancelled();
 
     /// <inheritdoc />
-    protected override void OnAdvancedConfig() => AdvancedConfigRequested?.Invoke(_options);
+    protected override void OnAdvancedConfig() => RaiseAdvancedConfigRequested(_options);
 }
 

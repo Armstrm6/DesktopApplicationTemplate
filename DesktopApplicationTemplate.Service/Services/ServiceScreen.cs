@@ -20,10 +20,10 @@ public class ServiceScreen<TOptions> : IServiceScreen<TOptions>
     }
 
     /// <inheritdoc />
-    public event Action<string, TOptions>? Saved;
+    public event Action<string, TOptions>? ServiceSaved;
 
     /// <inheritdoc />
-    public event Action? Cancelled;
+    public event Action? EditCancelled;
 
     /// <inheritdoc />
     public event Action<TOptions>? AdvancedConfigRequested;
@@ -32,7 +32,7 @@ public class ServiceScreen<TOptions> : IServiceScreen<TOptions>
     public void Save(string serviceName, TOptions options)
     {
         _logger?.Log($"Saving service {serviceName}", LogLevel.Debug);
-        Saved?.Invoke(serviceName, options);
+        ServiceSaved?.Invoke(serviceName, options);
         _logger?.Log($"Saved service {serviceName}", LogLevel.Debug);
     }
 
@@ -40,7 +40,7 @@ public class ServiceScreen<TOptions> : IServiceScreen<TOptions>
     public void Cancel()
     {
         _logger?.Log("Service creation cancelled", LogLevel.Debug);
-        Cancelled?.Invoke();
+        EditCancelled?.Invoke();
     }
 
     /// <inheritdoc />

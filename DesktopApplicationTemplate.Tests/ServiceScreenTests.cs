@@ -8,13 +8,13 @@ namespace DesktopApplicationTemplate.Tests;
 public class ServiceScreenTests
 {
     [Fact]
-    public void Save_RaisesSavedEvent()
+    public void Save_RaisesServiceSavedEvent()
     {
         var logger = new Mock<ILoggingService>();
         var screen = new ServiceScreen<object>(logger.Object);
         string? name = null;
         object? opts = null;
-        screen.Saved += (n, o) => { name = n; opts = o; };
+        screen.ServiceSaved += (n, o) => { name = n; opts = o; };
 
         var options = new object();
         screen.Save("svc", options);
@@ -24,11 +24,11 @@ public class ServiceScreenTests
     }
 
     [Fact]
-    public void Cancel_RaisesCancelledEvent()
+    public void Cancel_RaisesEditCancelledEvent()
     {
         var screen = new ServiceScreen<object>();
         var cancelled = false;
-        screen.Cancelled += () => cancelled = true;
+        screen.EditCancelled += () => cancelled = true;
 
         screen.Cancel();
 

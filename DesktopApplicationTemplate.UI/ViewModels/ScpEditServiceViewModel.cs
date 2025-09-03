@@ -10,7 +10,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 public class ScpEditServiceViewModel : ServiceEditViewModelBase<ScpServiceOptions>
 {
     private ScpServiceOptions _options = new();
-    private string _serviceName = string.Empty;
     private string _host = string.Empty;
     private string _port = string.Empty;
     private string _username = string.Empty;
@@ -19,8 +18,8 @@ public class ScpEditServiceViewModel : ServiceEditViewModelBase<ScpServiceOption
     /// <summary>
     /// Initializes a new instance of the <see cref="ScpEditServiceViewModel"/> class.
     /// </summary>
-    public ScpEditServiceViewModel(ILoggingService? logger = null)
-        : base(logger)
+    public ScpEditServiceViewModel(IServiceRule rule, ILoggingService? logger = null)
+        : base(rule, logger)
     {
     }
 
@@ -30,36 +29,13 @@ public class ScpEditServiceViewModel : ServiceEditViewModelBase<ScpServiceOption
     public void Load(string serviceName, ScpServiceOptions options)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
-        _serviceName = serviceName ?? throw new ArgumentNullException(nameof(serviceName));
+        ServiceName = serviceName ?? throw new ArgumentNullException(nameof(serviceName));
         Host = _options.Host;
         Port = _options.Port.ToString();
         Username = _options.Username;
         Password = _options.Password;
     }
 
-    /// <summary>
-    /// Raised when the configuration is saved.
-    /// </summary>
-    public event Action<string, ScpServiceOptions>? ServiceUpdated;
-
-    /// <summary>
-    /// Raised when editing is cancelled.
-    /// </summary>
-    public event Action? Cancelled;
-
-    /// <summary>
-    /// Raised when advanced configuration is requested.
-    /// </summary>
-    public event Action<ScpServiceOptions>? AdvancedConfigRequested;
-
-    /// <summary>
-    /// Name of the service.
-    /// </summary>
-    public string ServiceName
-    {
-        get => _serviceName;
-        set { _serviceName = value; OnPropertyChanged(); }
-    }
 
     /// <summary>
     /// SCP host name.
@@ -105,13 +81,13 @@ public class ScpEditServiceViewModel : ServiceEditViewModelBase<ScpServiceOption
             _options.Port = port;
         _options.Username = Username;
         _options.Password = Password;
-        ServiceUpdated?.Invoke(ServiceName, _options);
+        RaiseServiceSaved(_options);
     }
 
     /// <inheritdoc />
-    protected override void OnCancel() => Cancelled?.Invoke();
+    protected override void OnCancel() => RaiseEditCancelled();
 
     /// <inheritdoc />
-    protected override void OnAdvancedConfig() => AdvancedConfigRequested?.Invoke(_options);
+    protected override void OnAdvancedConfig() => RaiseAdvancedConfigRequested(_options);
 }
 
