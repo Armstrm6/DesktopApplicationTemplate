@@ -18,6 +18,9 @@ public class TcpServiceOptionsTests
         Assert.Equal(0, options.Port);
         Assert.False(options.UseUdp);
         Assert.Equal(TcpServiceMode.Listening, options.Mode);
+        Assert.Equal(string.Empty, options.InputMessage);
+        Assert.Equal(string.Empty, options.Script);
+        Assert.Equal(string.Empty, options.OutputMessage);
     }
 
     [Fact]
@@ -28,7 +31,10 @@ public class TcpServiceOptionsTests
             ["TcpService:Host"] = "localhost",
             ["TcpService:Port"] = "9000",
             ["TcpService:UseUdp"] = "true",
-            ["TcpService:Mode"] = "Sending"
+            ["TcpService:Mode"] = "Sending",
+            ["TcpService:InputMessage"] = "in",
+            ["TcpService:Script"] = "code",
+            ["TcpService:OutputMessage"] = "out"
         };
 
         var configuration = new ConfigurationBuilder()
@@ -46,5 +52,8 @@ public class TcpServiceOptionsTests
         Assert.Equal(9000, options.Port);
         Assert.True(options.UseUdp);
         Assert.Equal(TcpServiceMode.Sending, options.Mode);
+        Assert.Equal("in", options.InputMessage);
+        Assert.Equal("code", options.Script);
+        Assert.Equal("out", options.OutputMessage);
     }
 }

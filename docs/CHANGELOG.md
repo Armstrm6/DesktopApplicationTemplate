@@ -79,6 +79,7 @@
 - TCP service creation and message viewer enabling configuration and inspection of endpoint traffic.
 - Dedicated TCP edit and advanced configuration views with navigation tests.
 - View and view model for displaying TCP service messages with log-level filtering and log management commands.
+- Advanced configuration includes input/output message scripting with real-time execution preview.
 
 #### Changed
 - `TcpServiceViewModel` evaluates scripts asynchronously with streamlined server toggle logging.

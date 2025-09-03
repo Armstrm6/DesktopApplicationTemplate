@@ -3,6 +3,7 @@ using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Helpers;
 using FluentAssertions;
 using Moq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace DesktopApplicationTemplate.Tests;
@@ -73,5 +74,20 @@ public class TcpServiceViewModelTests
         vm.BackCommand.Execute(null);
 
         raised.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task TestScriptCommand_UpdatesOutputMessage()
+    {
+        var logger = new Mock<ILoggingService>();
+        var helper = new SaveConfirmationHelper(logger.Object);
+        var messages = new TcpServiceMessagesViewModel();
+        var vm = new TcpServiceViewModel(helper, messages);
+        vm.ScriptContent = "string Process(string m){ return m + \"!\"; }";
+        vm.InputMessage = "abc";
+
+        await ((AsyncRelayCommand)vm.TestScriptCommand).ExecuteAsync();
+
+        vm.OutputMessage.Should().Be("abc!");
     }
 }

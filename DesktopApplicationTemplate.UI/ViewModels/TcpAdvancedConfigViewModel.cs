@@ -2,6 +2,7 @@ using System;
 using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Services;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
 
 namespace DesktopApplicationTemplate.UI.ViewModels;
 
@@ -13,6 +14,9 @@ public class TcpAdvancedConfigViewModel : ViewModelBase, ILoggingViewModel
     private TcpServiceOptions? _options;
     private bool _useUdp;
     private TcpServiceMode _mode;
+    private string _inputMessage = string.Empty;
+    private string _script = string.Empty;
+    private string _outputMessage = string.Empty;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TcpAdvancedConfigViewModel"/> class.
@@ -32,8 +36,14 @@ public class TcpAdvancedConfigViewModel : ViewModelBase, ILoggingViewModel
         _options = options ?? throw new ArgumentNullException(nameof(options));
         _useUdp = options.UseUdp;
         _mode = options.Mode;
+        _inputMessage = options.InputMessage;
+        _script = options.Script;
+        _outputMessage = options.OutputMessage;
         OnPropertyChanged(nameof(UseUdp));
         OnPropertyChanged(nameof(Mode));
+        OnPropertyChanged(nameof(InputMessage));
+        OnPropertyChanged(nameof(Script));
+        OnPropertyChanged(nameof(OutputMessage));
     }
 
     /// <inheritdoc />
@@ -82,12 +92,61 @@ public class TcpAdvancedConfigViewModel : ViewModelBase, ILoggingViewModel
     /// </summary>
     public TcpServiceMode[] Modes { get; } = (TcpServiceMode[])Enum.GetValues(typeof(TcpServiceMode));
 
+    /// <summary>
+    /// Sample input message used for script testing.
+    /// </summary>
+    public string InputMessage
+    {
+        get => _inputMessage;
+        set { _inputMessage = value; OnPropertyChanged(); ComputeOutput(); }
+    }
+
+    /// <summary>
+    /// Script that transforms the <see cref="InputMessage"/>.
+    /// </summary>
+    public string Script
+    {
+        get => _script;
+        set { _script = value; OnPropertyChanged(); ComputeOutput(); }
+    }
+
+    /// <summary>
+    /// Output produced by executing <see cref="Script"/>.
+    /// </summary>
+    public string OutputMessage
+    {
+        get => _outputMessage;
+        private set { _outputMessage = value; OnPropertyChanged(); }
+    }
+
+    private void ComputeOutput()
+    {
+        if (string.IsNullOrWhiteSpace(Script) || string.IsNullOrWhiteSpace(InputMessage))
+        {
+            OutputMessage = string.Empty;
+            return;
+        }
+
+        try
+        {
+            var code = $"{Script}\nProcess(\"{InputMessage}\");";
+            OutputMessage = CSharpScript.EvaluateAsync<string>(code).GetAwaiter().GetResult();
+        }
+        catch
+        {
+            OutputMessage = string.Empty;
+        }
+    }
+
     private void Save()
     {
         Logger?.Log("TCP advanced options start", LogLevel.Debug);
         if (_options is null) throw new InvalidOperationException("Options not loaded");
         _options.UseUdp = UseUdp;
         _options.Mode = Mode;
+        _options.InputMessage = InputMessage;
+        _options.Script = Script;
+        _options.OutputMessage = OutputMessage;
         Logger?.Log("TCP advanced options finished", LogLevel.Debug);
         Saved?.Invoke(_options);
     }

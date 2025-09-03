@@ -7,12 +7,14 @@ using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.Core.Models;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
+using DesktopApplicationTemplate.UI.Services;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
 public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, INetworkAwareViewModel
     {
         private readonly TcpServiceMessagesViewModel _messagesViewModel;
+        private TcpServiceOptions? _options;
 
         private string _statusMessage = string.Empty;
         private bool _isServerRunning;
@@ -55,7 +57,8 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
 
         private string _scriptContent = string.Empty;
         private string _selectedLanguage = "Python";
-        private string _testMessage = string.Empty;
+        private string _inputMessage = string.Empty;
+        private string _outputMessage = string.Empty;
 
         public ObservableCollection<string> ScriptLanguages { get; } = new() { "Python", "C#" };
 
@@ -178,19 +181,27 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
             set { _selectedLanguage = value; OnPropertyChanged(); SetDefaultTemplate(); }
         }
 
-        public string TestMessage
+        public string InputMessage
         {
-            get => _testMessage;
+            get => _inputMessage;
             set
             {
-                _testMessage = value;
+                _inputMessage = value;
                 OnPropertyChanged();
-                if (!string.IsNullOrWhiteSpace(value))
+                if (!string.IsNullOrWhiteSpace(value) && SettingsViewModel.TcpLoggingEnabled)
                 {
-                    if (SettingsViewModel.TcpLoggingEnabled)
-                        Logger?.Log($"Received test message: {value}", LogLevel.Debug);
+                    Logger?.Log($"Received input message: {value}", LogLevel.Debug);
                 }
             }
+        }
+
+        /// <summary>
+        /// Result of the last script execution.
+        /// </summary>
+        public string OutputMessage
+        {
+            get => _outputMessage;
+            private set { _outputMessage = value; OnPropertyChanged(); }
         }
 
         public ICommand ToggleServerCommand { get; }
@@ -239,6 +250,17 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
             UpdateMessageViewModelNetworkSettings();
         }
 
+        /// <summary>
+        /// Loads existing options into the view model.
+        /// </summary>
+        public void Load(TcpServiceOptions options)
+        {
+            _options = options ?? throw new ArgumentNullException(nameof(options));
+            ScriptContent = options.Script;
+            InputMessage = options.InputMessage;
+            OutputMessage = options.OutputMessage;
+        }
+
         private void SetDefaultTemplate()
         {
             ScriptContent = SelectedLanguage == "Python"
@@ -265,7 +287,7 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
 
         private async Task TestScriptAsync()
         {
-            if (string.IsNullOrWhiteSpace(TestMessage))
+            if (string.IsNullOrWhiteSpace(InputMessage))
             {
                 if (SettingsViewModel.TcpLoggingEnabled)
                     Logger?.Log("TestScript called with empty message", LogLevel.Warning);
@@ -279,10 +301,11 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
             {
                 if (SelectedLanguage == "C#")
                 {
-                    var script = $"{ScriptContent}\nProcess(\"{TestMessage}\");";
+                    var script = $"{ScriptContent}\nProcess(\"{InputMessage}\");";
                     var result = await CSharpScript.EvaluateAsync<string>(script);
                     if (SettingsViewModel.TcpLoggingEnabled)
                         Logger?.Log($"Script output: {result}", LogLevel.Debug);
+                    OutputMessage = result;
                     MessageBox.Show(result, "Test Result");
                 }
                 else if (SettingsViewModel.TcpLoggingEnabled)
@@ -312,6 +335,12 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
         private void Save()
         {
             _saveHelper.Show();
+            if (_options != null)
+            {
+                _options.Script = ScriptContent;
+                _options.InputMessage = InputMessage;
+                _options.OutputMessage = OutputMessage;
+            }
             Saved?.Invoke(this, EventArgs.Empty);
             RequestClose?.Invoke(this, EventArgs.Empty);
         }

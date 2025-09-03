@@ -36,5 +36,20 @@ namespace DesktopApplicationTemplate.UI.Services
         /// Operating mode for the service.
         /// </summary>
         public TcpServiceMode Mode { get; set; } = TcpServiceMode.Listening;
+
+        /// <summary>
+        /// Sample input message used for testing scripts.
+        /// </summary>
+        public string InputMessage { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Script that transforms the <see cref="InputMessage"/>.
+        /// </summary>
+        public string Script { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Resulting output message from executing the <see cref="Script"/>.
+        /// </summary>
+        public string OutputMessage { get; set; } = string.Empty;
     }
 }
