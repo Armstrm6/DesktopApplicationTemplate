@@ -3,6 +3,7 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:views="clr-namespace:DesktopApplicationTemplate.UI.Views"
       mc:Ignorable="d">
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <Grid Margin="20">
@@ -22,11 +23,13 @@
             <TextBlock Grid.Row="1" Grid.Column="0" Text="Base Message" Style="{StaticResource FormLabel}"/>
             <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding BaseMessage}" Style="{StaticResource FormField}"/>
 
-            <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
-                <Button Content="Advanced" Width="100" Margin="5" Command="{Binding AdvancedConfigCommand}" AutomationProperties.Name="Open Heartbeat Advanced Configuration"/>
-                <Button Content="Save" Width="100" Margin="5" Command="{Binding SaveCommand}" AutomationProperties.Name="Save Heartbeat Service"/>
-                <Button Content="Cancel" Width="100" Margin="5" Command="{Binding CancelCommand}" AutomationProperties.Name="Cancel Heartbeat Edit"/>
-            </StackPanel>
+            <views:EditorButtonBar Grid.Row="2" Grid.ColumnSpan="2"
+                                   AdvancedConfigCommand="{Binding AdvancedConfigCommand}"
+                                   SaveCommand="{Binding SaveCommand}"
+                                   CancelCommand="{Binding CancelCommand}"
+                                   AdvancedAutomationName="Open Heartbeat Advanced Configuration"
+                                   SaveAutomationName="Save Heartbeat Service"
+                                   CancelAutomationName="Cancel Heartbeat Edit" />
         </Grid>
     </ScrollViewer>
 </Page>

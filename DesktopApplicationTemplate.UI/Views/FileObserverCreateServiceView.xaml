@@ -3,6 +3,7 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:views="clr-namespace:DesktopApplicationTemplate.UI.Views"
       mc:Ignorable="d">
     <Grid Margin="20">
         <Grid.ColumnDefinitions>
@@ -43,10 +44,13 @@
         </TextBox>
         <Button Grid.Row="1" Grid.Column="2" Content="Browse" Width="75" Margin="5,0,0,0" Command="{Binding BrowseCommand}"/>
 
-        <StackPanel Grid.Row="2" Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
-            <Button Content="Advanced" Width="100" Margin="5" Command="{Binding AdvancedConfigCommand}" AutomationProperties.Name="Open File Observer Advanced Configuration"/>
-            <Button Content="Create" Width="100" Margin="5" Command="{Binding CreateCommand}" AutomationProperties.Name="Create File Observer Service"/>
-            <Button Content="Cancel" Width="100" Margin="5" Command="{Binding CancelCommand}" AutomationProperties.Name="Cancel File Observer Creation"/>
-        </StackPanel>
+        <views:EditorButtonBar Grid.Row="2" Grid.ColumnSpan="3"
+                               AdvancedConfigCommand="{Binding AdvancedConfigCommand}"
+                               SaveCommand="{Binding CreateCommand}"
+                               CancelCommand="{Binding CancelCommand}"
+                               SaveButtonText="Create"
+                               AdvancedAutomationName="Open File Observer Advanced Configuration"
+                               SaveAutomationName="Create File Observer Service"
+                               CancelAutomationName="Cancel File Observer Creation" />
     </Grid>
 </Page>

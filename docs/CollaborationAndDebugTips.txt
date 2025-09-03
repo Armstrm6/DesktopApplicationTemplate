@@ -106,6 +106,7 @@ Latest Attempt: After registering service screen for FTP options and adding DI r
 Latest Attempt: Installed the .NET SDK 8.0.404; `dotnet restore` and `dotnet build` succeeded, but `dotnet test --settings tests.runsettings` failed because the Microsoft.WindowsDesktop.App 8.0.0 runtime is missing.
 Newest Attempt: After introducing shared ServiceEditorView, the `dotnet` command remains unavailable; relying on CI for verification.
 Another Attempt: After exposing AdvancedConfigCommand directly in HTTP service views, the `dotnet` CLI remains unavailable; relying on CI for build and test.
+Latest Attempt: After consolidating editor buttons into a shared control, the `dotnet` CLI is still missing; relying on CI for verification.
 Related Commits/PRs: 8517691, 4c0dbb5, 1b5b0ec, 739abbe, 4f74a36, ff70210, 272560a
 [2025-08-27 04:25] Topic: Logging interface restoration
 Context: Introduced core logging abstractions and refactored edit view models to support DI.

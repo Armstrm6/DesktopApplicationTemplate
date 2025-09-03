@@ -40,6 +40,7 @@
 - Main window height constrained to the work area to prevent overlapping the taskbar.
 - MQTT create and edit views include tooltips on text fields to clarify expected input.
 - Create and edit service view models inject `IServiceRule` to validate required fields with XAML error tooltips.
+- Service editor views share a reusable `EditorButtonBar` control with consistent automation names.
 
 #### Fixed
 - TCP and SCP edit workflows now load existing options via `Load` methods, enabling DI-friendly construction.
