@@ -148,12 +148,9 @@ namespace DesktopApplicationTemplate.UI
             services.AddTransient<ServiceEditViewModelBase<FileObserverServiceOptions>, FileObserverEditServiceViewModel>();
             services.AddTransient<FileObserverAdvancedConfigView>();
             services.AddTransient<FileObserverAdvancedConfigViewModel>();
-            services.AddTransient<CsvCreateServiceView>();
-            services.AddTransient<CsvCreateServiceViewModel>();
-            services.AddTransient<ServiceCreateViewModelBase<CsvServiceOptions>, CsvCreateServiceViewModel>();
-            services.AddTransient<CsvEditServiceView>();
-            services.AddTransient<CsvEditServiceViewModel>();
-            services.AddTransient<ServiceEditViewModelBase<CsvServiceOptions>, CsvEditServiceViewModel>();
+            services.AddTransient<CsvServiceEditorView>();
+            services.AddTransient<CsvServiceEditorViewModel>();
+            services.AddTransient<ServiceEditorViewModelBase<CsvServiceOptions>, CsvServiceEditorViewModel>();
             services.AddTransient<CsvAdvancedConfigView>();
             services.AddTransient<CsvAdvancedConfigViewModel>();
             services.AddTransient<ScpCreateServiceView>();
