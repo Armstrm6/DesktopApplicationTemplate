@@ -425,3 +425,12 @@ Effective Prompts / Instructions that worked: User request to eliminate unstable
 Decisions & Rationale: Drop UI tests to avoid infinite loops and rely on CI or manual verification for UI behavior.
 Action Items: Rely on CI for any UI validation.
 Related Commits/PRs:
+
+[2025-09-28 10:00] Topic: Installer build verification
+Context: Attempted to rebuild installer after verifying TextBoxHintBehavior.AutoToolTip.
+Observations: Property is public and installer references UI, but build failed with CS0108 in CsvServiceEditorView.g.cs hiding InitializeComponent.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: User request to confirm behavior and rebuild.
+Decisions & Rationale: Document build failure and rely on CI.
+Action Items: Resolve CsvServiceEditorView code generation conflicts.
+Related Commits/PRs:
