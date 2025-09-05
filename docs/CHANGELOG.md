@@ -49,6 +49,7 @@
 - Consolidated save and close dialogs into a configurable `ConfirmationWindow` with optional suppression.
 - Event handlers use C# property pattern matching instead of casting `sender` and accessing `DataContext`.
 - Replaced `as` cast and null check with pattern matching in `SettingsPage.NavigateBack`.
+- Keyboard helper now uses `SendInput` with `PressKey`/`ReleaseKey` APIs that track pressed keys.
 
 #### Fixed
 - TCP and SCP edit workflows now load existing options via `Load` methods, enabling DI-friendly construction.
