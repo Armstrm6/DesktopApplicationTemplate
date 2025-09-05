@@ -47,6 +47,7 @@
 - Create and edit service view models inject `IServiceRule` to validate required fields with XAML error tooltips.
 - Service editor views share a reusable `EditorButtonBar` control with consistent automation names.
 - Consolidated save and close dialogs into a configurable `ConfirmationWindow` with optional suppression.
+- Event handlers use C# property pattern matching instead of casting `sender` and accessing `DataContext`.
 
 #### Fixed
 - TCP and SCP edit workflows now load existing options via `Load` methods, enabling DI-friendly construction.

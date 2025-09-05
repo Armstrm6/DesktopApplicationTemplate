@@ -29,7 +29,7 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private void ServiceType_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button button && button.DataContext is CreateServiceViewModel.ServiceTypeMetadata meta)
+            if (sender is Button { DataContext: CreateServiceViewModel.ServiceTypeMetadata meta } button)
             {
                 var name = _viewModel.GenerateDefaultName(meta.Type);
                 if (meta.Type == "MQTT")
