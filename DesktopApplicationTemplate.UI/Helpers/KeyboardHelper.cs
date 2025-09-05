@@ -84,6 +84,22 @@ namespace DesktopApplicationTemplate.UI.Helpers
             }
         }
 
+        /// <summary>
+        /// Releases all keys that were programmatically pressed.
+        /// </summary>
+        public static void ReleaseAll()
+        {
+            lock (_pressedKeys)
+            {
+                foreach (var key in _pressedKeys)
+                {
+                    Send(key, true);
+                }
+
+                _pressedKeys.Clear();
+            }
+        }
+
         internal static bool IsPressed(Key key)
         {
             lock (_pressedKeys)
