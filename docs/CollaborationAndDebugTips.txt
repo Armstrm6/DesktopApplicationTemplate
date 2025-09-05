@@ -117,6 +117,7 @@ Another Attempt: After safeguarding `CsvServiceOptions` access with null-conditi
 Another Attempt: After typing view-model dependencies as interfaces, the `dotnet` command is still missing; build and test rely on CI.
 Another Attempt: After relocating logging abstractions to the core library, the `dotnet` CLI remains unavailable; relying on CI for build and tests.
 Latest Attempt: After guarding client certificate usage for cross-platform support, the `dotnet` command is still missing; build and tests deferred to CI.
+Another Attempt: After replacing explicit null checks with throw helpers in MqttService, the `dotnet` CLI remains unavailable; restore, build, and tests cannot run locally, so CI will verify.
 Related Commits/PRs: 8517691, 4c0dbb5, 1b5b0ec, 739abbe, 4f74a36, ff70210, 272560a
 [2025-08-27 04:25] Topic: Logging interface restoration
 Context: Introduced core logging abstractions and refactored edit view models to support DI.

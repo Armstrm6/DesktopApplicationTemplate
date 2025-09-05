@@ -126,6 +126,7 @@
 - Expanded connection types to include MQTT/WebSocket variants with optional TLS and updated connection views.
 - `MqttService` logs connection state changes and errors through the injected logging service.
 - Guarded client certificate loading with Windows checks and platform exceptions.
+- Replaced explicit null checks with `ArgumentNullException.ThrowIfNull` in `MqttService`.
 
 #### Fixed
 - MQTT service disconnects before reconnecting when settings change and converts blank will-topic/payload fields to `null`.
