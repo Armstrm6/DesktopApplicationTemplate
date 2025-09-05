@@ -49,7 +49,7 @@
 - Consolidated save and close dialogs into a configurable `ConfirmationWindow` with optional suppression.
 - Event handlers use C# property pattern matching instead of casting `sender` and accessing `DataContext`.
 - Replaced `as` cast and null check with pattern matching in `SettingsPage.NavigateBack`.
-- Keyboard helper now uses `SendInput` with `PressKey`/`ReleaseKey` APIs that track pressed keys.
+- Removed `KeyboardHelper` and exit hooks; simulated key presses manage their own cleanup.
 
 #### Fixed
 - TCP and SCP edit workflows now load existing options via `Load` methods, enabling DI-friendly construction.
@@ -64,8 +64,6 @@
 - Application shutdown tolerates a missing `MainViewModel` service, preventing test crashes when it's not registered.
 - SCP service creation validates required fields and disables the Create command when inputs are invalid.
 - Marked main window as Windows-only to silence cross-platform analyzer warnings.
-- Removed redundant keyboard state release on application exit now that simulated key presses handle their own cleanup.
-- Application exit and unhandled dispatcher exceptions release all simulated keys to prevent stuck input.
 
 ### HID Service
 #### Added
