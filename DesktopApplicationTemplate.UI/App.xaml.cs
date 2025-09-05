@@ -1,4 +1,3 @@
-﻿using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
@@ -228,9 +227,6 @@ namespace DesktopApplicationTemplate.UI
             {
                 vm.SaveServices();
             }
-
-            logger?.LogInformation("Releasing keyboard state");
-            Helpers.KeyboardHelper.ReleaseKeys(System.Windows.Input.Key.R, System.Windows.Input.Key.D, System.Windows.Input.Key.Q);
 
             await AppHost.StopAsync();
             AppHost.Dispose();
