@@ -1,9 +1,10 @@
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
+using System.Windows.Controls;
 
 namespace DesktopApplicationTemplate.UI.Views;
 
-public partial class CsvServiceEditorView : ServiceEditorView
+public partial class CsvServiceEditorView : Page
 {
     private readonly ILoggingService _logger;
 

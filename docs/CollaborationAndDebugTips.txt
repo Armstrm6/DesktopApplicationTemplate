@@ -431,9 +431,9 @@ Related Commits/PRs:
 
 [2025-09-28 10:00] Topic: Installer build verification
 Context: Attempted to rebuild installer after verifying TextBoxHintBehavior.AutoToolTip.
-Observations: Property is public and installer references UI, but build failed with CS0108 in CsvServiceEditorView.g.cs hiding InitializeComponent.
-Codex Limitations noticed: none
+Observations: Replaced inheritance from ServiceEditorView with a Page and EditorButtonBar composition to remove CS0108 warnings; UI and installer projects now build.
+Codex Limitations noticed: Microsoft.WindowsDesktop runtime missing so tests abort after building.
 Effective Prompts / Instructions that worked: User request to confirm behavior and rebuild.
-Decisions & Rationale: Document build failure and rely on CI.
-Action Items: Resolve CsvServiceEditorView code generation conflicts.
+Decisions & Rationale: Avoid InitializeComponent name conflicts by composing EditorButtonBar directly; rely on CI for Windows-specific tests.
+Action Items: none
 Related Commits/PRs:
