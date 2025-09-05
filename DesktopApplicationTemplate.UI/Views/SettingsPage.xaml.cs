@@ -50,11 +50,12 @@ namespace DesktopApplicationTemplate.UI.Views
                 }
             }
 
-            var mainWindow = Window.GetWindow(this) as MainView;
-            if (mainWindow != null)
+            if (Window.GetWindow(this) is not MainView mainWindow)
             {
-                mainWindow.ShowHome();
+                return;
             }
+
+            mainWindow.ShowHome();
         }
     }
 }
