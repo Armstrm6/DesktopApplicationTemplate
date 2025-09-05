@@ -154,13 +154,20 @@ public class MqttService
                 o.UseTls();
                 if (opts.ClientCertificate is not null)
                 {
-                    try
+                    if (OperatingSystem.IsWindows())
                     {
-                        o.WithClientCertificates(new[] { new X509Certificate2(opts.ClientCertificate) });
+                        try
+                        {
+                            o.WithClientCertificates(new[] { new X509Certificate2(opts.ClientCertificate) });
+                        }
+                        catch (CryptographicException ex)
+                        {
+                            _logger.Log($"Invalid client certificate: {ex.Message}", LogLevel.Warning);
+                        }
                     }
-                    catch (CryptographicException ex)
+                    else
                     {
-                        _logger.Log($"Invalid client certificate: {ex.Message}", LogLevel.Warning);
+                        throw new PlatformNotSupportedException("Client certificates are only supported on Windows.");
                     }
                 }
             });
