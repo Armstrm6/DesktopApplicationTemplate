@@ -32,8 +32,10 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             InitializeComponent();
             _viewModel = viewModel;
-            var factory = App.AppHost.Services.GetService(typeof(ILoggerFactory)) as ILoggerFactory;
-            _logger = factory?.CreateLogger<MainView>();
+            if (App.AppHost.Services.GetService(typeof(ILoggerFactory)) is ILoggerFactory factory)
+            {
+                _logger = factory.CreateLogger<MainView>();
+            }
             DataContext = _viewModel;
             _viewModel.EditRequested += OnEditRequested;
             _viewModel.AddServiceRequested += OnAddServiceRequested;
@@ -994,7 +996,7 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private void DeleteServiceMenu_Click(object sender, RoutedEventArgs e)
         {
-            if ((sender as MenuItem)?.DataContext is ServiceViewModel svc)
+            if (sender is MenuItem { DataContext: ServiceViewModel svc })
             {
                 var index = _viewModel.Services.IndexOf(svc);
                 svc.LogAdded -= _viewModel.OnServiceLogAdded;
@@ -1014,7 +1016,7 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private void RenameServiceMenu_Click(object sender, RoutedEventArgs e)
         {
-            if ((sender as MenuItem)?.DataContext is ServiceViewModel svc)
+            if (sender is MenuItem { DataContext: ServiceViewModel svc })
             {
                 string input = Interaction.InputBox("Enter new service name:", "Rename Service", svc.DisplayName);
                 if (!string.IsNullOrWhiteSpace(input))
@@ -1032,7 +1034,7 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private void ChangeColorMenu_Click(object sender, RoutedEventArgs e)
         {
-            if ((sender as MenuItem)?.DataContext is ServiceViewModel svc)
+            if (sender is MenuItem { DataContext: ServiceViewModel svc })
             {
                 var dlg = new ColorPickerWindow { Owner = this };
                 if (dlg.ShowDialog() == true)
@@ -1067,8 +1069,8 @@ namespace DesktopApplicationTemplate.UI.Views
                 return;
             }
 
-            var element = e.OriginalSource as DependencyObject;
-            if (Helpers.VisualTreeHelperExtensions.FindParent<ButtonBase>(element) == null)
+            if (e.OriginalSource is not DependencyObject element ||
+                Helpers.VisualTreeHelperExtensions.FindParent<ButtonBase>(element) == null)
             {
                 try
                 {
@@ -1084,8 +1086,8 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private void HeaderBar_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            var element = e.OriginalSource as DependencyObject;
-            if (Helpers.VisualTreeHelperExtensions.FindParent<ButtonBase>(element) != null)
+            if (e.OriginalSource is DependencyObject element &&
+                Helpers.VisualTreeHelperExtensions.FindParent<ButtonBase>(element) != null)
                 return;
 
             WindowState = WindowState == WindowState.Maximized
@@ -1098,7 +1100,9 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private void MainView_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            var element = e.OriginalSource as DependencyObject;
+            if (e.OriginalSource is not DependencyObject element)
+                return;
+
             bool clickedListItem = Helpers.VisualTreeHelperExtensions.FindParent<ListBoxItem>(element) != null;
             bool clickedFrame = Helpers.VisualTreeHelperExtensions.FindParent<Frame>(element) != null;
             bool clickedButton = Helpers.VisualTreeHelperExtensions.FindParent<ButtonBase>(element) != null;
@@ -1127,7 +1131,7 @@ namespace DesktopApplicationTemplate.UI.Views
             if (e.ClickCount < 2)
                 return;
 
-            if ((sender as Border)?.DataContext is ServiceViewModel svc)
+            if (sender is Border { DataContext: ServiceViewModel svc })
             {
                 _logger?.LogDebug("Service {Name} double-clicked", svc.DisplayName);
                 if (_viewModel.EditServiceCommand.CanExecute(svc))
@@ -1158,7 +1162,7 @@ namespace DesktopApplicationTemplate.UI.Views
             if (Math.Abs(position.X - _dragStart.X) > SystemParameters.MinimumHorizontalDragDistance ||
                 Math.Abs(position.Y - _dragStart.Y) > SystemParameters.MinimumVerticalDragDistance)
             {
-                if (sender is Border border && border.DataContext is ServiceViewModel svc)
+                if (sender is Border { DataContext: ServiceViewModel svc } border)
                 {
                     DragDrop.DoDragDrop(border, svc, System.Windows.DragDropEffects.Move);
                 }
@@ -1171,8 +1175,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 return;
 
             var source = (ServiceViewModel)e.Data.GetData(typeof(ServiceViewModel))!;
-            var target = (sender as Border)?.DataContext as ServiceViewModel;
-            if (source == null || target == null || source == target)
+            if (sender is not Border { DataContext: ServiceViewModel target } || source == target)
                 return;
 
             int oldIndex = _viewModel.Services.IndexOf(source);
