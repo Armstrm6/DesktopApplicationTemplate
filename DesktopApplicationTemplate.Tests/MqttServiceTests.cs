@@ -107,7 +107,7 @@ public class MqttServiceTests
         ConsoleTestLogger.LogPass();
     }
 
-    [Fact]
+    [WindowsFact]
     public async Task ConnectAsync_AppliesTlsAndCredentials()
     {
         var client = new Mock<IMqttClient>();
@@ -135,6 +135,29 @@ public class MqttServiceTests
             o.ChannelOptions != null &&
             o.ChannelOptions.TlsOptions != null
         ), It.IsAny<CancellationToken>()), Times.Once);
+        ConsoleTestLogger.LogPass();
+    }
+
+    [Fact]
+    public async Task ConnectAsync_ThrowsOnNonWindows_WhenClientCertificateProvided()
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            return;
+        }
+
+        var client = new Mock<IMqttClient>();
+        var options = Options.Create(new MqttServiceOptions
+        {
+            Host = "h",
+            Port = 1,
+            ClientId = "id",
+            ConnectionType = MqttConnectionType.MqttTls,
+            ClientCertificate = new byte[] { 1 }
+        });
+        var service = new MqttService(client.Object, options, Mock.Of<IMessageRoutingService>(), Mock.Of<ILoggingService>());
+
+        await Assert.ThrowsAsync<PlatformNotSupportedException>(() => service.ConnectAsync());
         ConsoleTestLogger.LogPass();
     }
 
