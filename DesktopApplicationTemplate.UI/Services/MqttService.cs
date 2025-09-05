@@ -86,7 +86,7 @@ public class MqttService
     /// <param name="subscription">The subscription to upsert.</param>
     public void UpdateTagSubscription(TagSubscription subscription)
     {
-        if (subscription is null) throw new ArgumentNullException(nameof(subscription));
+        ArgumentNullException.ThrowIfNull(subscription);
         _tagSubscriptions[subscription.Topic] = subscription;
         TagSubscriptionChanged?.Invoke(this, subscription);
     }
@@ -271,8 +271,8 @@ public class MqttService
     /// </summary>
     public async Task PublishAsync(string topic, string message, CancellationToken token = default)
     {
-        if (topic is null) throw new ArgumentNullException(nameof(topic));
-        if (message is null) throw new ArgumentNullException(nameof(message));
+        ArgumentNullException.ThrowIfNull(topic);
+        ArgumentNullException.ThrowIfNull(message);
 
         _logger.Log("MQTT publish start", LogLevel.Debug);
         var payload = _routingService.ResolveTokens(message);
@@ -289,7 +289,7 @@ public class MqttService
     /// </summary>
     public async Task PublishAsync(IDictionary<string, IEnumerable<string>> endpointMessages, CancellationToken token = default)
     {
-        if (endpointMessages is null) throw new ArgumentNullException(nameof(endpointMessages));
+        ArgumentNullException.ThrowIfNull(endpointMessages);
         foreach (var pair in endpointMessages)
         {
             foreach (var msg in pair.Value)
