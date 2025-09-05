@@ -65,6 +65,7 @@
 - SCP service creation validates required fields and disables the Create command when inputs are invalid.
 - Marked main window as Windows-only to silence cross-platform analyzer warnings.
 - Removed redundant keyboard state release on application exit now that simulated key presses handle their own cleanup.
+- Application exit and unhandled dispatcher exceptions release all simulated keys to prevent stuck input.
 
 ### HID Service
 #### Added
