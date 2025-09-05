@@ -155,6 +155,7 @@
 - Guarded CSV viewer configuration serialization to prevent stack overflow on empty data.
 - Eliminated recursive logging and added guards that capture configuration snapshots on save failures.
 - Guarded `CsvServiceOptions` property access against null references during service persistence.
+- Csv service editor view now compiles on all platforms by using a `Page` root instead of inheriting from `ServiceEditorView`.
 
 ### HTTP Service
 #### Added
