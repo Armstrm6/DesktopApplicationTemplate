@@ -66,8 +66,7 @@ public class FtpServerEditViewModelTests
     {
         var options = new FtpServerOptions();
         IServiceRule rule = new ServiceRule();
-        var vm = new FtpServerEditViewModel(rule, "ftp", options);
-        vm.Port = 0;
+        var vm = new FtpServerEditViewModel(rule, "ftp", options) { Port = 0 };
         Assert.True(vm.HasErrors);
         ConsoleTestLogger.LogPass();
     }

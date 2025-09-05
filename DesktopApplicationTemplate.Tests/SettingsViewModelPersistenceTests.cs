@@ -18,8 +18,7 @@ namespace DesktopApplicationTemplate.Tests
             SettingsViewModel.FilePath = Path.Combine(tempDir, "userSettings.json");
             try
             {
-                var vm = new SettingsViewModel();
-                vm.FirstRun = false;
+                var vm = new SettingsViewModel { FirstRun = false };
                 SettingsViewModel.SaveConfirmationSuppressed = true;
                 SettingsViewModel.CloseConfirmationSuppressed = true;
                 vm.Save();

@@ -55,8 +55,7 @@ public class FtpServerCreateViewModelTests
     {
         IServiceRule rule = new ServiceRule();
         IServiceScreen<FtpServerOptions> screen = new ServiceScreen<FtpServerOptions>();
-        var vm = new FtpServerCreateViewModel(rule, screen);
-        vm.Port = 0;
+        var vm = new FtpServerCreateViewModel(rule, screen) { Port = 0 };
         Assert.True(vm.HasErrors);
         ConsoleTestLogger.LogPass();
     }
@@ -66,8 +65,7 @@ public class FtpServerCreateViewModelTests
     {
         IServiceRule rule = new ServiceRule();
         IServiceScreen<FtpServerOptions> screen = new ServiceScreen<FtpServerOptions>();
-        var vm = new FtpServerCreateViewModel(rule, screen);
-        vm.ServiceName = string.Empty;
+        var vm = new FtpServerCreateViewModel(rule, screen) { ServiceName = string.Empty };
         Assert.True(vm.HasErrors);
         ConsoleTestLogger.LogPass();
     }

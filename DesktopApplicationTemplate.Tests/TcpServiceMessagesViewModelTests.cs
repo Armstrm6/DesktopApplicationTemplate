@@ -11,9 +11,14 @@ public class TcpServiceMessagesViewModelTests
     [Fact]
     public void DisplayLogs_RespectsLogLevelFilter()
     {
-        var vm = new TcpServiceMessagesViewModel();
-        vm.Logs.Add(new LogEntry { Message = "a", Level = DesktopApplicationTemplate.Core.Services.LogLevel.Debug });
-        vm.Logs.Add(new LogEntry { Message = "b", Level = DesktopApplicationTemplate.Core.Services.LogLevel.Error });
+        var vm = new TcpServiceMessagesViewModel
+        {
+            Logs =
+            {
+                new LogEntry { Message = "a", Level = DesktopApplicationTemplate.Core.Services.LogLevel.Debug },
+                new LogEntry { Message = "b", Level = DesktopApplicationTemplate.Core.Services.LogLevel.Error }
+            }
+        };
 
         vm.LogLevelFilter = DesktopApplicationTemplate.Core.Services.LogLevel.Error;
 
@@ -23,8 +28,10 @@ public class TcpServiceMessagesViewModelTests
     [Fact]
     public void ClearLogCommand_RemovesLogs()
     {
-        var vm = new TcpServiceMessagesViewModel();
-        vm.Logs.Add(new LogEntry { Message = "test" });
+        var vm = new TcpServiceMessagesViewModel
+        {
+            Logs = { new LogEntry { Message = "test" } }
+        };
 
         vm.ClearLogCommand.Execute(null);
 
@@ -71,15 +78,20 @@ public class TcpServiceMessagesViewModelTests
     [Fact]
     public void MessageCollections_ExposeGroupedData()
     {
-        var vm = new TcpServiceMessagesViewModel();
-        vm.Messages.Add(new TcpMessageRow
+        var vm = new TcpServiceMessagesViewModel
         {
-            IncomingMessage = "in",
-            IncomingIp = "1.1.1.1",
-            OutgoingMessage = "out",
-            ConnectedService = "svc",
-            Result = "ok"
-        });
+            Messages =
+            {
+                new TcpMessageRow
+                {
+                    IncomingMessage = "in",
+                    IncomingIp = "1.1.1.1",
+                    OutgoingMessage = "out",
+                    ConnectedService = "svc",
+                    Result = "ok"
+                }
+            }
+        };
 
         vm.IncomingData.Should().ContainSingle(d => d.Contains("in"));
         vm.ScriptModifications.Should().ContainSingle("out");

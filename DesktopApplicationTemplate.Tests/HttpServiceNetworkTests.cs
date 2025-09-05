@@ -63,8 +63,14 @@ public class HttpServiceNetworkTests
             });
 
         var helper = new SaveConfirmationHelper(new Mock<ILoggingService>().Object);
-        var vm = new HttpServiceViewModel(helper) { Url = "http://localhost/", SelectedMethod = "POST", RequestBody = "data", MessageHandler = handlerMock.Object };
-        vm.Headers.Add(new HttpServiceViewModel.HeaderItem { Key = "X-Test", Value = "1" });
+        var vm = new HttpServiceViewModel(helper)
+        {
+            Url = "http://localhost/",
+            SelectedMethod = "POST",
+            RequestBody = "data",
+            MessageHandler = handlerMock.Object,
+            Headers = { new HttpServiceViewModel.HeaderItem { Key = "X-Test", Value = "1" } }
+        };
 
         await vm.SendRequestAsync();
 

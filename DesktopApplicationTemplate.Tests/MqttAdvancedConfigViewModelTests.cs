@@ -15,15 +15,17 @@ public class MqttAdvancedConfigViewModelTests
         var tempCert = Path.GetTempFileName();
         File.WriteAllBytes(tempCert, new byte[] { 1, 2, 3 });
         var options = new MqttServiceOptions();
-        var vm = new MqttAdvancedConfigViewModel(options);
-        vm.ClientCertificatePath = tempCert;
-        vm.WillTopic = "topic";
-        vm.WillPayload = "payload";
-        vm.WillQualityOfService = MqttQualityOfServiceLevel.AtLeastOnce;
-        vm.WillRetain = true;
-        vm.KeepAliveSeconds = 30;
-        vm.CleanSession = false;
-        vm.ReconnectDelaySeconds = 10;
+        var vm = new MqttAdvancedConfigViewModel(options)
+        {
+            ClientCertificatePath = tempCert,
+            WillTopic = "topic",
+            WillPayload = "payload",
+            WillQualityOfService = MqttQualityOfServiceLevel.AtLeastOnce,
+            WillRetain = true,
+            KeepAliveSeconds = 30,
+            CleanSession = false,
+            ReconnectDelaySeconds = 10
+        };
         MqttServiceOptions? received = null;
         vm.Saved += o => received = o;
 

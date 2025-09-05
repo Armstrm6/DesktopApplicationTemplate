@@ -15,10 +15,7 @@ public class TcpServiceViewModelTests
         var logger = new Mock<ILoggingService>();
         var helper = new SaveConfirmationHelper(logger.Object) { SaveConfirmationSuppressed = true };
         var messages = new TcpServiceMessagesViewModel();
-        var vm = new TcpServiceViewModel(helper, messages);
-
-        vm.ScriptContent = "test";
-
+        var vm = new TcpServiceViewModel(helper, messages) { ScriptContent = "test" };
         messages.ScriptContent.Should().Be("test");
     }
 
@@ -28,14 +25,15 @@ public class TcpServiceViewModelTests
         var logger = new Mock<ILoggingService>();
         var helper = new SaveConfirmationHelper(logger.Object);
         var messages = new TcpServiceMessagesViewModel();
-        var vm = new TcpServiceViewModel(helper, messages);
-
-        vm.ComputerIp = "1.2.3.4";
-        vm.ListeningPort = "1000";
-        vm.ServerIp = "5.6.7.8";
-        vm.ServerGateway = "9.9.9.9";
-        vm.ServerPort = "2000";
-        vm.IsUdp = true;
+        var vm = new TcpServiceViewModel(helper, messages)
+        {
+            ComputerIp = "1.2.3.4",
+            ListeningPort = "1000",
+            ServerIp = "5.6.7.8",
+            ServerGateway = "9.9.9.9",
+            ServerPort = "2000",
+            IsUdp = true
+        };
 
         messages.ComputerIp.Should().Be("1.2.3.4");
         messages.ListeningPort.Should().Be("1000");
