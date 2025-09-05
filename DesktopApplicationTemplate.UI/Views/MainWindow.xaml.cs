@@ -39,7 +39,6 @@ namespace DesktopApplicationTemplate.UI.Views
             DataContext = _viewModel;
             _viewModel.EditRequested += OnEditRequested;
             _viewModel.AddServiceRequested += OnAddServiceRequested;
-            KeyDown += MainView_KeyDown;
             MouseDown += MainView_MouseDown;
             CommandBindings.Add(new CommandBinding(SystemCommands.CloseWindowCommand, CloseCommand_Executed));
             CommandBindings.Add(new CommandBinding(SystemCommands.MinimizeWindowCommand, MinimizeCommand_Executed));
@@ -1048,15 +1047,6 @@ namespace DesktopApplicationTemplate.UI.Views
                     }
                     _viewModel.SaveServices();
                 }
-            }
-        }
-
-        private void MainView_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
-        {
-            if (e.Key == System.Windows.Input.Key.Escape)
-            {
-                _viewModel.SelectedService = null;
-                ShowHome();
             }
         }
 

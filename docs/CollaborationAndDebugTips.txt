@@ -124,6 +124,7 @@ Another Attempt: After removing the keyboard release call, the `dotnet` command 
 Latest Attempt: After implementing the SendInput-based keyboard helper, the `dotnet` CLI is still missing; build and tests deferred to CI.
 Current Attempt: After adding keyboard release hooks for process exit and unhandled exceptions, installed .NET SDK 8.0.404; `dotnet restore` and `dotnet build` succeed but `dotnet test --settings tests.runsettings` aborts because the Microsoft.WindowsDesktop.App runtime is missing.
 Latest Attempt: After removing `KeyboardHelper` and its tests, the `dotnet` command remains unavailable; restore, build, and test commands cannot run locally, so CI will verify.
+Latest Attempt: After removing the MainView key handler, the `dotnet` command is still missing; build and tests deferred to CI.
 Related Commits/PRs: 8517691, 4c0dbb5, 1b5b0ec, 739abbe, 4f74a36, ff70210, 272560a
 [2025-08-27 04:25] Topic: Logging interface restoration
 Context: Introduced core logging abstractions and refactored edit view models to support DI.

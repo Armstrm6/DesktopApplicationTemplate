@@ -50,6 +50,7 @@
 - Event handlers use C# property pattern matching instead of casting `sender` and accessing `DataContext`.
 - Replaced `as` cast and null check with pattern matching in `SettingsPage.NavigateBack`.
 - Removed `KeyboardHelper` and exit hooks; simulated key presses manage their own cleanup.
+- Removed `MainView` KeyDown handler; pressing Escape no longer returns to the home page.
 
 #### Fixed
 - TCP and SCP edit workflows now load existing options via `Load` methods, enabling DI-friendly construction.
