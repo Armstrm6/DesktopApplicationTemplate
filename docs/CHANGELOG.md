@@ -63,6 +63,7 @@
 - Application shutdown tolerates a missing `MainViewModel` service, preventing test crashes when it's not registered.
 - SCP service creation validates required fields and disables the Create command when inputs are invalid.
 - Marked main window as Windows-only to silence cross-platform analyzer warnings.
+- Removed redundant keyboard state release on application exit now that simulated key presses handle their own cleanup.
 
 ### HID Service
 #### Added
