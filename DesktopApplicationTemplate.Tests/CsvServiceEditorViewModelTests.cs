@@ -13,9 +13,11 @@ public class CsvServiceEditorViewModelTests
     {
         IServiceRule rule = new ServiceRule();
         IServiceScreen<CsvServiceOptions> screen = new ServiceScreen<CsvServiceOptions>();
-        var vm = new CsvServiceEditorViewModel(rule, screen);
-        vm.ServiceName = "svc";
-        vm.OutputPath = "path";
+        var vm = new CsvServiceEditorViewModel(rule, screen)
+        {
+            ServiceName = "svc",
+            OutputPath = "path"
+        };
         string? name = null;
         CsvServiceOptions? received = null;
         vm.ServiceSaved += (n, o) => { name = n; received = o; };

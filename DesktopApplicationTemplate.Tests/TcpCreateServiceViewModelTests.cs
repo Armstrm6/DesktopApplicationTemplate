@@ -12,12 +12,13 @@ public class TcpCreateServiceViewModelTests
     public void SaveCommand_Raises_ServiceSaved()
     {
         IServiceRule rule = new ServiceRule();
-        var vm = new TcpCreateServiceViewModel(rule);
-        vm.ServiceName = "svc";
-        vm.Host = "host";
-        vm.Port = 1234;
-        vm.Options.UseUdp = true;
-        vm.Options.Mode = TcpServiceMode.ReceiveAndSend;
+        var vm = new TcpCreateServiceViewModel(rule)
+        {
+            ServiceName = "svc",
+            Host = "host",
+            Port = 1234,
+            Options = { UseUdp = true, Mode = TcpServiceMode.ReceiveAndSend }
+        };
         TcpServiceOptions? received = null;
         string? name = null;
         vm.ServiceSaved += (n, o) => { name = n; received = o; };
@@ -49,11 +50,12 @@ public class TcpCreateServiceViewModelTests
     public void AdvancedConfigCommand_Raises_Event_WithOptions()
     {
         IServiceRule rule = new ServiceRule();
-        var vm = new TcpCreateServiceViewModel(rule);
-        vm.Host = "host";
-        vm.Port = 123;
-        vm.Options.UseUdp = true;
-        vm.Options.Mode = TcpServiceMode.Sending;
+        var vm = new TcpCreateServiceViewModel(rule)
+        {
+            Host = "host",
+            Port = 123,
+            Options = { UseUdp = true, Mode = TcpServiceMode.Sending }
+        };
         TcpServiceOptions? received = null;
         vm.AdvancedConfigRequested += o => received = o;
 
@@ -70,8 +72,7 @@ public class TcpCreateServiceViewModelTests
     public void SettingEmptyServiceName_AddsError()
     {
         IServiceRule rule = new ServiceRule();
-        var vm = new TcpCreateServiceViewModel(rule);
-        vm.ServiceName = string.Empty;
+        var vm = new TcpCreateServiceViewModel(rule) { ServiceName = string.Empty };
         Assert.True(vm.HasErrors);
     }
 }

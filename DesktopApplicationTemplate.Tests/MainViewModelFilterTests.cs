@@ -19,11 +19,15 @@ namespace DesktopApplicationTemplate.Tests
             var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
             var network = new Mock<INetworkConfigurationService>();
             var networkVm = new NetworkConfigurationViewModel(network.Object);
-            var vm = new MainViewModel(csv, networkVm, network.Object);
-            vm.Services.Add(new ServiceViewModel { DisplayName = "HTTP - HTTP1", ServiceType = "HTTP", IsActive = true, Order = 0 });
-            vm.Services.Add(new ServiceViewModel { DisplayName = "TCP - TCP1", ServiceType = "TCP", IsActive = true, Order = 1 });
-
-            vm.Filters.NameFilter = "HTTP";
+            var vm = new MainViewModel(csv, networkVm, network.Object)
+            {
+                Services =
+                {
+                    new ServiceViewModel { DisplayName = "HTTP - HTTP1", ServiceType = "HTTP", IsActive = true, Order = 0 },
+                    new ServiceViewModel { DisplayName = "TCP - TCP1", ServiceType = "TCP", IsActive = true, Order = 1 }
+                },
+                Filters = { NameFilter = "HTTP" }
+            };
 
             var visible = vm.FilteredServices.Cast<ServiceViewModel>().ToList();
             Assert.Single(visible);
