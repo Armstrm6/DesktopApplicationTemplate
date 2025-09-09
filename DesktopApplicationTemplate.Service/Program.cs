@@ -27,7 +27,6 @@ namespace DesktopApplicationTemplate.Service
                 builder = builder.UseWindowsService(options =>
                 {
                     options.ServiceName = WindowsServiceInfo.ServiceName;
-                    options.DisplayName = WindowsServiceInfo.DisplayName;
                 }); // Enables Windows Service behavior
             }
 
