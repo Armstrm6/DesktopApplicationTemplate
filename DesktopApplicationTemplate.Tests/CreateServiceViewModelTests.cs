@@ -6,11 +6,8 @@ namespace DesktopApplicationTemplate.Tests
     public class CreateServiceViewModelTests
     {
         [Theory]
-        [InlineData("HID")]
         [InlineData("TCP")]
         [InlineData("HTTP")]
-        [InlineData("File Observer")]
-        [InlineData("Heartbeat")]
         [InlineData("CSV Creator")]
         [InlineData("SCP")]
         [InlineData("MQTT")]

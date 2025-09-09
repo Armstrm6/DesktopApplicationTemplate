@@ -9,11 +9,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public ObservableCollection<ServiceTypeMetadata> ServiceTypes { get; } = new()
         {
-            new("HID", "HID", "🔌"),
             new("TCP", "TCP", "🔗"),
             new("HTTP", "HTTP", "🌐"),
-            new("File Observer", "File Observer", "📂"),
-            new("Heartbeat", "Heartbeat", "❤️"),
             new("CSV Creator", "CSV Creator", "📄"),
             new("SCP", "SCP", "📦"),
             new("MQTT", "MQTT", "📡"),

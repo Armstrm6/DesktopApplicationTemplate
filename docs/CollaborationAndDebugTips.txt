@@ -368,6 +368,7 @@ Effective Prompts / Instructions that worked: User request to centralize shared 
 Decisions & Rationale: Reduce duplication and simplify maintenance by sharing fixtures.
 Action Items: Rely on CI for test execution.
 Related Commits/PRs: e6a90a3, ed1d219
+Latest Attempt: After limiting service creation options, the `dotnet` command remains unavailable; tests could not run locally and CI will verify.
 
 [2025-09-16 10:00] Topic: WindowsFact CA1416 guard
 Context: Build failed due to Windows-only `Thread.SetApartmentState` usage in a WindowsFact test case.
