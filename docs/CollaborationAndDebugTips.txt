@@ -124,6 +124,7 @@ Latest Attempt: After replacing event-handler casts with property pattern matchi
 Latest Attempt: During object and collection initializer refactor, the `dotnet` command remained unavailable; restore, build, and test commands could not run and CI will verify.
 Another Attempt: After removing the keyboard release call, the `dotnet` command remains unavailable; build and tests deferred to CI.
 Latest Attempt: After implementing the SendInput-based keyboard helper, the `dotnet` CLI is still missing; build and tests deferred to CI.
+Latest Attempt: After correcting XAML namespace qualifiers for converters and shared controls, the `dotnet` CLI is still missing; build and test commands cannot run locally and verification is deferred to CI.
 Current Attempt: After adding keyboard release hooks for process exit and unhandled exceptions, installed .NET SDK 8.0.404; `dotnet restore` and `dotnet build` succeed but `dotnet test --settings tests.runsettings` aborts because the Microsoft.WindowsDesktop.App runtime is missing.
 Latest Attempt: After removing `KeyboardHelper` and its tests, the `dotnet` command remains unavailable; restore, build, and test commands cannot run locally, so CI will verify.
 Latest Attempt: After removing the MainView key handler, the `dotnet` command is still missing; build and tests deferred to CI.
