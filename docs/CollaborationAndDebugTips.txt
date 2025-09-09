@@ -118,6 +118,7 @@ Another Attempt: After safeguarding `CsvServiceOptions` access with null-conditi
 Another Attempt: After typing view-model dependencies as interfaces, the `dotnet` command is still missing; build and test rely on CI.
 Another Attempt: After relocating logging abstractions to the core library, the `dotnet` CLI remains unavailable; relying on CI for build and tests.
 Latest Attempt: After guarding client certificate usage for cross-platform support, the `dotnet` command is still missing; build and tests deferred to CI.
+Newest Attempt: After qualifying HttpServiceView helper namespace and installing the .NET SDK 8.0.404, `dotnet build DesktopApplicationTemplate.sln` failed with missing `MqttConnectionType`, and `dotnet test --settings tests.runsettings --no-build` ran only core tests due to the absent WindowsDesktop runtime.
 Another Attempt: After replacing explicit null checks with throw helpers in MqttService, the `dotnet` CLI remains unavailable; restore, build, and tests cannot run locally, so CI will verify.
 Another Attempt: After adding a reusable ServiceLogView component, the `dotnet` command is still missing; relying on CI for build and test.
 Latest Attempt: After replacing event-handler casts with property pattern matching, the `dotnet` CLI is still missing; restore, build, and test commands cannot run locally and CI will verify.
@@ -139,7 +140,8 @@ Newest Attempt: After qualifying XAML namespaces and marking MQTT subscription v
 Latest Attempt: After aligning log view model with shared log entry and adding assembly-qualified namespaces, the `dotnet` command remains unavailable; build and tests will run in CI.
 Latest Attempt: After removing remaining assembly qualifiers from service view namespaces to fix converter errors, the dotnet CLI remains unavailable; build and tests deferred to CI.
 Latest Attempt: After adding a parameterless constructor to HttpServiceView, the dotnet CLI remains unavailable; rebuild and tests deferred to CI.
-Related Commits/PRs: 8517691, 4c0dbb5, 1b5b0ec, 739abbe, 4f74a36, ff70210, 272560a
+Latest Attempt: Installed the .NET SDK 8.0.404 and removed assembly qualifiers from HTTP and MQTT views; `dotnet build DesktopApplicationTemplate.sln` succeeded, but `dotnet test --settings tests.runsettings --no-build` aborted because the Microsoft.WindowsDesktop.App 8.0.0 runtime is missing.
+Related Commits/PRs: 8517691, 4c0dbb5, 1b5b0ec, 739abbe, 4f74a36, ff70210, 272560a, 26960dc
 [2025-08-27 04:25] Topic: Logging interface restoration
 Context: Introduced core logging abstractions and refactored edit view models to support DI.
 Observations: Added ILoggingService, LogLevel enum, moved LogEntry to core, and implemented Load methods on TCP and SCP edit view models.
