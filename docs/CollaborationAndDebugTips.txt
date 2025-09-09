@@ -138,9 +138,12 @@ Latest Attempt: After correcting LogEntry namespaces and removing the global log
 Another Attempt: After fixing ServiceLogView namespace bindings and command delegates, the `dotnet` command remains unavailable; restore, build, and tests must run in CI.
 Newest Attempt: After qualifying XAML namespaces and marking MQTT subscription view model as Windows-only, the `dotnet` CLI is still missing; relying on CI for build and test.
 Latest Attempt: After aligning log view model with shared log entry and adding assembly-qualified namespaces, the `dotnet` command remains unavailable; build and tests will run in CI.
+Latest Attempt: After including ServiceLogView.xaml as a Page and qualifying the HttpServiceView shared namespace, the `dotnet` CLI is still missing; restore, build, and test commands cannot run locally, so CI will verify.
+Latest Attempt: Installed .NET SDK 8.0.404 and explicitly included ServiceLogView.xaml; build fails with XAML error MC3074 for ServiceLogView, so CI will need to confirm the fix.
 Latest Attempt: After removing remaining assembly qualifiers from service view namespaces to fix converter errors, the dotnet CLI remains unavailable; build and tests deferred to CI.
 Latest Attempt: After adding a parameterless constructor to HttpServiceView, the dotnet CLI remains unavailable; rebuild and tests deferred to CI.
 Latest Attempt: Installed the .NET SDK 8.0.404 and removed assembly qualifiers from HTTP and MQTT views; `dotnet build DesktopApplicationTemplate.sln` succeeded, but `dotnet test --settings tests.runsettings --no-build` aborted because the Microsoft.WindowsDesktop.App 8.0.0 runtime is missing.
+Latest Attempt: After updating ServiceLogView build metadata and reverting HttpServiceView to the project-local shared namespace, `dotnet build DesktopApplicationTemplate.sln` succeeded but `dotnet test --settings tests.runsettings` aborted because the Microsoft.WindowsDesktop.App runtime is missing.
 Related Commits/PRs: 8517691, 4c0dbb5, 1b5b0ec, 739abbe, 4f74a36, ff70210, 272560a, 26960dc
 [2025-08-27 04:25] Topic: Logging interface restoration
 Context: Introduced core logging abstractions and refactored edit view models to support DI.

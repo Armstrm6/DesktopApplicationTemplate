@@ -41,4 +41,14 @@
     <Resource Include="Assets\**\*" />
   </ItemGroup>
 
-</Project>
+  <ItemGroup>
+    <Page Update="Views/Shared/ServiceLogView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Update="Views/Shared/ServiceLogView.xaml.cs">
+      <DependentUpon>ServiceLogView.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  </Project>
