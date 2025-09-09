@@ -1,34 +1,46 @@
+using System.Collections.Generic;
 using System.Windows;
+using System.Windows.Media;
+using ICSharpCode.AvalonEdit.Document;
+using DesktopApplicationTemplate.UI.ViewModels;
+using Microsoft.CodeAnalysis;
 
-namespace DesktopApplicationTemplate.UI.Views
+namespace DesktopApplicationTemplate.UI.Views;
+
+public partial class ScriptEditorWindow : Window
 {
-    public partial class ScriptEditorWindow : Window
+    public string ScriptText { get; private set; } = string.Empty;
+    public string LastTestMessage { get; private set; } = string.Empty;
+
+    public ScriptEditorWindow()
     {
-        public string ScriptText { get; private set; } = string.Empty;
+        InitializeComponent();
+        var vm = new ScriptEditorViewModel();
+        DataContext = vm;
+        vm.RequestClose += OnRequestClose;
+        vm.ErrorsChanged += HighlightErrors;
+    }
 
-        public ScriptEditorWindow(string initial)
+    private void OnRequestClose(object? sender, ScriptSavedEventArgs e)
+    {
+        ScriptText = e.Script;
+        LastTestMessage = e.TestMessage;
+        DialogResult = true;
+        Close();
+    }
+
+    private void HighlightErrors(IEnumerable<Diagnostic> diagnostics)
+    {
+        foreach (DocumentLine line in Editor.Document.Lines)
         {
-            InitializeComponent();
-            ScriptBox.Text = initial;
+            line.BackgroundColor = null;
         }
 
-        private void Ok_Click(object sender, RoutedEventArgs e)
+        foreach (var diag in diagnostics)
         {
-            ScriptText = ScriptBox.Text;
-            DialogResult = true;
-            Close();
-        }
-
-        private void Cancel_Click(object sender, RoutedEventArgs e)
-        {
-            DialogResult = false;
-            Close();
-        }
-
-        private void Help_Click(object sender, RoutedEventArgs e)
-        {
-            var help = new AsciiHelpWindow();
-            help.ShowDialog();
+            var span = diag.Location.GetLineSpan();
+            var line = Editor.Document.GetLineByNumber(span.StartLinePosition.Line + 1);
+            line.BackgroundColor = Colors.MistyRose;
         }
     }
 }
