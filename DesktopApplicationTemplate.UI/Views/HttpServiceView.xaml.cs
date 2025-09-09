@@ -15,13 +15,14 @@ using System.Windows.Shapes;
 using DesktopApplicationTemplate.UI.Services;
 
 using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.UI.ViewModels;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
     /// <summary>
     /// Interaction logic for HttpServiceView.xaml
     /// </summary>
-    public partial class HttpServiceView : Page
+    public partial class HttpServiceView : Page, IServiceLogHost
     {
         private readonly ViewModels.HttpServiceViewModel _viewModel;
         private readonly ILoggingService _logger;
@@ -33,6 +34,11 @@ namespace DesktopApplicationTemplate.UI.Views
             DataContext = _viewModel;
             _logger = logger;
             _viewModel.Logger = _logger;
+        }
+
+        public void SetServiceContext(ServiceViewModel service)
+        {
+            LogView.DataContext = new ServiceLogViewModel(service.DisplayName, service.ServiceType, service.Logs);
         }
 
         private void Help_Click(object sender, RoutedEventArgs e)
