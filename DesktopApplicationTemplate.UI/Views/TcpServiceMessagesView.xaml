@@ -16,7 +16,6 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0">
@@ -24,12 +23,7 @@
                 <ListBox ItemsSource="{Binding IncomingData}"/>
             </StackPanel>
 
-            <StackPanel Grid.Column="1" Margin="10,0">
-                <TextBlock Text="Script Modifications" FontWeight="Bold" Margin="0,0,0,5"/>
-                <ListBox ItemsSource="{Binding ScriptModifications}"/>
-            </StackPanel>
-
-            <StackPanel Grid.Column="2">
+            <StackPanel Grid.Column="1">
                 <TextBlock Text="Outgoing Results" FontWeight="Bold" Margin="0,0,0,5"/>
                 <ListBox ItemsSource="{Binding OutgoingResults}"/>
             </StackPanel>
@@ -39,11 +33,16 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-            <Button Content="Advanced Settings" Command="{Binding OpenAdvancedSettingsCommand}" Width="150" HorizontalAlignment="Right" Margin="0,0,0,5"/>
-            <shared:ServiceMessageTableView Grid.Row="1" DataContext="{Binding MessageTable}" Margin="0,0,0,10" />
-            <shared:ServiceLogView Grid.Row="2" x:Name="LogView" />
+            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,5">
+                <TextBlock Text="Test Message:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <TextBox Text="{Binding TestMessage, UpdateSourceTrigger=PropertyChanged}" Width="300"/>
+            </StackPanel>
+            <Button Grid.Row="1" Content="Advanced Settings" Command="{Binding OpenAdvancedSettingsCommand}" Width="150" HorizontalAlignment="Right" Margin="0,0,0,5"/>
+            <shared:ServiceMessageTableView Grid.Row="2" DataContext="{Binding MessageTable}" Margin="0,0,0,10" />
+            <shared:ServiceLogView Grid.Row="3" x:Name="LogView" />
         </Grid>
     </Grid>
 </Page>

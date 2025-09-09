@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Windows.Controls;
 using DesktopApplicationTemplate.UI.ViewModels;
 
@@ -17,6 +18,8 @@ namespace DesktopApplicationTemplate.UI.Views
         public void SetServiceContext(ServiceViewModel service)
         {
             LogView.DataContext = new ServiceLogViewModel(service.DisplayName, service.ServiceType, service.Logs);
+            if (DataContext is TcpServiceMessagesViewModel vm)
+                vm.ServiceName = service.DisplayName.Split(" - ").Last();
         }
     }
 }
