@@ -42,8 +42,7 @@
             </Grid.ColumnDefinitions>
 
             <TextBlock Text="Install Location:" Grid.Row="0" VerticalAlignment="Center" />
-            <TextBox Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding InstallPath, UpdateSourceTrigger=PropertyChanged}"
-                     behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
+            <TextBox Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding InstallPath, UpdateSourceTrigger=PropertyChanged}"/>
             <Button Grid.Row="0" Grid.Column="1" Content="Browse..." Padding="10,2" Margin="5,0,0,0" Command="{Binding BrowseCommand}" />
 
             <CheckBox Grid.Row="2" Content="Allow firewall access" IsChecked="{Binding AddFirewallRule}" />

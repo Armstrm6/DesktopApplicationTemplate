@@ -1,13 +1,13 @@
 <Page x:Class="DesktopApplicationTemplate.UI.Views.MqttTagSubscriptionsView"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:models="clr-namespace:DesktopApplicationTemplate.UI.Models"
+      xmlns:models="clr-namespace:DesktopApplicationTemplate.UI.Models;assembly=DesktopApplicationTemplate.UI"
       xmlns:mqtt="clr-namespace:MQTTnet.Protocol;assembly=MQTTnet"
       xmlns:d="http://schemas.microsoft.com/expression.blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:sys="clr-namespace:System;assembly=System.Runtime"
-      xmlns:behaviors="clr-namespace:DesktopApplicationTemplate.UI.Behaviors"
-      xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
+      xmlns:behaviors="clr-namespace:DesktopApplicationTemplate.UI.Behaviors;assembly=DesktopApplicationTemplate.UI"
+      xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers;assembly=DesktopApplicationTemplate.UI"
       mc:Ignorable="d">
     <Page.Resources>
         <ObjectDataProvider x:Key="QoSValues" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
