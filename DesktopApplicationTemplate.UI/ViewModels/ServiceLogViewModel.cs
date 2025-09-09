@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.Models;
+using DesktopApplicationTemplate.Core.Models;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {

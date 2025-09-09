@@ -2,12 +2,12 @@
       xmlns:vm="clr-namespace:DesktopApplicationTemplate.UI.ViewModels"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:local="clr-namespace:DesktopApplicationTemplate.UI.Views;assembly=DesktopApplicationTemplate.UI"
-      xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers;assembly=DesktopApplicationTemplate.UI"
+      xmlns:local="clr-namespace:DesktopApplicationTemplate.UI.Views"
+      xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-      xmlns:behaviors="clr-namespace:DesktopApplicationTemplate.UI.Behaviors;assembly=DesktopApplicationTemplate.UI"
-      xmlns:shared="clr-namespace:DesktopApplicationTemplate.UI.Views.Shared"
+      xmlns:behaviors="clr-namespace:DesktopApplicationTemplate.UI.Behaviors"
+      xmlns:shared="clr-namespace:DesktopApplicationTemplate.UI.Views.Shared;assembly=DesktopApplicationTemplate.UI"
       mc:Ignorable="d" Background="#f3f3f3">
 
     <Page.Resources>

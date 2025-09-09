@@ -73,7 +73,7 @@
 - Marked main window as Windows-only to silence cross-platform analyzer warnings.
 - Corrected `LogEntry` namespace usage and removed obsolete global log handler to restore build after introducing the shared log view.
 - Fixed ServiceLogView namespace references and command delegates so main, HTTP, and TCP views compile consistently.
-- Qualified helper and behavior namespaces and dropped installer TextBox hint to resolve remaining XAML build errors.
+- Qualified shared log control references and removed redundant assembly-qualified namespaces so converters, behaviors, and editors resolve correctly across views.
 
 ### HID Service
 #### Added

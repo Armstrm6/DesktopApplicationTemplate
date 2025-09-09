@@ -97,6 +97,7 @@ Latest Attempt: After updating MQTT topic subscription handling, the `dotnet` co
 Recent Attempt: `dotnet` command still missing; unable to run restore, build, or tests locally and will rely on CI.
 Newest Attempt: After adding MQTT log view, `dotnet` CLI remains missing; relying on CI for build and test.
 Another Attempt: After embedding a collapsible MQTT log panel and wiring global log handling, the `dotnet` CLI remains unavailable; relying on CI for build and test.
+Latest Attempt: After removing assembly-qualified namespaces and wiring MQTT subscriptions view to the shared log control, the `dotnet` CLI remains missing; relying on CI for build and test.
 Another Attempt: After updating TcpEditServiceViewModel advanced config and installing the .NET SDK 8.0.404, `dotnet restore` succeeded but `dotnet build` failed with MqttService.cs missing `ConnectingFailedAsync`; relying on CI for validation.
 Another Attempt: After adding TCP view placeholders, the `dotnet` command is still missing; restore, build, and tests cannot run locally, so CI will verify.
 Another Attempt: After extending TCP advanced configuration with script fields, the `dotnet` CLI remains unavailable; relying on CI.
