@@ -36,6 +36,7 @@
 - Average execution time displayed next to each service name in the service list.
 - Text inputs now automatically display tooltips derived from bound property names, guiding expected user input.
 - Reusable `AdvancedConfigViewModelBase<TOptions>` and `AdvancedConfigButtonBar` unify Save/Back logic across advanced configuration views.
+- Reusable `ServiceLogView` control and `ServiceLogViewModel` provide consistent log panels for the main window and services.
 
 #### Changed
 - Service selection window wraps service icons within bounds using a fixed-width panel.
@@ -70,6 +71,10 @@
 - Application shutdown tolerates a missing `MainViewModel` service, preventing test crashes when it's not registered.
 - SCP service creation validates required fields and disables the Create command when inputs are invalid.
 - Marked main window as Windows-only to silence cross-platform analyzer warnings.
+- Corrected `LogEntry` namespace usage and removed obsolete global log handler to restore build after introducing the shared log view.
+- Fixed ServiceLogView namespace references and command delegates so main, HTTP, and TCP views compile consistently.
+- Qualified shared log control references and removed redundant assembly-qualified namespaces so converters, behaviors, and editors resolve correctly across views.
+- Aligned ServiceLogViewModel with the shared `LogEntry` model and added explicit assembly namespaces so logs and converters compile across service views.
 
 ### HID Service
 #### Added

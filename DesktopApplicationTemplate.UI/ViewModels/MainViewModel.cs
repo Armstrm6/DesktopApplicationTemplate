@@ -227,7 +227,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             {
                 _selectedService = value;
                 OnPropertyChanged();
-                OnPropertyChanged(nameof(DisplayLogs));
+                LogViewModel.SetLogs(_selectedService?.Logs ?? AllLogs);
                 (RemoveServiceCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 (EditServiceCommand as RelayCommand<ServiceViewModel?>)?.RaiseCanExecuteChanged();
             }
@@ -239,14 +239,15 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public int ServicesCreated => Services.Count;
         public int CurrentActiveServices => Services.Count(s => s.IsActive);
 
-        private LogLevel _logLevelFilter = LogLevel.Debug;
+        public ServiceLogViewModel LogViewModel { get; }
+
         public LogLevel LogLevelFilter
         {
-            get => _logLevelFilter;
-            set { _logLevelFilter = value; OnPropertyChanged(); OnPropertyChanged(nameof(DisplayLogs)); }
+            get => LogViewModel.LogLevelFilter;
+            set => LogViewModel.LogLevelFilter = value;
         }
 
-        public IEnumerable<LogEntry> DisplayLogs => (SelectedService?.Logs ?? AllLogs).Where(l => l.Level >= LogLevelFilter);
+        public IEnumerable<LogEntry> DisplayLogs => LogViewModel.DisplayLogs;
 
         private readonly CsvService _csvService;
         private readonly ILoggingService? _logger;
@@ -278,6 +279,14 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             Filters.PropertyChanged += (_, __) => ApplyFilters();
             LoadServices();
             ApplyFilters();
+            LogViewModel = new ServiceLogViewModel("Main", "Main", AllLogs);
+            LogViewModel.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(ServiceLogViewModel.DisplayLogs))
+                    OnPropertyChanged(nameof(DisplayLogs));
+                if (e.PropertyName == nameof(ServiceLogViewModel.LogLevelFilter))
+                    OnPropertyChanged(nameof(LogLevelFilter));
+            };
             if (_logger is LoggingService concreteLogger)
             {
                 concreteLogger.Reload();
@@ -350,7 +359,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 }
                 OnPropertyChanged(nameof(ServicesCreated));
                 OnPropertyChanged(nameof(CurrentActiveServices));
-                OnPropertyChanged(nameof(DisplayLogs));
+                LogViewModel.RefreshLogs();
                 SaveServices();
                 _logger?.Log("Service removed", LogLevel.Debug);
             }
@@ -445,7 +454,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     // ignore CSV errors during logging
                 }
             }
-            OnPropertyChanged(nameof(DisplayLogs));
+            LogViewModel.RefreshLogs();
         }
 
         internal void OnServiceActiveChanged(bool _)
@@ -456,28 +465,19 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public void ClearLogs()
         {
-            if (SelectedService != null)
-            {
-                SelectedService.Logs.Clear();
-            }
-            else
-            {
-                AllLogs.Clear();
-            }
-            OnPropertyChanged(nameof(DisplayLogs));
+            LogViewModel.ClearLogs();
             _logger?.Log("Logs cleared", LogLevel.Debug);
         }
 
         public void ExportDisplayedLogs(string filePath)
         {
-            var lines = DisplayLogs.Select(l => l.Message).ToList();
-            File.WriteAllLines(filePath, lines);
-            _logger?.Log($"Exported {lines.Count} logs to {filePath}", LogLevel.Debug);
+            LogViewModel.ExportLogs(filePath);
+            _logger?.Log($"Exported {LogViewModel.DisplayLogs.Count()} logs to {filePath}", LogLevel.Debug);
         }
 
         public void RefreshLogs()
         {
-            OnPropertyChanged(nameof(DisplayLogs));
+            LogViewModel.RefreshLogs();
             _logger?.Log("Logs refreshed", LogLevel.Debug);
         }
 
