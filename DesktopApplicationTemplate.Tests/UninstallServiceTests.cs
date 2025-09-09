@@ -2,6 +2,7 @@ using System.IO;
 using System.Threading.Tasks;
 using DesktopApplication.Installer.Services;
 using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Service;
 using Moq;
 using Xunit;
 
@@ -22,7 +23,7 @@ public class UninstallServiceTests
 
         await service.UninstallAsync(temp);
 
-        processManager.Verify(p => p.GetProcessIdsByName("DesktopApplicationTemplate.Service"), Times.Once);
+        processManager.Verify(p => p.GetProcessIdsByName(WindowsServiceInfo.ServiceName), Times.Once);
         processManager.Verify(p => p.KillProcess(1), Times.Once);
         processManager.Verify(p => p.KillProcess(2), Times.Once);
         Assert.False(Directory.Exists(temp));

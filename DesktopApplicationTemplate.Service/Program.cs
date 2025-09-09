@@ -24,7 +24,11 @@ namespace DesktopApplicationTemplate.Service
                 .ConfigureLogging(logging => logging.AddConsole().AddDebug());
             if (runAsService && OperatingSystem.IsWindows())
             {
-                builder = builder.UseWindowsService(); // Enables Windows Service behavior
+                builder = builder.UseWindowsService(options =>
+                {
+                    options.ServiceName = WindowsServiceInfo.ServiceName;
+                    options.DisplayName = WindowsServiceInfo.DisplayName;
+                }); // Enables Windows Service behavior
             }
 
             return builder.ConfigureServices((hostContext, services) =>

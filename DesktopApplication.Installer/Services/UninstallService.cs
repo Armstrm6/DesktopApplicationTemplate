@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Service;
 
 namespace DesktopApplication.Installer.Services
 {
@@ -15,7 +16,7 @@ namespace DesktopApplication.Installer.Services
     {
         private readonly IProcessManager _processManager;
         private readonly ILoggingService? _logger;
-        private const string ServiceProcessName = "DesktopApplicationTemplate.Service";
+        private const string ServiceProcessName = WindowsServiceInfo.ServiceName;
 
         public UninstallService(IProcessManager processManager, ILoggingService? logger = null)
         {
