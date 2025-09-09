@@ -91,6 +91,7 @@
 - Removed assembly-qualified namespaces from HTTP and MQTT views so converters and enums resolve during build.
 - Updated Roslyn scripting packages to 4.12.0 to resolve dependency conflicts.
 - Replaced DocumentLine.BackgroundColor usage with a line transformer and switched async lambdas to AsyncRelayCommand to satisfy threading analyzers.
+- Extracted `StringNullOrEmptyToVisibilityConverter` into its own file so XAML views compile independently.
 
 ### HID Service
 #### Added
