@@ -77,6 +77,7 @@
 - Removed assembly qualifiers from internal namespaces and explicitly referenced shared views so converters, behaviors, and shared controls resolve across XAML views.
 - Qualified shared log control references and removed redundant assembly-qualified namespaces so converters, behaviors, and editors resolve correctly across views.
 - Aligned ServiceLogViewModel with the shared `LogEntry` model and added explicit assembly namespaces so logs and converters compile across service views.
+- Added parameterless constructor resolving dependencies for `HttpServiceView`, enabling the XAML designer to load.
 
 ### HID Service
 #### Added
