@@ -422,11 +422,11 @@ Decisions & Rationale: Target only net8.0 because Windows-specific code lives in
 Action Items: Rely on CI for WPF validation.
 Related Commits/PRs:
 [2025-09-22 10:00] Topic: TextBox hint behavior namespace
-Context: Verified TextBoxHintBehavior is public and ensured Forms.xaml references the behaviors namespace with assembly qualification.
-Observations: Verified Forms.xaml already contained the assembly-qualified behaviors namespace, added TextBox-specific attached property accessors with [AttachedPropertyBrowsableForType] to expose AutoToolTip to the installer project, and attempted dotnet restore/build/test, but the dotnet CLI is unavailable in this container. Updated `HttpServiceView.xaml` to use the assembly-qualified behaviors namespace; `dotnet build` reports `TextBoxHintBehavior.AutoToolTip` missing in the specified XML namespace. Removing the assembly qualifier restores the build.
-Codex Limitations noticed: .NET SDK and WindowsDesktop runtime missing previously; after installing the SDK, build succeeded but tests require the WindowsDesktop runtime.
+Context: Verified TextBoxHintBehavior is public and ensured Forms.xaml and all views reference the behaviors namespace with an explicit assembly qualifier.
+Observations: Reintroduced the assembly-qualified namespace in Forms.xaml and views using TextBoxHintBehavior. Attempted `dotnet restore`, `dotnet build DesktopApplicationTemplate.sln`, and `dotnet test --settings tests.runsettings`, but the `dotnet` CLI is unavailable in this container.
+Codex Limitations noticed: .NET SDK and WindowsDesktop runtime missing previously; build and tests cannot run without the CLI.
 Effective Prompts / Instructions that worked: User request to confirm UI build references and behavior visibility.
-Decisions & Rationale: Added assembly-qualified namespace to avoid XAML parse errors but reverted to the project-local namespace to resolve the build error and rely on CI for verification.
+Decisions & Rationale: Explicit assembly qualifiers ensure TextBoxHintBehavior resolves across projects; rely on CI for validation.
 Action Items: Rely on CI.
 Related Commits/PRs:
 

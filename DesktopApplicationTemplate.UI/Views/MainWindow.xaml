@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:DesktopApplicationTemplate.UI.Views"
         xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
         xmlns:sys="clr-namespace:System.Windows;assembly=PresentationFramework"
-        xmlns:behaviors="clr-namespace:DesktopApplicationTemplate.UI.Behaviors"
+        xmlns:behaviors="clr-namespace:DesktopApplicationTemplate.UI.Behaviors;assembly=DesktopApplicationTemplate.UI"
 
         xmlns:shared="clr-namespace:DesktopApplicationTemplate.UI.Views.Shared"
         mc:Ignorable="d"
