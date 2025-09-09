@@ -25,33 +25,25 @@ public static class TextBoxHintBehavior
     /// <summary>
     /// Gets the value of the <see cref="AutoToolTipProperty"/> for the specified text box.
     /// </summary>
-    /// <param name="textBox">The text box.</param>
+    /// <param name="obj">The text box.</param>
     /// <returns>The current value.</returns>
     [AttachedPropertyBrowsableForType(typeof(TextBox))]
-    public static bool GetAutoToolTip(TextBox textBox)
+    public static bool GetAutoToolTip(DependencyObject obj)
     {
-        if (textBox is null)
-        {
-            throw new ArgumentNullException(nameof(textBox));
-        }
-
-        return (bool)textBox.GetValue(AutoToolTipProperty);
+        ArgumentNullException.ThrowIfNull(obj);
+        return (bool)obj.GetValue(AutoToolTipProperty);
     }
 
     /// <summary>
     /// Sets the value of the <see cref="AutoToolTipProperty"/> for the specified text box.
     /// </summary>
-    /// <param name="textBox">The text box.</param>
+    /// <param name="obj">The text box.</param>
     /// <param name="value">The value to set.</param>
     [AttachedPropertyBrowsableForType(typeof(TextBox))]
-    public static void SetAutoToolTip(TextBox textBox, bool value)
+    public static void SetAutoToolTip(DependencyObject obj, bool value)
     {
-        if (textBox is null)
-        {
-            throw new ArgumentNullException(nameof(textBox));
-        }
-
-        textBox.SetValue(AutoToolTipProperty, value);
+        ArgumentNullException.ThrowIfNull(obj);
+        obj.SetValue(AutoToolTipProperty, value);
     }
 
     private static void OnAutoToolTipChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)

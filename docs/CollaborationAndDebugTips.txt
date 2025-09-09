@@ -127,6 +127,7 @@ Latest Attempt: After removing `KeyboardHelper` and its tests, the `dotnet` comm
 Latest Attempt: After removing the MainView key handler, the `dotnet` command is still missing; build and tests deferred to CI.
 Another Attempt: After confirming `KeyboardHelperTests.cs` is absent, the `dotnet` CLI remains unavailable; build and tests deferred to CI.
 Another Attempt: After adding explicit Windows service name options, the `dotnet` command is still missing; build and tests rely on CI.
+Latest Attempt: After removing the unsupported DisplayName option and correcting TextBoxHintBehavior signatures, the `dotnet` command remains unavailable; relying on CI for verification.
 Related Commits/PRs: 8517691, 4c0dbb5, 1b5b0ec, 739abbe, 4f74a36, ff70210, 272560a
 [2025-08-27 04:25] Topic: Logging interface restoration
 Context: Introduced core logging abstractions and refactored edit view models to support DI.

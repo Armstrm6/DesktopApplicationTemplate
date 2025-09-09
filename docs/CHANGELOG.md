@@ -23,6 +23,7 @@
 
 #### Fixed
 - Event raising helpers in `ServiceEditorViewModelBase` invoked themselves recursively; now invoke events directly.
+- Removed unsupported `DisplayName` assignment from Windows service options to restore service build.
 
 ### Navigation & UI
 #### Added
@@ -62,6 +63,7 @@
 - Marked main window `ContentFrame` public to allow navigation inspection.
 - Included `Forms.xaml` in theme resources with Page build action.
 - Installer window references `TextBoxHintBehavior.AutoToolTip` without design-time warnings.
+- `TextBoxHintBehavior` now uses `DependencyObject` parameters so the installer recognizes `AutoToolTip`.
 - Application startup tolerates a missing `MainView` service, preventing test crashes when the window isn't registered.
 - Application shutdown tolerates a missing `MainViewModel` service, preventing test crashes when it's not registered.
 - SCP service creation validates required fields and disables the Create command when inputs are invalid.
