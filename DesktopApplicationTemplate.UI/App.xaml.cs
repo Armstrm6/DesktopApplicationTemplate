@@ -174,6 +174,7 @@ namespace DesktopApplicationTemplate.UI
             services.AddOptions<ScpServiceOptions>();
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Startup event")]
         protected override async void OnStartup(StartupEventArgs e)
         {
             await AppHost.StartAsync();
@@ -213,6 +214,7 @@ namespace DesktopApplicationTemplate.UI
             base.OnStartup(e);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Application shutdown")]
         protected override async void OnExit(ExitEventArgs e)
         {
             var logger = AppHost.Services.GetService<Microsoft.Extensions.Logging.ILogger<App>>();

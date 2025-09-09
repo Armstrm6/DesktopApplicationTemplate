@@ -564,11 +564,15 @@ namespace DesktopApplicationTemplate.UI.Views
             if (newService.ServicePage is MqttTagSubscriptionsView mqttView)
             {
                 var mqttVm = (MqttTagSubscriptionsViewModel)mqttView.DataContext!;
-                newService.ActiveChanged += async active =>
+                newService.ActiveChanged += HandleActiveChanged;
+
+                void HandleActiveChanged(bool active)
                 {
                     if (active)
-                        await mqttVm.ConnectAsync();
-                };
+                    {
+                        _ = mqttVm.ConnectAsync();
+                    }
+                }
 
                 mqttVm.EditConnectionRequested += (_, _) =>
                 {

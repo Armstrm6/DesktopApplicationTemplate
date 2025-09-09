@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Media;
 using ICSharpCode.AvalonEdit.Document;
+using ICSharpCode.AvalonEdit.Rendering;
 using DesktopApplicationTemplate.UI.ViewModels;
 using Microsoft.CodeAnalysis;
 
@@ -31,16 +32,34 @@ public partial class ScriptEditorWindow : Window
 
     private void HighlightErrors(IEnumerable<Diagnostic> diagnostics)
     {
-        foreach (DocumentLine line in Editor.Document.Lines)
-        {
-            line.BackgroundColor = null;
-        }
+        Editor.TextArea.TextView.LineTransformers.Clear();
 
         foreach (var diag in diagnostics)
         {
             var span = diag.Location.GetLineSpan();
-            var line = Editor.Document.GetLineByNumber(span.StartLinePosition.Line + 1);
-            line.BackgroundColor = Colors.MistyRose;
+            var lineNumber = span.StartLinePosition.Line + 1;
+            Editor.TextArea.TextView.LineTransformers.Add(new LineHighlightTransformer(lineNumber, Colors.MistyRose));
+        }
+    }
+
+    private sealed class LineHighlightTransformer : DocumentColorizingTransformer
+    {
+        private readonly int _lineNumber;
+        private readonly SolidColorBrush _brush;
+
+        public LineHighlightTransformer(int lineNumber, Color color)
+        {
+            _lineNumber = lineNumber;
+            _brush = new SolidColorBrush(color);
+        }
+
+        protected override void ColorizeLine(DocumentLine line)
+        {
+            if (line.LineNumber == _lineNumber)
+            {
+                ChangeLinePart(line.Offset, line.EndOffset,
+                    element => element.TextRunProperties.SetBackgroundBrush(_brush));
+            }
         }
     }
 }

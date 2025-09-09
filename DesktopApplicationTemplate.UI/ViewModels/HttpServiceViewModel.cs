@@ -141,7 +141,7 @@ public class HttpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel
         public HttpServiceViewModel(SaveConfirmationHelper saveHelper)
         {
             _saveHelper = saveHelper;
-            SendCommand = new RelayCommand(async () => await SendRequestAsync());
+            SendCommand = new AsyncRelayCommand(SendRequestAsync);
             AddHeaderCommand = new RelayCommand(() => Headers.Add(new HeaderItem()));
             RemoveHeaderCommand = new RelayCommand(() =>
             {

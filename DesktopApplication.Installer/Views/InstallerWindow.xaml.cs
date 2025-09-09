@@ -22,6 +22,7 @@ namespace DesktopApplication.Installer.Views
             _vm.CheckUpdatesRequested += OnCheckUpdatesRequested;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
         private async void OnInstallRequested(string path, bool firewall, bool startup)
         {
             var progressVm = new ProgressWindowViewModel(path, firewall, startup);
@@ -32,6 +33,7 @@ namespace DesktopApplication.Installer.Views
             _vm.InstallPath = path;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
         private async void OnUninstallRequested(string path)
         {
             await _uninstallService.UninstallAsync(path).ConfigureAwait(false);

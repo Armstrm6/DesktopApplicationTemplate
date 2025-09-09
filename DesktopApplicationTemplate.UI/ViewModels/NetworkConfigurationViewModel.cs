@@ -16,8 +16,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         {
             _service = service;
             _logger = logger;
-            ApplyCommand = new RelayCommand(async () => await ApplyAsync());
-            RefreshCommand = new RelayCommand(async () => await LoadAsync());
+            ApplyCommand = new AsyncRelayCommand(ApplyAsync);
+            RefreshCommand = new AsyncRelayCommand(LoadAsync);
         }
 
         private string _ipAddress = string.Empty;
