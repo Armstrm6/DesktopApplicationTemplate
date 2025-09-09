@@ -16,6 +16,7 @@ using DesktopApplicationTemplate.UI.Services;
 
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
@@ -26,6 +27,12 @@ namespace DesktopApplicationTemplate.UI.Views
     {
         private readonly ViewModels.HttpServiceViewModel _viewModel;
         private readonly ILoggingService _logger;
+
+        public HttpServiceView()
+            : this(App.AppHost.Services.GetRequiredService<ViewModels.HttpServiceViewModel>(),
+                   App.AppHost.Services.GetRequiredService<ILoggingService>())
+        {
+        }
 
         public HttpServiceView(ViewModels.HttpServiceViewModel viewModel, ILoggingService logger)
         {
