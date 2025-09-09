@@ -5,6 +5,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
       xmlns:behaviors="clr-namespace:DesktopApplicationTemplate.UI.Behaviors"
+      xmlns:shared="clr-namespace:DesktopApplicationTemplate.UI.Views.Shared"
         mc:Ignorable="d"
       Title="Chappie Desktop Application" d:DesignWidth="682.857">
     <Page.Resources>
@@ -97,6 +98,7 @@
 
             <!-- RIGHT SIDE -->
             <StackPanel Grid.Column="1" Margin="10">
+                <shared:ServiceMessageTableView DataContext="{Binding MessageTable}" Margin="0,0,0,10" />
                 <TextBlock Text="Chappie Log" FontWeight="Bold" FontSize="14"/>
                 <DockPanel Margin="0,5,0,5">
                     <ComboBox x:Name="LogLevelBox" Width="150" Margin="0,0,10,0" SelectedIndex="0" SelectionChanged="LogLevelBox_SelectionChanged">

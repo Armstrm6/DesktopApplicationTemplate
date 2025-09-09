@@ -1,0 +1,23 @@
+<UserControl x:Class="DesktopApplicationTemplate.UI.Views.Shared.ServiceMessageTableView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d">
+    <DataGrid ItemsSource="{Binding Messages}"
+              CanUserAddRows="False"
+              CanUserDeleteRows="False"
+              CanUserResizeColumns="True"
+              IsReadOnly="True"
+              HeadersVisibility="Column"
+              RowHeaderWidth="0"
+              Height="360"
+              ScrollViewer.VerticalScrollBarVisibility="Auto">
+        <DataGrid.Columns>
+            <DataGridTextColumn Header="Incoming" Binding="{Binding IncomingMessage}" Width="*"/>
+            <DataGridTextColumn Header="Outgoing" Binding="{Binding OutgoingMessage}" Width="*"/>
+            <DataGridTextColumn Header="Destination" Binding="{Binding Destination}" Width="*"/>
+            <DataGridTextColumn Header="Timestamp" Binding="{Binding Timestamp}" Width="Auto"/>
+        </DataGrid.Columns>
+    </DataGrid>
+</UserControl>

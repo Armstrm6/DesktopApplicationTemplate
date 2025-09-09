@@ -49,6 +49,13 @@
     <Compile Update="Views/Shared/ServiceLogView.xaml.cs">
       <DependentUpon>ServiceLogView.xaml</DependentUpon>
     </Compile>
+    <Page Update="Views/Shared/ServiceMessageTableView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Update="Views/Shared/ServiceMessageTableView.xaml.cs">
+      <DependentUpon>ServiceMessageTableView.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   </Project>
