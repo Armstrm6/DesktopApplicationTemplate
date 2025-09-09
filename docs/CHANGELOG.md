@@ -72,6 +72,7 @@
 - SCP service creation validates required fields and disables the Create command when inputs are invalid.
 - Marked main window as Windows-only to silence cross-platform analyzer warnings.
 - Corrected `LogEntry` namespace usage and removed obsolete global log handler to restore build after introducing the shared log view.
+- Fixed ServiceLogView namespace references and command delegates so main, HTTP, and TCP views compile consistently.
 
 ### HID Service
 #### Added

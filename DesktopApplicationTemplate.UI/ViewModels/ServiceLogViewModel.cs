@@ -5,7 +5,6 @@ using System.Linq;
 using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Models;
-using DesktopApplicationTemplate.UI.Helpers;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -27,9 +26,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             ServiceName = serviceName;
             ServiceType = serviceType;
             _logs = logs;
-            RefreshLogCommand = new RelayCommand(_ => RefreshLogs());
-            ExportLogCommand = new RelayCommand(_ => ExportLogs(Path.Combine(Path.GetTempPath(), "exported_logs.txt")));
-            ClearLogCommand = new RelayCommand(_ => ClearLogs());
+            RefreshLogCommand = new RelayCommand(RefreshLogs);
+            ExportLogCommand = new RelayCommand(() => ExportLogs(Path.Combine(Path.GetTempPath(), "exported_logs.txt")));
+            ClearLogCommand = new RelayCommand(ClearLogs);
         }
 
         /// <summary>
