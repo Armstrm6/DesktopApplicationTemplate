@@ -75,6 +75,8 @@
 - Fixed ServiceLogView namespace references and command delegates so main, HTTP, and TCP views compile consistently.
 - Qualified helper and behavior namespaces and dropped installer TextBox hint to resolve remaining XAML build errors.
 - Removed assembly qualifiers from internal namespaces and explicitly referenced shared views so converters, behaviors, and shared controls resolve across XAML views.
+- Qualified shared log control references and removed redundant assembly-qualified namespaces so converters, behaviors, and editors resolve correctly across views.
+- Aligned ServiceLogViewModel with the shared `LogEntry` model and added explicit assembly namespaces so logs and converters compile across service views.
 
 ### HID Service
 #### Added

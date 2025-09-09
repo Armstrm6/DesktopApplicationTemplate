@@ -7,7 +7,7 @@ namespace DesktopApplicationTemplate.UI.Views;
 /// <summary>
 /// Interaction logic for MqttTagSubscriptionsView.xaml
 /// </summary>
-public partial class MqttTagSubscriptionsView : Page
+public partial class MqttTagSubscriptionsView : Page, IServiceLogHost
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="MqttTagSubscriptionsView"/> class.
@@ -17,5 +17,11 @@ public partial class MqttTagSubscriptionsView : Page
         InitializeComponent();
         vm.Logger = logger;
         DataContext = vm;
+    }
+
+    /// <inheritdoc />
+    public void SetServiceContext(ServiceViewModel service)
+    {
+        LogView.DataContext = new ServiceLogViewModel(service.DisplayName, service.ServiceType, service.Logs);
     }
 }
