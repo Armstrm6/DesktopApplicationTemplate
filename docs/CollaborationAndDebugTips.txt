@@ -131,6 +131,7 @@ Another Attempt: After adding explicit Windows service name options, the `dotnet
 Latest Attempt: After removing the unsupported DisplayName option and correcting TextBoxHintBehavior signatures, the `dotnet` command remains unavailable; relying on CI for verification.
 Latest Attempt: After importing the Helpers namespace into App startup to resolve missing helper types, the `dotnet` CLI is still missing; restore, build, and test commands cannot run locally, so CI will verify.
 Newest Attempt: While unifying log views, the `dotnet` command remained unavailable; build and tests deferred to CI.
+Latest Attempt: After correcting LogEntry namespaces and removing the global log level handler, the `dotnet` CLI is still missing; relying on CI for build and test.
 Related Commits/PRs: 8517691, 4c0dbb5, 1b5b0ec, 739abbe, 4f74a36, ff70210, 272560a
 [2025-08-27 04:25] Topic: Logging interface restoration
 Context: Introduced core logging abstractions and refactored edit view models to support DI.

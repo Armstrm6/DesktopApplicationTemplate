@@ -1182,27 +1182,7 @@ namespace DesktopApplicationTemplate.UI.Views
             }
         }
 
-        private void GlobalLogLevelBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (_viewModel == null)
-            {
-                _logger?.LogWarning("Log level changed before view model initialization");
-                return;
-            }
-
-            if (GlobalLogLevelBox.SelectedItem is ComboBoxItem item && item.Content != null)
-            {
-                _viewModel.LogLevelFilter = item.Content.ToString() switch
-                {
-                    "Warning" => LogLevel.Warning,
-                    "Error" => LogLevel.Error,
-                    "Debug" => LogLevel.Debug,
-                    _ => LogLevel.Debug
-                };
-
-                _logger?.LogInformation("Global log level set to {Level}", _viewModel.LogLevelFilter);
-            }
-        }
+        // Legacy handler removed; log level selection is now managed by ServiceLogView.
 
         private void ClearLog_Click(object sender, RoutedEventArgs e)
         {

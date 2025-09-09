@@ -71,6 +71,7 @@
 - Application shutdown tolerates a missing `MainViewModel` service, preventing test crashes when it's not registered.
 - SCP service creation validates required fields and disables the Create command when inputs are invalid.
 - Marked main window as Windows-only to silence cross-platform analyzer warnings.
+- Corrected `LogEntry` namespace usage and removed obsolete global log handler to restore build after introducing the shared log view.
 
 ### HID Service
 #### Added
