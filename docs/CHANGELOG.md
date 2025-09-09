@@ -39,6 +39,7 @@
 - Reusable `ServiceLogView` control and `ServiceLogViewModel` provide consistent log panels for the main window and services.
 - Reusable `ServiceMessageTableView` and `ServiceMessageTableViewModel` display recent service messages with default columns, integrated into the TCP service view.
 - Script editor window with Roslyn-based syntax highlighting and run/save commands.
+- TCP service messages view adds an Edit Script button for modifying scripts and test messages.
 
 #### Changed
 - Service selection window wraps service icons within bounds using a fixed-width panel.

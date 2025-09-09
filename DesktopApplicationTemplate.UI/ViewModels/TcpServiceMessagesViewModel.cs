@@ -101,6 +101,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         private string _testMessage = string.Empty;
 
+        private string _script = string.Empty;
+
         /// <summary>Message used for testing communication.</summary>
         public string TestMessage
         {
@@ -109,6 +111,18 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             {
                 if (_testMessage == value) return;
                 _testMessage = value ?? string.Empty;
+                OnPropertyChanged();
+            }
+        }
+
+        /// <summary>Script applied to incoming messages before routing.</summary>
+        public string Script
+        {
+            get => _script;
+            set
+            {
+                if (_script == value) return;
+                _script = value ?? string.Empty;
                 OnPropertyChanged();
             }
         }
@@ -155,6 +169,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             if (service == null) throw new ArgumentNullException(nameof(service));
             _options = service.TcpOptions ?? new TcpServiceOptions();
             ServiceName = service.DisplayName.Split(" - ").Last();
+            Script = _options.Script;
         }
 
         /// <summary>Updates network and scripting settings.</summary>
@@ -194,6 +209,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public void Save()
         {
             _options.LastTestMessage = TestMessage;
+            _options.Script = Script;
             _routing.UpdateMessage(ServiceName, TestMessage);
         }
 

@@ -136,4 +136,39 @@ public class TcpServiceMessagesViewModelTests
 
         options.LastTestMessage.Should().Be("test");
     }
+
+    [Fact]
+    public void Save_UpdatesScript()
+    {
+        var options = new TcpServiceOptions();
+        var service = new ServiceViewModel
+        {
+            DisplayName = "TCP - svc",
+            ServiceType = "TCP",
+            TcpOptions = options
+        };
+        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
+        vm.SetService(service);
+        vm.Script = "return message;";
+
+        vm.Save();
+
+        options.Script.Should().Be("return message;");
+    }
+
+    [Fact]
+    public void SetService_LoadsScript()
+    {
+        var service = new ServiceViewModel
+        {
+            DisplayName = "TCP - svc",
+            ServiceType = "TCP",
+            TcpOptions = new TcpServiceOptions { Script = "return message;" }
+        };
+        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
+
+        vm.SetService(service);
+
+        vm.Script.Should().Be("return message;");
+    }
 }

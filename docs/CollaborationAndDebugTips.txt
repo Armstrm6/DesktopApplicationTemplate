@@ -479,3 +479,11 @@ Effective Prompts / Instructions that worked: User request to adopt modern patte
 Decisions & Rationale: Use 'is not' pattern with early return.
 Action Items: Rely on CI for validation.
 Related Commits/PRs:
+[2025-09-30 10:00] Topic: Script editor dependency conflict
+Context: Tried restoring, building, and testing after adding TCP script editing.
+Observations: dotnet restore/build/test failed with Microsoft.CodeAnalysis.Common version conflicts.
+Codex Limitations noticed: Dependency mismatch blocks local validation; will depend on CI.
+Effective Prompts / Instructions that worked: Repository instructions to log limitations.
+Decisions & Rationale: Note conflict and proceed with code changes relying on CI verification.
+Action Items: Resolve package versions in future work.
+Related Commits/PRs:
