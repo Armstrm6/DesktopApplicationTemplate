@@ -38,6 +38,7 @@
 - Reusable `AdvancedConfigViewModelBase<TOptions>` and `AdvancedConfigButtonBar` unify Save/Back logic across advanced configuration views.
 - Reusable `ServiceLogView` control and `ServiceLogViewModel` provide consistent log panels for the main window and services.
 - Reusable `ServiceMessageTableView` and `ServiceMessageTableViewModel` display recent service messages with default columns, integrated into the TCP service view.
+- Script editor window with Roslyn-based syntax highlighting and run/save commands.
 
 #### Changed
 - Service selection window wraps service icons within bounds using a fixed-width panel.
