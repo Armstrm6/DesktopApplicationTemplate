@@ -491,3 +491,11 @@ Action Items: Resolve package versions in future work.
 Latest Attempt: After bumping Microsoft.CodeAnalysis packages to 4.12.0, `dotnet restore` succeeded but `dotnet build DesktopApplicationTemplate.sln` failed with CS1061 'DocumentLine' missing `BackgroundColor` and VSTHRD100/101 analyzer errors; `dotnet workload install wpf` still reports Workload ID not recognized. Relying on CI for validation.
 Next Attempt: Installed .NET SDK 8.0.404, replaced `DocumentLine.BackgroundColor` with a line transformer, and converted async lambdas to `AsyncRelayCommand`; `dotnet build DesktopApplicationTemplate.sln` now succeeds but `dotnet test --settings tests.runsettings` aborts because the Microsoft.WindowsDesktop.App runtime is missing.
 Related Commits/PRs:
+[2025-10-01 09:00] Topic: EditorButtonBar namespace
+Context: Verified EditorButtonBar build action and updated consuming views to use an assembly-qualified namespace.
+Observations: Added Page/DependentUpon entries and ensured all references use `views` with assembly qualifier.
+Codex Limitations noticed: `dotnet` CLI not installed; restore/build/test commands could not run.
+Effective Prompts / Instructions that worked: User request to confirm control references and build settings.
+Decisions & Rationale: Explicit project entries and namespace qualification ensure the control loads across views.
+Action Items: Rely on CI for validation.
+Related Commits/PRs:
