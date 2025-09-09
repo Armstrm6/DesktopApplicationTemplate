@@ -82,6 +82,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public event EventHandler? AdvancedSettingsRequested;
 
         private readonly IMessageRoutingService _routing;
+        private TcpServiceOptions _options = new();
 
         private string _serviceName = string.Empty;
 
@@ -147,6 +148,15 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             OpenAdvancedSettingsCommand = new RelayCommand(() => AdvancedSettingsRequested?.Invoke(this, EventArgs.Empty));
         }
 
+        /// <summary>Associates the view model with a service and its TCP options.</summary>
+        /// <param name="service">The service context.</param>
+        public void SetService(ServiceViewModel service)
+        {
+            if (service == null) throw new ArgumentNullException(nameof(service));
+            _options = service.TcpOptions ?? new TcpServiceOptions();
+            ServiceName = service.DisplayName.Split(" - ").Last();
+        }
+
         /// <summary>Updates network and scripting settings.</summary>
         public void UpdateNetworkSettings(string computerIp, string listeningPort, string serverIp, string serverGateway, string serverPort, bool isUdp)
         {
@@ -180,15 +190,22 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         private void OnLogAdded(LogEntry entry) => Logs.Insert(0, entry);
 
+        /// <summary>Saves the current test message to options and routing.</summary>
+        public void Save()
+        {
+            _options.LastTestMessage = TestMessage;
+            _routing.UpdateMessage(ServiceName, TestMessage);
+        }
+
         private void InitializeTestMessage()
         {
             if (string.IsNullOrWhiteSpace(ServiceName))
                 return;
 
-            if (!_routing.TryGetMessage(ServiceName, out var msg) || string.IsNullOrEmpty(msg))
-                TestMessage = $"{ServiceName}-PEAK-123456789";
-            else
-                TestMessage = msg;
+            TestMessage = string.IsNullOrWhiteSpace(_options.LastTestMessage)
+                ? $"{ServiceName}-PEAK-123456789"
+                : _options.LastTestMessage;
+            _routing.UpdateMessage(ServiceName, TestMessage);
         }
     }
 }

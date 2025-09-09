@@ -21,6 +21,7 @@ public class TcpServiceOptionsTests
         Assert.Equal(string.Empty, options.InputMessage);
         Assert.Equal(string.Empty, options.Script);
         Assert.Equal(string.Empty, options.OutputMessage);
+        Assert.Equal(string.Empty, options.LastTestMessage);
     }
 
     [Fact]
@@ -34,7 +35,8 @@ public class TcpServiceOptionsTests
             ["TcpService:Mode"] = "Sending",
             ["TcpService:InputMessage"] = "hi",
             ["TcpService:Script"] = "return message;",
-            ["TcpService:OutputMessage"] = "hi"
+            ["TcpService:OutputMessage"] = "hi",
+            ["TcpService:LastTestMessage"] = "last"
         };
 
         var configuration = new ConfigurationBuilder()
@@ -55,5 +57,6 @@ public class TcpServiceOptionsTests
         Assert.Equal("hi", options.InputMessage);
         Assert.Equal("return message;", options.Script);
         Assert.Equal("hi", options.OutputMessage);
+        Assert.Equal("last", options.LastTestMessage);
     }
 }

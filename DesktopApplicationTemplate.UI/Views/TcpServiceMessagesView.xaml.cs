@@ -19,7 +19,7 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             LogView.DataContext = new ServiceLogViewModel(service.DisplayName, service.ServiceType, service.Logs);
             if (DataContext is TcpServiceMessagesViewModel vm)
-                vm.ServiceName = service.DisplayName.Split(" - ").Last();
+                vm.SetService(service);
         }
     }
 }
