@@ -59,8 +59,6 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton(typeof(IServiceScreen<>), typeof(DesktopApplicationTemplate.Service.Services.ServiceScreen<>));
             services.AddSingleton<CloseConfirmationHelper>();
             services.AddSingleton<MainViewModel>();
-            services.AddSingleton<TcpServiceView>();
-            services.AddSingleton<TcpServiceViewModel>();
             services.AddSingleton<ServiceMessageTableViewModel>();
             services.AddSingleton<TcpServiceMessagesView>();
             services.AddTransient<TcpServiceMessagesViewModel>();

@@ -13,22 +13,6 @@ namespace DesktopApplicationTemplate.Tests
     public class TcpHttpViewModelLoggingTests
     {
         [Fact]
-        public void TcpService_ToggleServer_LogsMessage()
-        {
-            var logger = new Mock<ILoggingService>();
-            var helper = new SaveConfirmationHelper(logger.Object);
-            var vm = new TcpServiceViewModel(helper, new TcpServiceMessagesViewModel(), new ServiceMessageTableViewModel()) { Logger = logger.Object };
-            vm.ComputerIp = "127.0.0.1";
-            vm.ListeningPort = "5000";
-
-            vm.ToggleServerCommand.Execute(null);
-
-            logger.Verify(l => l.Log("Toggling server state", LogLevel.Debug), Times.Once);
-
-            ConsoleTestLogger.LogPass();
-        }
-
-        [Fact]
         public async Task HttpService_InvalidUrl_LogsWarning()
         {
             var logger = new Mock<ILoggingService>();

@@ -11,7 +11,7 @@ public class TcpServiceMessagesViewModelTests
     [Fact]
     public void DisplayLogs_RespectsLogLevelFilter()
     {
-        var vm = new TcpServiceMessagesViewModel
+        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel)
         {
             Logs =
             {
@@ -28,7 +28,7 @@ public class TcpServiceMessagesViewModelTests
     [Fact]
     public void ClearLogCommand_RemovesLogs()
     {
-        var vm = new TcpServiceMessagesViewModel
+        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel)
         {
             Logs = { new LogEntry { Message = "test" } }
         };
@@ -41,7 +41,7 @@ public class TcpServiceMessagesViewModelTests
     [Fact]
     public void OpenAdvancedSettingsCommand_RaisesEvent()
     {
-        var vm = new TcpServiceMessagesViewModel();
+        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel());
         var raised = false;
         vm.AdvancedSettingsRequested += (_, _) => raised = true;
 
@@ -53,7 +53,7 @@ public class TcpServiceMessagesViewModelTests
     [Fact]
     public void UpdateScript_SetsScriptContent()
     {
-        var vm = new TcpServiceMessagesViewModel();
+        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel());
 
         vm.UpdateScript("print('hi')");
 
@@ -63,7 +63,7 @@ public class TcpServiceMessagesViewModelTests
     [Fact]
     public void UpdateNetworkSettings_SetsProperties()
     {
-        var vm = new TcpServiceMessagesViewModel();
+        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel());
 
         vm.UpdateNetworkSettings("1.1.1.1", "1000", "2.2.2.2", "3.3.3.3", "2000", true);
 
@@ -78,7 +78,7 @@ public class TcpServiceMessagesViewModelTests
     [Fact]
     public void MessageCollections_ExposeGroupedData()
     {
-        var vm = new TcpServiceMessagesViewModel
+        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel)
         {
             Messages =
             {

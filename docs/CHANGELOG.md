@@ -117,9 +117,9 @@
 - Advanced TCP options support script-based message transformation with input and output previews.
 
 #### Changed
-- `TcpServiceViewModel` evaluates scripts asynchronously with streamlined server toggle logging.
 - Registered transient TCP view models and bound `TcpServiceOptions` configuration; each `ServiceViewModel` retains its own options.
 - Service persistence saves and restores `TcpServiceOptions` for TCP services.
+- Replaced `TcpServiceView` with `TcpServiceMessagesView` hosting a reusable message table.
 
 #### Fixed
 - Replaced `UriParser.GetSyntax` usage with `IsKnownScheme` and guarded TCP option restoration to avoid null references.
