@@ -68,13 +68,12 @@
 - TCP and SCP edit workflows now load existing options via `Load` methods, enabling DI-friendly construction.
 - Service list averages use one-way bindings to avoid runtime parse exceptions.
 - Main window declares behaviors namespace to prevent XAML parse errors.
-- Forms theme uses project namespaces without assembly qualifiers and relies on SDK implicit page inclusion to load the `FormField` style without duplicate XAML item errors.
+- Forms theme and views explicitly reference the `DesktopApplicationTemplate.UI` assembly for behaviors to ensure `TextBoxHintBehavior` is discovered.
 - System namespace references and form style resources compiled to eliminate XAML parse failures.
 - Marked main window `ContentFrame` public to allow navigation inspection.
 - Included `Forms.xaml` in theme resources with Page build action.
 - Installer window references `TextBoxHintBehavior.AutoToolTip` without design-time warnings.
 - `TextBoxHintBehavior` now uses `DependencyObject` parameters so the installer recognizes `AutoToolTip`.
-- Removed assembly qualifier from `HttpServiceView` behaviors namespace to restore build.
 - Added missing helper namespace in `App.xaml.cs`, restoring `SaveConfirmationHelper`, `CloseConfirmationHelper`, and `DependencyChecker` registrations.
 - Application startup tolerates a missing `MainView` service, preventing test crashes when the window isn't registered.
 - Application shutdown tolerates a missing `MainViewModel` service, preventing test crashes when it's not registered.
