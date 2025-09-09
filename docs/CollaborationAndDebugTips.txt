@@ -498,4 +498,5 @@ Codex Limitations noticed: `dotnet` CLI not installed; restore/build/test comman
 Effective Prompts / Instructions that worked: User request to confirm control references and build settings.
 Decisions & Rationale: Explicit project entries and namespace qualification ensure the control loads across views.
 Action Items: Rely on CI for validation.
+Latest Attempt: Rebuild could not be performed because the `dotnet` CLI is still unavailable; control resolution will rely on CI.
 Related Commits/PRs:
