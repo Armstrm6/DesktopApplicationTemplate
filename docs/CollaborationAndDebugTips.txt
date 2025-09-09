@@ -118,6 +118,7 @@ Another Attempt: After typing view-model dependencies as interfaces, the `dotnet
 Another Attempt: After relocating logging abstractions to the core library, the `dotnet` CLI remains unavailable; relying on CI for build and tests.
 Latest Attempt: After guarding client certificate usage for cross-platform support, the `dotnet` command is still missing; build and tests deferred to CI.
 Another Attempt: After replacing explicit null checks with throw helpers in MqttService, the `dotnet` CLI remains unavailable; restore, build, and tests cannot run locally, so CI will verify.
+Another Attempt: After adding a reusable ServiceLogView component, the `dotnet` command is still missing; relying on CI for build and test.
 Latest Attempt: After replacing event-handler casts with property pattern matching, the `dotnet` CLI is still missing; restore, build, and test commands cannot run locally and CI will verify.
 Latest Attempt: During object and collection initializer refactor, the `dotnet` command remained unavailable; restore, build, and test commands could not run and CI will verify.
 Another Attempt: After removing the keyboard release call, the `dotnet` command remains unavailable; build and tests deferred to CI.

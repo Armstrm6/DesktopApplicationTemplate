@@ -121,6 +121,11 @@ namespace DesktopApplicationTemplate.UI.Views
                     navm.UpdateNetworkConfiguration(_viewModel.NetworkConfig.CurrentConfiguration);
                 }
 
+                if (svc.ServicePage is IServiceLogHost logHost)
+                {
+                    logHost.SetServiceContext(svc);
+                }
+
                 if (svc.ServiceType == "TCP" && svc.ServicePage.DataContext is TcpServiceMessagesViewModel tcpVm)
                 {
                     tcpVm.AdvancedSettingsRequested += (_, _) =>

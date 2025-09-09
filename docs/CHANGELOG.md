@@ -36,6 +36,7 @@
 - Average execution time displayed next to each service name in the service list.
 - Text inputs now automatically display tooltips derived from bound property names, guiding expected user input.
 - Reusable `AdvancedConfigViewModelBase<TOptions>` and `AdvancedConfigButtonBar` unify Save/Back logic across advanced configuration views.
+- Reusable `ServiceLogView` control and `ServiceLogViewModel` provide consistent log panels for the main window and services.
 
 #### Changed
 - Service selection window wraps service icons within bounds using a fixed-width panel.
