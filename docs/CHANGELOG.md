@@ -89,6 +89,7 @@
 - ServiceLogView.xaml included as a Page and HttpServiceView references it via the project namespace, resolving designer errors.
 - Added parameterless constructor resolving dependencies for `HttpServiceView`, enabling the XAML designer to load.
 - Removed assembly-qualified namespaces from HTTP and MQTT views so converters and enums resolve during build.
+- Updated Roslyn scripting packages to 4.12.0 to resolve dependency conflicts.
 
 ### HID Service
 #### Added
