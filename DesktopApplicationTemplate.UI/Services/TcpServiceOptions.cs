@@ -38,6 +38,11 @@ namespace DesktopApplicationTemplate.UI.Services
         public TcpServiceMode Mode { get; set; } = TcpServiceMode.Listening;
 
         /// <summary>
+        /// Type label for the service.
+        /// </summary>
+        public string ServiceType { get; set; } = string.Empty;
+
+        /// <summary>
         /// Sample message used for testing script transformations.
         /// </summary>
         public string InputMessage { get; set; } = string.Empty;

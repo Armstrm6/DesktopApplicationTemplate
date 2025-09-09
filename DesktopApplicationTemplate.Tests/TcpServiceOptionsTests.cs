@@ -18,6 +18,7 @@ public class TcpServiceOptionsTests
         Assert.Equal(0, options.Port);
         Assert.False(options.UseUdp);
         Assert.Equal(TcpServiceMode.Listening, options.Mode);
+        Assert.Equal(string.Empty, options.ServiceType);
         Assert.Equal(string.Empty, options.InputMessage);
         Assert.Equal(string.Empty, options.Script);
         Assert.Equal(string.Empty, options.OutputMessage);
@@ -33,6 +34,7 @@ public class TcpServiceOptionsTests
             ["TcpService:Port"] = "9000",
             ["TcpService:UseUdp"] = "true",
             ["TcpService:Mode"] = "Sending",
+            ["TcpService:ServiceType"] = "Custom",
             ["TcpService:InputMessage"] = "hi",
             ["TcpService:Script"] = "return message;",
             ["TcpService:OutputMessage"] = "hi",
@@ -54,6 +56,7 @@ public class TcpServiceOptionsTests
         Assert.Equal(9000, options.Port);
         Assert.True(options.UseUdp);
         Assert.Equal(TcpServiceMode.Sending, options.Mode);
+        Assert.Equal("Custom", options.ServiceType);
         Assert.Equal("hi", options.InputMessage);
         Assert.Equal("return message;", options.Script);
         Assert.Equal("hi", options.OutputMessage);

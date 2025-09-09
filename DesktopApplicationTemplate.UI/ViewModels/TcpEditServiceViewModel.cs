@@ -35,6 +35,7 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
         Port = _options.Port;
         UseUdp = _options.UseUdp;
         Mode = _options.Mode;
+        ServiceType = _options.ServiceType;
     }
 
 
@@ -127,6 +128,7 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
         _options.Port = Port;
         _options.UseUdp = UseUdp;
         _options.Mode = Mode;
+        _options.ServiceType = ServiceType;
         RaiseServiceSaved(_options);
     }
 

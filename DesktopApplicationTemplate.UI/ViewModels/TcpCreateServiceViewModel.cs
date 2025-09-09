@@ -118,6 +118,7 @@ public class TcpCreateServiceViewModel : ServiceCreateViewModelBase<TcpServiceOp
         Options.Port = Port;
         Options.UseUdp = UseUdp;
         Options.Mode = Mode;
+        Options.ServiceType = ServiceType;
         Logger?.Log("TCP create options finished", LogLevel.Debug);
         RaiseServiceSaved(Options);
     }
