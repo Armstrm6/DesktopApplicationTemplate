@@ -53,6 +53,7 @@
 - Replaced `as` cast and null check with pattern matching in `SettingsPage.NavigateBack`.
 - Removed `KeyboardHelper` and exit hooks; simulated key presses manage their own cleanup.
 - Removed `MainView` KeyDown handler; pressing Escape no longer returns to the home page.
+- Removed unused `HomePage` view and `PackUriSchemeInitializer`.
 
 #### Fixed
 - TCP and SCP edit workflows now load existing options via `Load` methods, enabling DI-friendly construction.
@@ -195,6 +196,7 @@
 - Removed custom `ILoggingService` and service registrations in favor of `Microsoft.Extensions.Logging` with console and debug providers.
 - Moved `ILoggingService`, `LogLevel`, and `LogEntry` into the core library so tests no longer depend on the Windows project.
 - `LogEntry` now stores colors as hex strings instead of `System.Windows.Media.Brush`.
+- Log displays now use a common style and show newest entries first.
 
 ### Documentation & CI
 #### Added

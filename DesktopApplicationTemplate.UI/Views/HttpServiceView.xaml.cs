@@ -41,29 +41,5 @@ namespace DesktopApplicationTemplate.UI.Views
             help.ShowDialog();
         }
 
-        private void LogLevelBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (LogLevelBox.SelectedItem is ComboBoxItem item)
-            {
-                if (_logger is LoggingService concrete)
-                {
-                    switch (item.Content?.ToString())
-                    {
-                        case "Warning":
-                            concrete.MinimumLevel = LogLevel.Warning;
-                            break;
-                        case "Error":
-                            concrete.MinimumLevel = LogLevel.Error;
-                            break;
-                        case "Debug":
-                            concrete.MinimumLevel = LogLevel.Debug;
-                            break;
-                        default:
-                            concrete.MinimumLevel = LogLevel.Debug;
-                            break;
-                    }
-                }
-            }
-        }
     }
 }

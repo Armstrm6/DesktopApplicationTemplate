@@ -303,5 +303,5 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
     }
 
     private void OnLogAdded(LogEntry entry)
-        => LogEntries.Add(entry);
+        => LogEntries.Insert(0, entry);
 }
