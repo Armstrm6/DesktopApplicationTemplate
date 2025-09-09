@@ -57,6 +57,7 @@
 - Removed `KeyboardHelper` and exit hooks; simulated key presses manage their own cleanup.
 - Removed `MainView` KeyDown handler; pressing Escape no longer returns to the home page.
 - Removed unused `HomePage` view and `PackUriSchemeInitializer`.
+- TCP create and edit views inline UDP and mode options, removing the separate advanced configuration view.
 
 #### Fixed
 - TCP and SCP edit workflows now load existing options via `Load` methods, enabling DI-friendly construction.

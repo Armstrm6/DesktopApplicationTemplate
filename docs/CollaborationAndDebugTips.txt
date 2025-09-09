@@ -370,6 +370,7 @@ Decisions & Rationale: Reduce duplication and simplify maintenance by sharing fi
 Action Items: Rely on CI for test execution.
 Related Commits/PRs: e6a90a3, ed1d219
 Latest Attempt: After limiting service creation options, the `dotnet` command remains unavailable; tests could not run locally and CI will verify.
+Another Attempt: After inlining TCP advanced options into create/edit views, the `dotnet` command is still missing; restore, build, and test commands could not run and CI will verify.
 
 [2025-09-16 10:00] Topic: WindowsFact CA1416 guard
 Context: Build failed due to Windows-only `Thread.SetApartmentState` usage in a WindowsFact test case.

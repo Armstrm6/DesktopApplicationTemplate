@@ -12,6 +12,9 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
     private TcpServiceOptions _options = new();
     private string _host = string.Empty;
     private int _port;
+    private bool _useUdp;
+    private TcpServiceMode _mode;
+    private string _serviceType = "TCP";
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TcpEditServiceViewModel"/> class.
@@ -30,6 +33,8 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
         ServiceName = serviceName ?? throw new ArgumentNullException(nameof(serviceName));
         Host = _options.Host;
         Port = _options.Port;
+        UseUdp = _options.UseUdp;
+        Mode = _options.Mode;
     }
 
 
@@ -69,6 +74,47 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
         }
     }
 
+    /// <summary>
+    /// Indicates whether UDP should be used instead of TCP.
+    /// </summary>
+    public bool UseUdp
+    {
+        get => _useUdp;
+        set { _useUdp = value; OnPropertyChanged(); }
+    }
+
+    /// <summary>
+    /// Operating mode for the service.
+    /// </summary>
+    public TcpServiceMode Mode
+    {
+        get => _mode;
+        set { _mode = value; OnPropertyChanged(); }
+    }
+
+    /// <summary>
+    /// Available service modes.
+    /// </summary>
+    public TcpServiceMode[] Modes { get; } = (TcpServiceMode[])Enum.GetValues(typeof(TcpServiceMode));
+
+    /// <summary>
+    /// Type label for the service.
+    /// </summary>
+    public string ServiceType
+    {
+        get => _serviceType;
+        set
+        {
+            _serviceType = value;
+            var error = Rule.ValidateRequired(value, "Service type");
+            if (error is not null)
+                AddError(nameof(ServiceType), error);
+            else
+                ClearErrors(nameof(ServiceType));
+            OnPropertyChanged();
+        }
+    }
+
     /// <inheritdoc />
     protected override void OnSave()
     {
@@ -79,6 +125,8 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
         }
         _options.Host = Host;
         _options.Port = Port;
+        _options.UseUdp = UseUdp;
+        _options.Mode = Mode;
         RaiseServiceSaved(_options);
     }
 
@@ -88,9 +136,7 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
     /// <inheritdoc />
     protected override void OnAdvancedConfig()
     {
-        _options.Host = Host;
-        _options.Port = Port;
-        RaiseAdvancedConfigRequested(_options);
+        // Advanced configuration removed.
     }
 }
 
