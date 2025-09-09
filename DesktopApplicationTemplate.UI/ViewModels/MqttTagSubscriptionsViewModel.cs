@@ -7,6 +7,7 @@ using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Helpers;
+using System.Runtime.Versioning;
 using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.Services;
 using Microsoft.Extensions.Options;
@@ -17,7 +18,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// <summary>
 /// View model for managing MQTT topic subscriptions and test messages.
 /// </summary>
-    public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingViewModel
+[SupportedOSPlatform("windows")]
+public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingViewModel
     {
     private readonly MqttService _service;
     private readonly MqttServiceOptions _options;
@@ -303,5 +305,5 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
     }
 
     private void OnLogAdded(LogEntry entry)
-        => LogEntries.Add(entry);
+        => LogEntries.Insert(0, entry);
 }

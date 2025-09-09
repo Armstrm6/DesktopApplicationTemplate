@@ -3,6 +3,7 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:shared="clr-namespace:DesktopApplicationTemplate.UI.Views.Shared"
       mc:Ignorable="d">
     <Grid Margin="20">
         <Grid.RowDefinitions>
@@ -33,27 +34,13 @@
             </StackPanel>
         </Grid>
 
-        <StackPanel Grid.Row="1" Orientation="Vertical">
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
-                <TextBlock Text="Log Level" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                <ComboBox Width="150" SelectedValue="{Binding LogLevelFilter, Mode=TwoWay}">
-                    <ComboBoxItem Content="Debug"/>
-                    <ComboBoxItem Content="Warning"/>
-                    <ComboBoxItem Content="Error"/>
-                    <ComboBoxItem Content="Critical"/>
-                </ComboBox>
-                <Button Content="Export Log" Command="{Binding ExportLogCommand}" Margin="10,0,0,0" Width="100"/>
-                <Button Content="Clear Log" Command="{Binding ClearLogCommand}" Margin="10,0,0,0" Width="100"/>
-                <Button Content="Update Log" Command="{Binding RefreshLogCommand}" Margin="10,0,0,0" Width="100"/>
-                <Button Content="Advanced Settings" Command="{Binding OpenAdvancedSettingsCommand}" Margin="10,0,0,0" Width="150"/>
-            </StackPanel>
-            <ListBox ItemsSource="{Binding DisplayLogs}" Height="200">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding Message}" Foreground="{Binding Color}"/>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-        </StackPanel>
+        <Grid Grid.Row="1" Margin="0,10,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Button Content="Advanced Settings" Command="{Binding OpenAdvancedSettingsCommand}" Width="150" HorizontalAlignment="Right" Margin="0,0,0,5"/>
+            <shared:ServiceLogView Grid.Row="1" x:Name="LogView" />
+        </Grid>
     </Grid>
 </Page>

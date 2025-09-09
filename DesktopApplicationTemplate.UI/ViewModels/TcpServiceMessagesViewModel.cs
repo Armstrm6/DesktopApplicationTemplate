@@ -34,7 +34,20 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public ObservableCollection<LogEntry> Logs { get; } = new();
 
         /// <inheritdoc />
-        public ILoggingService? Logger { get; set; }
+        private ILoggingService? _logger;
+        public ILoggingService? Logger
+        {
+            get => _logger;
+            set
+            {
+                if (_logger == value) return;
+                if (_logger is not null)
+                    _logger.LogAdded -= OnLogAdded;
+                _logger = value;
+                if (_logger is not null)
+                    _logger.LogAdded += OnLogAdded;
+            }
+        }
 
         /// <summary>Gets or sets the minimum log level to display.</summary>
         public LogLevel LogLevelFilter
@@ -141,5 +154,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             File.WriteAllLines(path, DisplayLogs.Select(l => l.Message));
             Logger?.Log($"TCP logs exported to {path}", LogLevel.Debug);
         }
+
+        private void OnLogAdded(LogEntry entry) => Logs.Insert(0, entry);
     }
 }

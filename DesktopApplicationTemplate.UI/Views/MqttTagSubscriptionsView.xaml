@@ -8,6 +8,7 @@
       xmlns:sys="clr-namespace:System;assembly=System.Runtime"
       xmlns:behaviors="clr-namespace:DesktopApplicationTemplate.UI.Behaviors"
       xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
+      xmlns:shared="clr-namespace:DesktopApplicationTemplate.UI.Views.Shared"
       mc:Ignorable="d">
     <Page.Resources>
         <ObjectDataProvider x:Key="QoSValues" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
@@ -88,14 +89,6 @@
         </StackPanel>
 
         <!-- Log entries -->
-        <Expander Grid.Row="3" Margin="0,10,0,0" Header="Logs" IsExpanded="False">
-            <ListBox ItemsSource="{Binding LogEntries}">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding Message}" Foreground="{Binding Color}"/>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-        </Expander>
+        <shared:ServiceLogView Grid.Row="3" Margin="0,10,0,0" x:Name="LogView" />
     </Grid>
 </Page>

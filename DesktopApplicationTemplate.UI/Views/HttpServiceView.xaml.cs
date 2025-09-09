@@ -15,13 +15,14 @@ using System.Windows.Shapes;
 using DesktopApplicationTemplate.UI.Services;
 
 using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.UI.ViewModels;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
     /// <summary>
     /// Interaction logic for HttpServiceView.xaml
     /// </summary>
-    public partial class HttpServiceView : Page
+    public partial class HttpServiceView : Page, IServiceLogHost
     {
         private readonly ViewModels.HttpServiceViewModel _viewModel;
         private readonly ILoggingService _logger;
@@ -35,35 +36,16 @@ namespace DesktopApplicationTemplate.UI.Views
             _viewModel.Logger = _logger;
         }
 
+        public void SetServiceContext(ServiceViewModel service)
+        {
+            LogView.DataContext = new ServiceLogViewModel(service.DisplayName, service.ServiceType, service.Logs);
+        }
+
         private void Help_Click(object sender, RoutedEventArgs e)
         {
             var help = new AsciiHelpWindow();
             help.ShowDialog();
         }
 
-        private void LogLevelBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (LogLevelBox.SelectedItem is ComboBoxItem item)
-            {
-                if (_logger is LoggingService concrete)
-                {
-                    switch (item.Content?.ToString())
-                    {
-                        case "Warning":
-                            concrete.MinimumLevel = LogLevel.Warning;
-                            break;
-                        case "Error":
-                            concrete.MinimumLevel = LogLevel.Error;
-                            break;
-                        case "Debug":
-                            concrete.MinimumLevel = LogLevel.Debug;
-                            break;
-                        default:
-                            concrete.MinimumLevel = LogLevel.Debug;
-                            break;
-                    }
-                }
-            }
-        }
     }
 }

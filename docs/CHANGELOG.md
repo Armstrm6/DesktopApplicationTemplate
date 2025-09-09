@@ -36,6 +36,7 @@
 - Average execution time displayed next to each service name in the service list.
 - Text inputs now automatically display tooltips derived from bound property names, guiding expected user input.
 - Reusable `AdvancedConfigViewModelBase<TOptions>` and `AdvancedConfigButtonBar` unify Save/Back logic across advanced configuration views.
+- Reusable `ServiceLogView` control and `ServiceLogViewModel` provide consistent log panels for the main window and services.
 
 #### Changed
 - Service selection window wraps service icons within bounds using a fixed-width panel.
@@ -53,6 +54,7 @@
 - Replaced `as` cast and null check with pattern matching in `SettingsPage.NavigateBack`.
 - Removed `KeyboardHelper` and exit hooks; simulated key presses manage their own cleanup.
 - Removed `MainView` KeyDown handler; pressing Escape no longer returns to the home page.
+- Removed unused `HomePage` view and `PackUriSchemeInitializer`.
 
 #### Fixed
 - TCP and SCP edit workflows now load existing options via `Load` methods, enabling DI-friendly construction.
@@ -69,6 +71,10 @@
 - Application shutdown tolerates a missing `MainViewModel` service, preventing test crashes when it's not registered.
 - SCP service creation validates required fields and disables the Create command when inputs are invalid.
 - Marked main window as Windows-only to silence cross-platform analyzer warnings.
+- Corrected `LogEntry` namespace usage and removed obsolete global log handler to restore build after introducing the shared log view.
+- Fixed ServiceLogView namespace references and command delegates so main, HTTP, and TCP views compile consistently.
+- Qualified shared log control references and removed redundant assembly-qualified namespaces so converters, behaviors, and editors resolve correctly across views.
+- Aligned ServiceLogViewModel with the shared `LogEntry` model and added explicit assembly namespaces so logs and converters compile across service views.
 
 ### HID Service
 #### Added
@@ -195,6 +201,7 @@
 - Removed custom `ILoggingService` and service registrations in favor of `Microsoft.Extensions.Logging` with console and debug providers.
 - Moved `ILoggingService`, `LogLevel`, and `LogEntry` into the core library so tests no longer depend on the Windows project.
 - `LogEntry` now stores colors as hex strings instead of `System.Windows.Media.Brush`.
+- Log displays now use a common style and show newest entries first.
 
 ### Documentation & CI
 #### Added
