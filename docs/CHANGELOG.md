@@ -64,6 +64,7 @@
 - Included `Forms.xaml` in theme resources with Page build action.
 - Installer window references `TextBoxHintBehavior.AutoToolTip` without design-time warnings.
 - `TextBoxHintBehavior` now uses `DependencyObject` parameters so the installer recognizes `AutoToolTip`.
+- Added missing helper namespace in `App.xaml.cs`, restoring `SaveConfirmationHelper`, `CloseConfirmationHelper`, and `DependencyChecker` registrations.
 - Application startup tolerates a missing `MainView` service, preventing test crashes when the window isn't registered.
 - Application shutdown tolerates a missing `MainViewModel` service, preventing test crashes when it's not registered.
 - SCP service creation validates required fields and disables the Create command when inputs are invalid.
