@@ -35,7 +35,8 @@ namespace DesktopApplicationTemplate.UI.Services
                         Mode = s.TcpOptions.Mode,
                         InputMessage = s.TcpOptions.InputMessage,
                         Script = s.TcpOptions.Script,
-                        OutputMessage = s.TcpOptions.OutputMessage
+                        OutputMessage = s.TcpOptions.OutputMessage,
+                        LastTestMessage = s.TcpOptions.LastTestMessage
                     };
                 }
 
@@ -159,6 +160,7 @@ namespace DesktopApplicationTemplate.UI.Services
                             value.InputMessage = info.TcpOptions.InputMessage;
                             value.Script = info.TcpOptions.Script;
                             value.OutputMessage = info.TcpOptions.OutputMessage;
+                            value.LastTestMessage = info.TcpOptions.LastTestMessage;
                         }
                     }
                     if ((info.ServiceType == "FTP Server" || info.ServiceType == "FTP") && info.FtpOptions != null)

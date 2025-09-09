@@ -381,6 +381,13 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             {
                 Services[i].Order = i;
             }
+            foreach (var svc in Services)
+            {
+                if (svc.ServicePage?.DataContext is TcpServiceMessagesViewModel tcpVm)
+                {
+                    tcpVm.Save();
+                }
+            }
             ServicePersistence.Save(Services);
         }
 

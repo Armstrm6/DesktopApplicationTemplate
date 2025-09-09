@@ -51,5 +51,10 @@ namespace DesktopApplicationTemplate.UI.Services
         /// Resulting message after executing <see cref="Script"/>.
         /// </summary>
         public string OutputMessage { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Most recent test message entered in the TCP messages view.
+        /// </summary>
+        public string LastTestMessage { get; set; } = string.Empty;
     }
 }

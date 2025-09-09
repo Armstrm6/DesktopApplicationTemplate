@@ -111,7 +111,8 @@ namespace DesktopApplicationTemplate.Tests
                             Mode = TcpServiceMode.Sending,
                             InputMessage = "in",
                             Script = "return message;",
-                            OutputMessage = "out"
+                            OutputMessage = "out",
+                            LastTestMessage = "last"
                         }
                     }
                 };
@@ -126,6 +127,7 @@ namespace DesktopApplicationTemplate.Tests
                 opt.InputMessage = "changed";
                 opt.Script = "changed";
                 opt.OutputMessage = "changed";
+                opt.LastTestMessage = "changed";
 
                 var loaded = ServicePersistence.Load();
                 var info = Assert.Single(loaded);
@@ -137,6 +139,7 @@ namespace DesktopApplicationTemplate.Tests
                 Assert.Equal("in", info.TcpOptions.InputMessage);
                 Assert.Equal("return message;", info.TcpOptions.Script);
                 Assert.Equal("out", info.TcpOptions.OutputMessage);
+                Assert.Equal("last", info.TcpOptions.LastTestMessage);
 
                 // global options restored
                 var restored = host.Services.GetRequiredService<IOptions<TcpServiceOptions>>().Value;
@@ -147,6 +150,7 @@ namespace DesktopApplicationTemplate.Tests
                 Assert.Equal("in", restored.InputMessage);
                 Assert.Equal("return message;", restored.Script);
                 Assert.Equal("out", restored.OutputMessage);
+                Assert.Equal("last", restored.LastTestMessage);
             }
             finally
             {

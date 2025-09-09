@@ -91,11 +91,14 @@ public class TcpServiceMessagesViewModelTests
     [Fact]
     public void ServiceName_NoPriorMessage_UsesDefault()
     {
-        var routing = new MessageRoutingService();
-        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), routing)
+        var service = new ServiceViewModel
         {
-            ServiceName = "svc"
+            DisplayName = "TCP - svc",
+            ServiceType = "TCP",
+            TcpOptions = new TcpServiceOptions()
         };
+        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
+        vm.SetService(service);
 
         vm.TestMessage.Should().Be("svc-PEAK-123456789");
     }
@@ -103,13 +106,34 @@ public class TcpServiceMessagesViewModelTests
     [Fact]
     public void ServiceName_WithPriorMessage_UsesStored()
     {
-        var routing = new MessageRoutingService();
-        routing.UpdateMessage("svc", "hello");
-        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), routing)
+        var service = new ServiceViewModel
         {
-            ServiceName = "svc"
+            DisplayName = "TCP - svc",
+            ServiceType = "TCP",
+            TcpOptions = new TcpServiceOptions { LastTestMessage = "hello" }
         };
+        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
+        vm.SetService(service);
 
         vm.TestMessage.Should().Be("hello");
+    }
+
+    [Fact]
+    public void Save_UpdatesLastTestMessage()
+    {
+        var options = new TcpServiceOptions();
+        var service = new ServiceViewModel
+        {
+            DisplayName = "TCP - svc",
+            ServiceType = "TCP",
+            TcpOptions = options
+        };
+        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
+        vm.SetService(service);
+        vm.TestMessage = "test";
+
+        vm.Save();
+
+        options.LastTestMessage.Should().Be("test");
     }
 }

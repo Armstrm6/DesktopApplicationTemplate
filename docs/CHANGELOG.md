@@ -59,6 +59,7 @@
 - Removed unused `HomePage` view and `PackUriSchemeInitializer`.
 - TCP create and edit views inline UDP and mode options, removing the separate advanced configuration view.
 - TCP service messages view removes script editors and adds a test message input bound to view model.
+- TCP options persist the last test message and preload it when reopening the service.
 
 #### Fixed
 - TCP and SCP edit workflows now load existing options via `Load` methods, enabling DI-friendly construction.
