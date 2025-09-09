@@ -2,8 +2,10 @@ using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI.Helpers;
 using FluentAssertions;
 using Xunit;
+using System.Threading.Tasks;
 
 namespace DesktopApplicationTemplate.Tests;
 
@@ -97,10 +99,13 @@ public class TcpServiceMessagesViewModelTests
             ServiceType = "TCP",
             TcpOptions = new TcpServiceOptions()
         };
-        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
+        var routing = new MessageRoutingService();
+        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), routing);
         vm.SetService(service);
 
         vm.TestMessage.Should().Be("svc-PEAK-123456789");
+        routing.TryGetMessage("svc", out var message).Should().BeTrue();
+        message.Should().Be("svc-PEAK-123456789");
     }
 
     [Fact]
@@ -170,5 +175,33 @@ public class TcpServiceMessagesViewModelTests
         vm.SetService(service);
 
         vm.Script.Should().Be("return message;");
+    }
+
+    [Fact]
+    public async Task ScriptEditor_RunCommand_ProcessesMessage()
+    {
+        var editor = new ScriptEditorViewModel();
+        editor.TestMessage = "hello";
+
+        await ((AsyncRelayCommand)editor.RunCommand).ExecuteAsync(null);
+
+        editor.OutputMessage.Should().Be("hello");
+    }
+
+    [Fact]
+    public async Task ScriptEditor_SaveCommand_RaisesRequestCloseWithLastMessage()
+    {
+        var editor = new ScriptEditorViewModel();
+        editor.TestMessage = "msg";
+        await ((AsyncRelayCommand)editor.RunCommand).ExecuteAsync(null);
+
+        string? script = null;
+        string? last = null;
+        editor.RequestClose += (_, e) => { script = e.Script; last = e.TestMessage; };
+
+        editor.SaveCommand.Execute(null);
+
+        script.Should().Contain("Process");
+        last.Should().Be("msg");
     }
 }
