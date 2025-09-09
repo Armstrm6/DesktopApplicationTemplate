@@ -78,6 +78,7 @@
 - Removed assembly qualifiers from internal namespaces and explicitly referenced shared views so converters, behaviors, and shared controls resolve across XAML views.
 - Qualified shared log control references and removed redundant assembly-qualified namespaces so converters, behaviors, and editors resolve correctly across views.
 - Aligned ServiceLogViewModel with the shared `LogEntry` model and added explicit assembly namespaces so logs and converters compile across service views.
+- ServiceLogView.xaml included as a Page and HttpServiceView references it via the project namespace, resolving designer errors.
 - Added parameterless constructor resolving dependencies for `HttpServiceView`, enabling the XAML designer to load.
 - Removed assembly-qualified namespaces from HTTP and MQTT views so converters and enums resolve during build.
 
