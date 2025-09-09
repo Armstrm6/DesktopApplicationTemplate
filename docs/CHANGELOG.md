@@ -91,6 +91,7 @@
 - Updated Roslyn scripting packages to 4.12.0 to resolve dependency conflicts.
 - Replaced DocumentLine.BackgroundColor usage with a line transformer and switched async lambdas to AsyncRelayCommand to satisfy threading analyzers.
 - Extracted `StringNullOrEmptyToVisibilityConverter` into its own file so XAML views compile independently.
+- Qualified helper namespaces with explicit assembly references so `StringNullOrEmptyToVisibilityConverter` resolves across service views.
 - EditorButtonBar included as a Page with code-behind dependency and referenced via an assembly-qualified views namespace across consuming views.
 
 ### HID Service
