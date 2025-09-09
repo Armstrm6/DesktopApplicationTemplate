@@ -18,6 +18,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
     {
         private LogLevel _logLevelFilter = LogLevel.Debug;
 
+        /// <summary>Table view model for displaying message history.</summary>
+        public ServiceMessageTableViewModel MessageTable { get; }
+
         /// <summary>Collection of TCP message rows.</summary>
         public ObservableCollection<TcpMessageRow> Messages { get; } = new();
 
@@ -101,8 +104,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         /// <summary>Whether UDP mode is enabled.</summary>
         public bool IsUdp { get; private set; }
 
-        public TcpServiceMessagesViewModel()
+        public TcpServiceMessagesViewModel(ServiceMessageTableViewModel messageTable)
         {
+            MessageTable = messageTable ?? throw new ArgumentNullException(nameof(messageTable));
+
             Messages.CollectionChanged += (_, _) =>
             {
                 OnPropertyChanged(nameof(IncomingData));

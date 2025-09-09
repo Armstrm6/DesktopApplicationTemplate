@@ -130,23 +130,28 @@ namespace DesktopApplicationTemplate.UI.Views
                 {
                     tcpVm.AdvancedSettingsRequested += (_, _) =>
                     {
-                        var settingsView = App.AppHost.Services.GetRequiredService<TcpServiceView>();
-                        if (settingsView.DataContext is TcpServiceViewModel tvm)
+                        var vm = App.AppHost.Services.GetRequiredService<TcpEditServiceViewModel>();
+                        vm.ServiceType = svc.ServiceType;
+                        vm.Load(svc.DisplayName.Split(" - ").Last(), svc.TcpOptions ?? new TcpServiceOptions());
+                        var editView = App.AppHost.Services.GetRequiredService<TcpEditServiceView>();
+                        editView.Initialize(vm);
+
+                        vm.ServiceSaved += (name, opts) =>
                         {
-                            tvm.Load(svc.TcpOptions ?? new TcpServiceOptions());
-                            tvm.Saved += (_, _) =>
-                            {
-                                if (svc.ServicePage != null)
-                                    ShowPage(svc.ServicePage);
-                                _viewModel.SaveServices();
-                            };
-                            tvm.BackRequested += (_, _) =>
-                            {
-                                if (svc.ServicePage != null)
-                                    ShowPage(svc.ServicePage);
-                            };
-                        }
-                        ShowPage(settingsView);
+                            svc.DisplayName = $"{vm.ServiceType} - {name}";
+                            svc.ServiceType = vm.ServiceType;
+                            svc.TcpOptions = opts;
+                            if (svc.ServicePage != null)
+                                ShowPage(svc.ServicePage);
+                            _viewModel.SaveServices();
+                        };
+                        vm.EditCancelled += () =>
+                        {
+                            if (svc.ServicePage != null)
+                                ShowPage(svc.ServicePage);
+                        };
+
+                        ShowPage(editView);
                     };
                 }
             }

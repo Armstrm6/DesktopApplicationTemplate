@@ -372,6 +372,8 @@ Related Commits/PRs: e6a90a3, ed1d219
 Latest Attempt: After limiting service creation options, the `dotnet` command remains unavailable; tests could not run locally and CI will verify.
 Another Attempt: After inlining TCP advanced options into create/edit views, the `dotnet` command is still missing; restore, build, and test commands could not run and CI will verify.
 
+Latest Attempt: After removing TcpServiceView and updating navigation, the `dotnet` command remains unavailable; relying on CI for tests.
+
 [2025-09-16 10:00] Topic: WindowsFact CA1416 guard
 Context: Build failed due to Windows-only `Thread.SetApartmentState` usage in a WindowsFact test case.
 Observations: Wrapped `SetApartmentState` call in `OperatingSystem.IsWindows` check; CA1416 no longer triggers but UI tests still fail to compile because the WPF workload isn't available on Linux.

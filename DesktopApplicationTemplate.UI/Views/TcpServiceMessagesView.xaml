@@ -38,10 +38,12 @@
         <Grid Grid.Row="1" Margin="0,10,0,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <Button Content="Advanced Settings" Command="{Binding OpenAdvancedSettingsCommand}" Width="150" HorizontalAlignment="Right" Margin="0,0,0,5"/>
-            <shared:ServiceLogView Grid.Row="1" x:Name="LogView" />
+            <shared:ServiceMessageTableView Grid.Row="1" DataContext="{Binding MessageTable}" Margin="0,0,0,10" />
+            <shared:ServiceLogView Grid.Row="2" x:Name="LogView" />
         </Grid>
     </Grid>
 </Page>
