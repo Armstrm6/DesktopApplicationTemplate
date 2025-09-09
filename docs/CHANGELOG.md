@@ -74,6 +74,7 @@
 - Corrected `LogEntry` namespace usage and removed obsolete global log handler to restore build after introducing the shared log view.
 - Fixed ServiceLogView namespace references and command delegates so main, HTTP, and TCP views compile consistently.
 - Qualified shared log control references and removed redundant assembly-qualified namespaces so converters, behaviors, and editors resolve correctly across views.
+- Aligned ServiceLogViewModel with the shared `LogEntry` model and added explicit assembly namespaces so logs and converters compile across service views.
 
 ### HID Service
 #### Added
