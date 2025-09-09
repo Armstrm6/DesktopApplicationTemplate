@@ -19,6 +19,7 @@
 - Core library targets `net8.0` to avoid Windows targeting pack restore errors.
 - Adjusted solution and project references so cross-platform assemblies depend only on the core while Windows projects also reference `DesktopApplicationTemplate.Windows`.
 - Replaced `ServiceCreated`/`ServiceUpdated` with unified `ServiceSaved` events and centralized `ServiceName` validation in `ServiceEditorViewModelBase`.
+- Windows service host sets explicit `ServiceName` and `DisplayName` values with the application name and installer uses the same constant.
 
 #### Fixed
 - Event raising helpers in `ServiceEditorViewModelBase` invoked themselves recursively; now invoke events directly.

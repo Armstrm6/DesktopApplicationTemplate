@@ -1,11 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<UseWindowsService>true</UseWindowsService>
+        <UseWindowsService>true</UseWindowsService>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AssemblyName>DesktopApplicationTemplateService</AssemblyName>
+    <RootNamespace>DesktopApplicationTemplate.Service</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
