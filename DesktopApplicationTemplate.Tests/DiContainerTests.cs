@@ -21,6 +21,7 @@ public class DiContainerTests
         services.AddSingleton<IServiceRule, ServiceRule>();
         services.AddSingleton<MqttService>();
         services.AddSingleton<MqttTagSubscriptionsViewModel>();
+        services.AddSingleton<ServiceMessageTableViewModel>();
         services.AddTransient<TcpCreateServiceViewModel>();
         services.AddTransient<TcpEditServiceViewModel>();
         services.AddTransient<TcpAdvancedConfigViewModel>();
@@ -45,6 +46,7 @@ public class DiContainerTests
         Assert.NotNull(provider.GetRequiredService<TcpEditServiceViewModel>());
         Assert.NotNull(provider.GetRequiredService<TcpAdvancedConfigViewModel>());
         Assert.NotNull(provider.GetRequiredService<TcpServiceMessagesViewModel>());
+        Assert.NotNull(provider.GetRequiredService<ServiceMessageTableViewModel>());
         Assert.NotNull(provider.GetRequiredService<TcpServiceViewModel>());
     }
 }

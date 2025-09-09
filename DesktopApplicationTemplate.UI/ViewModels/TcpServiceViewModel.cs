@@ -15,6 +15,9 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
     {
         private readonly TcpServiceMessagesViewModel _messagesViewModel;
 
+        /// <summary>Table view model for displaying message history.</summary>
+        public ServiceMessageTableViewModel MessageTable { get; }
+
         private string _statusMessage = string.Empty;
         private bool _isServerRunning;
 
@@ -235,10 +238,14 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
         /// </summary>
         public ICommand BackCommand { get; }
 
-        public TcpServiceViewModel(SaveConfirmationHelper saveHelper, TcpServiceMessagesViewModel messagesViewModel)
+        public TcpServiceViewModel(
+            SaveConfirmationHelper saveHelper,
+            TcpServiceMessagesViewModel messagesViewModel,
+            ServiceMessageTableViewModel messageTable)
         {
             _saveHelper = saveHelper;
             _messagesViewModel = messagesViewModel ?? throw new ArgumentNullException(nameof(messagesViewModel));
+            MessageTable = messageTable;
             StatusMessage = "Chappie is initializing...";
             IsServerRunning = false;
             SaveCommand = new RelayCommand(Save);
@@ -307,6 +314,7 @@ public class TcpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, 
                     if (SettingsViewModel.TcpLoggingEnabled)
                         Logger?.Log($"Script output: {result}", LogLevel.Debug);
                     OutputMessage = result;
+                    MessageTable.AddMessage(InputMessage, result, $"{ServerIp}:{ServerPort}");
                     MessageBox.Show(result, "Test Result");
                 }
                 else if (SettingsViewModel.TcpLoggingEnabled)

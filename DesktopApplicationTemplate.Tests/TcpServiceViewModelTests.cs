@@ -15,7 +15,8 @@ public class TcpServiceViewModelTests
         var logger = new Mock<ILoggingService>();
         var helper = new SaveConfirmationHelper(logger.Object) { SaveConfirmationSuppressed = true };
         var messages = new TcpServiceMessagesViewModel();
-        var vm = new TcpServiceViewModel(helper, messages) { ScriptContent = "test" };
+        var table = new ServiceMessageTableViewModel();
+        var vm = new TcpServiceViewModel(helper, messages, table) { ScriptContent = "test" };
         messages.ScriptContent.Should().Be("test");
     }
 
@@ -25,7 +26,8 @@ public class TcpServiceViewModelTests
         var logger = new Mock<ILoggingService>();
         var helper = new SaveConfirmationHelper(logger.Object);
         var messages = new TcpServiceMessagesViewModel();
-        var vm = new TcpServiceViewModel(helper, messages)
+        var table = new ServiceMessageTableViewModel();
+        var vm = new TcpServiceViewModel(helper, messages, table)
         {
             ComputerIp = "1.2.3.4",
             ListeningPort = "1000",
@@ -49,7 +51,8 @@ public class TcpServiceViewModelTests
         var logger = new Mock<ILoggingService>();
         var helper = new SaveConfirmationHelper(logger.Object);
         var messages = new TcpServiceMessagesViewModel();
-        var vm = new TcpServiceViewModel(helper, messages);
+        var table = new ServiceMessageTableViewModel();
+        var vm = new TcpServiceViewModel(helper, messages, table);
         var raised = false;
         vm.Saved += (_, _) => raised = true;
 
@@ -64,7 +67,8 @@ public class TcpServiceViewModelTests
         var logger = new Mock<ILoggingService>();
         var helper = new SaveConfirmationHelper(logger.Object);
         var messages = new TcpServiceMessagesViewModel();
-        var vm = new TcpServiceViewModel(helper, messages);
+        var table = new ServiceMessageTableViewModel();
+        var vm = new TcpServiceViewModel(helper, messages, table);
         var raised = false;
         vm.BackRequested += (_, _) => raised = true;
 
