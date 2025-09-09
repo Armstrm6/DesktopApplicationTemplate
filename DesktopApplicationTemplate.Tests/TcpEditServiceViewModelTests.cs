@@ -17,8 +17,8 @@ public class TcpEditServiceViewModelTests
         vm.Load("svc", options);
         vm.Host = "new";
         vm.Port = 2;
-        options.UseUdp = true;
-        options.Mode = TcpServiceMode.Sending;
+        vm.UseUdp = true;
+        vm.Mode = TcpServiceMode.Sending;
         string? name = null;
         TcpServiceOptions? received = null;
         vm.ServiceSaved += (n, o) => { name = n; received = o; };
@@ -33,28 +33,6 @@ public class TcpEditServiceViewModelTests
         Assert.Equal(TcpServiceMode.Sending, received.Mode);
     }
 
-    [Fact]
-    public void AdvancedConfigCommand_Raises_Event_WithUpdatedOptions()
-    {
-        var options = new TcpServiceOptions { Host = "h", Port = 1, UseUdp = false, Mode = TcpServiceMode.Listening };
-        IServiceRule rule = new ServiceRule();
-        var vm = new TcpEditServiceViewModel(rule);
-        vm.Load("svc", options);
-        vm.Host = "new";
-        vm.Port = 2;
-        options.UseUdp = true;
-        options.Mode = TcpServiceMode.Sending;
-        TcpServiceOptions? received = null;
-        vm.AdvancedConfigRequested += o => received = o;
-
-        vm.AdvancedConfigCommand.Execute(null);
-
-        Assert.NotNull(received);
-        Assert.Equal("new", received!.Host);
-        Assert.Equal(2, received.Port);
-        Assert.True(received.UseUdp);
-        Assert.Equal(TcpServiceMode.Sending, received.Mode);
-    }
 
     [Fact]
     public void SettingEmptyServiceName_AddsError()

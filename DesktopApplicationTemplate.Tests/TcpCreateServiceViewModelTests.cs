@@ -17,7 +17,8 @@ public class TcpCreateServiceViewModelTests
             ServiceName = "svc",
             Host = "host",
             Port = 1234,
-            Options = { UseUdp = true, Mode = TcpServiceMode.ReceiveAndSend }
+            UseUdp = true,
+            Mode = TcpServiceMode.ReceiveAndSend
         };
         TcpServiceOptions? received = null;
         string? name = null;
@@ -46,27 +47,6 @@ public class TcpCreateServiceViewModelTests
         Assert.True(cancelled);
     }
 
-    [Fact]
-    public void AdvancedConfigCommand_Raises_Event_WithOptions()
-    {
-        IServiceRule rule = new ServiceRule();
-        var vm = new TcpCreateServiceViewModel(rule)
-        {
-            Host = "host",
-            Port = 123,
-            Options = { UseUdp = true, Mode = TcpServiceMode.Sending }
-        };
-        TcpServiceOptions? received = null;
-        vm.AdvancedConfigRequested += o => received = o;
-
-        vm.AdvancedConfigCommand.Execute(null);
-
-        Assert.NotNull(received);
-        Assert.Equal("host", received!.Host);
-        Assert.Equal(123, received.Port);
-        Assert.True(received.UseUdp);
-        Assert.Equal(TcpServiceMode.Sending, received.Mode);
-    }
 
     [Fact]
     public void SettingEmptyServiceName_AddsError()

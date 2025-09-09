@@ -103,8 +103,6 @@ namespace DesktopApplicationTemplate.UI
             services.AddTransient<TcpEditServiceView>();
             services.AddTransient<TcpEditServiceViewModel>();
             services.AddTransient<ServiceEditViewModelBase<TcpServiceOptions>, TcpEditServiceViewModel>();
-            services.AddTransient<TcpAdvancedConfigView>();
-            services.AddTransient<TcpAdvancedConfigViewModel>();
             services.AddTransient<FtpServerCreateView>();
             services.AddTransient<FtpServerCreateViewModel>();
             services.AddTransient<ServiceCreateViewModelBase<DesktopApplicationTemplate.UI.Services.FtpServerOptions>, FtpServerCreateViewModel>();

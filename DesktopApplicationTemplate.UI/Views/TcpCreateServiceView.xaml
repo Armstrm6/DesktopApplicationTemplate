@@ -18,8 +18,11 @@
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" /> <!-- Service Name -->
+                <RowDefinition Height="Auto" /> <!-- Service Type -->
                 <RowDefinition Height="Auto" /> <!-- Host -->
                 <RowDefinition Height="Auto" /> <!-- Port -->
+                <RowDefinition Height="Auto" /> <!-- Use UDP -->
+                <RowDefinition Height="Auto" /> <!-- Mode -->
                 <RowDefinition Height="Auto" /> <!-- Buttons -->
             </Grid.RowDefinitions>
 
@@ -39,8 +42,24 @@
                 <TextBlock Text="My TCP Service" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0" VerticalAlignment="Center" Visibility="{Binding Text, ElementName=ServiceNameBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
             </Grid>
 
-            <TextBlock Grid.Row="1" Grid.Column="0" Text="Host" Style="{StaticResource FormLabel}"/>
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="Service Type" Style="{StaticResource FormLabel}"/>
             <Grid Grid.Row="1" Grid.Column="1">
+                <TextBox x:Name="ServiceTypeBox" Text="{Binding ServiceType, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
+                    <TextBox.Style>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource FormField}">
+                            <Style.Triggers>
+                                <Trigger Property="Validation.HasError" Value="True">
+                                    <Setter Property="ToolTip" Value="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Self}}"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
+                <TextBlock Text="TCP" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0" VerticalAlignment="Center" Visibility="{Binding Text, ElementName=ServiceTypeBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+            </Grid>
+
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="Host" Style="{StaticResource FormLabel}"/>
+            <Grid Grid.Row="2" Grid.Column="1">
                 <TextBox x:Name="HostBox" Text="{Binding Host, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
                     <TextBox.Style>
                         <Style TargetType="TextBox" BasedOn="{StaticResource FormField}">
@@ -55,8 +74,8 @@
                 <TextBlock Text="192.168.1.10" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0" VerticalAlignment="Center" Visibility="{Binding Text, ElementName=HostBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
             </Grid>
 
-            <TextBlock Grid.Row="2" Grid.Column="0" Text="Port" Style="{StaticResource FormLabel}"/>
-            <Grid Grid.Row="2" Grid.Column="1">
+            <TextBlock Grid.Row="3" Grid.Column="0" Text="Port" Style="{StaticResource FormLabel}"/>
+            <Grid Grid.Row="3" Grid.Column="1">
                 <TextBox x:Name="PortBox" Text="{Binding Port, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
                     <TextBox.Style>
                         <Style TargetType="TextBox" BasedOn="{StaticResource FormField}">
@@ -71,12 +90,15 @@
                 <TextBlock Text="5020" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0" VerticalAlignment="Center" Visibility="{Binding Text, ElementName=PortBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
             </Grid>
 
-            <views:EditorButtonBar Grid.Row="3" Grid.ColumnSpan="2"
-                                   AdvancedConfigCommand="{Binding AdvancedConfigCommand}"
+            <CheckBox Grid.Row="4" Grid.ColumnSpan="2" Content="Use UDP" IsChecked="{Binding UseUdp}" Style="{StaticResource FormField}"/>
+
+            <TextBlock Grid.Row="5" Grid.Column="0" Text="Mode" Style="{StaticResource FormLabel}"/>
+            <ComboBox Grid.Row="5" Grid.Column="1" ItemsSource="{Binding Modes}" SelectedItem="{Binding Mode}" Style="{StaticResource FormField}"/>
+
+            <views:EditorButtonBar Grid.Row="6" Grid.ColumnSpan="2"
                                    SaveCommand="{Binding CreateCommand}"
                                    CancelCommand="{Binding CancelCommand}"
                                    SaveButtonText="Create"
-                                   AdvancedAutomationName="Open TCP Advanced Configuration"
                                    SaveAutomationName="Create TCP Service"
                                    CancelAutomationName="Cancel TCP Creation" />
         </Grid>

@@ -11,9 +11,12 @@ public class TcpCreateServiceViewModel : ServiceCreateViewModelBase<TcpServiceOp
 {
     private string _host = string.Empty;
     private int _port;
+    private bool _useUdp;
+    private TcpServiceMode _mode;
+    private string _serviceType = "TCP";
 
     /// <summary>
-    /// Current advanced options.
+    /// Current options.
     /// </summary>
     public TcpServiceOptions Options { get; } = new();
 
@@ -61,6 +64,47 @@ public class TcpCreateServiceViewModel : ServiceCreateViewModelBase<TcpServiceOp
         }
     }
 
+    /// <summary>
+    /// Indicates whether UDP should be used instead of TCP.
+    /// </summary>
+    public bool UseUdp
+    {
+        get => _useUdp;
+        set { _useUdp = value; OnPropertyChanged(); }
+    }
+
+    /// <summary>
+    /// Operating mode for the service.
+    /// </summary>
+    public TcpServiceMode Mode
+    {
+        get => _mode;
+        set { _mode = value; OnPropertyChanged(); }
+    }
+
+    /// <summary>
+    /// Available service modes.
+    /// </summary>
+    public TcpServiceMode[] Modes { get; } = (TcpServiceMode[])Enum.GetValues(typeof(TcpServiceMode));
+
+    /// <summary>
+    /// Type label for the service.
+    /// </summary>
+    public string ServiceType
+    {
+        get => _serviceType;
+        set
+        {
+            _serviceType = value;
+            var error = Rule.ValidateRequired(value, "Service type");
+            if (error is not null)
+                AddError(nameof(ServiceType), error);
+            else
+                ClearErrors(nameof(ServiceType));
+            OnPropertyChanged();
+        }
+    }
+
     /// <inheritdoc />
     protected override void OnSave()
     {
@@ -72,6 +116,8 @@ public class TcpCreateServiceViewModel : ServiceCreateViewModelBase<TcpServiceOp
         Logger?.Log("TCP create options start", LogLevel.Debug);
         Options.Host = Host;
         Options.Port = Port;
+        Options.UseUdp = UseUdp;
+        Options.Mode = Mode;
         Logger?.Log("TCP create options finished", LogLevel.Debug);
         RaiseServiceSaved(Options);
     }
@@ -86,9 +132,6 @@ public class TcpCreateServiceViewModel : ServiceCreateViewModelBase<TcpServiceOp
     /// <inheritdoc />
     protected override void OnAdvancedConfig()
     {
-        Logger?.Log("Opening TCP advanced config", LogLevel.Debug);
-        Options.Host = Host;
-        Options.Port = Port;
-        RaiseAdvancedConfigRequested(Options);
+        // Advanced configuration removed.
     }
 }
