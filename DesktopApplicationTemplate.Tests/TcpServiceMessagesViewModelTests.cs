@@ -1,5 +1,6 @@
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Models;
+using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using FluentAssertions;
 using Xunit;
@@ -11,7 +12,7 @@ public class TcpServiceMessagesViewModelTests
     [Fact]
     public void DisplayLogs_RespectsLogLevelFilter()
     {
-        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel)
+        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService())
         {
             Logs =
             {
@@ -28,7 +29,7 @@ public class TcpServiceMessagesViewModelTests
     [Fact]
     public void ClearLogCommand_RemovesLogs()
     {
-        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel)
+        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService())
         {
             Logs = { new LogEntry { Message = "test" } }
         };
@@ -41,7 +42,7 @@ public class TcpServiceMessagesViewModelTests
     [Fact]
     public void OpenAdvancedSettingsCommand_RaisesEvent()
     {
-        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel());
+        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
         var raised = false;
         vm.AdvancedSettingsRequested += (_, _) => raised = true;
 
@@ -51,19 +52,9 @@ public class TcpServiceMessagesViewModelTests
     }
 
     [Fact]
-    public void UpdateScript_SetsScriptContent()
-    {
-        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel());
-
-        vm.UpdateScript("print('hi')");
-
-        vm.ScriptContent.Should().Be("print('hi')");
-    }
-
-    [Fact]
     public void UpdateNetworkSettings_SetsProperties()
     {
-        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel());
+        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
 
         vm.UpdateNetworkSettings("1.1.1.1", "1000", "2.2.2.2", "3.3.3.3", "2000", true);
 
@@ -78,7 +69,7 @@ public class TcpServiceMessagesViewModelTests
     [Fact]
     public void MessageCollections_ExposeGroupedData()
     {
-        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel)
+        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService())
         {
             Messages =
             {
@@ -94,7 +85,31 @@ public class TcpServiceMessagesViewModelTests
         };
 
         vm.IncomingData.Should().ContainSingle(d => d.Contains("in"));
-        vm.ScriptModifications.Should().ContainSingle("out");
         vm.OutgoingResults.Should().ContainSingle(r => r.Contains("svc") && r.Contains("ok"));
+    }
+
+    [Fact]
+    public void ServiceName_NoPriorMessage_UsesDefault()
+    {
+        var routing = new MessageRoutingService();
+        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), routing)
+        {
+            ServiceName = "svc"
+        };
+
+        vm.TestMessage.Should().Be("svc-PEAK-123456789");
+    }
+
+    [Fact]
+    public void ServiceName_WithPriorMessage_UsesStored()
+    {
+        var routing = new MessageRoutingService();
+        routing.UpdateMessage("svc", "hello");
+        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), routing)
+        {
+            ServiceName = "svc"
+        };
+
+        vm.TestMessage.Should().Be("hello");
     }
 }

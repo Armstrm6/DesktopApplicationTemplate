@@ -8,6 +8,7 @@ using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Models;
+using DesktopApplicationTemplate.UI.Services;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -26,9 +27,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         /// <summary>Incoming data extracted from <see cref="Messages"/>.</summary>
         public IEnumerable<string> IncomingData => Messages.Select(m => $"{m.IncomingIp}: {m.IncomingMessage}");
-
-        /// <summary>Script modifications extracted from <see cref="Messages"/>.</summary>
-        public IEnumerable<string> ScriptModifications => Messages.Select(m => m.OutgoingMessage);
 
         /// <summary>Outgoing results extracted from <see cref="Messages"/>.</summary>
         public IEnumerable<string> OutgoingResults => Messages.Select(m => $"{m.ConnectedService}: {m.Result}");
@@ -83,8 +81,36 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         /// <summary>Raised when the advanced settings view should open.</summary>
         public event EventHandler? AdvancedSettingsRequested;
 
-        /// <summary>Current script content.</summary>
-        public string ScriptContent { get; private set; } = string.Empty;
+        private readonly IMessageRoutingService _routing;
+
+        private string _serviceName = string.Empty;
+
+        /// <summary>Name of the service associated with these messages.</summary>
+        public string ServiceName
+        {
+            get => _serviceName;
+            set
+            {
+                if (_serviceName == value) return;
+                _serviceName = value ?? string.Empty;
+                OnPropertyChanged();
+                InitializeTestMessage();
+            }
+        }
+
+        private string _testMessage = string.Empty;
+
+        /// <summary>Message used for testing communication.</summary>
+        public string TestMessage
+        {
+            get => _testMessage;
+            set
+            {
+                if (_testMessage == value) return;
+                _testMessage = value ?? string.Empty;
+                OnPropertyChanged();
+            }
+        }
 
         /// <summary>Computer IP for incoming connections.</summary>
         public string ComputerIp { get; private set; } = string.Empty;
@@ -104,14 +130,14 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         /// <summary>Whether UDP mode is enabled.</summary>
         public bool IsUdp { get; private set; }
 
-        public TcpServiceMessagesViewModel(ServiceMessageTableViewModel messageTable)
+        public TcpServiceMessagesViewModel(ServiceMessageTableViewModel messageTable, IMessageRoutingService routing)
         {
             MessageTable = messageTable ?? throw new ArgumentNullException(nameof(messageTable));
+            _routing = routing ?? throw new ArgumentNullException(nameof(routing));
 
             Messages.CollectionChanged += (_, _) =>
             {
                 OnPropertyChanged(nameof(IncomingData));
-                OnPropertyChanged(nameof(ScriptModifications));
                 OnPropertyChanged(nameof(OutgoingResults));
             };
 
@@ -119,14 +145,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             ExportLogCommand = new RelayCommand(ExportLogs);
             RefreshLogCommand = new RelayCommand(() => OnPropertyChanged(nameof(DisplayLogs)));
             OpenAdvancedSettingsCommand = new RelayCommand(() => AdvancedSettingsRequested?.Invoke(this, EventArgs.Empty));
-        }
-
-        /// <summary>Updates the stored script content.</summary>
-        /// <param name="script">New script text.</param>
-        public void UpdateScript(string script)
-        {
-            ScriptContent = script ?? string.Empty;
-            OnPropertyChanged(nameof(ScriptContent));
         }
 
         /// <summary>Updates network and scripting settings.</summary>
@@ -161,5 +179,16 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         }
 
         private void OnLogAdded(LogEntry entry) => Logs.Insert(0, entry);
+
+        private void InitializeTestMessage()
+        {
+            if (string.IsNullOrWhiteSpace(ServiceName))
+                return;
+
+            if (!_routing.TryGetMessage(ServiceName, out var msg) || string.IsNullOrEmpty(msg))
+                TestMessage = $"{ServiceName}-PEAK-123456789";
+            else
+                TestMessage = msg;
+        }
     }
 }
