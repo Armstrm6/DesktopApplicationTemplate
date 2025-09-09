@@ -59,41 +59,41 @@ namespace DesktopApplication.Installer.ViewModels
             try
             {
                 _logger?.Log("Installation started", LogLevel.Debug);
-                await RunStep(writer, 10, "Creating directories...", async () => await Task.Run(() => Directory.CreateDirectory(_installPath)));
-                await RunStep(writer, 30, "Copying files...", async () => await Task.Run(CopyApplicationFiles));
-                await RunStep(writer, 60, "Installing dependencies...", async () => await Task.Delay(500));
+                await RunStepAsync(writer, 10, "Creating directories...", async () => await Task.Run(() => Directory.CreateDirectory(_installPath)));
+                await RunStepAsync(writer, 30, "Copying files...", async () => await Task.Run(CopyApplicationFiles));
+                await RunStepAsync(writer, 60, "Installing dependencies...", async () => await Task.Delay(500));
                 if (_firewall)
-                    await RunStep(writer, 80, "Configuring firewall...", async () => await Task.Delay(500));
+                    await RunStepAsync(writer, 80, "Configuring firewall...", async () => await Task.Delay(500));
                 if (_startup)
-                    await RunStep(writer, 90, "Configuring autostart...", async () => await Task.Delay(500));
-                await RunStep(writer, 100, "Finished.", async () => await Task.Delay(200));
+                    await RunStepAsync(writer, 90, "Configuring autostart...", async () => await Task.Delay(500));
+                await RunStepAsync(writer, 100, "Finished.", async () => await Task.Delay(200));
                 _logger?.Log("Installation completed", LogLevel.Debug);
             }
             catch (OperationCanceledException)
             {
-                AppendLog(writer, "Installation cancelled.");
+                await AppendLogAsync(writer, "Installation cancelled.");
                 _logger?.Log("Installation cancelled", LogLevel.Warning);
             }
             finally
             {
-                writer.Flush();
+                await writer.FlushAsync().ConfigureAwait(false);
                 Completed?.Invoke();
             }
         }
 
-        private async Task RunStep(StreamWriter writer, int progress, string message, Func<Task> action)
+        private async Task RunStepAsync(StreamWriter writer, int progress, string message, Func<Task> action)
         {
             _cts.Token.ThrowIfCancellationRequested();
-            AppendLog(writer, message);
+            await AppendLogAsync(writer, message);
             _logger?.Log(message, LogLevel.Debug);
             await action();
             Progress = progress;
         }
 
-        private void AppendLog(StreamWriter writer, string message)
+        private async Task AppendLogAsync(StreamWriter writer, string message)
         {
-            writer.WriteLine(message);
-            writer.Flush();
+            await writer.WriteLineAsync(message).ConfigureAwait(false);
+            await writer.FlushAsync().ConfigureAwait(false);
             LogText += message + Environment.NewLine;
             _logger?.Log(message, LogLevel.Debug);
         }

@@ -487,4 +487,6 @@ Codex Limitations noticed: Dependency mismatch blocks local validation; will dep
 Effective Prompts / Instructions that worked: Repository instructions to log limitations.
 Decisions & Rationale: Note conflict and proceed with code changes relying on CI verification.
 Action Items: Resolve package versions in future work.
+Latest Attempt: After bumping Microsoft.CodeAnalysis packages to 4.12.0, `dotnet restore` succeeded but `dotnet build DesktopApplicationTemplate.sln` failed with CS1061 'DocumentLine' missing `BackgroundColor` and VSTHRD100/101 analyzer errors; `dotnet workload install wpf` still reports Workload ID not recognized. Relying on CI for validation.
+Next Attempt: Installed .NET SDK 8.0.404, replaced `DocumentLine.BackgroundColor` with a line transformer, and converted async lambdas to `AsyncRelayCommand`; `dotnet build DesktopApplicationTemplate.sln` now succeeds but `dotnet test --settings tests.runsettings` aborts because the Microsoft.WindowsDesktop.App runtime is missing.
 Related Commits/PRs:

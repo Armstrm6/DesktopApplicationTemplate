@@ -96,7 +96,7 @@ public class ScpServiceViewModel : ViewModelBase, ILoggingViewModel, INetworkAwa
         {
             _saveHelper = saveHelper;
             BrowseCommand = new RelayCommand(Browse);
-            TransferCommand = new RelayCommand(async () => await TransferAsync());
+            TransferCommand = new AsyncRelayCommand(TransferAsync);
             SaveCommand = new RelayCommand(Save);
             RefreshLogCommand = new RelayCommand(() => OnPropertyChanged(nameof(DisplayLogs)));
             ExportLogCommand = new RelayCommand(ExportLogs);
