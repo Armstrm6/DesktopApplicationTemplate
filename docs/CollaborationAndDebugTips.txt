@@ -118,6 +118,7 @@ Another Attempt: After adding a missing `DesktopApplicationTemplate.UI.Services`
 Another Attempt: After safeguarding `CsvServiceOptions` access with null-conditionals, the `dotnet` command remains unavailable; build and tests deferred to CI.
 Another Attempt: After typing view-model dependencies as interfaces, the `dotnet` command is still missing; build and test rely on CI.
 Another Attempt: After relocating logging abstractions to the core library, the `dotnet` CLI remains unavailable; relying on CI for build and tests.
+Another Attempt: After qualifying helper namespaces for StringNullOrEmptyToVisibilityConverter, the `dotnet` command is still missing; relying on CI.
 Latest Attempt: After guarding client certificate usage for cross-platform support, the `dotnet` command is still missing; build and tests deferred to CI.
 Newest Attempt: After qualifying HttpServiceView helper namespace and installing the .NET SDK 8.0.404, `dotnet build DesktopApplicationTemplate.sln` failed with missing `MqttConnectionType`, and `dotnet test --settings tests.runsettings --no-build` ran only core tests due to the absent WindowsDesktop runtime.
 Another Attempt: After replacing explicit null checks with throw helpers in MqttService, the `dotnet` CLI remains unavailable; restore, build, and tests cannot run locally, so CI will verify.
