@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.ComponentModel;
 using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Models;
@@ -284,15 +285,33 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private void OpenScriptEditor()
         {
             var editor = new ScriptEditorWindow();
-            if (editor.DataContext is ScriptEditorViewModel svm)
+            if (editor.DataContext is not ScriptEditorViewModel svm)
+                return;
+
+            if (!string.IsNullOrWhiteSpace(Script))
+                svm.ScriptText = Script;
+            svm.TestMessage = TestMessage;
+
+            void OnOutputGenerated(string output)
             {
-                if (!string.IsNullOrWhiteSpace(Script))
-                    svm.ScriptText = Script;
-                svm.TestMessage = TestMessage;
-                svm.OutputGenerated += output => OutputMessage = output;
+                OutputMessage = _options.OutputMessage = output;
             }
 
-            if (editor.ShowDialog() == true)
+            void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+            {
+                if (e.PropertyName == nameof(ScriptEditorViewModel.TestMessage))
+                    TestMessage = svm.TestMessage;
+            }
+
+            svm.OutputGenerated += OnOutputGenerated;
+            svm.PropertyChanged += OnPropertyChanged;
+
+            var result = editor.ShowDialog() == true;
+
+            svm.OutputGenerated -= OnOutputGenerated;
+            svm.PropertyChanged -= OnPropertyChanged;
+
+            if (result)
             {
                 Script = editor.ScriptText;
                 TestMessage = editor.LastTestMessage;
