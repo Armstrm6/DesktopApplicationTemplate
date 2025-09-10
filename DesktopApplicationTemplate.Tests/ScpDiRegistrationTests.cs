@@ -1,4 +1,5 @@
 using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Service.Services;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
@@ -17,6 +18,7 @@ public class ScpDiRegistrationTests
         services.AddLogging();
         services.AddSingleton<IRichTextLogger, NullRichTextLogger>();
         services.AddSingleton<ILoggingService, LoggingService>();
+        services.AddSingleton<IServiceRule, ServiceRule>();
         services.AddSingleton<SaveConfirmationHelper>();
         services.AddTransient<ScpCreateServiceViewModel>();
         services.AddTransient<ScpCreateServiceView>();
