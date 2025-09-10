@@ -517,6 +517,7 @@ Latest Attempt: After updating ScriptEditorViewModel to use JoinableTaskFactory,
 Newest Attempt: After adding a test for ScriptEditor RunCommand updating TcpServiceMessagesViewModel without saving, the `dotnet` command is still missing; restore, build, and test commands cannot run locally and CI will handle verification.
 Latest Attempt: Removed async lambdas in MainWindow to satisfy VSTHRD analyzers; `dotnet restore` and `dotnet build DesktopApplicationTemplate.sln` succeed, but `dotnet test --settings tests.runsettings` fails because the Microsoft.WindowsDesktop.App runtime is missing.
 Current Attempt: After persisting script editor test messages, `dotnet` CLI remains unavailable; restore, build, and test commands could not run locally and CI will verify.
+Newest Attempt: After ensuring the script editor returns processed output, `dotnet` CLI is still missing; restore, build, and test commands cannot run locally and CI will verify.
 Related Commits/PRs:
 [2025-10-01 09:00] Topic: EditorButtonBar namespace
 Context: Verified EditorButtonBar build action and updated consuming views to use an assembly-qualified namespace.

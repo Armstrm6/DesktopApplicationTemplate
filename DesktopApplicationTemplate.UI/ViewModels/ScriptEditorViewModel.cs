@@ -92,7 +92,7 @@ public class ScriptEditorViewModel : ViewModelBase
     private async Task RunAsync()
     {
         var globals = new Globals { message = TestMessage };
-        var code = ScriptText + "\nProcess(message);";
+        var code = ScriptText + "\nreturn Process(message);";
         var script = CSharpScript.Create<string>(code, ScriptOptions.Default, typeof(Globals));
         var diagnostics = script.Compile();
         await _jtf.SwitchToMainThreadAsync();
@@ -111,7 +111,7 @@ public class ScriptEditorViewModel : ViewModelBase
         {
             var result = await script.RunAsync(globals);
             await _jtf.SwitchToMainThreadAsync();
-            OutputMessage = result.ReturnValue;
+            OutputMessage = result.ReturnValue ?? string.Empty;
             OutputBrush = Brushes.Black;
             _lastTestMessage = TestMessage;
             OutputGenerated?.Invoke(OutputMessage);
