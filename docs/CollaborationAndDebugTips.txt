@@ -166,7 +166,8 @@ Latest Attempt: After making the script editor `Globals` class public, the `dotn
 Latest Attempt: After mirroring script editor test message updates in the TCP messages view and cleaning up subscriptions on close, the `dotnet` command remains unavailable; restore, build, and test commands cannot run locally, so CI will verify.
 Latest Attempt: After adding an Information log level and logging tests, the `dotnet` command is still missing; restore, build, and test commands cannot run locally and CI will verify.
 Latest Attempt: Renamed SaveServices to SaveServicesAsync, but the `dotnet` command remains unavailable; build and tests deferred to CI.
-Related Commits/PRs: 8517691, 4c0dbb5, 1b5b0ec, 739abbe, 4f74a36, ff70210, 272560a, 26960dc, 7e9096b, 6454680, a70fb18
+Latest Attempt: After restricting TcpServiceMessagesViewModel.OutputMessage setter to internal, the `dotnet` command remains unavailable; restore, build, and tests cannot run locally and CI will verify.
+Related Commits/PRs: 8517691, 4c0dbb5, 1b5b0ec, 739abbe, 4f74a36, ff70210, 272560a, 26960dc, 7e9096b, 6454680, a70fb18, f1e064e
 [2025-08-27 04:25] Topic: Logging interface restoration
 Context: Introduced core logging abstractions and refactored edit view models to support DI.
 Observations: Added ILoggingService, LogLevel enum, moved LogEntry to core, and implemented Load methods on TCP and SCP edit view models.

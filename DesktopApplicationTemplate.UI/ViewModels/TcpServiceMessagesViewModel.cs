@@ -142,7 +142,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public string OutputMessage
         {
             get => _outputMessage;
-            private set
+            internal set
             {
                 if (_outputMessage == value) return;
                 _outputMessage = value ?? string.Empty;
