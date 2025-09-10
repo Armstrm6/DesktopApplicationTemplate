@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.UI.Navigation;
 using DesktopApplicationTemplate.UI.ViewModels;
 using LogLevel = DesktopApplicationTemplate.Core.Services.LogLevel;
 using Microsoft.Extensions.DependencyInjection;
@@ -54,7 +55,7 @@ namespace DesktopApplicationTemplate.UI.Views
             HomeContentGrid.Visibility = Visibility.Visible;
         }
 
-        private void ShowPage(Page page)
+        public void ShowPage(Page page)
         {
             HomeContentGrid.Visibility = Visibility.Collapsed;
             ContentFrame.Visibility = Visibility.Visible;
@@ -80,7 +81,7 @@ namespace DesktopApplicationTemplate.UI.Views
             ShowHome();
         }
 
-        private Page? GetOrCreateServicePage(ServiceListModel svc)
+        public Page? GetOrCreateServicePage(ServiceListModel svc)
         {
             if (svc.ServicePage != null)
                 return svc.ServicePage;
@@ -174,9 +175,10 @@ namespace DesktopApplicationTemplate.UI.Views
             ShowCreateServiceSelectionPage();
         }
 
-        private void ShowCreateServiceSelectionPage()
+        public void ShowCreateServiceSelectionPage()
         {
             var page = App.AppHost.Services.GetRequiredService<CreateServicePage>();
+            _createServicePage = page;
             page.ServiceCreated += (name, type) =>
             {
                 var svc = new ServiceListModel
@@ -197,411 +199,32 @@ namespace DesktopApplicationTemplate.UI.Views
                     ShowPage(svc.ServicePage);
                 _ = _viewModel.SaveServicesAsync();
             };
-            page.MqttSelected += NavigateToMqtt;
-            page.TcpSelected += NavigateToTcp;
-            page.HeartbeatSelected += NavigateToHeartbeat;
-            page.FtpServerSelected += NavigateToFtpServer;
-            page.HttpSelected += NavigateToHttp;
-            page.HidSelected += NavigateToHid;
-            page.CsvSelected += NavigateToCsvCreator;
-            page.FileObserverSelected += NavigateToFileObserver;
-            page.ScpSelected += NavigateToScp;
+            page.ServiceTypeSelected += NavigateTo;
             page.Cancelled += ShowHome;
             ShowPage(page);
         }
 
-        private void NavigateToMqtt(string defaultName)
+        private CreateServicePage? _createServicePage;
+
+        private void NavigateTo(string serviceType)
         {
-            var vm = App.AppHost.Services.GetRequiredService<MqttCreateServiceViewModel>();
-            vm.ServiceName = defaultName;
-            vm.ServiceSaved += (name, options) => _ = AddMqttServiceAsync(name, options);
-            vm.EditCancelled += ShowCreateServiceSelectionPage;
-            var view = ActivatorUtilities.CreateInstance<MqttCreateServiceView>(App.AppHost.Services, vm);
-            vm.AdvancedConfigRequested += opts =>
-            {
-                var advVm = ActivatorUtilities.CreateInstance<MqttAdvancedConfigViewModel>(App.AppHost.Services, opts);
-                var advView = App.AppHost.Services.GetRequiredService<MqttAdvancedConfigView>();
-                advView.Initialize(advVm);
-                advVm.Saved += _ => ShowPage(view);
-                advVm.BackRequested += () => ShowPage(view);
-                ShowPage(advView);
-            };
+            var defaultName = _createServicePage?.GenerateDefaultName(serviceType) ?? serviceType;
+            var handler = App.AppHost.Services.GetServices<INavigationHandler>()
+                .FirstOrDefault(h => h.ServiceType == serviceType);
+            if (handler == null)
+                return;
+            var view = handler.CreateView(defaultName);
             ShowPage(view);
         }
 
-        private void NavigateToHid(string defaultName)
-        {
-            var vm = App.AppHost.Services.GetRequiredService<HidCreateServiceViewModel>();
-            vm.ServiceName = defaultName;
-            vm.ServiceSaved += (name, options) =>
-            {
-                var svc = new ServiceListModel
-                {
-                    DisplayName = $"HID - {name}",
-                    ServiceType = "HID",
-                    IsActive = false,
-                    HidOptions = options
-                };
-                svc.SetColorsByType();
-                svc.LogAdded += _viewModel.OnServiceLogAdded;
-                svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
-                GetOrCreateServicePage(svc);
-                _viewModel.Services.Add(svc);
-                _logger?.LogInformation("Service {Name} added", svc.DisplayName);
-                _viewModel.SelectedService = svc;
-                ServiceList.ScrollIntoView(svc);
-                if (svc.ServicePage != null)
-                    ShowPage(svc.ServicePage);
-                _ = _viewModel.SaveServicesAsync();
-            };
-            vm.EditCancelled += ShowCreateServiceSelectionPage;
-            var view = ActivatorUtilities.CreateInstance<HidCreateServiceView>(App.AppHost.Services, vm);
-            vm.AdvancedConfigRequested += opts =>
-            {
-                var advVm = ActivatorUtilities.CreateInstance<HidAdvancedConfigViewModel>(App.AppHost.Services, opts);
-                var advView = App.AppHost.Services.GetRequiredService<HidAdvancedConfigView>();
-                advView.Initialize(advVm);
-                advVm.Saved += _ => ShowPage(view);
-                advVm.BackRequested += () => ShowPage(view);
-                ShowPage(advView);
-            };
-            ShowPage(view);
-        }
 
-        private void NavigateToScp(string defaultName)
-        {
-            var vm = App.AppHost.Services.GetRequiredService<ScpCreateServiceViewModel>();
-            vm.ServiceName = defaultName;
-            vm.ServiceSaved += (name, options) =>
-            {
-                var svc = new ServiceListModel
-                {
-                    DisplayName = $"SCP - {name}",
-                    ServiceType = "SCP",
-                    IsActive = false,
-                    ScpOptions = options
-                };
-                svc.SetColorsByType();
-                svc.LogAdded += _viewModel.OnServiceLogAdded;
-                svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
-                GetOrCreateServicePage(svc);
-                _viewModel.Services.Add(svc);
-                _logger?.LogInformation("Service {Name} added", svc.DisplayName);
-                _viewModel.SelectedService = svc;
-                ServiceList.ScrollIntoView(svc);
-                if (svc.ServicePage != null)
-                    ShowPage(svc.ServicePage);
-                _ = _viewModel.SaveServicesAsync();
-            };
-            vm.EditCancelled += ShowCreateServiceSelectionPage;
-            var view = ActivatorUtilities.CreateInstance<ScpCreateServiceView>(App.AppHost.Services, vm);
-            vm.AdvancedConfigRequested += opts =>
-            {
-                var advVm = App.AppHost.Services.GetRequiredService<ScpAdvancedConfigViewModel>();
-                advVm.Load(opts);
-                var advView = App.AppHost.Services.GetRequiredService<ScpAdvancedConfigView>();
-                advView.Initialize(advVm);
-                advVm.Saved += _ => ShowPage(view);
-                advVm.BackRequested += () => ShowPage(view);
-                ShowPage(advView);
-            };
-            ShowPage(view);
-        }
 
-        private void NavigateToHeartbeat(string defaultName)
-        {
-            var vm = App.AppHost.Services.GetRequiredService<HeartbeatCreateServiceViewModel>();
-            vm.ServiceName = defaultName;
-            vm.ServiceSaved += (name, options) =>
-            {
-                var svc = new ServiceListModel
-                {
-                    DisplayName = $"Heartbeat - {name}",
-                    ServiceType = "Heartbeat",
-                    IsActive = false,
-                    HeartbeatOptions = options
-                };
-                svc.SetColorsByType();
-                svc.LogAdded += _viewModel.OnServiceLogAdded;
-                svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
-                GetOrCreateServicePage(svc);
-                _viewModel.Services.Add(svc);
-                _logger?.LogInformation("Service {Name} added", svc.DisplayName);
-                _viewModel.SelectedService = svc;
-                ServiceList.ScrollIntoView(svc);
-                if (svc.ServicePage != null)
-                    ShowPage(svc.ServicePage);
-                _ = _viewModel.SaveServicesAsync();
-            };
-            vm.EditCancelled += ShowCreateServiceSelectionPage;
-            var view = ActivatorUtilities.CreateInstance<HeartbeatCreateServiceView>(App.AppHost.Services, vm);
-            vm.AdvancedConfigRequested += opts =>
-            {
-                var advVm = ActivatorUtilities.CreateInstance<HeartbeatAdvancedConfigViewModel>(App.AppHost.Services, opts);
-                var advView = App.AppHost.Services.GetRequiredService<HeartbeatAdvancedConfigView>();
-                advView.Initialize(advVm);
-                advVm.Saved += _ => ShowPage(view);
-                advVm.BackRequested += () => ShowPage(view);
-                ShowPage(advView);
-            };
-            ShowPage(view);
-        }
 
-        private void NavigateToFileObserver(string defaultName)
-        {
-            var vm = App.AppHost.Services.GetRequiredService<FileObserverCreateServiceViewModel>();
-            vm.ServiceName = defaultName;
-            vm.ServiceSaved += (name, options) =>
-            {
-                var svc = new ServiceListModel
-                {
-                    DisplayName = $"File Observer - {name}",
-                    ServiceType = "File Observer",
-                    IsActive = false,
-                    FileObserverOptions = options
-                };
-                svc.SetColorsByType();
-                svc.LogAdded += _viewModel.OnServiceLogAdded;
-                svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
-                GetOrCreateServicePage(svc);
-                _viewModel.Services.Add(svc);
-                _logger?.LogInformation("Service {Name} added", svc.DisplayName);
-                _viewModel.SelectedService = svc;
-                ServiceList.ScrollIntoView(svc);
-                if (svc.ServicePage != null)
-                    ShowPage(svc.ServicePage);
-                _ = _viewModel.SaveServicesAsync();
-            };
-            vm.EditCancelled += ShowCreateServiceSelectionPage;
-            var view = ActivatorUtilities.CreateInstance<FileObserverCreateServiceView>(App.AppHost.Services, vm);
-            vm.AdvancedConfigRequested += opts =>
-            {
-                var advVm = ActivatorUtilities.CreateInstance<FileObserverAdvancedConfigViewModel>(App.AppHost.Services, opts);
-                var advView = App.AppHost.Services.GetRequiredService<FileObserverAdvancedConfigView>();
-                advView.Initialize(advVm);
-                advVm.Saved += _ => ShowPage(view);
-                advVm.BackRequested += () => ShowPage(view);
-                ShowPage(advView);
-            };
-            ShowPage(view);
-        }
 
-        private void NavigateToCsvCreator(string defaultName)
-        {
-            var vm = App.AppHost.Services.GetRequiredService<CsvServiceEditorViewModel>();
-            vm.ServiceName = defaultName;
-            vm.ServiceSaved += (name, options) =>
-            {
-                var svc = new ServiceListModel
-                {
-                    DisplayName = $"CSV Creator - {name}",
-                    ServiceType = "CSV Creator",
-                    IsActive = false,
-                    CsvOptions = options
-                };
-                svc.SetColorsByType();
-                svc.LogAdded += _viewModel.OnServiceLogAdded;
-                svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
-                GetOrCreateServicePage(svc);
-                _viewModel.Services.Add(svc);
-                _logger?.LogInformation("Service {Name} added", svc.DisplayName);
-                _viewModel.SelectedService = svc;
-                ServiceList.ScrollIntoView(svc);
-                if (svc.ServicePage != null)
-                    ShowPage(svc.ServicePage);
-                _ = _viewModel.SaveServicesAsync();
-            };
-            vm.EditCancelled += ShowCreateServiceSelectionPage;
-            var view = App.AppHost.Services.GetRequiredService<CsvServiceEditorView>();
-            view.Initialize(vm);
-            vm.AdvancedConfigRequested += opts =>
-            {
-                var advVm = ActivatorUtilities.CreateInstance<CsvAdvancedConfigViewModel>(App.AppHost.Services, opts);
-                var advView = App.AppHost.Services.GetRequiredService<CsvAdvancedConfigView>();
-                advView.Initialize(advVm);
-                advVm.Saved += _ => ShowPage(view);
-                advVm.BackRequested += () => ShowPage(view);
-                ShowPage(advView);
-            };
-            ShowPage(view);
-        }
 
-        private void NavigateToTcp(string defaultName)
-        {
-            var vm = App.AppHost.Services.GetRequiredService<TcpCreateServiceViewModel>();
-            vm.ServiceName = defaultName;
-            vm.ServiceSaved += (name, options) =>
-            {
-                var svc = new ServiceListModel
-                {
-                    DisplayName = $"{vm.ServiceType} - {name}",
-                    ServiceType = vm.ServiceType,
-                    IsActive = false,
-                    TcpOptions = options
-                };
-                svc.SetColorsByType();
-                svc.LogAdded += _viewModel.OnServiceLogAdded;
-                svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
-                GetOrCreateServicePage(svc);
-                _viewModel.Services.Add(svc);
-                _logger?.LogInformation("Service {Name} added", svc.DisplayName);
-                _viewModel.SelectedService = svc;
-                ServiceList.ScrollIntoView(svc);
-                if (svc.ServicePage != null)
-                    ShowPage(svc.ServicePage);
-                _ = _viewModel.SaveServicesAsync();
-            };
-            vm.EditCancelled += ShowCreateServiceSelectionPage;
-            var view = ActivatorUtilities.CreateInstance<TcpCreateServiceView>(App.AppHost.Services, vm);
-            ShowPage(view);
-        }
 
-        private void NavigateToHttp(string defaultName)
-        {
-            var vm = App.AppHost.Services.GetRequiredService<HttpCreateServiceViewModel>();
-            vm.ServiceName = defaultName;
-            vm.ServiceSaved += (name, options) =>
-            {
-                var svc = new ServiceListModel
-                {
-                    DisplayName = $"HTTP - {name}",
-                    ServiceType = "HTTP",
-                    IsActive = false,
-                    HttpOptions = options
-                };
-                svc.SetColorsByType();
-                svc.LogAdded += _viewModel.OnServiceLogAdded;
-                svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
-                GetOrCreateServicePage(svc);
-                _viewModel.Services.Add(svc);
-                _logger?.LogInformation("Service {Name} added", svc.DisplayName);
-                _viewModel.SelectedService = svc;
-                ServiceList.ScrollIntoView(svc);
-                if (svc.ServicePage != null)
-                    ShowPage(svc.ServicePage);
-                _ = _viewModel.SaveServicesAsync();
-            };
-            vm.EditCancelled += ShowCreateServiceSelectionPage;
-            var view = ActivatorUtilities.CreateInstance<HttpCreateServiceView>(App.AppHost.Services, vm);
-            vm.AdvancedConfigRequested += opts =>
-            {
-                var advVm = ActivatorUtilities.CreateInstance<HttpAdvancedConfigViewModel>(App.AppHost.Services, opts);
-                var advView = App.AppHost.Services.GetRequiredService<HttpAdvancedConfigView>();
-                advView.Initialize(advVm);
-                advVm.Saved += _ => ShowPage(view);
-                advVm.BackRequested += () => ShowPage(view);
-                ShowPage(advView);
-            };
-            ShowPage(view);
-        }
 
-        private void NavigateToFtpServer(string defaultName)
-        {
-            var vm = App.AppHost.Services.GetRequiredService<FtpServerCreateViewModel>();
-            vm.ServiceName = defaultName;
 
-            var opts = App.AppHost.Services.GetRequiredService<IOptions<FtpServerOptions>>().Value;
-            vm.Options.Port = opts.Port;
-            vm.Options.RootPath = opts.RootPath;
-            vm.Options.AllowAnonymous = opts.AllowAnonymous;
-            vm.Options.Username = opts.Username;
-            vm.Options.Password = opts.Password;
-
-            var view = ActivatorUtilities.CreateInstance<FtpServerCreateView>(App.AppHost.Services, vm);
-            vm.ServiceSaved += (name, options) =>
-            {
-                _logger?.LogInformation("FTP server {Name} created", name);
-                AddFtpService(name, options);
-                _ = _viewModel.SaveServicesAsync();
-            };
-            vm.AdvancedConfigRequested += opts2 =>
-            {
-                var advVm = ActivatorUtilities.CreateInstance<FtpServerAdvancedConfigViewModel>(App.AppHost.Services, opts2);
-                var advView = App.AppHost.Services.GetRequiredService<FtpServerAdvancedConfigView>();
-                advView.Initialize(advVm);
-                advVm.Saved += _ => ShowPage(view);
-                advVm.BackRequested += () => ShowPage(view);
-                ShowPage(advView);
-            };
-            vm.EditCancelled += ShowCreateServiceSelectionPage;
-            ShowPage(view);
-        }
-
-        private async Task AddMqttServiceAsync(string name, MqttServiceOptions options)
-        {
-            var newService = new ServiceListModel
-            {
-                DisplayName = $"MQTT - {name}",
-                ServiceType = "MQTT",
-                IsActive = false
-            };
-
-            newService.SetColorsByType();
-            newService.LogAdded += _viewModel.OnServiceLogAdded;
-            newService.ActiveChanged += _viewModel.OnServiceActiveChanged;
-
-            GetOrCreateServicePage(newService);
-
-            var opt = App.AppHost.Services.GetRequiredService<IOptions<MqttServiceOptions>>().Value;
-            opt.Host = options.Host;
-            opt.Port = options.Port;
-            opt.ClientId = options.ClientId;
-            opt.Username = options.Username;
-            opt.Password = options.Password;
-            opt.ConnectionType = options.ConnectionType;
-            opt.WillTopic = options.WillTopic;
-            opt.WillPayload = options.WillPayload;
-            opt.WillQualityOfService = options.WillQualityOfService;
-            opt.WillRetain = options.WillRetain;
-            opt.KeepAliveSeconds = options.KeepAliveSeconds;
-            opt.CleanSession = options.CleanSession;
-            opt.ReconnectDelay = options.ReconnectDelay;
-
-            _viewModel.Services.Add(newService);
-            _logger?.LogInformation("Service {Name} added", newService.DisplayName);
-            _viewModel.SelectedService = newService;
-            ServiceList.ScrollIntoView(newService);
-
-            if (newService.ServicePage is MqttTagSubscriptionsView mqttView)
-            {
-                var mqttVm = (MqttTagSubscriptionsViewModel)mqttView.DataContext!;
-                newService.ActiveChanged += HandleActiveChanged;
-
-                void HandleActiveChanged(bool active)
-                {
-                    if (active)
-                    {
-                        _ = mqttVm.ConnectAsync();
-                    }
-                }
-
-                mqttVm.EditConnectionRequested += (_, _) =>
-                {
-                    var editView = App.AppHost.Services.GetRequiredService<MqttEditConnectionView>();
-                    if (editView.DataContext is MqttEditConnectionViewModel vm)
-                    {
-                        var options = App.AppHost.Services.GetRequiredService<IOptions<MqttServiceOptions>>().Value;
-                        vm.Load(options);
-                        vm.HighlightMissingFields();
-                        vm.RequestClose += (_, _) =>
-                        {
-                            if (newService.ServicePage != null)
-                                ShowPage(newService.ServicePage);
-                            _ = _viewModel.SaveServicesAsync();
-                        };
-                    }
-                    ShowPage(editView);
-                };
-            }
-
-            if (newService.ServicePage != null)
-            {
-                ShowPage(newService.ServicePage);
-            }
-
-            await _viewModel.SaveServicesAsync();
-            _logger?.LogDebug("AddService workflow completed");
-        }
 
         internal void AddFtpService(string name, FtpServerOptions options)
         {

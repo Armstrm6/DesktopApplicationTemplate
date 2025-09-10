@@ -9,15 +9,7 @@ namespace DesktopApplicationTemplate.UI.Views
     {
         private readonly CreateServiceViewModel _viewModel;
         public event Action<string, string>? ServiceCreated;
-        public event Action<string>? MqttSelected;
-        public event Action<string>? TcpSelected;
-        public event Action<string>? HeartbeatSelected;
-        public event Action<string>? FtpServerSelected;
-        public event Action<string>? HttpSelected;
-        public event Action<string>? HidSelected;
-        public event Action<string>? CsvSelected;
-        public event Action<string>? FileObserverSelected;
-        public event Action<string>? ScpSelected;
+        public event Action<string>? ServiceTypeSelected;
         public event Action? Cancelled;
 
         public CreateServicePage(CreateServiceViewModel viewModel)
@@ -32,54 +24,16 @@ namespace DesktopApplicationTemplate.UI.Views
             if (sender is Button { DataContext: CreateServiceViewModel.ServiceTypeMetadata meta } button)
             {
                 var name = _viewModel.GenerateDefaultName(meta.Type);
-                if (meta.Type == "MQTT")
+                if (meta.Type is "MQTT" or "TCP" or "Heartbeat" or "FTP" or "FTP Server" or "HTTP" or "HID" or "CSV Creator" or "File Observer" or "SCP")
                 {
-                    MqttSelected?.Invoke(name);
-                    return;
-                }
-                if (meta.Type == "TCP")
-                {
-                    TcpSelected?.Invoke(name);
-                    return;
-                }
-                if (meta.Type == "Heartbeat")
-                {
-                    HeartbeatSelected?.Invoke(name);
-                    return;
-                }
-                if (meta.Type == "FTP" || meta.Type == "FTP Server")
-                {
-                    FtpServerSelected?.Invoke(name);
-                    return;
-                }
-                if (meta.Type == "HTTP")
-                {
-                    HttpSelected?.Invoke(name);
-                    return;
-                }
-                if (meta.Type == "HID")
-                {
-                    HidSelected?.Invoke(name);
-                    return;
-                }
-                if (meta.Type == "CSV Creator")
-                {
-                    CsvSelected?.Invoke(name);
-                    return;
-                }
-                if (meta.Type == "File Observer")
-                {
-                    FileObserverSelected?.Invoke(name);
-                    return;
-                }
-                if (meta.Type == "SCP")
-                {
-                    ScpSelected?.Invoke(name);
+                    ServiceTypeSelected?.Invoke(meta.Type);
                     return;
                 }
                 ServiceCreated?.Invoke(name, meta.Type);
             }
         }
+
+        public string GenerateDefaultName(string type) => _viewModel.GenerateDefaultName(type);
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
