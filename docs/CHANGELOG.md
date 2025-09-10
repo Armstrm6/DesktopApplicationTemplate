@@ -72,6 +72,7 @@
 - Script editor raises an `OutputGenerated` event and TCP service messages view updates its output message when scripts run.
 - TcpServiceMessagesViewModel executes scripts asynchronously and awaits results when saving.
 - TcpServiceMessagesViewModel logs script execution results and exceptions.
+- Restricted `TcpServiceMessagesViewModel.OutputMessage` setter to internal to prevent external modification.
 
 #### Fixed
 - TCP and SCP edit workflows now load existing options via `Load` methods, enabling DI-friendly construction.

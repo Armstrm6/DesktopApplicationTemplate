@@ -270,12 +270,15 @@ public class TcpServiceMessagesViewModelTests
     {
         var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
         var editor = new ScriptEditorViewModel();
-        editor.OutputGenerated += output => vm.OutputMessage = output;
+
+        void OnOutput(string output) => vm.OutputMessage = output; // internal setter
+        editor.OutputGenerated += OnOutput;
         editor.TestMessage = "test";
 
         await ((AsyncRelayCommand)editor.RunCommand).ExecuteAsync(null);
 
         vm.OutputMessage.Should().Be("test");
+        editor.OutputGenerated -= OnOutput;
     }
 
     [Fact]
@@ -290,14 +293,16 @@ public class TcpServiceMessagesViewModelTests
         };
         var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
         vm.SetService(service);
-
         var editor = new ScriptEditorViewModel();
-        editor.OutputGenerated += output => vm.OutputMessage = output;
+
+        void OnOutput(string output) => vm.OutputMessage = output; // internal setter
+        editor.OutputGenerated += OnOutput;
         editor.TestMessage = "test";
 
         await ((AsyncRelayCommand)editor.RunCommand).ExecuteAsync(null);
 
         vm.OutputMessage.Should().Be("test");
         options.OutputMessage.Should().BeEmpty();
+        editor.OutputGenerated -= OnOutput;
     }
 }
