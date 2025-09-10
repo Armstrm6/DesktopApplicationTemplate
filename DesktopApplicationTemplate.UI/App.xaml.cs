@@ -258,6 +258,9 @@ namespace DesktopApplicationTemplate.UI
                 await vm.SaveServicesAsync().ConfigureAwait(false);
             }
 
+            var hid = AppHost.Services.GetService<HidViewModel>();
+            hid?.Dispose();
+
             await AppHost.StopAsync();
             AppHost.Dispose();
             base.OnExit(e);

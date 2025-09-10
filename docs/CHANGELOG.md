@@ -130,6 +130,7 @@
 
 #### Fixed
 - HidViewModel now logs formatting errors and resets simulated keyboard state, skipping message forwarding when templates are malformed.
+- HidViewModel releases simulated key presses on disposal, and `App.OnExit` invokes this cleanup to restore the keyboard state.
 
 ### FTP Service
 #### Added
