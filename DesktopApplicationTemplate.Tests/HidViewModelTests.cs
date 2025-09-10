@@ -37,6 +37,32 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
+        public void BuildMessage_InvalidFormat_DoesNotForward()
+        {
+            bool forwarded = false;
+            MessageForwarder.ForwardAction = (_, _) => forwarded = true;
+
+            var logger = new Mock<ILoggingService>();
+            var helper = new SaveConfirmationHelper(logger.Object);
+            var vm = new HidViewModel(helper) { Logger = logger.Object };
+            vm.MessageTemplate = "test";
+            vm.FormatTemplate = "{0"; // malformed format string
+
+            bool reset = false;
+            KeyboardSimulator.ResetAction = () => reset = true;
+            vm.BuildCommand.Execute(null);
+
+            Assert.Equal(string.Empty, vm.FinalMessage);
+            Assert.False(forwarded);
+            Assert.True(reset);
+            logger.Verify(l => l.Log(It.Is<string>(s => s.Contains("formatting")), LogLevel.Error), Times.Once);
+            MessageForwarder.ForwardAction = null;
+            KeyboardSimulator.ResetAction = null;
+
+            ConsoleTestLogger.LogPass();
+        }
+
+        [Fact]
         public void DataFlowProperties_RaisePropertyChanged()
         {
             var logger = new Mock<ILoggingService>();
