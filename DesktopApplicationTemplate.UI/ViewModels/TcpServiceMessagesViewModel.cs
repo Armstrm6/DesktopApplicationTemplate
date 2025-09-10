@@ -253,7 +253,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private async Task<string> RunScriptAsync()
         {
             var globals = new ScriptGlobals { message = TestMessage };
-            var code = Script + "\nProcess(message);";
+            var code = Script + "\nreturn Process(message);";
             var script = CSharpScript.Create<string>(code, ScriptOptions.Default, typeof(ScriptGlobals));
             var diagnostics = script.Compile();
             if (diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
