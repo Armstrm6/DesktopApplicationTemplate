@@ -102,10 +102,11 @@
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock VerticalAlignment="Center" FontWeight="Bold">
-                                                <Run Text="{Binding DisplayName}" />
-                                                <Run Text="{Binding AverageExecutionTimeMs, Mode=OneWay, StringFormat= (Avg: {0:F0} ms), TargetNullValue=''}" />
-                                            </TextBlock>
+                                            <StackPanel>
+                                                <TextBlock FontWeight="Bold" Text="{Binding DisplayName}" />
+                                                <TextBlock Text="{Binding ExecutionTimeText}" />
+                                                <TextBlock Text="{Binding LastInputMessage}" TextTrimming="CharacterEllipsis" />
+                                            </StackPanel>
                                             <ToggleButton Grid.Column="1" IsChecked="{Binding IsActive, Mode=TwoWay}" Style="{StaticResource ToggleSwitchStyle}"/>
                                         </Grid>
                                     </Border>
