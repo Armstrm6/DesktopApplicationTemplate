@@ -109,6 +109,7 @@
 - Script editor dispatches output and error highlights to the UI thread so results appear when Run is clicked.
 - Script editor uses a `JoinableTaskFactory` to switch to the UI thread and remove VSTHRD001 analyzer warnings.
 - Script editor unsubscribes handlers on close and mirrors test message changes to the TCP messages view.
+- Renamed `SaveServices` to `SaveServicesAsync` and updated callers to await it, removing blocking calls.
 
 
 ### HID Service

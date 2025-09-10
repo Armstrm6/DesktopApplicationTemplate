@@ -17,6 +17,7 @@ using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Models;
 using System.Text.Json.Serialization;
 using DesktopApplicationTemplate.UI;
+using DesktopApplicationTemplate.UI.Helpers;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -228,7 +229,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 _selectedService = value;
                 OnPropertyChanged();
                 LogViewModel.SetLogs(_selectedService?.Logs ?? AllLogs);
-                (RemoveServiceCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                (RemoveServiceCommand as AsyncRelayCommand)?.RaiseCanExecuteChanged();
                 (EditServiceCommand as RelayCommand<ServiceViewModel?>)?.RaiseCanExecuteChanged();
             }
         }
@@ -273,7 +274,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 _logger?.Log($"Using service persistence path {ServicePersistence.FilePath}", LogLevel.Debug);
             }
             AddServiceCommand = new RelayCommand(AddService);
-            RemoveServiceCommand = new RelayCommand(RemoveSelectedService, () => SelectedService != null);
+            RemoveServiceCommand = new AsyncRelayCommand(RemoveSelectedServiceAsync, () => SelectedService != null);
             EditServiceCommand = new RelayCommand<ServiceViewModel?>(EditService, svc => svc != null);
             FilteredServices = CollectionViewSource.GetDefaultView(Services);
             Filters.PropertyChanged += (_, __) => ApplyFilters();
@@ -336,7 +337,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             return $"{serviceType}{index}";
         }
 
-        private void RemoveSelectedService()
+        private async Task RemoveSelectedServiceAsync()
         {
             if (SelectedService != null)
             {
@@ -360,7 +361,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 OnPropertyChanged(nameof(ServicesCreated));
                 OnPropertyChanged(nameof(CurrentActiveServices));
                 LogViewModel.RefreshLogs();
-                SaveServices();
+                await SaveServicesAsync().ConfigureAwait(false);
                 _logger?.Log("Service removed", LogLevel.Debug);
             }
         }
@@ -374,7 +375,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
         }
 
-        public void SaveServices()
+        public async Task SaveServicesAsync()
         {
             // Update order prior to saving
             for (int i = 0; i < Services.Count; i++)
@@ -385,7 +386,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             {
                 if (svc.ServicePage?.DataContext is TcpServiceMessagesViewModel tcpVm)
                 {
-                    tcpVm.SaveAsync().GetAwaiter().GetResult();
+                    await tcpVm.SaveAsync().ConfigureAwait(false);
                 }
             }
             ServicePersistence.Save(Services);

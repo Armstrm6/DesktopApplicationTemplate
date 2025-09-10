@@ -16,6 +16,7 @@ using System.Windows.Input;
 using System.Windows.Controls.Primitives;
 using DesktopApplicationTemplate.UI;
 using System.Runtime.Versioning;
+using System.Threading.Tasks;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
@@ -136,14 +137,14 @@ namespace DesktopApplicationTemplate.UI.Views
                         var editView = App.AppHost.Services.GetRequiredService<TcpEditServiceView>();
                         editView.Initialize(vm);
 
-                        vm.ServiceSaved += (name, opts) =>
+                        vm.ServiceSaved += async (name, opts) =>
                         {
                             svc.DisplayName = $"{vm.ServiceType} - {name}";
                             svc.ServiceType = vm.ServiceType;
                             svc.TcpOptions = opts;
                             if (svc.ServicePage != null)
                                 ShowPage(svc.ServicePage);
-                            _viewModel.SaveServices();
+                            await _viewModel.SaveServicesAsync();
                         };
                         vm.EditCancelled += () =>
                         {
@@ -176,7 +177,7 @@ namespace DesktopApplicationTemplate.UI.Views
         private void ShowCreateServiceSelectionPage()
         {
             var page = App.AppHost.Services.GetRequiredService<CreateServicePage>();
-            page.ServiceCreated += (name, type) =>
+            page.ServiceCreated += async (name, type) =>
             {
                 var svc = new ServiceViewModel
                 {
@@ -194,7 +195,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 ServiceList.ScrollIntoView(svc);
                 if (svc.ServicePage != null)
                     ShowPage(svc.ServicePage);
-                _viewModel.SaveServices();
+                await _viewModel.SaveServicesAsync();
             };
             page.MqttSelected += NavigateToMqtt;
             page.TcpSelected += NavigateToTcp;
@@ -213,7 +214,7 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             var vm = App.AppHost.Services.GetRequiredService<MqttCreateServiceViewModel>();
             vm.ServiceName = defaultName;
-            vm.ServiceSaved += (name, options) => AddMqttService(name, options);
+            vm.ServiceSaved += async (name, options) => await AddMqttServiceAsync(name, options);
             vm.EditCancelled += ShowCreateServiceSelectionPage;
             var view = ActivatorUtilities.CreateInstance<MqttCreateServiceView>(App.AppHost.Services, vm);
             vm.AdvancedConfigRequested += opts =>
@@ -232,7 +233,7 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             var vm = App.AppHost.Services.GetRequiredService<HidCreateServiceViewModel>();
             vm.ServiceName = defaultName;
-            vm.ServiceSaved += (name, options) =>
+            vm.ServiceSaved += async (name, options) =>
             {
                 var svc = new ServiceViewModel
                 {
@@ -251,7 +252,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 ServiceList.ScrollIntoView(svc);
                 if (svc.ServicePage != null)
                     ShowPage(svc.ServicePage);
-                _viewModel.SaveServices();
+                await _viewModel.SaveServicesAsync();
             };
             vm.EditCancelled += ShowCreateServiceSelectionPage;
             var view = ActivatorUtilities.CreateInstance<HidCreateServiceView>(App.AppHost.Services, vm);
@@ -271,7 +272,7 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             var vm = App.AppHost.Services.GetRequiredService<ScpCreateServiceViewModel>();
             vm.ServiceName = defaultName;
-            vm.ServiceSaved += (name, options) =>
+            vm.ServiceSaved += async (name, options) =>
             {
                 var svc = new ServiceViewModel
                 {
@@ -290,7 +291,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 ServiceList.ScrollIntoView(svc);
                 if (svc.ServicePage != null)
                     ShowPage(svc.ServicePage);
-                _viewModel.SaveServices();
+                await _viewModel.SaveServicesAsync();
             };
             vm.EditCancelled += ShowCreateServiceSelectionPage;
             var view = ActivatorUtilities.CreateInstance<ScpCreateServiceView>(App.AppHost.Services, vm);
@@ -311,7 +312,7 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             var vm = App.AppHost.Services.GetRequiredService<HeartbeatCreateServiceViewModel>();
             vm.ServiceName = defaultName;
-            vm.ServiceSaved += (name, options) =>
+            vm.ServiceSaved += async (name, options) =>
             {
                 var svc = new ServiceViewModel
                 {
@@ -330,7 +331,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 ServiceList.ScrollIntoView(svc);
                 if (svc.ServicePage != null)
                     ShowPage(svc.ServicePage);
-                _viewModel.SaveServices();
+                await _viewModel.SaveServicesAsync();
             };
             vm.EditCancelled += ShowCreateServiceSelectionPage;
             var view = ActivatorUtilities.CreateInstance<HeartbeatCreateServiceView>(App.AppHost.Services, vm);
@@ -350,7 +351,7 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             var vm = App.AppHost.Services.GetRequiredService<FileObserverCreateServiceViewModel>();
             vm.ServiceName = defaultName;
-            vm.ServiceSaved += (name, options) =>
+            vm.ServiceSaved += async (name, options) =>
             {
                 var svc = new ServiceViewModel
                 {
@@ -369,7 +370,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 ServiceList.ScrollIntoView(svc);
                 if (svc.ServicePage != null)
                     ShowPage(svc.ServicePage);
-                _viewModel.SaveServices();
+                await _viewModel.SaveServicesAsync();
             };
             vm.EditCancelled += ShowCreateServiceSelectionPage;
             var view = ActivatorUtilities.CreateInstance<FileObserverCreateServiceView>(App.AppHost.Services, vm);
@@ -389,7 +390,7 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             var vm = App.AppHost.Services.GetRequiredService<CsvServiceEditorViewModel>();
             vm.ServiceName = defaultName;
-            vm.ServiceSaved += (name, options) =>
+            vm.ServiceSaved += async (name, options) =>
             {
                 var svc = new ServiceViewModel
                 {
@@ -408,7 +409,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 ServiceList.ScrollIntoView(svc);
                 if (svc.ServicePage != null)
                     ShowPage(svc.ServicePage);
-                _viewModel.SaveServices();
+                await _viewModel.SaveServicesAsync();
             };
             vm.EditCancelled += ShowCreateServiceSelectionPage;
             var view = App.AppHost.Services.GetRequiredService<CsvServiceEditorView>();
@@ -429,7 +430,7 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             var vm = App.AppHost.Services.GetRequiredService<TcpCreateServiceViewModel>();
             vm.ServiceName = defaultName;
-            vm.ServiceSaved += (name, options) =>
+            vm.ServiceSaved += async (name, options) =>
             {
                 var svc = new ServiceViewModel
                 {
@@ -448,7 +449,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 ServiceList.ScrollIntoView(svc);
                 if (svc.ServicePage != null)
                     ShowPage(svc.ServicePage);
-                _viewModel.SaveServices();
+                await _viewModel.SaveServicesAsync();
             };
             vm.EditCancelled += ShowCreateServiceSelectionPage;
             var view = ActivatorUtilities.CreateInstance<TcpCreateServiceView>(App.AppHost.Services, vm);
@@ -459,7 +460,7 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             var vm = App.AppHost.Services.GetRequiredService<HttpCreateServiceViewModel>();
             vm.ServiceName = defaultName;
-            vm.ServiceSaved += (name, options) =>
+            vm.ServiceSaved += async (name, options) =>
             {
                 var svc = new ServiceViewModel
                 {
@@ -478,7 +479,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 ServiceList.ScrollIntoView(svc);
                 if (svc.ServicePage != null)
                     ShowPage(svc.ServicePage);
-                _viewModel.SaveServices();
+                await _viewModel.SaveServicesAsync();
             };
             vm.EditCancelled += ShowCreateServiceSelectionPage;
             var view = ActivatorUtilities.CreateInstance<HttpCreateServiceView>(App.AppHost.Services, vm);
@@ -507,11 +508,11 @@ namespace DesktopApplicationTemplate.UI.Views
             vm.Options.Password = opts.Password;
 
             var view = ActivatorUtilities.CreateInstance<FtpServerCreateView>(App.AppHost.Services, vm);
-            vm.ServiceSaved += (name, options) =>
+            vm.ServiceSaved += async (name, options) =>
             {
                 _logger?.LogInformation("FTP server {Name} created", name);
                 AddFtpService(name, options);
-                _viewModel.SaveServices();
+                await _viewModel.SaveServicesAsync();
             };
             vm.AdvancedConfigRequested += opts2 =>
             {
@@ -526,7 +527,7 @@ namespace DesktopApplicationTemplate.UI.Views
             ShowPage(view);
         }
 
-        private void AddMqttService(string name, MqttServiceOptions options)
+        private async Task AddMqttServiceAsync(string name, MqttServiceOptions options)
         {
             var newService = new ServiceViewModel
             {
@@ -582,11 +583,11 @@ namespace DesktopApplicationTemplate.UI.Views
                         var options = App.AppHost.Services.GetRequiredService<IOptions<MqttServiceOptions>>().Value;
                         vm.Load(options);
                         vm.HighlightMissingFields();
-                        vm.RequestClose += (_, _) =>
+                        vm.RequestClose += async (_, _) =>
                         {
                             if (newService.ServicePage != null)
                                 ShowPage(newService.ServicePage);
-                            _viewModel.SaveServices();
+                            await _viewModel.SaveServicesAsync();
                         };
                     }
                     ShowPage(editView);
@@ -598,7 +599,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 ShowPage(newService.ServicePage);
             }
 
-            _viewModel.SaveServices();
+            await _viewModel.SaveServicesAsync();
             _logger?.LogDebug("AddService workflow completed");
         }
 
@@ -644,12 +645,12 @@ namespace DesktopApplicationTemplate.UI.Views
                 var vm = ActivatorUtilities.CreateInstance<MqttEditServiceViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
                 var editView = App.AppHost.Services.GetRequiredService<MqttEditServiceView>();
                 editView.Initialize(vm);
-                vm.ServiceSaved += (name, opts) =>
+                vm.ServiceSaved += async (name, opts) =>
                 {
                     service.DisplayName = $"MQTT - {name}";
                     if (tagPage != null)
                         ShowPage(tagPage);
-                    _viewModel.SaveServices();
+                    await _viewModel.SaveServicesAsync();
                 };
                 vm.EditCancelled += () =>
                 {
@@ -677,13 +678,13 @@ namespace DesktopApplicationTemplate.UI.Views
             var vm = ActivatorUtilities.CreateInstance<HeartbeatEditServiceViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
             var editView = App.AppHost.Services.GetRequiredService<HeartbeatEditServiceView>();
             editView.Initialize(vm);
-            vm.ServiceSaved += (name, opts) =>
+            vm.ServiceSaved += async (name, opts) =>
             {
                 service.DisplayName = $"Heartbeat - {name}";
                 service.HeartbeatOptions = opts;
                 if (hbPage != null)
                     ShowPage(hbPage);
-                _viewModel.SaveServices();
+                await _viewModel.SaveServicesAsync();
             };
             vm.EditCancelled += () =>
             {
@@ -711,13 +712,13 @@ namespace DesktopApplicationTemplate.UI.Views
             var vm = ActivatorUtilities.CreateInstance<HidEditServiceViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
             var editView = App.AppHost.Services.GetRequiredService<HidEditServiceView>();
             editView.Initialize(vm);
-            vm.ServiceSaved += (name, opts) =>
+            vm.ServiceSaved += async (name, opts) =>
             {
                 service.DisplayName = $"HID - {name}";
                 service.HidOptions = opts;
                 if (hidPage != null)
                     ShowPage(hidPage);
-                _viewModel.SaveServices();
+                await _viewModel.SaveServicesAsync();
             };
             vm.EditCancelled += () =>
             {
@@ -746,13 +747,13 @@ namespace DesktopApplicationTemplate.UI.Views
             vm.Load(service.DisplayName.Split(" - ").Last(), options);
             var editView = App.AppHost.Services.GetRequiredService<CsvServiceEditorView>();
             editView.Initialize(vm);
-            vm.ServiceSaved += (name, opts) =>
+            vm.ServiceSaved += async (name, opts) =>
             {
                 service.DisplayName = $"CSV Creator - {name}";
                 service.CsvOptions = opts;
                 if (csvPage != null)
                     ShowPage(csvPage);
-                _viewModel.SaveServices();
+                await _viewModel.SaveServicesAsync();
             };
             vm.EditCancelled += () =>
             {
@@ -780,13 +781,13 @@ namespace DesktopApplicationTemplate.UI.Views
             var vm = ActivatorUtilities.CreateInstance<FileObserverEditServiceViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
             var editView = App.AppHost.Services.GetRequiredService<FileObserverEditServiceView>();
             editView.Initialize(vm);
-            vm.ServiceSaved += (name, opts) =>
+            vm.ServiceSaved += async (name, opts) =>
             {
                 service.DisplayName = $"File Observer - {name}";
                 service.FileObserverOptions = opts;
                 if (foPage != null)
                     ShowPage(foPage);
-                _viewModel.SaveServices();
+                await _viewModel.SaveServicesAsync();
             };
             vm.EditCancelled += () =>
             {
@@ -815,13 +816,13 @@ namespace DesktopApplicationTemplate.UI.Views
             vm.Load(service.DisplayName.Split(" - ").Last(), options);
             var editView = App.AppHost.Services.GetRequiredService<ScpEditServiceView>();
             editView.Initialize(vm);
-            vm.ServiceSaved += (name, opts) =>
+            vm.ServiceSaved += async (name, opts) =>
             {
                 service.DisplayName = $"SCP - {name}";
                 service.ScpOptions = opts;
                 if (scpPage != null)
                     ShowPage(scpPage);
-                _viewModel.SaveServices();
+                await _viewModel.SaveServicesAsync();
             };
             vm.EditCancelled += () =>
             {
@@ -853,14 +854,14 @@ namespace DesktopApplicationTemplate.UI.Views
                 var editView = App.AppHost.Services.GetRequiredService<TcpEditServiceView>();
                 editView.Initialize(vm);
 
-                vm.ServiceSaved += (name, opts) =>
+                vm.ServiceSaved += async (name, opts) =>
                 {
                     service.DisplayName = $"{vm.ServiceType} - {name}";
                     service.ServiceType = vm.ServiceType;
                     service.TcpOptions = opts;
                     if (tcpPage != null)
                         ShowPage(tcpPage);
-                    _viewModel.SaveServices();
+                    await _viewModel.SaveServicesAsync();
                 };
                 vm.EditCancelled += () =>
                 {
@@ -879,13 +880,13 @@ namespace DesktopApplicationTemplate.UI.Views
                 var vm = ActivatorUtilities.CreateInstance<HttpEditServiceViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
                 var editView = App.AppHost.Services.GetRequiredService<HttpEditServiceView>();
                 editView.Initialize(vm);
-                vm.ServiceSaved += (name, opts) =>
+                vm.ServiceSaved += async (name, opts) =>
                 {
                     service.DisplayName = $"HTTP - {name}";
                     service.HttpOptions = opts;
                     if (httpPage != null)
                         ShowPage(httpPage);
-                    _viewModel.SaveServices();
+                    await _viewModel.SaveServicesAsync();
                 };
                 vm.EditCancelled += () =>
                 {
@@ -913,7 +914,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 var options = service.FtpOptions ?? new FtpServerOptions();
                 var vm = ActivatorUtilities.CreateInstance<FtpServerEditViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
                 var editView = ActivatorUtilities.CreateInstance<FtpServerEditView>(App.AppHost.Services, vm);
-                vm.ServiceSaved += (name, opts) =>
+                vm.ServiceSaved += async (name, opts) =>
                 {
                     service.DisplayName = $"FTP Server - {name}";
                     service.FtpOptions = opts;
@@ -925,7 +926,7 @@ namespace DesktopApplicationTemplate.UI.Views
                     opt.Password = opts.Password;
                     if (ftpPage != null)
                         ShowPage(ftpPage);
-                    _viewModel.SaveServices();
+                    await _viewModel.SaveServicesAsync();
                 };
                 vm.EditCancelled += () =>
                 {
@@ -989,7 +990,7 @@ namespace DesktopApplicationTemplate.UI.Views
             }
         }
 
-        private void DeleteServiceMenu_Click(object sender, RoutedEventArgs e)
+        private async void DeleteServiceMenu_Click(object sender, RoutedEventArgs e)
         {
             if (sender is MenuItem { DataContext: ServiceViewModel svc })
             {
@@ -1005,11 +1006,11 @@ namespace DesktopApplicationTemplate.UI.Views
                 {
                     _viewModel.SelectedService = null;
                 }
-                _viewModel.SaveServices();
+                await _viewModel.SaveServicesAsync();
             }
         }
 
-        private void RenameServiceMenu_Click(object sender, RoutedEventArgs e)
+        private async void RenameServiceMenu_Click(object sender, RoutedEventArgs e)
         {
             if (sender is MenuItem { DataContext: ServiceViewModel svc })
             {
@@ -1022,12 +1023,12 @@ namespace DesktopApplicationTemplate.UI.Views
                         namePart = _viewModel.GenerateServiceName(svc.ServiceType);
                     }
                     svc.DisplayName = $"{svc.ServiceType} - {namePart}";
-                    _viewModel.SaveServices();
+                    await _viewModel.SaveServicesAsync();
                 }
             }
         }
 
-        private void ChangeColorMenu_Click(object sender, RoutedEventArgs e)
+        private async void ChangeColorMenu_Click(object sender, RoutedEventArgs e)
         {
             if (sender is MenuItem { DataContext: ServiceViewModel svc })
             {
@@ -1041,7 +1042,7 @@ namespace DesktopApplicationTemplate.UI.Views
                         s.BackgroundColor = brush;
                         s.BorderColor = brush;
                     }
-                    _viewModel.SaveServices();
+                    await _viewModel.SaveServicesAsync();
                 }
             }
         }
@@ -1155,7 +1156,7 @@ namespace DesktopApplicationTemplate.UI.Views
             }
         }
 
-        private void ServiceItem_Drop(object sender, System.Windows.DragEventArgs e)
+        private async void ServiceItem_Drop(object sender, System.Windows.DragEventArgs e)
         {
             if (!e.Data.GetDataPresent(typeof(ServiceViewModel)))
                 return;
@@ -1169,7 +1170,7 @@ namespace DesktopApplicationTemplate.UI.Views
             if (oldIndex != newIndex)
             {
                 _viewModel.Services.Move(oldIndex, newIndex);
-                _viewModel.SaveServices();
+                await _viewModel.SaveServicesAsync();
             }
         }
 

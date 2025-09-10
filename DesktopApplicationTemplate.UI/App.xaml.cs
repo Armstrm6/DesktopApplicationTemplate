@@ -225,7 +225,7 @@ namespace DesktopApplicationTemplate.UI
             }
             else
             {
-                vm.SaveServices();
+                await vm.SaveServicesAsync().ConfigureAwait(false);
             }
 
             await AppHost.StopAsync();
