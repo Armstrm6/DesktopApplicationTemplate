@@ -274,9 +274,17 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             if (string.IsNullOrWhiteSpace(ServiceName))
                 return;
 
-            TestMessage = string.IsNullOrWhiteSpace(_options.LastTestMessage)
-                ? $"{ServiceName}-PEAK-123456789"
-                : _options.LastTestMessage;
+            if (string.IsNullOrWhiteSpace(_options.LastTestMessage) &&
+                _routing.TryGetMessage(ServiceName, out var routed))
+            {
+                TestMessage = routed ?? string.Empty;
+            }
+            else
+            {
+                TestMessage = string.IsNullOrWhiteSpace(_options.LastTestMessage)
+                    ? $"{ServiceName}-PEAK-123456789"
+                    : _options.LastTestMessage;
+            }
             _routing.UpdateMessage(ServiceName, TestMessage);
         }
 
@@ -293,6 +301,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             void OnOutputGenerated(string output)
             {
                 OutputMessage = _options.OutputMessage = output;
+                TestMessage = svm.TestMessage;
+                _options.LastTestMessage = svm.TestMessage;
+                _routing.UpdateMessage(ServiceName, svm.TestMessage);
             }
 
             void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
