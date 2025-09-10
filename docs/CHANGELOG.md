@@ -93,6 +93,7 @@
 - TCP script execution returns the processing result instead of null by returning the value from `Process`.
 - TCP service messages view runs the script with the test message on load, populating the output automatically.
 
+
 - Marked main window as Windows-only to silence cross-platform analyzer warnings.
 - Corrected `LogEntry` namespace usage and removed obsolete global log handler to restore build after introducing the shared log view.
 - Fixed ServiceLogView namespace references and command delegates so main, HTTP, and TCP views compile consistently.
