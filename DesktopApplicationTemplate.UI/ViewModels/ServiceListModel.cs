@@ -37,11 +37,47 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         private double _totalExecutionTimeMs;
         private int _executionCount;
+        private TimeSpan _lastExecutionDuration;
+        private string _lastInputMessage = string.Empty;
 
         /// <summary>
         /// Gets the average execution time in milliseconds for operations performed by this service.
         /// </summary>
         public double? AverageExecutionTimeMs => _executionCount == 0 ? null : _totalExecutionTimeMs / _executionCount;
+
+        /// <summary>
+        /// Gets the duration of the most recent execution for this service.
+        /// </summary>
+        public TimeSpan LastExecutionDuration
+        {
+            get => _lastExecutionDuration;
+            private set
+            {
+                _lastExecutionDuration = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(ExecutionTimeText));
+            }
+        }
+
+        /// <summary>
+        /// Gets a formatted string displaying the last execution duration and average.
+        /// </summary>
+        public string ExecutionTimeText => _executionCount == 0
+            ? string.Empty
+            : $"Last: {LastExecutionDuration.TotalMilliseconds:F0} ms (Avg: {AverageExecutionTimeMs:F0} ms)";
+
+        /// <summary>
+        /// Gets the last input message received by this service.
+        /// </summary>
+        public string LastInputMessage
+        {
+            get => _lastInputMessage;
+            private set
+            {
+                _lastInputMessage = value;
+                OnPropertyChanged();
+            }
+        }
 
         /// <summary>
         /// Gets or sets the accumulated execution time in milliseconds.
@@ -53,6 +89,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             {
                 _totalExecutionTimeMs = value;
                 OnPropertyChanged(nameof(AverageExecutionTimeMs));
+                OnPropertyChanged(nameof(ExecutionTimeText));
             }
         }
 
@@ -66,6 +103,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             {
                 _executionCount = value;
                 OnPropertyChanged(nameof(AverageExecutionTimeMs));
+                OnPropertyChanged(nameof(ExecutionTimeText));
             }
         }
 
@@ -137,6 +175,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public void AddLog(string message, WpfBrush? color = null, LogLevel level = LogLevel.Debug, bool checkReference = true)
         {
+            LastInputMessage = message;
             var ts = DateTime.Now.ToString("MM.dd.yyyy - HH:mm:ss.fffffff");
             var entry = new LogEntry { Message = $"{ts} {message}", Color = (color ?? WpfBrushes.Black).ToString(), Level = level };
             Logs.Insert(0, entry);
@@ -159,6 +198,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
             _totalExecutionTimeMs += duration.TotalMilliseconds;
             _executionCount++;
+            LastExecutionDuration = duration;
             OnPropertyChanged(nameof(AverageExecutionTimeMs));
         }
 

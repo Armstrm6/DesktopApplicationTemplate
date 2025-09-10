@@ -83,13 +83,15 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        public void RecordExecutionTime_ComputesAverage()
+        public void RecordExecutionTime_ComputesAverageAndTracksLastExecution()
         {
             var vm = new ServiceListModel();
             vm.RecordExecutionTime(TimeSpan.FromMilliseconds(100));
             vm.RecordExecutionTime(TimeSpan.FromMilliseconds(50));
 
             Assert.Equal(75, vm.AverageExecutionTimeMs);
+            Assert.Equal(TimeSpan.FromMilliseconds(50), vm.LastExecutionDuration);
+            Assert.Equal("Last: 50 ms (Avg: 75 ms)", vm.ExecutionTimeText);
             ConsoleTestLogger.LogPass();
         }
 
@@ -98,6 +100,16 @@ namespace DesktopApplicationTemplate.Tests
         {
             var vm = new ServiceListModel();
             Assert.Throws<ArgumentException>(() => vm.RecordExecutionTime(TimeSpan.FromMilliseconds(-1)));
+            ConsoleTestLogger.LogPass();
+        }
+
+        [Fact]
+        public void AddLog_UpdatesLastInputMessage()
+        {
+            var vm = new ServiceListModel();
+            vm.AddLog("hello world");
+
+            Assert.Equal("hello world", vm.LastInputMessage);
             ConsoleTestLogger.LogPass();
         }
 
