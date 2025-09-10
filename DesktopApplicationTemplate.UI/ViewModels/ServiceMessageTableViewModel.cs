@@ -9,6 +9,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
     /// </summary>
     public class ServiceMessageTableViewModel : ViewModelBase
     {
+        private const int MaxRows = 5;
+
         /// <summary>Collection of service message rows.</summary>
         public ObservableCollection<ServiceMessageRow> Messages { get; } = new();
 
@@ -25,6 +27,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 Destination = destination ?? string.Empty,
                 Timestamp = DateTime.Now
             });
+
+            if (Messages.Count > MaxRows)
+                Messages.RemoveAt(Messages.Count - 1);
         }
     }
 }
