@@ -15,6 +15,8 @@ using FubarDev.FtpServer;
 using FubarDev.FtpServer.FileSystem.DotNet;
 using System.IO;
 using System.Windows;
+using System;
+using System.Windows.Threading;
 
 
 namespace DesktopApplicationTemplate.UI
@@ -25,6 +27,9 @@ namespace DesktopApplicationTemplate.UI
 
         public App()
         {
+            DispatcherUnhandledException += OnDispatcherUnhandledException;
+            AppDomain.CurrentDomain.UnhandledException += OnAppDomainUnhandledException;
+
             AppHost = Host.CreateDefaultBuilder()
                 .ConfigureLogging(builder => builder.AddConsole().AddDebug())
                 .ConfigureAppConfiguration((context, config) =>
@@ -172,6 +177,31 @@ namespace DesktopApplicationTemplate.UI
             services.AddOptions<FileObserverServiceOptions>();
             services.AddOptions<CsvServiceOptions>();
             services.AddOptions<ScpServiceOptions>();
+        }
+
+        internal void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+        {
+            var logger = AppHost.Services.GetService<ILogger<App>>();
+            logger?.LogError(e.Exception, "Unhandled dispatcher exception");
+            HookReleaseHelper.Release();
+            e.Handled = true;
+            Shutdown();
+        }
+
+        internal void OnAppDomainUnhandledException(object? sender, UnhandledExceptionEventArgs e)
+        {
+            var logger = AppHost.Services.GetService<ILogger<App>>();
+            if (e.ExceptionObject is Exception ex)
+            {
+                logger?.LogError(ex, "Unhandled domain exception");
+            }
+            else
+            {
+                logger?.LogError("Unhandled domain exception");
+            }
+
+            HookReleaseHelper.Release();
+            Current?.Dispatcher.Invoke(() => Current.Shutdown());
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Startup event")]
