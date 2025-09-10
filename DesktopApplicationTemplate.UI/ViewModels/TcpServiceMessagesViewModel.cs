@@ -13,6 +13,7 @@ using DesktopApplicationTemplate.UI.Views;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.VisualStudio.Threading;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -21,6 +22,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
     /// </summary>
     public class TcpServiceMessagesViewModel : ViewModelBase, ILoggingViewModel
     {
+        private static readonly JoinableTaskFactory _jtf = new(new JoinableTaskContext());
         private LogLevel _logLevelFilter = LogLevel.Debug;
 
         /// <summary>Table view model for displaying message history.</summary>
@@ -240,22 +242,25 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         private string RunScript()
         {
-            var globals = new ScriptGlobals { message = TestMessage };
-            var code = Script + "\nProcess(message);";
-            var script = CSharpScript.Create<string>(code, ScriptOptions.Default, typeof(ScriptGlobals));
-            var diagnostics = script.Compile();
-            if (diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
-                return string.Join(Environment.NewLine, diagnostics.Select(d => d.ToString()));
+            return _jtf.Run(async () =>
+            {
+                var globals = new ScriptGlobals { message = TestMessage };
+                var code = Script + "\nProcess(message);";
+                var script = CSharpScript.Create<string>(code, ScriptOptions.Default, typeof(ScriptGlobals));
+                var diagnostics = script.Compile();
+                if (diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
+                    return string.Join(Environment.NewLine, diagnostics.Select(d => d.ToString()));
 
-            try
-            {
-                var result = script.RunAsync(globals).GetAwaiter().GetResult();
-                return result.ReturnValue ?? string.Empty;
-            }
-            catch (Exception ex)
-            {
-                return ex.ToString();
-            }
+                try
+                {
+                    var result = await script.RunAsync(globals).ConfigureAwait(false);
+                    return result.ReturnValue ?? string.Empty;
+                }
+                catch (Exception ex)
+                {
+                    return ex.ToString();
+                }
+            });
         }
 
         private class ScriptGlobals

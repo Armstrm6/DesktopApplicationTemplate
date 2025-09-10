@@ -67,6 +67,7 @@
 - Service message table retains only the five most recent entries.
 - TCP service messages view wrapped in a ScrollViewer with adjusted row sizing.
 - ServiceMessageTableView limits height to keep the table compact.
+- Replaced main window navigation logo with a text header.
 
 #### Fixed
 - TCP and SCP edit workflows now load existing options via `Load` methods, enabling DI-friendly construction.
