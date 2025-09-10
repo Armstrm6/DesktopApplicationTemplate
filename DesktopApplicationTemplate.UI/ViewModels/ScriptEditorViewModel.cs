@@ -116,7 +116,7 @@ public class ScriptEditorViewModel : ViewModelBase
 
     private void Save() => RequestClose?.Invoke(this, new ScriptSavedEventArgs(ScriptText, _lastTestMessage));
 
-    private class Globals
+    public class Globals
     {
         public string message = string.Empty;
     }
