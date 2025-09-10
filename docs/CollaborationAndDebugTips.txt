@@ -167,6 +167,7 @@ Latest Attempt: After mirroring script editor test message updates in the TCP me
 Latest Attempt: After adding an Information log level and logging tests, the `dotnet` command is still missing; restore, build, and test commands cannot run locally and CI will verify.
 Latest Attempt: Renamed SaveServices to SaveServicesAsync, but the `dotnet` command remains unavailable; build and tests deferred to CI.
 Latest Attempt: After restricting TcpServiceMessagesViewModel.OutputMessage setter to internal, the `dotnet` command remains unavailable; restore, build, and tests cannot run locally and CI will verify.
+Latest Attempt: After confirming TcpServiceMessagesViewModel.SaveAsync usage, `dotnet restore` succeeded but `dotnet build` reported VSTHRD100/101 analyzer errors; tests could not run locally and CI will verify.
 Related Commits/PRs: 8517691, 4c0dbb5, 1b5b0ec, 739abbe, 4f74a36, ff70210, 272560a, 26960dc, 7e9096b, 6454680, a70fb18, f1e064e
 [2025-08-27 04:25] Topic: Logging interface restoration
 Context: Introduced core logging abstractions and refactored edit view models to support DI.
@@ -511,6 +512,7 @@ Next Attempt: Installed .NET SDK 8.0.404, replaced `DocumentLine.BackgroundColor
 Current Attempt: `dotnet restore`, `dotnet build DesktopApplicationTemplate.sln`, and `dotnet test --settings tests.runsettings` report command not found; relying on CI for validation.
 Latest Attempt: After updating ScriptEditorViewModel to use JoinableTaskFactory, `dotnet restore` and `dotnet build DesktopApplicationTemplate.sln` succeeded. `dotnet workload install wpf` still reports Workload ID not recognized, and `dotnet test --settings tests.runsettings` aborts because the Microsoft.WindowsDesktop.App runtime is missing.
 Newest Attempt: After adding a test for ScriptEditor RunCommand updating TcpServiceMessagesViewModel without saving, the `dotnet` command is still missing; restore, build, and test commands cannot run locally and CI will handle verification.
+Latest Attempt: Removed async lambdas in MainWindow to satisfy VSTHRD analyzers; `dotnet restore` and `dotnet build DesktopApplicationTemplate.sln` succeed, but `dotnet test --settings tests.runsettings` fails because the Microsoft.WindowsDesktop.App runtime is missing.
 Related Commits/PRs:
 [2025-10-01 09:00] Topic: EditorButtonBar namespace
 Context: Verified EditorButtonBar build action and updated consuming views to use an assembly-qualified namespace.
