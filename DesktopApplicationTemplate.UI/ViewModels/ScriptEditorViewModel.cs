@@ -2,8 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Media;
+using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
@@ -91,32 +92,41 @@ public class ScriptEditorViewModel : ViewModelBase
         var code = ScriptText + "\nProcess(message);";
         var script = CSharpScript.Create<string>(code, ScriptOptions.Default, typeof(Globals));
         var diagnostics = script.Compile();
-        ErrorsChanged?.Invoke(diagnostics);
+        await Application.Current.Dispatcher.InvokeAsync(() => ErrorsChanged?.Invoke(diagnostics));
 
         if (diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
         {
-            OutputMessage = string.Join(Environment.NewLine, diagnostics.Select(d => d.ToString()));
-            OutputBrush = Brushes.Red;
+            await Application.Current.Dispatcher.InvokeAsync(() =>
+            {
+                OutputMessage = string.Join(Environment.NewLine, diagnostics.Select(d => d.ToString()));
+                OutputBrush = Brushes.Red;
+            });
             return;
         }
 
         try
         {
             var result = await script.RunAsync(globals);
-            OutputMessage = result.ReturnValue;
-            OutputBrush = Brushes.Black;
-            _lastTestMessage = TestMessage;
+            await Application.Current.Dispatcher.InvokeAsync(() =>
+            {
+                OutputMessage = result.ReturnValue;
+                OutputBrush = Brushes.Black;
+                _lastTestMessage = TestMessage;
+            });
         }
         catch (Exception ex)
         {
-            OutputMessage = ex.ToString();
-            OutputBrush = Brushes.Red;
+            await Application.Current.Dispatcher.InvokeAsync(() =>
+            {
+                OutputMessage = ex.ToString();
+                OutputBrush = Brushes.Red;
+            });
         }
     }
 
     private void Save() => RequestClose?.Invoke(this, new ScriptSavedEventArgs(ScriptText, _lastTestMessage));
 
-    private class Globals
+    public class Globals
     {
         public string message = string.Empty;
     }

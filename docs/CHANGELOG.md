@@ -102,6 +102,8 @@
 - Output message textbox uses a one-way binding to avoid runtime errors on the read-only `OutputMessage` property.
 - Script editor window removes `Text` binding from AvalonEdit control to prevent XAML parse exceptions.
 - Made `ScriptGlobals` public so TCP scripts can access the `message` field without protection-level errors.
+- Made `ScriptEditorViewModel.Globals` public so scripts can access the `message` field without protection-level errors.
+- Script editor dispatches output and error highlights to the UI thread so results appear when Run is clicked.
 
 ### HID Service
 #### Added
