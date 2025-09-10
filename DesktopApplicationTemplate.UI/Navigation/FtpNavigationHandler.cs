@@ -8,14 +8,14 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace DesktopApplicationTemplate.UI.Navigation
 {
-    public class MqttNavigationHandler : INavigationHandler
+    public class FtpNavigationHandler : INavigationHandler
     {
         private readonly IServiceProvider _services;
         private readonly MainView _mainView;
 
-        public string ServiceType => "MQTT";
+        public string ServiceType => "FTP Server";
 
-        public MqttNavigationHandler(IServiceProvider services, MainView mainView)
+        public FtpNavigationHandler(IServiceProvider services, MainView mainView)
         {
             _services = services;
             _mainView = mainView;
@@ -23,15 +23,15 @@ namespace DesktopApplicationTemplate.UI.Navigation
 
         public Page CreateView(string defaultName)
         {
-            var vm = _services.GetRequiredService<MqttCreateServiceViewModel>();
+            var vm = _services.GetRequiredService<FtpServerCreateViewModel>();
             vm.ServiceName = defaultName;
-            vm.ServiceSaved += (name, options) => _ = _mainView.AddServiceAsync(ServiceType, new ServiceFactoryOptions<MqttServiceOptions>(name, options));
+            vm.ServiceSaved += (name, options) => _ = _mainView.AddServiceAsync(ServiceType, new ServiceFactoryOptions<FtpServerOptions>(name, options));
             vm.EditCancelled += _mainView.ShowCreateServiceSelectionPage;
-            var view = ActivatorUtilities.CreateInstance<MqttCreateServiceView>(_services, vm);
+            var view = ActivatorUtilities.CreateInstance<FtpServerCreateView>(_services, vm);
             vm.AdvancedConfigRequested += opts =>
             {
-                var advVm = ActivatorUtilities.CreateInstance<MqttAdvancedConfigViewModel>(_services, opts);
-                var advView = _services.GetRequiredService<MqttAdvancedConfigView>();
+                var advVm = ActivatorUtilities.CreateInstance<FtpServerAdvancedConfigViewModel>(_services, opts);
+                var advView = _services.GetRequiredService<FtpServerAdvancedConfigView>();
                 advView.Initialize(advVm);
                 advVm.Saved += _ => _mainView.ShowPage(view);
                 advVm.BackRequested += () => _mainView.ShowPage(view);
@@ -39,6 +39,5 @@ namespace DesktopApplicationTemplate.UI.Navigation
             };
             return view;
         }
-
     }
 }

@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.Navigation;
 using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI.Factories;
 using LogLevel = DesktopApplicationTemplate.Core.Services.LogLevel;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -225,29 +226,17 @@ namespace DesktopApplicationTemplate.UI.Views
 
 
 
-
-        internal void AddFtpService(string name, FtpServerOptions options)
+        internal async Task AddServiceAsync(string type, object options)
         {
-            var svc = new ServiceListModel
-            {
-                DisplayName = $"FTP Server - {name}",
-                ServiceType = "FTP Server",
-                IsActive = false,
-                FtpOptions = options
-            };
+            var factory = App.AppHost.Services.GetServices<IServiceFactory>()
+                .FirstOrDefault(f => f.ServiceType == type);
+            if (factory == null)
+                return;
 
+            var svc = factory.Create(options);
             svc.SetColorsByType();
             svc.LogAdded += _viewModel.OnServiceLogAdded;
             svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
-
-            var opt = App.AppHost.Services.GetRequiredService<IOptions<FtpServerOptions>>().Value;
-            opt.Port = options.Port;
-            opt.RootPath = options.RootPath;
-            opt.AllowAnonymous = options.AllowAnonymous;
-            opt.Username = options.Username;
-            opt.Password = options.Password;
-
-            GetOrCreateServicePage(svc);
 
             _viewModel.Services.Add(svc);
             _logger?.LogInformation("Service {Name} added", svc.DisplayName);
@@ -255,6 +244,8 @@ namespace DesktopApplicationTemplate.UI.Views
             ServiceList.ScrollIntoView(svc);
             if (svc.ServicePage != null)
                 ShowPage(svc.ServicePage);
+            await _viewModel.SaveServicesAsync();
+            _logger?.LogDebug("AddService workflow completed");
         }
 
         private void OnEditRequested(ServiceListModel service)
