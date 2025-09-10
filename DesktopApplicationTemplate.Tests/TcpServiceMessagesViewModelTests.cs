@@ -6,6 +6,7 @@ using DesktopApplicationTemplate.UI.Helpers;
 using FluentAssertions;
 using Xunit;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace DesktopApplicationTemplate.Tests;
 
@@ -19,13 +20,14 @@ public class TcpServiceMessagesViewModelTests
             Logs =
             {
                 new LogEntry { Message = "a", Level = DesktopApplicationTemplate.Core.Services.LogLevel.Debug },
-                new LogEntry { Message = "b", Level = DesktopApplicationTemplate.Core.Services.LogLevel.Error }
+                new LogEntry { Message = "b", Level = DesktopApplicationTemplate.Core.Services.LogLevel.Information },
+                new LogEntry { Message = "c", Level = DesktopApplicationTemplate.Core.Services.LogLevel.Error }
             }
         };
 
-        vm.LogLevelFilter = DesktopApplicationTemplate.Core.Services.LogLevel.Error;
+        vm.LogLevelFilter = DesktopApplicationTemplate.Core.Services.LogLevel.Information;
 
-        vm.DisplayLogs.Should().ContainSingle().Which.Message.Should().Be("b");
+        vm.DisplayLogs.Select(l => l.Message).Should().Equal(new[] { "b", "c" });
     }
 
     [Fact]

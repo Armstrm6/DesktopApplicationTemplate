@@ -59,6 +59,7 @@ namespace DesktopApplicationTemplate.UI.Services
         private static string LevelToColor(LogLevel level) => level switch
         {
             LogLevel.Debug => "#000000",
+            LogLevel.Information => "#0000FF",
             LogLevel.Warning => "#FFA500",
             LogLevel.Error => "#FF0000",
             LogLevel.Critical => "#8B0000",

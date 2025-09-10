@@ -222,6 +222,7 @@
 #### Added
 - Logging service loads existing log file on startup and reloads entries when the minimum level changes.
 - Core `ILoggingService` interface and `LogLevel` enum shared across projects.
+- Information log level inserted between Debug and Warning with a default blue color.
 
 #### Fixed
 - Service persistence and logging tests stabilized by reloading options, awaiting file writes, and running settings-related tests sequentially.
