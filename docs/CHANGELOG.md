@@ -98,6 +98,7 @@
 - TCP script execution returns the processing result instead of null by returning the value from `Process`.
 - Script editor Run command returns the processed message so the output field updates instead of showing null.
 - Service message table disables auto-generated columns to prevent duplicate columns.
+- `VisualTreeHelperExtensions.FindParent` now falls back to the logical tree for non-visual ancestors.
 
 - Marked main window as Windows-only to silence cross-platform analyzer warnings.
 - Corrected `LogEntry` namespace usage and removed obsolete global log handler to restore build after introducing the shared log view.
