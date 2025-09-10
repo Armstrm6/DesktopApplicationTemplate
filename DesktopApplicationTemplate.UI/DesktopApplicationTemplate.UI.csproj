@@ -40,9 +40,6 @@
     <Resource Include="Themes/DataFlowDiagram.xaml" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Resource Include="Assets\**\*" />
-  </ItemGroup>
 
   <ItemGroup>
     <Page Update="Views/Shared/ServiceLogView.xaml">
