@@ -215,7 +215,7 @@ public class TcpServiceMessagesViewModelTests
     }
 
     [Fact]
-    public void Save_DefaultScript_RunsMessage()
+    public void Save_DefaultScript_NoProtectionLevelErrors()
     {
         var options = new TcpServiceOptions();
         var service = new ServiceViewModel
@@ -231,6 +231,7 @@ public class TcpServiceMessagesViewModelTests
         vm.Save();
 
         vm.OutputMessage.Should().Be("ping");
+        vm.OutputMessage.Should().NotContain("protection level");
         options.OutputMessage.Should().Be("ping");
     }
 
