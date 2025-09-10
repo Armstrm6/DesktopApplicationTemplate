@@ -138,6 +138,7 @@ Latest Attempt: After importing the Helpers namespace into App startup to resolv
 Newest Attempt: While unifying log views, the `dotnet` command remained unavailable; build and tests deferred to CI.
 Latest Attempt: After correcting LogEntry namespaces and removing the global log level handler, the `dotnet` CLI is still missing; relying on CI for build and test.
 Another Attempt: After fixing ServiceLogView namespace bindings and command delegates, the `dotnet` command remains unavailable; restore, build, and tests must run in CI.
+Latest Attempt: Installed .NET SDK 8.0.404; `dotnet restore` and `dotnet build` succeeded, but `dotnet test --settings tests.runsettings` aborted because the Microsoft.WindowsDesktop.App 8.0.0 runtime is missing; relying on CI.
 Latest Attempt: After converting TcpServiceMessagesViewModel script execution to async and updating related tests, the `dotnet` CLI is still missing; `dotnet restore`, `dotnet build DesktopApplicationTemplate.sln`, and `dotnet test --settings tests.runsettings` all report command not found.
 Newest Attempt: After qualifying XAML namespaces and marking MQTT subscription view model as Windows-only, the `dotnet` CLI is still missing; relying on CI for build and test.
 Latest Attempt: After aligning log view model with shared log entry and adding assembly-qualified namespaces, the `dotnet` command remains unavailable; build and tests will run in CI.

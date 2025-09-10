@@ -17,6 +17,7 @@ using System.IO;
 using System.Windows;
 using System;
 using System.Windows.Threading;
+using System.Threading.Tasks;
 
 
 namespace DesktopApplicationTemplate.UI
@@ -28,7 +29,7 @@ namespace DesktopApplicationTemplate.UI
         public App()
         {
             DispatcherUnhandledException += OnDispatcherUnhandledException;
-            AppDomain.CurrentDomain.UnhandledException += OnAppDomainUnhandledException;
+            AppDomain.CurrentDomain.UnhandledException += HandleAppDomainUnhandledException;
 
             AppHost = Host.CreateDefaultBuilder()
                 .ConfigureLogging(builder => builder.AddConsole().AddDebug())
@@ -188,7 +189,13 @@ namespace DesktopApplicationTemplate.UI
             Shutdown();
         }
 
-        internal void OnAppDomainUnhandledException(object? sender, UnhandledExceptionEventArgs e)
+        private void HandleAppDomainUnhandledException(object? sender, UnhandledExceptionEventArgs e)
+        {
+            _ = OnAppDomainUnhandledExceptionAsync(sender, e);
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD001:Use SwitchToMainThreadAsync to switch to the UI thread", Justification = "Dispatcher is sufficient for shutdown")]
+        internal async Task OnAppDomainUnhandledExceptionAsync(object? sender, UnhandledExceptionEventArgs e)
         {
             var logger = AppHost.Services.GetService<ILogger<App>>();
             if (e.ExceptionObject is Exception ex)
@@ -201,7 +208,10 @@ namespace DesktopApplicationTemplate.UI
             }
 
             HookReleaseHelper.Release();
-            Current?.Dispatcher.Invoke(() => Current.Shutdown());
+            if (Current is not null)
+            {
+                await Current.Dispatcher.InvokeAsync(() => Current.Shutdown());
+            }
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Startup event")]
