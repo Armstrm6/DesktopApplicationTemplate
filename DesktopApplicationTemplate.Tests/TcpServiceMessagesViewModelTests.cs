@@ -162,6 +162,27 @@ public class TcpServiceMessagesViewModelTests
     }
 
     [Fact]
+    public void Save_ComputesOutputMessage()
+    {
+        var options = new TcpServiceOptions();
+        var service = new ServiceViewModel
+        {
+            DisplayName = "TCP - svc",
+            ServiceType = "TCP",
+            TcpOptions = options
+        };
+        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
+        vm.SetService(service);
+        vm.Script = "string Process(string message) => message + \"!\";";
+        vm.TestMessage = "hi";
+
+        vm.Save();
+
+        vm.OutputMessage.Should().Be("hi!");
+        options.OutputMessage.Should().Be("hi!");
+    }
+
+    [Fact]
     public void SetService_LoadsScript()
     {
         var service = new ServiceViewModel

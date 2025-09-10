@@ -40,6 +40,7 @@
 - Reusable `ServiceMessageTableView` and `ServiceMessageTableViewModel` display recent service messages with default columns, integrated into the TCP service view.
 - Script editor window with Roslyn-based syntax highlighting and run/save commands.
 - TCP service messages view adds an Edit Script button for modifying scripts and test messages.
+- TCP service messages view displays script output next to the test message.
 
 #### Changed
 - Service selection window wraps service icons within bounds using a fixed-width panel.
