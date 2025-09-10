@@ -2,18 +2,20 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.VisualStudio.Threading;
 using DesktopApplicationTemplate.UI.Helpers;
 
 namespace DesktopApplicationTemplate.UI.ViewModels;
 
 public class ScriptEditorViewModel : ViewModelBase
 {
+    private static readonly JoinableTaskFactory _jtf = new(new JoinableTaskContext());
+
     public const string DefaultScript = "string Process(string message)\n{\n    return message;\n}";
 
     private string _scriptText = DefaultScript;
@@ -92,35 +94,30 @@ public class ScriptEditorViewModel : ViewModelBase
         var code = ScriptText + "\nProcess(message);";
         var script = CSharpScript.Create<string>(code, ScriptOptions.Default, typeof(Globals));
         var diagnostics = script.Compile();
-        await Application.Current.Dispatcher.InvokeAsync(() => ErrorsChanged?.Invoke(diagnostics));
+        await _jtf.SwitchToMainThreadAsync();
+        ErrorsChanged?.Invoke(diagnostics);
 
         if (diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
         {
-            await Application.Current.Dispatcher.InvokeAsync(() =>
-            {
-                OutputMessage = string.Join(Environment.NewLine, diagnostics.Select(d => d.ToString()));
-                OutputBrush = Brushes.Red;
-            });
+            await _jtf.SwitchToMainThreadAsync();
+            OutputMessage = string.Join(Environment.NewLine, diagnostics.Select(d => d.ToString()));
+            OutputBrush = Brushes.Red;
             return;
         }
 
         try
         {
             var result = await script.RunAsync(globals);
-            await Application.Current.Dispatcher.InvokeAsync(() =>
-            {
-                OutputMessage = result.ReturnValue;
-                OutputBrush = Brushes.Black;
-                _lastTestMessage = TestMessage;
-            });
+            await _jtf.SwitchToMainThreadAsync();
+            OutputMessage = result.ReturnValue;
+            OutputBrush = Brushes.Black;
+            _lastTestMessage = TestMessage;
         }
         catch (Exception ex)
         {
-            await Application.Current.Dispatcher.InvokeAsync(() =>
-            {
-                OutputMessage = ex.ToString();
-                OutputBrush = Brushes.Red;
-            });
+            await _jtf.SwitchToMainThreadAsync();
+            OutputMessage = ex.ToString();
+            OutputBrush = Brushes.Red;
         }
     }
 
