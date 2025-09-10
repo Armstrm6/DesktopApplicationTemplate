@@ -1,6 +1,7 @@
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI.Helpers;
 using Moq;
 using System.IO;
 using System.Linq;
@@ -9,6 +10,7 @@ using Xunit;
 using MQTTnet.Client;
 using Microsoft.Extensions.Options;
 using MQTTnet;
+using System.Threading.Tasks;
 
 namespace DesktopApplicationTemplate.Tests
 {
@@ -44,7 +46,7 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        public void RemoveServiceCommand_LogsLifecycle()
+        public async Task RemoveServiceCommand_LogsLifecycle()
         {
             var logger = new Mock<ILoggingService>();
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
@@ -62,7 +64,7 @@ namespace DesktopApplicationTemplate.Tests
                 vm.Services.Add(service);
                 vm.SelectedService = service;
 
-                vm.RemoveServiceCommand.Execute(null);
+                await ((AsyncRelayCommand)vm.RemoveServiceCommand).ExecuteAsync(null);
 
                 logger.Verify(l => l.Log(It.Is<string>(m => m.Contains("Removing service")), It.IsAny<LogLevel>()), Times.Once);
                 logger.Verify(l => l.Log(It.Is<string>(m => m.Contains("Service removed")), It.IsAny<LogLevel>()), Times.Once);
@@ -185,7 +187,7 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        public void ServiceCounts_Update_OnAddRemoveActivation()
+        public async Task ServiceCounts_Update_OnAddRemoveActivation()
         {
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
             var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
@@ -217,7 +219,7 @@ namespace DesktopApplicationTemplate.Tests
                 Assert.Equal(1, vm.CurrentActiveServices);
 
                 vm.SelectedService = svc;
-                vm.RemoveServiceCommand.Execute(null);
+                await ((AsyncRelayCommand)vm.RemoveServiceCommand).ExecuteAsync(null);
 
                 Assert.Equal(0, vm.ServicesCreated);
                 Assert.Equal(0, vm.CurrentActiveServices);
