@@ -10,6 +10,9 @@ using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.Views;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.Scripting;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -107,6 +110,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         private string _script = string.Empty;
 
+        private string _outputMessage = string.Empty;
+
         /// <summary>Message used for testing communication.</summary>
         public string TestMessage
         {
@@ -127,6 +132,18 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             {
                 if (_script == value) return;
                 _script = value ?? string.Empty;
+                OnPropertyChanged();
+            }
+        }
+
+        /// <summary>Result of executing the test message with the current script.</summary>
+        public string OutputMessage
+        {
+            get => _outputMessage;
+            private set
+            {
+                if (_outputMessage == value) return;
+                _outputMessage = value ?? string.Empty;
                 OnPropertyChanged();
             }
         }
@@ -175,6 +192,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             _options = service.TcpOptions ?? new TcpServiceOptions();
             ServiceName = service.DisplayName.Split(" - ").Last();
             Script = _options.Script;
+            OutputMessage = _options.OutputMessage;
         }
 
         /// <summary>Updates network and scripting settings.</summary>
@@ -216,6 +234,33 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             _options.LastTestMessage = TestMessage;
             _options.Script = Script;
             _routing.UpdateMessage(ServiceName, TestMessage);
+            OutputMessage = RunScript();
+            _options.OutputMessage = OutputMessage;
+        }
+
+        private string RunScript()
+        {
+            var globals = new ScriptGlobals { message = TestMessage };
+            var code = Script + "\nProcess(message);";
+            var script = CSharpScript.Create<string>(code, ScriptOptions.Default, typeof(ScriptGlobals));
+            var diagnostics = script.Compile();
+            if (diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
+                return string.Join(Environment.NewLine, diagnostics.Select(d => d.ToString()));
+
+            try
+            {
+                var result = script.RunAsync(globals).GetAwaiter().GetResult();
+                return result.ReturnValue ?? string.Empty;
+            }
+            catch (Exception ex)
+            {
+                return ex.ToString();
+            }
+        }
+
+        private class ScriptGlobals
+        {
+            public string message = string.Empty;
         }
 
         private void InitializeTestMessage()
@@ -236,6 +281,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             {
                 svm.ScriptText = Script;
                 svm.TestMessage = TestMessage;
+                svm.PropertyChanged += (_, e) =>
+                {
+                    if (e.PropertyName == nameof(ScriptEditorViewModel.OutputMessage))
+                        OutputMessage = svm.OutputMessage;
+                };
             }
 
             if (editor.ShowDialog() == true)
