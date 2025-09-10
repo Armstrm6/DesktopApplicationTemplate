@@ -111,6 +111,24 @@ public class TcpServiceMessagesViewModelTests
     }
 
     [Fact]
+    public void ServiceName_NoPriorMessage_UsesRoutingMessage()
+    {
+        var service = new ServiceViewModel
+        {
+            DisplayName = "TCP - svc",
+            ServiceType = "TCP",
+            TcpOptions = new TcpServiceOptions()
+        };
+        var routing = new MessageRoutingService();
+        routing.UpdateMessage("svc", "last");
+        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), routing);
+
+        vm.SetService(service);
+
+        vm.TestMessage.Should().Be("last");
+    }
+
+    [Fact]
     public void ServiceName_WithPriorMessage_UsesStored()
     {
         var service = new ServiceViewModel
@@ -282,7 +300,7 @@ public class TcpServiceMessagesViewModelTests
     }
 
     [Fact]
-    public async Task OpenScriptEditor_RunCommand_DoesNotPersistWithoutSave()
+    public async Task OpenScriptEditor_RunCommand_PersistsOutputAndTestMessage()
     {
         var options = new TcpServiceOptions();
         var service = new ServiceViewModel
@@ -291,7 +309,8 @@ public class TcpServiceMessagesViewModelTests
             ServiceType = "TCP",
             TcpOptions = options
         };
-        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
+        var routing = new MessageRoutingService();
+        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), routing);
         vm.SetService(service);
         var editor = new ScriptEditorViewModel();
 
@@ -302,7 +321,22 @@ public class TcpServiceMessagesViewModelTests
         await ((AsyncRelayCommand)editor.RunCommand).ExecuteAsync(null);
 
         vm.OutputMessage.Should().Be("test");
-        options.OutputMessage.Should().BeEmpty();
+        options.OutputMessage.Should().Be("test");
+        options.LastTestMessage.Should().Be("test");
+        routing.TryGetMessage("svc", out var message).Should().BeTrue();
+        message.Should().Be("test");
         editor.OutputGenerated -= OnOutput;
+    }
+
+    [Fact]
+    public void OutputMessage_SetSameValue_RaisesPropertyChanged()
+    {
+        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
+        string? property = null;
+        vm.PropertyChanged += (_, e) => property = e.PropertyName;
+
+        vm.OutputMessage = string.Empty;
+
+        property.Should().Be(nameof(TcpServiceMessagesViewModel.OutputMessage));
     }
 }
