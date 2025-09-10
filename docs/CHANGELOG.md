@@ -43,6 +43,7 @@
 - TCP service messages view displays script output next to the test message.
 - FTP service view hosts a log panel displaying service-specific entries.
 - Service list displays the last execution duration and most recent input message beneath each service name.
+- Application registers global exception handlers that log errors, release input hooks, and shut down gracefully.
 
 #### Changed
 - Service selection window wraps service icons within bounds using a fixed-width panel.
