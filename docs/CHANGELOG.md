@@ -64,6 +64,8 @@
 - TCP scripting workflow consolidated into the messages view, enabling inline script editing and execution.
 - TCP options persist the last test message and preload it when reopening the service.
 - Service message table retains only the five most recent entries.
+- TCP service messages view wrapped in a ScrollViewer with adjusted row sizing.
+- ServiceMessageTableView limits height to keep the table compact.
 
 #### Fixed
 - TCP and SCP edit workflows now load existing options via `Load` methods, enabling DI-friendly construction.

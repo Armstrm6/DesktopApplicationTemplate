@@ -11,8 +11,8 @@
               IsReadOnly="True"
               HeadersVisibility="Column"
               RowHeaderWidth="0"
-              Height="360"
-              ScrollViewer.VerticalScrollBarVisibility="Auto">
+                MaxHeight="200"
+                ScrollViewer.VerticalScrollBarVisibility="Auto">
         <DataGrid.Columns>
             <DataGridTextColumn Header="Incoming" Binding="{Binding IncomingMessage}" Width="*"/>
             <DataGridTextColumn Header="Outgoing" Binding="{Binding OutgoingMessage}" Width="*"/>
