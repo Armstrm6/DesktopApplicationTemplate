@@ -91,8 +91,8 @@ public class ScriptEditorViewModel : ViewModelBase
 
     private async Task RunAsync()
     {
-        var globals = new Globals { message = TestMessage };
-        var code = ScriptText + "\nreturn Process(message);";
+        var globals = new Globals { Message = TestMessage };
+        var code = ScriptText + "\nreturn Process(Message);";
         var script = CSharpScript.Create<string>(code, ScriptOptions.Default, typeof(Globals));
         var diagnostics = script.Compile();
         await _jtf.SwitchToMainThreadAsync();
@@ -126,11 +126,11 @@ public class ScriptEditorViewModel : ViewModelBase
     }
 
     private void Save() => RequestClose?.Invoke(this, new ScriptSavedEventArgs(ScriptText, _lastTestMessage));
+}
 
-    public class Globals
-    {
-        public string message = string.Empty;
-    }
+public class Globals
+{
+    public string Message { get; set; } = string.Empty;
 }
 
 public class ScriptSavedEventArgs : EventArgs
