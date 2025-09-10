@@ -81,6 +81,7 @@ public class ScriptEditorViewModel : ViewModelBase
 
     public event EventHandler<ScriptSavedEventArgs>? RequestClose;
     public event Action<IEnumerable<Diagnostic>>? ErrorsChanged;
+    public event Action<string>? OutputGenerated;
 
     public ScriptEditorViewModel()
     {
@@ -102,6 +103,7 @@ public class ScriptEditorViewModel : ViewModelBase
             await _jtf.SwitchToMainThreadAsync();
             OutputMessage = string.Join(Environment.NewLine, diagnostics.Select(d => d.ToString()));
             OutputBrush = Brushes.Red;
+            OutputGenerated?.Invoke(OutputMessage);
             return;
         }
 
@@ -112,12 +114,14 @@ public class ScriptEditorViewModel : ViewModelBase
             OutputMessage = result.ReturnValue;
             OutputBrush = Brushes.Black;
             _lastTestMessage = TestMessage;
+            OutputGenerated?.Invoke(OutputMessage);
         }
         catch (Exception ex)
         {
             await _jtf.SwitchToMainThreadAsync();
             OutputMessage = ex.ToString();
             OutputBrush = Brushes.Red;
+            OutputGenerated?.Invoke(OutputMessage);
         }
     }
 

@@ -69,6 +69,7 @@
 - ServiceMessageTableView limits height to keep the table compact.
 - Replaced main window navigation logo with a text header.
 - Script editor exposes the built-in script via `DefaultScript`, and TCP service messages view loads it when no script is provided.
+- Script editor raises an `OutputGenerated` event and TCP service messages view updates its output message when scripts run.
 
 #### Fixed
 - TCP and SCP edit workflows now load existing options via `Load` methods, enabling DI-friendly construction.

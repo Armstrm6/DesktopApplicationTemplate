@@ -158,6 +158,7 @@ Latest Attempt: After removing the application logo and adding header text, `dot
 Latest Attempt: Installed .NET SDK 8.0.404 and built successfully, but `dotnet test --settings tests.runsettings` aborted because the Microsoft.WindowsDesktop.App runtime is missing; relying on CI.
 Latest Attempt: After fixing the script editor binding error, the `dotnet` command remains unavailable; restore, build, and tests cannot run locally, so CI will verify.
 Latest Attempt: After exposing the default TCP script and adding tests, the `dotnet` command remains unavailable; restore, build, and test commands cannot run locally, so CI will verify.
+Latest Attempt: After wiring script output events to the TCP messages view, the `dotnet` CLI is still missing; restore, build, and test steps could not run and will be validated in CI.
 Latest Attempt: After exposing `ScriptGlobals` for TCP scripting, the `dotnet` command remains unavailable; relying on CI for build and test.
 Latest Attempt: After making the script editor `Globals` class public, the `dotnet` command remains unavailable; restore, build, and test commands cannot run locally so CI will verify.
 Related Commits/PRs: 8517691, 4c0dbb5, 1b5b0ec, 739abbe, 4f74a36, ff70210, 272560a, 26960dc, 7e9096b
