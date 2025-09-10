@@ -533,6 +533,7 @@ Latest Attempt: After implementing HID cleanup disposal, the `dotnet` command re
 Latest Attempt: After replacing Moq event raises with direct MQTT client event invocations in MqttServiceTests, `dotnet test --settings tests.runsettings` aborted because the Microsoft.WindowsDesktop.App 8.0.0 runtime is missing; relying on CI.
 Latest Attempt: `dotnet workload install wpf` reported the workload ID is not recognized. After adding `IServiceRule` registration to `ScpDiRegistrationTests`, `dotnet test --settings tests.runsettings` aborted because the Microsoft.WindowsDesktop.App 8.0.0 runtime is missing; relying on CI.
 Latest Attempt: After moving script editor globals to a top-level class and adjusting RunAsync, the `dotnet` command was initially missing; installing the .NET SDK 8.0.404 enabled restore and build, but `dotnet test --settings tests.runsettings` aborted because the Microsoft.WindowsDesktop.App runtime is missing.
+Newest Attempt: Installed the .NET SDK 8.0.404 via script; `dotnet restore` and `dotnet build DesktopApplicationTemplate.sln` succeeded, but `dotnet test --settings tests.runsettings` aborted because the Microsoft.WindowsDesktop.App 8.0.0 runtime is missing; relying on CI.
 Related Commits/PRs:
 [2025-10-01 09:00] Topic: EditorButtonBar namespace
 Context: Verified EditorButtonBar build action and updated consuming views to use an assembly-qualified namespace.
