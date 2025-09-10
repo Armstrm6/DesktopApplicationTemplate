@@ -18,6 +18,7 @@ namespace DesktopApplicationTemplate.UI.Helpers
                 {
                     FrameworkElement fe => fe.Parent,
                     FrameworkContentElement fce => fce.Parent,
+                    ContentElement ce => ContentOperations.GetParent(ce),
                     Visual or Visual3D => VisualTreeHelper.GetParent(parent),
                     _ => LogicalTreeHelper.GetParent(parent)
                 };

@@ -100,6 +100,7 @@
 - Script editor Run command returns the processed message so the output field updates instead of showing null.
 - Service message table disables auto-generated columns to prevent duplicate columns.
 - `VisualTreeHelperExtensions.FindParent` now falls back to the logical tree for non-visual ancestors.
+- `FindParent<T>` now supports non-visual elements (e.g., `Run`) without throwing.
 
 - Marked main window as Windows-only to silence cross-platform analyzer warnings.
 - Corrected `LogEntry` namespace usage and removed obsolete global log handler to restore build after introducing the shared log view.
