@@ -167,6 +167,7 @@ Latest Attempt: After mirroring script editor test message updates in the TCP me
 Latest Attempt: After adding an Information log level and logging tests, the `dotnet` command is still missing; restore, build, and test commands cannot run locally and CI will verify.
 Latest Attempt: Renamed SaveServices to SaveServicesAsync, but the `dotnet` command remains unavailable; build and tests deferred to CI.
 Latest Attempt: After restricting TcpServiceMessagesViewModel.OutputMessage setter to internal, the `dotnet` command remains unavailable; restore, build, and tests cannot run locally and CI will verify.
+Latest Attempt: After ensuring TCP scripts return their results, the `dotnet` command is still missing; restore, build, and test commands could not run locally, so CI will verify.
 Latest Attempt: After confirming TcpServiceMessagesViewModel.SaveAsync usage, `dotnet restore` succeeded but `dotnet build` reported VSTHRD100/101 analyzer errors; tests could not run locally and CI will verify.
 Latest Attempt: After ensuring TcpServiceMessagesViewModel.OutputMessage setter always raises PropertyChanged, the `dotnet` command remains unavailable; restore, build, and test steps will run in CI.
 Related Commits/PRs: 8517691, 4c0dbb5, 1b5b0ec, 739abbe, 4f74a36, ff70210, 272560a, 26960dc, 7e9096b, 6454680, a70fb18, f1e064e

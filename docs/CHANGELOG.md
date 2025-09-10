@@ -90,6 +90,7 @@
 - SCP service creation validates required fields and disables the Create command when inputs are invalid.
 - Script editor Run command now persists test messages and outputs, falling back to the last routed message when no prior test exists.
 - TCP service messages view always updates the output message, even when unchanged, ensuring script results appear.
+- TCP script execution returns the processing result instead of null by returning the value from `Process`.
 
 - Marked main window as Windows-only to silence cross-platform analyzer warnings.
 - Corrected `LogEntry` namespace usage and removed obsolete global log handler to restore build after introducing the shared log view.
