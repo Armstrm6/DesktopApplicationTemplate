@@ -23,10 +23,10 @@
                 <Button Content="Export Log" Width="100" Margin="10,0,0,0" Command="{Binding ExportLogCommand}" Background="#CCCCFF"/>
                 <Button Content="Clear Log" Width="100" Margin="10,0,0,0" Command="{Binding ClearLogCommand}" Background="#FFCCCC"/>
             </StackPanel>
-            <ListBox Grid.Row="1" ItemsSource="{Binding DisplayLogs}">
+            <ListBox Grid.Row="1" ItemsSource="{Binding DisplayLogs}" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" MinHeight="150">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock Text="{Binding Message}" Foreground="{Binding Color}" />
+                        <TextBlock Text="{Binding Message}" Foreground="{Binding Color}" TextWrapping="Wrap" Margin="0,0,0,5" />
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
