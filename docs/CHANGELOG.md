@@ -98,6 +98,7 @@
 - Extracted `StringNullOrEmptyToVisibilityConverter` into its own file so XAML views compile independently.
 - Qualified helper namespaces with explicit assembly references so `StringNullOrEmptyToVisibilityConverter` resolves across service views.
 - EditorButtonBar included as a Page with code-behind dependency and referenced via an assembly-qualified views namespace across consuming views.
+- Output message textbox uses a one-way binding to avoid runtime errors on the read-only `OutputMessage` property.
 
 ### HID Service
 #### Added

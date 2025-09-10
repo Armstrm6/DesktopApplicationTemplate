@@ -155,6 +155,7 @@ Another Attempt: After wrapping the TCP service messages view in a ScrollViewer 
 Latest Attempt: After moving script editing to an ICommand, the `dotnet` CLI remains unavailable; restore, build, and tests could not run locally and CI will verify.
 Newest Attempt: `dotnet` command still missing; restore, build, and tests cannot run locally and CI will verify.
 Latest Attempt: After removing the application logo and adding header text, `dotnet restore` succeeded but `dotnet build DesktopApplicationTemplate.sln` failed with XAML errors and `dotnet test --settings tests.runsettings` produced similar errors; relying on CI for validation.
+Latest Attempt: Installed .NET SDK 8.0.404 and built successfully, but `dotnet test --settings tests.runsettings` aborted because the Microsoft.WindowsDesktop.App runtime is missing; relying on CI.
 Related Commits/PRs: 8517691, 4c0dbb5, 1b5b0ec, 739abbe, 4f74a36, ff70210, 272560a, 26960dc
 [2025-08-27 04:25] Topic: Logging interface restoration
 Context: Introduced core logging abstractions and refactored edit view models to support DI.
