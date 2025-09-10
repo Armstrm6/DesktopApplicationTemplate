@@ -68,6 +68,7 @@
 - TCP service messages view wrapped in a ScrollViewer with adjusted row sizing.
 - ServiceMessageTableView limits height to keep the table compact.
 - Replaced main window navigation logo with a text header.
+- Script editor exposes the built-in script via `DefaultScript`, and TCP service messages view loads it when no script is provided.
 
 #### Fixed
 - TCP and SCP edit workflows now load existing options via `Load` methods, enabling DI-friendly construction.
