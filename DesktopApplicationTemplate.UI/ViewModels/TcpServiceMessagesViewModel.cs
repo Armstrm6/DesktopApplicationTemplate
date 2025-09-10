@@ -144,7 +144,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             get => _outputMessage;
             internal set
             {
-                if (_outputMessage == value) return;
                 _outputMessage = value ?? string.Empty;
                 OnPropertyChanged();
             }

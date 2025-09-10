@@ -327,4 +327,16 @@ public class TcpServiceMessagesViewModelTests
         message.Should().Be("test");
         editor.OutputGenerated -= OnOutput;
     }
+
+    [Fact]
+    public void OutputMessage_SetSameValue_RaisesPropertyChanged()
+    {
+        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
+        string? property = null;
+        vm.PropertyChanged += (_, e) => property = e.PropertyName;
+
+        vm.OutputMessage = string.Empty;
+
+        property.Should().Be(nameof(TcpServiceMessagesViewModel.OutputMessage));
+    }
 }
