@@ -502,3 +502,11 @@ Effective Prompts / Instructions that worked: User request to confirm control re
 Decisions & Rationale: Explicit project entries and namespace qualification ensure the control loads across views.
 Action Items: Rely on CI for validation.
 Related Commits/PRs:
+[2025-10-02 09:00] Topic: Service log view scrollbars
+Context: Adjusted ServiceLogView ListBox to show scrollbars and wrap text.
+Observations: Updated XAML with auto scrollbars, text wrapping, and margin for clearer log entries.
+Codex Limitations noticed: dotnet CLI is unavailable; unable to run restore, build, or tests.
+Effective Prompts / Instructions that worked: User request to expose more log text in the UI.
+Decisions & Rationale: Improve log readability; document missing tooling and rely on CI for validation.
+Action Items: Rely on CI for verification.
+Related Commits/PRs:
