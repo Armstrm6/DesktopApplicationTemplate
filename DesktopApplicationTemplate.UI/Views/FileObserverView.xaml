@@ -4,8 +4,8 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:vm="clr-namespace:DesktopApplicationTemplate.UI.ViewModels"
-      xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers;assembly=DesktopApplicationTemplate.UI"
-      xmlns:behaviors="clr-namespace:DesktopApplicationTemplate.UI.Behaviors;assembly=DesktopApplicationTemplate.UI"
+      xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
+      xmlns:behaviors="clr-namespace:DesktopApplicationTemplate.UI.Behaviors"
       mc:Ignorable="d">
     <Page.Resources>
         <helpers:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter" />

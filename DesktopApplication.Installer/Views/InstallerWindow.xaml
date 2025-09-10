@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DesktopApplication.Installer.Views"
-        xmlns:behaviors="clr-namespace:DesktopApplicationTemplate.UI.Behaviors;assembly=DesktopApplicationTemplate.UI"
+        xmlns:behaviors="clr-namespace:DesktopApplicationTemplate.UI.Behaviors"
         mc:Ignorable="d"
         Title="Application Installer" Height="300" Width="500"
         WindowStartupLocation="CenterScreen"
