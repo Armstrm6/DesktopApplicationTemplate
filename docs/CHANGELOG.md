@@ -73,6 +73,7 @@
 - TcpServiceMessagesViewModel executes scripts asynchronously and awaits results when saving.
 - TcpServiceMessagesViewModel logs script execution results and exceptions.
 - Restricted `TcpServiceMessagesViewModel.OutputMessage` setter to internal to prevent external modification.
+- TcpServiceMessagesViewModel runs the initial script asynchronously to avoid blocking.
 
 #### Fixed
 - TCP and SCP edit workflows now load existing options via `Load` methods, enabling DI-friendly construction.

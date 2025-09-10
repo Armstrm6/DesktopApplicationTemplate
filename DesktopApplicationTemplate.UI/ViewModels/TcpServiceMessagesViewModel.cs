@@ -196,6 +196,22 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 ? ScriptEditorViewModel.DefaultScript
                 : _options.Script;
             OutputMessage = _options.OutputMessage;
+            _ = RunInitialScriptAsync();
+        }
+
+        private async Task RunInitialScriptAsync()
+        {
+            try
+            {
+                OutputMessage = await RunScriptAsync().ConfigureAwait(false);
+                Logger?.Log($"Script executed successfully: {OutputMessage}", LogLevel.Information);
+            }
+            catch (Exception ex)
+            {
+                OutputMessage = ex.ToString();
+                Logger?.Log($"Script execution failed: {ex}", LogLevel.Error);
+            }
+            _options.OutputMessage = OutputMessage;
         }
 
         /// <summary>Updates network and scripting settings.</summary>
