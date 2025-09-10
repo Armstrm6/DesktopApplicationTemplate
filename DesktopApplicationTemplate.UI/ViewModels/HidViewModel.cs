@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+using System;
+using System.Collections.ObjectModel;
 using System.Windows.Input;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Services;
@@ -104,13 +105,25 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             Logger?.Log("Building HID message", LogLevel.Debug);
             IncomingData = MessageTemplate;
             ProcessingData = FormatTemplate ?? "{0}";
-            FinalMessage = string.Format(ProcessingData, IncomingData);
-            OutgoingData = FinalMessage;
-            Logger?.Log($"Final HID message: {FinalMessage}", LogLevel.Debug);
-            if (!string.IsNullOrWhiteSpace(AttachedService))
+            try
             {
-                Logger?.Log($"Forwarding message to {AttachedService}", LogLevel.Debug);
-                MessageForwarder.Forward(AttachedService, FinalMessage);
+                FinalMessage = string.Format(ProcessingData, IncomingData);
+                OutgoingData = FinalMessage;
+                Logger?.Log($"Final HID message: {FinalMessage}", LogLevel.Debug);
+                if (!string.IsNullOrWhiteSpace(AttachedService))
+                {
+                    Logger?.Log($"Forwarding message to {AttachedService}", LogLevel.Debug);
+                    MessageForwarder.Forward(AttachedService, FinalMessage);
+                }
+            }
+            catch (FormatException ex)
+            {
+                Logger?.Log($"HID message formatting failed: {ex.Message}", LogLevel.Error);
+                return;
+            }
+            finally
+            {
+                KeyboardSimulator.Reset();
             }
         }
 

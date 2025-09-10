@@ -127,6 +127,9 @@
 - HID service view includes a data flow diagram showing incoming, processed, and outgoing data bound to the view model.
 - HID service creation, edit, and advanced configuration views with navigation tests.
 
+#### Fixed
+- HidViewModel now logs formatting errors and resets simulated keyboard state, skipping message forwarding when templates are malformed.
+
 ### FTP Service
 #### Added
 - FTP service creation, edit, and advanced configuration views with DI registration, validation, and navigation tests.
