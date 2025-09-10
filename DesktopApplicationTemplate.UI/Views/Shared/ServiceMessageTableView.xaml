@@ -5,6 +5,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d">
     <DataGrid ItemsSource="{Binding Messages}"
+              AutoGenerateColumns="False"
               CanUserAddRows="False"
               CanUserDeleteRows="False"
               CanUserResizeColumns="True"
