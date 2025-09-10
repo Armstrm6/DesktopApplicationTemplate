@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Media;
 using ICSharpCode.AvalonEdit.Document;
@@ -18,8 +19,20 @@ public partial class ScriptEditorWindow : Window
         InitializeComponent();
         var vm = new ScriptEditorViewModel();
         DataContext = vm;
+        Editor.Text = vm.ScriptText;
+        Editor.TextChanged += (_, _) => vm.ScriptText = Editor.Text;
+        vm.PropertyChanged += OnViewModelPropertyChanged;
         vm.RequestClose += OnRequestClose;
         vm.ErrorsChanged += HighlightErrors;
+    }
+
+    private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (sender is not ScriptEditorViewModel vm || e.PropertyName != nameof(ScriptEditorViewModel.ScriptText))
+            return;
+
+        if (Editor.Text != vm.ScriptText)
+            Editor.Text = vm.ScriptText;
     }
 
     private void OnRequestClose(object? sender, ScriptSavedEventArgs e)
