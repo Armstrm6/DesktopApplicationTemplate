@@ -238,7 +238,16 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             _options.LastTestMessage = TestMessage;
             _options.Script = Script;
             _routing.UpdateMessage(ServiceName, TestMessage);
-            OutputMessage = await RunScriptAsync().ConfigureAwait(false);
+            try
+            {
+                OutputMessage = await RunScriptAsync().ConfigureAwait(false);
+                Logger?.Log($"Script executed successfully: {OutputMessage}", LogLevel.Information);
+            }
+            catch (Exception ex)
+            {
+                OutputMessage = ex.ToString();
+                Logger?.Log($"Script execution failed: {ex}", LogLevel.Error);
+            }
             _options.OutputMessage = OutputMessage;
         }
 
@@ -251,15 +260,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             if (diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
                 return string.Join(Environment.NewLine, diagnostics.Select(d => d.ToString()));
 
-            try
-            {
-                var result = await script.RunAsync(globals).ConfigureAwait(false);
-                return result.ReturnValue ?? string.Empty;
-            }
-            catch (Exception ex)
-            {
-                return ex.ToString();
-            }
+            var result = await script.RunAsync(globals).ConfigureAwait(false);
+            return result.ReturnValue ?? string.Empty;
         }
 
         public class ScriptGlobals
