@@ -32,7 +32,7 @@ public class MqttServiceTests
         service.ConnectionStateChanged += (_, c) => state = c;
 
         await service.ConnectAsync();
-        client.Raise(c => c.ConnectedAsync += null!, new MqttClientConnectedEventArgs(new MqttClientConnectResult()));
+        await ((dynamic)client.Object).ConnectedAsync.Invoke(new MqttClientConnectedEventArgs(new MqttClientConnectResult()));
 
         Assert.True(state);
         ConsoleTestLogger.LogPass();
@@ -218,7 +218,7 @@ public class MqttServiceTests
     }
 
     [Fact]
-    public void DisconnectedEvent_RaisesConnectionStateChanged_AndLogs()
+    public async Task DisconnectedEvent_RaisesConnectionStateChanged_AndLogs()
     {
         var client = new Mock<IMqttClient>();
         var logger = new Mock<ILoggingService>();
@@ -226,8 +226,7 @@ public class MqttServiceTests
         bool? state = null;
         service.ConnectionStateChanged += (_, c) => state = c;
 
-        client.Raise(
-            c => c.DisconnectedAsync += null!,
+        await ((dynamic)client.Object).DisconnectedAsync.Invoke(
             new MqttClientDisconnectedEventArgs(
                 false,
                 new MqttClientConnectResult(),

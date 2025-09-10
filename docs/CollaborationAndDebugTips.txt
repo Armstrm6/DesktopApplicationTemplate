@@ -528,6 +528,7 @@ Current Attempt: After persisting script editor test messages, `dotnet` CLI rema
 Newest Attempt: After ensuring the script editor returns processed output, `dotnet` CLI is still missing; restore, build, and test commands cannot run locally and CI will verify.
 Latest Attempt: Exception handler tests added, but `dotnet` command remains unavailable so restore, build, and test steps could not execute; relying on CI for verification.
 Latest Attempt: After implementing HID cleanup disposal, the `dotnet` command remains unavailable; restore, build, and test commands could not run locally and CI will verify.
+Latest Attempt: After replacing Moq event raises with direct MQTT client event invocations in MqttServiceTests, `dotnet test --settings tests.runsettings` aborted because the Microsoft.WindowsDesktop.App 8.0.0 runtime is missing; relying on CI.
 Related Commits/PRs:
 [2025-10-01 09:00] Topic: EditorButtonBar namespace
 Context: Verified EditorButtonBar build action and updated consuming views to use an assembly-qualified namespace.
