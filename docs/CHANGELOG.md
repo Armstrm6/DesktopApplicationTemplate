@@ -44,6 +44,7 @@
 - FTP service view hosts a log panel displaying service-specific entries.
 - Service list displays the last execution duration and most recent input message beneath each service name.
 - Application registers global exception handlers that log errors, release input hooks, and shut down gracefully.
+- Unit test ensures `VisualTreeHelperExtensions.FindParent` locates the containing `TextBlock` for inline elements.
 
 #### Changed
 - Service selection window wraps service icons within bounds using a fixed-width panel.
