@@ -9,8 +9,9 @@ namespace DesktopApplicationTemplate.Core.Services
     public enum LogLevel
     {
         Debug = 0,
-        Warning = 1,
-        Error = 2,
-        Critical = 3
+        Information = 1,
+        Warning = 2,
+        Error = 3,
+        Critical = 4
     }
 }
