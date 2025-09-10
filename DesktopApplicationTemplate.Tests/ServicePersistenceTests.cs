@@ -24,10 +24,10 @@ namespace DesktopApplicationTemplate.Tests
             ServicePersistence.FilePath = Path.Combine(tempDir, "services.json");
             try
             {
-                var services = new List<ServiceViewModel>
+                var services = new List<ServiceListModel>
                 {
-                    new ServiceViewModel{DisplayName="A", ServiceType="Heartbeat", IsActive=true, Order=0},
-                    new ServiceViewModel{DisplayName="B", ServiceType="TCP", IsActive=false, Order=1}
+                    new ServiceListModel{DisplayName="A", ServiceType="Heartbeat", IsActive=true, Order=0},
+                    new ServiceListModel{DisplayName="B", ServiceType="TCP", IsActive=false, Order=1}
                 };
                 services[0].AssociatedServices.Add("B");
                 services[1].AssociatedServices.Add("A");
@@ -57,11 +57,11 @@ namespace DesktopApplicationTemplate.Tests
             ServicePersistence.FilePath = Path.Combine(tempDir, "services.json");
             try
             {
-                var a = new ServiceViewModel { DisplayName = "A", ServiceType = "TCP" };
-                var b = new ServiceViewModel { DisplayName = "B", ServiceType = "TCP" };
+                var a = new ServiceListModel { DisplayName = "A", ServiceType = "TCP" };
+                var b = new ServiceListModel { DisplayName = "B", ServiceType = "TCP" };
                 a.AssociatedServices.Add("B");
                 b.AssociatedServices.Add("A");
-                var services = new List<ServiceViewModel> { a, b };
+                var services = new List<ServiceListModel> { a, b };
 
                 ServicePersistence.Save(services);
 
@@ -95,9 +95,9 @@ namespace DesktopApplicationTemplate.Tests
             {
                 var opt = host.Services.GetRequiredService<IOptions<TcpServiceOptions>>().Value;
 
-                var services = new List<ServiceViewModel>
+                var services = new List<ServiceListModel>
                 {
-                    new ServiceViewModel
+                    new ServiceListModel
                     {
                         DisplayName="TCP - One",
                         ServiceType="TCP",
@@ -186,9 +186,9 @@ namespace DesktopApplicationTemplate.Tests
             {
                 var opt = host.Services.GetRequiredService<IOptions<FtpServerOptions>>().Value;
 
-                var services = new List<ServiceViewModel>
+                var services = new List<ServiceListModel>
                 {
-                    new ServiceViewModel
+                    new ServiceListModel
                     {
                         DisplayName = "FTP Server - One",
                         ServiceType = "FTP Server",
@@ -261,9 +261,9 @@ namespace DesktopApplicationTemplate.Tests
             {
                 var opt = host.Services.GetRequiredService<IOptions<FtpServerOptions>>().Value;
 
-                var services = new List<ServiceViewModel>
+                var services = new List<ServiceListModel>
                 {
-                    new ServiceViewModel
+                    new ServiceListModel
                     {
                         DisplayName = "FTP - One",
                         ServiceType = "FTP",

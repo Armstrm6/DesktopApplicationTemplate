@@ -14,7 +14,7 @@ namespace DesktopApplicationTemplate.UI.Views
             DataContext = viewModel;
         }
 
-        public void SetServiceContext(ServiceViewModel service)
+        public void SetServiceContext(ServiceListModel service)
         {
             LogView.DataContext = new ServiceLogViewModel(service.DisplayName, service.ServiceType, service.Logs);
             if (DataContext is TcpServiceMessagesViewModel vm)

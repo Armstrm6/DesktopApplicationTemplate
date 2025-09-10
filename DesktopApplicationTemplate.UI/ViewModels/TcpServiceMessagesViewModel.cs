@@ -187,7 +187,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         /// <summary>Associates the view model with a service and its TCP options.</summary>
         /// <param name="service">The service context.</param>
-        public void SetService(ServiceViewModel service)
+        public void SetService(ServiceListModel service)
         {
             if (service == null) throw new ArgumentNullException(nameof(service));
             _options = service.TcpOptions ?? new TcpServiceOptions();

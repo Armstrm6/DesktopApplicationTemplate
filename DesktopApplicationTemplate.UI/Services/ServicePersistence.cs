@@ -15,7 +15,7 @@ namespace DesktopApplicationTemplate.UI.Services
     {
         public static string FilePath { get; set; } = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "services.json");
 
-        public static void Save(IEnumerable<ServiceViewModel> services, ILoggingService? logger = null)
+        public static void Save(IEnumerable<ServiceListModel> services, ILoggingService? logger = null)
         {
             var data = new List<ServiceInfo>();
             var index = 0;
