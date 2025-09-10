@@ -18,6 +18,7 @@ public class ScpDiRegistrationTests
         services.AddLogging();
         services.AddSingleton<IRichTextLogger, NullRichTextLogger>();
         services.AddSingleton<ILoggingService, LoggingService>();
+        // Register service rule for SCP validation.
         services.AddSingleton<IServiceRule, ServiceRule>();
         services.AddSingleton<SaveConfirmationHelper>();
         services.AddTransient<ScpCreateServiceViewModel>();
