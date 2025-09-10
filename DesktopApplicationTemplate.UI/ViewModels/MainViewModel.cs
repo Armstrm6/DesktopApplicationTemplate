@@ -385,7 +385,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             {
                 if (svc.ServicePage?.DataContext is TcpServiceMessagesViewModel tcpVm)
                 {
-                    tcpVm.Save();
+                    tcpVm.SaveAsync().GetAwaiter().GetResult();
                 }
             }
             ServicePersistence.Save(Services);

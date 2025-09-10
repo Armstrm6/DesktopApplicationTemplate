@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.ComponentModel;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Models;
@@ -14,7 +15,6 @@ using DesktopApplicationTemplate.UI.Views;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
-using Microsoft.VisualStudio.Threading;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -23,7 +23,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
     /// </summary>
     public class TcpServiceMessagesViewModel : ViewModelBase, ILoggingViewModel
     {
-        private static readonly JoinableTaskFactory _jtf = new(new JoinableTaskContext());
         private LogLevel _logLevelFilter = LogLevel.Debug;
 
         /// <summary>Table view model for displaying message history.</summary>
@@ -184,7 +183,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             ExportLogCommand = new RelayCommand(ExportLogs);
             RefreshLogCommand = new RelayCommand(() => OnPropertyChanged(nameof(DisplayLogs)));
             OpenAdvancedSettingsCommand = new RelayCommand(() => AdvancedSettingsRequested?.Invoke(this, EventArgs.Empty));
-            OpenScriptEditorCommand = new RelayCommand(OpenScriptEditor);
+            OpenScriptEditorCommand = new AsyncRelayCommand(OpenScriptEditorAsync);
         }
 
         /// <summary>Associates the view model with a service and its TCP options.</summary>
@@ -234,36 +233,33 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private void OnLogAdded(LogEntry entry) => Logs.Insert(0, entry);
 
         /// <summary>Saves the current test message to options and routing.</summary>
-        public void Save()
+        public async Task SaveAsync()
         {
             _options.LastTestMessage = TestMessage;
             _options.Script = Script;
             _routing.UpdateMessage(ServiceName, TestMessage);
-            OutputMessage = RunScript();
+            OutputMessage = await RunScriptAsync().ConfigureAwait(false);
             _options.OutputMessage = OutputMessage;
         }
 
-        private string RunScript()
+        private async Task<string> RunScriptAsync()
         {
-            return _jtf.Run(async () =>
-            {
-                var globals = new ScriptGlobals { message = TestMessage };
-                var code = Script + "\nProcess(message);";
-                var script = CSharpScript.Create<string>(code, ScriptOptions.Default, typeof(ScriptGlobals));
-                var diagnostics = script.Compile();
-                if (diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
-                    return string.Join(Environment.NewLine, diagnostics.Select(d => d.ToString()));
+            var globals = new ScriptGlobals { message = TestMessage };
+            var code = Script + "\nProcess(message);";
+            var script = CSharpScript.Create<string>(code, ScriptOptions.Default, typeof(ScriptGlobals));
+            var diagnostics = script.Compile();
+            if (diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
+                return string.Join(Environment.NewLine, diagnostics.Select(d => d.ToString()));
 
-                try
-                {
-                    var result = await script.RunAsync(globals).ConfigureAwait(false);
-                    return result.ReturnValue ?? string.Empty;
-                }
-                catch (Exception ex)
-                {
-                    return ex.ToString();
-                }
-            });
+            try
+            {
+                var result = await script.RunAsync(globals).ConfigureAwait(false);
+                return result.ReturnValue ?? string.Empty;
+            }
+            catch (Exception ex)
+            {
+                return ex.ToString();
+            }
         }
 
         public class ScriptGlobals
@@ -282,7 +278,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             _routing.UpdateMessage(ServiceName, TestMessage);
         }
 
-        private void OpenScriptEditor()
+        private async Task OpenScriptEditorAsync()
         {
             var editor = new ScriptEditorWindow();
             if (editor.DataContext is not ScriptEditorViewModel svm)
@@ -315,7 +311,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             {
                 Script = editor.ScriptText;
                 TestMessage = editor.LastTestMessage;
-                Save();
+                await SaveAsync().ConfigureAwait(false);
             }
         }
     }

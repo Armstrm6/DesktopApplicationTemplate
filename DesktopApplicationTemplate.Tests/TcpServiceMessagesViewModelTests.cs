@@ -124,7 +124,7 @@ public class TcpServiceMessagesViewModelTests
     }
 
     [Fact]
-    public void Save_UpdatesLastTestMessage()
+    public async Task SaveAsync_UpdatesLastTestMessage()
     {
         var options = new TcpServiceOptions();
         var service = new ServiceViewModel
@@ -137,13 +137,13 @@ public class TcpServiceMessagesViewModelTests
         vm.SetService(service);
         vm.TestMessage = "test";
 
-        vm.Save();
+        await vm.SaveAsync();
 
         options.LastTestMessage.Should().Be("test");
     }
 
     [Fact]
-    public void Save_UpdatesScript()
+    public async Task SaveAsync_UpdatesScript()
     {
         var options = new TcpServiceOptions();
         var service = new ServiceViewModel
@@ -156,13 +156,13 @@ public class TcpServiceMessagesViewModelTests
         vm.SetService(service);
         vm.Script = "return message;";
 
-        vm.Save();
+        await vm.SaveAsync();
 
         options.Script.Should().Be("return message;");
     }
 
     [Fact]
-    public void Save_ComputesOutputMessage()
+    public async Task SaveAsync_ComputesOutputMessage()
     {
         var options = new TcpServiceOptions();
         var service = new ServiceViewModel
@@ -176,7 +176,7 @@ public class TcpServiceMessagesViewModelTests
         vm.Script = "string Process(string message) => message + \"!\";";
         vm.TestMessage = "hi";
 
-        vm.Save();
+        await vm.SaveAsync();
 
         vm.OutputMessage.Should().Be("hi!");
         options.OutputMessage.Should().Be("hi!");
@@ -215,7 +215,7 @@ public class TcpServiceMessagesViewModelTests
     }
 
     [Fact]
-    public void Save_DefaultScript_NoProtectionLevelErrors()
+    public async Task SaveAsync_DefaultScript_NoProtectionLevelErrors()
     {
         var options = new TcpServiceOptions();
         var service = new ServiceViewModel
@@ -228,7 +228,7 @@ public class TcpServiceMessagesViewModelTests
         vm.SetService(service);
         vm.TestMessage = "ping";
 
-        vm.Save();
+        await vm.SaveAsync();
 
         vm.OutputMessage.Should().Be("ping");
         vm.OutputMessage.Should().NotContain("protection level");
