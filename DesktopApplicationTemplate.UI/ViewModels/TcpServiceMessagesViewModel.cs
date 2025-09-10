@@ -193,7 +193,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             if (service == null) throw new ArgumentNullException(nameof(service));
             _options = service.TcpOptions ?? new TcpServiceOptions();
             ServiceName = service.DisplayName.Split(" - ").Last();
-            Script = _options.Script;
+            Script = string.IsNullOrWhiteSpace(_options.Script)
+                ? ScriptEditorViewModel.DefaultScript
+                : _options.Script;
             OutputMessage = _options.OutputMessage;
         }
 
@@ -284,7 +286,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             var editor = new ScriptEditorWindow();
             if (editor.DataContext is ScriptEditorViewModel svm)
             {
-                svm.ScriptText = Script;
+                if (!string.IsNullOrWhiteSpace(Script))
+                    svm.ScriptText = Script;
                 svm.TestMessage = TestMessage;
                 svm.PropertyChanged += (_, e) =>
                 {

@@ -13,7 +13,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 
 public class ScriptEditorViewModel : ViewModelBase
 {
-    private string _scriptText = "string Process(string message)\n{\n    return message;\n}";
+    public const string DefaultScript = "string Process(string message)\n{\n    return message;\n}";
+
+    private string _scriptText = DefaultScript;
     private string _testMessage = string.Empty;
     private string _outputMessage = string.Empty;
     private Brush _outputBrush = Brushes.Black;

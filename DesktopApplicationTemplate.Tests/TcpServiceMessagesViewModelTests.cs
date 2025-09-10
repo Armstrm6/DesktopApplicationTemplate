@@ -199,6 +199,42 @@ public class TcpServiceMessagesViewModelTests
     }
 
     [Fact]
+    public void SetService_NoScript_UsesDefault()
+    {
+        var service = new ServiceViewModel
+        {
+            DisplayName = "TCP - svc",
+            ServiceType = "TCP",
+            TcpOptions = new TcpServiceOptions()
+        };
+        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
+
+        vm.SetService(service);
+
+        vm.Script.Should().Be(ScriptEditorViewModel.DefaultScript);
+    }
+
+    [Fact]
+    public void Save_DefaultScript_RunsMessage()
+    {
+        var options = new TcpServiceOptions();
+        var service = new ServiceViewModel
+        {
+            DisplayName = "TCP - svc",
+            ServiceType = "TCP",
+            TcpOptions = options
+        };
+        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
+        vm.SetService(service);
+        vm.TestMessage = "ping";
+
+        vm.Save();
+
+        vm.OutputMessage.Should().Be("ping");
+        options.OutputMessage.Should().Be("ping");
+    }
+
+    [Fact]
     public async Task ScriptEditor_RunCommand_ProcessesMessage()
     {
         var editor = new ScriptEditorViewModel();
