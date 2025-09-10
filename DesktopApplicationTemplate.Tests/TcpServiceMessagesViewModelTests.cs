@@ -275,4 +275,27 @@ public class TcpServiceMessagesViewModelTests
 
         vm.OutputMessage.Should().Be("test");
     }
+
+    [Fact]
+    public async Task OpenScriptEditor_RunCommand_DoesNotPersistWithoutSave()
+    {
+        var options = new TcpServiceOptions();
+        var service = new ServiceViewModel
+        {
+            DisplayName = "TCP - svc",
+            ServiceType = "TCP",
+            TcpOptions = options
+        };
+        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
+        vm.SetService(service);
+
+        var editor = new ScriptEditorViewModel();
+        editor.OutputGenerated += output => vm.OutputMessage = output;
+        editor.TestMessage = "test";
+
+        await ((AsyncRelayCommand)editor.RunCommand).ExecuteAsync(null);
+
+        vm.OutputMessage.Should().Be("test");
+        options.OutputMessage.Should().BeEmpty();
+    }
 }
