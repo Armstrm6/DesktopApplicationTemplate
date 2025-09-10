@@ -24,6 +24,7 @@
     <PackageReference Include="Xceed.Wpf.Toolkit" Version="4.7.25103.5738" />
     <PackageReference Include="AvalonEdit" Version="6.3.1.120" />
     <PackageReference Include="RoslynPad.Editor.Windows" Version="4.12.1" />
+    <PackageReference Include="Microsoft.VisualStudio.Threading" Version="17.12.19" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DesktopApplicationTemplate.Service\DesktopApplicationTemplate.Service.csproj" />
