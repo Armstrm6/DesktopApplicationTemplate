@@ -165,6 +165,7 @@ namespace DesktopApplicationTemplate.UI
             services.AddTransient<ScpAdvancedConfigView>();
             services.AddTransient<ScpAdvancedConfigViewModel>();
             services.AddTransient<SettingsPage>();
+            services.AddTransient<Navigation.INavigationHandler, Navigation.MqttNavigationHandler>();
 
 
             // Load strongly typed settings
