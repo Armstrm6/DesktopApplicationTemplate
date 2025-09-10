@@ -196,6 +196,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 ? ScriptEditorViewModel.DefaultScript
                 : _options.Script;
             OutputMessage = _options.OutputMessage;
+            RunInitialScript();
         }
 
         /// <summary>Updates network and scripting settings.</summary>
@@ -253,7 +254,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private async Task<string> RunScriptAsync()
         {
             var globals = new ScriptGlobals { message = TestMessage };
-            var code = Script + "\nProcess(message);";
+            var code = Script + "\nreturn Process(message);";
             var script = CSharpScript.Create<string>(code, ScriptOptions.Default, typeof(ScriptGlobals));
             var diagnostics = script.Compile();
             if (diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
@@ -261,6 +262,19 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
             var result = await script.RunAsync(globals).ConfigureAwait(false);
             return result.ReturnValue ?? string.Empty;
+        }
+
+        private void RunInitialScript()
+        {
+            try
+            {
+                OutputMessage = RunScriptAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+            }
+            catch (Exception ex)
+            {
+                OutputMessage = ex.ToString();
+            }
+            _options.OutputMessage = OutputMessage;
         }
 
         public class ScriptGlobals

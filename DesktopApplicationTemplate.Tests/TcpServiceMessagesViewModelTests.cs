@@ -256,6 +256,47 @@ public class TcpServiceMessagesViewModelTests
     }
 
     [Fact]
+    public async Task SaveAsync_CustomScript_ReturnsTransformedMessage()
+    {
+        var options = new TcpServiceOptions();
+        var service = new ServiceViewModel
+        {
+            DisplayName = "TCP - svc",
+            ServiceType = "TCP",
+            TcpOptions = options
+        };
+        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
+        vm.SetService(service);
+        vm.TestMessage = "ping";
+        vm.Script = "string Process(string message)\n{\n    return message.ToUpperInvariant();\n}";
+
+        await vm.SaveAsync();
+
+        vm.OutputMessage.Should().Be("PING");
+    }
+
+    [Fact]
+    public void SetService_RunsScriptAndPopulatesOutput()
+    {
+        var options = new TcpServiceOptions
+        {
+            Script = "string Process(string message)\n{\n    return message + \"!\";\n}"
+        };
+        var service = new ServiceViewModel
+        {
+            DisplayName = "TCP - svc",
+            ServiceType = "TCP",
+            TcpOptions = options
+        };
+        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
+
+        vm.SetService(service);
+
+        vm.OutputMessage.Should().Be("svc-PEAK-123456789!");
+        options.OutputMessage.Should().Be("svc-PEAK-123456789!");
+    }
+
+    [Fact]
     public async Task ScriptEditor_RunCommand_ProcessesMessage()
     {
         var editor = new ScriptEditorViewModel();
