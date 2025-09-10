@@ -268,8 +268,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         private async Task<string> RunScriptAsync()
         {
-            var globals = new ScriptGlobals { message = TestMessage };
-            var code = Script + "\nreturn Process(message);";
+            var globals = new ScriptGlobals { Message = TestMessage };
+            var code = Script + "\nreturn Process(Message);";
             var script = CSharpScript.Create<string>(code, ScriptOptions.Default, typeof(ScriptGlobals));
             var diagnostics = script.Compile();
             if (diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
@@ -277,11 +277,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
             var result = await script.RunAsync(globals).ConfigureAwait(false);
             return result.ReturnValue ?? string.Empty;
-        }
-
-        public class ScriptGlobals
-        {
-            public string message = string.Empty;
         }
 
         private void InitializeTestMessage()
