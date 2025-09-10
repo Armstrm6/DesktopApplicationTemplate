@@ -106,6 +106,7 @@
 - Made `ScriptEditorViewModel.Globals` public so scripts can access the `message` field without protection-level errors.
 - Script editor dispatches output and error highlights to the UI thread so results appear when Run is clicked.
 - Script editor uses a `JoinableTaskFactory` to switch to the UI thread and remove VSTHRD001 analyzer warnings.
+- Script editor unsubscribes handlers on close and mirrors test message changes to the TCP messages view.
 
 
 ### HID Service
