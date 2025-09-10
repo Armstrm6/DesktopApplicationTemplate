@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using System.Windows.Controls;
 
 namespace DesktopApplicationTemplate.UI.Navigation
@@ -7,6 +6,5 @@ namespace DesktopApplicationTemplate.UI.Navigation
     {
         string ServiceType { get; }
         Page CreateView(string defaultName);
-        Task AddServiceAsync(string name, object options);
     }
 }

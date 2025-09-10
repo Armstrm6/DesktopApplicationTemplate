@@ -5,6 +5,7 @@ using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.Core.Models;
 using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.Helpers;
+using Factories = DesktopApplicationTemplate.UI.Factories;
 // Qualify service-layer types explicitly to avoid name clashes with UI services
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -166,6 +167,9 @@ namespace DesktopApplicationTemplate.UI
             services.AddTransient<ScpAdvancedConfigViewModel>();
             services.AddTransient<SettingsPage>();
             services.AddTransient<Navigation.INavigationHandler, Navigation.MqttNavigationHandler>();
+            services.AddTransient<Navigation.INavigationHandler, Navigation.FtpNavigationHandler>();
+            services.AddTransient<Factories.IServiceFactory, Factories.MqttServiceFactory>();
+            services.AddTransient<Factories.IServiceFactory, Factories.FtpServiceFactory>();
 
 
             // Load strongly typed settings
