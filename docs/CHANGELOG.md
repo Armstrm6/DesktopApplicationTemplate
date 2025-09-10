@@ -41,6 +41,7 @@
 - Script editor window with Roslyn-based syntax highlighting and run/save commands.
 - TCP service messages view adds an Edit Script button for modifying scripts and test messages.
 - TCP service messages view displays script output next to the test message.
+- FTP service view hosts a log panel displaying service-specific entries.
 
 #### Changed
 - Service selection window wraps service icons within bounds using a fixed-width panel.
