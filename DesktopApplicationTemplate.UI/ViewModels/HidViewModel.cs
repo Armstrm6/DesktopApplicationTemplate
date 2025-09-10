@@ -7,7 +7,7 @@ using DesktopApplicationTemplate.Core.Services;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
-    public class HidViewModel : ViewModelBase
+    public class HidViewModel : ViewModelBase, IDisposable
     {
         private string _messageTemplate = string.Empty;
         public string MessageTemplate
@@ -131,6 +131,14 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         {
             Logger?.Log("Saving HID configuration", LogLevel.Debug);
             _saveHelper.Show();
+        }
+
+        /// <summary>
+        /// Releases any simulated key presses.
+        /// </summary>
+        public void Dispose()
+        {
+            KeyboardSimulator.Reset();
         }
     }
 }

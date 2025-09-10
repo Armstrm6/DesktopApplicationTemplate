@@ -83,5 +83,22 @@ namespace DesktopApplicationTemplate.Tests
 
             ConsoleTestLogger.LogPass();
         }
+
+        [Fact]
+        public void Dispose_ReleasesKeyboard()
+        {
+            bool reset = false;
+            KeyboardSimulator.ResetAction = () => reset = true;
+            var logger = new Mock<ILoggingService>();
+            var helper = new SaveConfirmationHelper(logger.Object);
+            var vm = new HidViewModel(helper);
+
+            vm.Dispose();
+
+            Assert.True(reset);
+            KeyboardSimulator.ResetAction = null;
+
+            ConsoleTestLogger.LogPass();
+        }
     }
 }
