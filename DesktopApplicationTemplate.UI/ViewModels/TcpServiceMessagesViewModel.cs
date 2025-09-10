@@ -289,11 +289,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 if (!string.IsNullOrWhiteSpace(Script))
                     svm.ScriptText = Script;
                 svm.TestMessage = TestMessage;
-                svm.PropertyChanged += (_, e) =>
-                {
-                    if (e.PropertyName == nameof(ScriptEditorViewModel.OutputMessage))
-                        OutputMessage = svm.OutputMessage;
-                };
+                svm.OutputGenerated += output => OutputMessage = output;
             }
 
             if (editor.ShowDialog() == true)

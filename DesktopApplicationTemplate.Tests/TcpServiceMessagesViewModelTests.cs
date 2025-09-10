@@ -262,4 +262,17 @@ public class TcpServiceMessagesViewModelTests
         script.Should().Contain("Process");
         last.Should().Be("msg");
     }
+
+    [Fact]
+    public async Task OpenScriptEditor_RunCommand_UpdatesOutputMessage()
+    {
+        var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
+        var editor = new ScriptEditorViewModel();
+        editor.OutputGenerated += output => vm.OutputMessage = output;
+        editor.TestMessage = "test";
+
+        await ((AsyncRelayCommand)editor.RunCommand).ExecuteAsync(null);
+
+        vm.OutputMessage.Should().Be("test");
+    }
 }
