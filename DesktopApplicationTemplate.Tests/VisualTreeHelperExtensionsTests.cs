@@ -37,5 +37,33 @@ public class VisualTreeHelperExtensionsTests
 
         exception.Should().BeNull();
     }
+
+    [WindowsFact]
+    public void FindParent_On_Unattached_Run_Does_Not_Throw()
+    {
+        Exception? exception = null;
+
+        var thread = new Thread(() =>
+        {
+            try
+            {
+                var run = new Run("child");
+
+                var parent = VisualTreeHelperExtensions.FindParent<TextBlock>(run);
+
+                parent.Should().BeNull();
+            }
+            catch (Exception ex)
+            {
+                exception = ex;
+            }
+        });
+
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        thread.Join();
+
+        exception.Should().BeNull();
+    }
 }
 
