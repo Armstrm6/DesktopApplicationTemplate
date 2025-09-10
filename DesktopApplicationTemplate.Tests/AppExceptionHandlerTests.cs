@@ -4,6 +4,8 @@ using DesktopApplicationTemplate.UI;
 using DesktopApplicationTemplate.UI.Helpers;
 using FluentAssertions;
 using Xunit;
+using System.Threading.Tasks;
+using System.Reflection;
 
 namespace DesktopApplicationTemplate.Tests
 {
@@ -15,7 +17,12 @@ namespace DesktopApplicationTemplate.Tests
             var app = new App();
             var called = false;
             HookReleaseHelper.ReleaseAction = () => called = true;
-            var args = new DispatcherUnhandledExceptionEventArgs(Dispatcher.CurrentDispatcher, new InvalidOperationException(), false);
+            var args = (DispatcherUnhandledExceptionEventArgs)Activator.CreateInstance(
+                typeof(DispatcherUnhandledExceptionEventArgs),
+                BindingFlags.Instance | BindingFlags.NonPublic,
+                null,
+                new object[] { Dispatcher.CurrentDispatcher, new InvalidOperationException() },
+                null)!;
 
             app.OnDispatcherUnhandledException(app, args);
 
@@ -24,14 +31,14 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        public void AppDomainUnhandledException_InvokesHookRelease()
+        public async Task AppDomainUnhandledException_InvokesHookRelease()
         {
             var app = new App();
             var called = false;
             HookReleaseHelper.ReleaseAction = () => called = true;
             var args = new UnhandledExceptionEventArgs(new InvalidOperationException(), false);
 
-            app.OnAppDomainUnhandledException(app, args);
+            await app.OnAppDomainUnhandledExceptionAsync(app, args);
 
             called.Should().BeTrue();
         }
