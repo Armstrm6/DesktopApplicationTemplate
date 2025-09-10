@@ -159,7 +159,8 @@ Latest Attempt: Installed .NET SDK 8.0.404 and built successfully, but `dotnet t
 Latest Attempt: After fixing the script editor binding error, the `dotnet` command remains unavailable; restore, build, and tests cannot run locally, so CI will verify.
 Latest Attempt: After exposing the default TCP script and adding tests, the `dotnet` command remains unavailable; restore, build, and test commands cannot run locally, so CI will verify.
 Latest Attempt: After exposing `ScriptGlobals` for TCP scripting, the `dotnet` command remains unavailable; relying on CI for build and test.
-Related Commits/PRs: 8517691, 4c0dbb5, 1b5b0ec, 739abbe, 4f74a36, ff70210, 272560a, 26960dc
+Latest Attempt: After making the script editor `Globals` class public, the `dotnet` command remains unavailable; restore, build, and test commands cannot run locally so CI will verify.
+Related Commits/PRs: 8517691, 4c0dbb5, 1b5b0ec, 739abbe, 4f74a36, ff70210, 272560a, 26960dc, 7e9096b
 [2025-08-27 04:25] Topic: Logging interface restoration
 Context: Introduced core logging abstractions and refactored edit view models to support DI.
 Observations: Added ILoggingService, LogLevel enum, moved LogEntry to core, and implemented Load methods on TCP and SCP edit view models.
