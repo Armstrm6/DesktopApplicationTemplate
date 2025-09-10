@@ -101,6 +101,7 @@
 - EditorButtonBar included as a Page with code-behind dependency and referenced via an assembly-qualified views namespace across consuming views.
 - Output message textbox uses a one-way binding to avoid runtime errors on the read-only `OutputMessage` property.
 - Script editor window removes `Text` binding from AvalonEdit control to prevent XAML parse exceptions.
+- Made `ScriptGlobals` public so TCP scripts can access the `message` field without protection-level errors.
 
 ### HID Service
 #### Added

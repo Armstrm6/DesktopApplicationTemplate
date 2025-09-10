@@ -265,7 +265,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             });
         }
 
-        private class ScriptGlobals
+        public class ScriptGlobals
         {
             public string message = string.Empty;
         }
