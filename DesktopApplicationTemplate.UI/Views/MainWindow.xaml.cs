@@ -80,7 +80,7 @@ namespace DesktopApplicationTemplate.UI.Views
             ShowHome();
         }
 
-        private Page? GetOrCreateServicePage(ServiceViewModel svc)
+        private Page? GetOrCreateServicePage(ServiceListModel svc)
         {
             if (svc.ServicePage != null)
                 return svc.ServicePage;
@@ -179,7 +179,7 @@ namespace DesktopApplicationTemplate.UI.Views
             var page = App.AppHost.Services.GetRequiredService<CreateServicePage>();
             page.ServiceCreated += (name, type) =>
             {
-                var svc = new ServiceViewModel
+                var svc = new ServiceListModel
                 {
                     DisplayName = $"{type} - {name}",
                     ServiceType = type,
@@ -235,7 +235,7 @@ namespace DesktopApplicationTemplate.UI.Views
             vm.ServiceName = defaultName;
             vm.ServiceSaved += (name, options) =>
             {
-                var svc = new ServiceViewModel
+                var svc = new ServiceListModel
                 {
                     DisplayName = $"HID - {name}",
                     ServiceType = "HID",
@@ -274,7 +274,7 @@ namespace DesktopApplicationTemplate.UI.Views
             vm.ServiceName = defaultName;
             vm.ServiceSaved += (name, options) =>
             {
-                var svc = new ServiceViewModel
+                var svc = new ServiceListModel
                 {
                     DisplayName = $"SCP - {name}",
                     ServiceType = "SCP",
@@ -314,7 +314,7 @@ namespace DesktopApplicationTemplate.UI.Views
             vm.ServiceName = defaultName;
             vm.ServiceSaved += (name, options) =>
             {
-                var svc = new ServiceViewModel
+                var svc = new ServiceListModel
                 {
                     DisplayName = $"Heartbeat - {name}",
                     ServiceType = "Heartbeat",
@@ -353,7 +353,7 @@ namespace DesktopApplicationTemplate.UI.Views
             vm.ServiceName = defaultName;
             vm.ServiceSaved += (name, options) =>
             {
-                var svc = new ServiceViewModel
+                var svc = new ServiceListModel
                 {
                     DisplayName = $"File Observer - {name}",
                     ServiceType = "File Observer",
@@ -392,7 +392,7 @@ namespace DesktopApplicationTemplate.UI.Views
             vm.ServiceName = defaultName;
             vm.ServiceSaved += (name, options) =>
             {
-                var svc = new ServiceViewModel
+                var svc = new ServiceListModel
                 {
                     DisplayName = $"CSV Creator - {name}",
                     ServiceType = "CSV Creator",
@@ -432,7 +432,7 @@ namespace DesktopApplicationTemplate.UI.Views
             vm.ServiceName = defaultName;
             vm.ServiceSaved += (name, options) =>
             {
-                var svc = new ServiceViewModel
+                var svc = new ServiceListModel
                 {
                     DisplayName = $"{vm.ServiceType} - {name}",
                     ServiceType = vm.ServiceType,
@@ -462,7 +462,7 @@ namespace DesktopApplicationTemplate.UI.Views
             vm.ServiceName = defaultName;
             vm.ServiceSaved += (name, options) =>
             {
-                var svc = new ServiceViewModel
+                var svc = new ServiceListModel
                 {
                     DisplayName = $"HTTP - {name}",
                     ServiceType = "HTTP",
@@ -529,7 +529,7 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private async Task AddMqttServiceAsync(string name, MqttServiceOptions options)
         {
-            var newService = new ServiceViewModel
+            var newService = new ServiceListModel
             {
                 DisplayName = $"MQTT - {name}",
                 ServiceType = "MQTT",
@@ -605,7 +605,7 @@ namespace DesktopApplicationTemplate.UI.Views
 
         internal void AddFtpService(string name, FtpServerOptions options)
         {
-            var svc = new ServiceViewModel
+            var svc = new ServiceListModel
             {
                 DisplayName = $"FTP Server - {name}",
                 ServiceType = "FTP Server",
@@ -634,7 +634,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 ShowPage(svc.ServicePage);
         }
 
-        private void OnEditRequested(ServiceViewModel service)
+        private void OnEditRequested(ServiceListModel service)
         {
             _logger?.LogDebug("Edit requested for {Name}", service.DisplayName);
 
@@ -994,7 +994,7 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private async Task DeleteServiceMenuAsync(object sender, RoutedEventArgs e)
         {
-            if (sender is MenuItem { DataContext: ServiceViewModel svc })
+            if (sender is MenuItem { DataContext: ServiceListModel svc })
             {
                 var index = _viewModel.Services.IndexOf(svc);
                 svc.LogAdded -= _viewModel.OnServiceLogAdded;
@@ -1016,7 +1016,7 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private async Task RenameServiceMenuAsync(object sender, RoutedEventArgs e)
         {
-            if (sender is MenuItem { DataContext: ServiceViewModel svc })
+            if (sender is MenuItem { DataContext: ServiceListModel svc })
             {
                 string input = Interaction.InputBox("Enter new service name:", "Rename Service", svc.DisplayName);
                 if (!string.IsNullOrWhiteSpace(input))
@@ -1036,7 +1036,7 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private async Task ChangeColorMenuAsync(object sender, RoutedEventArgs e)
         {
-            if (sender is MenuItem { DataContext: ServiceViewModel svc })
+            if (sender is MenuItem { DataContext: ServiceListModel svc })
             {
                 var dlg = new ColorPickerWindow { Owner = this };
                 if (dlg.ShowDialog() == true)
@@ -1124,7 +1124,7 @@ namespace DesktopApplicationTemplate.UI.Views
             if (e.ClickCount < 2)
                 return;
 
-            if (sender is Border { DataContext: ServiceViewModel svc })
+            if (sender is Border { DataContext: ServiceListModel svc })
             {
                 _logger?.LogDebug("Service {Name} double-clicked", svc.DisplayName);
                 if (_viewModel.EditServiceCommand.CanExecute(svc))
@@ -1155,7 +1155,7 @@ namespace DesktopApplicationTemplate.UI.Views
             if (Math.Abs(position.X - _dragStart.X) > SystemParameters.MinimumHorizontalDragDistance ||
                 Math.Abs(position.Y - _dragStart.Y) > SystemParameters.MinimumVerticalDragDistance)
             {
-                if (sender is Border { DataContext: ServiceViewModel svc } border)
+                if (sender is Border { DataContext: ServiceListModel svc } border)
                 {
                     DragDrop.DoDragDrop(border, svc, System.Windows.DragDropEffects.Move);
                 }
@@ -1166,11 +1166,11 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private async Task ServiceItemDropAsync(object sender, System.Windows.DragEventArgs e)
         {
-            if (!e.Data.GetDataPresent(typeof(ServiceViewModel)))
+            if (!e.Data.GetDataPresent(typeof(ServiceListModel)))
                 return;
 
-            var source = (ServiceViewModel)e.Data.GetData(typeof(ServiceViewModel))!;
-            if (sender is not Border { DataContext: ServiceViewModel target } || source == target)
+            var source = (ServiceListModel)e.Data.GetData(typeof(ServiceListModel))!;
+            if (sender is not Border { DataContext: ServiceListModel target } || source == target)
                 return;
 
             int oldIndex = _viewModel.Services.IndexOf(source);

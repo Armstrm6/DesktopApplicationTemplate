@@ -12,15 +12,15 @@ using Xunit;
 
 namespace DesktopApplicationTemplate.Tests
 {
-    public class ServiceViewModelTests
+    public class ServiceListModelTests
     {
         [Fact]
         public void AddLog_ReferenceUpdatesAssociatedServices()
         {
-            var a = new ServiceViewModel { DisplayName = "Heartbeat - A", ServiceType = "Heartbeat" };
-            var b = new ServiceViewModel { DisplayName = "TCP - B", ServiceType = "TCP" };
-            var services = new List<ServiceViewModel> { a, b };
-            ServiceViewModel.ResolveService = (type, name) =>
+            var a = new ServiceListModel { DisplayName = "Heartbeat - A", ServiceType = "Heartbeat" };
+            var b = new ServiceListModel { DisplayName = "TCP - B", ServiceType = "TCP" };
+            var services = new List<ServiceListModel> { a, b };
+            ServiceListModel.ResolveService = (type, name) =>
                 services.Find(s => s.ServiceType == type && s.DisplayName.Split(" - ").Last() == name);
 
             a.AddLog("TCP.B.Test message");
@@ -43,8 +43,8 @@ namespace DesktopApplicationTemplate.Tests
             var netVm = new NetworkConfigurationViewModel(net);
             var main = new MainViewModel(csv, netVm, net, servicesFilePath: Path.Combine(tempDir, "services.json"));
 
-            main.Services.Add(new ServiceViewModel { DisplayName = "TCP - TCP1", ServiceType = "TCP" });
-            main.Services.Add(new ServiceViewModel { DisplayName = "TCP - TCP2", ServiceType = "TCP" });
+            main.Services.Add(new ServiceListModel { DisplayName = "TCP - TCP1", ServiceType = "TCP" });
+            main.Services.Add(new ServiceListModel { DisplayName = "TCP - TCP2", ServiceType = "TCP" });
 
             var name = main.GenerateServiceName("TCP");
             Assert.Equal("TCP3", name);
@@ -64,8 +64,8 @@ namespace DesktopApplicationTemplate.Tests
             var netVm = new NetworkConfigurationViewModel(net);
             var main = new MainViewModel(csv, netVm, net, servicesFilePath: Path.Combine(tempDir, "services.json"));
 
-            var svc1 = new ServiceViewModel { DisplayName = "TCP - TCP1", ServiceType = "TCP" };
-            var svc2 = new ServiceViewModel { DisplayName = "TCP - TCP2", ServiceType = "TCP" };
+            var svc1 = new ServiceListModel { DisplayName = "TCP - TCP1", ServiceType = "TCP" };
+            var svc2 = new ServiceListModel { DisplayName = "TCP - TCP2", ServiceType = "TCP" };
             main.Services.Add(svc1);
             main.Services.Add(svc2);
 
@@ -85,7 +85,7 @@ namespace DesktopApplicationTemplate.Tests
         [Fact]
         public void RecordExecutionTime_ComputesAverage()
         {
-            var vm = new ServiceViewModel();
+            var vm = new ServiceListModel();
             vm.RecordExecutionTime(TimeSpan.FromMilliseconds(100));
             vm.RecordExecutionTime(TimeSpan.FromMilliseconds(50));
 
@@ -96,7 +96,7 @@ namespace DesktopApplicationTemplate.Tests
         [Fact]
         public void RecordExecutionTime_Throws_When_Negative()
         {
-            var vm = new ServiceViewModel();
+            var vm = new ServiceListModel();
             Assert.Throws<ArgumentException>(() => vm.RecordExecutionTime(TimeSpan.FromMilliseconds(-1)));
             ConsoleTestLogger.LogPass();
         }

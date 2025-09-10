@@ -16,7 +16,7 @@ namespace DesktopApplicationTemplate.UI.Views
             viewModel.Logger = logger;
         }
 
-        public void SetServiceContext(ServiceViewModel service)
+        public void SetServiceContext(ServiceListModel service)
         {
             LogView.DataContext = new ServiceLogViewModel(service.DisplayName, service.ServiceType, service.Logs);
         }

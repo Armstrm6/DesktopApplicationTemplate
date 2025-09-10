@@ -23,13 +23,13 @@ namespace DesktopApplicationTemplate.Tests
             {
                 Services =
                 {
-                    new ServiceViewModel { DisplayName = "HTTP - HTTP1", ServiceType = "HTTP", IsActive = true, Order = 0 },
-                    new ServiceViewModel { DisplayName = "TCP - TCP1", ServiceType = "TCP", IsActive = true, Order = 1 }
+                    new ServiceListModel { DisplayName = "HTTP - HTTP1", ServiceType = "HTTP", IsActive = true, Order = 0 },
+                    new ServiceListModel { DisplayName = "TCP - TCP1", ServiceType = "TCP", IsActive = true, Order = 1 }
                 },
                 Filters = { NameFilter = "HTTP" }
             };
 
-            var visible = vm.FilteredServices.Cast<ServiceViewModel>().ToList();
+            var visible = vm.FilteredServices.Cast<ServiceListModel>().ToList();
             Assert.Single(visible);
             Assert.Equal("HTTP - HTTP1", visible[0].DisplayName);
             ConsoleTestLogger.LogPass();

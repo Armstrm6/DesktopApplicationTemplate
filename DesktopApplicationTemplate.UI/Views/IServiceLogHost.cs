@@ -11,6 +11,6 @@ namespace DesktopApplicationTemplate.UI.Views
         /// Sets the service context for the hosted log view.
         /// </summary>
         /// <param name="service">The service model containing log data.</param>
-        void SetServiceContext(ServiceViewModel service);
+        void SetServiceContext(ServiceListModel service);
     }
 }

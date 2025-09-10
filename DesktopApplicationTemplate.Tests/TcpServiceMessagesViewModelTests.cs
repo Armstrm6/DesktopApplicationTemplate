@@ -95,7 +95,7 @@ public class TcpServiceMessagesViewModelTests
     [Fact]
     public void ServiceName_NoPriorMessage_UsesDefault()
     {
-        var service = new ServiceViewModel
+        var service = new ServiceListModel
         {
             DisplayName = "TCP - svc",
             ServiceType = "TCP",
@@ -113,7 +113,7 @@ public class TcpServiceMessagesViewModelTests
     [Fact]
     public void ServiceName_NoPriorMessage_UsesRoutingMessage()
     {
-        var service = new ServiceViewModel
+        var service = new ServiceListModel
         {
             DisplayName = "TCP - svc",
             ServiceType = "TCP",
@@ -131,7 +131,7 @@ public class TcpServiceMessagesViewModelTests
     [Fact]
     public void ServiceName_WithPriorMessage_UsesStored()
     {
-        var service = new ServiceViewModel
+        var service = new ServiceListModel
         {
             DisplayName = "TCP - svc",
             ServiceType = "TCP",
@@ -147,7 +147,7 @@ public class TcpServiceMessagesViewModelTests
     public async Task SaveAsync_UpdatesLastTestMessage()
     {
         var options = new TcpServiceOptions();
-        var service = new ServiceViewModel
+        var service = new ServiceListModel
         {
             DisplayName = "TCP - svc",
             ServiceType = "TCP",
@@ -166,7 +166,7 @@ public class TcpServiceMessagesViewModelTests
     public async Task SaveAsync_UpdatesScript()
     {
         var options = new TcpServiceOptions();
-        var service = new ServiceViewModel
+        var service = new ServiceListModel
         {
             DisplayName = "TCP - svc",
             ServiceType = "TCP",
@@ -185,7 +185,7 @@ public class TcpServiceMessagesViewModelTests
     public async Task SaveAsync_ComputesOutputMessage()
     {
         var options = new TcpServiceOptions();
-        var service = new ServiceViewModel
+        var service = new ServiceListModel
         {
             DisplayName = "TCP - svc",
             ServiceType = "TCP",
@@ -205,7 +205,7 @@ public class TcpServiceMessagesViewModelTests
     [Fact]
     public void SetService_LoadsScript()
     {
-        var service = new ServiceViewModel
+        var service = new ServiceListModel
         {
             DisplayName = "TCP - svc",
             ServiceType = "TCP",
@@ -221,7 +221,7 @@ public class TcpServiceMessagesViewModelTests
     [Fact]
     public void SetService_NoScript_UsesDefault()
     {
-        var service = new ServiceViewModel
+        var service = new ServiceListModel
         {
             DisplayName = "TCP - svc",
             ServiceType = "TCP",
@@ -238,7 +238,7 @@ public class TcpServiceMessagesViewModelTests
     public async Task SaveAsync_DefaultScript_NoProtectionLevelErrors()
     {
         var options = new TcpServiceOptions();
-        var service = new ServiceViewModel
+        var service = new ServiceListModel
         {
             DisplayName = "TCP - svc",
             ServiceType = "TCP",
@@ -259,7 +259,7 @@ public class TcpServiceMessagesViewModelTests
     public async Task SaveAsync_CustomScript_ReturnsTransformedMessage()
     {
         var options = new TcpServiceOptions();
-        var service = new ServiceViewModel
+        var service = new ServiceListModel
         {
             DisplayName = "TCP - svc",
             ServiceType = "TCP",
@@ -323,7 +323,7 @@ public class TcpServiceMessagesViewModelTests
     public async Task OpenScriptEditor_RunCommand_PersistsOutputAndTestMessage()
     {
         var options = new TcpServiceOptions();
-        var service = new ServiceViewModel
+        var service = new ServiceListModel
         {
             DisplayName = "TCP - svc",
             ServiceType = "TCP",
