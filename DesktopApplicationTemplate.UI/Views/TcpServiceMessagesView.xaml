@@ -39,7 +39,7 @@
                 <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,5">
                     <TextBlock Text="Test Message:" VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <TextBox Text="{Binding TestMessage, UpdateSourceTrigger=PropertyChanged}" Width="300"/>
-                    <Button Content="Edit Script" Margin="10,0,0,0" Click="EditScript_Click"/>
+                    <Button Content="Edit Script" Margin="10,0,0,0" Command="{Binding OpenScriptEditorCommand}"/>
                 </StackPanel>
                 <Button Grid.Row="1" Content="Advanced Settings" Command="{Binding OpenAdvancedSettingsCommand}" Width="150" HorizontalAlignment="Right" Margin="0,0,0,5"/>
                 <shared:ServiceMessageTableView Grid.Row="2" DataContext="{Binding MessageTable}" Margin="0,0,0,10" />
