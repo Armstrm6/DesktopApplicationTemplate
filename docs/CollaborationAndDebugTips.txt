@@ -171,6 +171,7 @@ Latest Attempt: After ensuring TCP scripts return their results, the `dotnet` co
 Latest Attempt: After confirming TcpServiceMessagesViewModel.SaveAsync usage, `dotnet restore` succeeded but `dotnet build` reported VSTHRD100/101 analyzer errors; tests could not run locally and CI will verify.
 Latest Attempt: After ensuring TcpServiceMessagesViewModel.OutputMessage setter always raises PropertyChanged, the `dotnet` command remains unavailable; restore, build, and test steps will run in CI.
 Latest Attempt: After converting RunInitialScript to async and updating SetService, the `dotnet` CLI is still missing; `dotnet build DesktopApplicationTemplate.sln` and `dotnet test --settings tests.runsettings` could not run locally and will be verified in CI.
+Latest Attempt: After adding a log panel to the FTP service view, the `dotnet` command remains unavailable; restore, build, and test steps could not run locally, so CI will verify.
 Related Commits/PRs: 8517691, 4c0dbb5, 1b5b0ec, 739abbe, 4f74a36, ff70210, 272560a, 26960dc, 7e9096b, 6454680, a70fb18, f1e064e
 [2025-08-27 04:25] Topic: Logging interface restoration
 Context: Introduced core logging abstractions and refactored edit view models to support DI.
