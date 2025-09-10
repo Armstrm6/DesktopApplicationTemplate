@@ -9,6 +9,7 @@ using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.UI.Views;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -77,6 +78,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         /// <summary>Command to open advanced TCP settings.</summary>
         public ICommand OpenAdvancedSettingsCommand { get; }
+
+        /// <summary>Command to open the script editor window.</summary>
+        public ICommand OpenScriptEditorCommand { get; }
 
         /// <summary>Raised when the advanced settings view should open.</summary>
         public event EventHandler? AdvancedSettingsRequested;
@@ -160,6 +164,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             ExportLogCommand = new RelayCommand(ExportLogs);
             RefreshLogCommand = new RelayCommand(() => OnPropertyChanged(nameof(DisplayLogs)));
             OpenAdvancedSettingsCommand = new RelayCommand(() => AdvancedSettingsRequested?.Invoke(this, EventArgs.Empty));
+            OpenScriptEditorCommand = new RelayCommand(OpenScriptEditor);
         }
 
         /// <summary>Associates the view model with a service and its TCP options.</summary>
@@ -222,6 +227,23 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 ? $"{ServiceName}-PEAK-123456789"
                 : _options.LastTestMessage;
             _routing.UpdateMessage(ServiceName, TestMessage);
+        }
+
+        private void OpenScriptEditor()
+        {
+            var editor = new ScriptEditorWindow();
+            if (editor.DataContext is ScriptEditorViewModel svm)
+            {
+                svm.ScriptText = Script;
+                svm.TestMessage = TestMessage;
+            }
+
+            if (editor.ShowDialog() == true)
+            {
+                Script = editor.ScriptText;
+                TestMessage = editor.LastTestMessage;
+                Save();
+            }
         }
     }
 }
