@@ -537,6 +537,7 @@ Latest Attempt: `dotnet workload install wpf` reported the workload ID is not re
 Latest Attempt: After moving script editor globals to a top-level class and adjusting RunAsync, the `dotnet` command was initially missing; installing the .NET SDK 8.0.404 enabled restore and build, but `dotnet test --settings tests.runsettings` aborted because the Microsoft.WindowsDesktop.App runtime is missing.
 Newest Attempt: Installed the .NET SDK 8.0.404 via script; `dotnet restore` and `dotnet build DesktopApplicationTemplate.sln` succeeded, but `dotnet test --settings tests.runsettings` aborted because the Microsoft.WindowsDesktop.App 8.0.0 runtime is missing; relying on CI.
 Latest Attempt: After introducing service factories, the `dotnet` CLI is still missing; relying on CI for build and test.
+Latest Attempt: Installed .NET SDK 8.0.404; `dotnet restore` succeeded but `dotnet build DesktopApplicationTemplate.sln` and `dotnet test --settings tests.runsettings` failed with missing MainView in FtpServiceFactory. CI will verify.
 Related Commits/PRs:
 [2025-10-01 09:00] Topic: EditorButtonBar namespace
 Context: Verified EditorButtonBar build action and updated consuming views to use an assembly-qualified namespace.
