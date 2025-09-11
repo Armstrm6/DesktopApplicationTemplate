@@ -284,6 +284,7 @@
 - `TestCommon` library providing shared test helpers and fixtures referenced by all test projects.
 - `TestHelpers.CreateService` simplifies creating `ServiceListModel` instances in tests to reduce duplication.
 - Test-only composite service demonstrates reuse of `ServiceRule` and `ServiceScreen` in unit tests.
+- Comparison tests ensure composed sample service matches original implementation results and log formatting.
 - Collaboration tips note that WPF projects require Windows or the WindowsDesktop runtime and fail with `InitializeComponent` and `NETSDK1100` errors if missing.
 - Guide on creating custom services and registering dependencies via `IServiceModule`.
 
