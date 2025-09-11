@@ -18,6 +18,8 @@ using System.IO;
 using System.Windows;
 using System;
 using System.Windows.Threading;
+using System.Collections.Generic;
+using DesktopApplicationTemplate.Models;
 using System.Threading.Tasks;
 
 
@@ -51,6 +53,7 @@ namespace DesktopApplicationTemplate.UI
 
         private void ConfigureServices(IConfiguration configuration, IServiceCollection services)
         {
+            services.AddSingleton<IDictionary<ServiceType, Action<ServiceListModel>>>(_ => new Dictionary<ServiceType, Action<ServiceListModel>>());
             services.AddSingleton<MainView>();
             services.AddSingleton<IStartupService, StartupService>();
             services.AddSingleton<IProcessRunner, ProcessRunner>();
