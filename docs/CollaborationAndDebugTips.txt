@@ -158,6 +158,7 @@ Latest Attempt: After moving script editing to an ICommand, the `dotnet` CLI rem
 Newest Attempt: `dotnet` command still missing; restore, build, and tests cannot run locally and CI will verify.
 Latest Attempt: After removing the application logo and adding header text, `dotnet restore` succeeded but `dotnet build DesktopApplicationTemplate.sln` failed with XAML errors and `dotnet test --settings tests.runsettings` produced similar errors; relying on CI for validation.
 Latest Attempt: Installed .NET SDK 8.0.404 and built successfully, but `dotnet test --settings tests.runsettings` aborted because the Microsoft.WindowsDesktop.App runtime is missing; relying on CI.
+Latest Attempt: After storing service types as short codes, the `dotnet` command is still missing; build and tests deferred to CI.
 Newest Attempt: After extracting ScriptGlobals into its own class for TCP script execution, the `dotnet` command remains unavailable; restore, build, and test steps could not run locally and CI will verify.
 Latest Attempt: After fixing the script editor binding error, the `dotnet` command remains unavailable; restore, build, and tests cannot run locally, so CI will verify.
 Latest Attempt: After adding script execution logging to TcpServiceMessagesViewModel, the `dotnet` command is still missing; restore, build, and tests cannot run locally and CI will verify.

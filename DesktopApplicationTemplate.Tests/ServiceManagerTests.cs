@@ -1,4 +1,5 @@
 using DesktopApplicationTemplate.Service;
+using DesktopApplicationTemplate.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using System.Collections.Generic;
@@ -18,8 +19,8 @@ namespace DesktopApplicationTemplate.Tests
             {
                 var services = new[]
                 {
-                    new ServiceInfo { DisplayName = "Svc1", ServiceType = "Heartbeat", IsActive = true, Order = 0 },
-                    new ServiceInfo { DisplayName = "Svc2", ServiceType = "TCP", IsActive = false, Order = 1 }
+                    new ServiceInfo { DisplayName = "Svc1", ServiceType = ServiceType.Heartbeat, IsActive = true, Order = 0 },
+                    new ServiceInfo { DisplayName = "Svc2", ServiceType = ServiceType.Tcp, IsActive = false, Order = 1 }
                 };
                 File.WriteAllText(tempFile, JsonSerializer.Serialize(services));
 

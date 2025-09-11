@@ -23,6 +23,7 @@
 - Replaced `ServiceCreated`/`ServiceUpdated` with unified `ServiceSaved` events and centralized `ServiceName` validation in `ServiceEditorViewModelBase`.
 - Windows service host sets explicit `ServiceName` and `DisplayName` values with the application name and installer uses the same constant.
 - Replaced verbose `ServiceName` strings with `ServiceType` enum properties for log view models.
+- Service persistence now stores `ServiceType` as short codes and reads legacy string names.
 
 #### Fixed
 - Event raising helpers in `ServiceEditorViewModelBase` invoked themselves recursively; now invoke events directly.

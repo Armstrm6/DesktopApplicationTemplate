@@ -8,13 +8,15 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using DesktopApplicationTemplate.Models;
+using DesktopApplicationTemplate.Core.Converters;
 
 namespace DesktopApplicationTemplate.Service
 {
     public class ServiceInfo
     {
         public string DisplayName { get; set; } = string.Empty;
-        public string ServiceType { get; set; } = string.Empty;
+        public ServiceType ServiceType { get; set; }
         public bool IsActive { get; set; }
         public DateTime Created { get; set; }
         public int Order { get; set; }
@@ -34,13 +36,13 @@ namespace DesktopApplicationTemplate.Service
             public CancellationTokenSource CancellationTokenSource { get; init; } = default!;
             public Task Task { get; init; } = default!;
             public DateTime StartTime { get; init; }
-            public string ServiceType { get; init; } = string.Empty;
+            public ServiceType ServiceType { get; init; }
         }
 
         private sealed class ServiceRecord
         {
             public string Name { get; init; } = string.Empty;
-            public string ServiceType { get; init; } = string.Empty;
+            public ServiceType ServiceType { get; init; }
             public DateTime StartTime { get; init; }
             public string Status { get; set; } = string.Empty;
         }
@@ -131,7 +133,7 @@ namespace DesktopApplicationTemplate.Service
 
         private async Task RunServiceLoop(ServiceInfo info, CancellationToken token)
         {
-            if (info.ServiceType == "Heartbeat")
+            if (info.ServiceType == ServiceType.Heartbeat)
             {
                 var hb = _config.GetSection("Heartbeat");
                 var message = hb.GetValue<string>("Message", "PING");
@@ -196,7 +198,7 @@ namespace DesktopApplicationTemplate.Service
             {
                 var pid = Process.GetCurrentProcess().Id;
                 var lines = _records.Values
-                    .Select(r => $"{pid}\t{r.Name}\t{r.ServiceType}\t{r.StartTime:o}\t{r.Status}")
+                    .Select(r => $"{pid}\t{r.Name}\t{ServiceTypeJsonConverter.ToLegacyString(r.ServiceType)}\t{r.StartTime:o}\t{r.Status}")
                     .ToArray();
                 File.WriteAllLines(_activeServicesFilePath, lines);
             }
