@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using DesktopApplicationTemplate.Models;
-using DesktopApplicationTemplate.Core.Converters;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -28,7 +27,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public string GenerateDefaultName(ServiceType serviceType)
         {
-            var typeName = ServiceTypeJsonConverter.ToLegacyString(serviceType);
+            var typeName = serviceType.ToLegacyString();
             int index = 1;
             while (_existingNames.Contains($"{typeName}{index}"))
             {

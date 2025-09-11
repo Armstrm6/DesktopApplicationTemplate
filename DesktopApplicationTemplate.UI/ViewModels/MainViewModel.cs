@@ -11,7 +11,6 @@ using WpfBrushes = System.Windows.Media.Brushes;
 using DesktopApplicationTemplate.Core.Models;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Persistence;
-using DesktopApplicationTemplate.Core.Converters;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Helpers;
 
@@ -127,7 +126,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         internal string GenerateServiceName(ServiceType serviceType)
         {
-            var typeName = ServiceTypeJsonConverter.ToLegacyString(serviceType);
+            var typeName = serviceType.ToLegacyString();
             int index = 1;
             foreach (var svc in Services.Where(s => s.ServiceType == serviceType))
             {
@@ -240,7 +239,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     return false;
 
                 if (Filters.TypeFilter != "All" &&
-                    ServiceTypeJsonConverter.TryParse(Filters.TypeFilter, out var fType) &&
+                    ServiceTypeExtensions.TryParse(Filters.TypeFilter, out var fType) &&
                     svc.ServiceType != fType)
                     return false;
 

@@ -20,7 +20,6 @@ using DesktopApplicationTemplate.UI;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using DesktopApplicationTemplate.Core.Converters;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
@@ -139,7 +138,7 @@ namespace DesktopApplicationTemplate.UI.Views
                     tcpVm.AdvancedSettingsRequested += (_, _) =>
                     {
                         var vm = App.AppHost.Services.GetRequiredService<TcpEditServiceViewModel>();
-                        vm.ServiceType = ServiceTypeJsonConverter.ToLegacyString(svc.ServiceType);
+                        vm.ServiceType = svc.ServiceType.ToLegacyString();
                         vm.Load(svc.DisplayName.Split(" - ").Last(), svc.TcpOptions ?? new TcpServiceOptions());
                         var editView = App.AppHost.Services.GetRequiredService<TcpEditServiceView>();
                         editView.Initialize(vm);
@@ -147,7 +146,7 @@ namespace DesktopApplicationTemplate.UI.Views
                         vm.ServiceSaved += (name, opts) =>
                         {
                             svc.DisplayName = $"{vm.ServiceType} - {name}";
-                            if (ServiceTypeJsonConverter.TryParse(vm.ServiceType, out var newType))
+                            if (ServiceTypeExtensions.TryParse(vm.ServiceType, out var newType))
                                 svc.ServiceType = newType;
                             svc.TcpOptions = opts;
                             if (svc.ServicePage != null)
@@ -190,7 +189,7 @@ namespace DesktopApplicationTemplate.UI.Views
             {
                 var svc = new ServiceListModel
                 {
-                    DisplayName = $"{ServiceTypeJsonConverter.ToLegacyString(type)} - {name}",
+                    DisplayName = $"{type.ToLegacyString()} - {name}",
                     ServiceType = type,
                     IsActive = false
                 };
@@ -215,7 +214,7 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private void NavigateTo(ServiceType serviceType)
         {
-            var defaultName = _createServicePage?.GenerateDefaultName(serviceType) ?? ServiceTypeJsonConverter.ToLegacyString(serviceType);
+            var defaultName = _createServicePage?.GenerateDefaultName(serviceType) ?? serviceType.ToLegacyString();
             var handler = App.AppHost.Services.GetServices<INavigationHandler>()
                 .FirstOrDefault(h => h.ServiceType == serviceType);
             if (handler == null)
@@ -477,14 +476,14 @@ namespace DesktopApplicationTemplate.UI.Views
         var tcpPage = GetOrCreateServicePage(service);
         var options = service.TcpOptions ?? new TcpServiceOptions();
         var vm = App.AppHost.Services.GetRequiredService<TcpEditServiceViewModel>();
-        vm.ServiceType = ServiceTypeJsonConverter.ToLegacyString(service.ServiceType);
+        vm.ServiceType = service.ServiceType.ToLegacyString();
         vm.Load(service.DisplayName.Split(" - ").Last(), options);
         var editView = App.AppHost.Services.GetRequiredService<TcpEditServiceView>();
         editView.Initialize(vm);
         vm.ServiceSaved += (name, opts) =>
         {
             service.DisplayName = $"{vm.ServiceType} - {name}";
-            if (ServiceTypeJsonConverter.TryParse(vm.ServiceType, out var newType))
+            if (ServiceTypeExtensions.TryParse(vm.ServiceType, out var newType))
                 service.ServiceType = newType;
             service.TcpOptions = opts;
             if (tcpPage != null)
@@ -644,7 +643,7 @@ namespace DesktopApplicationTemplate.UI.Views
                     {
                         namePart = _viewModel.GenerateServiceName(svc.ServiceType);
                     }
-                    svc.DisplayName = $"{ServiceTypeJsonConverter.ToLegacyString(svc.ServiceType)} - {namePart}";
+                    svc.DisplayName = $"{svc.ServiceType.ToLegacyString()} - {namePart}";
                     await _viewModel.SaveServicesAsync();
                 }
             }

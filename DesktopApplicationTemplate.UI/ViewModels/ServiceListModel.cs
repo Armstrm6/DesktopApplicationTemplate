@@ -6,7 +6,6 @@ using System.Windows.Controls;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.Core.Converters;
 using WpfBrush = System.Windows.Media.Brush;
 using WpfBrushes = System.Windows.Media.Brushes;
 
@@ -211,7 +210,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 var typeStr = m.Groups[1].Value;
                 var name = m.Groups[2].Value;
                 var msg = m.Groups[3].Value;
-                if (ServiceTypeJsonConverter.TryParse(typeStr, out var type))
+                if (ServiceTypeExtensions.TryParse(typeStr, out var type))
                 {
                     var target = ResolveService(type, name);
                     if (target != null && target != this)
