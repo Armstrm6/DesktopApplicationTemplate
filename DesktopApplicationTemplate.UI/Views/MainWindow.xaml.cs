@@ -138,16 +138,15 @@ namespace DesktopApplicationTemplate.UI.Views
                     tcpVm.AdvancedSettingsRequested += (_, _) =>
                     {
                         var vm = App.AppHost.Services.GetRequiredService<TcpEditServiceViewModel>();
-                        vm.ServiceType = svc.ServiceType.ToLegacyString();
+                        vm.ServiceType = svc.ServiceType;
                         vm.Load(svc.DisplayName.Split(" - ").Last(), svc.TcpOptions ?? new TcpServiceOptions());
                         var editView = App.AppHost.Services.GetRequiredService<TcpEditServiceView>();
                         editView.Initialize(vm);
 
                         vm.ServiceSaved += (name, opts) =>
                         {
-                            svc.DisplayName = $"{vm.ServiceType} - {name}";
-                            if (ServiceTypeExtensions.TryParse(vm.ServiceType, out var newType))
-                                svc.ServiceType = newType;
+                            svc.DisplayName = $"{vm.ServiceType.ToLegacyString()} - {name}";
+                            svc.ServiceType = vm.ServiceType;
                             svc.TcpOptions = opts;
                             if (svc.ServicePage != null)
                                 ShowPage(svc.ServicePage);
@@ -476,15 +475,14 @@ namespace DesktopApplicationTemplate.UI.Views
         var tcpPage = GetOrCreateServicePage(service);
         var options = service.TcpOptions ?? new TcpServiceOptions();
         var vm = App.AppHost.Services.GetRequiredService<TcpEditServiceViewModel>();
-        vm.ServiceType = service.ServiceType.ToLegacyString();
+        vm.ServiceType = service.ServiceType;
         vm.Load(service.DisplayName.Split(" - ").Last(), options);
         var editView = App.AppHost.Services.GetRequiredService<TcpEditServiceView>();
         editView.Initialize(vm);
         vm.ServiceSaved += (name, opts) =>
         {
-            service.DisplayName = $"{vm.ServiceType} - {name}";
-            if (ServiceTypeExtensions.TryParse(vm.ServiceType, out var newType))
-                service.ServiceType = newType;
+            service.DisplayName = $"{vm.ServiceType.ToLegacyString()} - {name}";
+            service.ServiceType = vm.ServiceType;
             service.TcpOptions = opts;
             if (tcpPage != null)
                 ShowPage(tcpPage);

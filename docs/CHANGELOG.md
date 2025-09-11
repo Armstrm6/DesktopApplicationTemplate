@@ -56,6 +56,7 @@
 - Application registers global exception handlers that log errors, release input hooks, and shut down gracefully.
 - Unit test ensures `VisualTreeHelperExtensions.FindParent` locates the containing `TextBlock` for inline elements.
 - Tests confirm the main window delegates edit requests to service-type handlers.
+- Settings page offers a preferred service selector bound to `ServiceType` values.
 
 #### Changed
 - Service selection window wraps service icons within bounds using a fixed-width panel.

@@ -2,6 +2,7 @@ using System;
 using System.Windows.Input;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Models;
 
 namespace DesktopApplicationTemplate.UI.ViewModels;
 
@@ -12,6 +13,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 public abstract class ServiceEditorViewModelBase<TOptions> : ValidatableViewModelBase, ILoggingViewModel
 {
     private string _serviceName = string.Empty;
+    private ServiceType _serviceType;
 
     protected ServiceEditorViewModelBase(IServiceRule rule, ILoggingService? logger = null)
     {
@@ -49,6 +51,15 @@ public abstract class ServiceEditorViewModelBase<TOptions> : ValidatableViewMode
                 ClearErrors(nameof(ServiceName));
             OnPropertyChanged();
         }
+    }
+
+    /// <summary>
+    /// Type of the service being edited or created.
+    /// </summary>
+    public ServiceType ServiceType
+    {
+        get => _serviceType;
+        set { _serviceType = value; OnPropertyChanged(); }
     }
 
     /// <summary>
