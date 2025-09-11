@@ -47,5 +47,32 @@ namespace DesktopApplicationTemplate.Tests
             }
             ConsoleTestLogger.LogPass();
         }
+
+        [Theory]
+        [InlineData("HB")]
+        [InlineData("Heartbeat")]
+        public void Sync_LoadsServicesFromConfiguration(string typeValue)
+        {
+            var tempDir = Path.Combine(Path.GetTempPath(), System.Guid.NewGuid().ToString());
+            var tempFile = Path.Combine(tempDir, "services.json");
+
+            var configValues = new Dictionary<string, string?>
+            {
+                {"Services:0:DisplayName", "Svc1"},
+                {"Services:0:ServiceType", typeValue},
+                {"Services:0:IsActive", "true"},
+                {"Services:0:Order", "0"},
+                {"Heartbeat:Message", "HB"},
+                {"Heartbeat:IntervalSeconds", "1"}
+            };
+            IConfiguration config = new ConfigurationBuilder()
+                .AddInMemoryCollection(configValues)
+                .Build();
+
+            using var manager = new ServiceManager(NullLogger<ServiceManager>.Instance, config, tempFile);
+            manager.Sync();
+            Assert.Contains("Svc1", manager.ActiveServices);
+            ConsoleTestLogger.LogPass();
+        }
     }
 }
