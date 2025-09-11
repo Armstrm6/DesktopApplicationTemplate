@@ -4,6 +4,7 @@ using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Views;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using DesktopApplicationTemplate.Models;
 
 namespace DesktopApplicationTemplate.UI.Factories
 {
@@ -13,7 +14,7 @@ namespace DesktopApplicationTemplate.UI.Factories
         private readonly MainView _mainView;
         private readonly MainViewModel _mainViewModel;
 
-        public string ServiceType => "MQTT";
+        public ServiceType ServiceType => ServiceType.Mqtt;
 
         public MqttServiceFactory(IServiceProvider services, MainView mainView, MainViewModel mainViewModel)
         {
@@ -31,7 +32,7 @@ namespace DesktopApplicationTemplate.UI.Factories
             var newService = new ServiceListModel
             {
                 DisplayName = $"MQTT - {name}",
-                ServiceType = "MQTT",
+                ServiceType = ServiceType.Mqtt,
                 IsActive = false
             };
 

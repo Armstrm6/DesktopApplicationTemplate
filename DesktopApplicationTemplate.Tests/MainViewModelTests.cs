@@ -27,19 +27,19 @@ namespace DesktopApplicationTemplate.Tests
             vm.Services.Add(new ServiceListModel
             {
                 DisplayName = "HTTP - HTTP1",
-                ServiceType = "HTTP",
+                ServiceType = ServiceType.Http,
                 IsActive = false,
                 Order = 0
             });
             vm.Services.Add(new ServiceListModel
             {
                 DisplayName = "HTTP - HTTP3",
-                ServiceType = "HTTP",
+                ServiceType = ServiceType.Http,
                 IsActive = false,
                 Order = 1
             });
 
-            string next = vm.GenerateServiceName("HTTP");
+            string next = vm.GenerateServiceName(ServiceType.Http);
 
             Assert.Equal("HTTP4", next);
             ConsoleTestLogger.LogPass();
@@ -60,7 +60,7 @@ namespace DesktopApplicationTemplate.Tests
             try
             {
                 var vm = new MainViewModel(csv, networkVm, network.Object, logger.Object, servicesPath);
-                var service = new ServiceListModel { DisplayName = "HTTP - HTTP1", ServiceType = "HTTP" };
+                var service = new ServiceListModel { DisplayName = "HTTP - HTTP1", ServiceType = ServiceType.Http };
                 vm.Services.Add(service);
                 vm.SelectedService = service;
 
@@ -87,7 +87,7 @@ namespace DesktopApplicationTemplate.Tests
             var network = new Mock<INetworkConfigurationService>();
             var networkVm = new NetworkConfigurationViewModel(network.Object);
             var vm = new MainViewModel(csv, networkVm, network.Object);
-            var svc = new ServiceListModel { DisplayName = "HTTP - HTTP1", ServiceType = "HTTP" };
+            var svc = new ServiceListModel { DisplayName = "HTTP - HTTP1", ServiceType = ServiceType.Http };
             svc.Logs.Add(new LogEntry { Message = "test" });
             vm.Services.Add(svc);
             vm.SelectedService = svc;
@@ -106,7 +106,7 @@ namespace DesktopApplicationTemplate.Tests
             var network = new Mock<INetworkConfigurationService>();
             var networkVm = new NetworkConfigurationViewModel(network.Object);
             var vm = new MainViewModel(csv, networkVm, network.Object);
-            var svc = new ServiceListModel { DisplayName = "HTTP - HTTP1", ServiceType = "HTTP" };
+            var svc = new ServiceListModel { DisplayName = "HTTP - HTTP1", ServiceType = ServiceType.Http };
             svc.Logs.Add(new LogEntry { Message = "first" });
             vm.Services.Add(svc);
             vm.SelectedService = svc;
@@ -156,7 +156,7 @@ namespace DesktopApplicationTemplate.Tests
             var network = new Mock<INetworkConfigurationService>();
             var networkVm = new NetworkConfigurationViewModel(network.Object);
             var vm = new MainViewModel(csv, networkVm, network.Object);
-            var svc = new ServiceListModel { DisplayName = "MQTT - Test", ServiceType = "MQTT" };
+            var svc = new ServiceListModel { DisplayName = "MQTT - Test", ServiceType = ServiceType.Mqtt };
             vm.Services.Add(svc);
 
             MqttEditConnectionViewModel? captured = null;
@@ -207,7 +207,7 @@ namespace DesktopApplicationTemplate.Tests
                     if (e.PropertyName == nameof(MainViewModel.ServicesCreated)) createdChanges++;
                     if (e.PropertyName == nameof(MainViewModel.CurrentActiveServices)) activeChanges++;
                 };
-                var svc = new ServiceListModel { DisplayName = "HTTP - HTTP1", ServiceType = "HTTP" };
+                var svc = new ServiceListModel { DisplayName = "HTTP - HTTP1", ServiceType = ServiceType.Http };
                 svc.ActiveChanged += vm.OnServiceActiveChanged;
                 vm.AddServiceForTest(svc);
 

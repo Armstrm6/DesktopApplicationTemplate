@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Core.Converters;
 using WpfBrush = System.Windows.Media.Brush;
 using WpfBrushes = System.Windows.Media.Brushes;
 
@@ -14,7 +15,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
     public class ServiceListModel : ViewModelBase
     {
         public string DisplayName { get; set; } = string.Empty;
-        public string ServiceType { get; set; } = string.Empty;
+        public ServiceType ServiceType { get; set; }
         [JsonIgnore] public Page? Page { get; set; }
         public int Order { get; set; }
 
@@ -147,7 +148,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         /// </summary>
         public CsvServiceOptions? CsvOptions { get; set; }
 
-        public static Func<string, string, ServiceListModel?>? ResolveService { get; set; }
+        public static Func<ServiceType, string, ServiceListModel?>? ResolveService { get; set; }
 
         private bool _isActive;
         public bool IsActive
@@ -207,17 +208,20 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             var m = Regex.Match(message, @"^([^.]+)\.([^.]+)\.(.+)$");
             if (m.Success && ResolveService != null)
             {
-                var type = m.Groups[1].Value;
+                var typeStr = m.Groups[1].Value;
                 var name = m.Groups[2].Value;
                 var msg = m.Groups[3].Value;
-                var target = ResolveService(type, name);
-                if (target != null && target != this)
+                if (ServiceTypeJsonConverter.TryParse(typeStr, out var type))
                 {
-                    if (!AssociatedServices.Contains(target.DisplayName))
-                        AssociatedServices.Add(target.DisplayName);
-                    if (!target.AssociatedServices.Contains(DisplayName))
-                        target.AssociatedServices.Add(DisplayName);
-                    target.AddLog(msg, color, level, false);
+                    var target = ResolveService(type, name);
+                    if (target != null && target != this)
+                    {
+                        if (!AssociatedServices.Contains(target.DisplayName))
+                            AssociatedServices.Add(target.DisplayName);
+                        if (!target.AssociatedServices.Contains(DisplayName))
+                            target.AssociatedServices.Add(DisplayName);
+                        target.AddLog(msg, color, level, false);
+                    }
                 }
             }
         }
@@ -226,14 +230,15 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         {
             (BackgroundColor, BorderColor) = ServiceType switch
             {
-                "TCP" => (WpfBrushes.LightBlue, WpfBrushes.DarkBlue),
-                "HTTP" => (WpfBrushes.LightGreen, WpfBrushes.DarkGreen),
-                "File Observer" => (WpfBrushes.LightSalmon, WpfBrushes.DarkSalmon),
-                "HID" => (WpfBrushes.LightYellow, WpfBrushes.Goldenrod),
-                "Heartbeat" => (WpfBrushes.LightPink, WpfBrushes.DeepPink),
-                "SCP" => (WpfBrushes.LightCyan, WpfBrushes.CadetBlue),
-                "MQTT" => (WpfBrushes.LightGoldenrodYellow, WpfBrushes.Goldenrod),
-                "FTP Server" or "FTP" => (WpfBrushes.LightSteelBlue, WpfBrushes.SteelBlue),
+                ServiceType.Tcp => (WpfBrushes.LightBlue, WpfBrushes.DarkBlue),
+                ServiceType.Http => (WpfBrushes.LightGreen, WpfBrushes.DarkGreen),
+                ServiceType.FileObserver => (WpfBrushes.LightSalmon, WpfBrushes.DarkSalmon),
+                ServiceType.Hid => (WpfBrushes.LightYellow, WpfBrushes.Goldenrod),
+                ServiceType.Heartbeat => (WpfBrushes.LightPink, WpfBrushes.DeepPink),
+                ServiceType.Scp => (WpfBrushes.LightCyan, WpfBrushes.CadetBlue),
+                ServiceType.Mqtt => (WpfBrushes.LightGoldenrodYellow, WpfBrushes.Goldenrod),
+                ServiceType.Ftp => (WpfBrushes.LightSteelBlue, WpfBrushes.SteelBlue),
+                ServiceType.Csv => (WpfBrushes.LightGray, WpfBrushes.Gray),
                 _ => (WpfBrushes.LightGray, WpfBrushes.Gray)
             };
             OnPropertyChanged(nameof(BackgroundColor));

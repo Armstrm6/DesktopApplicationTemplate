@@ -1,4 +1,3 @@
-using DesktopApplicationTemplate.Models;
 using System;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
@@ -70,7 +69,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             _networkService.ConfigurationChanged += (_, cfg) => ApplyNetworkConfiguration(cfg);
             ServiceListModel.ResolveService = (type, name) =>
                 Services.FirstOrDefault(s =>
-                    s.ServiceType.Equals(type, StringComparison.OrdinalIgnoreCase) &&
+                    s.ServiceType == type &&
                     s.DisplayName.Split(" - ").Last().Equals(name, StringComparison.OrdinalIgnoreCase));
             if (!string.IsNullOrWhiteSpace(servicesFilePath))
             {
@@ -116,12 +115,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             if (target == null)
                 return;
 
-            if (!ServiceTypeJsonConverter.TryParse(target.ServiceType, out _))
-            {
-                _logger?.Log($"Unrecognized service type '{target.ServiceType}'", LogLevel.Warning);
-                return;
-            }
-
             EditRequested?.Invoke(target);
         }
 
@@ -132,19 +125,20 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             _logger?.Log("AddService completed", LogLevel.Debug);
         }
 
-        internal string GenerateServiceName(string serviceType)
+        internal string GenerateServiceName(ServiceType serviceType)
         {
+            var typeName = ServiceTypeJsonConverter.ToLegacyString(serviceType);
             int index = 1;
             foreach (var svc in Services.Where(s => s.ServiceType == serviceType))
             {
                 var namePart = svc.DisplayName.Split(" - ").Last();
-                if (namePart.StartsWith(serviceType) &&
-                    int.TryParse(namePart.Substring(serviceType.Length), out int n) && n >= index)
+                if (namePart.StartsWith(typeName) &&
+                    int.TryParse(namePart.Substring(typeName.Length), out int n) && n >= index)
                 {
                     index = n + 1;
                 }
             }
-            return $"{serviceType}{index}";
+            return $"{typeName}{index}";
         }
 
         private async Task RemoveSelectedServiceAsync()
@@ -154,7 +148,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 _logger?.Log($"Removing service {SelectedService.DisplayName}", LogLevel.Debug);
                 var index = Services.IndexOf(SelectedService);
                 SelectedService.AddLog("Service removed", WpfBrushes.Red);
-                if (!SelectedService.ServiceType.Contains("CSV", StringComparison.OrdinalIgnoreCase))
+                if (SelectedService.ServiceType != ServiceType.Csv)
                     _csvService.RemoveColumnsForService(SelectedService.DisplayName);
                 SelectedService.LogAdded -= OnServiceLogAdded;
                 SelectedService.ActiveChanged -= OnServiceActiveChanged;
@@ -210,7 +204,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 var svc = new ServiceListModel
                 {
                     DisplayName = info.DisplayName,
-                    ServiceType = ServiceTypeJsonConverter.ToLegacyString(info.ServiceType),
+                    ServiceType = info.ServiceType,
                     IsActive = info.IsActive,
                     Order = info.Order,
                     TcpOptions = info.TcpOptions,
@@ -225,7 +219,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 svc.SetColorsByType();
                 svc.LogAdded += OnServiceLogAdded;
                 svc.ActiveChanged += OnServiceActiveChanged;
-                if (!svc.ServiceType.Contains("CSV", StringComparison.OrdinalIgnoreCase))
+                if (svc.ServiceType != ServiceType.Csv)
                     _csvService.EnsureColumnsForService(svc.DisplayName);
                 Services.Add(svc);
                 _logger?.Log($"Loaded service {svc.DisplayName}", LogLevel.Debug);
@@ -245,7 +239,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     !svc.DisplayName.Contains(Filters.NameFilter, StringComparison.OrdinalIgnoreCase))
                     return false;
 
-                if (Filters.TypeFilter != "All" && svc.ServiceType != Filters.TypeFilter)
+                if (Filters.TypeFilter != "All" &&
+                    ServiceTypeJsonConverter.TryParse(Filters.TypeFilter, out var fType) &&
+                    svc.ServiceType != fType)
                     return false;
 
                 if (Filters.StatusFilter == "Active" && !svc.IsActive)
@@ -261,7 +257,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public void OnServiceLogAdded(ServiceListModel svc, LogEntry entry)
         {
             AllLogs.Insert(0, entry);
-            if (svc.ServiceType != "CSV Creator" && Services.Any(s => s.ServiceType == "CSV Creator"))
+            if (svc.ServiceType != ServiceType.Csv && Services.Any(s => s.ServiceType == ServiceType.Csv))
             {
                 try
                 {

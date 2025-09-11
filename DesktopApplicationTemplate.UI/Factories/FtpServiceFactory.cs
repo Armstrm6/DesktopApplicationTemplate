@@ -2,6 +2,7 @@ using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using DesktopApplicationTemplate.Models;
 
 namespace DesktopApplicationTemplate.UI.Factories
 {
@@ -10,7 +11,7 @@ namespace DesktopApplicationTemplate.UI.Factories
         private readonly IServiceProvider _services;
         private readonly MainView _mainView;
 
-        public string ServiceType => "FTP Server";
+        public ServiceType ServiceType => ServiceType.Ftp;
 
         public FtpServiceFactory(IServiceProvider services, MainView mainView)
         {
@@ -27,7 +28,7 @@ namespace DesktopApplicationTemplate.UI.Factories
             var svc = new ServiceListModel
             {
                 DisplayName = $"FTP Server - {name}",
-                ServiceType = "FTP Server",
+                ServiceType = ServiceType.Ftp,
                 IsActive = false,
                 FtpOptions = options
             };

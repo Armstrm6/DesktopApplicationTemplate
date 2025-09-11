@@ -27,7 +27,7 @@ namespace DesktopApplicationTemplate.Persistence
                 CsvServiceOptions? csv = null;
                 FtpServerOptions? ftp = null;
                 HttpServiceOptions? http = null;
-                if (s.ServiceType == "TCP" && s.TcpOptions != null)
+                if (s.ServiceType == ServiceType.Tcp && s.TcpOptions != null)
                 {
                     tcp = new TcpServiceOptions
                     {
@@ -43,7 +43,7 @@ namespace DesktopApplicationTemplate.Persistence
                     };
                 }
 
-                if ((s.ServiceType == "FTP Server" || s.ServiceType == "FTP") && s.FtpOptions != null)
+                if (s.ServiceType == ServiceType.Ftp && s.FtpOptions != null)
                 {
                     ftp = new FtpServerOptions
                     {
@@ -55,7 +55,7 @@ namespace DesktopApplicationTemplate.Persistence
                     };
                 }
 
-                if (s.ServiceType == "HTTP" && s.HttpOptions != null)
+                if (s.ServiceType == ServiceType.Http && s.HttpOptions != null)
                 {
                     http = new HttpServiceOptions
                     {
@@ -65,7 +65,7 @@ namespace DesktopApplicationTemplate.Persistence
                         ClientCertificatePath = s.HttpOptions.ClientCertificatePath
                     };
                 }
-                if (s.ServiceType == "CSV Creator" && s.CsvOptions != null)
+                if (s.ServiceType == ServiceType.Csv && s.CsvOptions != null)
                 {
                     csv = new CsvServiceOptions
                     {
@@ -75,12 +75,10 @@ namespace DesktopApplicationTemplate.Persistence
                     };
                 }
 
-                ServiceTypeJsonConverter.TryParse(s.ServiceType, out var type);
-
                 data.Add(new ServiceInfo
                 {
                     DisplayName = s.DisplayName,
-                    ServiceType = type,
+                    ServiceType = s.ServiceType,
                     IsActive = s.IsActive,
                     Created = DateTime.Now,
                     Order = index++,
