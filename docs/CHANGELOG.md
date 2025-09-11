@@ -84,6 +84,7 @@
 - Restricted `TcpServiceMessagesViewModel.OutputMessage` setter to internal to prevent external modification.
 - TcpServiceMessagesViewModel runs the initial script asynchronously to avoid blocking.
 - App domain unhandled exception handler is asynchronous and awaits dispatcher shutdown.
+- Main window resolves edit workflows through a DI-injected handler dictionary instead of a large if/else chain.
 
 #### Fixed
 - TCP and SCP edit workflows now load existing options via `Load` methods, enabling DI-friendly construction.

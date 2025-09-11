@@ -148,6 +148,7 @@ Latest Attempt: After removing remaining assembly qualifiers from service view n
 Latest Attempt: After adding a parameterless constructor to HttpServiceView, the dotnet CLI remains unavailable; rebuild and tests deferred to CI.
 Latest Attempt: Installed the .NET SDK 8.0.404 and removed assembly qualifiers from HTTP and MQTT views; `dotnet build DesktopApplicationTemplate.sln` succeeded, but `dotnet test --settings tests.runsettings --no-build` aborted because the Microsoft.WindowsDesktop.App 8.0.0 runtime is missing.
 Latest Attempt: After updating ServiceLogView build metadata and reverting HttpServiceView to the project-local shared namespace, `dotnet build DesktopApplicationTemplate.sln` succeeded but `dotnet test --settings tests.runsettings` aborted because the Microsoft.WindowsDesktop.App runtime is missing.
+Another Attempt: `dotnet` CLI still missing; restore, build, and test commands cannot run locally, so CI will handle verification.
 Latest Attempt: After removing TCP script controls and adding a test message property, the `dotnet` command is still missing; build and tests will run in CI.
 Latest Attempt: After adding the script editor window, the `dotnet` command remains unavailable; build and tests will run in CI.
 Newest Attempt: After updating TCP service persistence and tests, the `dotnet` command is still missing; restore, build, and test commands could not run locally so CI will verify.
