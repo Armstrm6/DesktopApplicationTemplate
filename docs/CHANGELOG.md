@@ -12,6 +12,7 @@
 - Unified creation and edit workflows under `ServiceEditorViewModelBase<TOptions>` exposing `SaveCommand` and customizable `SaveButtonText`.
 - Service manager tracks task start times and writes statuses to `activeservices.txt` for running services.
 - Service factories convert options into initialized services and pages with a unified `AddServiceAsync` workflow.
+- Factories added for HTTP, TCP, HID, SCP, CSV, File Observer, and Heartbeat services.
 - `ServiceType` enum clarifies supported service categories.
 - Migration routine converts legacy service type names to `ServiceType` and logs unmapped values.
 - `IServiceModule` interface enables service-specific DI registration and modules are discovered and registered automatically at startup.
