@@ -195,6 +195,13 @@ namespace DesktopApplicationTemplate.UI
             services.AddTransient<Navigation.INavigationHandler, Navigation.FtpNavigationHandler>();
             services.AddTransient<Factories.IServiceFactory, Factories.MqttServiceFactory>();
             services.AddTransient<Factories.IServiceFactory, Factories.FtpServiceFactory>();
+            services.AddTransient<Factories.IServiceFactory, Factories.HttpServiceFactory>();
+            services.AddTransient<Factories.IServiceFactory, Factories.TcpServiceFactory>();
+            services.AddTransient<Factories.IServiceFactory, Factories.HidServiceFactory>();
+            services.AddTransient<Factories.IServiceFactory, Factories.ScpServiceFactory>();
+            services.AddTransient<Factories.IServiceFactory, Factories.CsvServiceFactory>();
+            services.AddTransient<Factories.IServiceFactory, Factories.FileObserverServiceFactory>();
+            services.AddTransient<Factories.IServiceFactory, Factories.HeartbeatServiceFactory>();
 
 
             // Load strongly typed settings
