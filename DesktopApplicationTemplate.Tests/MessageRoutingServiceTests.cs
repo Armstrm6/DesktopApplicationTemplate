@@ -1,3 +1,4 @@
+using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Services;
 using Xunit;
 
@@ -10,10 +11,10 @@ namespace DesktopApplicationTemplate.Tests
         {
             var routing = new MessageRoutingService();
 
-            routing.UpdateMessage("svc", "first");
-            routing.UpdateMessage("svc", "second");
+            routing.UpdateMessage(ServiceType.Tcp, "svc", "first");
+            routing.UpdateMessage(ServiceType.Tcp, "svc", "second");
 
-            var found = routing.TryGetMessage("svc", out var message);
+            var found = routing.TryGetMessage(ServiceType.Tcp, "svc", out var message);
 
             Assert.True(found);
             Assert.Equal("second", message);
@@ -23,9 +24,9 @@ namespace DesktopApplicationTemplate.Tests
         public void ResolveTokens_ReplacesWithLatestMessage()
         {
             var routing = new MessageRoutingService();
-            routing.UpdateMessage("svc", "hello");
+            routing.UpdateMessage(ServiceType.Tcp, "svc", "hello");
 
-            var result = routing.ResolveTokens("{svc.Message}");
+            var result = routing.ResolveTokens("{Tcp.svc.Message}");
 
             Assert.Equal("hello", result);
         }
@@ -34,7 +35,7 @@ namespace DesktopApplicationTemplate.Tests
         public void ResolveTokens_ReturnsEmpty_WhenUnknown()
         {
             var routing = new MessageRoutingService();
-            var result = routing.ResolveTokens("{missing.Message}");
+            var result = routing.ResolveTokens("{Tcp.missing.Message}");
             Assert.Equal(string.Empty, result);
         }
     }

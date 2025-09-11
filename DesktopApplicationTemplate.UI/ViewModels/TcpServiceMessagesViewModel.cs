@@ -93,6 +93,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private readonly IMessageRoutingService _routing;
         private TcpServiceOptions _options = new();
 
+        /// <summary>Type of the service associated with these messages.</summary>
+        public ServiceType ServiceType { get; private set; } = ServiceType.Tcp;
+
         private string _serviceName = string.Empty;
 
         /// <summary>Name of the service associated with these messages.</summary>
@@ -191,6 +194,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         {
             if (service == null) throw new ArgumentNullException(nameof(service));
             _options = service.TcpOptions ?? new TcpServiceOptions();
+            ServiceType = service.ServiceType;
             ServiceName = service.DisplayName.Split(" - ").Last();
             Script = string.IsNullOrWhiteSpace(_options.Script)
                 ? ScriptEditorViewModel.DefaultScript
@@ -252,7 +256,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         {
             _options.LastTestMessage = TestMessage;
             _options.Script = Script;
-            _routing.UpdateMessage(ServiceName, TestMessage);
+            _routing.UpdateMessage(ServiceType, ServiceName, TestMessage);
             try
             {
                 OutputMessage = await RunScriptAsync().ConfigureAwait(false);
@@ -285,7 +289,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 return;
 
             if (string.IsNullOrWhiteSpace(_options.LastTestMessage) &&
-                _routing.TryGetMessage(ServiceName, out var routed))
+                _routing.TryGetMessage(ServiceType, ServiceName, out var routed))
             {
                 TestMessage = routed ?? string.Empty;
             }
@@ -295,7 +299,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     ? $"{ServiceName}-PEAK-123456789"
                     : _options.LastTestMessage;
             }
-            _routing.UpdateMessage(ServiceName, TestMessage);
+            _routing.UpdateMessage(ServiceType, ServiceName, TestMessage);
         }
 
         private async Task OpenScriptEditorAsync()
@@ -313,7 +317,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 OutputMessage = _options.OutputMessage = output;
                 TestMessage = svm.TestMessage;
                 _options.LastTestMessage = svm.TestMessage;
-                _routing.UpdateMessage(ServiceName, svm.TestMessage);
+                _routing.UpdateMessage(ServiceType, ServiceName, svm.TestMessage);
             }
 
             void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)

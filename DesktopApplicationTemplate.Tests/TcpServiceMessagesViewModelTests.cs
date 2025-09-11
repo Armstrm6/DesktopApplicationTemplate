@@ -104,7 +104,7 @@ public class TcpServiceMessagesViewModelTests
         vm.SetService(service);
 
         vm.TestMessage.Should().Be("svc-PEAK-123456789");
-        routing.TryGetMessage("svc", out var message).Should().BeTrue();
+        routing.TryGetMessage(ServiceType.Tcp, "svc", out var message).Should().BeTrue();
         message.Should().Be("svc-PEAK-123456789");
     }
 
@@ -116,7 +116,7 @@ public class TcpServiceMessagesViewModelTests
             TcpOptions = new TcpServiceOptions()
         };
         var routing = new MessageRoutingService();
-        routing.UpdateMessage("svc", "last");
+        routing.UpdateMessage(ServiceType.Tcp, "svc", "last");
         var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), routing);
 
         vm.SetService(service);
@@ -321,7 +321,7 @@ public class TcpServiceMessagesViewModelTests
         vm.OutputMessage.Should().Be("test");
         options.OutputMessage.Should().Be("test");
         options.LastTestMessage.Should().Be("test");
-        routing.TryGetMessage("svc", out var message).Should().BeTrue();
+        routing.TryGetMessage(ServiceType.Tcp, "svc", out var message).Should().BeTrue();
         message.Should().Be("test");
         editor.OutputGenerated -= OnOutput;
     }

@@ -202,7 +202,7 @@
 #### Changed
 - `MqttService` refactored with options-based constructor, clean reconnect logic, and consolidated publish methods.
 - `MqttServiceViewModel` uses `MqttServiceOptions` for settings and delegates token resolution to `MessageRoutingService`.
-- `MessageRoutingService` tracks latest messages per service and resolves `{ServiceName.Message}` tokens before publishing.
+ - `MessageRoutingService` tracks latest messages per service and resolves `{ServiceType.ServiceName.Message}` tokens before publishing.
 - `MqttTagSubscriptionsViewModel` consolidated to a single subscription collection with unified properties.
 - `MqttTagSubscriptionsViewModel` passes updated options to `MqttService.ConnectAsync` and logs connection success or failure.
 - Topics now appear in the subscription list before broker subscribe and log errors when the call fails; the Add button disables when no topic is provided.
@@ -274,6 +274,7 @@
 - Moved `ILoggingService`, `LogLevel`, and `LogEntry` into the core library so tests no longer depend on the Windows project.
 - `LogEntry` now stores colors as hex strings instead of `System.Windows.Media.Brush`.
 - Log displays now use a common style and show newest entries first.
+- Message routing tokens now use `ServiceType.ServiceName` and routing APIs accept a `ServiceType` parameter.
 
 ### Documentation & CI
 #### Added
