@@ -83,6 +83,15 @@ namespace DesktopApplicationTemplate.Service
             public int Order { get; set; }
         }
 
+        private sealed class ServiceInfoLegacy
+        {
+            public string DisplayName { get; set; } = string.Empty;
+            public string ServiceType { get; set; } = string.Empty;
+            public bool IsActive { get; set; }
+            public DateTime Created { get; set; }
+            public int Order { get; set; }
+        }
+
         private List<ServiceInfo> Load()
         {
             if (!File.Exists(_filePath))
@@ -102,13 +111,37 @@ namespace DesktopApplicationTemplate.Service
                             Order = cfg.Order
                         });
                     }
+                    else
+                    {
+                        _logger.LogWarning("Unmapped service type '{Type}' for '{Name}'", cfg.ServiceType, cfg.DisplayName);
+                    }
                 }
                 return results;
             }
             try
             {
                 var json = File.ReadAllText(_filePath);
-                return JsonSerializer.Deserialize<List<ServiceInfo>>(json) ?? new List<ServiceInfo>();
+                var legacy = JsonSerializer.Deserialize<List<ServiceInfoLegacy>>(json) ?? new List<ServiceInfoLegacy>();
+                var results = new List<ServiceInfo>();
+                foreach (var info in legacy)
+                {
+                    if (ServiceTypeJsonConverter.TryParse(info.ServiceType, out var type))
+                    {
+                        results.Add(new ServiceInfo
+                        {
+                            DisplayName = info.DisplayName,
+                            ServiceType = type,
+                            IsActive = info.IsActive,
+                            Created = info.Created,
+                            Order = info.Order
+                        });
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Unmapped service type '{Type}' for '{Name}'", info.ServiceType, info.DisplayName);
+                    }
+                }
+                return results;
             }
             catch
             {
