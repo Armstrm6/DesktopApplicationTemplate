@@ -145,7 +145,33 @@ namespace DesktopApplicationTemplate.Persistence
             }
             try
             {
-                var result = JsonSerializer.Deserialize<List<ServiceInfo>>(json) ?? new List<ServiceInfo>();
+                var legacy = JsonSerializer.Deserialize<List<LegacyServiceInfo>>(json) ?? new List<LegacyServiceInfo>();
+                var result = new List<ServiceInfo>();
+                foreach (var info in legacy)
+                {
+                    if (ServiceTypeJsonConverter.TryParse(info.ServiceType, out var type))
+                    {
+                        result.Add(new ServiceInfo
+                        {
+                            DisplayName = info.DisplayName,
+                            ServiceType = type,
+                            IsActive = info.IsActive,
+                            Created = info.Created,
+                            Order = info.Order,
+                            AssociatedServices = info.AssociatedServices ?? new List<string>(),
+                            TcpOptions = info.TcpOptions,
+                            FtpOptions = info.FtpOptions,
+                            HttpOptions = info.HttpOptions,
+                            CsvOptions = info.CsvOptions,
+                            TotalExecutionTimeMs = info.TotalExecutionTimeMs,
+                            ExecutionCount = info.ExecutionCount
+                        });
+                    }
+                    else
+                    {
+                        logger?.Log($"Unmapped service type '{info.ServiceType}' for '{info.DisplayName}'", LogLevel.Warning);
+                    }
+                }
 
                 foreach (var info in result)
                 {
@@ -202,6 +228,22 @@ namespace DesktopApplicationTemplate.Persistence
     {
         public string DisplayName { get; set; } = string.Empty;
         public ServiceType ServiceType { get; set; }
+        public bool IsActive { get; set; }
+        public DateTime Created { get; set; }
+        public int Order { get; set; }
+        public List<string> AssociatedServices { get; set; } = new();
+        public TcpServiceOptions? TcpOptions { get; set; }
+        public FtpServerOptions? FtpOptions { get; set; }
+        public HttpServiceOptions? HttpOptions { get; set; }
+        public CsvServiceOptions? CsvOptions { get; set; }
+        public double TotalExecutionTimeMs { get; set; }
+        public int ExecutionCount { get; set; }
+    }
+
+    private class LegacyServiceInfo
+    {
+        public string DisplayName { get; set; } = string.Empty;
+        public string ServiceType { get; set; } = string.Empty;
         public bool IsActive { get; set; }
         public DateTime Created { get; set; }
         public int Order { get; set; }

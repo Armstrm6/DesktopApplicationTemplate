@@ -3,6 +3,7 @@ using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI;
 using DesktopApplicationTemplate.Models;
+using DesktopApplicationTemplate.Core.Services;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -313,6 +314,60 @@ namespace DesktopApplicationTemplate.Tests
             }
 
             ConsoleTestLogger.LogPass();
+        }
+
+        [Fact]
+        public void Load_ParsesLegacyServiceTypeNames()
+        {
+            var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(tempDir);
+            string oldPath = ServicePersistence.FilePath;
+            ServicePersistence.FilePath = Path.Combine(tempDir, "services.json");
+            try
+            {
+                File.WriteAllText(ServicePersistence.FilePath, "[{'DisplayName':'Svc','ServiceType':'FTP Server'}]".Replace(''','"'));
+                var logger = new ListLogger();
+                var loaded = ServicePersistence.Load(logger);
+                var info = Assert.Single(loaded);
+                Assert.Equal(ServiceType.Ftp, info.ServiceType);
+            }
+            finally
+            {
+                ServicePersistence.FilePath = oldPath;
+                Directory.Delete(tempDir, true);
+            }
+
+            ConsoleTestLogger.LogPass();
+        }
+
+        [Fact]
+        public void Load_LogsUnmappedServiceTypes()
+        {
+            var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(tempDir);
+            string oldPath = ServicePersistence.FilePath;
+            ServicePersistence.FilePath = Path.Combine(tempDir, "services.json");
+            try
+            {
+                File.WriteAllText(ServicePersistence.FilePath, "[{'DisplayName':'Svc','ServiceType':'Unknown'}]".Replace(''','"'));
+                var logger = new ListLogger();
+                var loaded = ServicePersistence.Load(logger);
+                Assert.Empty(loaded);
+                Assert.Contains(logger.Messages, m => m.Contains("Unknown"));
+            }
+            finally
+            {
+                ServicePersistence.FilePath = oldPath;
+                Directory.Delete(tempDir, true);
+            }
+
+            ConsoleTestLogger.LogPass();
+        }
+
+        private sealed class ListLogger : ILoggingService
+        {
+            public List<string> Messages { get; } = new();
+            public void Log(string message, LogLevel level = LogLevel.Information) => Messages.Add(message);
         }
     }
 }
