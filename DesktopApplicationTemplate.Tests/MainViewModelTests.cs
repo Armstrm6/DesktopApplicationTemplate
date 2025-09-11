@@ -41,8 +41,9 @@ namespace DesktopApplicationTemplate.Tests
             ConsoleTestLogger.LogPass();
         }
 
-        [Fact]
-        public async Task RemoveServiceCommand_LogsLifecycle()
+        [Theory]
+        [InlineData(ServiceType.Tcp, "TCP1")]
+        public async Task RemoveServiceCommand_LogsLifecycle(ServiceType type, string name)
         {
             var logger = new Mock<ILoggingService>();
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
@@ -56,7 +57,7 @@ namespace DesktopApplicationTemplate.Tests
             try
             {
                 var vm = new MainViewModel(csv, networkVm, network.Object, logger.Object, servicesPath);
-                var service = TestHelpers.CreateService(ServiceType.Http, "HTTP1");
+                var service = TestHelpers.CreateService(type, name);
                 vm.Services.Add(service);
                 vm.SelectedService = service;
 
@@ -75,15 +76,16 @@ namespace DesktopApplicationTemplate.Tests
             ConsoleTestLogger.LogPass();
         }
 
-        [Fact]
-        public void ClearLogs_RemovesEntries()
+        [Theory]
+        [InlineData(ServiceType.Tcp, "TCP1")]
+        public void ClearLogs_RemovesEntries(ServiceType type, string name)
         {
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
             var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
             var network = new Mock<INetworkConfigurationService>();
             var networkVm = new NetworkConfigurationViewModel(network.Object);
             var vm = new MainViewModel(csv, networkVm, network.Object);
-            var svc = TestHelpers.CreateService(ServiceType.Http, "HTTP1");
+            var svc = TestHelpers.CreateService(type, name);
             svc.Logs.Add(new LogEntry { Message = "test" });
             vm.Services.Add(svc);
             vm.SelectedService = svc;
@@ -94,15 +96,16 @@ namespace DesktopApplicationTemplate.Tests
             ConsoleTestLogger.LogPass();
         }
 
-        [Fact]
-        public void ExportDisplayedLogs_WritesFile()
+        [Theory]
+        [InlineData(ServiceType.Tcp, "TCP1")]
+        public void ExportDisplayedLogs_WritesFile(ServiceType type, string name)
         {
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
             var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
             var network = new Mock<INetworkConfigurationService>();
             var networkVm = new NetworkConfigurationViewModel(network.Object);
             var vm = new MainViewModel(csv, networkVm, network.Object);
-            var svc = TestHelpers.CreateService(ServiceType.Http, "HTTP1");
+            var svc = TestHelpers.CreateService(type, name);
             svc.Logs.Add(new LogEntry { Message = "first" });
             vm.Services.Add(svc);
             vm.SelectedService = svc;
@@ -116,8 +119,9 @@ namespace DesktopApplicationTemplate.Tests
             ConsoleTestLogger.LogPass();
         }
 
-        [Fact]
-        public void RefreshLogs_RaisesPropertyChanged()
+        [Theory]
+        [InlineData(ServiceType.Tcp, "TCP1")]
+        public void RefreshLogs_RaisesPropertyChanged(ServiceType type, string name)
         {
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
             var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
@@ -126,6 +130,9 @@ namespace DesktopApplicationTemplate.Tests
             var vm = new MainViewModel(csv, networkVm, network.Object);
             bool raised = false;
             vm.PropertyChanged += (s, e) => { if (e.PropertyName == "DisplayLogs") raised = true; };
+            var svc = TestHelpers.CreateService(type, name);
+            vm.Services.Add(svc);
+            vm.SelectedService = svc;
 
             vm.RefreshLogs();
 
@@ -182,8 +189,9 @@ namespace DesktopApplicationTemplate.Tests
             }
         }
 
-        [Fact]
-        public async Task ServiceCounts_Update_OnAddRemoveActivation()
+        [Theory]
+        [InlineData(ServiceType.Tcp, "TCP1")]
+        public async Task ServiceCounts_Update_OnAddRemoveActivation(ServiceType type, string name)
         {
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
             var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
@@ -203,7 +211,7 @@ namespace DesktopApplicationTemplate.Tests
                     if (e.PropertyName == nameof(MainViewModel.ServicesCreated)) createdChanges++;
                     if (e.PropertyName == nameof(MainViewModel.CurrentActiveServices)) activeChanges++;
                 };
-                var svc = TestHelpers.CreateService(ServiceType.Http, "HTTP1");
+                var svc = TestHelpers.CreateService(type, name);
                 svc.ActiveChanged += vm.OnServiceActiveChanged;
                 vm.AddServiceForTest(svc);
 

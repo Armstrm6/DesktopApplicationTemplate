@@ -79,8 +79,9 @@ namespace DesktopApplicationTemplate.Tests
             ConsoleTestLogger.LogPass();
         }
 
-        [Fact]
-        public void SaveAndLoad_PreservesTcpOptions()
+        [Theory]
+        [InlineData(ServiceType.Tcp, "TCP1")]
+        public void SaveAndLoad_PreservesTcpOptions(ServiceType type, string name)
         {
             var host = Host.CreateDefaultBuilder()
                 .ConfigureServices(s => s.Configure<TcpServiceOptions>(_ => { }))
@@ -100,7 +101,7 @@ namespace DesktopApplicationTemplate.Tests
 
                 var services = new List<ServiceListModel>
                 {
-                    TestHelpers.CreateService(ServiceType.Tcp, "One")
+                    TestHelpers.CreateService(type, name)
                     {
                         IsActive=false,
                         Order=0,

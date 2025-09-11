@@ -33,8 +33,9 @@ namespace DesktopApplicationTemplate.Tests
             ConsoleTestLogger.LogPass();
         }
 
-        [Fact]
-        public void GenerateServiceName_SkipsExistingNames()
+        [Theory]
+        [InlineData(ServiceType.Tcp, "TCP1")]
+        public void GenerateServiceName_SkipsExistingNames(ServiceType type, string baseName)
         {
             var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             Directory.CreateDirectory(tempDir);
@@ -44,18 +45,21 @@ namespace DesktopApplicationTemplate.Tests
             var netVm = new NetworkConfigurationViewModel(net);
             var main = new MainViewModel(csv, netVm, net, servicesFilePath: Path.Combine(tempDir, "services.json"));
 
-            main.Services.Add(TestHelpers.CreateService(ServiceType.Tcp, "TCP1"));
-            main.Services.Add(TestHelpers.CreateService(ServiceType.Tcp, "TCP2"));
+            main.Services.Add(TestHelpers.CreateService(type, baseName));
+            var secondName = baseName[..^1] + "2";
+            main.Services.Add(TestHelpers.CreateService(type, secondName));
 
-            var name = main.GenerateServiceName(ServiceType.Tcp);
-            Assert.Equal("TCP3", name);
+            var name = main.GenerateServiceName(type);
+            var expected = baseName[..^1] + "3";
+            Assert.Equal(expected, name);
 
             Directory.Delete(tempDir, true);
             ConsoleTestLogger.LogPass();
         }
 
-        [Fact]
-        public void RenameService_AppendsNumericSuffix_WhenNameExists()
+        [Theory]
+        [InlineData(ServiceType.Tcp, "TCP1")]
+        public void RenameService_AppendsNumericSuffix_WhenNameExists(ServiceType type, string baseName)
         {
             var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             Directory.CreateDirectory(tempDir);
@@ -65,19 +69,20 @@ namespace DesktopApplicationTemplate.Tests
             var netVm = new NetworkConfigurationViewModel(net);
             var main = new MainViewModel(csv, netVm, net, servicesFilePath: Path.Combine(tempDir, "services.json"));
 
-            var svc1 = TestHelpers.CreateService(ServiceType.Tcp, "TCP1");
-            var svc2 = TestHelpers.CreateService(ServiceType.Tcp, "TCP2");
+            var svc1 = TestHelpers.CreateService(type, baseName);
+            var svc2 = TestHelpers.CreateService(type, baseName[..^1] + "2");
             main.Services.Add(svc1);
             main.Services.Add(svc2);
 
-            var desired = "TCP1";
+            var desired = baseName;
             if (main.Services.Any(s => s != svc2 && s.DisplayName.Split(" - ").Last().Equals(desired, StringComparison.OrdinalIgnoreCase)))
             {
                 desired = main.GenerateServiceName(svc2.ServiceType);
             }
             svc2.DisplayName = $"{ServiceTypeJsonConverter.ToLegacyString(svc2.ServiceType)} - {desired}";
 
-            Assert.Equal("TCP - TCP3", svc2.DisplayName);
+            var expected = $"{ServiceTypeJsonConverter.ToLegacyString(type)} - {baseName[..^1] + "3"}";
+            Assert.Equal(expected, svc2.DisplayName);
 
             Directory.Delete(tempDir, true);
             ConsoleTestLogger.LogPass();
