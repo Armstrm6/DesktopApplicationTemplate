@@ -287,6 +287,7 @@
 - Comparison tests ensure composed sample service matches original implementation results and log formatting.
 - Collaboration tips note that WPF projects require Windows or the WindowsDesktop runtime and fail with `InitializeComponent` and `NETSDK1100` errors if missing.
 - Guide on creating custom services and registering dependencies via `IServiceModule`.
+- README now explains `ServiceType`, dictionary-based edit handlers, and dynamic DI modules with a sample for adding a new service.
 
 #### Changed
 - Consolidated GitHub Actions into a single `CI` workflow with collaboration instructions in `AGENTS.md`.
