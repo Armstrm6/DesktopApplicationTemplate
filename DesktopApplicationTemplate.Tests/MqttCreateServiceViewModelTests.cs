@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.Service.Services;
+using DesktopApplicationTemplate.Services.Common;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using MQTTnet.Protocol;

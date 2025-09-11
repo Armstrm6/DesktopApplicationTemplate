@@ -2,7 +2,7 @@ using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
-using DesktopApplicationTemplate.Service.Services;
+using DesktopApplicationTemplate.Services.Common;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -18,7 +18,7 @@ public class DiContainerTests
         services.AddSingleton<ILoggingService, LoggingService>();
         services.AddSingleton<IMessageRoutingService, MessageRoutingService>();
         services.AddSingleton<SaveConfirmationHelper>();
-        services.AddSingleton<IServiceRule, ServiceRule>();
+        services.AddCommonServices();
         services.AddSingleton<MqttService>();
         services.AddSingleton<MqttTagSubscriptionsViewModel>();
         services.AddSingleton<ServiceMessageTableViewModel>();

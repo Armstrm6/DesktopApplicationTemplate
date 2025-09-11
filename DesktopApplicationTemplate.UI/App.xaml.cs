@@ -22,6 +22,7 @@ using System.Windows.Threading;
 using System.Collections.Generic;
 using DesktopApplicationTemplate.Models;
 using System.Threading.Tasks;
+using DesktopApplicationTemplate.Services.Common;
 
 
 namespace DesktopApplicationTemplate.UI
@@ -86,10 +87,8 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<ILoggingService, LoggingService>();
             services.AddSingleton<IMessageRoutingService, MessageRoutingService>();
             services.AddSingleton<IFileDialogService, FileDialogService>();
-            services.AddSingleton<IFileSearchService, DesktopApplicationTemplate.Service.Services.FileSearchService>();
+            services.AddCommonServices();
             services.AddSingleton<SaveConfirmationHelper>();
-            services.AddSingleton<IServiceRule, DesktopApplicationTemplate.Service.Services.ServiceRule>();
-            services.AddSingleton(typeof(IServiceScreen<>), typeof(DesktopApplicationTemplate.Service.Services.ServiceScreen<>));
             services.AddSingleton<CloseConfirmationHelper>();
             services.AddSingleton<MainViewModel>();
             services.AddSingleton<ServiceMessageTableViewModel>();

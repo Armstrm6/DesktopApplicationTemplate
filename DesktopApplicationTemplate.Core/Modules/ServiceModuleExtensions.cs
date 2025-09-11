@@ -28,10 +28,10 @@ public static class ServiceModuleExtensions
         var modules = assemblies
             .SelectMany(a => a.GetTypes())
             .Where(t => moduleType.IsAssignableFrom(t) && !t.IsAbstract && !t.IsInterface)
-            .Select(t => Activator.CreateInstance(t) as IServiceModule)
-            .Where(m => m is not null);
+            .Select(t => Activator.CreateInstance(t))
+            .OfType<IServiceModule>();
 
-        foreach (var module in modules!)
+        foreach (var module in modules)
         {
             module.RegisterServices(services);
         }

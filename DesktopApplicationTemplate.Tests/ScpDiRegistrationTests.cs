@@ -1,5 +1,5 @@
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.Service.Services;
+using DesktopApplicationTemplate.Services.Common;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
@@ -19,7 +19,7 @@ public class ScpDiRegistrationTests
         services.AddSingleton<IRichTextLogger, NullRichTextLogger>();
         services.AddSingleton<ILoggingService, LoggingService>();
         // Register service rule for SCP validation.
-        services.AddSingleton<IServiceRule, ServiceRule>();
+        services.AddCommonServices();
         services.AddSingleton<SaveConfirmationHelper>();
         services.AddTransient<ScpCreateServiceViewModel>();
         services.AddTransient<ScpCreateServiceView>();

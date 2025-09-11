@@ -3,9 +3,10 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Linq;
 using System;
-using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Modules;
+using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Service.Services;
+using DesktopApplicationTemplate.Services.Common;
 using FubarDev.FtpServer;
 using FubarDev.FtpServer.FileSystem.DotNet;
 
@@ -35,9 +36,7 @@ namespace DesktopApplicationTemplate.Service
             {
                 services.AddServiceModules();
                 services.AddHostedService<Worker>(); // register the background service
-                services.AddSingleton<IServiceRule, ServiceRule>();
-                services.AddTransient(typeof(IServiceScreen<>), typeof(ServiceScreen<>));
-                services.AddSingleton<IFileSearchService, FileSearchService>();
+                services.AddCommonServices();
                 services.AddFtpServer(builder => builder
                     .UseDotNetFileSystem()
                     .EnableAnonymousAuthentication());
