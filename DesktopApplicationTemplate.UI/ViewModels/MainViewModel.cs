@@ -82,7 +82,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             Filters.PropertyChanged += (_, __) => ApplyFilters();
             LoadServices();
             ApplyFilters();
-            LogViewModel = new ServiceLogViewModel("Main", "Main", AllLogs);
+            LogViewModel = new ServiceLogViewModel(ServiceType.Mqtt, AllLogs);
             LogViewModel.PropertyChanged += (s, e) =>
             {
                 if (e.PropertyName == nameof(ServiceLogViewModel.DisplayLogs))

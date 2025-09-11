@@ -1,5 +1,7 @@
+using System;
 using System.Windows.Controls;
 using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.Models;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
@@ -16,7 +18,8 @@ namespace DesktopApplicationTemplate.UI.Views
 
         public void SetServiceContext(ServiceListModel service)
         {
-            LogView.DataContext = new ServiceLogViewModel(service.DisplayName, service.ServiceType, service.Logs);
+            Enum.TryParse<ServiceType>(service.ServiceType, true, out var type);
+            LogView.DataContext = new ServiceLogViewModel(type, service.Logs);
             if (DataContext is TcpServiceMessagesViewModel vm)
                 vm.SetService(service);
         }
