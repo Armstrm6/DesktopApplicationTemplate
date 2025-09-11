@@ -556,6 +556,7 @@ Current Attempt: After logging unrecognized service types in EditService, the `d
 Latest Attempt: After replacing TCP view model service type strings with enums, the `dotnet` CLI is still missing; build and tests deferred to CI.
 Latest Attempt: After converting several [Fact] tests to [Theory], `dotnet test --settings tests.runsettings` failed because the `dotnet` command is not found; relying on CI.
 Latest Attempt: After adding edit service handler tests, the `dotnet` CLI remains unavailable; restore, build, and test commands could not run locally, so CI will verify.
+Latest Attempt: `dotnet` command not found during logging helper update; unable to run restore, build, or tests and will rely on CI.
 Related Commits/PRs:
 [2025-10-01 09:00] Topic: EditorButtonBar namespace
 Context: Verified EditorButtonBar build action and updated consuming views to use an assembly-qualified namespace.
