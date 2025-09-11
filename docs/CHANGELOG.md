@@ -25,6 +25,7 @@
 - Replaced verbose `ServiceName` strings with `ServiceType` enum properties for log view models.
 - Service persistence now stores `ServiceType` as short codes and reads legacy string names.
 - Service creation and navigation now resolve services via `ServiceType` enum lookups instead of string-based switches.
+- `ServiceManager` loads default services from configuration using `ServiceType` short codes and accepts legacy names.
 
 #### Fixed
 - Event raising helpers in `ServiceEditorViewModelBase` invoked themselves recursively; now invoke events directly.

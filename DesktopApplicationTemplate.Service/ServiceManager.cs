@@ -75,10 +75,36 @@ namespace DesktopApplicationTemplate.Service
             }
         }
 
+        private sealed class ServiceInfoConfig
+        {
+            public string DisplayName { get; set; } = string.Empty;
+            public string ServiceType { get; set; } = string.Empty;
+            public bool IsActive { get; set; }
+            public int Order { get; set; }
+        }
+
         private List<ServiceInfo> Load()
         {
             if (!File.Exists(_filePath))
-                return new List<ServiceInfo>();
+            {
+                var configs = _config.GetSection("Services").Get<List<ServiceInfoConfig>>() ?? new List<ServiceInfoConfig>();
+                var results = new List<ServiceInfo>();
+                foreach (var cfg in configs)
+                {
+                    if (ServiceTypeJsonConverter.TryParse(cfg.ServiceType, out var type))
+                    {
+                        results.Add(new ServiceInfo
+                        {
+                            DisplayName = cfg.DisplayName,
+                            ServiceType = type,
+                            IsActive = cfg.IsActive,
+                            Created = DateTime.Now,
+                            Order = cfg.Order
+                        });
+                    }
+                }
+                return results;
+            }
             try
             {
                 var json = File.ReadAllText(_filePath);
