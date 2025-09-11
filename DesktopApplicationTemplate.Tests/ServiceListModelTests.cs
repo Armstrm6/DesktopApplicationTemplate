@@ -18,8 +18,8 @@ namespace DesktopApplicationTemplate.Tests
         [Fact]
         public void AddLog_ReferenceUpdatesAssociatedServices()
         {
-            var a = new ServiceListModel { DisplayName = "Heartbeat - A", ServiceType = ServiceType.Heartbeat };
-            var b = new ServiceListModel { DisplayName = "TCP - B", ServiceType = ServiceType.Tcp };
+            var a = TestHelpers.CreateService(ServiceType.Heartbeat, "A");
+            var b = TestHelpers.CreateService(ServiceType.Tcp, "B");
             var services = new List<ServiceListModel> { a, b };
             ServiceListModel.ResolveService = (type, name) =>
                 services.Find(s => s.ServiceType == type && s.DisplayName.Split(" - ").Last() == name);
@@ -44,8 +44,8 @@ namespace DesktopApplicationTemplate.Tests
             var netVm = new NetworkConfigurationViewModel(net);
             var main = new MainViewModel(csv, netVm, net, servicesFilePath: Path.Combine(tempDir, "services.json"));
 
-            main.Services.Add(new ServiceListModel { DisplayName = "TCP - TCP1", ServiceType = ServiceType.Tcp });
-            main.Services.Add(new ServiceListModel { DisplayName = "TCP - TCP2", ServiceType = ServiceType.Tcp });
+            main.Services.Add(TestHelpers.CreateService(ServiceType.Tcp, "TCP1"));
+            main.Services.Add(TestHelpers.CreateService(ServiceType.Tcp, "TCP2"));
 
             var name = main.GenerateServiceName(ServiceType.Tcp);
             Assert.Equal("TCP3", name);
@@ -65,8 +65,8 @@ namespace DesktopApplicationTemplate.Tests
             var netVm = new NetworkConfigurationViewModel(net);
             var main = new MainViewModel(csv, netVm, net, servicesFilePath: Path.Combine(tempDir, "services.json"));
 
-            var svc1 = new ServiceListModel { DisplayName = "TCP - TCP1", ServiceType = ServiceType.Tcp };
-            var svc2 = new ServiceListModel { DisplayName = "TCP - TCP2", ServiceType = ServiceType.Tcp };
+            var svc1 = TestHelpers.CreateService(ServiceType.Tcp, "TCP1");
+            var svc2 = TestHelpers.CreateService(ServiceType.Tcp, "TCP2");
             main.Services.Add(svc1);
             main.Services.Add(svc2);
 
