@@ -53,21 +53,21 @@ namespace DesktopApplicationTemplate.UI
 
         private void ConfigureServices(IConfiguration configuration, IServiceCollection services)
         {
-            services.AddKeyedSingleton<Action<ServiceListModel>>(ServiceType.Mqtt, sp => service => sp.GetRequiredService<MainView>().EditMqtt(service));
-            services.AddKeyedSingleton<Action<ServiceListModel>>(ServiceType.Heartbeat, sp => service => sp.GetRequiredService<MainView>().EditHeartbeat(service));
-            services.AddKeyedSingleton<Action<ServiceListModel>>(ServiceType.Hid, sp => service => sp.GetRequiredService<MainView>().EditHid(service));
-            services.AddKeyedSingleton<Action<ServiceListModel>>(ServiceType.Csv, sp => service => sp.GetRequiredService<MainView>().EditCsv(service));
-            services.AddKeyedSingleton<Action<ServiceListModel>>(ServiceType.FileObserver, sp => service => sp.GetRequiredService<MainView>().EditFileObserver(service));
-            services.AddKeyedSingleton<Action<ServiceListModel>>(ServiceType.Scp, sp => service => sp.GetRequiredService<MainView>().EditScp(service));
-            services.AddKeyedSingleton<Action<ServiceListModel>>(ServiceType.Tcp, sp => service => sp.GetRequiredService<MainView>().EditTcp(service));
-            services.AddKeyedSingleton<Action<ServiceListModel>>(ServiceType.Http, sp => service => sp.GetRequiredService<MainView>().EditHttp(service));
-            services.AddKeyedSingleton<Action<ServiceListModel>>(ServiceType.Ftp, sp => service => sp.GetRequiredService<MainView>().EditFtp(service));
-            services.AddSingleton<IDictionary<ServiceType, Action<ServiceListModel>>>(sp =>
+            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Mqtt, sp => new DelegateEditServiceHandler(service => sp.GetRequiredService<MainView>().EditMqtt(service)));
+            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Heartbeat, sp => new DelegateEditServiceHandler(service => sp.GetRequiredService<MainView>().EditHeartbeat(service)));
+            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Hid, sp => new DelegateEditServiceHandler(service => sp.GetRequiredService<MainView>().EditHid(service)));
+            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Csv, sp => new DelegateEditServiceHandler(service => sp.GetRequiredService<MainView>().EditCsv(service)));
+            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.FileObserver, sp => new DelegateEditServiceHandler(service => sp.GetRequiredService<MainView>().EditFileObserver(service)));
+            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Scp, sp => new DelegateEditServiceHandler(service => sp.GetRequiredService<MainView>().EditScp(service)));
+            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Tcp, sp => new DelegateEditServiceHandler(service => sp.GetRequiredService<MainView>().EditTcp(service)));
+            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Http, sp => new DelegateEditServiceHandler(service => sp.GetRequiredService<MainView>().EditHttp(service)));
+            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Ftp, sp => new DelegateEditServiceHandler(service => sp.GetRequiredService<MainView>().EditFtp(service)));
+            services.AddSingleton<IDictionary<ServiceType, IEditServiceHandler>>(sp =>
             {
-                var handlers = new Dictionary<ServiceType, Action<ServiceListModel>>();
+                var handlers = new Dictionary<ServiceType, IEditServiceHandler>();
                 foreach (ServiceType type in Enum.GetValues<ServiceType>())
                 {
-                    var handler = sp.GetKeyedService<Action<ServiceListModel>>(type);
+                    var handler = sp.GetKeyedService<IEditServiceHandler>(type);
                     if (handler != null)
                     {
                         handlers[type] = handler;

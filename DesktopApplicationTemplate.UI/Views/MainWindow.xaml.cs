@@ -32,9 +32,9 @@ namespace DesktopApplicationTemplate.UI.Views
     {
         private readonly MainViewModel _viewModel;
         private readonly ILogger<MainView>? _logger;
-        private readonly IDictionary<ServiceType, Action<ServiceListModel>> _editHandlers;
+        private readonly IDictionary<ServiceType, IEditServiceHandler> _editHandlers;
 
-        public MainView(MainViewModel viewModel, IDictionary<ServiceType, Action<ServiceListModel>> editHandlers)
+        public MainView(MainViewModel viewModel, IDictionary<ServiceType, IEditServiceHandler> editHandlers)
         {
             InitializeComponent();
             _viewModel = viewModel;
@@ -260,7 +260,7 @@ namespace DesktopApplicationTemplate.UI.Views
 
         if (_editHandlers.TryGetValue(service.ServiceType, out var handler))
         {
-            handler(service);
+            handler.Edit(service);
             return;
         }
 
