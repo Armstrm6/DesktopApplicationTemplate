@@ -13,6 +13,7 @@
 - Service factories convert options into initialized services and pages with a unified `AddServiceAsync` workflow.
 - `ServiceType` enum clarifies supported service categories.
 - Migration routine converts legacy service type names to `ServiceType` and logs unmapped values.
+- `IServiceModule` interface enables service-specific DI registration and modules are discovered and registered automatically at startup.
 
 #### Changed
 - Clarified environment instruction precedence in `AGENTS.md`.

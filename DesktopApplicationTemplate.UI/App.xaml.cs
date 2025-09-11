@@ -1,5 +1,6 @@
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Core.Modules;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.Core.Models;
@@ -53,6 +54,7 @@ namespace DesktopApplicationTemplate.UI
 
         private void ConfigureServices(IConfiguration configuration, IServiceCollection services)
         {
+            services.AddServiceModules();
             services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Mqtt, sp => new DelegateEditServiceHandler(service => sp.GetRequiredService<MainView>().EditMqtt(service)));
             services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Heartbeat, sp => new DelegateEditServiceHandler(service => sp.GetRequiredService<MainView>().EditHeartbeat(service)));
             services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Hid, sp => new DelegateEditServiceHandler(service => sp.GetRequiredService<MainView>().EditHid(service)));
