@@ -555,3 +555,12 @@ Effective Prompts / Instructions that worked: User request to expose more log te
 Decisions & Rationale: Improve log readability; document missing tooling and rely on CI for validation.
 Action Items: Rely on CI for verification.
 Related Commits/PRs:
+
+[2025-10-04 10:00] Topic: Service log type enum
+Context: Replaced ServiceLogViewModel's service name string with a ServiceType enum property.
+Observations: Updated service views to parse type and dropped redundant name parameter.
+Codex Limitations noticed: dotnet CLI not installed; restore, build, and test commands could not run.
+Effective Prompts / Instructions that worked: User request to simplify log model constructors.
+Decisions & Rationale: Use ServiceType enum to streamline log view configuration.
+Action Items: Rely on CI for validation.
+Related Commits/PRs:

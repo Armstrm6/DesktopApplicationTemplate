@@ -16,15 +16,22 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private ObservableCollection<LogEntry> _logs;
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="ServiceLogViewModel"/> class
+        /// with default values.
+        /// </summary>
+        public ServiceLogViewModel()
+            : this(ServiceType.Mqtt, new ObservableCollection<LogEntry>())
+        {
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ServiceLogViewModel"/> class.
         /// </summary>
-        /// <param name="serviceName">The name of the service.</param>
-        /// <param name="serviceType">The type of the service.</param>
+        /// <param name="type">The category of service associated with these logs.</param>
         /// <param name="logs">The collection of log entries to display.</param>
-        public ServiceLogViewModel(string serviceName, string serviceType, ObservableCollection<LogEntry> logs)
+        public ServiceLogViewModel(ServiceType type, ObservableCollection<LogEntry> logs)
         {
-            ServiceName = serviceName;
-            ServiceType = serviceType;
+            Type = type;
             _logs = logs;
             RefreshLogCommand = new RelayCommand(RefreshLogs);
             ExportLogCommand = new RelayCommand(() => ExportLogs(Path.Combine(Path.GetTempPath(), "exported_logs.txt")));
@@ -32,14 +39,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         }
 
         /// <summary>
-        /// Gets the service name associated with the logs.
+        /// Gets the service category associated with the logs.
         /// </summary>
-        public string ServiceName { get; }
-
-        /// <summary>
-        /// Gets the service type associated with the logs.
-        /// </summary>
-        public string ServiceType { get; }
+        public ServiceType Type { get; }
 
         /// <summary>
         /// Gets or sets the log level filter.
