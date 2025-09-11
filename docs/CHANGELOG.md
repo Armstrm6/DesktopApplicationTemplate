@@ -283,6 +283,7 @@
 - `/test` comment workflow to run CI on demand.
 - `TestCommon` library providing shared test helpers and fixtures referenced by all test projects.
 - `TestHelpers.CreateService` simplifies creating `ServiceListModel` instances in tests to reduce duplication.
+- Test-only composite service demonstrates reuse of `ServiceRule` and `ServiceScreen` in unit tests.
 - Collaboration tips note that WPF projects require Windows or the WindowsDesktop runtime and fail with `InitializeComponent` and `NETSDK1100` errors if missing.
 - Guide on creating custom services and registering dependencies via `IServiceModule`.
 
