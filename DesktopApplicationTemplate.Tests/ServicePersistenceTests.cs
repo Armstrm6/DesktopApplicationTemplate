@@ -111,7 +111,6 @@ namespace DesktopApplicationTemplate.Tests
                             Port = 42,
                             UseUdp = true,
                             Mode = TcpServiceMode.Sending,
-                            ServiceType = "TCP",
                             InputMessage = "in",
                             Script = "return message;",
                             OutputMessage = "out",
@@ -127,7 +126,6 @@ namespace DesktopApplicationTemplate.Tests
                 opt.Port = 100;
                 opt.UseUdp = false;
                 opt.Mode = TcpServiceMode.Listening;
-                opt.ServiceType = "changed";
                 opt.InputMessage = "changed";
                 opt.Script = "changed";
                 opt.OutputMessage = "changed";
@@ -144,7 +142,6 @@ namespace DesktopApplicationTemplate.Tests
                 Assert.Equal("return message;", info.TcpOptions.Script);
                 Assert.Equal("out", info.TcpOptions.OutputMessage);
                 Assert.Equal("last", info.TcpOptions.LastTestMessage);
-                Assert.Equal("TCP", info.TcpOptions.ServiceType);
 
                 // global options restored
                 var restored = host.Services.GetRequiredService<IOptions<TcpServiceOptions>>().Value;
@@ -156,7 +153,6 @@ namespace DesktopApplicationTemplate.Tests
                 Assert.Equal("return message;", restored.Script);
                 Assert.Equal("out", restored.OutputMessage);
                 Assert.Equal("last", restored.LastTestMessage);
-                Assert.Equal("TCP", restored.ServiceType);
             }
             finally
             {

@@ -14,7 +14,6 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
     private int _port;
     private bool _useUdp;
     private TcpServiceMode _mode;
-    private string _serviceType = "TCP";
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TcpEditServiceViewModel"/> class.
@@ -35,7 +34,6 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
         Port = _options.Port;
         UseUdp = _options.UseUdp;
         Mode = _options.Mode;
-        ServiceType = _options.ServiceType;
     }
 
 
@@ -98,24 +96,6 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
     /// </summary>
     public TcpServiceMode[] Modes { get; } = (TcpServiceMode[])Enum.GetValues(typeof(TcpServiceMode));
 
-    /// <summary>
-    /// Type label for the service.
-    /// </summary>
-    public string ServiceType
-    {
-        get => _serviceType;
-        set
-        {
-            _serviceType = value;
-            var error = Rule.ValidateRequired(value, "Service type");
-            if (error is not null)
-                AddError(nameof(ServiceType), error);
-            else
-                ClearErrors(nameof(ServiceType));
-            OnPropertyChanged();
-        }
-    }
-
     /// <inheritdoc />
     protected override void OnSave()
     {
@@ -128,7 +108,6 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
         _options.Port = Port;
         _options.UseUdp = UseUdp;
         _options.Mode = Mode;
-        _options.ServiceType = ServiceType;
         RaiseServiceSaved(_options);
     }
 

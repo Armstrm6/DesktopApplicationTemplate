@@ -15,7 +15,6 @@ public class TcpCreateServiceViewModelTests
         var vm = new TcpCreateServiceViewModel(rule)
         {
             ServiceName = "svc",
-            ServiceType = "Custom",
             Host = "host",
             Port = 1234,
             UseUdp = true,
@@ -33,7 +32,6 @@ public class TcpCreateServiceViewModelTests
         Assert.Equal(1234, received.Port);
         Assert.True(received.UseUdp);
         Assert.Equal(TcpServiceMode.ReceiveAndSend, received.Mode);
-        Assert.Equal("Custom", received.ServiceType);
     }
 
     [Fact]

@@ -543,6 +543,7 @@ Newest Attempt: Installed the .NET SDK 8.0.404 via script; `dotnet restore` and 
 Latest Attempt: After introducing service factories, the `dotnet` CLI is still missing; relying on CI for build and test.
 Latest Attempt: Installed .NET SDK 8.0.404; `dotnet restore` succeeded but `dotnet build DesktopApplicationTemplate.sln` and `dotnet test --settings tests.runsettings` failed with missing MainView in FtpServiceFactory. CI will verify.
 Current Attempt: After logging unrecognized service types in EditService, the `dotnet` CLI remains unavailable; restore, build, and tests could not run locally—relying on CI.
+Latest Attempt: After replacing TCP view model service type strings with enums, the `dotnet` CLI is still missing; build and tests deferred to CI.
 Related Commits/PRs:
 [2025-10-01 09:00] Topic: EditorButtonBar namespace
 Context: Verified EditorButtonBar build action and updated consuming views to use an assembly-qualified namespace.

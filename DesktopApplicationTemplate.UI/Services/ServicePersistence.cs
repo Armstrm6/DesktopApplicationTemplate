@@ -35,7 +35,6 @@ namespace DesktopApplicationTemplate.Persistence
                         Port = s.TcpOptions.Port,
                         UseUdp = s.TcpOptions.UseUdp,
                         Mode = s.TcpOptions.Mode,
-                        ServiceType = s.TcpOptions.ServiceType,
                         InputMessage = s.TcpOptions.InputMessage,
                         Script = s.TcpOptions.Script,
                         OutputMessage = s.TcpOptions.OutputMessage,
@@ -160,7 +159,6 @@ namespace DesktopApplicationTemplate.Persistence
                             value.Port = info.TcpOptions.Port;
                             value.UseUdp = info.TcpOptions.UseUdp;
                             value.Mode = info.TcpOptions.Mode;
-                            value.ServiceType = info.TcpOptions.ServiceType;
                             value.InputMessage = info.TcpOptions.InputMessage;
                             value.Script = info.TcpOptions.Script;
                             value.OutputMessage = info.TcpOptions.OutputMessage;

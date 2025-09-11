@@ -70,6 +70,7 @@
 - Removed `MainView` KeyDown handler; pressing Escape no longer returns to the home page.
 - Removed unused `HomePage` view and `PackUriSchemeInitializer`.
 - TCP create and edit views inline UDP and mode options, removing the separate advanced configuration view.
+- TCP create and edit view models remove string-based service type fields, using `ServiceType` enum for navigation.
 - TCP service messages view removes script editors and adds a test message input bound to view model.
 - TCP scripting workflow consolidated into the messages view, enabling inline script editing and execution.
 - TCP options persist the last test message and preload it when reopening the service.

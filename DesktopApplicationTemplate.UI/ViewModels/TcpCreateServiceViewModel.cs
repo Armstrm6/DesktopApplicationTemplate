@@ -13,7 +13,6 @@ public class TcpCreateServiceViewModel : ServiceCreateViewModelBase<TcpServiceOp
     private int _port;
     private bool _useUdp;
     private TcpServiceMode _mode;
-    private string _serviceType = "TCP";
 
     /// <summary>
     /// Current options.
@@ -87,24 +86,6 @@ public class TcpCreateServiceViewModel : ServiceCreateViewModelBase<TcpServiceOp
     /// </summary>
     public TcpServiceMode[] Modes { get; } = (TcpServiceMode[])Enum.GetValues(typeof(TcpServiceMode));
 
-    /// <summary>
-    /// Type label for the service.
-    /// </summary>
-    public string ServiceType
-    {
-        get => _serviceType;
-        set
-        {
-            _serviceType = value;
-            var error = Rule.ValidateRequired(value, "Service type");
-            if (error is not null)
-                AddError(nameof(ServiceType), error);
-            else
-                ClearErrors(nameof(ServiceType));
-            OnPropertyChanged();
-        }
-    }
-
     /// <inheritdoc />
     protected override void OnSave()
     {
@@ -118,7 +99,6 @@ public class TcpCreateServiceViewModel : ServiceCreateViewModelBase<TcpServiceOp
         Options.Port = Port;
         Options.UseUdp = UseUdp;
         Options.Mode = Mode;
-        Options.ServiceType = ServiceType;
         Logger?.Log("TCP create options finished", LogLevel.Debug);
         RaiseServiceSaved(Options);
     }
