@@ -91,7 +91,7 @@ namespace DesktopApplicationTemplate.Tests
         [Fact]
         public void RecordExecutionTime_ComputesAverageAndTracksLastExecution()
         {
-            var vm = new ServiceListModel();
+            var vm = new ServiceListModel { ServiceType = ServiceType.Tcp };
             vm.RecordExecutionTime(TimeSpan.FromMilliseconds(100));
             vm.RecordExecutionTime(TimeSpan.FromMilliseconds(50));
 
@@ -104,7 +104,7 @@ namespace DesktopApplicationTemplate.Tests
         [Fact]
         public void RecordExecutionTime_Throws_When_Negative()
         {
-            var vm = new ServiceListModel();
+            var vm = new ServiceListModel { ServiceType = ServiceType.Tcp };
             Assert.Throws<ArgumentException>(() => vm.RecordExecutionTime(TimeSpan.FromMilliseconds(-1)));
             ConsoleTestLogger.LogPass();
         }
@@ -112,7 +112,7 @@ namespace DesktopApplicationTemplate.Tests
         [Fact]
         public void AddLog_UpdatesLastInputMessage()
         {
-            var vm = new ServiceListModel();
+            var vm = new ServiceListModel { ServiceType = ServiceType.Tcp };
             vm.AddLog("hello world");
 
             Assert.Equal("hello world", vm.LastInputMessage);
