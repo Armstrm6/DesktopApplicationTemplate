@@ -133,6 +133,7 @@
 - Script editor unsubscribes handlers on close and mirrors test message changes to the TCP messages view.
 - Renamed `SaveServices` to `SaveServicesAsync` and updated callers to await it, removing blocking calls.
 - Replaced Xceed `ColorCanvas` with `ColorPicker` to prevent XAML parse exceptions when selecting service colors.
+- Edit service workflow logs and ignores unrecognized service types.
 
 
 ### HID Service
