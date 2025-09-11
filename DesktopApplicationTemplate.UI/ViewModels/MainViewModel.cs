@@ -11,7 +11,9 @@ using System.Windows.Input;
 using WpfBrushes = System.Windows.Media.Brushes;
 using DesktopApplicationTemplate.Core.Models;
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Persistence;
+using DesktopApplicationTemplate.Core.Converters;
+using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Helpers;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
@@ -202,7 +204,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 var svc = new ServiceListModel
                 {
                     DisplayName = info.DisplayName,
-                    ServiceType = info.ServiceType,
+                    ServiceType = ServiceTypeJsonConverter.ToLegacyString(info.ServiceType),
                     IsActive = info.IsActive,
                     Order = info.Order,
                     TcpOptions = info.TcpOptions,

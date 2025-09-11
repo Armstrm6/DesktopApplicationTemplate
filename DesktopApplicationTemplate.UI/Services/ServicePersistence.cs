@@ -4,12 +4,14 @@ using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Core.Converters;
+using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.ViewModels;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
 using DesktopApplicationTemplate.UI;
 
-namespace DesktopApplicationTemplate.UI.Services
+namespace DesktopApplicationTemplate.Persistence
 {
     public static class ServicePersistence
     {
@@ -73,10 +75,12 @@ namespace DesktopApplicationTemplate.UI.Services
                     };
                 }
 
+                ServiceTypeJsonConverter.TryParse(s.ServiceType, out var type);
+
                 data.Add(new ServiceInfo
                 {
                     DisplayName = s.DisplayName,
-                    ServiceType = s.ServiceType,
+                    ServiceType = type,
                     IsActive = s.IsActive,
                     Created = DateTime.Now,
                     Order = index++,
@@ -148,7 +152,7 @@ namespace DesktopApplicationTemplate.UI.Services
 
                 foreach (var info in result)
                 {
-                    if (info.ServiceType == "TCP" && info.TcpOptions != null)
+                    if (info.ServiceType == ServiceType.Tcp && info.TcpOptions != null)
                     {
                         var opt = App.AppHost?.Services.GetService<IOptions<TcpServiceOptions>>();
                         if (opt != null)
@@ -165,7 +169,7 @@ namespace DesktopApplicationTemplate.UI.Services
                             value.LastTestMessage = info.TcpOptions.LastTestMessage;
                         }
                     }
-                    if ((info.ServiceType == "FTP Server" || info.ServiceType == "FTP") && info.FtpOptions != null)
+                    if (info.ServiceType == ServiceType.Ftp && info.FtpOptions != null)
                     {
                         try
                         {
@@ -201,7 +205,7 @@ namespace DesktopApplicationTemplate.UI.Services
     public class ServiceInfo
     {
         public string DisplayName { get; set; } = string.Empty;
-        public string ServiceType { get; set; } = string.Empty;
+        public ServiceType ServiceType { get; set; }
         public bool IsActive { get; set; }
         public DateTime Created { get; set; }
         public int Order { get; set; }
