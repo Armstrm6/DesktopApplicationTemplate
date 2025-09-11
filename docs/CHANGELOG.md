@@ -52,6 +52,7 @@
 - Service list displays the last execution duration and most recent input message beneath each service name.
 - Application registers global exception handlers that log errors, release input hooks, and shut down gracefully.
 - Unit test ensures `VisualTreeHelperExtensions.FindParent` locates the containing `TextBlock` for inline elements.
+- Tests confirm the main window delegates edit requests to service-type handlers.
 
 #### Changed
 - Service selection window wraps service icons within bounds using a fixed-width panel.

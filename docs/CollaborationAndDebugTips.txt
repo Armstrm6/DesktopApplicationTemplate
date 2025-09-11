@@ -549,6 +549,7 @@ Latest Attempt: Installed .NET SDK 8.0.404; `dotnet restore` succeeded but `dotn
 Current Attempt: After logging unrecognized service types in EditService, the `dotnet` CLI remains unavailable; restore, build, and tests could not run locally—relying on CI.
 Latest Attempt: After replacing TCP view model service type strings with enums, the `dotnet` CLI is still missing; build and tests deferred to CI.
 Latest Attempt: After converting several [Fact] tests to [Theory], `dotnet test --settings tests.runsettings` failed because the `dotnet` command is not found; relying on CI.
+Latest Attempt: After adding edit service handler tests, the `dotnet` CLI remains unavailable; restore, build, and test commands could not run locally, so CI will verify.
 Related Commits/PRs:
 [2025-10-01 09:00] Topic: EditorButtonBar namespace
 Context: Verified EditorButtonBar build action and updated consuming views to use an assembly-qualified namespace.
