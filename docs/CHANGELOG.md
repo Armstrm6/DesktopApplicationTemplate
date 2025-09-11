@@ -39,6 +39,7 @@
 ### Navigation & UI
 #### Added
 - Navigation helpers for HTTP, HID, File Observer, Heartbeat, CSV Creator, and SCP services with tests ensuring double-click opens edit views.
+- Creation navigation handlers for HTTP, TCP, HID, SCP, CSV, File Observer, and Heartbeat services.
 - Application logo displayed in the main window navigation bar.
 - Navigation bar `HeaderBar` supports drag and toggles window state on double-click.
 - Popup-based `FilterPanel` user control for in-place service filtering.
