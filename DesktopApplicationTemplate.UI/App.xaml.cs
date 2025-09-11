@@ -53,7 +53,28 @@ namespace DesktopApplicationTemplate.UI
 
         private void ConfigureServices(IConfiguration configuration, IServiceCollection services)
         {
-            services.AddSingleton<IDictionary<ServiceType, Action<ServiceListModel>>>(_ => new Dictionary<ServiceType, Action<ServiceListModel>>());
+            services.AddKeyedSingleton<Action<ServiceListModel>>(ServiceType.Mqtt, sp => service => sp.GetRequiredService<MainView>().EditMqtt(service));
+            services.AddKeyedSingleton<Action<ServiceListModel>>(ServiceType.Heartbeat, sp => service => sp.GetRequiredService<MainView>().EditHeartbeat(service));
+            services.AddKeyedSingleton<Action<ServiceListModel>>(ServiceType.Hid, sp => service => sp.GetRequiredService<MainView>().EditHid(service));
+            services.AddKeyedSingleton<Action<ServiceListModel>>(ServiceType.Csv, sp => service => sp.GetRequiredService<MainView>().EditCsv(service));
+            services.AddKeyedSingleton<Action<ServiceListModel>>(ServiceType.FileObserver, sp => service => sp.GetRequiredService<MainView>().EditFileObserver(service));
+            services.AddKeyedSingleton<Action<ServiceListModel>>(ServiceType.Scp, sp => service => sp.GetRequiredService<MainView>().EditScp(service));
+            services.AddKeyedSingleton<Action<ServiceListModel>>(ServiceType.Tcp, sp => service => sp.GetRequiredService<MainView>().EditTcp(service));
+            services.AddKeyedSingleton<Action<ServiceListModel>>(ServiceType.Http, sp => service => sp.GetRequiredService<MainView>().EditHttp(service));
+            services.AddKeyedSingleton<Action<ServiceListModel>>(ServiceType.Ftp, sp => service => sp.GetRequiredService<MainView>().EditFtp(service));
+            services.AddSingleton<IDictionary<ServiceType, Action<ServiceListModel>>>(sp =>
+            {
+                var handlers = new Dictionary<ServiceType, Action<ServiceListModel>>();
+                foreach (ServiceType type in Enum.GetValues<ServiceType>())
+                {
+                    var handler = sp.GetKeyedService<Action<ServiceListModel>>(type);
+                    if (handler != null)
+                    {
+                        handlers[type] = handler;
+                    }
+                }
+                return handlers;
+            });
             services.AddSingleton<MainView>();
             services.AddSingleton<IStartupService, StartupService>();
             services.AddSingleton<IProcessRunner, ProcessRunner>();
