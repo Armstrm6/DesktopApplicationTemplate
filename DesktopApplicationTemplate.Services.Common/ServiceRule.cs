@@ -1,6 +1,6 @@
 using DesktopApplicationTemplate.Core.Services;
 
-namespace DesktopApplicationTemplate.Service.Services;
+namespace DesktopApplicationTemplate.Services.Common;
 
 /// <summary>
 /// Default implementation of <see cref="IServiceRule"/>.

@@ -1,11 +1,13 @@
+using System.Runtime.Versioning;
 using DesktopApplicationTemplate.Core.Services;
 
-namespace DesktopApplicationTemplate.Service.Services;
+namespace DesktopApplicationTemplate.Services.Common;
 
 /// <summary>
 /// Default implementation of <see cref="IServiceScreen{TOptions}"/>.
 /// </summary>
 /// <typeparam name="TOptions">Type of options managed by the screen.</typeparam>
+[SupportedOSPlatform("windows")]
 public class ServiceScreen<TOptions> : IServiceScreen<TOptions>
 {
     private readonly ILoggingService? _logger;

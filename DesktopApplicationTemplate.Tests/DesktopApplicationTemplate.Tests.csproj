@@ -32,6 +32,7 @@
     <ProjectReference Include="..\DesktopApplicationTemplate.Service\DesktopApplicationTemplate.Service.csproj" />
     <ProjectReference Include="..\DesktopApplication.Installer\DesktopApplication.Installer.csproj" />
     <ProjectReference Include="..\DesktopApplicationTemplate.Core\DesktopApplicationTemplate.Core.csproj" />
+    <ProjectReference Include="..\DesktopApplicationTemplate.Services.Common\DesktopApplicationTemplate.Services.Common.csproj" />
     <ProjectReference Include="..\TestCommon\TestCommon.csproj" />
   </ItemGroup>
 

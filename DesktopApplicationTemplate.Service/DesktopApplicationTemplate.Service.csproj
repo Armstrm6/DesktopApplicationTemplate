@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DesktopApplicationTemplate.Core\DesktopApplicationTemplate.Core.csproj" />
+    <ProjectReference Include="..\DesktopApplicationTemplate.Services.Common\DesktopApplicationTemplate.Services.Common.csproj" />
   </ItemGroup>
 
 </Project>
