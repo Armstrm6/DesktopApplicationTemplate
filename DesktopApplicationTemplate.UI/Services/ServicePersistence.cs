@@ -4,12 +4,14 @@ using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Core.Converters;
+using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.ViewModels;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
 using DesktopApplicationTemplate.UI;
 
-namespace DesktopApplicationTemplate.UI.Services
+namespace DesktopApplicationTemplate.Persistence
 {
     public static class ServicePersistence
     {
@@ -25,7 +27,7 @@ namespace DesktopApplicationTemplate.UI.Services
                 CsvServiceOptions? csv = null;
                 FtpServerOptions? ftp = null;
                 HttpServiceOptions? http = null;
-                if (s.ServiceType == "TCP" && s.TcpOptions != null)
+                if (s.ServiceType == ServiceType.Tcp && s.TcpOptions != null)
                 {
                     tcp = new TcpServiceOptions
                     {
@@ -41,7 +43,7 @@ namespace DesktopApplicationTemplate.UI.Services
                     };
                 }
 
-                if ((s.ServiceType == "FTP Server" || s.ServiceType == "FTP") && s.FtpOptions != null)
+                if (s.ServiceType == ServiceType.Ftp && s.FtpOptions != null)
                 {
                     ftp = new FtpServerOptions
                     {
@@ -53,7 +55,7 @@ namespace DesktopApplicationTemplate.UI.Services
                     };
                 }
 
-                if (s.ServiceType == "HTTP" && s.HttpOptions != null)
+                if (s.ServiceType == ServiceType.Http && s.HttpOptions != null)
                 {
                     http = new HttpServiceOptions
                     {
@@ -63,7 +65,7 @@ namespace DesktopApplicationTemplate.UI.Services
                         ClientCertificatePath = s.HttpOptions.ClientCertificatePath
                     };
                 }
-                if (s.ServiceType == "CSV Creator" && s.CsvOptions != null)
+                if (s.ServiceType == ServiceType.Csv && s.CsvOptions != null)
                 {
                     csv = new CsvServiceOptions
                     {
@@ -148,7 +150,7 @@ namespace DesktopApplicationTemplate.UI.Services
 
                 foreach (var info in result)
                 {
-                    if (info.ServiceType == "TCP" && info.TcpOptions != null)
+                    if (info.ServiceType == ServiceType.Tcp && info.TcpOptions != null)
                     {
                         var opt = App.AppHost?.Services.GetService<IOptions<TcpServiceOptions>>();
                         if (opt != null)
@@ -165,7 +167,7 @@ namespace DesktopApplicationTemplate.UI.Services
                             value.LastTestMessage = info.TcpOptions.LastTestMessage;
                         }
                     }
-                    if ((info.ServiceType == "FTP Server" || info.ServiceType == "FTP") && info.FtpOptions != null)
+                    if (info.ServiceType == ServiceType.Ftp && info.FtpOptions != null)
                     {
                         try
                         {
@@ -201,7 +203,7 @@ namespace DesktopApplicationTemplate.UI.Services
     public class ServiceInfo
     {
         public string DisplayName { get; set; } = string.Empty;
-        public string ServiceType { get; set; } = string.Empty;
+        public ServiceType ServiceType { get; set; }
         public bool IsActive { get; set; }
         public DateTime Created { get; set; }
         public int Order { get; set; }

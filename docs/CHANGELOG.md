@@ -22,6 +22,9 @@
 - Adjusted solution and project references so cross-platform assemblies depend only on the core while Windows projects also reference `DesktopApplicationTemplate.Windows`.
 - Replaced `ServiceCreated`/`ServiceUpdated` with unified `ServiceSaved` events and centralized `ServiceName` validation in `ServiceEditorViewModelBase`.
 - Windows service host sets explicit `ServiceName` and `DisplayName` values with the application name and installer uses the same constant.
+- Replaced verbose `ServiceName` strings with `ServiceType` enum properties for log view models.
+- Service persistence now stores `ServiceType` as short codes and reads legacy string names.
+- Service creation and navigation now resolve services via `ServiceType` enum lookups instead of string-based switches.
 
 #### Fixed
 - Event raising helpers in `ServiceEditorViewModelBase` invoked themselves recursively; now invoke events directly.
@@ -82,6 +85,8 @@
 - Restricted `TcpServiceMessagesViewModel.OutputMessage` setter to internal to prevent external modification.
 - TcpServiceMessagesViewModel runs the initial script asynchronously to avoid blocking.
 - App domain unhandled exception handler is asynchronous and awaits dispatcher shutdown.
+- Main window resolves edit workflows through a DI-injected handler dictionary instead of a large if/else chain.
+- Edit handlers register with DI keyed by `ServiceType`, and the main window receives a dictionary constructed from those registrations.
 
 #### Fixed
 - TCP and SCP edit workflows now load existing options via `Load` methods, enabling DI-friendly construction.
@@ -129,6 +134,7 @@
 - Script editor unsubscribes handlers on close and mirrors test message changes to the TCP messages view.
 - Renamed `SaveServices` to `SaveServicesAsync` and updated callers to await it, removing blocking calls.
 - Replaced Xceed `ColorCanvas` with `ColorPicker` to prevent XAML parse exceptions when selecting service colors.
+- Edit service workflow logs and ignores unrecognized service types.
 
 
 ### HID Service

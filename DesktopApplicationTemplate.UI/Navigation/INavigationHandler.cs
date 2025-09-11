@@ -1,10 +1,11 @@
 using System.Windows.Controls;
+using DesktopApplicationTemplate.Models;
 
 namespace DesktopApplicationTemplate.UI.Navigation
 {
     public interface INavigationHandler
     {
-        string ServiceType { get; }
+        ServiceType ServiceType { get; }
         Page CreateView(string defaultName);
     }
 }

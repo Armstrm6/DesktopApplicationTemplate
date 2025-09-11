@@ -1,7 +1,8 @@
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.Core.Models;
+using DesktopApplicationTemplate.Models;
+using DesktopApplicationTemplate.Core.Converters;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,8 +18,8 @@ namespace DesktopApplicationTemplate.Tests
         [Fact]
         public void AddLog_ReferenceUpdatesAssociatedServices()
         {
-            var a = new ServiceListModel { DisplayName = "Heartbeat - A", ServiceType = "Heartbeat" };
-            var b = new ServiceListModel { DisplayName = "TCP - B", ServiceType = "TCP" };
+            var a = new ServiceListModel { DisplayName = "Heartbeat - A", ServiceType = ServiceType.Heartbeat };
+            var b = new ServiceListModel { DisplayName = "TCP - B", ServiceType = ServiceType.Tcp };
             var services = new List<ServiceListModel> { a, b };
             ServiceListModel.ResolveService = (type, name) =>
                 services.Find(s => s.ServiceType == type && s.DisplayName.Split(" - ").Last() == name);
@@ -43,10 +44,10 @@ namespace DesktopApplicationTemplate.Tests
             var netVm = new NetworkConfigurationViewModel(net);
             var main = new MainViewModel(csv, netVm, net, servicesFilePath: Path.Combine(tempDir, "services.json"));
 
-            main.Services.Add(new ServiceListModel { DisplayName = "TCP - TCP1", ServiceType = "TCP" });
-            main.Services.Add(new ServiceListModel { DisplayName = "TCP - TCP2", ServiceType = "TCP" });
+            main.Services.Add(new ServiceListModel { DisplayName = "TCP - TCP1", ServiceType = ServiceType.Tcp });
+            main.Services.Add(new ServiceListModel { DisplayName = "TCP - TCP2", ServiceType = ServiceType.Tcp });
 
-            var name = main.GenerateServiceName("TCP");
+            var name = main.GenerateServiceName(ServiceType.Tcp);
             Assert.Equal("TCP3", name);
 
             Directory.Delete(tempDir, true);
@@ -64,8 +65,8 @@ namespace DesktopApplicationTemplate.Tests
             var netVm = new NetworkConfigurationViewModel(net);
             var main = new MainViewModel(csv, netVm, net, servicesFilePath: Path.Combine(tempDir, "services.json"));
 
-            var svc1 = new ServiceListModel { DisplayName = "TCP - TCP1", ServiceType = "TCP" };
-            var svc2 = new ServiceListModel { DisplayName = "TCP - TCP2", ServiceType = "TCP" };
+            var svc1 = new ServiceListModel { DisplayName = "TCP - TCP1", ServiceType = ServiceType.Tcp };
+            var svc2 = new ServiceListModel { DisplayName = "TCP - TCP2", ServiceType = ServiceType.Tcp };
             main.Services.Add(svc1);
             main.Services.Add(svc2);
 
@@ -74,7 +75,7 @@ namespace DesktopApplicationTemplate.Tests
             {
                 desired = main.GenerateServiceName(svc2.ServiceType);
             }
-            svc2.DisplayName = $"{svc2.ServiceType} - {desired}";
+            svc2.DisplayName = $"{ServiceTypeJsonConverter.ToLegacyString(svc2.ServiceType)} - {desired}";
 
             Assert.Equal("TCP - TCP3", svc2.DisplayName);
 
