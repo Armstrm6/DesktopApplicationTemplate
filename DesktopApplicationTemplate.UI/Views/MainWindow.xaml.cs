@@ -39,8 +39,6 @@ namespace DesktopApplicationTemplate.UI.Views
             InitializeComponent();
             _viewModel = viewModel;
             _editHandlers = editHandlers;
-            _editHandlers.Clear();
-            RegisterEditHandlers();
             if (App.AppHost.Services.GetService(typeof(ILoggerFactory)) is ILoggerFactory factory)
             {
                 _logger = factory.CreateLogger<MainView>();
@@ -88,18 +86,6 @@ namespace DesktopApplicationTemplate.UI.Views
             ShowHome();
         }
 
-        private void RegisterEditHandlers()
-        {
-            _editHandlers[ServiceType.Mqtt] = EditMqtt;
-            _editHandlers[ServiceType.Heartbeat] = EditHeartbeat;
-            _editHandlers[ServiceType.Hid] = EditHid;
-            _editHandlers[ServiceType.Csv] = EditCsv;
-            _editHandlers[ServiceType.FileObserver] = EditFileObserver;
-            _editHandlers[ServiceType.Scp] = EditScp;
-            _editHandlers[ServiceType.Tcp] = EditTcp;
-            _editHandlers[ServiceType.Http] = EditHttp;
-            _editHandlers[ServiceType.Ftp] = EditFtp;
-        }
 
         public Page? GetOrCreateServicePage(ServiceListModel svc)
         {
@@ -286,7 +272,7 @@ namespace DesktopApplicationTemplate.UI.Views
         }
     }
 
-    private void EditMqtt(ServiceListModel service)
+    internal void EditMqtt(ServiceListModel service)
     {
         var tagPage = GetOrCreateServicePage(service);
         var options = App.AppHost.Services.GetRequiredService<IOptions<MqttServiceOptions>>().Value;
@@ -318,7 +304,7 @@ namespace DesktopApplicationTemplate.UI.Views
         _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
     }
 
-    private void EditHeartbeat(ServiceListModel service)
+    internal void EditHeartbeat(ServiceListModel service)
     {
         var hbPage = GetOrCreateServicePage(service);
         var options = service.HeartbeatOptions ?? new HeartbeatServiceOptions();
@@ -351,7 +337,7 @@ namespace DesktopApplicationTemplate.UI.Views
         _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
     }
 
-    private void EditHid(ServiceListModel service)
+    internal void EditHid(ServiceListModel service)
     {
         var hidPage = GetOrCreateServicePage(service);
         var options = service.HidOptions ?? new HidServiceOptions();
@@ -384,7 +370,7 @@ namespace DesktopApplicationTemplate.UI.Views
         _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
     }
 
-    private void EditCsv(ServiceListModel service)
+    internal void EditCsv(ServiceListModel service)
     {
         var csvPage = GetOrCreateServicePage(service);
         var options = service.CsvOptions ?? new CsvServiceOptions();
@@ -418,7 +404,7 @@ namespace DesktopApplicationTemplate.UI.Views
         _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
     }
 
-    private void EditFileObserver(ServiceListModel service)
+    internal void EditFileObserver(ServiceListModel service)
     {
         var foPage = GetOrCreateServicePage(service);
         var options = service.FileObserverOptions ?? new FileObserverServiceOptions();
@@ -451,7 +437,7 @@ namespace DesktopApplicationTemplate.UI.Views
         _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
     }
 
-    private void EditScp(ServiceListModel service)
+    internal void EditScp(ServiceListModel service)
     {
         var scpPage = GetOrCreateServicePage(service);
         var options = service.ScpOptions ?? new ScpServiceOptions();
@@ -486,7 +472,7 @@ namespace DesktopApplicationTemplate.UI.Views
         _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
     }
 
-    private void EditTcp(ServiceListModel service)
+    internal void EditTcp(ServiceListModel service)
     {
         var tcpPage = GetOrCreateServicePage(service);
         var options = service.TcpOptions ?? new TcpServiceOptions();
@@ -513,7 +499,7 @@ namespace DesktopApplicationTemplate.UI.Views
         _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
     }
 
-    private void EditHttp(ServiceListModel service)
+    internal void EditHttp(ServiceListModel service)
     {
         var httpPage = GetOrCreateServicePage(service);
         var options = service.HttpOptions ?? new HttpServiceOptions();
@@ -546,7 +532,7 @@ namespace DesktopApplicationTemplate.UI.Views
         _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
     }
 
-    private void EditFtp(ServiceListModel service)
+    internal void EditFtp(ServiceListModel service)
     {
         var ftpPage = GetOrCreateServicePage(service);
         var options = service.FtpOptions ?? new FtpServerOptions();
