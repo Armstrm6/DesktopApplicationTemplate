@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
@@ -17,6 +18,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private bool _runServicesOnStartup;
         private bool _logTcpMessages = true;
         private bool _firstRun = true;
+        private ServiceType _preferredServiceType = ServiceType.Tcp;
         private static bool _suppressSaveConfirmation;
         private static bool _suppressCloseConfirmation;
         private bool _dirty;
@@ -40,6 +42,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public bool RunServicesOnStartup { get => _runServicesOnStartup; set { _runServicesOnStartup = value; _dirty = true; OnPropertyChanged(); } }
         public bool LogTcpMessages { get => _logTcpMessages; set { _logTcpMessages = value; _dirty = true; OnPropertyChanged(); } }
         public bool FirstRun { get => _firstRun; set { _firstRun = value; _dirty = true; OnPropertyChanged(); } }
+        public ServiceType PreferredServiceType { get => _preferredServiceType; set { _preferredServiceType = value; _dirty = true; OnPropertyChanged(); } }
+        public ServiceType[] ServiceTypes { get; } = Enum.GetValues<ServiceType>();
         public bool HasUnsavedChanges => _dirty;
 
         public void Load()
@@ -58,6 +62,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 _runServicesOnStartup = obj.RunServicesOnStartup;
                 _logTcpMessages = obj.LogTcpMessages;
                 _firstRun = obj.FirstRun;
+                _preferredServiceType = obj.PreferredServiceType;
                 TcpLoggingEnabled = obj.LogTcpMessages;
                 SaveConfirmationSuppressed = obj.SuppressSaveConfirmation;
                 CloseConfirmationSuppressed = obj.SuppressCloseConfirmation;
@@ -74,6 +79,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 RunServicesOnStartup = _runServicesOnStartup,
                 LogTcpMessages = _logTcpMessages,
                 FirstRun = _firstRun,
+                PreferredServiceType = _preferredServiceType,
                 SuppressSaveConfirmation = SaveConfirmationSuppressed,
                 SuppressCloseConfirmation = CloseConfirmationSuppressed
             };

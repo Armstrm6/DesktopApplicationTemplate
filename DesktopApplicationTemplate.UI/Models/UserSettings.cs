@@ -10,5 +10,10 @@ namespace DesktopApplicationTemplate.Models
         public bool FirstRun { get; set; } = true;
         public bool SuppressSaveConfirmation { get; set; }
         public bool SuppressCloseConfirmation { get; set; }
+
+        /// <summary>
+        /// Preferred service category for new operations.
+        /// </summary>
+        public ServiceType PreferredServiceType { get; set; } = ServiceType.Tcp;
     }
 }
