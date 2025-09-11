@@ -126,6 +126,37 @@ The UI exposes several built in service types. A brief description of each is sh
 
 Each service has an editor page where the parameters and test messages can be modified.  A **Help** button is available on these pages to display common ASCII commands (ACK, NAK, ENQ, ETX) which can be inserted when building protocol messages.
 
+## Extending the application
+
+`ServiceType` is an enum that identifies each supported service category. It is serialized using short codes and still recognizes legacy names so existing configurations continue to load.
+
+Dictionary-based edit handlers are registered for each `ServiceType` and injected into the main window as a lookup. When a user edits a service, the window resolves the handler from that dictionary instead of relying on large switch statements, making it easy to plug in new handlers.
+
+Dynamic DI modules are enabled by `services.AddServiceModules()`, which scans assemblies for `IServiceModule` implementations and calls their `RegisterServices` methods. Dropping a new module into the application automatically registers its services without manual wiring.
+
+### Adding a new service example
+
+1. Add a value to the `ServiceType` enum.
+2. Implement the service and its UI components.
+3. Create an `IServiceModule` for DI registration:
+
+   ```csharp
+   public class SampleServiceModule : IServiceModule
+   {
+       public ServiceType Type => ServiceType.Sample;
+
+       public void RegisterServices(IServiceCollection services)
+       {
+           services.AddSingleton<SampleService>();
+           services.AddTransient<SampleCreateViewModel>();
+           services.AddTransient<SampleEditViewModel>();
+           services.AddTransient<SamplePage>();
+       }
+   }
+   ```
+
+4. Wire up navigation and edit handlers for the new `ServiceType` and document any changes.
+
 ## Testing services locally
 
 After building the solution, run the UI project and navigate to the desired service page. Most services expose a test action (for example, "Send" on the HTTP page or "Test Script" on the TCP page) that can be executed locally. Logs for each service are displayed next to the editor fields.
