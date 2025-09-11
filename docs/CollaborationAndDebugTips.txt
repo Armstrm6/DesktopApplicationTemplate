@@ -578,3 +578,12 @@ Effective Prompts / Instructions that worked: User request to simplify log model
 Decisions & Rationale: Use ServiceType enum to streamline log view configuration.
 Action Items: Rely on CI for validation.
 Related Commits/PRs:
+[2025-10-05 10:00] Topic: Custom service guide
+Context: Added documentation detailing component reuse and IServiceModule for new services.
+Observations: Created docs/CustomServiceGuide.md with steps for adding a service type and registering dependencies.
+Codex Limitations noticed: dotnet CLI not installed; restore, build, and test commands could not run locally. PowerShell unavailable so entry appended manually.
+Effective Prompts / Instructions that worked: User request for guidance on extending services.
+Decisions & Rationale: Provide a reference to help contributors reuse existing components.
+Action Items: Rely on CI for validation.
+Related Commits/PRs:
+
