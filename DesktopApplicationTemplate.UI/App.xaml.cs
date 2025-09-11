@@ -193,6 +193,13 @@ namespace DesktopApplicationTemplate.UI
             services.AddTransient<SettingsPage>();
             services.AddTransient<Navigation.INavigationHandler, Navigation.MqttNavigationHandler>();
             services.AddTransient<Navigation.INavigationHandler, Navigation.FtpNavigationHandler>();
+            services.AddTransient<Navigation.INavigationHandler, Navigation.HttpNavigationHandler>();
+            services.AddTransient<Navigation.INavigationHandler, Navigation.TcpNavigationHandler>();
+            services.AddTransient<Navigation.INavigationHandler, Navigation.HidNavigationHandler>();
+            services.AddTransient<Navigation.INavigationHandler, Navigation.ScpNavigationHandler>();
+            services.AddTransient<Navigation.INavigationHandler, Navigation.CsvNavigationHandler>();
+            services.AddTransient<Navigation.INavigationHandler, Navigation.FileObserverNavigationHandler>();
+            services.AddTransient<Navigation.INavigationHandler, Navigation.HeartbeatNavigationHandler>();
             services.AddTransient<Factories.IServiceFactory, Factories.MqttServiceFactory>();
             services.AddTransient<Factories.IServiceFactory, Factories.FtpServiceFactory>();
             services.AddTransient<Factories.IServiceFactory, Factories.HttpServiceFactory>();
