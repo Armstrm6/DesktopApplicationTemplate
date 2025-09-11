@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using System.Linq;
 using System;
 using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Core.Modules;
 using DesktopApplicationTemplate.Service.Services;
 using FubarDev.FtpServer;
 using FubarDev.FtpServer.FileSystem.DotNet;
@@ -32,6 +33,7 @@ namespace DesktopApplicationTemplate.Service
 
             return builder.ConfigureServices((hostContext, services) =>
             {
+                services.AddServiceModules();
                 services.AddHostedService<Worker>(); // register the background service
                 services.AddSingleton<IServiceRule, ServiceRule>();
                 services.AddTransient(typeof(IServiceScreen<>), typeof(ServiceScreen<>));
