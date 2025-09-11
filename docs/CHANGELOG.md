@@ -11,6 +11,7 @@
 - Unified creation and edit workflows under `ServiceEditorViewModelBase<TOptions>` exposing `SaveCommand` and customizable `SaveButtonText`.
 - Service manager tracks task start times and writes statuses to `activeservices.txt` for running services.
 - Service factories convert options into initialized services and pages with a unified `AddServiceAsync` workflow.
+- `ServiceType` enum clarifies supported service categories.
 
 #### Changed
 - Clarified environment instruction precedence in `AGENTS.md`.
