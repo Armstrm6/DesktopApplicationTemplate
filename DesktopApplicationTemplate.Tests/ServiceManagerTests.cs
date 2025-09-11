@@ -4,6 +4,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Text.Json;
 using Xunit;
 
@@ -32,14 +34,20 @@ namespace DesktopApplicationTemplate.Tests
 
                 using var manager = new ServiceManager(NullLogger<ServiceManager>.Instance, config, tempFile);
                 manager.Sync();
-                Assert.Contains("Svc1", manager.ActiveServices);
-                Assert.DoesNotContain("Svc2", manager.ActiveServices);
+
+                var runningField = typeof(ServiceManager).GetField("_running", BindingFlags.Instance | BindingFlags.NonPublic)!;
+                var running = (IDictionary<string, object>)runningField.GetValue(manager)!;
+                Assert.Contains(running.Values, r =>
+                    (ServiceType)r.GetType().GetProperty("ServiceType")!.GetValue(r)! == ServiceType.Heartbeat);
+                Assert.DoesNotContain(running.Values, r =>
+                    (ServiceType)r.GetType().GetProperty("ServiceType")!.GetValue(r)! == ServiceType.Tcp);
 
                 services[0].IsActive = false;
                 File.WriteAllText(tempFile, JsonSerializer.Serialize(services));
                 manager.Sync();
 
-                Assert.Empty(manager.ActiveServices);
+                running = (IDictionary<string, object>)runningField.GetValue(manager)!;
+                Assert.Empty(running);
             }
             finally
             {
@@ -49,9 +57,9 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Theory]
-        [InlineData("HB")]
-        [InlineData("Heartbeat")]
-        public void Sync_LoadsServicesFromConfiguration(string typeValue)
+        [InlineData("HB", ServiceType.Heartbeat)]
+        [InlineData("Heartbeat", ServiceType.Heartbeat)]
+        public void Sync_LoadsServicesFromConfiguration(string typeValue, ServiceType expected)
         {
             var tempDir = Path.Combine(Path.GetTempPath(), System.Guid.NewGuid().ToString());
             var tempFile = Path.Combine(tempDir, "services.json");
@@ -71,7 +79,12 @@ namespace DesktopApplicationTemplate.Tests
 
             using var manager = new ServiceManager(NullLogger<ServiceManager>.Instance, config, tempFile);
             manager.Sync();
-            Assert.Contains("Svc1", manager.ActiveServices);
+
+            var load = typeof(ServiceManager).GetMethod("Load", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            var infos = (List<ServiceInfo>)load.Invoke(manager, null)!;
+            var info = Assert.Single(infos);
+            Assert.Equal(expected, info.ServiceType);
+            Assert.True(info.IsActive);
             ConsoleTestLogger.LogPass();
         }
     }
