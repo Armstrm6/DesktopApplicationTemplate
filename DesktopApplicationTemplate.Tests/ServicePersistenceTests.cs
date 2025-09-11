@@ -2,6 +2,7 @@ using DesktopApplicationTemplate.Persistence;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI;
+using DesktopApplicationTemplate.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -27,8 +28,8 @@ namespace DesktopApplicationTemplate.Tests
             {
                 var services = new List<ServiceListModel>
                 {
-                    new ServiceListModel{DisplayName="A", ServiceType="Heartbeat", IsActive=true, Order=0},
-                    new ServiceListModel{DisplayName="B", ServiceType="TCP", IsActive=false, Order=1}
+                    new ServiceListModel{DisplayName="A", ServiceType=ServiceType.Heartbeat, IsActive=true, Order=0},
+                    new ServiceListModel{DisplayName="B", ServiceType=ServiceType.Tcp, IsActive=false, Order=1}
                 };
                 services[0].AssociatedServices.Add("B");
                 services[1].AssociatedServices.Add("A");
@@ -58,8 +59,8 @@ namespace DesktopApplicationTemplate.Tests
             ServicePersistence.FilePath = Path.Combine(tempDir, "services.json");
             try
             {
-                var a = new ServiceListModel { DisplayName = "A", ServiceType = "TCP" };
-                var b = new ServiceListModel { DisplayName = "B", ServiceType = "TCP" };
+                var a = new ServiceListModel { DisplayName = "A", ServiceType = ServiceType.Tcp };
+                var b = new ServiceListModel { DisplayName = "B", ServiceType = ServiceType.Tcp };
                 a.AssociatedServices.Add("B");
                 b.AssociatedServices.Add("A");
                 var services = new List<ServiceListModel> { a, b };
@@ -101,7 +102,7 @@ namespace DesktopApplicationTemplate.Tests
                     new ServiceListModel
                     {
                         DisplayName="TCP - One",
-                        ServiceType="TCP",
+                        ServiceType=ServiceType.Tcp,
                         IsActive=false,
                         Order=0,
                         TcpOptions = new TcpServiceOptions
@@ -192,7 +193,7 @@ namespace DesktopApplicationTemplate.Tests
                     new ServiceListModel
                     {
                         DisplayName = "FTP Server - One",
-                        ServiceType = "FTP Server",
+                        ServiceType = ServiceType.Ftp,
                         IsActive = false,
                         Order = 0,
                         FtpOptions = new FtpServerOptions
@@ -267,7 +268,7 @@ namespace DesktopApplicationTemplate.Tests
                     new ServiceListModel
                     {
                         DisplayName = "FTP - One",
-                        ServiceType = "FTP",
+                        ServiceType = ServiceType.Ftp,
                         IsActive = false,
                         Order = 0,
                         FtpOptions = new FtpServerOptions

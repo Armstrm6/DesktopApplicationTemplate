@@ -98,7 +98,7 @@ public class TcpServiceMessagesViewModelTests
         var service = new ServiceListModel
         {
             DisplayName = "TCP - svc",
-            ServiceType = "TCP",
+            ServiceType = ServiceType.Tcp,
             TcpOptions = new TcpServiceOptions()
         };
         var routing = new MessageRoutingService();
@@ -116,7 +116,7 @@ public class TcpServiceMessagesViewModelTests
         var service = new ServiceListModel
         {
             DisplayName = "TCP - svc",
-            ServiceType = "TCP",
+            ServiceType = ServiceType.Tcp,
             TcpOptions = new TcpServiceOptions()
         };
         var routing = new MessageRoutingService();
@@ -134,7 +134,7 @@ public class TcpServiceMessagesViewModelTests
         var service = new ServiceListModel
         {
             DisplayName = "TCP - svc",
-            ServiceType = "TCP",
+            ServiceType = ServiceType.Tcp,
             TcpOptions = new TcpServiceOptions { LastTestMessage = "hello" }
         };
         var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
@@ -150,7 +150,7 @@ public class TcpServiceMessagesViewModelTests
         var service = new ServiceListModel
         {
             DisplayName = "TCP - svc",
-            ServiceType = "TCP",
+            ServiceType = ServiceType.Tcp,
             TcpOptions = options
         };
         var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
@@ -169,7 +169,7 @@ public class TcpServiceMessagesViewModelTests
         var service = new ServiceListModel
         {
             DisplayName = "TCP - svc",
-            ServiceType = "TCP",
+            ServiceType = ServiceType.Tcp,
             TcpOptions = options
         };
         var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
@@ -188,7 +188,7 @@ public class TcpServiceMessagesViewModelTests
         var service = new ServiceListModel
         {
             DisplayName = "TCP - svc",
-            ServiceType = "TCP",
+            ServiceType = ServiceType.Tcp,
             TcpOptions = options
         };
         var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
@@ -208,7 +208,7 @@ public class TcpServiceMessagesViewModelTests
         var service = new ServiceListModel
         {
             DisplayName = "TCP - svc",
-            ServiceType = "TCP",
+            ServiceType = ServiceType.Tcp,
             TcpOptions = new TcpServiceOptions { Script = "return message;" }
         };
         var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
@@ -224,7 +224,7 @@ public class TcpServiceMessagesViewModelTests
         var service = new ServiceListModel
         {
             DisplayName = "TCP - svc",
-            ServiceType = "TCP",
+            ServiceType = ServiceType.Tcp,
             TcpOptions = new TcpServiceOptions()
         };
         var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
@@ -241,7 +241,7 @@ public class TcpServiceMessagesViewModelTests
         var service = new ServiceListModel
         {
             DisplayName = "TCP - svc",
-            ServiceType = "TCP",
+            ServiceType = ServiceType.Tcp,
             TcpOptions = options
         };
         var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
@@ -262,7 +262,7 @@ public class TcpServiceMessagesViewModelTests
         var service = new ServiceListModel
         {
             DisplayName = "TCP - svc",
-            ServiceType = "TCP",
+            ServiceType = ServiceType.Tcp,
             TcpOptions = options
         };
         var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
@@ -326,7 +326,7 @@ public class TcpServiceMessagesViewModelTests
         var service = new ServiceListModel
         {
             DisplayName = "TCP - svc",
-            ServiceType = "TCP",
+            ServiceType = ServiceType.Tcp,
             TcpOptions = options
         };
         var routing = new MessageRoutingService();

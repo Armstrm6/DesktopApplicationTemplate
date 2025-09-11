@@ -5,6 +5,7 @@ using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Views;
 using Microsoft.Extensions.DependencyInjection;
+using DesktopApplicationTemplate.Models;
 
 namespace DesktopApplicationTemplate.UI.Navigation
 {
@@ -13,7 +14,7 @@ namespace DesktopApplicationTemplate.UI.Navigation
         private readonly IServiceProvider _services;
         private readonly MainView _mainView;
 
-        public string ServiceType => "FTP Server";
+        public ServiceType ServiceType => ServiceType.Ftp;
 
         public FtpNavigationHandler(IServiceProvider services, MainView mainView)
         {

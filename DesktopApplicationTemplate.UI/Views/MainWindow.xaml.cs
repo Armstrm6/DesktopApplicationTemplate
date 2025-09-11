@@ -94,15 +94,15 @@ namespace DesktopApplicationTemplate.UI.Views
 
             svc.ServicePage = svc.ServiceType switch
             {
-                "TCP" => App.AppHost.Services.GetRequiredService<TcpServiceMessagesView>(),
-                "HTTP" => App.AppHost.Services.GetRequiredService<HttpServiceView>(),
-                "File Observer" => App.AppHost.Services.GetRequiredService<FileObserverView>(),
-                "HID" => App.AppHost.Services.GetRequiredService<HidViews>(),
-                "Heartbeat" => App.AppHost.Services.GetRequiredService<HeartbeatView>(),
-                "SCP" => App.AppHost.Services.GetRequiredService<SCPServiceView>(),
-                "MQTT" => App.AppHost.Services.GetRequiredService<MqttTagSubscriptionsView>(),
-                "FTP Server" or "FTP" => App.AppHost.Services.GetRequiredService<FTPServiceView>(),
-                "CSV Creator" => App.AppHost.Services.GetRequiredService<CsvServiceView>(),
+                ServiceType.Tcp => App.AppHost.Services.GetRequiredService<TcpServiceMessagesView>(),
+                ServiceType.Http => App.AppHost.Services.GetRequiredService<HttpServiceView>(),
+                ServiceType.FileObserver => App.AppHost.Services.GetRequiredService<FileObserverView>(),
+                ServiceType.Hid => App.AppHost.Services.GetRequiredService<HidViews>(),
+                ServiceType.Heartbeat => App.AppHost.Services.GetRequiredService<HeartbeatView>(),
+                ServiceType.Scp => App.AppHost.Services.GetRequiredService<SCPServiceView>(),
+                ServiceType.Mqtt => App.AppHost.Services.GetRequiredService<MqttTagSubscriptionsView>(),
+                ServiceType.Ftp => App.AppHost.Services.GetRequiredService<FTPServiceView>(),
+                ServiceType.Csv => App.AppHost.Services.GetRequiredService<CsvServiceView>(),
                 _ => null
             };
 
@@ -110,7 +110,7 @@ namespace DesktopApplicationTemplate.UI.Views
             {
                 if (svc.ServicePage.DataContext is ILoggingViewModel vm && vm.Logger is LoggingService logger)
                 {
-                    if (svc.ServiceType == "MQTT")
+                    if (svc.ServiceType == ServiceType.Mqtt)
                     {
                         logger.LogAdded += entry => _viewModel.OnServiceLogAdded(svc, entry);
                     }
@@ -134,12 +134,12 @@ namespace DesktopApplicationTemplate.UI.Views
                     logHost.SetServiceContext(svc);
                 }
 
-                if (svc.ServiceType == "TCP" && svc.ServicePage.DataContext is TcpServiceMessagesViewModel tcpVm)
+                if (svc.ServiceType == ServiceType.Tcp && svc.ServicePage.DataContext is TcpServiceMessagesViewModel tcpVm)
                 {
                     tcpVm.AdvancedSettingsRequested += (_, _) =>
                     {
                         var vm = App.AppHost.Services.GetRequiredService<TcpEditServiceViewModel>();
-                        vm.ServiceType = svc.ServiceType;
+                        vm.ServiceType = ServiceTypeJsonConverter.ToLegacyString(svc.ServiceType);
                         vm.Load(svc.DisplayName.Split(" - ").Last(), svc.TcpOptions ?? new TcpServiceOptions());
                         var editView = App.AppHost.Services.GetRequiredService<TcpEditServiceView>();
                         editView.Initialize(vm);
@@ -147,7 +147,8 @@ namespace DesktopApplicationTemplate.UI.Views
                         vm.ServiceSaved += (name, opts) =>
                         {
                             svc.DisplayName = $"{vm.ServiceType} - {name}";
-                            svc.ServiceType = vm.ServiceType;
+                            if (ServiceTypeJsonConverter.TryParse(vm.ServiceType, out var newType))
+                                svc.ServiceType = newType;
                             svc.TcpOptions = opts;
                             if (svc.ServicePage != null)
                                 ShowPage(svc.ServicePage);
@@ -189,7 +190,7 @@ namespace DesktopApplicationTemplate.UI.Views
             {
                 var svc = new ServiceListModel
                 {
-                    DisplayName = $"{type} - {name}",
+                    DisplayName = $"{ServiceTypeJsonConverter.ToLegacyString(type)} - {name}",
                     ServiceType = type,
                     IsActive = false
                 };
@@ -212,9 +213,9 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private CreateServicePage? _createServicePage;
 
-        private void NavigateTo(string serviceType)
+        private void NavigateTo(ServiceType serviceType)
         {
-            var defaultName = _createServicePage?.GenerateDefaultName(serviceType) ?? serviceType;
+            var defaultName = _createServicePage?.GenerateDefaultName(serviceType) ?? ServiceTypeJsonConverter.ToLegacyString(serviceType);
             var handler = App.AppHost.Services.GetServices<INavigationHandler>()
                 .FirstOrDefault(h => h.ServiceType == serviceType);
             if (handler == null)
@@ -231,7 +232,7 @@ namespace DesktopApplicationTemplate.UI.Views
 
 
 
-        internal async Task AddServiceAsync(string type, object options)
+        internal async Task AddServiceAsync(ServiceType type, object options)
         {
             var factory = App.AppHost.Services.GetServices<IServiceFactory>()
                 .FirstOrDefault(f => f.ServiceType == type);
@@ -257,8 +258,7 @@ namespace DesktopApplicationTemplate.UI.Views
     {
         _logger?.LogDebug("Edit requested for {Name}", service.DisplayName);
 
-        if (ServiceTypeJsonConverter.TryParse(service.ServiceType, out var type) &&
-            _editHandlers.TryGetValue(type, out var handler))
+        if (_editHandlers.TryGetValue(service.ServiceType, out var handler))
         {
             handler(service);
             return;
@@ -477,14 +477,15 @@ namespace DesktopApplicationTemplate.UI.Views
         var tcpPage = GetOrCreateServicePage(service);
         var options = service.TcpOptions ?? new TcpServiceOptions();
         var vm = App.AppHost.Services.GetRequiredService<TcpEditServiceViewModel>();
-        vm.ServiceType = service.ServiceType;
+        vm.ServiceType = ServiceTypeJsonConverter.ToLegacyString(service.ServiceType);
         vm.Load(service.DisplayName.Split(" - ").Last(), options);
         var editView = App.AppHost.Services.GetRequiredService<TcpEditServiceView>();
         editView.Initialize(vm);
         vm.ServiceSaved += (name, opts) =>
         {
             service.DisplayName = $"{vm.ServiceType} - {name}";
-            service.ServiceType = vm.ServiceType;
+            if (ServiceTypeJsonConverter.TryParse(vm.ServiceType, out var newType))
+                service.ServiceType = newType;
             service.TcpOptions = opts;
             if (tcpPage != null)
                 ShowPage(tcpPage);
@@ -643,7 +644,7 @@ namespace DesktopApplicationTemplate.UI.Views
                     {
                         namePart = _viewModel.GenerateServiceName(svc.ServiceType);
                     }
-                    svc.DisplayName = $"{svc.ServiceType} - {namePart}";
+                    svc.DisplayName = $"{ServiceTypeJsonConverter.ToLegacyString(svc.ServiceType)} - {namePart}";
                     await _viewModel.SaveServicesAsync();
                 }
             }
