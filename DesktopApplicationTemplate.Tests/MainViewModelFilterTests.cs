@@ -23,8 +23,8 @@ namespace DesktopApplicationTemplate.Tests
             {
                 Services =
                 {
-                    new ServiceListModel { DisplayName = "HTTP - HTTP1", ServiceType = ServiceType.Http, IsActive = true, Order = 0 },
-                    new ServiceListModel { DisplayName = "TCP - TCP1", ServiceType = ServiceType.Tcp, IsActive = true, Order = 1 }
+                    TestHelpers.CreateService(ServiceType.Http, "HTTP1") { IsActive = true, Order = 0 },
+                    TestHelpers.CreateService(ServiceType.Tcp, "TCP1") { IsActive = true, Order = 1 }
                 },
                 Filters = { NameFilter = "HTTP" }
             };

@@ -100,10 +100,8 @@ namespace DesktopApplicationTemplate.Tests
 
                 var services = new List<ServiceListModel>
                 {
-                    new ServiceListModel
+                    TestHelpers.CreateService(ServiceType.Tcp, "One")
                     {
-                        DisplayName="TCP - One",
-                        ServiceType=ServiceType.Tcp,
                         IsActive=false,
                         Order=0,
                         TcpOptions = new TcpServiceOptions
@@ -187,10 +185,8 @@ namespace DesktopApplicationTemplate.Tests
 
                 var services = new List<ServiceListModel>
                 {
-                    new ServiceListModel
+                    TestHelpers.CreateService(ServiceType.Ftp, "One")
                     {
-                        DisplayName = "FTP Server - One",
-                        ServiceType = ServiceType.Ftp,
                         IsActive = false,
                         Order = 0,
                         FtpOptions = new FtpServerOptions
@@ -262,10 +258,8 @@ namespace DesktopApplicationTemplate.Tests
 
                 var services = new List<ServiceListModel>
                 {
-                    new ServiceListModel
+                    TestHelpers.CreateService(ServiceType.Ftp, "One")
                     {
-                        DisplayName = "FTP - One",
-                        ServiceType = ServiceType.Ftp,
                         IsActive = false,
                         Order = 0,
                         FtpOptions = new FtpServerOptions
