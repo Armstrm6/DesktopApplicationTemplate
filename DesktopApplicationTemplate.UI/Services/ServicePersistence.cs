@@ -4,7 +4,6 @@ using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.Core.Converters;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.ViewModels;
 using Microsoft.Extensions.Options;
@@ -149,7 +148,7 @@ namespace DesktopApplicationTemplate.Persistence
                 var result = new List<ServiceInfo>();
                 foreach (var info in legacy)
                 {
-                    if (ServiceTypeJsonConverter.TryParse(info.ServiceType, out var type))
+                    if (ServiceTypeExtensions.TryParse(info.ServiceType, out var type))
                     {
                         result.Add(new ServiceInfo
                         {

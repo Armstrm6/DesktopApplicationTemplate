@@ -2,7 +2,6 @@ using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Models;
-using DesktopApplicationTemplate.Core.Converters;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -79,9 +78,9 @@ namespace DesktopApplicationTemplate.Tests
             {
                 desired = main.GenerateServiceName(svc2.ServiceType);
             }
-            svc2.DisplayName = $"{ServiceTypeJsonConverter.ToLegacyString(svc2.ServiceType)} - {desired}";
+            svc2.DisplayName = $"{svc2.ServiceType.ToLegacyString()} - {desired}";
 
-            var expected = $"{ServiceTypeJsonConverter.ToLegacyString(type)} - {baseName[..^1] + "3"}";
+            var expected = $"{type.ToLegacyString()} - {baseName[..^1] + "3"}";
             Assert.Equal(expected, svc2.DisplayName);
 
             Directory.Delete(tempDir, true);

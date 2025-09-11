@@ -9,7 +9,6 @@ using System.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using DesktopApplicationTemplate.Models;
-using DesktopApplicationTemplate.Core.Converters;
 
 namespace DesktopApplicationTemplate.Service
 {
@@ -100,7 +99,7 @@ namespace DesktopApplicationTemplate.Service
                 var results = new List<ServiceInfo>();
                 foreach (var cfg in configs)
                 {
-                    if (ServiceTypeJsonConverter.TryParse(cfg.ServiceType, out var type))
+                    if (ServiceTypeExtensions.TryParse(cfg.ServiceType, out var type))
                     {
                         results.Add(new ServiceInfo
                         {
@@ -125,7 +124,7 @@ namespace DesktopApplicationTemplate.Service
                 var results = new List<ServiceInfo>();
                 foreach (var info in legacy)
                 {
-                    if (ServiceTypeJsonConverter.TryParse(info.ServiceType, out var type))
+                    if (ServiceTypeExtensions.TryParse(info.ServiceType, out var type))
                     {
                         results.Add(new ServiceInfo
                         {
@@ -257,7 +256,7 @@ namespace DesktopApplicationTemplate.Service
             {
                 var pid = Process.GetCurrentProcess().Id;
                 var lines = _records.Values
-                    .Select(r => $"{pid}\t{r.Name}\t{ServiceTypeJsonConverter.ToLegacyString(r.ServiceType)}\t{r.StartTime:o}\t{r.Status}")
+                    .Select(r => $"{pid}\t{r.Name}\t{r.ServiceType.ToLegacyString()}\t{r.StartTime:o}\t{r.Status}")
                     .ToArray();
                 File.WriteAllLines(_activeServicesFilePath, lines);
             }

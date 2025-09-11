@@ -15,6 +15,7 @@
 - `ServiceType` enum clarifies supported service categories.
 - Migration routine converts legacy service type names to `ServiceType` and logs unmapped values.
 - `IServiceModule` interface enables service-specific DI registration and modules are discovered and registered automatically at startup.
+- Static `ServiceTypeExtensions` maps service types to short codes for reuse in serialization and configuration.
 
 #### Changed
 - Clarified environment instruction precedence in `AGENTS.md`.
