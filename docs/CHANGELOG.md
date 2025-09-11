@@ -266,6 +266,7 @@
 ### Documentation & CI
 #### Added
 - Section on working in restricted environments and reminder to log limitations in collaboration docs.
+- Documented `ServiceType` enum values in `docs/ServiceTypes.md` and linked from README.
 - Documented architecture and coding standards in `AGENTS.md`.
 - `CONTRIBUTING.md` and PR template enforcing CI-only testing with a CI badge in the README.
 - `/test` comment workflow to run CI on demand.

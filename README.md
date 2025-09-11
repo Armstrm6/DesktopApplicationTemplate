@@ -114,6 +114,8 @@ no manual configuration is required.
 
 ## Services overview
 
+For details on each service enumeration, see [Service Types](docs/ServiceTypes.md).
+
 The UI exposes several built in service types. A brief description of each is shown below.
 
 - **HID** – configure HID devices, forward output to another service, set debounce and key down times, select USB protocol (2.0/3.0) and apply custom formatting.
