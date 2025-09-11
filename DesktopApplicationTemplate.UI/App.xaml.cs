@@ -55,7 +55,7 @@ namespace DesktopApplicationTemplate.UI
 
         private void ConfigureServices(IConfiguration configuration, IServiceCollection services)
         {
-            services.AddServiceModules();
+            services.AddServiceModules(); // Scans loaded assemblies for IServiceModule implementations and lets them register services
             services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Mqtt, sp => new DelegateEditServiceHandler(service => sp.GetRequiredService<MainView>().EditMqtt(service)));
             services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Heartbeat, sp => new DelegateEditServiceHandler(service => sp.GetRequiredService<MainView>().EditHeartbeat(service)));
             services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Hid, sp => new DelegateEditServiceHandler(service => sp.GetRequiredService<MainView>().EditHid(service)));
@@ -67,6 +67,7 @@ namespace DesktopApplicationTemplate.UI
             services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Ftp, sp => new DelegateEditServiceHandler(service => sp.GetRequiredService<MainView>().EditFtp(service)));
             services.AddSingleton<IDictionary<ServiceType, IEditServiceHandler>>(sp =>
             {
+                // Build a lookup of edit handlers by resolving each keyed registration for every ServiceType value
                 var handlers = new Dictionary<ServiceType, IEditServiceHandler>();
                 foreach (ServiceType type in Enum.GetValues<ServiceType>())
                 {

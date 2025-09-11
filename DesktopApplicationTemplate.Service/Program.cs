@@ -34,7 +34,7 @@ namespace DesktopApplicationTemplate.Service
 
             return builder.ConfigureServices((hostContext, services) =>
             {
-                services.AddServiceModules();
+                services.AddServiceModules(); // Discovers IServiceModule implementations in loaded assemblies
                 services.AddHostedService<Worker>(); // register the background service
                 services.AddCommonServices();
                 services.AddFtpServer(builder => builder
