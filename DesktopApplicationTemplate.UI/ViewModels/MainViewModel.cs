@@ -113,10 +113,16 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private void EditService(ServiceListModel? service)
         {
             var target = service ?? SelectedService;
-            if (target != null)
+            if (target == null)
+                return;
+
+            if (!ServiceTypeJsonConverter.TryParse(target.ServiceType, out _))
             {
-                EditRequested?.Invoke(target);
+                _logger?.Log($"Unrecognized service type '{target.ServiceType}'", LogLevel.Warning);
+                return;
             }
+
+            EditRequested?.Invoke(target);
         }
 
         private void AddService()
