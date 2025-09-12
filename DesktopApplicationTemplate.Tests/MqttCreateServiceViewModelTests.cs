@@ -5,7 +5,7 @@ using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Services.Common;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
-using DesktopApplicationTemplate.UI.ViewModels.Mqtt;
+using DesktopApplicationTemplate.UI.ViewModels.Mqtt.Create;
 using MQTTnet.Protocol;
 using Xunit;
 

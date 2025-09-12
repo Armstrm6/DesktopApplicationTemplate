@@ -1,6 +1,5 @@
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
-using DesktopApplicationTemplate.UI.ViewModels.Tcp;
 using DesktopApplicationTemplate.UI.ViewModels.Http;
 using DesktopApplicationTemplate.UI.Helpers;
 using System.Threading.Tasks;

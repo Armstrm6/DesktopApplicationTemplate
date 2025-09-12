@@ -1,7 +1,7 @@
 using System;
 using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI.ViewModels;
-using DesktopApplicationTemplate.UI.ViewModels.Tcp;
+using DesktopApplicationTemplate.UI.ViewModels.Tcp.Edit;
 using DesktopApplicationTemplate.UI.Views.Tcp;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.Models;

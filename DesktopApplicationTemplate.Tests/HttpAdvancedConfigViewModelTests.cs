@@ -1,6 +1,6 @@
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
-using DesktopApplicationTemplate.UI.ViewModels.Http;
+using DesktopApplicationTemplate.UI.ViewModels.Http.Advanced;
 using Xunit;
 
 namespace DesktopApplicationTemplate.Tests;

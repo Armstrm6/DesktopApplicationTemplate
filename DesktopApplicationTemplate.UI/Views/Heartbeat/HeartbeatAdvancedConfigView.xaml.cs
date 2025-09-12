@@ -1,6 +1,6 @@
 using System.Windows.Controls;
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.UI.ViewModels.Heartbeat;
+using DesktopApplicationTemplate.UI.ViewModels.Heartbeat.Advanced;
 
 namespace DesktopApplicationTemplate.UI.Views.Heartbeat;
 

@@ -1,5 +1,5 @@
 using System.Windows.Controls;
-using DesktopApplicationTemplate.UI.ViewModels.Mqtt;
+using DesktopApplicationTemplate.UI.ViewModels.Mqtt.Edit;
 
 namespace DesktopApplicationTemplate.UI.Views.Mqtt;
 

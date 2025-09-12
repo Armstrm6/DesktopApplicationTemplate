@@ -2,7 +2,7 @@ using System.IO;
 using System.Linq;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
-using DesktopApplicationTemplate.UI.ViewModels.Mqtt;
+using DesktopApplicationTemplate.UI.ViewModels.Mqtt.Advanced;
 using MQTTnet.Protocol;
 using Xunit;
 

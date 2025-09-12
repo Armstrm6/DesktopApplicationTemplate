@@ -1,7 +1,7 @@
 using System;
 using System.Windows.Controls;
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.UI.ViewModels.Ftp;
+using DesktopApplicationTemplate.UI.ViewModels.Ftp.Advanced;
 
 namespace DesktopApplicationTemplate.UI.Views.Ftp;
 

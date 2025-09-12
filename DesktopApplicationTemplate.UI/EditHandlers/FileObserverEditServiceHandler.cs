@@ -1,7 +1,8 @@
 using System;
 using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI.ViewModels;
-using DesktopApplicationTemplate.UI.ViewModels.FileObserver;
+using DesktopApplicationTemplate.UI.ViewModels.FileObserver.Edit;
+using DesktopApplicationTemplate.UI.ViewModels.FileObserver.Advanced;
 using DesktopApplicationTemplate.UI.Views.FileObserver;
 using DesktopApplicationTemplate.UI.Services;
 using Microsoft.Extensions.DependencyInjection;

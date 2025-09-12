@@ -3,7 +3,7 @@ using System;
 using System.Windows.Controls;
 using DesktopApplicationTemplate.UI.Factories;
 using DesktopApplicationTemplate.UI.Services;
-using DesktopApplicationTemplate.UI.ViewModels.Tcp;
+using DesktopApplicationTemplate.UI.ViewModels.Tcp.Create;
 using DesktopApplicationTemplate.UI.Views.Tcp;
 using Microsoft.Extensions.DependencyInjection;
 using DesktopApplicationTemplate.Models;
