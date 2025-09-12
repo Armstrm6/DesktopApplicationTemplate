@@ -18,7 +18,7 @@ public class ScpCreateServiceViewModel : ServiceCreateViewModelBase<ScpServiceOp
     /// Initializes a new instance of the <see cref="ScpCreateServiceViewModel"/> class.
     /// </summary>
     public ScpCreateServiceViewModel(IServiceRule rule, ILoggingService? logger = null)
-        : base(rule, logger)
+        : base(rule, logger: logger)
     {
     }
 
@@ -123,45 +123,13 @@ public class ScpCreateServiceViewModel : ServiceCreateViewModelBase<ScpServiceOp
         }
     }
 
-    /// <summary>
-    /// Current configuration options.
-    /// </summary>
-    public ScpServiceOptions Options { get; } = new();
-
     /// <inheritdoc />
-    protected override void OnSave()
+    protected override void ApplyOptions(ScpServiceOptions options)
     {
-        if (HasErrors)
-        {
-            Logger?.Log("SCP create validation failed", LogLevel.Warning);
-            return;
-        }
-        Logger?.Log("SCP create options start", LogLevel.Debug);
-        Options.Host = Host;
+        options.Host = Host;
         if (int.TryParse(Port, out var port))
-            Options.Port = port;
-        Options.Username = Username;
-        Options.Password = Password;
-        Logger?.Log("SCP create options finished", LogLevel.Debug);
-        RaiseServiceSaved(Options);
-    }
-
-    /// <inheritdoc />
-    protected override void OnCancel()
-    {
-        Logger?.Log("SCP create cancelled", LogLevel.Debug);
-        RaiseEditCancelled();
-    }
-
-    /// <inheritdoc />
-    protected override void OnAdvancedConfig()
-    {
-        Logger?.Log("Opening SCP advanced config", LogLevel.Debug);
-        Options.Host = Host;
-        if (int.TryParse(Port, out var port))
-            Options.Port = port;
-        Options.Username = Username;
-        Options.Password = Password;
-        RaiseAdvancedConfigRequested(Options);
+            options.Port = port;
+        options.Username = Username;
+        options.Password = Password;
     }
 }
