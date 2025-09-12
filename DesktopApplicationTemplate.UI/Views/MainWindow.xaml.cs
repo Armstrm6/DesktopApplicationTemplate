@@ -4,7 +4,7 @@ using System.Windows.Controls;
 using DesktopApplicationTemplate.UI.Navigation;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Factories;
-using DesktopApplicationTemplate.Models;
+using DesktopApplicationTemplate.Core;
 using LogLevel = DesktopApplicationTemplate.Core.Services.LogLevel;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
