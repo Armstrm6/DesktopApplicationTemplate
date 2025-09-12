@@ -27,7 +27,7 @@ namespace DesktopApplicationTemplate.Persistence
                 CsvServiceOptions? csv = null;
                 FtpServerOptions? ftp = null;
                 HttpServiceOptions? http = null;
-                if (s.ServiceType == ServiceType.Tcp && s.TcpOptions != null)
+                if (s.Type == ServiceType.Tcp && s.TcpOptions != null)
                 {
                     tcp = new TcpServiceOptions
                     {
@@ -42,7 +42,7 @@ namespace DesktopApplicationTemplate.Persistence
                     };
                 }
 
-                if (s.ServiceType == ServiceType.Ftp && s.FtpOptions != null)
+                if (s.Type == ServiceType.Ftp && s.FtpOptions != null)
                 {
                     ftp = new FtpServerOptions
                     {
@@ -54,7 +54,7 @@ namespace DesktopApplicationTemplate.Persistence
                     };
                 }
 
-                if (s.ServiceType == ServiceType.Http && s.HttpOptions != null)
+                if (s.Type == ServiceType.Http && s.HttpOptions != null)
                 {
                     http = new HttpServiceOptions
                     {
@@ -64,7 +64,7 @@ namespace DesktopApplicationTemplate.Persistence
                         ClientCertificatePath = s.HttpOptions.ClientCertificatePath
                     };
                 }
-                if (s.ServiceType == ServiceType.Csv && s.CsvOptions != null)
+                if (s.Type == ServiceType.Csv && s.CsvOptions != null)
                 {
                     csv = new CsvServiceOptions
                     {
@@ -77,7 +77,7 @@ namespace DesktopApplicationTemplate.Persistence
                 data.Add(new ServiceInfo
                 {
                     DisplayName = s.DisplayName,
-                    ServiceType = s.ServiceType,
+                    ServiceType = s.Type,
                     IsActive = s.IsActive,
                     Created = DateTime.Now,
                     Order = index++,

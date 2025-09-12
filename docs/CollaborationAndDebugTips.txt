@@ -515,6 +515,8 @@ Related Commits/PRs:
 Latest Attempt: After reorganizing service views and view models into per-service subfolders, the `dotnet` command remains unavailable; restore, build, and test commands could not run locally, so CI will verify.
 Newest Attempt: After adding service factory and navigation handler tests, the `dotnet` CLI remains missing and `dotnet test --settings tests.runsettings` cannot run; relying on CI.
 
+Latest Attempt: After moving edit handlers into the MainViewModel and switching ServiceListModel to a Type enum property, the `dotnet` command is still unavailable; restore, build, and test steps could not run locally so CI will verify.
+
 [2025-08-29 16:00] Topic: UI test removal
 Context: Removed DesktopApplicationTemplate.UI.Tests project and WPF UI tests that hung due to initialization issues.
 Observations: Deleting UI tests leaves only data-focused tests; solution no longer references the UI test project.

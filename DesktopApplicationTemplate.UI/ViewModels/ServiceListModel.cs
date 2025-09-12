@@ -14,7 +14,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
     public class ServiceListModel : ViewModelBase
     {
         public string DisplayName { get; set; } = string.Empty;
-        public ServiceType ServiceType { get; set; }
+        public ServiceType Type { get; set; }
         [JsonIgnore] public Page? Page { get; set; }
         public int Order { get; set; }
 
@@ -227,7 +227,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public void SetColorsByType()
         {
-            (BackgroundColor, BorderColor) = ServiceType switch
+            (BackgroundColor, BorderColor) = Type switch
             {
                 ServiceType.Tcp => (WpfBrushes.LightBlue, WpfBrushes.DarkBlue),
                 ServiceType.Http => (WpfBrushes.LightGreen, WpfBrushes.DarkGreen),

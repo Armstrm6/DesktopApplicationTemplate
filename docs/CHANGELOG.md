@@ -31,6 +31,7 @@
 - Service persistence now stores `ServiceType` as short codes and reads legacy string names.
 - Service creation and navigation now resolve services via `ServiceType` enum lookups instead of string-based switches.
 - `ServiceManager` loads default services from configuration using `ServiceType` short codes and accepts legacy names.
+- `ServiceListModel` now exposes a `Type` enum property, removing string-based service comparisons.
 
 #### Fixed
 - Event raising helpers in `ServiceEditorViewModelBase` invoked themselves recursively; now invoke events directly.
@@ -78,6 +79,7 @@
 - Removed `KeyboardHelper` and exit hooks; simulated key presses manage their own cleanup.
 - Removed `MainView` KeyDown handler; pressing Escape no longer returns to the home page.
 - Removed unused `HomePage` view and `PackUriSchemeInitializer`.
+- Main view model resolves edit requests through a DI-injected handler dictionary.
 - TCP create and edit views inline UDP and mode options, removing the separate advanced configuration view.
 - TCP create and edit view models remove string-based service type fields, using `ServiceType` enum for navigation.
 - TCP service messages view removes script editors and adds a test message input bound to view model.

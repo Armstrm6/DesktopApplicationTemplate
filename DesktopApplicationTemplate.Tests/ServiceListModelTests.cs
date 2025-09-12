@@ -22,7 +22,7 @@ namespace DesktopApplicationTemplate.Tests
             var b = TestHelpers.CreateService(ServiceType.Tcp, "B");
             var services = new List<ServiceListModel> { a, b };
             ServiceListModel.ResolveService = (type, name) =>
-                services.Find(s => s.ServiceType == type && s.DisplayName.Split(" - ").Last() == name);
+                services.Find(s => s.Type == type && s.DisplayName.Split(" - ").Last() == name);
 
             a.AddLog("TCP.B.Test message");
 
@@ -43,7 +43,7 @@ namespace DesktopApplicationTemplate.Tests
             var csv = new CsvService(csvVm);
             var net = new StubNetworkService();
             var netVm = new NetworkConfigurationViewModel(net);
-            var main = new MainViewModel(csv, netVm, net, servicesFilePath: Path.Combine(tempDir, "services.json"));
+            var main = new MainViewModel(csv, netVm, net, new Dictionary<ServiceType, IEditServiceHandler>(), servicesFilePath: Path.Combine(tempDir, "services.json"));
 
             main.Services.Add(TestHelpers.CreateService(type, baseName));
             var secondName = baseName[..^1] + "2";
@@ -67,7 +67,7 @@ namespace DesktopApplicationTemplate.Tests
             var csv = new CsvService(csvVm);
             var net = new StubNetworkService();
             var netVm = new NetworkConfigurationViewModel(net);
-            var main = new MainViewModel(csv, netVm, net, servicesFilePath: Path.Combine(tempDir, "services.json"));
+            var main = new MainViewModel(csv, netVm, net, new Dictionary<ServiceType, IEditServiceHandler>(), servicesFilePath: Path.Combine(tempDir, "services.json"));
 
             var svc1 = TestHelpers.CreateService(type, baseName);
             var svc2 = TestHelpers.CreateService(type, baseName[..^1] + "2");
@@ -77,9 +77,9 @@ namespace DesktopApplicationTemplate.Tests
             var desired = baseName;
             if (main.Services.Any(s => s != svc2 && s.DisplayName.Split(" - ").Last().Equals(desired, StringComparison.OrdinalIgnoreCase)))
             {
-                desired = main.GenerateServiceName(svc2.ServiceType);
+                desired = main.GenerateServiceName(svc2.Type);
             }
-            svc2.DisplayName = $"{svc2.ServiceType.ToLegacyString()} - {desired}";
+            svc2.DisplayName = $"{svc2.Type.ToLegacyString()} - {desired}";
 
             var expected = $"{type.ToLegacyString()} - {baseName[..^1] + "3"}";
             Assert.Equal(expected, svc2.DisplayName);
@@ -91,7 +91,7 @@ namespace DesktopApplicationTemplate.Tests
         [Fact]
         public void RecordExecutionTime_ComputesAverageAndTracksLastExecution()
         {
-            var vm = new ServiceListModel { ServiceType = ServiceType.Tcp };
+            var vm = new ServiceListModel { Type = ServiceType.Tcp };
             vm.RecordExecutionTime(TimeSpan.FromMilliseconds(100));
             vm.RecordExecutionTime(TimeSpan.FromMilliseconds(50));
 
@@ -104,7 +104,7 @@ namespace DesktopApplicationTemplate.Tests
         [Fact]
         public void RecordExecutionTime_Throws_When_Negative()
         {
-            var vm = new ServiceListModel { ServiceType = ServiceType.Tcp };
+            var vm = new ServiceListModel { Type = ServiceType.Tcp };
             Assert.Throws<ArgumentException>(() => vm.RecordExecutionTime(TimeSpan.FromMilliseconds(-1)));
             ConsoleTestLogger.LogPass();
         }
@@ -112,7 +112,7 @@ namespace DesktopApplicationTemplate.Tests
         [Fact]
         public void AddLog_UpdatesLastInputMessage()
         {
-            var vm = new ServiceListModel { ServiceType = ServiceType.Tcp };
+            var vm = new ServiceListModel { Type = ServiceType.Tcp };
             vm.AddLog("hello world");
 
             Assert.Equal("hello world", vm.LastInputMessage);
