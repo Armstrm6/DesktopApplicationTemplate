@@ -30,7 +30,7 @@ namespace DesktopApplicationTemplate.UI.Factories
             var svc = new ServiceListModel
             {
                 DisplayName = $"FTP Server - {name}",
-                ServiceType = ServiceType.Ftp,
+                Type = ServiceType.Ftp,
                 IsActive = false,
                 FtpOptions = options
             };

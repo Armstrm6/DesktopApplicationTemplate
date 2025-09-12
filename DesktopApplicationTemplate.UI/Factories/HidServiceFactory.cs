@@ -26,7 +26,7 @@ namespace DesktopApplicationTemplate.UI.Factories
             var svc = new ServiceListModel
             {
                 DisplayName = $"{ServiceType.Hid.ToLegacyString()} - {name}",
-                ServiceType = ServiceType.Hid,
+                Type = ServiceType.Hid,
                 IsActive = false,
                 HidOptions = options
             };

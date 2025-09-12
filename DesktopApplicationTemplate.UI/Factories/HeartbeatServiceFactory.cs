@@ -26,7 +26,7 @@ namespace DesktopApplicationTemplate.UI.Factories
             var svc = new ServiceListModel
             {
                 DisplayName = $"{ServiceType.Heartbeat.ToLegacyString()} - {name}",
-                ServiceType = ServiceType.Heartbeat,
+                Type = ServiceType.Heartbeat,
                 IsActive = false,
                 HeartbeatOptions = options
             };

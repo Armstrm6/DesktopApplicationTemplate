@@ -26,7 +26,7 @@ namespace DesktopApplicationTemplate.UI.Factories
             var svc = new ServiceListModel
             {
                 DisplayName = $"{ServiceType.FileObserver.ToLegacyString()} - {name}",
-                ServiceType = ServiceType.FileObserver,
+                Type = ServiceType.FileObserver,
                 IsActive = false,
                 FileObserverOptions = options
             };

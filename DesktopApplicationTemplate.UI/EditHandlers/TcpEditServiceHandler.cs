@@ -4,7 +4,7 @@ using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.ViewModels.Tcp;
 using DesktopApplicationTemplate.UI.Views.Tcp;
 using DesktopApplicationTemplate.UI.Services;
-using DesktopApplicationTemplate.Core.Models;
+using DesktopApplicationTemplate.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 

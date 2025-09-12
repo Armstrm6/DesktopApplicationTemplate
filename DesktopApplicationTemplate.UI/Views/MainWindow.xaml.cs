@@ -4,7 +4,7 @@ using System.Windows.Controls;
 using DesktopApplicationTemplate.UI.Navigation;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Factories;
-using DesktopApplicationTemplate.Core.Models;
+using DesktopApplicationTemplate.Models;
 using LogLevel = DesktopApplicationTemplate.Core.Services.LogLevel;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -275,7 +275,7 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             if (sender is MenuItem { DataContext: ServiceListModel svc })
             {
-                string input = Interaction.InputBox("Enter new service name:", "Rename Service", svc.DisplayName);
+                string input = Microsoft.VisualBasic.Interaction.InputBox("Enter new service name:", "Rename Service", svc.DisplayName);
                 if (!string.IsNullOrWhiteSpace(input))
                 {
                     var namePart = input.Contains(" - ") ? input.Split(" - ").Last() : input;

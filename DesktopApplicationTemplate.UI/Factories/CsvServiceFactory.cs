@@ -26,7 +26,7 @@ namespace DesktopApplicationTemplate.UI.Factories
             var svc = new ServiceListModel
             {
                 DisplayName = $"{ServiceType.Csv.ToLegacyString()} - {name}",
-                ServiceType = ServiceType.Csv,
+                Type = ServiceType.Csv,
                 IsActive = false,
                 CsvOptions = options
             };

@@ -36,6 +36,7 @@
 #### Fixed
 - Event raising helpers in `ServiceEditorViewModelBase` invoked themselves recursively; now invoke events directly.
 - Removed unsupported `DisplayName` assignment from Windows service options to restore service build.
+- Service factories populate the `Type` property when creating service models.
 
 ### Navigation & UI
 #### Added
