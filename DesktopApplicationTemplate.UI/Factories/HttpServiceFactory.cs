@@ -26,7 +26,7 @@ namespace DesktopApplicationTemplate.UI.Factories
             var svc = new ServiceListModel
             {
                 DisplayName = $"{ServiceType.Http.ToLegacyString()} - {name}",
-                ServiceType = ServiceType.Http,
+                Type = ServiceType.Http,
                 IsActive = false,
                 HttpOptions = options
             };

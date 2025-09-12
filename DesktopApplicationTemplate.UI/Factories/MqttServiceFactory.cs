@@ -1,7 +1,9 @@
 using System;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI.ViewModels.Mqtt;
 using DesktopApplicationTemplate.UI.Views;
+using DesktopApplicationTemplate.UI.Views.Mqtt;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using DesktopApplicationTemplate.Models;
@@ -32,7 +34,7 @@ namespace DesktopApplicationTemplate.UI.Factories
             var newService = new ServiceListModel
             {
                 DisplayName = $"MQTT - {name}",
-                ServiceType = ServiceType.Mqtt,
+                Type = ServiceType.Mqtt,
                 IsActive = false
             };
 

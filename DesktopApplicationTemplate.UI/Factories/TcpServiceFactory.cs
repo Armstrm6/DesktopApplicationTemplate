@@ -26,7 +26,7 @@ namespace DesktopApplicationTemplate.UI.Factories
             var svc = new ServiceListModel
             {
                 DisplayName = $"{ServiceType.Tcp.ToLegacyString()} - {name}",
-                ServiceType = ServiceType.Tcp,
+                Type = ServiceType.Tcp,
                 IsActive = false,
                 TcpOptions = options
             };

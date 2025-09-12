@@ -76,15 +76,15 @@ namespace DesktopApplicationTemplate.UI
         private void ConfigureServices(IConfiguration configuration, IServiceCollection services)
         {
             services.AddServiceModules();
-            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Mqtt, sp => new MqttEditServiceHandler(sp.GetRequiredService<MainView>(), sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<MqttEditServiceHandler>>()));
-            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Heartbeat, sp => new HeartbeatEditServiceHandler(sp.GetRequiredService<MainView>(), sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<HeartbeatEditServiceHandler>>()));
-            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Hid, sp => new HidEditServiceHandler(sp.GetRequiredService<MainView>(), sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<HidEditServiceHandler>>()));
-            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Csv, sp => new CsvEditServiceHandler(sp.GetRequiredService<MainView>(), sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<CsvEditServiceHandler>>()));
-            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.FileObserver, sp => new FileObserverEditServiceHandler(sp.GetRequiredService<MainView>(), sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<FileObserverEditServiceHandler>>()));
-            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Scp, sp => new ScpEditServiceHandler(sp.GetRequiredService<MainView>(), sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<ScpEditServiceHandler>>()));
-            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Tcp, sp => new TcpEditServiceHandler(sp.GetRequiredService<MainView>(), sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<TcpEditServiceHandler>>()));
-            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Http, sp => new HttpEditServiceHandler(sp.GetRequiredService<MainView>(), sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<HttpEditServiceHandler>>()));
-            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Ftp, sp => new FtpEditServiceHandler(sp.GetRequiredService<MainView>(), sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<FtpEditServiceHandler>>()));
+            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Mqtt, (sp, _) => new MqttEditServiceHandler(sp.GetRequiredService<MainView>(), sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<MqttEditServiceHandler>>()));
+            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Heartbeat, (sp, _) => new HeartbeatEditServiceHandler(sp.GetRequiredService<MainView>(), sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<HeartbeatEditServiceHandler>>()));
+            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Hid, (sp, _) => new HidEditServiceHandler(sp.GetRequiredService<MainView>(), sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<HidEditServiceHandler>>()));
+            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Csv, (sp, _) => new CsvEditServiceHandler(sp.GetRequiredService<MainView>(), sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<CsvEditServiceHandler>>()));
+            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.FileObserver, (sp, _) => new FileObserverEditServiceHandler(sp.GetRequiredService<MainView>(), sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<FileObserverEditServiceHandler>>()));
+            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Scp, (sp, _) => new ScpEditServiceHandler(sp.GetRequiredService<MainView>(), sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<ScpEditServiceHandler>>()));
+            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Tcp, (sp, _) => new TcpEditServiceHandler(sp.GetRequiredService<MainView>(), sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<TcpEditServiceHandler>>()));
+            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Http, (sp, _) => new HttpEditServiceHandler(sp.GetRequiredService<MainView>(), sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<HttpEditServiceHandler>>()));
+            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Ftp, (sp, _) => new FtpEditServiceHandler(sp.GetRequiredService<MainView>(), sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<FtpEditServiceHandler>>()));
             services.AddSingleton<IDictionary<ServiceType, IEditServiceHandler>>(sp =>
             {
                 var handlers = new Dictionary<ServiceType, IEditServiceHandler>();
@@ -136,15 +136,15 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<CsvService>();
             services.AddSingleton<CsvServiceView>();
             services.AddSingleton<SettingsViewModel>();
-            services.AddKeyedTransient<Page>(ServiceType.Tcp, sp => sp.GetRequiredService<TcpServiceMessagesView>());
-            services.AddKeyedTransient<Page>(ServiceType.Http, sp => sp.GetRequiredService<HttpServiceView>());
-            services.AddKeyedTransient<Page>(ServiceType.FileObserver, sp => sp.GetRequiredService<FileObserverView>());
-            services.AddKeyedTransient<Page>(ServiceType.Hid, sp => sp.GetRequiredService<HidViews>());
-            services.AddKeyedTransient<Page>(ServiceType.Heartbeat, sp => sp.GetRequiredService<HeartbeatView>());
-            services.AddKeyedTransient<Page>(ServiceType.Scp, sp => sp.GetRequiredService<SCPServiceView>());
-            services.AddKeyedTransient<Page>(ServiceType.Mqtt, sp => sp.GetRequiredService<MqttTagSubscriptionsView>());
-            services.AddKeyedTransient<Page>(ServiceType.Ftp, sp => sp.GetRequiredService<FTPServiceView>());
-            services.AddKeyedTransient<Page>(ServiceType.Csv, sp => sp.GetRequiredService<CsvServiceView>());
+            services.AddKeyedTransient<Page>(ServiceType.Tcp, (sp, _) => sp.GetRequiredService<TcpServiceMessagesView>());
+            services.AddKeyedTransient<Page>(ServiceType.Http, (sp, _) => sp.GetRequiredService<HttpServiceView>());
+            services.AddKeyedTransient<Page>(ServiceType.FileObserver, (sp, _) => sp.GetRequiredService<FileObserverView>());
+            services.AddKeyedTransient<Page>(ServiceType.Hid, (sp, _) => sp.GetRequiredService<HidViews>());
+            services.AddKeyedTransient<Page>(ServiceType.Heartbeat, (sp, _) => sp.GetRequiredService<HeartbeatView>());
+            services.AddKeyedTransient<Page>(ServiceType.Scp, (sp, _) => sp.GetRequiredService<SCPServiceView>());
+            services.AddKeyedTransient<Page>(ServiceType.Mqtt, (sp, _) => sp.GetRequiredService<MqttTagSubscriptionsView>());
+            services.AddKeyedTransient<Page>(ServiceType.Ftp, (sp, _) => sp.GetRequiredService<FTPServiceView>());
+            services.AddKeyedTransient<Page>(ServiceType.Csv, (sp, _) => sp.GetRequiredService<CsvServiceView>());
             services.AddSingleton<IDictionary<ServiceType, Func<Page>>>(sp => new Dictionary<ServiceType, Func<Page>>
             {
                 [ServiceType.Tcp] = () => sp.GetKeyedService<Page>(ServiceType.Tcp)!,
@@ -232,15 +232,15 @@ namespace DesktopApplicationTemplate.UI
             services.AddTransient<ScpAdvancedConfigView>();
             services.AddTransient<ScpAdvancedConfigViewModel>();
             services.AddTransient<SettingsPage>();
-            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Mqtt, sp => new Navigation.MqttNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
-            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Ftp, sp => new Navigation.FtpNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
-            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Http, sp => new Navigation.HttpNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
-            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Tcp, sp => new Navigation.TcpNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
-            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Hid, sp => new Navigation.HidNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
-            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Scp, sp => new Navigation.ScpNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
-            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Csv, sp => new Navigation.CsvNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
-            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.FileObserver, sp => new Navigation.FileObserverNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
-            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Heartbeat, sp => new Navigation.HeartbeatNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Mqtt, (sp, _) => new Navigation.MqttNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Ftp, (sp, _) => new Navigation.FtpNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Http, (sp, _) => new Navigation.HttpNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Tcp, (sp, _) => new Navigation.TcpNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Hid, (sp, _) => new Navigation.HidNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Scp, (sp, _) => new Navigation.ScpNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Csv, (sp, _) => new Navigation.CsvNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.FileObserver, (sp, _) => new Navigation.FileObserverNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Heartbeat, (sp, _) => new Navigation.HeartbeatNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
             services.AddSingleton<IDictionary<ServiceType, Navigation.INavigationHandler>>(sp =>
             {
                 var handlers = new Dictionary<ServiceType, Navigation.INavigationHandler>();
@@ -254,15 +254,15 @@ namespace DesktopApplicationTemplate.UI
                 }
                 return handlers;
             });
-            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Mqtt, sp => new Factories.MqttServiceFactory(sp, () => sp.GetRequiredService<MainView>(), sp.GetRequiredService<MainViewModel>()));
-            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Ftp, sp => new Factories.FtpServiceFactory(sp, () => sp.GetRequiredService<MainView>()));
-            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Http, sp => new Factories.HttpServiceFactory(() => sp.GetRequiredService<MainView>()));
-            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Tcp, sp => new Factories.TcpServiceFactory(() => sp.GetRequiredService<MainView>()));
-            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Hid, sp => new Factories.HidServiceFactory(() => sp.GetRequiredService<MainView>()));
-            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Scp, sp => new Factories.ScpServiceFactory(() => sp.GetRequiredService<MainView>()));
-            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Csv, sp => new Factories.CsvServiceFactory(() => sp.GetRequiredService<MainView>()));
-            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.FileObserver, sp => new Factories.FileObserverServiceFactory(() => sp.GetRequiredService<MainView>()));
-            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Heartbeat, sp => new Factories.HeartbeatServiceFactory(() => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Mqtt, (sp, _) => new Factories.MqttServiceFactory(sp, () => sp.GetRequiredService<MainView>(), sp.GetRequiredService<MainViewModel>()));
+            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Ftp, (sp, _) => new Factories.FtpServiceFactory(sp, () => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Http, (sp, _) => new Factories.HttpServiceFactory(() => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Tcp, (sp, _) => new Factories.TcpServiceFactory(() => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Hid, (sp, _) => new Factories.HidServiceFactory(() => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Scp, (sp, _) => new Factories.ScpServiceFactory(() => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Csv, (sp, _) => new Factories.CsvServiceFactory(() => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.FileObserver, (sp, _) => new Factories.FileObserverServiceFactory(() => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Heartbeat, (sp, _) => new Factories.HeartbeatServiceFactory(() => sp.GetRequiredService<MainView>()));
             services.AddSingleton<IDictionary<ServiceType, Factories.IServiceFactory>>(sp =>
             {
                 var factories = new Dictionary<ServiceType, Factories.IServiceFactory>();
