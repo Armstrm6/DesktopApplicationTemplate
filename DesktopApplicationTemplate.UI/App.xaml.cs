@@ -1,4 +1,5 @@
 using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.UI.EditHandlers;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Modules;
 using DesktopApplicationTemplate.UI.ViewModels;
@@ -74,15 +75,15 @@ namespace DesktopApplicationTemplate.UI
         private void ConfigureServices(IConfiguration configuration, IServiceCollection services)
         {
             services.AddServiceModules();
-            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Mqtt, sp => new DelegateEditServiceHandler(service => sp.GetRequiredService<MainView>().EditMqtt(service)));
-            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Heartbeat, sp => new DelegateEditServiceHandler(service => sp.GetRequiredService<MainView>().EditHeartbeat(service)));
-            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Hid, sp => new DelegateEditServiceHandler(service => sp.GetRequiredService<MainView>().EditHid(service)));
-            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Csv, sp => new DelegateEditServiceHandler(service => sp.GetRequiredService<MainView>().EditCsv(service)));
-            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.FileObserver, sp => new DelegateEditServiceHandler(service => sp.GetRequiredService<MainView>().EditFileObserver(service)));
-            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Scp, sp => new DelegateEditServiceHandler(service => sp.GetRequiredService<MainView>().EditScp(service)));
-            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Tcp, sp => new DelegateEditServiceHandler(service => sp.GetRequiredService<MainView>().EditTcp(service)));
-            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Http, sp => new DelegateEditServiceHandler(service => sp.GetRequiredService<MainView>().EditHttp(service)));
-            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Ftp, sp => new DelegateEditServiceHandler(service => sp.GetRequiredService<MainView>().EditFtp(service)));
+            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Mqtt, sp => new MqttEditServiceHandler(sp.GetRequiredService<MainView>(), sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<MqttEditServiceHandler>>()));
+            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Heartbeat, sp => new HeartbeatEditServiceHandler(sp.GetRequiredService<MainView>(), sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<HeartbeatEditServiceHandler>>()));
+            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Hid, sp => new HidEditServiceHandler(sp.GetRequiredService<MainView>(), sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<HidEditServiceHandler>>()));
+            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Csv, sp => new CsvEditServiceHandler(sp.GetRequiredService<MainView>(), sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<CsvEditServiceHandler>>()));
+            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.FileObserver, sp => new FileObserverEditServiceHandler(sp.GetRequiredService<MainView>(), sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<FileObserverEditServiceHandler>>()));
+            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Scp, sp => new ScpEditServiceHandler(sp.GetRequiredService<MainView>(), sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<ScpEditServiceHandler>>()));
+            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Tcp, sp => new TcpEditServiceHandler(sp.GetRequiredService<MainView>(), sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<TcpEditServiceHandler>>()));
+            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Http, sp => new HttpEditServiceHandler(sp.GetRequiredService<MainView>(), sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<HttpEditServiceHandler>>()));
+            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Ftp, sp => new FtpEditServiceHandler(sp.GetRequiredService<MainView>(), sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<FtpEditServiceHandler>>()));
             services.AddSingleton<IDictionary<ServiceType, IEditServiceHandler>>(sp =>
             {
                 var handlers = new Dictionary<ServiceType, IEditServiceHandler>();
