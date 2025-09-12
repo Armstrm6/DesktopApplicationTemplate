@@ -206,7 +206,8 @@ Latest Attempt: After extracting edit workflows into dedicated handler classes, 
 Latest Attempt: After introducing a DI-based page resolver dictionary, the `dotnet` command remains unavailable; restore, build, and test commands could not run locally and CI will verify.
 Latest Attempt: After removing service-specific references from MainView, the `dotnet` command is still missing; build and test commands cannot run locally and CI will verify.
 Latest Attempt: After updating service factories to set the `Type` property and installing the .NET SDK 8.0.404, `dotnet restore` succeeded but `dotnet build DesktopApplicationTemplate.sln` failed with compile errors in test projects, and `dotnet test --settings tests.runsettings` could not run due to the missing Microsoft.WindowsDesktop.App 8.0.0 runtime; relying on CI.
-Related Commits/PRs: 8517691, 4c0dbb5, 1b5b0ec, 739abbe, 4f74a36, ff70210, 272560a, 26960dc, 7e9096b, 6454680, a70fb18, f1e064e
+Latest Attempt: After removing redundant ViewModels compile includes from the UI project, the `dotnet` CLI remains unavailable; `dotnet clean` and `dotnet build` could not run locally, so CI will verify.
+Related Commits/PRs: 8517691, 4c0dbb5, 1b5b0ec, 739abbe, 4f74a36, ff70210, 272560a, 26960dc, 7e9096b, 6454680, a70fb18, f1e064e, 8f72dc1
 [2025-08-27 04:25] Topic: Logging interface restoration
 Context: Introduced core logging abstractions and refactored edit view models to support DI.
 Observations: Added ILoggingService, LogLevel enum, moved LogEntry to core, and implemented Load methods on TCP and SCP edit view models.
