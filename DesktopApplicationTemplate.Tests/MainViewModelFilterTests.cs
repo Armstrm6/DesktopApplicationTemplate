@@ -5,6 +5,7 @@ using DesktopApplicationTemplate.UI.ViewModels.Csv;
 using DesktopApplicationTemplate.Models;
 using Moq;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Xunit;
@@ -20,7 +21,7 @@ namespace DesktopApplicationTemplate.Tests
             var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
             var network = new Mock<INetworkConfigurationService>();
             var networkVm = new NetworkConfigurationViewModel(network.Object);
-            var vm = new MainViewModel(csv, networkVm, network.Object)
+            var vm = new MainViewModel(csv, networkVm, network.Object, new Dictionary<ServiceType, IEditServiceHandler>())
             {
                 Services =
                 {

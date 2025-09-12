@@ -12,7 +12,6 @@ using DesktopApplicationTemplate.UI.Helpers;
 using System.Windows.Media;
 using System.Windows.Input;
 using System.Windows.Controls.Primitives;
-using DesktopApplicationTemplate.UI;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using System.Collections.Generic;
@@ -27,21 +26,18 @@ namespace DesktopApplicationTemplate.UI.Views
     {
         private readonly MainViewModel _viewModel;
         private readonly ILogger<MainView>? _logger;
-        private readonly IDictionary<ServiceType, IEditServiceHandler> _editHandlers;
         private readonly IDictionary<ServiceType, IServiceFactory> _serviceFactories;
         private readonly IDictionary<ServiceType, INavigationHandler> _navigationHandlers;
         private readonly IDictionary<ServiceType, Func<Page>> _pageResolvers;
 
         public MainView(
             MainViewModel viewModel,
-            IDictionary<ServiceType, IEditServiceHandler> editHandlers,
             IDictionary<ServiceType, IServiceFactory> serviceFactories,
             IDictionary<ServiceType, INavigationHandler> navigationHandlers,
             IDictionary<ServiceType, Func<Page>> pageResolvers)
         {
             InitializeComponent();
             _viewModel = viewModel;
-            _editHandlers = editHandlers;
             _serviceFactories = serviceFactories;
             _navigationHandlers = navigationHandlers;
             _pageResolvers = pageResolvers;
@@ -50,7 +46,6 @@ namespace DesktopApplicationTemplate.UI.Views
                 _logger = factory.CreateLogger<MainView>();
             }
             DataContext = _viewModel;
-            _viewModel.EditRequested += OnEditRequested;
             _viewModel.AddServiceRequested += OnAddServiceRequested;
             MouseDown += MainView_MouseDown;
             CommandBindings.Add(new CommandBinding(SystemCommands.CloseWindowCommand, CloseCommand_Executed));
@@ -95,7 +90,7 @@ namespace DesktopApplicationTemplate.UI.Views
 
         public Page? GetOrCreateServicePage(ServiceListModel svc)
         {
-            if (svc.ServicePage == null && _pageResolvers.TryGetValue(svc.ServiceType, out var factory))
+            if (svc.ServicePage == null && _pageResolvers.TryGetValue(svc.Type, out var factory))
             {
                 svc.ServicePage = factory();
             }
@@ -104,7 +99,7 @@ namespace DesktopApplicationTemplate.UI.Views
             {
                 if (svc.ServicePage.DataContext is ILoggingViewModel vm && vm.Logger is not null)
                 {
-                    if (svc.ServiceType == ServiceType.Mqtt)
+                    if (svc.Type == ServiceType.Mqtt)
                     {
                         vm.Logger.LogAdded += entry => _viewModel.OnServiceLogAdded(svc, entry);
                     }
@@ -156,7 +151,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 var svc = new ServiceListModel
                 {
                     DisplayName = $"{type.ToLegacyString()} - {name}",
-                    ServiceType = type,
+                    Type = type,
                     IsActive = false
                 };
                 svc.SetColorsByType();
@@ -215,20 +210,6 @@ namespace DesktopApplicationTemplate.UI.Views
             await _viewModel.SaveServicesAsync();
             _logger?.LogDebug("AddService workflow completed");
         }
-
-    private void OnEditRequested(ServiceListModel service)
-    {
-        _logger?.LogDebug("Edit requested for {Name}", service.DisplayName);
-
-        if (_editHandlers.TryGetValue(service.ServiceType, out var handler))
-        {
-            handler.Edit(service);
-        }
-        else
-        {
-            _logger?.LogWarning("No edit handler registered for {ServiceType}", service.ServiceType);
-        }
-    }
 
 
         private void RemoveService_Click(object sender, RoutedEventArgs e)
@@ -300,9 +281,9 @@ namespace DesktopApplicationTemplate.UI.Views
                     var namePart = input.Contains(" - ") ? input.Split(" - ").Last() : input;
                     if (_viewModel.Services.Any(s => s != svc && s.DisplayName.Split(" - ").Last().Equals(namePart, StringComparison.OrdinalIgnoreCase)))
                     {
-                        namePart = _viewModel.GenerateServiceName(svc.ServiceType);
+                        namePart = _viewModel.GenerateServiceName(svc.Type);
                     }
-                    svc.DisplayName = $"{svc.ServiceType.ToLegacyString()} - {namePart}";
+                    svc.DisplayName = $"{svc.Type.ToLegacyString()} - {namePart}";
                     await _viewModel.SaveServicesAsync();
                 }
             }
@@ -319,7 +300,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 {
                     var color = dlg.ChosenColor;
                     var brush = new SolidColorBrush(color);
-                    foreach (var s in _viewModel.Services.Where(s => s.ServiceType == svc.ServiceType))
+                    foreach (var s in _viewModel.Services.Where(s => s.Type == svc.Type))
                     {
                         s.BackgroundColor = brush;
                         s.BorderColor = brush;

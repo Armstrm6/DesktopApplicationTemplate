@@ -30,14 +30,14 @@ public class TcpEditServiceHandler : IEditServiceHandler
         var tcpPage = _view.GetOrCreateServicePage(service);
         var options = service.TcpOptions ?? new TcpServiceOptions();
         var vm = _services.GetRequiredService<TcpEditServiceViewModel>();
-        vm.ServiceType = service.ServiceType;
+        vm.ServiceType = service.Type;
         vm.Load(service.DisplayName.Split(" - ").Last(), options);
         var editView = _services.GetRequiredService<TcpEditServiceView>();
         editView.Initialize(vm);
         vm.ServiceSaved += (name, opts) =>
         {
             service.DisplayName = $"{vm.ServiceType.ToLegacyString()} - {name}";
-            service.ServiceType = vm.ServiceType;
+            service.Type = vm.ServiceType;
             service.TcpOptions = opts;
             if (tcpPage != null)
                 _view.ShowPage(tcpPage);

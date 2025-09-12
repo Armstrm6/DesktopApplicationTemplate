@@ -130,7 +130,7 @@ Each service has an editor page where the parameters and test messages can be mo
 
 `ServiceType` is an enum that identifies each supported service category. It is serialized using short codes and still recognizes legacy names so existing configurations continue to load.
 
-Dictionary-based edit handlers are registered for each `ServiceType` and injected into the main window as a lookup. When a user edits a service, the window resolves the handler from that dictionary instead of relying on large switch statements, making it easy to plug in new handlers.
+Dictionary-based edit handlers are registered for each `ServiceType` and injected into the main view model as a lookup. When a user edits a service, the view model resolves the handler from that dictionary instead of relying on large switch statements, making it easy to plug in new handlers.
 
 Dynamic DI modules are enabled by `services.AddServiceModules()`, which scans assemblies for `IServiceModule` implementations and calls their `RegisterServices` methods. Dropping a new module into the application automatically registers its services without manual wiring.
 

@@ -7,7 +7,7 @@ public static class TestHelpers
 {
     public static ServiceListModel CreateService(ServiceType type, string name) => new ServiceListModel
     {
-        ServiceType = type,
+        Type = type,
         DisplayName = $"{type.ToLegacyString()} - {name}"
     };
 }

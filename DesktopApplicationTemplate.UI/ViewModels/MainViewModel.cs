@@ -14,6 +14,7 @@ using DesktopApplicationTemplate.Persistence;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Helpers;
+using DesktopApplicationTemplate.UI;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -39,7 +40,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public ICommand AddServiceCommand { get; }
         public ICommand RemoveServiceCommand { get; }
         public ICommand EditServiceCommand { get; }
-        public event Action<ServiceListModel>? EditRequested;
         public int ServicesCreated => Services.Count;
         public int CurrentActiveServices => Services.Count(s => s.IsActive);
 
@@ -56,20 +56,22 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private readonly CsvService _csvService;
         private readonly ILoggingService? _logger;
         private readonly INetworkConfigurationService _networkService;
+        private readonly IDictionary<ServiceType, IEditServiceHandler> _editHandlers;
 
         public NetworkConfigurationViewModel NetworkConfig { get; }
 
-        public MainViewModel(CsvService csvService, NetworkConfigurationViewModel networkConfig, INetworkConfigurationService networkService, ILoggingService? logger = null, string? servicesFilePath = null)
+        public MainViewModel(CsvService csvService, NetworkConfigurationViewModel networkConfig, INetworkConfigurationService networkService, IDictionary<ServiceType, IEditServiceHandler> editHandlers, ILoggingService? logger = null, string? servicesFilePath = null)
         {
             _csvService = csvService;
             _networkService = networkService;
             _logger = logger;
             NetworkConfig = networkConfig;
+            _editHandlers = editHandlers;
             _ = NetworkConfig.LoadAsync();
             _networkService.ConfigurationChanged += (_, cfg) => ApplyNetworkConfiguration(cfg);
             ServiceListModel.ResolveService = (type, name) =>
                 Services.FirstOrDefault(s =>
-                    s.ServiceType == type &&
+                    s.Type == type &&
                     s.DisplayName.Split(" - ").Last().Equals(name, StringComparison.OrdinalIgnoreCase));
             if (!string.IsNullOrWhiteSpace(servicesFilePath))
             {
@@ -115,7 +117,14 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             if (target == null)
                 return;
 
-            EditRequested?.Invoke(target);
+            if (_editHandlers.TryGetValue(target.Type, out var handler))
+            {
+                handler.Edit(target);
+            }
+            else
+            {
+                _logger?.Log($"No edit handler registered for {target.Type}", LogLevel.Warning);
+            }
         }
 
         private void AddService()
@@ -129,7 +138,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         {
             var typeName = serviceType.ToLegacyString();
             int index = 1;
-            foreach (var svc in Services.Where(s => s.ServiceType == serviceType))
+            foreach (var svc in Services.Where(s => s.Type == serviceType))
             {
                 var namePart = svc.DisplayName.Split(" - ").Last();
                 if (namePart.StartsWith(typeName) &&
@@ -148,7 +157,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 _logger?.Log($"Removing service {SelectedService.DisplayName}", LogLevel.Debug);
                 var index = Services.IndexOf(SelectedService);
                 SelectedService.AddLog("Service removed", WpfBrushes.Red);
-                if (SelectedService.ServiceType != ServiceType.Csv)
+                if (SelectedService.Type != ServiceType.Csv)
                     _csvService.RemoveColumnsForService(SelectedService.DisplayName);
                 SelectedService.LogAdded -= OnServiceLogAdded;
                 SelectedService.ActiveChanged -= OnServiceActiveChanged;
@@ -167,15 +176,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 LogViewModel.RefreshLogs();
                 await SaveServicesAsync().ConfigureAwait(false);
                 _logger?.Log("Service removed", LogLevel.Debug);
-            }
-        }
-
-        public void EditSelectedService()
-        {
-            if (SelectedService != null)
-            {
-                SelectedService.IsActive = false;
-                EditRequested?.Invoke(SelectedService);
             }
         }
 
@@ -204,7 +204,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 var svc = new ServiceListModel
                 {
                     DisplayName = info.DisplayName,
-                    ServiceType = info.ServiceType,
+                    Type = info.ServiceType,
                     IsActive = info.IsActive,
                     Order = info.Order,
                     TcpOptions = info.TcpOptions,
@@ -219,7 +219,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 svc.SetColorsByType();
                 svc.LogAdded += OnServiceLogAdded;
                 svc.ActiveChanged += OnServiceActiveChanged;
-                if (svc.ServiceType != ServiceType.Csv)
+                if (svc.Type != ServiceType.Csv)
                     _csvService.EnsureColumnsForService(svc.DisplayName);
                 Services.Add(svc);
                 _logger?.Log($"Loaded service {svc.DisplayName}", LogLevel.Debug);
@@ -241,7 +241,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
                 if (Filters.TypeFilter != "All" &&
                     ServiceTypeExtensions.TryParse(Filters.TypeFilter, out var fType) &&
-                    svc.ServiceType != fType)
+                    svc.Type != fType)
                     return false;
 
                 if (Filters.StatusFilter == "Active" && !svc.IsActive)
@@ -257,7 +257,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public void OnServiceLogAdded(ServiceListModel svc, LogEntry entry)
         {
             AllLogs.Insert(0, entry);
-            if (svc.ServiceType != ServiceType.Csv && Services.Any(s => s.ServiceType == ServiceType.Csv))
+            if (svc.Type != ServiceType.Csv && Services.Any(s => s.Type == ServiceType.Csv))
             {
                 try
                 {

@@ -29,8 +29,8 @@ namespace DesktopApplicationTemplate.Tests
             {
                 var services = new List<ServiceListModel>
                 {
-                    new ServiceListModel{DisplayName="A", ServiceType=ServiceType.Heartbeat, IsActive=true, Order=0},
-                    new ServiceListModel{DisplayName="B", ServiceType=ServiceType.Tcp, IsActive=false, Order=1}
+                    new ServiceListModel{DisplayName="A", Type=ServiceType.Heartbeat, IsActive=true, Order=0},
+                    new ServiceListModel{DisplayName="B", Type=ServiceType.Tcp, IsActive=false, Order=1}
                 };
                 services[0].AssociatedServices.Add("B");
                 services[1].AssociatedServices.Add("A");
@@ -60,8 +60,8 @@ namespace DesktopApplicationTemplate.Tests
             ServicePersistence.FilePath = Path.Combine(tempDir, "services.json");
             try
             {
-                var a = new ServiceListModel { DisplayName = "A", ServiceType = ServiceType.Tcp };
-                var b = new ServiceListModel { DisplayName = "B", ServiceType = ServiceType.Tcp };
+                var a = new ServiceListModel { DisplayName = "A", Type = ServiceType.Tcp };
+                var b = new ServiceListModel { DisplayName = "B", Type = ServiceType.Tcp };
                 a.AssociatedServices.Add("B");
                 b.AssociatedServices.Add("A");
                 var services = new List<ServiceListModel> { a, b };

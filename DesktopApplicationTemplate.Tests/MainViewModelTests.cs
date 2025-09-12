@@ -4,7 +4,9 @@ using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.ViewModels.Mqtt;
 using DesktopApplicationTemplate.UI.ViewModels.Csv;
 using DesktopApplicationTemplate.UI.Helpers;
+using DesktopApplicationTemplate.UI;
 using Moq;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using DesktopApplicationTemplate.Models;
@@ -25,7 +27,7 @@ namespace DesktopApplicationTemplate.Tests
             var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
             var network = new Mock<INetworkConfigurationService>();
             var networkVm = new NetworkConfigurationViewModel(network.Object);
-            var vm = new MainViewModel(csv, networkVm, network.Object);
+            var vm = new MainViewModel(csv, networkVm, network.Object, new Dictionary<ServiceType, IEditServiceHandler>());
             vm.Services.Add(TestHelpers.CreateService(ServiceType.Http, "HTTP1")
             {
                 IsActive = false,
@@ -58,7 +60,7 @@ namespace DesktopApplicationTemplate.Tests
             var oldPath = ServicePersistence.FilePath;
             try
             {
-                var vm = new MainViewModel(csv, networkVm, network.Object, logger.Object, servicesPath);
+                var vm = new MainViewModel(csv, networkVm, network.Object, new Dictionary<ServiceType, IEditServiceHandler>(), logger.Object, servicesPath);
                 var service = TestHelpers.CreateService(type, name);
                 vm.Services.Add(service);
                 vm.SelectedService = service;
@@ -86,7 +88,7 @@ namespace DesktopApplicationTemplate.Tests
             var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
             var network = new Mock<INetworkConfigurationService>();
             var networkVm = new NetworkConfigurationViewModel(network.Object);
-            var vm = new MainViewModel(csv, networkVm, network.Object);
+            var vm = new MainViewModel(csv, networkVm, network.Object, new Dictionary<ServiceType, IEditServiceHandler>());
             var svc = TestHelpers.CreateService(type, name);
             svc.Logs.Add(new LogEntry { Message = "test" });
             vm.Services.Add(svc);
@@ -106,7 +108,7 @@ namespace DesktopApplicationTemplate.Tests
             var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
             var network = new Mock<INetworkConfigurationService>();
             var networkVm = new NetworkConfigurationViewModel(network.Object);
-            var vm = new MainViewModel(csv, networkVm, network.Object);
+            var vm = new MainViewModel(csv, networkVm, network.Object, new Dictionary<ServiceType, IEditServiceHandler>());
             var svc = TestHelpers.CreateService(type, name);
             svc.Logs.Add(new LogEntry { Message = "first" });
             vm.Services.Add(svc);
@@ -129,7 +131,7 @@ namespace DesktopApplicationTemplate.Tests
             var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
             var network = new Mock<INetworkConfigurationService>();
             var networkVm = new NetworkConfigurationViewModel(network.Object);
-            var vm = new MainViewModel(csv, networkVm, network.Object);
+            var vm = new MainViewModel(csv, networkVm, network.Object, new Dictionary<ServiceType, IEditServiceHandler>());
             bool raised = false;
             vm.PropertyChanged += (s, e) => { if (e.PropertyName == "DisplayLogs") raised = true; };
             var svc = TestHelpers.CreateService(type, name);
@@ -143,43 +145,28 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
-        public void EditServiceCommand_LoadsCurrentMqttOptions()
+        public void EditServiceCommand_InvokesHandler()
         {
-            var options = Options.Create(new MqttServiceOptions
-            {
-                Host = "existing",
-                Port = 1883,
-                ClientId = "client"
-            });
-            var client = new Mock<IMqttClient>();
-            client.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new MqttClientConnectResult());
-            var service = new MqttService(client.Object, options, Mock.Of<IMessageRoutingService>(), Mock.Of<ILoggingService>());
-
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
             var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
             var network = new Mock<INetworkConfigurationService>();
             var networkVm = new NetworkConfigurationViewModel(network.Object);
-            var vm = new MainViewModel(csv, networkVm, network.Object);
+            var handler = new Mock<IEditServiceHandler>();
+            var handlers = new Dictionary<ServiceType, IEditServiceHandler> { { ServiceType.Mqtt, handler.Object } };
+            var vm = new MainViewModel(csv, networkVm, network.Object, handlers);
             var svc = TestHelpers.CreateService(ServiceType.Mqtt, "Test");
             vm.Services.Add(svc);
 
-            MqttEditConnectionViewModel? captured = null;
-            vm.EditRequested += _ => captured = new MqttEditConnectionViewModel(service, options);
-
             vm.EditServiceCommand.Execute(svc);
 
-            Assert.NotNull(captured);
-            Assert.Equal("existing", captured!.Host);
-            Assert.Equal(1883, captured.Port);
-            Assert.Equal("client", captured.ClientId);
+            handler.Verify(h => h.Edit(svc), Times.Once);
             ConsoleTestLogger.LogPass();
         }
 
         private class TestMainViewModel : MainViewModel
         {
             public TestMainViewModel(CsvService csv, NetworkConfigurationViewModel networkConfig, INetworkConfigurationService networkService)
-                : base(csv, networkConfig, networkService)
+                : base(csv, networkConfig, networkService, new Dictionary<ServiceType, IEditServiceHandler>())
             {
             }
 
@@ -248,7 +235,7 @@ namespace DesktopApplicationTemplate.Tests
             var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
             var network = new Mock<INetworkConfigurationService>();
             var networkVm = new NetworkConfigurationViewModel(network.Object);
-            var vm = new MainViewModel(csv, networkVm, network.Object);
+            var vm = new MainViewModel(csv, networkVm, network.Object, new Dictionary<ServiceType, IEditServiceHandler>());
 
             bool raised = false;
             vm.AddServiceRequested += () => raised = true;
