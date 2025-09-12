@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
-using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.Navigation;
 using DesktopApplicationTemplate.UI.ViewModels;
-using DesktopApplicationTemplate.UI.ViewModels.Tcp;
 using DesktopApplicationTemplate.UI.Factories;
 using DesktopApplicationTemplate.Core.Models;
 using LogLevel = DesktopApplicationTemplate.Core.Services.LogLevel;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualBasic;
 using DesktopApplicationTemplate.UI.Helpers;
 using System.Windows.Media;
 using System.Windows.Input;
@@ -105,15 +102,15 @@ namespace DesktopApplicationTemplate.UI.Views
 
             if (svc.ServicePage != null)
             {
-                if (svc.ServicePage.DataContext is ILoggingViewModel vm && vm.Logger is LoggingService logger)
+                if (svc.ServicePage.DataContext is ILoggingViewModel vm && vm.Logger is not null)
                 {
                     if (svc.ServiceType == ServiceType.Mqtt)
                     {
-                        logger.LogAdded += entry => _viewModel.OnServiceLogAdded(svc, entry);
+                        vm.Logger.LogAdded += entry => _viewModel.OnServiceLogAdded(svc, entry);
                     }
                     else
                     {
-                        logger.LogAdded += entry =>
+                        vm.Logger.LogAdded += entry =>
                         {
                             var brush = (Brush?)new BrushConverter().ConvertFromString(entry.Color);
                             svc.AddLog(entry.Message, brush, entry.Level);
@@ -131,34 +128,6 @@ namespace DesktopApplicationTemplate.UI.Views
                     logHost.SetServiceContext(svc);
                 }
 
-                if (svc.ServiceType == ServiceType.Tcp && svc.ServicePage.DataContext is TcpServiceMessagesViewModel tcpVm)
-                {
-                    tcpVm.AdvancedSettingsRequested += (_, _) =>
-                    {
-                        var vm = App.AppHost.Services.GetRequiredService<TcpEditServiceViewModel>();
-                        vm.ServiceType = svc.ServiceType;
-                        vm.Load(svc.DisplayName.Split(" - ").Last(), svc.TcpOptions ?? new TcpServiceOptions());
-                        var editView = App.AppHost.Services.GetRequiredService<Tcp.TcpEditServiceView>();
-                        editView.Initialize(vm);
-
-                        vm.ServiceSaved += (name, opts) =>
-                        {
-                            svc.DisplayName = $"{vm.ServiceType.ToLegacyString()} - {name}";
-                            svc.ServiceType = vm.ServiceType;
-                            svc.TcpOptions = opts;
-                            if (svc.ServicePage != null)
-                                ShowPage(svc.ServicePage);
-                            _ = _viewModel.SaveServicesAsync();
-                        };
-                        vm.EditCancelled += () =>
-                        {
-                            if (svc.ServicePage != null)
-                                ShowPage(svc.ServicePage);
-                        };
-
-                        ShowPage(editView);
-                    };
-                }
             }
 
             return svc.ServicePage;
