@@ -6,7 +6,6 @@ using DesktopApplicationTemplate.UI.Navigation;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.ViewModels.Tcp;
 using DesktopApplicationTemplate.UI.Factories;
-using DesktopApplicationTemplate.UI.Views.Tcp;
 using DesktopApplicationTemplate.Core.Models;
 using LogLevel = DesktopApplicationTemplate.Core.Services.LogLevel;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,18 +33,21 @@ namespace DesktopApplicationTemplate.UI.Views
         private readonly IDictionary<ServiceType, IEditServiceHandler> _editHandlers;
         private readonly IDictionary<ServiceType, IServiceFactory> _serviceFactories;
         private readonly IDictionary<ServiceType, INavigationHandler> _navigationHandlers;
+        private readonly IDictionary<ServiceType, Func<Page>> _pageResolvers;
 
         public MainView(
             MainViewModel viewModel,
             IDictionary<ServiceType, IEditServiceHandler> editHandlers,
             IDictionary<ServiceType, IServiceFactory> serviceFactories,
-            IDictionary<ServiceType, INavigationHandler> navigationHandlers)
+            IDictionary<ServiceType, INavigationHandler> navigationHandlers,
+            IDictionary<ServiceType, Func<Page>> pageResolvers)
         {
             InitializeComponent();
             _viewModel = viewModel;
             _editHandlers = editHandlers;
             _serviceFactories = serviceFactories;
             _navigationHandlers = navigationHandlers;
+            _pageResolvers = pageResolvers;
             if (App.AppHost.Services.GetService(typeof(ILoggerFactory)) is ILoggerFactory factory)
             {
                 _logger = factory.CreateLogger<MainView>();
@@ -96,22 +98,10 @@ namespace DesktopApplicationTemplate.UI.Views
 
         public Page? GetOrCreateServicePage(ServiceListModel svc)
         {
-            if (svc.ServicePage != null)
-                return svc.ServicePage;
-
-            svc.ServicePage = svc.ServiceType switch
+            if (svc.ServicePage == null && _pageResolvers.TryGetValue(svc.ServiceType, out var factory))
             {
-                ServiceType.Tcp => App.AppHost.Services.GetRequiredService<TcpServiceMessagesView>(),
-                ServiceType.Http => App.AppHost.Services.GetRequiredService<HttpServiceView>(),
-                ServiceType.FileObserver => App.AppHost.Services.GetRequiredService<FileObserverView>(),
-                ServiceType.Hid => App.AppHost.Services.GetRequiredService<HidViews>(),
-                ServiceType.Heartbeat => App.AppHost.Services.GetRequiredService<HeartbeatView>(),
-                ServiceType.Scp => App.AppHost.Services.GetRequiredService<SCPServiceView>(),
-                ServiceType.Mqtt => App.AppHost.Services.GetRequiredService<MqttTagSubscriptionsView>(),
-                ServiceType.Ftp => App.AppHost.Services.GetRequiredService<FTPServiceView>(),
-                ServiceType.Csv => App.AppHost.Services.GetRequiredService<CsvServiceView>(),
-                _ => null
-            };
+                svc.ServicePage = factory();
+            }
 
             if (svc.ServicePage != null)
             {
@@ -148,7 +138,7 @@ namespace DesktopApplicationTemplate.UI.Views
                         var vm = App.AppHost.Services.GetRequiredService<TcpEditServiceViewModel>();
                         vm.ServiceType = svc.ServiceType;
                         vm.Load(svc.DisplayName.Split(" - ").Last(), svc.TcpOptions ?? new TcpServiceOptions());
-                        var editView = App.AppHost.Services.GetRequiredService<TcpEditServiceView>();
+                        var editView = App.AppHost.Services.GetRequiredService<Tcp.TcpEditServiceView>();
                         editView.Initialize(vm);
 
                         vm.ServiceSaved += (name, opts) =>

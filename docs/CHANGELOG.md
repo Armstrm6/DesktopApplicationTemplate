@@ -99,6 +99,7 @@
 - Edit handlers register with DI keyed by `ServiceType`, and the main window receives a dictionary constructed from those registrations.
 - Dedicated edit handler classes replace delegate wrappers, moving edit logic out of `MainView`.
 - Main window now receives service factory and navigation handler dictionaries from DI for constant-time lookups.
+- Main window resolves service pages through a DI-injected dictionary instead of a service-type switch.
 - Service views and view models reorganized into per-service subfolders with updated namespaces.
 
 #### Fixed

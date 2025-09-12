@@ -36,6 +36,7 @@ using FubarDev.FtpServer;
 using FubarDev.FtpServer.FileSystem.DotNet;
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 using System;
 using System.Windows.Threading;
 using System.Collections.Generic;
@@ -135,6 +136,27 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<CsvService>();
             services.AddSingleton<CsvServiceView>();
             services.AddSingleton<SettingsViewModel>();
+            services.AddKeyedTransient<Page>(ServiceType.Tcp, sp => sp.GetRequiredService<TcpServiceMessagesView>());
+            services.AddKeyedTransient<Page>(ServiceType.Http, sp => sp.GetRequiredService<HttpServiceView>());
+            services.AddKeyedTransient<Page>(ServiceType.FileObserver, sp => sp.GetRequiredService<FileObserverView>());
+            services.AddKeyedTransient<Page>(ServiceType.Hid, sp => sp.GetRequiredService<HidViews>());
+            services.AddKeyedTransient<Page>(ServiceType.Heartbeat, sp => sp.GetRequiredService<HeartbeatView>());
+            services.AddKeyedTransient<Page>(ServiceType.Scp, sp => sp.GetRequiredService<SCPServiceView>());
+            services.AddKeyedTransient<Page>(ServiceType.Mqtt, sp => sp.GetRequiredService<MqttTagSubscriptionsView>());
+            services.AddKeyedTransient<Page>(ServiceType.Ftp, sp => sp.GetRequiredService<FTPServiceView>());
+            services.AddKeyedTransient<Page>(ServiceType.Csv, sp => sp.GetRequiredService<CsvServiceView>());
+            services.AddSingleton<IDictionary<ServiceType, Func<Page>>>(sp => new Dictionary<ServiceType, Func<Page>>
+            {
+                [ServiceType.Tcp] = () => sp.GetKeyedService<Page>(ServiceType.Tcp)!,
+                [ServiceType.Http] = () => sp.GetKeyedService<Page>(ServiceType.Http)!,
+                [ServiceType.FileObserver] = () => sp.GetKeyedService<Page>(ServiceType.FileObserver)!,
+                [ServiceType.Hid] = () => sp.GetKeyedService<Page>(ServiceType.Hid)!,
+                [ServiceType.Heartbeat] = () => sp.GetKeyedService<Page>(ServiceType.Heartbeat)!,
+                [ServiceType.Scp] = () => sp.GetKeyedService<Page>(ServiceType.Scp)!,
+                [ServiceType.Mqtt] = () => sp.GetKeyedService<Page>(ServiceType.Mqtt)!,
+                [ServiceType.Ftp] = () => sp.GetKeyedService<Page>(ServiceType.Ftp)!,
+                [ServiceType.Csv] = () => sp.GetKeyedService<Page>(ServiceType.Csv)!,
+            });
             services.AddTransient<SplashWindow>();
             services.AddTransient<CreateServicePage>();
             services.AddTransient<CreateServiceViewModel>();
