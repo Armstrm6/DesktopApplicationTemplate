@@ -4,7 +4,7 @@ using System.Windows.Controls;
 using DesktopApplicationTemplate.UI.Factories;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels.Tcp.Create;
-using DesktopApplicationTemplate.UI.Views.Tcp;
+using DesktopApplicationTemplate.UI.Views.Tcp.Create;
 using Microsoft.Extensions.DependencyInjection;
 using DesktopApplicationTemplate.Models;
 using System.Threading.Tasks;

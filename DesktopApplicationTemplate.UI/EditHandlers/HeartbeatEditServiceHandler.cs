@@ -3,7 +3,7 @@ using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.ViewModels.Heartbeat.Edit;
 using DesktopApplicationTemplate.UI.ViewModels.Heartbeat.Advanced;
-using DesktopApplicationTemplate.UI.Views.Heartbeat;
+using DesktopApplicationTemplate.UI.Views.Heartbeat.Edit;
 using DesktopApplicationTemplate.UI.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

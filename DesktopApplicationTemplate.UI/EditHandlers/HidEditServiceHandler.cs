@@ -3,7 +3,7 @@ using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.ViewModels.Hid.Edit;
 using DesktopApplicationTemplate.UI.ViewModels.Hid.Advanced;
-using DesktopApplicationTemplate.UI.Views.Hid;
+using DesktopApplicationTemplate.UI.Views.Hid.Edit;
 using DesktopApplicationTemplate.UI.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

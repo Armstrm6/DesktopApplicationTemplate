@@ -6,7 +6,9 @@ using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.ViewModels.Scp.Create;
 using DesktopApplicationTemplate.UI.ViewModels.Scp.Edit;
 using DesktopApplicationTemplate.UI.ViewModels.Scp.Advanced;
-using DesktopApplicationTemplate.UI.Views.Scp;
+using DesktopApplicationTemplate.UI.Views.Scp.Create;
+using DesktopApplicationTemplate.UI.Views.Scp.Edit;
+using DesktopApplicationTemplate.UI.Views.Scp.Advanced;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
