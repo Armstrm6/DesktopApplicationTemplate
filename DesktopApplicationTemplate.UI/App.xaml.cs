@@ -191,24 +191,50 @@ namespace DesktopApplicationTemplate.UI
             services.AddTransient<ScpAdvancedConfigView>();
             services.AddTransient<ScpAdvancedConfigViewModel>();
             services.AddTransient<SettingsPage>();
-            services.AddTransient<Navigation.INavigationHandler, Navigation.MqttNavigationHandler>();
-            services.AddTransient<Navigation.INavigationHandler, Navigation.FtpNavigationHandler>();
-            services.AddTransient<Navigation.INavigationHandler, Navigation.HttpNavigationHandler>();
-            services.AddTransient<Navigation.INavigationHandler, Navigation.TcpNavigationHandler>();
-            services.AddTransient<Navigation.INavigationHandler, Navigation.HidNavigationHandler>();
-            services.AddTransient<Navigation.INavigationHandler, Navigation.ScpNavigationHandler>();
-            services.AddTransient<Navigation.INavigationHandler, Navigation.CsvNavigationHandler>();
-            services.AddTransient<Navigation.INavigationHandler, Navigation.FileObserverNavigationHandler>();
-            services.AddTransient<Navigation.INavigationHandler, Navigation.HeartbeatNavigationHandler>();
-            services.AddTransient<Factories.IServiceFactory, Factories.MqttServiceFactory>();
-            services.AddTransient<Factories.IServiceFactory, Factories.FtpServiceFactory>();
-            services.AddTransient<Factories.IServiceFactory, Factories.HttpServiceFactory>();
-            services.AddTransient<Factories.IServiceFactory, Factories.TcpServiceFactory>();
-            services.AddTransient<Factories.IServiceFactory, Factories.HidServiceFactory>();
-            services.AddTransient<Factories.IServiceFactory, Factories.ScpServiceFactory>();
-            services.AddTransient<Factories.IServiceFactory, Factories.CsvServiceFactory>();
-            services.AddTransient<Factories.IServiceFactory, Factories.FileObserverServiceFactory>();
-            services.AddTransient<Factories.IServiceFactory, Factories.HeartbeatServiceFactory>();
+            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Mqtt, sp => new Navigation.MqttNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Ftp, sp => new Navigation.FtpNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Http, sp => new Navigation.HttpNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Tcp, sp => new Navigation.TcpNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Hid, sp => new Navigation.HidNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Scp, sp => new Navigation.ScpNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Csv, sp => new Navigation.CsvNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.FileObserver, sp => new Navigation.FileObserverNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Heartbeat, sp => new Navigation.HeartbeatNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
+            services.AddSingleton<IDictionary<ServiceType, Navigation.INavigationHandler>>(sp =>
+            {
+                var handlers = new Dictionary<ServiceType, Navigation.INavigationHandler>();
+                foreach (ServiceType type in Enum.GetValues<ServiceType>())
+                {
+                    var handler = sp.GetKeyedService<Navigation.INavigationHandler>(type);
+                    if (handler != null)
+                    {
+                        handlers[type] = handler;
+                    }
+                }
+                return handlers;
+            });
+            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Mqtt, sp => new Factories.MqttServiceFactory(sp, () => sp.GetRequiredService<MainView>(), sp.GetRequiredService<MainViewModel>()));
+            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Ftp, sp => new Factories.FtpServiceFactory(sp, () => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Http, sp => new Factories.HttpServiceFactory(() => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Tcp, sp => new Factories.TcpServiceFactory(() => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Hid, sp => new Factories.HidServiceFactory(() => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Scp, sp => new Factories.ScpServiceFactory(() => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Csv, sp => new Factories.CsvServiceFactory(() => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.FileObserver, sp => new Factories.FileObserverServiceFactory(() => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Heartbeat, sp => new Factories.HeartbeatServiceFactory(() => sp.GetRequiredService<MainView>()));
+            services.AddSingleton<IDictionary<ServiceType, Factories.IServiceFactory>>(sp =>
+            {
+                var factories = new Dictionary<ServiceType, Factories.IServiceFactory>();
+                foreach (ServiceType type in Enum.GetValues<ServiceType>())
+                {
+                    var factory = sp.GetKeyedService<Factories.IServiceFactory>(type);
+                    if (factory != null)
+                    {
+                        factories[type] = factory;
+                    }
+                }
+                return factories;
+            });
 
 
             // Load strongly typed settings

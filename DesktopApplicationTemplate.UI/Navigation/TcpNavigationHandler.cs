@@ -12,22 +12,23 @@ namespace DesktopApplicationTemplate.UI.Navigation
     public class TcpNavigationHandler : INavigationHandler
     {
         private readonly IServiceProvider _services;
-        private readonly MainView _mainView;
+        private readonly Func<MainView> _getMainView;
 
         public ServiceType ServiceType => ServiceType.Tcp;
 
-        public TcpNavigationHandler(IServiceProvider services, MainView mainView)
+        public TcpNavigationHandler(IServiceProvider services, Func<MainView> getMainView)
         {
             _services = services;
-            _mainView = mainView;
+            _getMainView = getMainView;
         }
 
         public Page CreateView(string defaultName)
         {
             var vm = _services.GetRequiredService<TcpCreateServiceViewModel>();
             vm.ServiceName = defaultName;
-            vm.ServiceSaved += (name, options) => _ = _mainView.AddServiceAsync(ServiceType, new ServiceFactoryOptions<TcpServiceOptions>(name, options));
-            vm.EditCancelled += _mainView.ShowCreateServiceSelectionPage;
+            var mainView = _getMainView();
+            vm.ServiceSaved += (name, options) => _ = mainView.AddServiceAsync(ServiceType, new ServiceFactoryOptions<TcpServiceOptions>(name, options));
+            vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
             var view = ActivatorUtilities.CreateInstance<TcpCreateServiceView>(_services, vm);
             return view;
         }

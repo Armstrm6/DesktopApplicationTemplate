@@ -201,6 +201,7 @@ Latest Attempt: After introducing `ServiceTypeExtensions` for code mapping, the 
 Latest Attempt: After binding settings dialogs to `ServiceType` enums, the `dotnet` command remains unavailable; restore, build, and test steps cannot run locally and CI will verify.
 Latest Attempt: After adding navigation handler tests, the `dotnet` command remains unavailable; restore, build, and test commands could not run locally and CI will verify.
 Latest Attempt: After registering factories for additional services, the `dotnet` command is still missing; restore, build, and tests could not run locally so CI will verify.
+Latest Attempt: After injecting service factory and navigation handler dictionaries into MainView, the `dotnet` command remains unavailable; restore, build, and tests could not run locally, so CI will verify.
 Related Commits/PRs: 8517691, 4c0dbb5, 1b5b0ec, 739abbe, 4f74a36, ff70210, 272560a, 26960dc, 7e9096b, 6454680, a70fb18, f1e064e
 [2025-08-27 04:25] Topic: Logging interface restoration
 Context: Introduced core logging abstractions and refactored edit view models to support DI.

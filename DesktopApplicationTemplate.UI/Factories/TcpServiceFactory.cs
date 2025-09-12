@@ -1,3 +1,4 @@
+using System;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Views;
@@ -7,13 +8,13 @@ namespace DesktopApplicationTemplate.UI.Factories
 {
     public class TcpServiceFactory : IServiceFactory
     {
-        private readonly MainView _mainView;
+        private readonly Func<MainView> _getMainView;
 
         public ServiceType ServiceType => ServiceType.Tcp;
 
-        public TcpServiceFactory(MainView mainView)
+        public TcpServiceFactory(Func<MainView> getMainView)
         {
-            _mainView = mainView;
+            _getMainView = getMainView;
         }
 
         public ServiceListModel Create(object optionsObj)
@@ -30,7 +31,7 @@ namespace DesktopApplicationTemplate.UI.Factories
                 TcpOptions = options
             };
 
-            _mainView.GetOrCreateServicePage(svc);
+            _getMainView().GetOrCreateServicePage(svc);
 
             return svc;
         }

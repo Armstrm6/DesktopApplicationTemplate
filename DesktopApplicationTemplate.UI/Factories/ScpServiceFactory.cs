@@ -1,3 +1,4 @@
+using System;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Views;
@@ -7,13 +8,13 @@ namespace DesktopApplicationTemplate.UI.Factories
 {
     public class ScpServiceFactory : IServiceFactory
     {
-        private readonly MainView _mainView;
+        private readonly Func<MainView> _getMainView;
 
         public ServiceType ServiceType => ServiceType.Scp;
 
-        public ScpServiceFactory(MainView mainView)
+        public ScpServiceFactory(Func<MainView> getMainView)
         {
-            _mainView = mainView;
+            _getMainView = getMainView;
         }
 
         public ServiceListModel Create(object optionsObj)
@@ -30,7 +31,7 @@ namespace DesktopApplicationTemplate.UI.Factories
                 ScpOptions = options
             };
 
-            _mainView.GetOrCreateServicePage(svc);
+            _getMainView().GetOrCreateServicePage(svc);
 
             return svc;
         }

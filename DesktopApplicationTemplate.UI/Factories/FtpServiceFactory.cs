@@ -1,3 +1,4 @@
+using System;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,14 +10,14 @@ namespace DesktopApplicationTemplate.UI.Factories
     public class FtpServiceFactory : IServiceFactory
     {
         private readonly IServiceProvider _services;
-        private readonly MainView _mainView;
+        private readonly Func<MainView> _getMainView;
 
         public ServiceType ServiceType => ServiceType.Ftp;
 
-        public FtpServiceFactory(IServiceProvider services, MainView mainView)
+        public FtpServiceFactory(IServiceProvider services, Func<MainView> getMainView)
         {
             _services = services;
-            _mainView = mainView;
+            _getMainView = getMainView;
         }
 
         public ServiceListModel Create(object optionsObj)
@@ -33,7 +34,7 @@ namespace DesktopApplicationTemplate.UI.Factories
                 FtpOptions = options
             };
 
-            _mainView.GetOrCreateServicePage(svc);
+            _getMainView().GetOrCreateServicePage(svc);
 
             var opt = _services.GetRequiredService<IOptions<FtpServerOptions>>().Value;
             opt.Port = options.Port;

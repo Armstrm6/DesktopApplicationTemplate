@@ -11,15 +11,15 @@ namespace DesktopApplicationTemplate.UI.Factories
     public class MqttServiceFactory : IServiceFactory
     {
         private readonly IServiceProvider _services;
-        private readonly MainView _mainView;
+        private readonly Func<MainView> _getMainView;
         private readonly MainViewModel _mainViewModel;
 
         public ServiceType ServiceType => ServiceType.Mqtt;
 
-        public MqttServiceFactory(IServiceProvider services, MainView mainView, MainViewModel mainViewModel)
+        public MqttServiceFactory(IServiceProvider services, Func<MainView> getMainView, MainViewModel mainViewModel)
         {
             _services = services;
-            _mainView = mainView;
+            _getMainView = getMainView;
             _mainViewModel = mainViewModel;
         }
 
@@ -36,7 +36,7 @@ namespace DesktopApplicationTemplate.UI.Factories
                 IsActive = false
             };
 
-            _mainView.GetOrCreateServicePage(newService);
+            _getMainView().GetOrCreateServicePage(newService);
 
             var opt = _services.GetRequiredService<IOptions<MqttServiceOptions>>().Value;
             opt.Host = options.Host;
@@ -74,11 +74,11 @@ namespace DesktopApplicationTemplate.UI.Factories
                         vm.RequestClose += (_, _) =>
                         {
                             if (newService.ServicePage != null)
-                                _mainView.ShowPage(newService.ServicePage);
+                                _getMainView().ShowPage(newService.ServicePage);
                             _ = _mainViewModel.SaveServicesAsync();
                         };
                     }
-                    _mainView.ShowPage(editView);
+                    _getMainView().ShowPage(editView);
                 };
             }
 
