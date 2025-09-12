@@ -52,9 +52,4 @@
       <DependentUpon>%(Filename).xaml</DependentUpon>
     </Compile>
   </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="ViewModels/**/**/*.cs" />
-  </ItemGroup>
-
-  </Project>
+</Project>
