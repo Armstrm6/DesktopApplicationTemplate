@@ -3,7 +3,8 @@ using DesktopApplicationTemplate.Services.Common;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
-using DesktopApplicationTemplate.UI.Views;
+using DesktopApplicationTemplate.UI.ViewModels.Scp;
+using DesktopApplicationTemplate.UI.Views.Scp;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 

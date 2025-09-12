@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI.ViewModels.Csv;
 using FluentAssertions;
 using Xunit;
 

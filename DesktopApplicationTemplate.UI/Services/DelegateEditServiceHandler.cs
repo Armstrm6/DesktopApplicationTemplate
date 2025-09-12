@@ -1,5 +1,5 @@
 using System;
-using DesktopApplicationTemplate.Models;
+using DesktopApplicationTemplate.UI.ViewModels;
 
 namespace DesktopApplicationTemplate.UI;
 

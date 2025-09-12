@@ -1,9 +1,10 @@
+using DesktopApplicationTemplate.UI.Views;
 using System;
 using System.Windows.Controls;
 using DesktopApplicationTemplate.UI.Factories;
 using DesktopApplicationTemplate.UI.Services;
-using DesktopApplicationTemplate.UI.ViewModels;
-using DesktopApplicationTemplate.UI.Views;
+using DesktopApplicationTemplate.UI.ViewModels.FileObserver;
+using DesktopApplicationTemplate.UI.Views.FileObserver;
 using Microsoft.Extensions.DependencyInjection;
 using DesktopApplicationTemplate.Models;
 

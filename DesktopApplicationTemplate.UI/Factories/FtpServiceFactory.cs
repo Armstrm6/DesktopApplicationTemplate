@@ -1,3 +1,4 @@
+using DesktopApplicationTemplate.UI.Views;
 using System;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;

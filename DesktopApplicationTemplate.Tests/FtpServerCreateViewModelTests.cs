@@ -2,6 +2,7 @@ using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Services.Common;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI.ViewModels.Ftp;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;

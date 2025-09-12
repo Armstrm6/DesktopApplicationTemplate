@@ -44,26 +44,12 @@
 
 
   <ItemGroup>
-    <Page Update="Views/Shared/ServiceLogView.xaml">
+    <Page Update="Views/**/*.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Compile Update="Views/Shared/ServiceLogView.xaml.cs">
-      <DependentUpon>ServiceLogView.xaml</DependentUpon>
-    </Compile>
-    <Page Update="Views/Shared/ServiceMessageTableView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Compile Update="Views/Shared/ServiceMessageTableView.xaml.cs">
-      <DependentUpon>ServiceMessageTableView.xaml</DependentUpon>
-    </Compile>
-    <Page Update="Views/Shared/EditorButtonBar.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Compile Update="Views/Shared/EditorButtonBar.xaml.cs">
-      <DependentUpon>EditorButtonBar.xaml</DependentUpon>
+    <Compile Update="Views/**/*.xaml.cs">
+      <DependentUpon>%(Filename).xaml</DependentUpon>
     </Compile>
   </ItemGroup>
 

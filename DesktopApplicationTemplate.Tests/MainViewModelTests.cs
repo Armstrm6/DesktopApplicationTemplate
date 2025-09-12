@@ -1,6 +1,8 @@
 using DesktopApplicationTemplate.Persistence;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI.ViewModels.Mqtt;
+using DesktopApplicationTemplate.UI.ViewModels.Csv;
 using DesktopApplicationTemplate.UI.Helpers;
 using Moq;
 using System.IO;

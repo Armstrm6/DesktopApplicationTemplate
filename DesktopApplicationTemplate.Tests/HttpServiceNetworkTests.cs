@@ -1,4 +1,5 @@
 using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI.ViewModels.Http;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.Tests;
 using DesktopApplicationTemplate.Core.Services;

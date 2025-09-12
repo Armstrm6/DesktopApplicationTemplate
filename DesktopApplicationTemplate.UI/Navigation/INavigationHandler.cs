@@ -1,3 +1,4 @@
+using DesktopApplicationTemplate.UI.Views;
 using System.Windows.Controls;
 using DesktopApplicationTemplate.Models;
 

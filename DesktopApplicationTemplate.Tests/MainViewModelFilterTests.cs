@@ -1,6 +1,7 @@
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI.ViewModels.Csv;
 using DesktopApplicationTemplate.Models;
 using Moq;
 using System;
