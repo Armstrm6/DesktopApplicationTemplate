@@ -12,22 +12,23 @@ namespace DesktopApplicationTemplate.UI.Navigation
     public class CsvNavigationHandler : INavigationHandler
     {
         private readonly IServiceProvider _services;
-        private readonly MainView _mainView;
+        private readonly Func<MainView> _getMainView;
 
         public ServiceType ServiceType => ServiceType.Csv;
 
-        public CsvNavigationHandler(IServiceProvider services, MainView mainView)
+        public CsvNavigationHandler(IServiceProvider services, Func<MainView> getMainView)
         {
             _services = services;
-            _mainView = mainView;
+            _getMainView = getMainView;
         }
 
         public Page CreateView(string defaultName)
         {
             var vm = _services.GetRequiredService<CsvServiceEditorViewModel>();
             vm.ServiceName = defaultName;
-            vm.ServiceSaved += (name, options) => _ = _mainView.AddServiceAsync(ServiceType, new ServiceFactoryOptions<CsvServiceOptions>(name, options));
-            vm.EditCancelled += _mainView.ShowCreateServiceSelectionPage;
+            var mainView = _getMainView();
+            vm.ServiceSaved += (name, options) => _ = mainView.AddServiceAsync(ServiceType, new ServiceFactoryOptions<CsvServiceOptions>(name, options));
+            vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
             var view = _services.GetRequiredService<CsvServiceEditorView>();
             view.Initialize(vm);
             vm.AdvancedConfigRequested += opts =>
@@ -35,9 +36,9 @@ namespace DesktopApplicationTemplate.UI.Navigation
                 var advVm = ActivatorUtilities.CreateInstance<CsvAdvancedConfigViewModel>(_services, opts);
                 var advView = _services.GetRequiredService<CsvAdvancedConfigView>();
                 advView.Initialize(advVm);
-                advVm.Saved += _ => _mainView.ShowPage(view);
-                advVm.BackRequested += () => _mainView.ShowPage(view);
-                _mainView.ShowPage(advView);
+                advVm.Saved += _ => mainView.ShowPage(view);
+                advVm.BackRequested += () => mainView.ShowPage(view);
+                mainView.ShowPage(advView);
             };
             return view;
         }

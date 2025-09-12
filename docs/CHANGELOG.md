@@ -97,6 +97,7 @@
 - App domain unhandled exception handler is asynchronous and awaits dispatcher shutdown.
 - Main window resolves edit workflows through a DI-injected handler dictionary instead of a large if/else chain.
 - Edit handlers register with DI keyed by `ServiceType`, and the main window receives a dictionary constructed from those registrations.
+- Main window now receives service factory and navigation handler dictionaries from DI for constant-time lookups.
 
 #### Fixed
 - TCP and SCP edit workflows now load existing options via `Load` methods, enabling DI-friendly construction.

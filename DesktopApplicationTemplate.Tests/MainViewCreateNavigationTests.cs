@@ -1,10 +1,9 @@
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Navigation;
 using DesktopApplicationTemplate.UI.Views;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Moq;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 using System.Windows.Controls;
 using Xunit;
@@ -34,17 +33,13 @@ public class MainViewCreateNavigationTests
         };
         foreach (var kvp in handlerMocks)
         {
-            kvp.Value.SetupGet(h => h.ServiceType).Returns(kvp.Key);
+            kvp.Value.Setup(h => h.CreateView(kvp.Key.ToLegacyString())).Returns(new Page());
         }
         var expectedPage = new Page();
         handlerMocks[type].Setup(h => h.CreateView(type.ToLegacyString())).Returns(expectedPage);
-        var services = new ServiceCollection();
-        foreach (var m in handlerMocks.Values)
-            services.AddSingleton(m.Object);
-        var provider = services.BuildServiceProvider();
-        var host = new Mock<IHost>();
-        host.Setup(h => h.Services).Returns(provider);
-        typeof(App).GetProperty("AppHost")!.GetSetMethod(true)!.Invoke(null, new object[] { host.Object });
+        var dict = handlerMocks.ToDictionary(k => k.Key, v => v.Value.Object);
+        typeof(MainView).GetField("_navigationHandlers", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!
+            .SetValue(view, dict);
         typeof(MainView).GetField("_createServicePage", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!
             .SetValue(view, null);
         var method = typeof(MainView).GetMethod("NavigateTo", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
@@ -75,10 +70,8 @@ public class MainViewCreateNavigationTests
         var view = (MainView)FormatterServices.GetUninitializedObject(typeof(MainView));
         typeof(MainView).GetField("ContentFrame")!.SetValue(view, new Frame());
         typeof(MainView).GetField("HomeContentGrid")!.SetValue(view, new Grid());
-        var services = new ServiceCollection().BuildServiceProvider();
-        var host = new Mock<IHost>();
-        host.Setup(h => h.Services).Returns(services);
-        typeof(App).GetProperty("AppHost")!.GetSetMethod(true)!.Invoke(null, new object[] { host.Object });
+        typeof(MainView).GetField("_navigationHandlers", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!
+            .SetValue(view, new Dictionary<ServiceType, INavigationHandler>());
         var method = typeof(MainView).GetMethod("NavigateTo", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
 
         // Act

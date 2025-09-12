@@ -11,7 +11,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualBasic;
 using DesktopApplicationTemplate.UI.Helpers;
-using System.Linq;
 using System.Windows.Media;
 using DesktopApplicationTemplate.Models;
 using System.Windows.Input;
@@ -32,12 +31,20 @@ namespace DesktopApplicationTemplate.UI.Views
         private readonly MainViewModel _viewModel;
         private readonly ILogger<MainView>? _logger;
         private readonly IDictionary<ServiceType, IEditServiceHandler> _editHandlers;
+        private readonly IDictionary<ServiceType, IServiceFactory> _serviceFactories;
+        private readonly IDictionary<ServiceType, INavigationHandler> _navigationHandlers;
 
-        public MainView(MainViewModel viewModel, IDictionary<ServiceType, IEditServiceHandler> editHandlers)
+        public MainView(
+            MainViewModel viewModel,
+            IDictionary<ServiceType, IEditServiceHandler> editHandlers,
+            IDictionary<ServiceType, IServiceFactory> serviceFactories,
+            IDictionary<ServiceType, INavigationHandler> navigationHandlers)
         {
             InitializeComponent();
             _viewModel = viewModel;
             _editHandlers = editHandlers;
+            _serviceFactories = serviceFactories;
+            _navigationHandlers = navigationHandlers;
             if (App.AppHost.Services.GetService(typeof(ILoggerFactory)) is ILoggerFactory factory)
             {
                 _logger = factory.CreateLogger<MainView>();
@@ -214,12 +221,11 @@ namespace DesktopApplicationTemplate.UI.Views
         private void NavigateTo(ServiceType serviceType)
         {
             var defaultName = _createServicePage?.GenerateDefaultName(serviceType) ?? serviceType.ToLegacyString();
-            var handler = App.AppHost.Services.GetServices<INavigationHandler>()
-                .FirstOrDefault(h => h.ServiceType == serviceType);
-            if (handler == null)
-                return;
-            var view = handler.CreateView(defaultName);
-            ShowPage(view);
+            if (_navigationHandlers.TryGetValue(serviceType, out var handler))
+            {
+                var view = handler.CreateView(defaultName);
+                ShowPage(view);
+            }
         }
 
 
@@ -232,9 +238,7 @@ namespace DesktopApplicationTemplate.UI.Views
 
         internal async Task AddServiceAsync(ServiceType type, object options)
         {
-            var factory = App.AppHost.Services.GetServices<IServiceFactory>()
-                .FirstOrDefault(f => f.ServiceType == type);
-            if (factory == null)
+            if (!_serviceFactories.TryGetValue(type, out var factory))
                 return;
 
             var svc = factory.Create(options);
