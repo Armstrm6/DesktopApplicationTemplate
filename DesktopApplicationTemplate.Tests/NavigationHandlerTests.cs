@@ -39,6 +39,21 @@ public class NavigationHandlerTests
     }
 
     [WindowsFact]
+    public async Task AddServiceAsync_AddsService()
+    {
+        var provider = App.AppHost.Services;
+        var mainView = provider.GetRequiredService<MainView>();
+        var handler = provider.GetKeyedService<INavigationHandler>(ServiceType.Http)!;
+        var mainVm = (MainViewModel)typeof(MainView).GetField("_viewModel", BindingFlags.NonPublic | BindingFlags.Instance)!
+            .GetValue(mainView)!;
+        mainVm.Services.Clear();
+
+        await handler.AddServiceAsync("svc", new HttpServiceOptions { BaseUrl = "http://example" });
+
+        Assert.Single(mainVm.Services);
+    }
+
+    [WindowsFact]
     public void AdvancedConfig_ReturnsToCreateView()
     {
         var provider = App.AppHost.Services;

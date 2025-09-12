@@ -7,6 +7,7 @@ using DesktopApplicationTemplate.UI.ViewModels.Heartbeat;
 using DesktopApplicationTemplate.UI.Views.Heartbeat;
 using Microsoft.Extensions.DependencyInjection;
 using DesktopApplicationTemplate.Models;
+using System.Threading.Tasks;
 
 namespace DesktopApplicationTemplate.UI.Navigation
 {
@@ -28,7 +29,7 @@ namespace DesktopApplicationTemplate.UI.Navigation
             var vm = _services.GetRequiredService<HeartbeatCreateServiceViewModel>();
             vm.ServiceName = defaultName;
             var mainView = _getMainView();
-            vm.ServiceSaved += (name, options) => _ = mainView.AddServiceAsync(ServiceType, new ServiceFactoryOptions<HeartbeatServiceOptions>(name, options));
+            vm.ServiceSaved += (name, options) => _ = AddServiceAsync(name, options);
             vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
             var view = ActivatorUtilities.CreateInstance<HeartbeatCreateServiceView>(_services, vm);
             vm.AdvancedConfigRequested += opts =>
@@ -41,6 +42,12 @@ namespace DesktopApplicationTemplate.UI.Navigation
                 mainView.ShowPage(advView);
             };
             return view;
+        }
+
+        public Task AddServiceAsync(string name, object options)
+        {
+            var mainView = _getMainView();
+            return mainView.AddServiceAsync(ServiceType, new ServiceFactoryOptions<HeartbeatServiceOptions>(name, (HeartbeatServiceOptions)options));
         }
     }
 }
