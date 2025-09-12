@@ -7,6 +7,7 @@ using DesktopApplicationTemplate.UI.ViewModels.Tcp;
 using DesktopApplicationTemplate.UI.Views.Tcp;
 using Microsoft.Extensions.DependencyInjection;
 using DesktopApplicationTemplate.Models;
+using System.Threading.Tasks;
 
 namespace DesktopApplicationTemplate.UI.Navigation
 {
@@ -28,10 +29,16 @@ namespace DesktopApplicationTemplate.UI.Navigation
             var vm = _services.GetRequiredService<TcpCreateServiceViewModel>();
             vm.ServiceName = defaultName;
             var mainView = _getMainView();
-            vm.ServiceSaved += (name, options) => _ = mainView.AddServiceAsync(ServiceType, new ServiceFactoryOptions<TcpServiceOptions>(name, options));
+            vm.ServiceSaved += (name, options) => _ = AddServiceAsync(name, options);
             vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
             var view = ActivatorUtilities.CreateInstance<TcpCreateServiceView>(_services, vm);
             return view;
+        }
+
+        public Task AddServiceAsync(string name, object options)
+        {
+            var mainView = _getMainView();
+            return mainView.AddServiceAsync(ServiceType, new ServiceFactoryOptions<TcpServiceOptions>(name, (TcpServiceOptions)options));
         }
     }
 }

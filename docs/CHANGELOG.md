@@ -90,6 +90,7 @@
 - ServiceMessageTableView limits height to keep the table compact.
 - Replaced main window navigation logo with a text header.
 - Centralized service navigation through `INavigationHandler` with DI-resolved handlers.
+- Navigation handlers expose `AddServiceAsync` to register services directly.
 - Script editor exposes the built-in script via `DefaultScript`, and TCP service messages view loads it when no script is provided.
 - Script editor raises an `OutputGenerated` event and TCP service messages view updates its output message when scripts run.
 - TcpServiceMessagesViewModel executes scripts asynchronously and awaits results when saving.

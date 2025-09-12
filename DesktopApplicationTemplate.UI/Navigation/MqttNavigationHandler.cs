@@ -7,6 +7,7 @@ using DesktopApplicationTemplate.UI.ViewModels.Mqtt;
 using DesktopApplicationTemplate.UI.Views.Mqtt;
 using Microsoft.Extensions.DependencyInjection;
 using DesktopApplicationTemplate.Models;
+using System.Threading.Tasks;
 
 namespace DesktopApplicationTemplate.UI.Navigation
 {
@@ -28,7 +29,7 @@ namespace DesktopApplicationTemplate.UI.Navigation
             var vm = _services.GetRequiredService<MqttCreateServiceViewModel>();
             vm.ServiceName = defaultName;
             var mainView = _getMainView();
-            vm.ServiceSaved += (name, options) => _ = mainView.AddServiceAsync(ServiceType, new ServiceFactoryOptions<MqttServiceOptions>(name, options));
+            vm.ServiceSaved += (name, options) => _ = AddServiceAsync(name, options);
             vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
             var view = ActivatorUtilities.CreateInstance<MqttCreateServiceView>(_services, vm);
             vm.AdvancedConfigRequested += opts =>
@@ -41,6 +42,11 @@ namespace DesktopApplicationTemplate.UI.Navigation
                 mainView.ShowPage(advView);
             };
             return view;
+        }
+        public Task AddServiceAsync(string name, object options)
+        {
+            var mainView = _getMainView();
+            return mainView.AddServiceAsync(ServiceType, new ServiceFactoryOptions<MqttServiceOptions>(name, (MqttServiceOptions)options));
         }
 
     }
