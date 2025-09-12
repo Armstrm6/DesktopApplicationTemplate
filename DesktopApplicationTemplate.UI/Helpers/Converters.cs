@@ -23,19 +23,6 @@ namespace DesktopApplicationTemplate.UI.Helpers
         }
     }
 
-    public class NullToVisibilityConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            return value == null ? Visibility.Collapsed : Visibility.Visible;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
     public class BooleanToBrushConverter : IValueConverter
     {
         public Brush TrueBrush { get; set; } = Brushes.Green;
