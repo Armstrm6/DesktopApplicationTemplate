@@ -4,6 +4,7 @@ using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.ViewModels.Mqtt;
 using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI.Views.Mqtt;
+using DesktopApplicationTemplate.UI.Views.Mqtt.Edit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using DesktopApplicationTemplate.Models;

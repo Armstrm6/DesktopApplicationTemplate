@@ -2,7 +2,7 @@ using System;
 using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.ViewModels.Tcp.Edit;
-using DesktopApplicationTemplate.UI.Views.Tcp;
+using DesktopApplicationTemplate.UI.Views.Tcp.Edit;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.Models;
 using Microsoft.Extensions.DependencyInjection;

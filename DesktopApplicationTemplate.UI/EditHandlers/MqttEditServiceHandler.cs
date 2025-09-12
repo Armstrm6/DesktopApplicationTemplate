@@ -3,7 +3,7 @@ using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.ViewModels.Mqtt.Edit;
 using DesktopApplicationTemplate.UI.ViewModels.Mqtt.Advanced;
-using DesktopApplicationTemplate.UI.Views.Mqtt;
+using DesktopApplicationTemplate.UI.Views.Mqtt.Edit;
 using DesktopApplicationTemplate.UI.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
