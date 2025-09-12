@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI.ViewModels.Mqtt;
 using Moq;
 using MQTTnet;
 using MQTTnet.Client;

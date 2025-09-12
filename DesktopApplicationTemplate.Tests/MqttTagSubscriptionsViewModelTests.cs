@@ -8,6 +8,7 @@ using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI.ViewModels.Mqtt;
 using Moq;
 using MQTTnet.Client;
 using MQTTnet.Protocol;

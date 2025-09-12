@@ -2,6 +2,8 @@ using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI.ViewModels.Mqtt;
+using DesktopApplicationTemplate.UI.ViewModels.Tcp;
 using DesktopApplicationTemplate.Services.Common;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;

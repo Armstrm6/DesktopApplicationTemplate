@@ -6,6 +6,7 @@ using System.Text.Json.Serialization;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI.Services;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
 using DesktopApplicationTemplate.UI;
@@ -239,7 +240,7 @@ namespace DesktopApplicationTemplate.Persistence
         public int ExecutionCount { get; set; }
     }
 
-    private class LegacyServiceInfo
+    internal class LegacyServiceInfo
     {
         public string DisplayName { get; set; } = string.Empty;
         public string ServiceType { get; set; } = string.Empty;

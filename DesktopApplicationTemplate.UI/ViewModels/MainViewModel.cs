@@ -11,6 +11,7 @@ using WpfBrushes = System.Windows.Media.Brushes;
 using DesktopApplicationTemplate.Core.Models;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Persistence;
+using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Helpers;
 

@@ -1,5 +1,6 @@
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI.ViewModels.Ftp;
 using Moq;
 using Xunit;
 
