@@ -1,4 +1,3 @@
-using System;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Services;
 
@@ -15,7 +14,7 @@ public class HttpCreateServiceViewModel : ServiceCreateViewModelBase<HttpService
     /// Initializes a new instance of the <see cref="HttpCreateServiceViewModel"/> class.
     /// </summary>
     public HttpCreateServiceViewModel(IServiceRule rule, ILoggingService? logger = null)
-        : base(rule, logger)
+        : base(rule, logger: logger)
     {
     }
 
@@ -28,32 +27,9 @@ public class HttpCreateServiceViewModel : ServiceCreateViewModelBase<HttpService
         set { _baseUrl = value; OnPropertyChanged(); }
     }
 
-    /// <summary>
-    /// Current configuration options.
-    /// </summary>
-    public HttpServiceOptions Options { get; } = new();
-
     /// <inheritdoc />
-    protected override void OnSave()
+    protected override void ApplyOptions(HttpServiceOptions options)
     {
-        Logger?.Log("HTTP create options start", LogLevel.Debug);
-        Options.BaseUrl = BaseUrl;
-        Logger?.Log("HTTP create options finished", LogLevel.Debug);
-        RaiseServiceSaved(Options);
-    }
-
-    /// <inheritdoc />
-    protected override void OnCancel()
-    {
-        Logger?.Log("HTTP create cancelled", LogLevel.Debug);
-        RaiseEditCancelled();
-    }
-
-    /// <inheritdoc />
-    protected override void OnAdvancedConfig()
-    {
-        Logger?.Log("Opening HTTP advanced config", LogLevel.Debug);
-        Options.BaseUrl = BaseUrl;
-        RaiseAdvancedConfigRequested(Options);
+        options.BaseUrl = BaseUrl;
     }
 }

@@ -1,4 +1,3 @@
-using System;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Services;
 
@@ -19,7 +18,7 @@ public class MqttCreateServiceViewModel : ServiceCreateViewModelBase<MqttService
     /// Initializes a new instance of the <see cref="MqttCreateServiceViewModel"/> class.
     /// </summary>
     public MqttCreateServiceViewModel(IServiceRule rule, ILoggingService? logger = null)
-        : base(rule, logger)
+        : base(rule, logger: logger)
     {
     }
 
@@ -95,49 +94,15 @@ public class MqttCreateServiceViewModel : ServiceCreateViewModelBase<MqttService
         set { _password = value; OnPropertyChanged(); }
     }
 
-    /// <summary>
-    /// Current configuration options including advanced settings.
-    /// </summary>
-    public MqttServiceOptions Options { get; } = new();
-
     /// <inheritdoc />
-    protected override void OnSave()
+    protected override void ApplyOptions(MqttServiceOptions options)
     {
-        if (HasErrors)
-        {
-            Logger?.Log("MQTT create validation failed", LogLevel.Warning);
-            return;
-        }
-        Logger?.Log("MQTT create options start", LogLevel.Debug);
-        Options.Host = Host;
-        Options.Port = Port;
-        Options.ClientId = ClientId;
-        Options.Username = string.IsNullOrWhiteSpace(Username) ? null : Username;
-        Options.Password = string.IsNullOrWhiteSpace(Password) ? null : Password;
-        Options.WillTopic = string.IsNullOrWhiteSpace(Options.WillTopic) ? null : Options.WillTopic;
-        Options.WillPayload = string.IsNullOrWhiteSpace(Options.WillPayload) ? null : Options.WillPayload;
-        Logger?.Log("MQTT create options finished", LogLevel.Debug);
-        RaiseServiceSaved(Options);
-    }
-
-    /// <inheritdoc />
-    protected override void OnCancel()
-    {
-        Logger?.Log("MQTT create options cancelled", LogLevel.Debug);
-        RaiseEditCancelled();
-    }
-
-    /// <inheritdoc />
-    protected override void OnAdvancedConfig()
-    {
-        Logger?.Log("Opening MQTT advanced config", LogLevel.Debug);
-        Options.Host = Host;
-        Options.Port = Port;
-        Options.ClientId = ClientId;
-        Options.Username = string.IsNullOrWhiteSpace(Username) ? null : Username;
-        Options.Password = string.IsNullOrWhiteSpace(Password) ? null : Password;
-        Options.WillTopic = string.IsNullOrWhiteSpace(Options.WillTopic) ? null : Options.WillTopic;
-        Options.WillPayload = string.IsNullOrWhiteSpace(Options.WillPayload) ? null : Options.WillPayload;
-        RaiseAdvancedConfigRequested(Options);
+        options.Host = Host;
+        options.Port = Port;
+        options.ClientId = ClientId;
+        options.Username = string.IsNullOrWhiteSpace(Username) ? null : Username;
+        options.Password = string.IsNullOrWhiteSpace(Password) ? null : Password;
+        options.WillTopic = string.IsNullOrWhiteSpace(options.WillTopic) ? null : options.WillTopic;
+        options.WillPayload = string.IsNullOrWhiteSpace(options.WillPayload) ? null : options.WillPayload;
     }
 }

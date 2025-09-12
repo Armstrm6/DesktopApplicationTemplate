@@ -9,7 +9,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Ftp;
 /// </summary>
 public class FtpServerCreateViewModel : ServiceCreateViewModelBase<FtpServerOptions>
 {
-    private readonly IServiceScreen<FtpServerOptions> _screen;
     private int _port = 21;
     private string _rootPath = string.Empty;
 
@@ -17,19 +16,9 @@ public class FtpServerCreateViewModel : ServiceCreateViewModelBase<FtpServerOpti
     /// Initializes a new instance of the <see cref="FtpServerCreateViewModel"/> class.
     /// </summary>
     public FtpServerCreateViewModel(IServiceRule rule, IServiceScreen<FtpServerOptions> screen, ILoggingService? logger = null)
-        : base(rule, logger)
+        : base(rule, screen, logger)
     {
-        _screen = screen ?? throw new ArgumentNullException(nameof(screen));
-
-        _screen.ServiceSaved += (_, o) => RaiseServiceSaved(o);
-        _screen.EditCancelled += () => RaiseEditCancelled();
-        _screen.AdvancedConfigRequested += o => RaiseAdvancedConfigRequested(o);
     }
-
-    /// <summary>
-    /// Current advanced options.
-    /// </summary>
-    public FtpServerOptions Options { get; } = new();
 
     /// <summary>
     /// Port to listen on.
@@ -68,23 +57,9 @@ public class FtpServerCreateViewModel : ServiceCreateViewModelBase<FtpServerOpti
     }
 
     /// <inheritdoc />
-    protected override void OnSave()
+    protected override void ApplyOptions(FtpServerOptions options)
     {
-        if (HasErrors)
-            return;
-        Options.Port = Port;
-        Options.RootPath = RootPath;
-        _screen.Save(ServiceName, Options);
-    }
-
-    /// <inheritdoc />
-    protected override void OnCancel() => _screen.Cancel();
-
-    /// <inheritdoc />
-    protected override void OnAdvancedConfig()
-    {
-        Options.Port = Port;
-        Options.RootPath = RootPath;
-        _screen.OpenAdvanced(Options);
+        options.Port = Port;
+        options.RootPath = RootPath;
     }
 }

@@ -18,7 +18,7 @@ public class HidCreateServiceViewModel : ServiceCreateViewModelBase<HidServiceOp
     /// Initializes a new instance of the <see cref="HidCreateServiceViewModel"/> class.
     /// </summary>
     public HidCreateServiceViewModel(IServiceRule rule, ILoggingService? logger = null)
-        : base(rule, logger)
+        : base(rule, logger: logger)
     {
         UsbProtocols = new[] { "2.0", "3.0" };
     }
@@ -55,36 +55,11 @@ public class HidCreateServiceViewModel : ServiceCreateViewModelBase<HidServiceOp
         set { _attachedService = value; OnPropertyChanged(); }
     }
 
-    /// <summary>
-    /// Current configuration options.
-    /// </summary>
-    public HidServiceOptions Options { get; } = new();
-    
     /// <inheritdoc />
-    protected override void OnSave()
+    protected override void ApplyOptions(HidServiceOptions options)
     {
-        Logger?.Log("HID create options start", LogLevel.Debug);
-        Options.MessageTemplate = MessageTemplate;
-        Options.UsbProtocol = SelectedUsbProtocol;
-        Options.AttachedService = AttachedService;
-        Logger?.Log("HID create options finished", LogLevel.Debug);
-        RaiseServiceSaved(Options);
-    }
-
-    /// <inheritdoc />
-    protected override void OnCancel()
-    {
-        Logger?.Log("HID create cancelled", LogLevel.Debug);
-        RaiseEditCancelled();
-    }
-
-    /// <inheritdoc />
-    protected override void OnAdvancedConfig()
-    {
-        Logger?.Log("Opening HID advanced config", LogLevel.Debug);
-        Options.MessageTemplate = MessageTemplate;
-        Options.UsbProtocol = SelectedUsbProtocol;
-        Options.AttachedService = AttachedService;
-        RaiseAdvancedConfigRequested(Options);
+        options.MessageTemplate = MessageTemplate;
+        options.UsbProtocol = SelectedUsbProtocol;
+        options.AttachedService = AttachedService;
     }
 }

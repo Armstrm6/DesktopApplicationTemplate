@@ -18,7 +18,7 @@ public class FileObserverCreateServiceViewModel : ServiceCreateViewModelBase<Fil
     /// Initializes a new instance of the <see cref="FileObserverCreateServiceViewModel"/> class.
     /// </summary>
     public FileObserverCreateServiceViewModel(IServiceRule rule, IFileDialogService fileDialog, ILoggingService? logger = null)
-        : base(rule, logger)
+        : base(rule, logger: logger)
     {
         _fileDialog = fileDialog ?? throw new ArgumentNullException(nameof(fileDialog));
         BrowseCommand = new RelayCommand(BrowseFolder);
@@ -47,38 +47,10 @@ public class FileObserverCreateServiceViewModel : ServiceCreateViewModelBase<Fil
     /// </summary>
     public ICommand BrowseCommand { get; }
 
-    /// <summary>
-    /// Current configuration options.
-    /// </summary>
-    public FileObserverServiceOptions Options { get; } = new();
-
     /// <inheritdoc />
-    protected override void OnSave()
+    protected override void ApplyOptions(FileObserverServiceOptions options)
     {
-        if (HasErrors)
-        {
-            Logger?.Log("FileObserver create validation failed", LogLevel.Warning);
-            return;
-        }
-        Logger?.Log("FileObserver create options start", LogLevel.Debug);
-        Options.FilePath = FilePath;
-        Logger?.Log("FileObserver create options finished", LogLevel.Debug);
-        RaiseServiceSaved(Options);
-    }
-
-    /// <inheritdoc />
-    protected override void OnCancel()
-    {
-        Logger?.Log("FileObserver create cancelled", LogLevel.Debug);
-        RaiseEditCancelled();
-    }
-
-    /// <inheritdoc />
-    protected override void OnAdvancedConfig()
-    {
-        Logger?.Log("Opening FileObserver advanced config", LogLevel.Debug);
-        Options.FilePath = FilePath;
-        RaiseAdvancedConfigRequested(Options);
+        options.FilePath = FilePath;
     }
 
     private void BrowseFolder()

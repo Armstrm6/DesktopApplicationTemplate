@@ -15,15 +15,10 @@ public class TcpCreateServiceViewModel : ServiceCreateViewModelBase<TcpServiceOp
     private TcpServiceMode _mode;
 
     /// <summary>
-    /// Current options.
-    /// </summary>
-    public TcpServiceOptions Options { get; } = new();
-
-    /// <summary>
     /// Initializes a new instance of the <see cref="TcpCreateServiceViewModel"/> class.
     /// </summary>
     public TcpCreateServiceViewModel(IServiceRule rule, ILoggingService? logger = null)
-        : base(rule, logger)
+        : base(rule, logger: logger)
     {
     }
 
@@ -87,32 +82,11 @@ public class TcpCreateServiceViewModel : ServiceCreateViewModelBase<TcpServiceOp
     public TcpServiceMode[] Modes { get; } = (TcpServiceMode[])Enum.GetValues(typeof(TcpServiceMode));
 
     /// <inheritdoc />
-    protected override void OnSave()
+    protected override void ApplyOptions(TcpServiceOptions options)
     {
-        if (HasErrors)
-        {
-            Logger?.Log("TCP create validation failed", LogLevel.Warning);
-            return;
-        }
-        Logger?.Log("TCP create options start", LogLevel.Debug);
-        Options.Host = Host;
-        Options.Port = Port;
-        Options.UseUdp = UseUdp;
-        Options.Mode = Mode;
-        Logger?.Log("TCP create options finished", LogLevel.Debug);
-        RaiseServiceSaved(Options);
-    }
-
-    /// <inheritdoc />
-    protected override void OnCancel()
-    {
-        Logger?.Log("TCP create options cancelled", LogLevel.Debug);
-        RaiseEditCancelled();
-    }
-
-    /// <inheritdoc />
-    protected override void OnAdvancedConfig()
-    {
-        // Advanced configuration removed.
+        options.Host = Host;
+        options.Port = Port;
+        options.UseUdp = UseUdp;
+        options.Mode = Mode;
     }
 }

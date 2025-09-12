@@ -1,4 +1,3 @@
-using System;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Services;
 
@@ -15,7 +14,7 @@ public class HeartbeatCreateServiceViewModel : ServiceCreateViewModelBase<Heartb
     /// Initializes a new instance of the <see cref="HeartbeatCreateServiceViewModel"/> class.
     /// </summary>
     public HeartbeatCreateServiceViewModel(IServiceRule rule, ILoggingService? logger = null)
-        : base(rule, logger)
+        : base(rule, logger: logger)
     {
     }
 
@@ -28,32 +27,9 @@ public class HeartbeatCreateServiceViewModel : ServiceCreateViewModelBase<Heartb
         set { _baseMessage = value; OnPropertyChanged(); }
     }
 
-    /// <summary>
-    /// Current configuration options.
-    /// </summary>
-    public HeartbeatServiceOptions Options { get; } = new();
-
     /// <inheritdoc />
-    protected override void OnSave()
+    protected override void ApplyOptions(HeartbeatServiceOptions options)
     {
-        Logger?.Log("Heartbeat create options start", LogLevel.Debug);
-        Options.BaseMessage = BaseMessage;
-        Logger?.Log("Heartbeat create options finished", LogLevel.Debug);
-        RaiseServiceSaved(Options);
-    }
-
-    /// <inheritdoc />
-    protected override void OnCancel()
-    {
-        Logger?.Log("Heartbeat create cancelled", LogLevel.Debug);
-        RaiseEditCancelled();
-    }
-
-    /// <inheritdoc />
-    protected override void OnAdvancedConfig()
-    {
-        Logger?.Log("Heartbeat advanced config requested", LogLevel.Debug);
-        Options.BaseMessage = BaseMessage;
-        RaiseAdvancedConfigRequested(Options);
+        options.BaseMessage = BaseMessage;
     }
 }
