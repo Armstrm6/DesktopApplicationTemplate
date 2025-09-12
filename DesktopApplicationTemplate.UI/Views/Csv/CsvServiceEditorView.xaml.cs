@@ -1,5 +1,5 @@
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.UI.ViewModels.Csv;
+using DesktopApplicationTemplate.UI.ViewModels.Csv.Edit;
 using System.Windows.Controls;
 
 namespace DesktopApplicationTemplate.UI.Views.Csv;

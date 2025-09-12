@@ -1,6 +1,6 @@
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
-using DesktopApplicationTemplate.UI.ViewModels.Scp;
+using DesktopApplicationTemplate.UI.ViewModels.Scp.Advanced;
 using FluentAssertions;
 using Xunit;
 

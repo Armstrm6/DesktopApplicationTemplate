@@ -1,6 +1,6 @@
 using System.Windows.Controls;
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.UI.ViewModels.Mqtt;
+using DesktopApplicationTemplate.UI.ViewModels.Mqtt.Advanced;
 
 namespace DesktopApplicationTemplate.UI.Views.Mqtt;
 

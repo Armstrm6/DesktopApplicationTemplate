@@ -1,6 +1,6 @@
 using System.Windows.Controls;
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.UI.ViewModels.Scp;
+using DesktopApplicationTemplate.UI.ViewModels.Scp.Advanced;
 
 namespace DesktopApplicationTemplate.UI.Views.Scp;
 

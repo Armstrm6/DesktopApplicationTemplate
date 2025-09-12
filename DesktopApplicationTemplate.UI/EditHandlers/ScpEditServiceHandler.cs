@@ -1,7 +1,8 @@
 using System;
 using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI.ViewModels;
-using DesktopApplicationTemplate.UI.ViewModels.Scp;
+using DesktopApplicationTemplate.UI.ViewModels.Scp.Edit;
+using DesktopApplicationTemplate.UI.ViewModels.Scp.Advanced;
 using DesktopApplicationTemplate.UI.Views.Scp;
 using DesktopApplicationTemplate.UI.Services;
 using Microsoft.Extensions.DependencyInjection;

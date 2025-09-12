@@ -1,7 +1,8 @@
 using System;
 using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI.ViewModels;
-using DesktopApplicationTemplate.UI.ViewModels.Ftp;
+using DesktopApplicationTemplate.UI.ViewModels.Ftp.Edit;
+using DesktopApplicationTemplate.UI.ViewModels.Ftp.Advanced;
 using DesktopApplicationTemplate.UI.Views.Ftp;
 using DesktopApplicationTemplate.UI.Services;
 using Microsoft.Extensions.DependencyInjection;

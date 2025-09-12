@@ -1,6 +1,6 @@
 using System.Windows.Controls;
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.UI.ViewModels.Http;
+using DesktopApplicationTemplate.UI.ViewModels.Http.Edit;
 
 namespace DesktopApplicationTemplate.UI.Views.Http;
 

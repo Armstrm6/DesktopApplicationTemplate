@@ -1,6 +1,6 @@
 using System.Windows.Controls;
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.UI.ViewModels.FileObserver;
+using DesktopApplicationTemplate.UI.ViewModels.FileObserver.Advanced;
 
 namespace DesktopApplicationTemplate.UI.Views.FileObserver;
 

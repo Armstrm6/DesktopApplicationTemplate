@@ -1,6 +1,6 @@
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
-using DesktopApplicationTemplate.UI.ViewModels.FileObserver;
+using DesktopApplicationTemplate.UI.ViewModels.FileObserver.Advanced;
 using FluentAssertions;
 using Xunit;
 

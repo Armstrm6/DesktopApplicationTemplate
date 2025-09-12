@@ -1,6 +1,6 @@
 using System.Windows.Controls;
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.UI.ViewModels.Tcp;
+using DesktopApplicationTemplate.UI.ViewModels.Tcp.Create;
 
 namespace DesktopApplicationTemplate.UI.Views.Tcp;
 

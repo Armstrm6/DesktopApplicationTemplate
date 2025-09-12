@@ -1,6 +1,6 @@
 using System.Windows.Controls;
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.UI.ViewModels.Hid;
+using DesktopApplicationTemplate.UI.ViewModels.Hid.Advanced;
 
 namespace DesktopApplicationTemplate.UI.Views.Hid;
 

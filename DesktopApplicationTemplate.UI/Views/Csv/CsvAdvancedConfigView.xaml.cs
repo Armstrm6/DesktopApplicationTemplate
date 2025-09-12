@@ -1,6 +1,6 @@
 using System.Windows.Controls;
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.UI.ViewModels.Csv;
+using DesktopApplicationTemplate.UI.ViewModels.Csv.Advanced;
 
 namespace DesktopApplicationTemplate.UI.Views.Csv;
 

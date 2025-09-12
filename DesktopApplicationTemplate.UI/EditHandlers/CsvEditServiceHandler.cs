@@ -1,7 +1,8 @@
 using System;
 using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI.ViewModels;
-using DesktopApplicationTemplate.UI.ViewModels.Csv;
+using DesktopApplicationTemplate.UI.ViewModels.Csv.Edit;
+using DesktopApplicationTemplate.UI.ViewModels.Csv.Advanced;
 using DesktopApplicationTemplate.UI.Views.Csv;
 using DesktopApplicationTemplate.UI.Services;
 using Microsoft.Extensions.DependencyInjection;

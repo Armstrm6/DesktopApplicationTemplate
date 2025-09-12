@@ -1,6 +1,6 @@
 using System;
 using System.Windows.Controls;
-using DesktopApplicationTemplate.UI.ViewModels.Ftp;
+using DesktopApplicationTemplate.UI.ViewModels.Ftp.Edit;
 
 namespace DesktopApplicationTemplate.UI.Views.Ftp;
 
