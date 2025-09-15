@@ -13,22 +13,24 @@ namespace DesktopApplicationTemplate.UI.EditHandlers;
 
 public class CsvEditServiceHandler : IEditServiceHandler
 {
-    private readonly MainView _view;
-    private readonly MainViewModel _viewModel;
+    private readonly Func<MainView> _getMainView;
+    private readonly Func<MainViewModel> _getMainViewModel;
     private readonly IServiceProvider _services;
     private readonly ILogger<CsvEditServiceHandler>? _logger;
 
-    public CsvEditServiceHandler(MainView view, MainViewModel viewModel, IServiceProvider services, ILogger<CsvEditServiceHandler>? logger = null)
+    public CsvEditServiceHandler(Func<MainView> getMainView, Func<MainViewModel> getMainViewModel, IServiceProvider services, ILogger<CsvEditServiceHandler>? logger = null)
     {
-        _view = view;
-        _viewModel = viewModel;
+        _getMainView = getMainView;
+        _getMainViewModel = getMainViewModel;
         _services = services;
         _logger = logger;
     }
 
     public void Edit(ServiceListModel service)
     {
-        var csvPage = _view.GetOrCreateServicePage(service);
+        var mainView = _getMainView();
+        var mainViewModel = _getMainViewModel();
+        var csvPage = mainView.GetOrCreateServicePage(service);
         var options = service.CsvOptions ?? new CsvServiceOptions();
         var vm = _services.GetRequiredService<CsvServiceEditorViewModel>();
         vm.Load(service.DisplayName.Split(" - ").Last(), options);
@@ -39,24 +41,24 @@ public class CsvEditServiceHandler : IEditServiceHandler
             service.DisplayName = $"CSV Creator - {name}";
             service.CsvOptions = opts;
             if (csvPage != null)
-                _view.ShowPage(csvPage);
-            _ = _viewModel.SaveServicesAsync();
+                mainView.ShowPage(csvPage);
+            _ = mainViewModel.SaveServicesAsync();
         };
         vm.EditCancelled += () =>
         {
             if (csvPage != null)
-                _view.ShowPage(csvPage);
+                mainView.ShowPage(csvPage);
         };
         vm.AdvancedConfigRequested += opts =>
         {
             var advVm = ActivatorUtilities.CreateInstance<CsvAdvancedConfigViewModel>(_services, opts);
             var advView = _services.GetRequiredService<CsvAdvancedConfigView>();
             advView.Initialize(advVm);
-            advVm.Saved += _ => _view.ShowPage(editView);
-            advVm.BackRequested += () => _view.ShowPage(editView);
-            _view.ShowPage(advView);
+            advVm.Saved += _ => mainView.ShowPage(editView);
+            advVm.BackRequested += () => mainView.ShowPage(editView);
+            mainView.ShowPage(advView);
         };
-        _view.ShowPage(editView);
+        mainView.ShowPage(editView);
         _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
     }
 }

@@ -14,22 +14,24 @@ namespace DesktopApplicationTemplate.UI.EditHandlers;
 
 public class MqttEditServiceHandler : IEditServiceHandler
 {
-    private readonly MainView _view;
-    private readonly MainViewModel _viewModel;
+    private readonly Func<MainView> _getMainView;
+    private readonly Func<MainViewModel> _getMainViewModel;
     private readonly IServiceProvider _services;
     private readonly ILogger<MqttEditServiceHandler>? _logger;
 
-    public MqttEditServiceHandler(MainView view, MainViewModel viewModel, IServiceProvider services, ILogger<MqttEditServiceHandler>? logger = null)
+    public MqttEditServiceHandler(Func<MainView> getMainView, Func<MainViewModel> getMainViewModel, IServiceProvider services, ILogger<MqttEditServiceHandler>? logger = null)
     {
-        _view = view;
-        _viewModel = viewModel;
+        _getMainView = getMainView;
+        _getMainViewModel = getMainViewModel;
         _services = services;
         _logger = logger;
     }
 
     public void Edit(ServiceListModel service)
     {
-        var tagPage = _view.GetOrCreateServicePage(service);
+        var mainView = _getMainView();
+        var mainViewModel = _getMainViewModel();
+        var tagPage = mainView.GetOrCreateServicePage(service);
         var options = _services.GetRequiredService<IOptions<MqttServiceOptions>>().Value;
         var vm = ActivatorUtilities.CreateInstance<MqttEditServiceViewModel>(_services, service.DisplayName.Split(" - ").Last(), options);
         var editView = _services.GetRequiredService<MqttEditServiceView>();
@@ -38,24 +40,24 @@ public class MqttEditServiceHandler : IEditServiceHandler
         {
             service.DisplayName = $"MQTT - {name}";
             if (tagPage != null)
-                _view.ShowPage(tagPage);
-            _ = _viewModel.SaveServicesAsync();
+                mainView.ShowPage(tagPage);
+            _ = mainViewModel.SaveServicesAsync();
         };
         vm.EditCancelled += () =>
         {
             if (tagPage != null)
-                _view.ShowPage(tagPage);
+                mainView.ShowPage(tagPage);
         };
         vm.AdvancedConfigRequested += opts =>
         {
             var advVm = ActivatorUtilities.CreateInstance<MqttAdvancedConfigViewModel>(_services, opts);
             var advView = _services.GetRequiredService<MqttAdvancedConfigView>();
             advView.Initialize(advVm);
-            advVm.Saved += _ => _view.ShowPage(editView);
-            advVm.BackRequested += () => _view.ShowPage(editView);
-            _view.ShowPage(advView);
+            advVm.Saved += _ => mainView.ShowPage(editView);
+            advVm.BackRequested += () => mainView.ShowPage(editView);
+            mainView.ShowPage(advView);
         };
-        _view.ShowPage(editView);
+        mainView.ShowPage(editView);
         _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
     }
 }

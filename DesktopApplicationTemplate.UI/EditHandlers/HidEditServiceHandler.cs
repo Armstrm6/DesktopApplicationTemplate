@@ -13,22 +13,24 @@ namespace DesktopApplicationTemplate.UI.EditHandlers;
 
 public class HidEditServiceHandler : IEditServiceHandler
 {
-    private readonly MainView _view;
-    private readonly MainViewModel _viewModel;
+    private readonly Func<MainView> _getMainView;
+    private readonly Func<MainViewModel> _getMainViewModel;
     private readonly IServiceProvider _services;
     private readonly ILogger<HidEditServiceHandler>? _logger;
 
-    public HidEditServiceHandler(MainView view, MainViewModel viewModel, IServiceProvider services, ILogger<HidEditServiceHandler>? logger = null)
+    public HidEditServiceHandler(Func<MainView> getMainView, Func<MainViewModel> getMainViewModel, IServiceProvider services, ILogger<HidEditServiceHandler>? logger = null)
     {
-        _view = view;
-        _viewModel = viewModel;
+        _getMainView = getMainView;
+        _getMainViewModel = getMainViewModel;
         _services = services;
         _logger = logger;
     }
 
     public void Edit(ServiceListModel service)
     {
-        var hidPage = _view.GetOrCreateServicePage(service);
+        var mainView = _getMainView();
+        var mainViewModel = _getMainViewModel();
+        var hidPage = mainView.GetOrCreateServicePage(service);
         var options = service.HidOptions ?? new HidServiceOptions();
         var vm = ActivatorUtilities.CreateInstance<HidEditServiceViewModel>(_services, service.DisplayName.Split(" - ").Last(), options);
         var editView = _services.GetRequiredService<HidEditServiceView>();
@@ -38,24 +40,24 @@ public class HidEditServiceHandler : IEditServiceHandler
             service.DisplayName = $"HID - {name}";
             service.HidOptions = opts;
             if (hidPage != null)
-                _view.ShowPage(hidPage);
-            _ = _viewModel.SaveServicesAsync();
+                mainView.ShowPage(hidPage);
+            _ = mainViewModel.SaveServicesAsync();
         };
         vm.EditCancelled += () =>
         {
             if (hidPage != null)
-                _view.ShowPage(hidPage);
+                mainView.ShowPage(hidPage);
         };
         vm.AdvancedConfigRequested += opts =>
         {
             var advVm = ActivatorUtilities.CreateInstance<HidAdvancedConfigViewModel>(_services, opts);
             var advView = _services.GetRequiredService<HidAdvancedConfigView>();
             advView.Initialize(advVm);
-            advVm.Saved += _ => _view.ShowPage(editView);
-            advVm.BackRequested += () => _view.ShowPage(editView);
-            _view.ShowPage(advView);
+            advVm.Saved += _ => mainView.ShowPage(editView);
+            advVm.BackRequested += () => mainView.ShowPage(editView);
+            mainView.ShowPage(advView);
         };
-        _view.ShowPage(editView);
+        mainView.ShowPage(editView);
         _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
     }
 }

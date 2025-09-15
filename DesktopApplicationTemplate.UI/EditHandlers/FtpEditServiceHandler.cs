@@ -14,22 +14,24 @@ namespace DesktopApplicationTemplate.UI.EditHandlers;
 
 public class FtpEditServiceHandler : IEditServiceHandler
 {
-    private readonly MainView _view;
-    private readonly MainViewModel _viewModel;
+    private readonly Func<MainView> _getMainView;
+    private readonly Func<MainViewModel> _getMainViewModel;
     private readonly IServiceProvider _services;
     private readonly ILogger<FtpEditServiceHandler>? _logger;
 
-    public FtpEditServiceHandler(MainView view, MainViewModel viewModel, IServiceProvider services, ILogger<FtpEditServiceHandler>? logger = null)
+    public FtpEditServiceHandler(Func<MainView> getMainView, Func<MainViewModel> getMainViewModel, IServiceProvider services, ILogger<FtpEditServiceHandler>? logger = null)
     {
-        _view = view;
-        _viewModel = viewModel;
+        _getMainView = getMainView;
+        _getMainViewModel = getMainViewModel;
         _services = services;
         _logger = logger;
     }
 
     public void Edit(ServiceListModel service)
     {
-        var ftpPage = _view.GetOrCreateServicePage(service);
+        var mainView = _getMainView();
+        var mainViewModel = _getMainViewModel();
+        var ftpPage = mainView.GetOrCreateServicePage(service);
         var options = service.FtpOptions ?? new FtpServerOptions();
         var vm = ActivatorUtilities.CreateInstance<FtpServerEditViewModel>(_services, service.DisplayName.Split(" - ").Last(), options);
         var editView = ActivatorUtilities.CreateInstance<FtpServerEditView>(_services, vm);
@@ -44,24 +46,24 @@ public class FtpEditServiceHandler : IEditServiceHandler
             opt.Username = opts.Username;
             opt.Password = opts.Password;
             if (ftpPage != null)
-                _view.ShowPage(ftpPage);
-            _ = _viewModel.SaveServicesAsync();
+                mainView.ShowPage(ftpPage);
+            _ = mainViewModel.SaveServicesAsync();
         };
         vm.EditCancelled += () =>
         {
             if (ftpPage != null)
-                _view.ShowPage(ftpPage);
+                mainView.ShowPage(ftpPage);
         };
         vm.AdvancedConfigRequested += opts =>
         {
             var advVm = ActivatorUtilities.CreateInstance<FtpServerAdvancedConfigViewModel>(_services, opts);
             var advView = _services.GetRequiredService<FtpServerAdvancedConfigView>();
             advView.Initialize(advVm);
-            advVm.Saved += _ => _view.ShowPage(editView);
-            advVm.BackRequested += () => _view.ShowPage(editView);
-            _view.ShowPage(advView);
+            advVm.Saved += _ => mainView.ShowPage(editView);
+            advVm.BackRequested += () => mainView.ShowPage(editView);
+            mainView.ShowPage(advView);
         };
-        _view.ShowPage(editView);
+        mainView.ShowPage(editView);
         _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
     }
 }

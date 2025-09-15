@@ -13,22 +13,24 @@ namespace DesktopApplicationTemplate.UI.EditHandlers;
 
 public class ScpEditServiceHandler : IEditServiceHandler
 {
-    private readonly MainView _view;
-    private readonly MainViewModel _viewModel;
+    private readonly Func<MainView> _getMainView;
+    private readonly Func<MainViewModel> _getMainViewModel;
     private readonly IServiceProvider _services;
     private readonly ILogger<ScpEditServiceHandler>? _logger;
 
-    public ScpEditServiceHandler(MainView view, MainViewModel viewModel, IServiceProvider services, ILogger<ScpEditServiceHandler>? logger = null)
+    public ScpEditServiceHandler(Func<MainView> getMainView, Func<MainViewModel> getMainViewModel, IServiceProvider services, ILogger<ScpEditServiceHandler>? logger = null)
     {
-        _view = view;
-        _viewModel = viewModel;
+        _getMainView = getMainView;
+        _getMainViewModel = getMainViewModel;
         _services = services;
         _logger = logger;
     }
 
     public void Edit(ServiceListModel service)
     {
-        var scpPage = _view.GetOrCreateServicePage(service);
+        var mainView = _getMainView();
+        var mainViewModel = _getMainViewModel();
+        var scpPage = mainView.GetOrCreateServicePage(service);
         var options = service.ScpOptions ?? new ScpServiceOptions();
         var vm = _services.GetRequiredService<ScpEditServiceViewModel>();
         vm.Load(service.DisplayName.Split(" - ").Last(), options);
@@ -39,13 +41,13 @@ public class ScpEditServiceHandler : IEditServiceHandler
             service.DisplayName = $"SCP - {name}";
             service.ScpOptions = opts;
             if (scpPage != null)
-                _view.ShowPage(scpPage);
-            _ = _viewModel.SaveServicesAsync();
+                mainView.ShowPage(scpPage);
+            _ = mainViewModel.SaveServicesAsync();
         };
         vm.EditCancelled += () =>
         {
             if (scpPage != null)
-                _view.ShowPage(scpPage);
+                mainView.ShowPage(scpPage);
         };
         vm.AdvancedConfigRequested += opts =>
         {
@@ -53,11 +55,11 @@ public class ScpEditServiceHandler : IEditServiceHandler
             advVm.Load(opts);
             var advView = _services.GetRequiredService<ScpAdvancedConfigView>();
             advView.Initialize(advVm);
-            advVm.Saved += _ => _view.ShowPage(editView);
-            advVm.BackRequested += () => _view.ShowPage(editView);
-            _view.ShowPage(advView);
+            advVm.Saved += _ => mainView.ShowPage(editView);
+            advVm.BackRequested += () => mainView.ShowPage(editView);
+            mainView.ShowPage(advView);
         };
-        _view.ShowPage(editView);
+        mainView.ShowPage(editView);
         _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
     }
 }
