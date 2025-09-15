@@ -1,4 +1,5 @@
 using DesktopApplicationTemplate.Models;
+using DesktopApplicationTemplate.UI;
 using DesktopApplicationTemplate.UI.Factories;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.Views;
