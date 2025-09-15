@@ -5,15 +5,7 @@ Environment Setup
 -----------------
 - Install the .NET SDK version `8.0.404` (pinned via `global.json`).
 - On Windows, the .NET SDK includes WPF by default; no additional workload installation is needed.
-- Windows collaborators run the standard build and test commands below and share the results. Codex cannot execute them inside the Linux container and relies on collaborator-provided logs.
-
-  ```bash
-  dotnet restore
-  dotnet build DesktopApplicationTemplate.sln
-  dotnet test --settings tests.runsettings
-  ```
-
-  Record a brief summary of the shared output in `Codex/docs/CollaborationAndDebugTips.txt` so future work understands the latest build state.
+- Ask a Windows collaborator to run the solution build and test workflow and share their logs. Codex cannot execute these commands in the Linux container and summarizes collaborator-provided results in `Codex/docs/CollaborationAndDebugTips.txt`.
 
 Effective Collaboration Techniques
 ----------------------------------
@@ -22,16 +14,22 @@ Effective Collaboration Techniques
 - Ask Windows collaborators to run programmatic checks after modifications and share their output. Codex summarizes the results in `Codex/docs/CollaborationAndDebugTips.txt` instead of running the commands directly.
 - Use `rg` or targeted `find` commands instead of recursive `ls` or `grep`.
 
+Reference Documents
+-------------------
+- Review `Codex/docs/CHANGELOG.md` for release-level summaries that describe why notable changes shipped.
+- Capture troubleshooting details and collaborator-provided build/test outcomes in `Codex/docs/CollaborationAndDebugTips.txt`.
+- When updating either document, extend the relevant entry when applicable or start a new timestamped section only when introducing a distinct topic.
+
 GitHub Workflow Notes
 ---------------------
 - Keep changes on the main branch and make atomic commits with descriptive messages.
-- After code updates, ensure a Windows collaborator runs `dotnet test --settings tests.runsettings` and share their output in the pull request summary. Codex references their results when drafting the PR.
+- After code updates, request that a Windows collaborator run `dotnet test --settings tests.runsettings` (or the relevant checks) and forward their output. Cite the collaborator's results when drafting the PR instead of running the commands locally.
 - Only committed code is evaluated, so ensure the working tree is clean before calling `make_pr`.
 
 Documentation Style
 -------------------
-- When updating `Codex/docs/CHANGELOG.md` or `Codex/docs/CollaborationAndDebugTips.txt`, find the existing topic and insert new notes within that block.
-- Add a timestamp only when starting a new topic to prevent redundant entries.
+- Cross-link new instructions to the appropriate sections in this document, `Codex/docs/CHANGELOG.md`, or `Codex/docs/CollaborationAndDebugTips.txt` so contributors can find them later.
+- Summaries of collaborator test runs belong in `Codex/docs/CollaborationAndDebugTips.txt`, not inline in pull request descriptions.
 
 Draw.io Integration
 -------------------
@@ -44,7 +42,7 @@ Unit Testing Insights
 - Tests use xUnit with Moq for mocking and reside in `DesktopApplicationTemplate.Tests`.
 - Prefer isolated tests that validate one behavior and use expressive method names.
 - Configure dependencies through DI to keep tests focused and deterministic.
-- Coordinate with Windows collaborators to run `dotnet test` so results cover the full Windows-only surface area.
+- Coordinate with Windows collaborators to execute the `dotnet test` runs and share their logs; summarize collaborator-provided outcomes in `Codex/docs/CollaborationAndDebugTips.txt` since the container cannot run them directly.
 
 Miscellaneous Tips
 ------------------
@@ -56,30 +54,4 @@ Miscellaneous Tips
 Working in restricted environments
 ----------------------------------
 - Review `Codex/AGENTS.md` and the resources under `Codex/docs/`.
-- Note limitations (tests, writes) in PRs or collaboration log.
-
-[2025-08-15 10:00] Topic: MQTT options and DI
-Context: Introduced `MqttServiceOptions` with DI support and consolidated registrations using `IOptions`.
-Observations: Added `MessageRoutingService` and verified the service provider builds cleanly.
-Codex Limitations noticed: pwsh not available for add-tip script.
-Effective Prompts / Instructions that worked: Register options and inject via DI.
-Decisions & Rationale: Use `IOptions` to supply defaults and centralize configuration.
-Action Items: Run tests.
-Related Commits/PRs:
-[2025-08-19 14:42] Topic: MQTT connection editor
-Context: Added window for editing MQTT connection settings from tag subscriptions.
-Observations: Introduced dedicated view model with update, cancel, and unsubscribe commands.
-Codex Limitations noticed: none
-Effective Prompts / Instructions that worked: follow MVVM and DI registration guidelines.
-Decisions & Rationale: Separate connection editing to keep subscription view focused.
-Action Items: run tests
-Related Commits/PRs:
-
-[2025-08-20 13:26] Topic: Build error fixes
-Context: Build failed due to logging package downgrade and duplicate MQTT subscribe method.
-Observations: Resolved package downgrade and MQTT subscription build errors by updating logging abstractions, exposing connection helpers, and initializing required fields.
-Codex Limitations noticed: Linux container lacks Microsoft.WindowsDesktop runtime so tests cannot execute.
-Effective Prompts / Instructions that worked: clarify specific compiler errors and upgrade paths.
-Decisions & Rationale: remove duplicate SubscribeAsync method and add async command helpers for testability.
-Action Items: Rely on CI for full test run.
-Related Commits/PRs:
+- Note limitations (tests, writes) in PRs or in `Codex/docs/CollaborationAndDebugTips.txt`.
