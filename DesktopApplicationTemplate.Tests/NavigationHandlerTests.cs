@@ -1,4 +1,5 @@
 using DesktopApplicationTemplate.Models;
+using DesktopApplicationTemplate.UI;
 using DesktopApplicationTemplate.UI.Navigation;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
