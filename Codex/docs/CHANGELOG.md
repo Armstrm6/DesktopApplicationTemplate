@@ -298,14 +298,13 @@
 - `/test` comment workflow to run CI on demand.
 - `TestCommon` library providing shared test helpers and fixtures referenced by all test projects.
 - `TestHelpers.CreateService` simplifies creating `ServiceListModel` instances in tests to reduce duplication.
-- Test-only composite service demonstrates reuse of `ServiceRule` and `ServiceScreen` in unit tests.
-- Comparison tests ensure composed sample service matches original implementation results and log formatting.
 - Collaboration tips note that WPF projects require Windows or the WindowsDesktop runtime and fail with `InitializeComponent` and `NETSDK1100` errors if missing.
 - Guide on creating custom services and registering dependencies via `IServiceModule`.
 - README now explains `ServiceType`, dictionary-based edit handlers, and dynamic DI modules with a sample for adding a new service.
 - Tests verify service factories create pages and navigation handlers wire events.
 
 #### Changed
+- Moved `docs/CHANGELOG.md` and supporting tools into `Codex/docs/` and `Codex/tools/`, updating documentation references to the new paths.
 - Consolidated GitHub Actions into a single `CI` workflow with collaboration instructions in `AGENTS.md`.
 - CI workflow runs on pushes to `feature/**` and `bugfix/**` branches, supports manual triggers, and skips checks for pull requests targeting `dev`.
 - Updated GitHub workflows to install the WPF workload instead of the deprecated `windowsdesktop` workload.

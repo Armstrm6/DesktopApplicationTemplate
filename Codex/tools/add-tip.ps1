@@ -19,7 +19,9 @@ param(
   [string]$Actions = "",
   [string]$Refs = ""
 )
-$path = Join-Path $PSScriptRoot "..\docs\CollaborationAndDebugTips.txt"
+$codexRoot = Split-Path $PSScriptRoot -Parent
+$docsRoot = Join-Path $codexRoot "docs"
+$path = Join-Path $docsRoot "CollaborationAndDebugTips.txt"
 $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm"
 $block = @"
 [$timestamp] Topic: $Topic
