@@ -3,12 +3,12 @@
     Append a collaboration tip entry.
 
 .DESCRIPTION
-    Writes a topic block to docs/CollaborationAndDebugTips.txt. Search the file for an
+    Writes a topic block to Codex/docs/CollaborationAndDebugTips.txt. Search the file for an
     existing topic before running. If the topic already exists, append new commit
     references or observations to that block rather than creating a duplicate.
 
 .EXAMPLE
-    pwsh tools/add-tip.ps1 -Topic "FTP service fixes" -Observations "Clarified null guard" -Refs "b6b4e9d"
+    pwsh Codex/tools/add-tip.ps1 -Topic "FTP service fixes" -Observations "Clarified null guard" -Refs "b6b4e9d"
 #>
 param(
   [Parameter(Mandatory=$true)][string]$Topic,

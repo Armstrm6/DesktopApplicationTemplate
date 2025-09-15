@@ -29,7 +29,7 @@ GitHub Workflow Notes
 
 Documentation Style
 -------------------
-- When updating `docs/CHANGELOG.md` or `docs/CollaborationAndDebugTips.txt`, find the existing topic and insert new notes within that block.
+- When updating `Codex/docs/CHANGELOG.md` or `Codex/docs/CollaborationAndDebugTips.txt`, find the existing topic and insert new notes within that block.
 - Add a timestamp only when starting a new topic to prevent redundant entries.
 
 Draw.io Integration
@@ -54,7 +54,7 @@ Miscellaneous Tips
 
 Working in restricted environments
 ----------------------------------
-- Review AGENTS and docs.
+- Review `Codex/AGENTS.md` and the resources under `Codex/docs/`.
 - Note limitations (tests, writes) in PRs or collaboration log.
 
 [2025-08-15 10:00] Topic: MQTT options and DI

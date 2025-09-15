@@ -20,7 +20,7 @@
 
 #### Changed
 - Clarified environment instruction precedence in `AGENTS.md`.
-- Renamed root `CollaborationAndDebugTips.txt` to `CollaborationGuidelines.txt` and clarified distinction from `docs/CollaborationAndDebugTips.txt`.
+- Renamed root `CollaborationAndDebugTips.txt` to `CollaborationGuidelines.txt` and clarified distinction from `Codex/docs/CollaborationAndDebugTips.txt`.
 - Updated `global.json` to require the .NET 8 SDK version `8.0.404`.
 - Disabled default `AutoStart` and set environment configuration files to `"AutoStart": false`.
 - Core library targets `net8.0` to avoid Windows targeting pack restore errors.
@@ -319,6 +319,7 @@
 - Removed WPF workload installation steps; WPF ships with the Windows .NET SDK.
 - Removed `DesktopApplicationTemplate.UI.Tests` project and WPF-specific unit tests.
 - Removed redundant `ViewModels` compile includes from the UI project, relying on default wildcard items.
+- Consolidated collaboration guides, docs, and tools into the `Codex/` directory to centralize project instructions.
 
 #### Fixed
 - Added missing `FluentAssertions` package reference to the test project and documented dependency checks to avoid build failures.
