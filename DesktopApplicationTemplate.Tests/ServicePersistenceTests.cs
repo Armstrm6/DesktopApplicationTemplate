@@ -352,7 +352,11 @@ namespace DesktopApplicationTemplate.Tests
         {
             public List<string> Messages { get; } = new();
             public LogLevel MinimumLevel { get; set; }
-            public event Action<LogEntry>? LogAdded;
+            public event Action<LogEntry> LogAdded
+            {
+                add { }
+                remove { }
+            }
             public void Log(string message, LogLevel level)
             {
                 Messages.Add(message);
