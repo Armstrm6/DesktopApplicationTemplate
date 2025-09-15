@@ -52,5 +52,4 @@
       <DependentUpon>%(Filename).xaml</DependentUpon>
     </Compile>
   </ItemGroup>
-
 </Project>

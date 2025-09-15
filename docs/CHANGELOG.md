@@ -37,6 +37,7 @@
 - Event raising helpers in `ServiceEditorViewModelBase` invoked themselves recursively; now invoke events directly.
 - Removed unsupported `DisplayName` assignment from Windows service options to restore service build.
 - Service factories populate the `Type` property when creating service models.
+- Removed duplicate `ServiceType` enum to resolve namespace conflicts.
 
 ### Navigation & UI
 #### Added
@@ -115,6 +116,7 @@
 - Marked main window `ContentFrame` public to allow navigation inspection.
 - Included `Forms.xaml` in theme resources with Page build action.
 - Installer window references `TextBoxHintBehavior.AutoToolTip` without design-time warnings.
+- Removed assembly qualifiers and added missing using directives so advanced views and converters resolve correctly.
 - `TextBoxHintBehavior` now uses `DependencyObject` parameters so the installer recognizes `AutoToolTip`.
 - Added missing helper namespace in `App.xaml.cs`, restoring `SaveConfirmationHelper`, `CloseConfirmationHelper`, and `DependencyChecker` registrations.
 - Application startup tolerates a missing `MainView` service, preventing test crashes when the window isn't registered.

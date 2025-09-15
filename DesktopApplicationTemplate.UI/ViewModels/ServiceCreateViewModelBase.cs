@@ -9,6 +9,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels;
 /// </summary>
 /// <typeparam name="TOptions">Type of options managed by the service.</typeparam>
 public abstract class ServiceCreateViewModelBase<TOptions> : ServiceEditorViewModelBase<TOptions>
+    where TOptions : new()
 {
     private readonly IServiceScreen<TOptions>? _screen;
 

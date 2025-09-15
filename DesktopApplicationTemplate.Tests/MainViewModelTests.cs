@@ -5,6 +5,7 @@ using DesktopApplicationTemplate.UI.ViewModels.Mqtt;
 using DesktopApplicationTemplate.UI.ViewModels.Csv;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI;
+using DesktopApplicationTemplate.UI.Services;
 using Moq;
 using System.Collections.Generic;
 using System.IO;
@@ -28,16 +29,14 @@ namespace DesktopApplicationTemplate.Tests
             var network = new Mock<INetworkConfigurationService>();
             var networkVm = new NetworkConfigurationViewModel(network.Object);
             var vm = new MainViewModel(csv, networkVm, network.Object, new Dictionary<ServiceType, IEditServiceHandler>());
-            vm.Services.Add(TestHelpers.CreateService(ServiceType.Http, "HTTP1")
-            {
-                IsActive = false,
-                Order = 0
-            });
-            vm.Services.Add(TestHelpers.CreateService(ServiceType.Http, "HTTP3")
-            {
-                IsActive = false,
-                Order = 1
-            });
+            var s1 = TestHelpers.CreateService(ServiceType.Http, "HTTP1");
+            s1.IsActive = false;
+            s1.Order = 0;
+            var s3 = TestHelpers.CreateService(ServiceType.Http, "HTTP3");
+            s3.IsActive = false;
+            s3.Order = 1;
+            vm.Services.Add(s1);
+            vm.Services.Add(s3);
 
             string next = vm.GenerateServiceName(ServiceType.Http);
 

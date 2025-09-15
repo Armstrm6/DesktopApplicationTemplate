@@ -4,6 +4,7 @@ using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.ViewModels.Csv.Edit;
 using DesktopApplicationTemplate.UI.ViewModels.Csv.Advanced;
 using DesktopApplicationTemplate.UI.Views.Csv.Edit;
+using DesktopApplicationTemplate.UI.Views.Csv.Advanced;
 using DesktopApplicationTemplate.UI.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
