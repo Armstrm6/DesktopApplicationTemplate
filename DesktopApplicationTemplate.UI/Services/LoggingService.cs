@@ -31,19 +31,31 @@ namespace DesktopApplicationTemplate.UI.Services
         public LoggingService(IRichTextLogger richTextLogger, string? logFilePath = null)
         {
             _richTextLogger = richTextLogger;
-            var resolvedLogFilePath = logFilePath ?? Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                "DesktopApplicationTemplate",
-                "app.log");
 
+            var resolvedLogFilePath = logFilePath ?? GetDefaultLogFilePath();
+            EnsureDirectoryExists(resolvedLogFilePath);
+
+            _logFilePath = resolvedLogFilePath;
+            Reload();
+        }
+
+        private static string GetDefaultLogFilePath()
+        {
+            var logDirectory = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "DesktopApplicationTemplate");
+
+            return Path.Combine(logDirectory, "app.log");
+        }
+
+        private static void EnsureDirectoryExists(string resolvedLogFilePath)
+        {
             var directoryPath = Path.GetDirectoryName(resolvedLogFilePath);
+
             if (!string.IsNullOrEmpty(directoryPath))
             {
                 Directory.CreateDirectory(directoryPath);
             }
-
-            _logFilePath = resolvedLogFilePath;
-            Reload();
         }
 
         public void Log(string message, LogLevel level)
