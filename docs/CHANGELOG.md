@@ -318,6 +318,7 @@
 - Core unit test project targets cross-platform `net8.0` for broader compatibility.
 - Removed WPF workload installation steps; WPF ships with the Windows .NET SDK.
 - Removed `DesktopApplicationTemplate.UI.Tests` project and WPF-specific unit tests.
+- Removed redundant `ViewModels` compile includes from the UI project, relying on default wildcard items.
 
 #### Fixed
 - Added missing `FluentAssertions` package reference to the test project and documented dependency checks to avoid build failures.
