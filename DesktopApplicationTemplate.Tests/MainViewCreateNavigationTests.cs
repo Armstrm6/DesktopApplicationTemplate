@@ -4,7 +4,7 @@ using DesktopApplicationTemplate.UI.Views;
 using Moq;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization;
+using System.Runtime.CompilerServices;
 using System.Windows.Controls;
 using Xunit;
 
@@ -23,7 +23,7 @@ public class MainViewCreateNavigationTests
     public void NavigateTo_InvokesCorrectHandler(ServiceType type)
     {
         // Arrange
-        var view = (MainView)FormatterServices.GetUninitializedObject(typeof(MainView));
+        var view = (MainView)RuntimeHelpers.GetUninitializedObject(typeof(MainView));
         typeof(MainView).GetField("ContentFrame")!.SetValue(view, new Frame());
         typeof(MainView).GetField("HomeContentGrid")!.SetValue(view, new Grid());
         var handlerMocks = new Dictionary<ServiceType, Mock<INavigationHandler>>
@@ -67,7 +67,7 @@ public class MainViewCreateNavigationTests
     public void NavigateTo_NoHandler_DoesNothing()
     {
         // Arrange
-        var view = (MainView)FormatterServices.GetUninitializedObject(typeof(MainView));
+        var view = (MainView)RuntimeHelpers.GetUninitializedObject(typeof(MainView));
         typeof(MainView).GetField("ContentFrame")!.SetValue(view, new Frame());
         typeof(MainView).GetField("HomeContentGrid")!.SetValue(view, new Grid());
         typeof(MainView).GetField("_navigationHandlers", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!
