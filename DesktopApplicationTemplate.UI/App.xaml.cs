@@ -378,6 +378,7 @@ namespace DesktopApplicationTemplate.UI
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Startup event")]
         protected override async void OnStartup(StartupEventArgs e)
         {
+            ShutdownMode = ShutdownMode.OnExplicitShutdown;
             await AppHost.StartAsync();
 
             var settings = AppHost.Services.GetRequiredService<SettingsViewModel>();
@@ -409,7 +410,9 @@ namespace DesktopApplicationTemplate.UI
             }
             else
             {
-                mainWindow.Show();
+                MainWindow = mainWindow;
+                MainWindow.Show();
+                ShutdownMode = ShutdownMode.OnMainWindowClose;
             }
 
             base.OnStartup(e);
