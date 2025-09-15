@@ -33,18 +33,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Themes\" />
-    <Resource Include="Themes/BubblyWindow.xaml" />
-    <Resource Include="Themes/LightTheme.xaml" />
-    <Resource Include="Themes/DarkTheme.xaml" />
-    <Resource Include="Themes/ToggleSwitch.xaml" />
-    <Resource Include="Themes/MqttTagSubscriptionsView.xaml" />
-    <Resource Include="Themes/DataFlowDiagram.xaml" />
-  </ItemGroup>
-
-
-  <ItemGroup>
     <Page Update="Views/**/*.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Themes/**/*.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
