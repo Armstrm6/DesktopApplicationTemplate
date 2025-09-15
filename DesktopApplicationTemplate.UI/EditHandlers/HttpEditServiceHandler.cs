@@ -4,6 +4,7 @@ using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.ViewModels.Http.Edit;
 using DesktopApplicationTemplate.UI.ViewModels.Http.Advanced;
 using DesktopApplicationTemplate.UI.Views.Http.Edit;
+using DesktopApplicationTemplate.UI.Views.Http.Advanced;
 using DesktopApplicationTemplate.UI.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

@@ -99,25 +99,22 @@ namespace DesktopApplicationTemplate.Tests
             {
                 var opt = host.Services.GetRequiredService<IOptions<TcpServiceOptions>>().Value;
 
-                var services = new List<ServiceListModel>
+                var serviceInfo = TestHelpers.CreateService(type, name);
+                serviceInfo.IsActive = false;
+                serviceInfo.Order = 0;
+                serviceInfo.TcpOptions = new TcpServiceOptions
                 {
-                    TestHelpers.CreateService(type, name)
-                    {
-                        IsActive=false,
-                        Order=0,
-                        TcpOptions = new TcpServiceOptions
-                        {
-                            Host = "h",
-                            Port = 42,
-                            UseUdp = true,
-                            Mode = TcpServiceMode.Sending,
-                            InputMessage = "in",
-                            Script = "return message;",
-                            OutputMessage = "out",
-                            LastTestMessage = "last"
-                        }
-                    }
+                    Host = "h",
+                    Port = 42,
+                    UseUdp = true,
+                    Mode = TcpServiceMode.Sending,
+                    InputMessage = "in",
+                    Script = "return message;",
+                    OutputMessage = "out",
+                    LastTestMessage = "last"
                 };
+
+                var services = new List<ServiceListModel> { serviceInfo };
 
                 ServicePersistence.Save(services);
 
@@ -184,22 +181,18 @@ namespace DesktopApplicationTemplate.Tests
             {
                 var opt = host.Services.GetRequiredService<IOptions<FtpServerOptions>>().Value;
 
-                var services = new List<ServiceListModel>
+                var serviceInfo = TestHelpers.CreateService(ServiceType.Ftp, "One");
+                serviceInfo.IsActive = false;
+                serviceInfo.Order = 0;
+                serviceInfo.FtpOptions = new FtpServerOptions
                 {
-                    TestHelpers.CreateService(ServiceType.Ftp, "One")
-                    {
-                        IsActive = false,
-                        Order = 0,
-                        FtpOptions = new FtpServerOptions
-                        {
-                            Port = 21,
-                            RootPath = "/srv",
-                            AllowAnonymous = true,
-                            Username = "u",
-                            Password = "p"
-                        }
-                    }
+                    Port = 21,
+                    RootPath = "/srv",
+                    AllowAnonymous = true,
+                    Username = "u",
+                    Password = "p"
                 };
+                var services = new List<ServiceListModel> { serviceInfo };
 
                 ServicePersistence.Save(services);
 
@@ -257,22 +250,18 @@ namespace DesktopApplicationTemplate.Tests
             {
                 var opt = host.Services.GetRequiredService<IOptions<FtpServerOptions>>().Value;
 
-                var services = new List<ServiceListModel>
+                var serviceInfo = TestHelpers.CreateService(ServiceType.Ftp, "One");
+                serviceInfo.IsActive = false;
+                serviceInfo.Order = 0;
+                serviceInfo.FtpOptions = new FtpServerOptions
                 {
-                    TestHelpers.CreateService(ServiceType.Ftp, "One")
-                    {
-                        IsActive = false,
-                        Order = 0,
-                        FtpOptions = new FtpServerOptions
-                        {
-                            Port = 21,
-                            RootPath = "/srv",
-                            AllowAnonymous = true,
-                            Username = "u",
-                            Password = "p"
-                        }
-                    }
+                    Port = 21,
+                    RootPath = "/srv",
+                    AllowAnonymous = true,
+                    Username = "u",
+                    Password = "p"
                 };
+                var services = new List<ServiceListModel> { serviceInfo };
 
                 ServicePersistence.Save(services);
 
@@ -320,7 +309,7 @@ namespace DesktopApplicationTemplate.Tests
             ServicePersistence.FilePath = Path.Combine(tempDir, "services.json");
             try
             {
-                File.WriteAllText(ServicePersistence.FilePath, "[{'DisplayName':'Svc','ServiceType':'FTP Server'}]".Replace(''','"'));
+                File.WriteAllText(ServicePersistence.FilePath, "[{'DisplayName':'Svc','ServiceType':'FTP Server'}]".Replace("'", "\""));
                 var logger = new ListLogger();
                 var loaded = ServicePersistence.Load(logger);
                 var info = Assert.Single(loaded);
@@ -344,7 +333,7 @@ namespace DesktopApplicationTemplate.Tests
             ServicePersistence.FilePath = Path.Combine(tempDir, "services.json");
             try
             {
-                File.WriteAllText(ServicePersistence.FilePath, "[{'DisplayName':'Svc','ServiceType':'Unknown'}]".Replace(''','"'));
+                File.WriteAllText(ServicePersistence.FilePath, "[{'DisplayName':'Svc','ServiceType':'Unknown'}]".Replace("'", "\""));
                 var logger = new ListLogger();
                 var loaded = ServicePersistence.Load(logger);
                 Assert.Empty(loaded);
@@ -362,7 +351,15 @@ namespace DesktopApplicationTemplate.Tests
         private sealed class ListLogger : ILoggingService
         {
             public List<string> Messages { get; } = new();
-            public void Log(string message, LogLevel level = LogLevel.Information) => Messages.Add(message);
+            public LogLevel MinimumLevel { get; set; }
+            public event Action<LogEntry>? LogAdded;
+            public void Log(string message, LogLevel level)
+            {
+                Messages.Add(message);
+            }
+            public void Reload()
+            {
+            }
         }
     }
 }

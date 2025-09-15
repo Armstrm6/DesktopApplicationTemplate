@@ -4,6 +4,7 @@ using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.ViewModels.FileObserver.Edit;
 using DesktopApplicationTemplate.UI.ViewModels.FileObserver.Advanced;
 using DesktopApplicationTemplate.UI.Views.FileObserver.Edit;
+using DesktopApplicationTemplate.UI.Views.FileObserver.Advanced;
 using DesktopApplicationTemplate.UI.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

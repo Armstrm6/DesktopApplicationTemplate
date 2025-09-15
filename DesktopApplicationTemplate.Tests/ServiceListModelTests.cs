@@ -2,6 +2,7 @@ using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.ViewModels.Csv;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Core.Models;
 using DesktopApplicationTemplate.Models;
 using System;
 using System.Collections.Generic;

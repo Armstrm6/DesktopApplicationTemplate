@@ -96,10 +96,8 @@ public class TcpServiceMessagesViewModelTests
     [Fact]
     public void ServiceName_NoPriorMessage_UsesDefault()
     {
-        var service = TestHelpers.CreateService(ServiceType.Tcp, "svc")
-        {
-            TcpOptions = new TcpServiceOptions()
-        };
+        var service = TestHelpers.CreateService(ServiceType.Tcp, "svc");
+        service.TcpOptions = new TcpServiceOptions();
         var routing = new MessageRoutingService();
         var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), routing);
         vm.SetService(service);
@@ -112,10 +110,8 @@ public class TcpServiceMessagesViewModelTests
     [Fact]
     public void ServiceName_NoPriorMessage_UsesRoutingMessage()
     {
-        var service = TestHelpers.CreateService(ServiceType.Tcp, "svc")
-        {
-            TcpOptions = new TcpServiceOptions()
-        };
+        var service = TestHelpers.CreateService(ServiceType.Tcp, "svc");
+        service.TcpOptions = new TcpServiceOptions();
         var routing = new MessageRoutingService();
         routing.UpdateMessage(ServiceType.Tcp, "svc", "last");
         var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), routing);
@@ -128,10 +124,8 @@ public class TcpServiceMessagesViewModelTests
     [Fact]
     public void ServiceName_WithPriorMessage_UsesStored()
     {
-        var service = TestHelpers.CreateService(ServiceType.Tcp, "svc")
-        {
-            TcpOptions = new TcpServiceOptions { LastTestMessage = "hello" }
-        };
+        var service = TestHelpers.CreateService(ServiceType.Tcp, "svc");
+        service.TcpOptions = new TcpServiceOptions { LastTestMessage = "hello" };
         var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
         vm.SetService(service);
 
@@ -142,10 +136,8 @@ public class TcpServiceMessagesViewModelTests
     public async Task SaveAsync_UpdatesLastTestMessage()
     {
         var options = new TcpServiceOptions();
-        var service = TestHelpers.CreateService(ServiceType.Tcp, "svc")
-        {
-            TcpOptions = options
-        };
+        var service = TestHelpers.CreateService(ServiceType.Tcp, "svc");
+        service.TcpOptions = options;
         var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
         vm.SetService(service);
         vm.TestMessage = "test";
@@ -159,10 +151,8 @@ public class TcpServiceMessagesViewModelTests
     public async Task SaveAsync_UpdatesScript()
     {
         var options = new TcpServiceOptions();
-        var service = TestHelpers.CreateService(ServiceType.Tcp, "svc")
-        {
-            TcpOptions = options
-        };
+        var service = TestHelpers.CreateService(ServiceType.Tcp, "svc");
+        service.TcpOptions = options;
         var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
         vm.SetService(service);
         vm.Script = "return message;";
@@ -176,10 +166,8 @@ public class TcpServiceMessagesViewModelTests
     public async Task SaveAsync_ComputesOutputMessage()
     {
         var options = new TcpServiceOptions();
-        var service = TestHelpers.CreateService(ServiceType.Tcp, "svc")
-        {
-            TcpOptions = options
-        };
+        var service = TestHelpers.CreateService(ServiceType.Tcp, "svc");
+        service.TcpOptions = options;
         var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
         vm.SetService(service);
         vm.Script = "string Process(string message) => message + \"!\";";
@@ -194,10 +182,8 @@ public class TcpServiceMessagesViewModelTests
     [Fact]
     public void SetService_LoadsScript()
     {
-        var service = TestHelpers.CreateService(ServiceType.Tcp, "svc")
-        {
-            TcpOptions = new TcpServiceOptions { Script = "return message;" }
-        };
+        var service = TestHelpers.CreateService(ServiceType.Tcp, "svc");
+        service.TcpOptions = new TcpServiceOptions { Script = "return message;" };
         var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
 
         vm.SetService(service);
@@ -208,10 +194,8 @@ public class TcpServiceMessagesViewModelTests
     [Fact]
     public void SetService_NoScript_UsesDefault()
     {
-        var service = TestHelpers.CreateService(ServiceType.Tcp, "svc")
-        {
-            TcpOptions = new TcpServiceOptions()
-        };
+        var service = TestHelpers.CreateService(ServiceType.Tcp, "svc");
+        service.TcpOptions = new TcpServiceOptions();
         var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
 
         vm.SetService(service);
@@ -223,10 +207,8 @@ public class TcpServiceMessagesViewModelTests
     public async Task SaveAsync_DefaultScript_NoProtectionLevelErrors()
     {
         var options = new TcpServiceOptions();
-        var service = TestHelpers.CreateService(ServiceType.Tcp, "svc")
-        {
-            TcpOptions = options
-        };
+        var service = TestHelpers.CreateService(ServiceType.Tcp, "svc");
+        service.TcpOptions = options;
         var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
         vm.SetService(service);
         vm.TestMessage = "ping";
@@ -242,10 +224,8 @@ public class TcpServiceMessagesViewModelTests
     public async Task SaveAsync_CustomScript_ReturnsTransformedMessage()
     {
         var options = new TcpServiceOptions();
-        var service = TestHelpers.CreateService(ServiceType.Tcp, "svc")
-        {
-            TcpOptions = options
-        };
+        var service = TestHelpers.CreateService(ServiceType.Tcp, "svc");
+        service.TcpOptions = options;
         var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
         vm.SetService(service);
         vm.TestMessage = "ping";
@@ -304,10 +284,8 @@ public class TcpServiceMessagesViewModelTests
     public async Task OpenScriptEditor_RunCommand_PersistsOutputAndTestMessage()
     {
         var options = new TcpServiceOptions();
-        var service = TestHelpers.CreateService(ServiceType.Tcp, "svc")
-        {
-            TcpOptions = options
-        };
+        var service = TestHelpers.CreateService(ServiceType.Tcp, "svc");
+        service.TcpOptions = options;
         var routing = new MessageRoutingService();
         var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), routing);
         vm.SetService(service);
