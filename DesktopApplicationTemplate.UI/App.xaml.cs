@@ -411,7 +411,7 @@ namespace DesktopApplicationTemplate.UI
             else
             {
                 MainWindow = mainWindow;
-                MainWindow.Show();
+                mainWindow.Show();
                 ShutdownMode = ShutdownMode.OnMainWindowClose;
             }
 
