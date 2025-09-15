@@ -69,28 +69,35 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             {
                 return;
             }
+
+            UserSettings? userSettings = null;
+
             try
             {
                 var json = File.ReadAllText(FilePath);
-                var obj = JsonSerializer.Deserialize<UserSettings>(json);
-                if (obj != null)
-                {
-                    _darkTheme = obj.DarkTheme;
-                    _autoCheckUpdates = obj.AutoCheckUpdates;
-                    _runUIOnStartup = obj.RunUIOnStartup;
-                    _runServicesOnStartup = obj.RunServicesOnStartup;
-                    _logTcpMessages = obj.LogTcpMessages;
-                    _firstRun = obj.FirstRun;
-                    _preferredServiceType = obj.PreferredServiceType;
-                    TcpLoggingEnabled = obj.LogTcpMessages;
-                    SaveConfirmationSuppressed = obj.SuppressSaveConfirmation;
-                    CloseConfirmationSuppressed = obj.SuppressCloseConfirmation;
-                }
+                userSettings = JsonSerializer.Deserialize<UserSettings>(json);
             }
             catch (IOException ex)
             {
-                _logger?.Log($"Failed to load settings from '{FilePath}': {ex}", LogLevel.Error);
+                _logger?.Log($"Failed to load settings from '{FilePath}'. Using default settings. Error: {ex}", LogLevel.Error);
+                return;
             }
+
+            if (userSettings == null)
+            {
+                return;
+            }
+
+            _darkTheme = userSettings.DarkTheme;
+            _autoCheckUpdates = userSettings.AutoCheckUpdates;
+            _runUIOnStartup = userSettings.RunUIOnStartup;
+            _runServicesOnStartup = userSettings.RunServicesOnStartup;
+            _logTcpMessages = userSettings.LogTcpMessages;
+            _firstRun = userSettings.FirstRun;
+            _preferredServiceType = userSettings.PreferredServiceType;
+            TcpLoggingEnabled = userSettings.LogTcpMessages;
+            SaveConfirmationSuppressed = userSettings.SuppressSaveConfirmation;
+            CloseConfirmationSuppressed = userSettings.SuppressCloseConfirmation;
         }
 
         public void Save()
