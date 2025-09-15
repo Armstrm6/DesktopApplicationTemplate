@@ -4,12 +4,15 @@ using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.IO;
+using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Models;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
     public class SettingsViewModel : ViewModelBase
     {
+        private readonly ILoggingService? _logger;
+
         internal static string FilePath { get; set; } =
             Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "userSettings.json");
         private bool _darkTheme;
@@ -22,6 +25,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private static bool _suppressSaveConfirmation;
         private static bool _suppressCloseConfirmation;
         private bool _dirty;
+
+        public SettingsViewModel(ILoggingService? logger = null)
+        {
+            _logger = logger;
+        }
 
         public static bool TcpLoggingEnabled { get; private set; } = true;
         public static bool SaveConfirmationSuppressed
@@ -52,20 +60,27 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             {
                 return;
             }
-            var json = File.ReadAllText(FilePath);
-            var obj = JsonSerializer.Deserialize<UserSettings>(json);
-            if (obj != null)
+            try
             {
-                _darkTheme = obj.DarkTheme;
-                _autoCheckUpdates = obj.AutoCheckUpdates;
-                _runUIOnStartup = obj.RunUIOnStartup;
-                _runServicesOnStartup = obj.RunServicesOnStartup;
-                _logTcpMessages = obj.LogTcpMessages;
-                _firstRun = obj.FirstRun;
-                _preferredServiceType = obj.PreferredServiceType;
-                TcpLoggingEnabled = obj.LogTcpMessages;
-                SaveConfirmationSuppressed = obj.SuppressSaveConfirmation;
-                CloseConfirmationSuppressed = obj.SuppressCloseConfirmation;
+                var json = File.ReadAllText(FilePath);
+                var obj = JsonSerializer.Deserialize<UserSettings>(json);
+                if (obj != null)
+                {
+                    _darkTheme = obj.DarkTheme;
+                    _autoCheckUpdates = obj.AutoCheckUpdates;
+                    _runUIOnStartup = obj.RunUIOnStartup;
+                    _runServicesOnStartup = obj.RunServicesOnStartup;
+                    _logTcpMessages = obj.LogTcpMessages;
+                    _firstRun = obj.FirstRun;
+                    _preferredServiceType = obj.PreferredServiceType;
+                    TcpLoggingEnabled = obj.LogTcpMessages;
+                    SaveConfirmationSuppressed = obj.SuppressSaveConfirmation;
+                    CloseConfirmationSuppressed = obj.SuppressCloseConfirmation;
+                }
+            }
+            catch (IOException ex)
+            {
+                _logger?.Log($"Failed to load settings from '{FilePath}': {ex}", LogLevel.Error);
             }
         }
 
