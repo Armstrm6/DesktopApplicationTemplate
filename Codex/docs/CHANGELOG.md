@@ -20,7 +20,7 @@
 
 #### Changed
 - Clarified environment instruction precedence in `AGENTS.md`.
-- Renamed root `CollaborationAndDebugTips.txt` to `CollaborationGuidelines.txt` and clarified distinction from `Codex/docs/CollaborationAndDebugTips.txt`.
+- Moved the collaboration guide into `Codex/CollaborationGuidelines.txt` and clarified distinction from `Codex/docs/CollaborationAndDebugTips.txt`.
 - Updated `global.json` to require the .NET 8 SDK version `8.0.404`.
 - Disabled default `AutoStart` and set environment configuration files to `"AutoStart": false`.
 - Core library targets `net8.0` to avoid Windows targeting pack restore errors.

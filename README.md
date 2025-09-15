@@ -35,14 +35,7 @@ repository root will automatically respect this setting.
 
 After cloning the repository:
 
-- Run a full build and test cycle:
-
-  ```bash
-  dotnet restore
-  dotnet build DesktopApplicationTemplate.sln
-  dotnet test --settings tests.runsettings
-  ```
-
+- Coordinate with a Windows collaborator to run the standard `dotnet restore`, `dotnet build DesktopApplicationTemplate.sln`, and `dotnet test --settings tests.runsettings` commands documented below. Codex runs inside a Linux container without the WindowsDesktop runtime, so it depends on collaborators to share build and test results.
 - Run the setup script to configure the Git hooks and [Git LFS](https://git-lfs.com/):
 
   ```bash
@@ -52,6 +45,8 @@ After cloning the repository:
 Run the script any time the project dependencies or hooks need to be refreshed.
 
 ## Build the solution
+
+> **Note:** The Codex container lacks the WindowsDesktop runtime and cannot execute these commands. Windows collaborators should run them locally and provide the results for review.
 
 Restore NuGet packages and build all projects:
 
@@ -97,6 +92,8 @@ dotnet run --project DesktopApplicationTemplate.Service/DesktopApplicationTempla
 ```
 
 ## Execute unit tests
+
+> **Note:** Codex cannot run WPF tests in the container environment. Collaborators on Windows should execute the command below and share the outcome.
 
 Use `dotnet test` to run the xUnit tests. The repository includes a
 `tests.runsettings` file that ensures the entire test suite runs even

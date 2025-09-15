@@ -7,6 +7,7 @@ Purpose: Running log of what worked, what broke, and why.
 - Append commit hashes or PR numbers to the **Related Commits/PRs** line as work continues.
 - Use `Codex/tools/add-tip.ps1` with the same `-Topic` value to generate a block, then merge it into the existing entry.
 - Always record environment limitations (e.g., missing dotnet runtime).
+- When Windows collaborators run builds or tests, capture the commands and summarize their results so Codex can reference them.
 
 [2025-08-27 04:05] Topic: Documentation restructuring
 Context: Grouped changelog entries under feature headings and clarified topic-based logging.
