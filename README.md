@@ -35,7 +35,7 @@ repository root will automatically respect this setting.
 
 After cloning the repository:
 
-- Coordinate with a Windows collaborator to run the standard `dotnet restore`, `dotnet build DesktopApplicationTemplate.sln`, and `dotnet test --settings tests.runsettings` commands documented below. Codex runs inside a Linux container without the WindowsDesktop runtime, so it depends on collaborators to share build and test results.
+- Rely on GitHub Actions to run the standard `dotnet restore`, `dotnet build DesktopApplicationTemplate.sln`, and `dotnet test --settings tests.runsettings` commands documented below. Codex runs inside a Linux container without the WindowsDesktop runtime, so capture the CI logs (or maintainer summaries) when documenting build and test results.
 - Run the setup script to configure the Git hooks and [Git LFS](https://git-lfs.com/):
 
   ```bash
@@ -46,7 +46,7 @@ Run the script any time the project dependencies or hooks need to be refreshed.
 
 ## Build the solution
 
-> **Note:** The Codex container lacks the WindowsDesktop runtime and cannot execute these commands. Windows collaborators should run them locally and provide the results for review.
+> **Note:** The Codex container lacks the WindowsDesktop runtime and cannot execute these commands. GitHub Actions performs the authoritative build; Windows collaborators only need to re-run the steps locally when diagnosing CI issues.
 
 Restore NuGet packages and build all projects:
 
@@ -93,7 +93,7 @@ dotnet run --project DesktopApplicationTemplate.Service/DesktopApplicationTempla
 
 ## Execute unit tests
 
-> **Note:** Codex cannot run WPF tests in the container environment. Collaborators on Windows should execute the command below and share the outcome.
+> **Note:** Codex cannot run WPF tests in the container environment. GitHub Actions runs the command below; review the CI logs for the outcome and only request a Windows collaborator's help if additional diagnostics are required.
 
 Use `dotnet test` to run the xUnit tests. The repository includes a
 `tests.runsettings` file that ensures the entire test suite runs even
