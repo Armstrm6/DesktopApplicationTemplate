@@ -28,10 +28,21 @@ namespace DesktopApplicationTemplate.UI.Services
 
         public event Action<LogEntry>? LogAdded;
 
-        public LoggingService(IRichTextLogger richTextLogger, string logFilePath = "app.log")
+        public LoggingService(IRichTextLogger richTextLogger, string? logFilePath = null)
         {
             _richTextLogger = richTextLogger;
-            _logFilePath = logFilePath;
+            var resolvedLogFilePath = logFilePath ?? Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "DesktopApplicationTemplate",
+                "app.log");
+
+            var directoryPath = Path.GetDirectoryName(resolvedLogFilePath);
+            if (!string.IsNullOrEmpty(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
+
+            _logFilePath = resolvedLogFilePath;
             Reload();
         }
 
