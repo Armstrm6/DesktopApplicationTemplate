@@ -34,7 +34,9 @@ public class NavigationHandlerTests
             .GetValue(mainView)!;
         mainVm.Services.Clear();
 
-        vm.ServiceSaved?.Invoke("svc", new HttpServiceOptions { BaseUrl = "http://example" });
+        vm.ServiceName = "svc";
+        vm.BaseUrl = "http://example";
+        vm.CreateCommand.Execute(null);
         await Task.Delay(10);
 
         Assert.Single(mainVm.Services);
@@ -67,17 +69,17 @@ public class NavigationHandlerTests
         var frame = (Frame)typeof(MainView).GetField("ContentFrame", BindingFlags.NonPublic | BindingFlags.Instance)!
             .GetValue(mainView)!;
 
-        vm.AdvancedConfigRequested?.Invoke(new HttpServiceOptions());
+        vm.AdvancedConfigCommand.Execute(new HttpServiceOptions());
         var advPage = (Page)frame.Content!;
         Assert.NotSame(createPage, advPage);
         var advVm = (HttpAdvancedConfigViewModel)advPage.DataContext!;
-        advVm.BackRequested?.Invoke();
+        advVm.BackCommand.Execute(null);
         Assert.Same(createPage, frame.Content);
 
-        vm.AdvancedConfigRequested?.Invoke(new HttpServiceOptions());
+        vm.AdvancedConfigCommand.Execute(new HttpServiceOptions());
         advPage = (Page)frame.Content!;
         advVm = (HttpAdvancedConfigViewModel)advPage.DataContext!;
-        advVm.Saved?.Invoke(new HttpServiceOptions());
+        advVm.SaveCommand.Execute(null);
         Assert.Same(createPage, frame.Content);
     }
 }
