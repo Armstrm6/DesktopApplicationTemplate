@@ -13,22 +13,24 @@ namespace DesktopApplicationTemplate.UI.EditHandlers;
 
 public class FileObserverEditServiceHandler : IEditServiceHandler
 {
-    private readonly MainView _view;
-    private readonly MainViewModel _viewModel;
+    private readonly Func<MainView> _getMainView;
+    private readonly Func<MainViewModel> _getMainViewModel;
     private readonly IServiceProvider _services;
     private readonly ILogger<FileObserverEditServiceHandler>? _logger;
 
-    public FileObserverEditServiceHandler(MainView view, MainViewModel viewModel, IServiceProvider services, ILogger<FileObserverEditServiceHandler>? logger = null)
+    public FileObserverEditServiceHandler(Func<MainView> getMainView, Func<MainViewModel> getMainViewModel, IServiceProvider services, ILogger<FileObserverEditServiceHandler>? logger = null)
     {
-        _view = view;
-        _viewModel = viewModel;
+        _getMainView = getMainView;
+        _getMainViewModel = getMainViewModel;
         _services = services;
         _logger = logger;
     }
 
     public void Edit(ServiceListModel service)
     {
-        var foPage = _view.GetOrCreateServicePage(service);
+        var mainView = _getMainView();
+        var mainViewModel = _getMainViewModel();
+        var foPage = mainView.GetOrCreateServicePage(service);
         var options = service.FileObserverOptions ?? new FileObserverServiceOptions();
         var vm = ActivatorUtilities.CreateInstance<FileObserverEditServiceViewModel>(_services, service.DisplayName.Split(" - ").Last(), options);
         var editView = _services.GetRequiredService<FileObserverEditServiceView>();
@@ -38,24 +40,24 @@ public class FileObserverEditServiceHandler : IEditServiceHandler
             service.DisplayName = $"File Observer - {name}";
             service.FileObserverOptions = opts;
             if (foPage != null)
-                _view.ShowPage(foPage);
-            _ = _viewModel.SaveServicesAsync();
+                mainView.ShowPage(foPage);
+            _ = mainViewModel.SaveServicesAsync();
         };
         vm.EditCancelled += () =>
         {
             if (foPage != null)
-                _view.ShowPage(foPage);
+                mainView.ShowPage(foPage);
         };
         vm.AdvancedConfigRequested += opts =>
         {
             var advVm = ActivatorUtilities.CreateInstance<FileObserverAdvancedConfigViewModel>(_services, opts);
             var advView = _services.GetRequiredService<FileObserverAdvancedConfigView>();
             advView.Initialize(advVm);
-            advVm.Saved += _ => _view.ShowPage(editView);
-            advVm.BackRequested += () => _view.ShowPage(editView);
-            _view.ShowPage(advView);
+            advVm.Saved += _ => mainView.ShowPage(editView);
+            advVm.BackRequested += () => mainView.ShowPage(editView);
+            mainView.ShowPage(advView);
         };
-        _view.ShowPage(editView);
+        mainView.ShowPage(editView);
         _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
     }
 }

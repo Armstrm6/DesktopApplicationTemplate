@@ -13,22 +13,24 @@ namespace DesktopApplicationTemplate.UI.EditHandlers;
 
 public class HttpEditServiceHandler : IEditServiceHandler
 {
-    private readonly MainView _view;
-    private readonly MainViewModel _viewModel;
+    private readonly Func<MainView> _getMainView;
+    private readonly Func<MainViewModel> _getMainViewModel;
     private readonly IServiceProvider _services;
     private readonly ILogger<HttpEditServiceHandler>? _logger;
 
-    public HttpEditServiceHandler(MainView view, MainViewModel viewModel, IServiceProvider services, ILogger<HttpEditServiceHandler>? logger = null)
+    public HttpEditServiceHandler(Func<MainView> getMainView, Func<MainViewModel> getMainViewModel, IServiceProvider services, ILogger<HttpEditServiceHandler>? logger = null)
     {
-        _view = view;
-        _viewModel = viewModel;
+        _getMainView = getMainView;
+        _getMainViewModel = getMainViewModel;
         _services = services;
         _logger = logger;
     }
 
     public void Edit(ServiceListModel service)
     {
-        var httpPage = _view.GetOrCreateServicePage(service);
+        var mainView = _getMainView();
+        var mainViewModel = _getMainViewModel();
+        var httpPage = mainView.GetOrCreateServicePage(service);
         var options = service.HttpOptions ?? new HttpServiceOptions();
         var vm = ActivatorUtilities.CreateInstance<HttpEditServiceViewModel>(_services, service.DisplayName.Split(" - ").Last(), options);
         var editView = _services.GetRequiredService<HttpEditServiceView>();
@@ -38,24 +40,24 @@ public class HttpEditServiceHandler : IEditServiceHandler
             service.DisplayName = $"HTTP - {name}";
             service.HttpOptions = opts;
             if (httpPage != null)
-                _view.ShowPage(httpPage);
-            _ = _viewModel.SaveServicesAsync();
+                mainView.ShowPage(httpPage);
+            _ = mainViewModel.SaveServicesAsync();
         };
         vm.EditCancelled += () =>
         {
             if (httpPage != null)
-                _view.ShowPage(httpPage);
+                mainView.ShowPage(httpPage);
         };
         vm.AdvancedConfigRequested += opts =>
         {
             var advVm = ActivatorUtilities.CreateInstance<HttpAdvancedConfigViewModel>(_services, opts);
             var advView = _services.GetRequiredService<HttpAdvancedConfigView>();
             advView.Initialize(advVm);
-            advVm.Saved += _ => _view.ShowPage(editView);
-            advVm.BackRequested += () => _view.ShowPage(editView);
-            _view.ShowPage(advView);
+            advVm.Saved += _ => mainView.ShowPage(editView);
+            advVm.BackRequested += () => mainView.ShowPage(editView);
+            mainView.ShowPage(advView);
         };
-        _view.ShowPage(editView);
+        mainView.ShowPage(editView);
         _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
     }
 }
