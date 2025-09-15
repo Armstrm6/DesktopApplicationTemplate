@@ -5,7 +5,7 @@ Purpose: Running log of what worked, what broke, and why.
 - Keep a single block per topic or feature.
 - To expand an existing topic, update its block instead of creating a new one.
 - Append commit hashes or PR numbers to the **Related Commits/PRs** line as work continues.
-- Use `tools/add-tip.ps1` with the same `-Topic` value to generate a block, then merge it into the existing entry.
+- Use `Codex/tools/add-tip.ps1` with the same `-Topic` value to generate a block, then merge it into the existing entry.
 - Always record environment limitations (e.g., missing dotnet runtime).
 
 [2025-08-27 04:05] Topic: Documentation restructuring
@@ -195,7 +195,7 @@ Latest Attempt: After wiring automatic service module registration, the `dotnet`
 Latest Attempt: After relocating common service logic to a shared library, installed the .NET SDK 8.0.404 and attempted `dotnet workload install wpf` which reported the workload ID not recognized. `dotnet build DesktopApplicationTemplate.sln` failed with WPF-related type errors, and `dotnet test --settings tests.runsettings --no-build` executed only core tests while Windows-specific tests reported invalid arguments; relying on CI.
 Latest Attempt: After adding a test-only composite service, the `dotnet` command remains unavailable; restore, build, and test commands cannot run locally, so CI will verify.
 Latest Attempt: After adding service comparison tests, the `dotnet` command remains unavailable; restore, build, and test commands could not run locally, so CI will verify.
-Latest Attempt: Running in a Linux container, `dotnet` commands are unavailable and `pwsh` is missing for `tools/add-tip.ps1`; tests cannot launch and CI must verify.
+Latest Attempt: Running in a Linux container, `dotnet` commands are unavailable and `pwsh` is missing for `Codex/tools/add-tip.ps1`; tests cannot launch and CI must verify.
 Latest Attempt: After documenting `ServiceType` and DI module patterns in the README, the `dotnet` CLI remains unavailable; restore, build, and test commands could not run locally, so CI will verify.
 Latest Attempt: After introducing `ServiceTypeExtensions` for code mapping, the `dotnet` CLI is still missing; restore, build, and test commands could not run locally, so CI will verify.
 Latest Attempt: After binding settings dialogs to `ServiceType` enums, the `dotnet` command remains unavailable; restore, build, and test steps cannot run locally and CI will verify.
@@ -522,7 +522,7 @@ Latest Attempt: After moving edit handlers into the MainViewModel and switching 
 [2025-08-29 16:00] Topic: UI test removal
 Context: Removed DesktopApplicationTemplate.UI.Tests project and WPF UI tests that hung due to initialization issues.
 Observations: Deleting UI tests leaves only data-focused tests; solution no longer references the UI test project.
-Codex Limitations noticed: PowerShell and the .NET SDK are unavailable, so `tools/add-tip.ps1` and `dotnet test` could not run.
+Codex Limitations noticed: PowerShell and the .NET SDK are unavailable, so `Codex/tools/add-tip.ps1` and `dotnet test` could not run.
 Effective Prompts / Instructions that worked: User request to eliminate unstable UI unit tests.
 Decisions & Rationale: Drop UI tests to avoid infinite loops and rely on CI or manual verification for UI behavior.
 Action Items: Rely on CI for any UI validation.
@@ -600,7 +600,7 @@ Action Items: Rely on CI for validation.
 Related Commits/PRs:
 [2025-10-05 10:00] Topic: Custom service guide
 Context: Added documentation detailing component reuse and IServiceModule for new services.
-Observations: Created docs/CustomServiceGuide.md with steps for adding a service type and registering dependencies.
+Observations: Created Codex/docs/CustomServiceGuide.md with steps for adding a service type and registering dependencies.
 Codex Limitations noticed: dotnet CLI not installed; restore, build, and test commands could not run locally. PowerShell unavailable so entry appended manually.
 Effective Prompts / Instructions that worked: User request for guidance on extending services.
 Decisions & Rationale: Provide a reference to help contributors reuse existing components.

@@ -4,7 +4,7 @@
 
 This repository contains a basic WPF UI application, a Windows Service and unit tests.
 
-See `CollaborationGuidelines.txt` for tips on working with the repository. A running log of past collaboration decisions lives in `docs/CollaborationAndDebugTips.txt`.
+See `Codex/CollaborationGuidelines.txt` for tips on working with the repository. A running log of past collaboration decisions lives in `Codex/docs/CollaborationAndDebugTips.txt`.
 
 ## Prerequisites
 
