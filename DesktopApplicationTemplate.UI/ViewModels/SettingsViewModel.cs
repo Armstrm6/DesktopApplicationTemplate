@@ -9,6 +9,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 {
     public class SettingsViewModel : ViewModelBase
     {
+        private readonly ILoggingService? _logger;
+
         internal static string FilePath { get; set; } =
             Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "userSettings.json");
         private readonly ILoggingService? _logger;
@@ -22,6 +24,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private static bool _suppressSaveConfirmation;
         private static bool _suppressCloseConfirmation;
         private bool _dirty;
+
+        public SettingsViewModel(ILoggingService? logger = null)
+        {
+            _logger = logger;
+        }
 
         public static bool TcpLoggingEnabled { get; private set; } = true;
         public static bool SaveConfirmationSuppressed
