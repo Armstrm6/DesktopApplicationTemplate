@@ -1,0 +1,24 @@
+using System.Collections.Generic;
+using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Models;
+
+namespace DesktopApplicationTemplate.Services.Common.Descriptors;
+
+public sealed class HttpServiceDescriptor : ServiceDescriptorBase
+{
+    public const string DescriptorId = ServiceDescriptorIds.Http;
+
+    public HttpServiceDescriptor(
+        IServiceOptionsSerializer? optionsSerializer = null,
+        IReadOnlyCollection<ServiceFactoryBinding>? factories = null)
+        : base(
+            DescriptorId,
+            "HTTP",
+            "Networking",
+            "Interact with HTTP endpoints for automation workflows.",
+            ServiceType.Http,
+            optionsSerializer,
+            factories)
+    {
+    }
+}

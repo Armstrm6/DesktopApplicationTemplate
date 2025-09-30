@@ -1,3 +1,4 @@
+using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Models;
 using FluentAssertions;
 using Xunit;
@@ -30,6 +31,14 @@ public class ServiceTypeExtensionsTests
     public void ToLegacyString_ReturnsFriendlyName(ServiceType type, string expected)
     {
         type.ToLegacyString().Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData(ServiceType.Tcp, ServiceDescriptorIds.Tcp)]
+    [InlineData(ServiceType.Http, ServiceDescriptorIds.Http)]
+    public void ToDescriptorId_ReturnsStableIdentifier(ServiceType type, string expected)
+    {
+        type.ToDescriptorId().Should().Be(expected);
     }
 }
 
