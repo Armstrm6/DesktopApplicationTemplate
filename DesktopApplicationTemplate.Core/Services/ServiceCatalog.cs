@@ -72,6 +72,9 @@ public sealed class ServiceCatalog : IServiceCatalog
         private ServiceType? _legacyType;
         private IServiceOptionsSerializer? _serializer;
         private readonly Dictionary<(ServiceFactoryKind Kind, Type ContractType, string? Key), ServiceFactoryBinding> _factories = new();
+        private ServicePresentationMetadata? _presentation;
+        private bool _hasPayloadDescriptor;
+        private Func<object?, string?> _payloadDescriptor = static _ => null;
 
         public ServiceDescriptorBuilder(string id)
         {
@@ -88,6 +91,31 @@ public sealed class ServiceCatalog : IServiceCatalog
             _displayName = AssignOrValidate(_displayName, descriptor.DisplayName, nameof(descriptor.DisplayName));
             _category = AssignOrValidate(_category, descriptor.Category, nameof(descriptor.Category));
             _description = AssignOrValidate(_description, descriptor.Description, nameof(descriptor.Description), allowNull: true);
+
+            if (!descriptor.Presentation.IsEmpty)
+            {
+                if (_presentation is null)
+                {
+                    _presentation = descriptor.Presentation;
+                }
+                else if (_presentation != descriptor.Presentation)
+                {
+                    throw new InvalidOperationException($"Conflicting presentation metadata for descriptor '{_id}'.");
+                }
+            }
+
+            if (descriptor.HasPayloadDescription)
+            {
+                if (!_hasPayloadDescriptor)
+                {
+                    _payloadDescriptor = descriptor.DescribePayload;
+                    _hasPayloadDescriptor = true;
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Conflicting payload description handlers for descriptor '{_id}'.");
+                }
+            }
 
             if (descriptor.LegacyType is { } legacy)
             {
@@ -133,7 +161,18 @@ public sealed class ServiceCatalog : IServiceCatalog
             }
 
             var factories = _factories.Values.ToList();
-            return new Snapshot(_id, _displayName!, _category!, _description, _legacyType, _serializer, factories);
+            var presentation = ServicePresentationMetadata.Normalize(_presentation);
+            return new Snapshot(
+                _id,
+                _displayName!,
+                _category!,
+                _description,
+                _legacyType,
+                _serializer,
+                factories,
+                presentation,
+                _hasPayloadDescriptor,
+                _payloadDescriptor);
         }
 
         private static string? AssignOrValidate(string? current, string? incoming, string propertyName, bool allowNull = false)
@@ -166,7 +205,10 @@ public sealed class ServiceCatalog : IServiceCatalog
             string? description,
             ServiceType? legacyType,
             IServiceOptionsSerializer? serializer,
-            IReadOnlyCollection<ServiceFactoryBinding> factories)
+            IReadOnlyCollection<ServiceFactoryBinding> factories,
+            ServicePresentationMetadata presentation,
+            bool hasPayloadDescription,
+            Func<object?, string?> payloadDescriptor)
         {
             Id = id;
             DisplayName = displayName;
@@ -175,6 +217,9 @@ public sealed class ServiceCatalog : IServiceCatalog
             LegacyType = legacyType;
             OptionsSerializer = serializer;
             Factories = factories;
+            Presentation = presentation;
+            HasPayloadDescription = hasPayloadDescription;
+            _payloadDescriptor = payloadDescriptor;
         }
 
         public string Id { get; }
@@ -190,5 +235,13 @@ public sealed class ServiceCatalog : IServiceCatalog
         public IServiceOptionsSerializer? OptionsSerializer { get; }
 
         public IReadOnlyCollection<ServiceFactoryBinding> Factories { get; }
+
+        public ServicePresentationMetadata Presentation { get; }
+
+        public bool HasPayloadDescription { get; }
+
+        public string? DescribePayload(object? payload) => _payloadDescriptor(payload);
+
+        private readonly Func<object?, string?> _payloadDescriptor;
     }
 }

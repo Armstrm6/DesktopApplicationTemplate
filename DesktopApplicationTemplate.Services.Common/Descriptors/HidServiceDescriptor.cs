@@ -18,7 +18,12 @@ public sealed class HidServiceDescriptor : ServiceDescriptorBase
             "Interact with Human Interface Devices for automation scenarios.",
             ServiceType.Hid,
             optionsSerializer,
-            factories)
+            factories,
+            new ServicePresentationMetadata(
+                null,
+                "#FFFFFFE0",
+                "#FFDAA520",
+                "HID"))
     {
     }
 }

@@ -18,7 +18,12 @@ public sealed class FileObserverServiceDescriptor : ServiceDescriptorBase
             "Monitor directories for changes and trigger automation flows.",
             ServiceType.FileObserver,
             optionsSerializer,
-            factories)
+            factories,
+            new ServicePresentationMetadata(
+                null,
+                "#FFFFA07A",
+                "#FFE9967A",
+                "File Observer"))
     {
     }
 }

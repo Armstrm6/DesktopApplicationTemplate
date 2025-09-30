@@ -18,7 +18,12 @@ public sealed class HttpServiceDescriptor : ServiceDescriptorBase
             "Interact with HTTP endpoints for automation workflows.",
             ServiceType.Http,
             optionsSerializer,
-            factories)
+            factories,
+            new ServicePresentationMetadata(
+                "🌐",
+                "#FF90EE90",
+                "#FF006400",
+                "HTTP"))
     {
     }
 }
