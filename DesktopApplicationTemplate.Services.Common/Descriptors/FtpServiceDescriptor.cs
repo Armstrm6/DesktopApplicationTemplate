@@ -18,7 +18,12 @@ public sealed class FtpServiceDescriptor : ServiceDescriptorBase
             "Transfer files to remote hosts using the FTP protocol.",
             ServiceType.Ftp,
             optionsSerializer,
-            factories)
+            factories,
+            new ServicePresentationMetadata(
+                "🖥️",
+                "#FFB0C4DE",
+                "#FF4682B4",
+                "FTP Server"))
     {
     }
 }

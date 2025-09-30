@@ -18,7 +18,12 @@ public sealed class CsvServiceDescriptor : ServiceDescriptorBase
             "Generate CSV output from message payloads.",
             ServiceType.Csv,
             optionsSerializer,
-            factories)
+            factories,
+            new ServicePresentationMetadata(
+                "📄",
+                "#FFD3D3D3",
+                "#FF808080",
+                "CSV Creator"))
     {
     }
 }

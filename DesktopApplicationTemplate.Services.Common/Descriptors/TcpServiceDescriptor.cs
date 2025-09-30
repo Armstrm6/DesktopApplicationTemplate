@@ -18,7 +18,12 @@ public sealed class TcpServiceDescriptor : ServiceDescriptorBase
             "Send and receive messages over TCP or UDP.",
             ServiceType.Tcp,
             optionsSerializer,
-            factories)
+            factories,
+            new ServicePresentationMetadata(
+                "🔗",
+                "#FFADD8E6",
+                "#FF00008B",
+                "TCP"))
     {
     }
 }

@@ -26,6 +26,12 @@ public class ServiceCatalogTests
         catalog.TryGetById(ServiceDescriptorIds.Tcp, out var tcpDescriptor).Should().BeTrue();
         tcpDescriptor!.LegacyType.Should().Be(ServiceType.Tcp);
         catalog.LegacyMap.Should().ContainKey(ServiceType.Tcp).WhoseValue.Should().Be(ServiceDescriptorIds.Tcp);
+        tcpDescriptor.Presentation.IconGlyph.Should().Be("🔗");
+        tcpDescriptor.Presentation.PrimaryAccentColor.Should().Be("#FFADD8E6");
+        tcpDescriptor.Presentation.SecondaryAccentColor.Should().Be("#FF00008B");
+        tcpDescriptor.Presentation.DisplayLabel.Should().Be("TCP");
+        tcpDescriptor.HasPayloadDescription.Should().BeFalse();
+        tcpDescriptor.DescribePayload(null).Should().BeNull();
     }
 
     [Fact]
@@ -72,5 +78,11 @@ public class ServiceCatalogTests
         public IServiceOptionsSerializer? OptionsSerializer => null;
 
         public IReadOnlyCollection<ServiceFactoryBinding> Factories => Array.Empty<ServiceFactoryBinding>();
+
+        public ServicePresentationMetadata Presentation => ServicePresentationMetadata.Empty;
+
+        public bool HasPayloadDescription => false;
+
+        public string? DescribePayload(object? payload) => null;
     }
 }

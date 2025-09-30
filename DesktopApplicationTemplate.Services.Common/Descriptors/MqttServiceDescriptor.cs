@@ -18,7 +18,12 @@ public sealed class MqttServiceDescriptor : ServiceDescriptorBase
             "Connect to MQTT brokers and manage topic subscriptions.",
             ServiceType.Mqtt,
             optionsSerializer,
-            factories)
+            factories,
+            new ServicePresentationMetadata(
+                "📡",
+                "#FFFAFAD2",
+                "#FFDAA520",
+                "MQTT"))
     {
     }
 }
