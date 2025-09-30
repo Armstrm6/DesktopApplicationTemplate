@@ -1,7 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using DesktopApplicationTemplate.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace DesktopApplicationTemplate.Core.Modules;
 
@@ -29,11 +32,20 @@ public static class ServiceModuleExtensions
             .SelectMany(a => a.GetTypes())
             .Where(t => moduleType.IsAssignableFrom(t) && !t.IsAbstract && !t.IsInterface)
             .Select(t => Activator.CreateInstance(t))
-            .OfType<IServiceModule>();
+            .OfType<IServiceModule>()
+            .ToList();
 
+        var descriptors = new List<IServiceDescriptor>();
         foreach (var module in modules)
         {
             module.RegisterServices(services);
+            var moduleDescriptors = module.DescribeServices() ?? Enumerable.Empty<IServiceDescriptor>();
+            descriptors.AddRange(moduleDescriptors);
+        }
+
+        if (descriptors.Count > 0)
+        {
+            services.TryAddSingleton<IServiceCatalog>(_ => new ServiceCatalog(descriptors));
         }
     }
 }
