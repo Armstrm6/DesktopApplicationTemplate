@@ -170,5 +170,11 @@ internal sealed class StubCatalog : IServiceCatalog
         public IServiceOptionsSerializer? OptionsSerializer => null;
 
         public IReadOnlyCollection<ServiceFactoryBinding> Factories => Array.Empty<ServiceFactoryBinding>();
+
+        public ServicePresentationMetadata Presentation => ServicePresentationMetadata.Empty;
+
+        public bool HasPayloadDescription => false;
+
+        public string? DescribePayload(object? payload) => null;
     }
 }

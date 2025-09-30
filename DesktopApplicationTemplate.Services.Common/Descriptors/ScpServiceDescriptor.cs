@@ -18,7 +18,12 @@ public sealed class ScpServiceDescriptor : ServiceDescriptorBase
             "Transfer files securely using the SCP protocol.",
             ServiceType.Scp,
             optionsSerializer,
-            factories)
+            factories,
+            new ServicePresentationMetadata(
+                "📦",
+                "#FFE0FFFF",
+                "#FF5F9EA0",
+                "SCP"))
     {
     }
 }

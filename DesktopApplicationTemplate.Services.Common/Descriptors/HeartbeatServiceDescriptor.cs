@@ -18,7 +18,12 @@ public sealed class HeartbeatServiceDescriptor : ServiceDescriptorBase
             "Emit periodic heartbeat messages for monitoring integrations.",
             ServiceType.Heartbeat,
             optionsSerializer,
-            factories)
+            factories,
+            new ServicePresentationMetadata(
+                null,
+                "#FFFFB6C1",
+                "#FFFF1493",
+                "Heartbeat"))
     {
     }
 }
