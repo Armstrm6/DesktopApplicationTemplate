@@ -8,17 +8,19 @@ using DesktopApplicationTemplate.UI.ViewModels.Http.Advanced;
 using DesktopApplicationTemplate.UI.Views.Http.Create;
 using DesktopApplicationTemplate.UI.Views.Http.Advanced;
 using Microsoft.Extensions.DependencyInjection;
-using DesktopApplicationTemplate.Models;
 using System.Threading.Tasks;
+using DesktopApplicationTemplate.Services.Common.Descriptors;
+using DesktopApplicationTemplate.UI.Configuration;
 
 namespace DesktopApplicationTemplate.UI.Navigation
 {
+    [ServiceDescriptorRegistration(HttpServiceDescriptor.DescriptorId, ServiceRegistrationKind.NavigationHandler)]
     public class HttpNavigationHandler : INavigationHandler
     {
         private readonly IServiceProvider _services;
         private readonly Func<MainView> _getMainView;
 
-        public ServiceType ServiceType => ServiceType.Http;
+        public string DescriptorId => HttpServiceDescriptor.DescriptorId;
 
         public HttpNavigationHandler(IServiceProvider services, Func<MainView> getMainView)
         {
@@ -49,7 +51,7 @@ namespace DesktopApplicationTemplate.UI.Navigation
         public Task AddServiceAsync(string name, object options)
         {
             var mainView = _getMainView();
-            return mainView.AddServiceAsync(ServiceType, new ServiceFactoryOptions<HttpServiceOptions>(name, (HttpServiceOptions)options));
+            return mainView.AddServiceAsync(DescriptorId, new ServiceFactoryOptions<HttpServiceOptions>(name, (HttpServiceOptions)options));
         }
     }
 }

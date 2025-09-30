@@ -19,7 +19,7 @@ public static class ServiceModuleExtensions
     /// </summary>
     /// <param name="services">The service collection to populate.</param>
     /// <param name="assemblies">Assemblies to scan. If none are provided, the current app domain assemblies are used.</param>
-    public static void AddServiceModules(this IServiceCollection services, params Assembly[] assemblies)
+    public static IServiceCatalog AddServiceModules(this IServiceCollection services, params Assembly[] assemblies)
     {
         assemblies ??= Array.Empty<Assembly>();
         if (assemblies.Length == 0)
@@ -43,9 +43,8 @@ public static class ServiceModuleExtensions
             descriptors.AddRange(moduleDescriptors);
         }
 
-        if (descriptors.Count > 0)
-        {
-            services.TryAddSingleton<IServiceCatalog>(_ => new ServiceCatalog(descriptors));
-        }
+        var catalog = new ServiceCatalog(descriptors);
+        services.TryAddSingleton<IServiceCatalog>(_ => catalog);
+        return catalog;
     }
 }

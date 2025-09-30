@@ -6,17 +6,19 @@ using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels.Tcp.Create;
 using DesktopApplicationTemplate.UI.Views.Tcp.Create;
 using Microsoft.Extensions.DependencyInjection;
-using DesktopApplicationTemplate.Models;
 using System.Threading.Tasks;
+using DesktopApplicationTemplate.Services.Common.Descriptors;
+using DesktopApplicationTemplate.UI.Configuration;
 
 namespace DesktopApplicationTemplate.UI.Navigation
 {
+    [ServiceDescriptorRegistration(TcpServiceDescriptor.DescriptorId, ServiceRegistrationKind.NavigationHandler)]
     public class TcpNavigationHandler : INavigationHandler
     {
         private readonly IServiceProvider _services;
         private readonly Func<MainView> _getMainView;
 
-        public ServiceType ServiceType => ServiceType.Tcp;
+        public string DescriptorId => TcpServiceDescriptor.DescriptorId;
 
         public TcpNavigationHandler(IServiceProvider services, Func<MainView> getMainView)
         {
@@ -38,7 +40,7 @@ namespace DesktopApplicationTemplate.UI.Navigation
         public Task AddServiceAsync(string name, object options)
         {
             var mainView = _getMainView();
-            return mainView.AddServiceAsync(ServiceType, new ServiceFactoryOptions<TcpServiceOptions>(name, (TcpServiceOptions)options));
+            return mainView.AddServiceAsync(DescriptorId, new ServiceFactoryOptions<TcpServiceOptions>(name, (TcpServiceOptions)options));
         }
     }
 }

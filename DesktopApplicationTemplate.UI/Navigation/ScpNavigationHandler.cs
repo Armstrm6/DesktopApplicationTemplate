@@ -8,17 +8,19 @@ using DesktopApplicationTemplate.UI.ViewModels.Scp.Advanced;
 using DesktopApplicationTemplate.UI.Views.Scp.Create;
 using DesktopApplicationTemplate.UI.Views.Scp.Advanced;
 using Microsoft.Extensions.DependencyInjection;
-using DesktopApplicationTemplate.Models;
 using System.Threading.Tasks;
+using DesktopApplicationTemplate.Services.Common.Descriptors;
+using DesktopApplicationTemplate.UI.Configuration;
 
 namespace DesktopApplicationTemplate.UI.Navigation
 {
+    [ServiceDescriptorRegistration(ScpServiceDescriptor.DescriptorId, ServiceRegistrationKind.NavigationHandler)]
     public class ScpNavigationHandler : INavigationHandler
     {
         private readonly IServiceProvider _services;
         private readonly Func<MainView> _getMainView;
 
-        public ServiceType ServiceType => ServiceType.Scp;
+        public string DescriptorId => ScpServiceDescriptor.DescriptorId;
 
         public ScpNavigationHandler(IServiceProvider services, Func<MainView> getMainView)
         {
@@ -49,7 +51,7 @@ namespace DesktopApplicationTemplate.UI.Navigation
         public Task AddServiceAsync(string name, object options)
         {
             var mainView = _getMainView();
-            return mainView.AddServiceAsync(ServiceType, new ServiceFactoryOptions<ScpServiceOptions>(name, (ScpServiceOptions)options));
+            return mainView.AddServiceAsync(DescriptorId, new ServiceFactoryOptions<ScpServiceOptions>(name, (ScpServiceOptions)options));
         }
     }
 }

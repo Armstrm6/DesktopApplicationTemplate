@@ -8,17 +8,19 @@ using DesktopApplicationTemplate.UI.ViewModels.Ftp.Advanced;
 using DesktopApplicationTemplate.UI.Views.Ftp.Create;
 using DesktopApplicationTemplate.UI.Views.Ftp.Advanced;
 using Microsoft.Extensions.DependencyInjection;
-using DesktopApplicationTemplate.Models;
 using System.Threading.Tasks;
+using DesktopApplicationTemplate.Services.Common.Descriptors;
+using DesktopApplicationTemplate.UI.Configuration;
 
 namespace DesktopApplicationTemplate.UI.Navigation
 {
+    [ServiceDescriptorRegistration(FtpServiceDescriptor.DescriptorId, ServiceRegistrationKind.NavigationHandler)]
     public class FtpNavigationHandler : INavigationHandler
     {
         private readonly IServiceProvider _services;
         private readonly Func<MainView> _getMainView;
 
-        public ServiceType ServiceType => ServiceType.Ftp;
+        public string DescriptorId => FtpServiceDescriptor.DescriptorId;
 
         public FtpNavigationHandler(IServiceProvider services, Func<MainView> getMainView)
         {
@@ -49,7 +51,7 @@ namespace DesktopApplicationTemplate.UI.Navigation
         public Task AddServiceAsync(string name, object options)
         {
             var mainView = _getMainView();
-            return mainView.AddServiceAsync(ServiceType, new ServiceFactoryOptions<FtpServerOptions>(name, (FtpServerOptions)options));
+            return mainView.AddServiceAsync(DescriptorId, new ServiceFactoryOptions<FtpServerOptions>(name, (FtpServerOptions)options));
         }
     }
 }

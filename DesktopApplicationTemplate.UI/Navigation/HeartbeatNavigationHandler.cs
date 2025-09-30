@@ -8,17 +8,19 @@ using DesktopApplicationTemplate.UI.ViewModels.Heartbeat.Advanced;
 using DesktopApplicationTemplate.UI.Views.Heartbeat.Create;
 using DesktopApplicationTemplate.UI.Views.Heartbeat.Advanced;
 using Microsoft.Extensions.DependencyInjection;
-using DesktopApplicationTemplate.Models;
 using System.Threading.Tasks;
+using DesktopApplicationTemplate.Services.Common.Descriptors;
+using DesktopApplicationTemplate.UI.Configuration;
 
 namespace DesktopApplicationTemplate.UI.Navigation
 {
+    [ServiceDescriptorRegistration(HeartbeatServiceDescriptor.DescriptorId, ServiceRegistrationKind.NavigationHandler)]
     public class HeartbeatNavigationHandler : INavigationHandler
     {
         private readonly IServiceProvider _services;
         private readonly Func<MainView> _getMainView;
 
-        public ServiceType ServiceType => ServiceType.Heartbeat;
+        public string DescriptorId => HeartbeatServiceDescriptor.DescriptorId;
 
         public HeartbeatNavigationHandler(IServiceProvider services, Func<MainView> getMainView)
         {
@@ -49,7 +51,7 @@ namespace DesktopApplicationTemplate.UI.Navigation
         public Task AddServiceAsync(string name, object options)
         {
             var mainView = _getMainView();
-            return mainView.AddServiceAsync(ServiceType, new ServiceFactoryOptions<HeartbeatServiceOptions>(name, (HeartbeatServiceOptions)options));
+            return mainView.AddServiceAsync(DescriptorId, new ServiceFactoryOptions<HeartbeatServiceOptions>(name, (HeartbeatServiceOptions)options));
         }
     }
 }

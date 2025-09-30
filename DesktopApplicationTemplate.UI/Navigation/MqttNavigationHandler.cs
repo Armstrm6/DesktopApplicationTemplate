@@ -8,17 +8,19 @@ using DesktopApplicationTemplate.UI.ViewModels.Mqtt.Advanced;
 using DesktopApplicationTemplate.UI.Views.Mqtt.Create;
 using DesktopApplicationTemplate.UI.Views.Mqtt.Advanced;
 using Microsoft.Extensions.DependencyInjection;
-using DesktopApplicationTemplate.Models;
 using System.Threading.Tasks;
+using DesktopApplicationTemplate.Services.Common.Descriptors;
+using DesktopApplicationTemplate.UI.Configuration;
 
 namespace DesktopApplicationTemplate.UI.Navigation
 {
+    [ServiceDescriptorRegistration(MqttServiceDescriptor.DescriptorId, ServiceRegistrationKind.NavigationHandler)]
     public class MqttNavigationHandler : INavigationHandler
     {
         private readonly IServiceProvider _services;
         private readonly Func<MainView> _getMainView;
 
-        public ServiceType ServiceType => ServiceType.Mqtt;
+        public string DescriptorId => MqttServiceDescriptor.DescriptorId;
 
         public MqttNavigationHandler(IServiceProvider services, Func<MainView> getMainView)
         {
@@ -48,7 +50,7 @@ namespace DesktopApplicationTemplate.UI.Navigation
         public Task AddServiceAsync(string name, object options)
         {
             var mainView = _getMainView();
-            return mainView.AddServiceAsync(ServiceType, new ServiceFactoryOptions<MqttServiceOptions>(name, (MqttServiceOptions)options));
+            return mainView.AddServiceAsync(DescriptorId, new ServiceFactoryOptions<MqttServiceOptions>(name, (MqttServiceOptions)options));
         }
 
     }
