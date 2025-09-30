@@ -6,6 +6,7 @@ using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.ViewModels.Http.Create;
 using DesktopApplicationTemplate.UI.ViewModels.Http.Advanced;
 using DesktopApplicationTemplate.UI.Views;
+using DesktopApplicationTemplate.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -26,7 +27,10 @@ public class NavigationHandlerTests
     {
         var provider = App.AppHost.Services;
         var mainView = provider.GetRequiredService<MainView>();
-        var handler = provider.GetKeyedService<INavigationHandler>(ServiceType.Http)!;
+        var catalog = provider.GetRequiredService<IServiceCatalog>();
+        var registry = provider.GetRequiredService<IServiceUiRegistry>();
+        var descriptorId = catalog.LegacyMap[ServiceType.Http];
+        var handler = registry.NavigationHandlers[descriptorId]();
         var createPage = handler.CreateView("svc");
         var vm = (HttpCreateServiceViewModel)createPage.DataContext!;
 
@@ -47,7 +51,10 @@ public class NavigationHandlerTests
     {
         var provider = App.AppHost.Services;
         var mainView = provider.GetRequiredService<MainView>();
-        var handler = provider.GetKeyedService<INavigationHandler>(ServiceType.Http)!;
+        var catalog = provider.GetRequiredService<IServiceCatalog>();
+        var registry = provider.GetRequiredService<IServiceUiRegistry>();
+        var descriptorId = catalog.LegacyMap[ServiceType.Http];
+        var handler = registry.NavigationHandlers[descriptorId]();
         var mainVm = (MainViewModel)typeof(MainView).GetField("_viewModel", BindingFlags.NonPublic | BindingFlags.Instance)!
             .GetValue(mainView)!;
         mainVm.Services.Clear();
@@ -62,7 +69,10 @@ public class NavigationHandlerTests
     {
         var provider = App.AppHost.Services;
         var mainView = provider.GetRequiredService<MainView>();
-        var handler = provider.GetKeyedService<INavigationHandler>(ServiceType.Http)!;
+        var catalog = provider.GetRequiredService<IServiceCatalog>();
+        var registry = provider.GetRequiredService<IServiceUiRegistry>();
+        var descriptorId = catalog.LegacyMap[ServiceType.Http];
+        var handler = registry.NavigationHandlers[descriptorId]();
         var createPage = handler.CreateView("svc");
         mainView.ShowPage(createPage);
         var vm = (HttpCreateServiceViewModel)createPage.DataContext!;
@@ -81,5 +91,18 @@ public class NavigationHandlerTests
         advVm = (HttpAdvancedConfigViewModel)advPage.DataContext!;
         advVm.SaveCommand.Execute(null);
         Assert.Same(createPage, frame.Content);
+    }
+
+    [WindowsFact]
+    public void CatalogDescriptorsProvideNavigationHandlers()
+    {
+        var provider = App.AppHost.Services;
+        var catalog = provider.GetRequiredService<IServiceCatalog>();
+        var registry = provider.GetRequiredService<IServiceUiRegistry>();
+
+        foreach (var descriptor in catalog.Descriptors)
+        {
+            Assert.True(registry.NavigationHandlers.ContainsKey(descriptor.Id));
+        }
     }
 }

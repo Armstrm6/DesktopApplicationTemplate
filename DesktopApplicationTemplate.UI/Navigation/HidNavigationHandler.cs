@@ -8,17 +8,19 @@ using DesktopApplicationTemplate.UI.ViewModels.Hid.Advanced;
 using DesktopApplicationTemplate.UI.Views.Hid.Create;
 using DesktopApplicationTemplate.UI.Views.Hid.Advanced;
 using Microsoft.Extensions.DependencyInjection;
-using DesktopApplicationTemplate.Models;
 using System.Threading.Tasks;
+using DesktopApplicationTemplate.Services.Common.Descriptors;
+using DesktopApplicationTemplate.UI.Configuration;
 
 namespace DesktopApplicationTemplate.UI.Navigation
 {
+    [ServiceDescriptorRegistration(HidServiceDescriptor.DescriptorId, ServiceRegistrationKind.NavigationHandler)]
     public class HidNavigationHandler : INavigationHandler
     {
         private readonly IServiceProvider _services;
         private readonly Func<MainView> _getMainView;
 
-        public ServiceType ServiceType => ServiceType.Hid;
+        public string DescriptorId => HidServiceDescriptor.DescriptorId;
 
         public HidNavigationHandler(IServiceProvider services, Func<MainView> getMainView)
         {
@@ -49,7 +51,7 @@ namespace DesktopApplicationTemplate.UI.Navigation
         public Task AddServiceAsync(string name, object options)
         {
             var mainView = _getMainView();
-            return mainView.AddServiceAsync(ServiceType, new ServiceFactoryOptions<HidServiceOptions>(name, (HidServiceOptions)options));
+            return mainView.AddServiceAsync(DescriptorId, new ServiceFactoryOptions<HidServiceOptions>(name, (HidServiceOptions)options));
         }
     }
 }

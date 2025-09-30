@@ -16,6 +16,7 @@ using DesktopApplicationTemplate.UI.ViewModels.Tcp;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI;
+using DesktopApplicationTemplate.UI.Navigation;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -57,17 +58,19 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private readonly CsvService _csvService;
         private readonly ILoggingService? _logger;
         private readonly INetworkConfigurationService _networkService;
-        private readonly IDictionary<ServiceType, IEditServiceHandler> _editHandlers;
+        private readonly IServiceUiRegistry _uiRegistry;
+        private readonly IServiceCatalog _catalog;
 
         public NetworkConfigurationViewModel NetworkConfig { get; }
 
-        public MainViewModel(CsvService csvService, NetworkConfigurationViewModel networkConfig, INetworkConfigurationService networkService, IDictionary<ServiceType, IEditServiceHandler> editHandlers, ILoggingService? logger = null, string? servicesFilePath = null)
+        public MainViewModel(CsvService csvService, NetworkConfigurationViewModel networkConfig, INetworkConfigurationService networkService, IServiceUiRegistry uiRegistry, IServiceCatalog catalog, ILoggingService? logger = null, string? servicesFilePath = null)
         {
             _csvService = csvService;
             _networkService = networkService;
             _logger = logger;
             NetworkConfig = networkConfig;
-            _editHandlers = editHandlers;
+            _uiRegistry = uiRegistry;
+            _catalog = catalog;
             _ = NetworkConfig.LoadAsync();
             _networkService.ConfigurationChanged += (_, cfg) => ApplyNetworkConfiguration(cfg);
             ServiceListModel.ResolveService = (type, name) =>
@@ -118,9 +121,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             if (target == null)
                 return;
 
-            if (_editHandlers.TryGetValue(target.Type, out var handler))
+            if (TryGetDescriptorId(target.Type, out var descriptorId) && _uiRegistry.EditHandlers.TryGetValue(descriptorId, out var handlerFactory))
             {
-                handler.Edit(target);
+                handlerFactory().Edit(target);
             }
             else
             {
@@ -282,6 +285,23 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         {
             LogViewModel.ClearLogs();
             _logger?.Log("Logs cleared", LogLevel.Debug);
+        }
+
+        private bool TryGetDescriptorId(ServiceType serviceType, out string descriptorId)
+        {
+            if (_catalog.TryGetByLegacyType(serviceType, out var descriptor))
+            {
+                descriptorId = descriptor.Id;
+                return true;
+            }
+
+            if (_catalog.LegacyMap.TryGetValue(serviceType, out descriptorId))
+            {
+                return true;
+            }
+
+            descriptorId = serviceType.ToDescriptorId();
+            return false;
         }
 
         public void ExportDisplayedLogs(string filePath)

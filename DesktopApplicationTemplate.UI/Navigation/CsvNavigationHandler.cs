@@ -8,17 +8,19 @@ using DesktopApplicationTemplate.UI.ViewModels.Csv.Advanced;
 using DesktopApplicationTemplate.UI.Views.Csv.Edit;
 using DesktopApplicationTemplate.UI.Views.Csv.Advanced;
 using Microsoft.Extensions.DependencyInjection;
-using DesktopApplicationTemplate.Models;
 using System.Threading.Tasks;
+using DesktopApplicationTemplate.Services.Common.Descriptors;
+using DesktopApplicationTemplate.UI.Configuration;
 
 namespace DesktopApplicationTemplate.UI.Navigation
 {
+    [ServiceDescriptorRegistration(CsvServiceDescriptor.DescriptorId, ServiceRegistrationKind.NavigationHandler)]
     public class CsvNavigationHandler : INavigationHandler
     {
         private readonly IServiceProvider _services;
         private readonly Func<MainView> _getMainView;
 
-        public ServiceType ServiceType => ServiceType.Csv;
+        public string DescriptorId => CsvServiceDescriptor.DescriptorId;
 
         public CsvNavigationHandler(IServiceProvider services, Func<MainView> getMainView)
         {
@@ -50,7 +52,7 @@ namespace DesktopApplicationTemplate.UI.Navigation
         public Task AddServiceAsync(string name, object options)
         {
             var mainView = _getMainView();
-            return mainView.AddServiceAsync(ServiceType, new ServiceFactoryOptions<CsvServiceOptions>(name, (CsvServiceOptions)options));
+            return mainView.AddServiceAsync(DescriptorId, new ServiceFactoryOptions<CsvServiceOptions>(name, (CsvServiceOptions)options));
         }
     }
 }

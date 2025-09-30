@@ -3,8 +3,8 @@ using System.Windows;
 using System.Windows.Controls;
 using DesktopApplicationTemplate.UI.Navigation;
 using DesktopApplicationTemplate.UI.ViewModels;
-using DesktopApplicationTemplate.UI.Factories;
 using DesktopApplicationTemplate.Models;
+using DesktopApplicationTemplate.Core.Services;
 using LogLevel = DesktopApplicationTemplate.Core.Services.LogLevel;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -25,21 +25,18 @@ namespace DesktopApplicationTemplate.UI.Views
     {
         private readonly MainViewModel _viewModel;
         private readonly ILogger<MainView>? _logger;
-        private readonly IDictionary<ServiceType, IServiceFactory> _serviceFactories;
-        private readonly IDictionary<ServiceType, INavigationHandler> _navigationHandlers;
-        private readonly IDictionary<ServiceType, Func<Page>> _pageResolvers;
+        private readonly IServiceUiRegistry _uiRegistry;
+        private readonly IServiceCatalog _catalog;
 
         public MainView(
             MainViewModel viewModel,
-            IDictionary<ServiceType, IServiceFactory> serviceFactories,
-            IDictionary<ServiceType, INavigationHandler> navigationHandlers,
-            IDictionary<ServiceType, Func<Page>> pageResolvers)
+            IServiceUiRegistry uiRegistry,
+            IServiceCatalog catalog)
         {
             InitializeComponent();
             _viewModel = viewModel;
-            _serviceFactories = serviceFactories;
-            _navigationHandlers = navigationHandlers;
-            _pageResolvers = pageResolvers;
+            _uiRegistry = uiRegistry;
+            _catalog = catalog;
             if (App.AppHost.Services.GetService(typeof(ILoggerFactory)) is ILoggerFactory factory)
             {
                 _logger = factory.CreateLogger<MainView>();
@@ -89,7 +86,12 @@ namespace DesktopApplicationTemplate.UI.Views
 
         public Page? GetOrCreateServicePage(ServiceListModel svc)
         {
-            if (svc.ServicePage == null && _pageResolvers.TryGetValue(svc.Type, out var factory))
+            if (!TryGetDescriptorId(svc.Type, out var descriptorId))
+            {
+                return svc.ServicePage;
+            }
+
+            if (svc.ServicePage == null && _uiRegistry.ServicePages.TryGetValue(descriptorId, out var factory))
             {
                 svc.ServicePage = factory();
             }
@@ -175,8 +177,14 @@ namespace DesktopApplicationTemplate.UI.Views
         private void NavigateTo(ServiceType serviceType)
         {
             var defaultName = _createServicePage?.GenerateDefaultName(serviceType) ?? serviceType.ToLegacyString();
-            if (_navigationHandlers.TryGetValue(serviceType, out var handler))
+            if (!TryGetDescriptorId(serviceType, out var descriptorId))
             {
+                return;
+            }
+
+            if (_uiRegistry.NavigationHandlers.TryGetValue(descriptorId, out var handlerFactory))
+            {
+                var handler = handlerFactory();
                 var view = handler.CreateView(defaultName);
                 ShowPage(view);
             }
@@ -190,11 +198,14 @@ namespace DesktopApplicationTemplate.UI.Views
 
 
 
-        internal async Task AddServiceAsync(ServiceType type, object options)
+        internal async Task AddServiceAsync(string descriptorId, object options)
         {
-            if (!_serviceFactories.TryGetValue(type, out var factory))
+            if (!_uiRegistry.Factories.TryGetValue(descriptorId, out var factoryFactory))
+            {
                 return;
+            }
 
+            var factory = factoryFactory();
             var svc = factory.Create(options);
             svc.SetColorsByType();
             svc.LogAdded += _viewModel.OnServiceLogAdded;
@@ -208,6 +219,23 @@ namespace DesktopApplicationTemplate.UI.Views
                 ShowPage(svc.ServicePage);
             await _viewModel.SaveServicesAsync();
             _logger?.LogDebug("AddService workflow completed");
+        }
+
+        private bool TryGetDescriptorId(ServiceType serviceType, out string descriptorId)
+        {
+            if (_catalog.TryGetByLegacyType(serviceType, out var descriptor))
+            {
+                descriptorId = descriptor.Id;
+                return true;
+            }
+
+            if (_catalog.LegacyMap.TryGetValue(serviceType, out descriptorId))
+            {
+                return true;
+            }
+
+            descriptorId = serviceType.ToDescriptorId();
+            return false;
         }
 
 

@@ -8,17 +8,19 @@ using DesktopApplicationTemplate.UI.ViewModels.FileObserver.Advanced;
 using DesktopApplicationTemplate.UI.Views.FileObserver.Create;
 using DesktopApplicationTemplate.UI.Views.FileObserver.Advanced;
 using Microsoft.Extensions.DependencyInjection;
-using DesktopApplicationTemplate.Models;
 using System.Threading.Tasks;
+using DesktopApplicationTemplate.Services.Common.Descriptors;
+using DesktopApplicationTemplate.UI.Configuration;
 
 namespace DesktopApplicationTemplate.UI.Navigation
 {
+    [ServiceDescriptorRegistration(FileObserverServiceDescriptor.DescriptorId, ServiceRegistrationKind.NavigationHandler)]
     public class FileObserverNavigationHandler : INavigationHandler
     {
         private readonly IServiceProvider _services;
         private readonly Func<MainView> _getMainView;
 
-        public ServiceType ServiceType => ServiceType.FileObserver;
+        public string DescriptorId => FileObserverServiceDescriptor.DescriptorId;
 
         public FileObserverNavigationHandler(IServiceProvider services, Func<MainView> getMainView)
         {
@@ -49,7 +51,7 @@ namespace DesktopApplicationTemplate.UI.Navigation
         public Task AddServiceAsync(string name, object options)
         {
             var mainView = _getMainView();
-            return mainView.AddServiceAsync(ServiceType, new ServiceFactoryOptions<FileObserverServiceOptions>(name, (FileObserverServiceOptions)options));
+            return mainView.AddServiceAsync(DescriptorId, new ServiceFactoryOptions<FileObserverServiceOptions>(name, (FileObserverServiceOptions)options));
         }
     }
 }

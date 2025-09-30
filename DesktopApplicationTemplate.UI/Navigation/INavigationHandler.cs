@@ -1,12 +1,10 @@
 using System.Threading.Tasks;
 using System.Windows.Controls;
-using DesktopApplicationTemplate.Models;
-
 namespace DesktopApplicationTemplate.UI.Navigation
 {
     public interface INavigationHandler
     {
-        ServiceType ServiceType { get; }
+        string DescriptorId { get; }
         Page CreateView(string defaultName);
         Task AddServiceAsync(string name, object options);
     }
