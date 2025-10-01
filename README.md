@@ -2,7 +2,7 @@
 
 ![CI](https://github.com/OWNER/REPO/actions/workflows/ci.yml/badge.svg)
 
-This repository contains a basic WPF UI application, a Windows Service and unit tests.
+This repository contains a basic WPF UI application and a Windows Service.
 
 See `Codex/CollaborationGuidelines.txt` for tips on working with the repository. A running log of past collaboration decisions lives in `Codex/docs/CollaborationAndDebugTips.txt`.
 
@@ -35,7 +35,7 @@ repository root will automatically respect this setting.
 
 After cloning the repository:
 
-- Rely on GitHub Actions to run the standard `dotnet restore`, `dotnet build DesktopApplicationTemplate.sln`, and `dotnet test --settings tests.runsettings` commands documented below. Codex runs inside a Linux container without the WindowsDesktop runtime, so capture the CI logs (or maintainer summaries) when documenting build and test results.
+- Rely on GitHub Actions to run the standard `dotnet restore` and `dotnet build DesktopApplicationTemplate.sln` commands documented below. Codex runs inside a Linux container without the WindowsDesktop runtime, so capture the CI logs (or maintainer summaries) when documenting build results.
 - Run the setup script to configure the Git hooks and [Git LFS](https://git-lfs.com/):
 
   ```bash
@@ -61,7 +61,7 @@ there is no need to switch manually when working inside this
 repository.
 
 You can also execute `setup.sh` to configure Git hooks and Git LFS, restore
-dependencies, build the solution and run the unit tests in a single step:
+dependencies, and build the solution in a single step:
 
 ```bash
 ./setup.sh
@@ -89,18 +89,6 @@ Run the background service (useful for development):
 
 ```bash
 dotnet run --project DesktopApplicationTemplate.Service/DesktopApplicationTemplate.Service.csproj
-```
-
-## Execute unit tests
-
-> **Note:** Codex cannot run WPF tests in the container environment. GitHub Actions runs the command below; review the CI logs for the outcome and only request a Windows collaborator's help if additional diagnostics are required.
-
-Use `dotnet test` to run the xUnit tests. The repository includes a
-`tests.runsettings` file that ensures the entire test suite runs even
-when some tests fail:
-
-```bash
-dotnet test DesktopApplicationTemplate.Tests/DesktopApplicationTemplate.Tests.csproj --settings tests.runsettings
 ```
 
 ## Installer notes
@@ -170,7 +158,7 @@ Each archive contains the manifest, compiled descriptors, and copy-local depende
 ### Templates and samples
 
 - **Template:** `Templates/ServicePluginTemplate` publishes a `dotnet new codex-serviceplugin` template that scaffolds a plug-in project with descriptor, runtime factory, manifest, and packaging imports. Install it locally with `dotnet new install Templates/ServicePluginTemplate` and scaffold new plug-ins under a folder where `..\..\ServicePlugin.Packaging` resolves to the repository root.
-- **Samples:** `Samples/TcpRelayPlugin` and `Samples/HttpRelayPlugin` demonstrate packaging descriptor-based services. Both projects import `ServicePlugin.Packaging`, emit archives during CI, and exercise descriptor metadata in tests.
+- **Samples:** `Samples/TcpRelayPlugin` and `Samples/HttpRelayPlugin` demonstrate packaging descriptor-based services. Both projects import `ServicePlugin.Packaging`, emit archives during CI, and exercise descriptor metadata during packaging validation.
 - **Verification:** Follow `Codex/docs/PluginVerificationChecklist.md` to confirm import flows, descriptor rendering, and persistence migrations prior to distributing new packages.
 
 ## Testing services locally
@@ -215,8 +203,7 @@ the script template will be loaded automatically.
 
 ## Running startup scripts
 
-To configure Git hooks and Git LFS, restore dependencies, build the solution
-and run the unit tests from a shell environment use:
+To configure Git hooks and Git LFS, restore dependencies, and build the solution from a shell environment use:
 
 ```bash
 chmod +x setup.sh
