@@ -71,7 +71,7 @@ public sealed class ServiceCatalog : IServiceCatalog
 
             _descriptorsById = descriptorsById;
             _descriptorsByLegacy = legacyLookup;
-            _legacyMap = legacyLookup.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Id, StringComparer.Ordinal);
+            _legacyMap = legacyLookup.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Id);
             _descriptors = snapshots;
         }
 
