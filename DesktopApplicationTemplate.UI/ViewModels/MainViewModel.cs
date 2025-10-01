@@ -140,7 +140,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         internal string GenerateServiceName(ServiceType serviceType)
         {
-            var typeName = serviceType.ToLegacyString();
+            var typeName = GetDisplayPrefix(serviceType);
             int index = 1;
             foreach (var svc in Services.Where(s => s.Type == serviceType))
             {
@@ -197,34 +197,40 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     await tcpVm.SaveAsync().ConfigureAwait(false);
                 }
             }
-            ServicePersistence.Save(Services);
+            ServicePersistence.Save(Services, _catalog, _logger);
         }
 
         private void LoadServices()
         {
-            var existing = ServicePersistence.Load(_logger);
+            var existing = ServicePersistence.Load(_catalog, _logger);
             foreach (var info in existing.OrderBy(i => i.Order))
             {
+                var descriptor = ResolveDescriptor(info.DescriptorId, info.ServiceType);
+                var serviceType = descriptor?.LegacyType ?? info.ServiceType;
                 var svc = new ServiceListModel
                 {
                     DisplayName = info.DisplayName,
-                    Type = info.ServiceType,
+                    Type = serviceType,
+                    DescriptorId = descriptor?.Id ?? info.DescriptorId,
+                    DescriptorPayload = info.Payload,
                     IsActive = info.IsActive,
                     Order = info.Order,
-                    TcpOptions = info.TcpOptions,
-                    FtpOptions = info.FtpOptions,
-                    HttpOptions = info.HttpOptions,
-                    CsvOptions = info.CsvOptions,
                     TotalExecutionTimeMs = info.TotalExecutionTimeMs,
                     ExecutionCount = info.ExecutionCount
                 };
                 foreach (var a in info.AssociatedServices ?? new List<string>())
+                {
                     svc.AssociatedServices.Add(a);
-                svc.SetColorsByType();
+                }
+
+                svc.ApplyDescriptor(descriptor);
                 svc.LogAdded += OnServiceLogAdded;
                 svc.ActiveChanged += OnServiceActiveChanged;
                 if (svc.Type != ServiceType.Csv)
+                {
                     _csvService.EnsureColumnsForService(svc.DisplayName);
+                }
+
                 Services.Add(svc);
                 _logger?.Log($"Loaded service {svc.DisplayName}", LogLevel.Debug);
             }
@@ -256,6 +262,41 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 return true;
             };
             FilteredServices.Refresh();
+        }
+
+        private IServiceDescriptor? ResolveDescriptor(string? descriptorId, ServiceType serviceType)
+        {
+            if (!string.IsNullOrWhiteSpace(descriptorId) && _catalog.TryGetById(descriptorId!, out var descriptor))
+            {
+                return descriptor;
+            }
+
+            if (_catalog.TryGetByLegacyType(serviceType, out descriptor))
+            {
+                return descriptor;
+            }
+
+            return null;
+        }
+
+        private string GetDisplayPrefix(ServiceType serviceType)
+        {
+            var descriptor = ResolveDescriptor(null, serviceType);
+            if (descriptor is not null)
+            {
+                var presentation = descriptor.Presentation;
+                if (!string.IsNullOrWhiteSpace(presentation.DisplayLabel))
+                {
+                    return presentation.DisplayLabel!;
+                }
+
+                if (!string.IsNullOrWhiteSpace(descriptor.DisplayName))
+                {
+                    return descriptor.DisplayName;
+                }
+            }
+
+            return serviceType.ToLegacyString();
         }
 
         public void OnServiceLogAdded(ServiceListModel svc, LogEntry entry)

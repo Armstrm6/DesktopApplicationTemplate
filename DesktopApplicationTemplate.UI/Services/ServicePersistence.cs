@@ -1,138 +1,65 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using DesktopApplicationTemplate.Core.Models;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Services;
-using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
-using DesktopApplicationTemplate.UI;
+using Microsoft.Extensions.Options;
 
 namespace DesktopApplicationTemplate.Persistence
 {
     public static class ServicePersistence
     {
+        private static readonly JsonSerializerOptions SerializerOptions = new()
+        {
+            WriteIndented = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        };
+
         public static string FilePath { get; set; } = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "services.json");
 
-        public static void Save(IEnumerable<ServiceListModel> services, ILoggingService? logger = null)
+        public static void Save(IEnumerable<ServiceListModel> services, IServiceCatalog catalog, ILoggingService? logger = null)
         {
-            var data = new List<ServiceInfo>();
+            var records = new List<PersistedServiceRecord>();
             var index = 0;
-            foreach (var s in services)
+            foreach (var service in services)
             {
-                TcpServiceOptions? tcp = null;
-                CsvServiceOptions? csv = null;
-                FtpServerOptions? ftp = null;
-                HttpServiceOptions? http = null;
-                if (s.Type == ServiceType.Tcp && s.TcpOptions != null)
+                var descriptor = ResolveDescriptor(service.DescriptorId, service.Type, catalog);
+                var payload = CreatePayloadElement(service.DescriptorPayload, descriptor?.OptionsSerializer);
+                records.Add(new PersistedServiceRecord
                 {
-                    tcp = new TcpServiceOptions
-                    {
-                        Host = s.TcpOptions.Host,
-                        Port = s.TcpOptions.Port,
-                        UseUdp = s.TcpOptions.UseUdp,
-                        Mode = s.TcpOptions.Mode,
-                        InputMessage = s.TcpOptions.InputMessage,
-                        Script = s.TcpOptions.Script,
-                        OutputMessage = s.TcpOptions.OutputMessage,
-                        LastTestMessage = s.TcpOptions.LastTestMessage
-                    };
-                }
-
-                if (s.Type == ServiceType.Ftp && s.FtpOptions != null)
-                {
-                    ftp = new FtpServerOptions
-                    {
-                        Port = s.FtpOptions.Port,
-                        RootPath = s.FtpOptions.RootPath,
-                        AllowAnonymous = s.FtpOptions.AllowAnonymous,
-                        Username = s.FtpOptions.Username,
-                        Password = s.FtpOptions.Password
-                    };
-                }
-
-                if (s.Type == ServiceType.Http && s.HttpOptions != null)
-                {
-                    http = new HttpServiceOptions
-                    {
-                        BaseUrl = s.HttpOptions.BaseUrl,
-                        Username = s.HttpOptions.Username,
-                        Password = s.HttpOptions.Password,
-                        ClientCertificatePath = s.HttpOptions.ClientCertificatePath
-                    };
-                }
-                if (s.Type == ServiceType.Csv && s.CsvOptions != null)
-                {
-                    csv = new CsvServiceOptions
-                    {
-                        OutputPath = s.CsvOptions?.OutputPath ?? string.Empty,
-                        Delimiter = s.CsvOptions?.Delimiter ?? ",",
-                        IncludeHeaders = s.CsvOptions?.IncludeHeaders ?? true
-                    };
-                }
-
-                data.Add(new ServiceInfo
-                {
-                    DisplayName = s.DisplayName,
-                    ServiceType = s.Type,
-                    IsActive = s.IsActive,
+                    DisplayName = service.DisplayName,
+                    DescriptorId = descriptor?.Id ?? ResolveDescriptorId(service),
+                    LegacyType = service.Type,
+                    LegacyTypeName = service.Type.ToString(),
+                    IsActive = service.IsActive,
                     Created = DateTime.Now,
                     Order = index++,
-                    AssociatedServices = new List<string>(s.AssociatedServices),
-                    TcpOptions = tcp,
-                    FtpOptions = ftp,
-                    HttpOptions = http,
-                    CsvOptions = csv,
-                    TotalExecutionTimeMs = s.TotalExecutionTimeMs,
-                    ExecutionCount = s.ExecutionCount
+                    AssociatedServices = new List<string>(service.AssociatedServices),
+                    Payload = payload,
+                    TotalExecutionTimeMs = service.TotalExecutionTimeMs,
+                    ExecutionCount = service.ExecutionCount
                 });
             }
 
-            var options = new JsonSerializerOptions
-            {
-                WriteIndented = true,
-                ReferenceHandler = ReferenceHandler.IgnoreCycles,
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-            };
-
-            try
-            {
-                var json = JsonSerializer.Serialize(data, options);
-                logger?.Log($"Persisting services to {FilePath}", LogLevel.Debug);
-                var directory = Path.GetDirectoryName(FilePath);
-                if (!string.IsNullOrEmpty(directory))
-                {
-                    Directory.CreateDirectory(directory);
-                }
-                using var fs = new FileStream(FilePath, FileMode.Create, FileAccess.Write, FileShare.None);
-                using var sw = new StreamWriter(fs);
-                sw.Write(json);
-                logger?.Log($"Saved {data.Count} services to {FilePath}", LogLevel.Debug);
-            }
-            catch (StackOverflowException)
-            {
-                var dumpOptions = new JsonSerializerOptions
-                {
-                    WriteIndented = true,
-                    ReferenceHandler = ReferenceHandler.Preserve
-                };
-                var dump = JsonSerializer.Serialize(data, dumpOptions);
-                var temp = Path.Combine(Path.GetTempPath(), "services_dump.json");
-                File.WriteAllText(temp, dump);
-                Environment.FailFast($"Stack overflow while saving services. Dump written to {temp}");
-            }
+            WriteRecords(records, logger);
         }
 
-        public static List<ServiceInfo> Load(ILoggingService? logger = null)
+        public static List<ServiceInfo> Load(IServiceCatalog catalog, ILoggingService? logger = null)
         {
             if (!File.Exists(FilePath))
             {
                 logger?.Log("Services file not found", LogLevel.Warning);
                 return new List<ServiceInfo>();
             }
+
             string json;
             try
             {
@@ -143,83 +70,255 @@ namespace DesktopApplicationTemplate.Persistence
                 logger?.Log("Services file not found", LogLevel.Warning);
                 return new List<ServiceInfo>();
             }
+
             try
             {
-                var legacy = JsonSerializer.Deserialize<List<LegacyServiceInfo>>(json) ?? new List<LegacyServiceInfo>();
-                var result = new List<ServiceInfo>();
-                foreach (var info in legacy)
+                var records = JsonSerializer.Deserialize<List<PersistedServiceRecord>>(json, SerializerOptions) ?? new();
+                return MapRecords(records, catalog, logger);
+            }
+            catch (JsonException)
+            {
+                // fall back to legacy payload shape
+            }
+            catch (NotSupportedException)
+            {
+                // fall back to legacy payload shape
+            }
+
+            var legacy = JsonSerializer.Deserialize<List<LegacyServiceInfo>>(json, SerializerOptions) ?? new List<LegacyServiceInfo>();
+            return MapLegacyRecords(legacy, catalog, logger);
+        }
+
+        private static void WriteRecords(IReadOnlyCollection<PersistedServiceRecord> records, ILoggingService? logger)
+        {
+            try
+            {
+                var json = JsonSerializer.Serialize(records, SerializerOptions);
+                logger?.Log($"Persisting services to {FilePath}", LogLevel.Debug);
+                var directory = Path.GetDirectoryName(FilePath);
+                if (!string.IsNullOrEmpty(directory))
                 {
-                    if (ServiceTypeExtensions.TryParse(info.ServiceType, out var type))
-                    {
-                        result.Add(new ServiceInfo
-                        {
-                            DisplayName = info.DisplayName,
-                            ServiceType = type,
-                            IsActive = info.IsActive,
-                            Created = info.Created,
-                            Order = info.Order,
-                            AssociatedServices = info.AssociatedServices ?? new List<string>(),
-                            TcpOptions = info.TcpOptions,
-                            FtpOptions = info.FtpOptions,
-                            HttpOptions = info.HttpOptions,
-                            CsvOptions = info.CsvOptions,
-                            TotalExecutionTimeMs = info.TotalExecutionTimeMs,
-                            ExecutionCount = info.ExecutionCount
-                        });
-                    }
-                    else
-                    {
-                        logger?.Log($"Unmapped service type '{info.ServiceType}' for '{info.DisplayName}'", LogLevel.Warning);
-                    }
+                    Directory.CreateDirectory(directory);
                 }
 
-                foreach (var info in result)
+                File.WriteAllText(FilePath, json);
+                logger?.Log($"Saved {records.Count} services to {FilePath}", LogLevel.Debug);
+            }
+            catch (StackOverflowException)
+            {
+                var dumpOptions = new JsonSerializerOptions
                 {
-                    if (info.ServiceType == ServiceType.Tcp && info.TcpOptions != null)
-                    {
-                        var opt = App.AppHost?.Services.GetService<IOptions<TcpServiceOptions>>();
-                        if (opt != null)
-                        {
-                            var value = opt.Value;
-                            value.Host = info.TcpOptions.Host;
-                            value.Port = info.TcpOptions.Port;
-                            value.UseUdp = info.TcpOptions.UseUdp;
-                            value.Mode = info.TcpOptions.Mode;
-                            value.InputMessage = info.TcpOptions.InputMessage;
-                            value.Script = info.TcpOptions.Script;
-                            value.OutputMessage = info.TcpOptions.OutputMessage;
-                            value.LastTestMessage = info.TcpOptions.LastTestMessage;
-                        }
-                    }
-                    if (info.ServiceType == ServiceType.Ftp && info.FtpOptions != null)
-                    {
-                        try
-                        {
-                            var opt = App.AppHost?.Services.GetService<IOptions<FtpServerOptions>>();
-                            if (opt != null)
-                            {
-                                var value = opt.Value;
-                                value.Port = info.FtpOptions.Port;
-                                value.RootPath = info.FtpOptions.RootPath;
-                                value.AllowAnonymous = info.FtpOptions.AllowAnonymous;
-                                value.Username = info.FtpOptions.Username;
-                                value.Password = info.FtpOptions.Password;
-                            }
-                        }
-                        catch
-                        {
-                            // ignore missing options during tests or early startup
-                        }
-                    }
+                    WriteIndented = true,
+                    ReferenceHandler = ReferenceHandler.Preserve
+                };
+                var dump = JsonSerializer.Serialize(records, dumpOptions);
+                var temp = Path.Combine(Path.GetTempPath(), "services_dump.json");
+                File.WriteAllText(temp, dump);
+                Environment.FailFast($"Stack overflow while saving services. Dump written to {temp}");
+            }
+        }
+
+        private static List<ServiceInfo> MapRecords(IEnumerable<PersistedServiceRecord> records, IServiceCatalog catalog, ILoggingService? logger)
+        {
+            var result = new List<ServiceInfo>();
+            foreach (var record in records.OrderBy(r => r.Order))
+            {
+                var descriptor = ResolveDescriptor(record.DescriptorId, record.LegacyType ?? ParseLegacyType(record.LegacyTypeName), catalog);
+                var payload = DeserializePayload(record.Payload, descriptor?.OptionsSerializer);
+
+                var info = new ServiceInfo
+                {
+                    DisplayName = record.DisplayName,
+                    DescriptorId = descriptor?.Id ?? record.DescriptorId,
+                    ServiceType = descriptor?.LegacyType ?? record.LegacyType ?? ParseLegacyType(record.LegacyTypeName),
+                    IsActive = record.IsActive,
+                    Created = record.Created,
+                    Order = record.Order,
+                    AssociatedServices = record.AssociatedServices ?? new List<string>(),
+                    Payload = payload,
+                    TotalExecutionTimeMs = record.TotalExecutionTimeMs,
+                    ExecutionCount = record.ExecutionCount
+                };
+
+                result.Add(info);
+                TryRestoreGlobalOptions(descriptor, payload);
+            }
+
+            logger?.Log($"Loaded {result.Count} services", LogLevel.Debug);
+            return result;
+        }
+
+        private static List<ServiceInfo> MapLegacyRecords(IEnumerable<LegacyServiceInfo> legacy, IServiceCatalog catalog, ILoggingService? logger)
+        {
+            var result = new List<ServiceInfo>();
+            foreach (var record in legacy)
+            {
+                if (!ServiceTypeExtensions.TryParse(record.ServiceType, out var type))
+                {
+                    logger?.Log($"Unmapped service type '{record.ServiceType}' for '{record.DisplayName}'", LogLevel.Warning);
+                    continue;
                 }
 
-                logger?.Log($"Loaded {result.Count} services", LogLevel.Debug);
+                var descriptor = ResolveDescriptor(record.DescriptorId, type, catalog) ?? ResolveDescriptor(type.ToDescriptorId(), type, catalog);
+                var payload = ResolveLegacyPayload(type, record);
+
+                var info = new ServiceInfo
+                {
+                    DisplayName = record.DisplayName,
+                    DescriptorId = descriptor?.Id ?? record.DescriptorId ?? type.ToDescriptorId(),
+                    ServiceType = descriptor?.LegacyType ?? type,
+                    IsActive = record.IsActive,
+                    Created = record.Created,
+                    Order = record.Order,
+                    AssociatedServices = record.AssociatedServices ?? new List<string>(),
+                    Payload = payload,
+                    TotalExecutionTimeMs = record.TotalExecutionTimeMs,
+                    ExecutionCount = record.ExecutionCount
+                };
+
+                result.Add(info);
+                TryRestoreGlobalOptions(descriptor, payload);
+            }
+
+            logger?.Log($"Loaded {result.Count} services", LogLevel.Debug);
+            return result;
+        }
+
+        private static object? ResolveLegacyPayload(ServiceType type, LegacyServiceInfo record) => type switch
+        {
+            ServiceType.Tcp => record.TcpOptions,
+            ServiceType.Ftp => record.FtpOptions,
+            ServiceType.Http => record.HttpOptions,
+            ServiceType.Csv => record.CsvOptions,
+            _ => null
+        };
+
+        private static IServiceDescriptor? ResolveDescriptor(string? descriptorId, ServiceType? legacyType, IServiceCatalog catalog)
+        {
+            if (!string.IsNullOrWhiteSpace(descriptorId) && catalog.TryGetById(descriptorId!, out var descriptor))
+            {
+                return descriptor;
+            }
+
+            if (legacyType.HasValue && catalog.TryGetByLegacyType(legacyType.Value, out descriptor))
+            {
+                return descriptor;
+            }
+
+            return null;
+        }
+
+        private static string ResolveDescriptorId(ServiceListModel service)
+        {
+            if (!string.IsNullOrWhiteSpace(service.DescriptorId))
+            {
+                return service.DescriptorId;
+            }
+
+            if (service.Type != default)
+            {
+                return service.Type.ToDescriptorId();
+            }
+
+            return service.DisplayName;
+        }
+
+        private static JsonElement? CreatePayloadElement(object? payload, IServiceOptionsSerializer? serializer)
+        {
+            if (payload is null)
+            {
+                return null;
+            }
+
+            if (payload is JsonElement element)
+            {
+                return element.Clone();
+            }
+
+            if (payload is JsonDocument document)
+            {
+                return document.RootElement.Clone();
+            }
+
+            if (serializer is not null)
+            {
+                using var stream = new MemoryStream();
+                using (var writer = new Utf8JsonWriter(stream))
+                {
+                    serializer.Serialize(writer, payload);
+                }
+
+                stream.Position = 0;
+                using var doc = JsonDocument.Parse(stream);
+                return doc.RootElement.Clone();
+            }
+
+            return JsonSerializer.SerializeToElement(payload, payload.GetType(), SerializerOptions);
+        }
+
+        private static object? DeserializePayload(JsonElement? element, IServiceOptionsSerializer? serializer)
+        {
+            if (!element.HasValue)
+            {
+                return null;
+            }
+
+            var value = element.Value;
+            if (value.ValueKind == JsonValueKind.Null || value.ValueKind == JsonValueKind.Undefined)
+            {
+                return null;
+            }
+
+            if (serializer is not null)
+            {
+                return serializer.Deserialize(value);
+            }
+
+            return value.Deserialize<object>(SerializerOptions);
+        }
+
+        private static ServiceType? ParseLegacyType(string? value)
+        {
+            if (ServiceTypeExtensions.TryParse(value, out var result))
+            {
                 return result;
             }
-            catch
+
+            return null;
+        }
+
+        private static void TryRestoreGlobalOptions(IServiceDescriptor? descriptor, object? payload)
+        {
+            if (descriptor?.OptionsSerializer is null || payload is null || App.AppHost?.Services is null)
             {
-                logger?.Log("Failed to parse services file", LogLevel.Error);
-                return new List<ServiceInfo>();
+                return;
+            }
+
+            var optionsType = descriptor.OptionsSerializer.OptionsType;
+            if (!optionsType.IsInstanceOfType(payload))
+            {
+                return;
+            }
+
+            var serviceProvider = App.AppHost.Services;
+            var optionsTypeGeneric = typeof(IOptions<>).MakeGenericType(optionsType);
+            var optionsInstance = serviceProvider.GetService(optionsTypeGeneric);
+            if (optionsInstance is null)
+            {
+                return;
+            }
+
+            var valueProperty = optionsTypeGeneric.GetProperty("Value", BindingFlags.Instance | BindingFlags.Public);
+            if (valueProperty?.GetValue(optionsInstance) is not object target)
+            {
+                return;
+            }
+
+            foreach (var property in optionsType.GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                         .Where(p => p.CanRead && p.CanWrite))
+            {
+                var value = property.GetValue(payload);
+                property.SetValue(target, value);
             }
         }
     }
@@ -227,15 +326,28 @@ namespace DesktopApplicationTemplate.Persistence
     public class ServiceInfo
     {
         public string DisplayName { get; set; } = string.Empty;
+        public string DescriptorId { get; set; } = string.Empty;
         public ServiceType ServiceType { get; set; }
         public bool IsActive { get; set; }
         public DateTime Created { get; set; }
         public int Order { get; set; }
         public List<string> AssociatedServices { get; set; } = new();
-        public TcpServiceOptions? TcpOptions { get; set; }
-        public FtpServerOptions? FtpOptions { get; set; }
-        public HttpServiceOptions? HttpOptions { get; set; }
-        public CsvServiceOptions? CsvOptions { get; set; }
+        public object? Payload { get; set; }
+        public double TotalExecutionTimeMs { get; set; }
+        public int ExecutionCount { get; set; }
+    }
+
+    internal class PersistedServiceRecord
+    {
+        public string DisplayName { get; set; } = string.Empty;
+        public string DescriptorId { get; set; } = string.Empty;
+        public ServiceType? LegacyType { get; set; }
+        public string? LegacyTypeName { get; set; }
+        public bool IsActive { get; set; }
+        public DateTime Created { get; set; }
+        public int Order { get; set; }
+        public List<string>? AssociatedServices { get; set; }
+        public JsonElement? Payload { get; set; }
         public double TotalExecutionTimeMs { get; set; }
         public int ExecutionCount { get; set; }
     }
@@ -244,10 +356,11 @@ namespace DesktopApplicationTemplate.Persistence
     {
         public string DisplayName { get; set; } = string.Empty;
         public string ServiceType { get; set; } = string.Empty;
+        public string? DescriptorId { get; set; }
         public bool IsActive { get; set; }
         public DateTime Created { get; set; }
         public int Order { get; set; }
-        public List<string> AssociatedServices { get; set; } = new();
+        public List<string>? AssociatedServices { get; set; }
         public TcpServiceOptions? TcpOptions { get; set; }
         public FtpServerOptions? FtpOptions { get; set; }
         public HttpServiceOptions? HttpOptions { get; set; }

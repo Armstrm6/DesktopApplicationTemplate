@@ -193,7 +193,14 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
         public void SetService(ServiceListModel service)
         {
             if (service == null) throw new ArgumentNullException(nameof(service));
-            _options = service.TcpOptions ?? new TcpServiceOptions();
+            var payload = service.GetPayload<TcpServiceOptions>();
+            if (payload is null)
+            {
+                payload = new TcpServiceOptions();
+                service.SetPayload(payload);
+            }
+
+            _options = payload;
             ServiceType = service.Type;
             ServiceName = service.DisplayName.Split(" - ").Last();
             Script = string.IsNullOrWhiteSpace(_options.Script)

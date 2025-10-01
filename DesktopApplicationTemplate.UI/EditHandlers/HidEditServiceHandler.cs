@@ -6,6 +6,8 @@ using DesktopApplicationTemplate.UI.ViewModels.Hid.Advanced;
 using DesktopApplicationTemplate.UI.Views.Hid.Edit;
 using DesktopApplicationTemplate.UI.Views.Hid.Advanced;
 using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Models;
+using DesktopApplicationTemplate.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -31,22 +33,35 @@ public class HidEditServiceHandler : IEditServiceHandler
         var mainView = _getMainView();
         var mainViewModel = _getMainViewModel();
         var hidPage = mainView.GetOrCreateServicePage(service);
-        var options = service.HidOptions ?? new HidServiceOptions();
-        var vm = ActivatorUtilities.CreateInstance<HidEditServiceViewModel>(_services, service.DisplayName.Split(" - ").Last(), options);
+        var payload = service.GetPayload<HidServiceOptions>();
+        if (payload is null)
+        {
+            payload = new HidServiceOptions();
+            service.SetPayload(payload);
+        }
+
+        var vm = ActivatorUtilities.CreateInstance<HidEditServiceViewModel>(_services, service.DisplayName.Split(" - ").Last(), payload);
         var editView = _services.GetRequiredService<HidEditServiceView>();
         editView.Initialize(vm);
         vm.ServiceSaved += (name, opts) =>
         {
-            service.DisplayName = $"HID - {name}";
-            service.HidOptions = opts;
+            var catalog = _services.GetRequiredService<IServiceCatalog>();
+            var descriptor = ResolveDescriptor(catalog, service.DescriptorId, service.Type);
+            service.ApplyDescriptor(descriptor, name);
+            service.SetPayload(opts);
             if (hidPage != null)
+            {
                 mainView.ShowPage(hidPage);
+            }
+
             _ = mainViewModel.SaveServicesAsync();
         };
         vm.EditCancelled += () =>
         {
             if (hidPage != null)
+            {
                 mainView.ShowPage(hidPage);
+            }
         };
         vm.AdvancedConfigRequested += opts =>
         {
@@ -60,5 +75,24 @@ public class HidEditServiceHandler : IEditServiceHandler
         mainView.ShowPage(editView);
         _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
     }
-}
 
+    private static IServiceDescriptor? ResolveDescriptor(IServiceCatalog catalog, string descriptorId, ServiceType serviceType)
+    {
+        if (!string.IsNullOrWhiteSpace(descriptorId) && catalog.TryGetById(descriptorId, out var byId))
+        {
+            return byId;
+        }
+
+        if (catalog.TryGetByLegacyType(serviceType, out var legacy))
+        {
+            return legacy;
+        }
+
+        if (catalog.LegacyMap.TryGetValue(serviceType, out var fallbackId) && catalog.TryGetById(fallbackId, out var fallback))
+        {
+            return fallback;
+        }
+
+        return null;
+    }
+}

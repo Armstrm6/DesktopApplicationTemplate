@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
@@ -15,6 +16,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
     {
         public string DisplayName { get; set; } = string.Empty;
         public ServiceType Type { get; set; }
+        public string DescriptorId { get; set; } = string.Empty;
+        public object? DescriptorPayload { get; set; }
         [JsonIgnore] public Page? Page { get; set; }
         public int Order { get; set; }
 
@@ -107,46 +110,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
         }
 
-        /// <summary>
-        /// TCP-specific configuration for this service, if applicable.
-        /// </summary>
-        public TcpServiceOptions? TcpOptions { get; set; }
-
-        /// <summary>
-        /// FTP server-specific configuration for this service, if applicable.
-        /// </summary>
-        public FtpServerOptions? FtpOptions { get; set; }
-
-        /// <summary>
-        /// HTTP-specific configuration for this service, if applicable.
-        /// </summary>
-        public HttpServiceOptions? HttpOptions { get; set; }
-
-        /// <summary>
-        /// HID-specific configuration for this service, if applicable.
-        /// </summary>
-        public HidServiceOptions? HidOptions { get; set; }
-
-        /// <summary>
-        /// Heartbeat-specific configuration for this service, if applicable.
-        /// </summary>
-        public HeartbeatServiceOptions? HeartbeatOptions { get; set; }
-
-        /// <summary>
-        /// File Observer-specific configuration for this service, if applicable.
-        /// </summary>
-        public FileObserverServiceOptions? FileObserverOptions { get; set; }
-
-        /// <summary>
-        /// SCP-specific configuration for this service, if applicable.
-        /// </summary>
-        public ScpServiceOptions? ScpOptions { get; set; }
-
-        /// <summary>
-        /// CSV creator-specific configuration for this service, if applicable.
-        /// </summary>
-        public CsvServiceOptions? CsvOptions { get; set; }
-
         public static Func<ServiceType, string, ServiceListModel?>? ResolveService { get; set; }
 
         private bool _isActive;
@@ -225,24 +188,108 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
         }
 
-        public void SetColorsByType()
+        public void ApplyDescriptor(IServiceDescriptor? descriptor, string? nameSuffix = null)
         {
-            (BackgroundColor, BorderColor) = Type switch
+            if (descriptor is not null)
             {
-                ServiceType.Tcp => (WpfBrushes.LightBlue, WpfBrushes.DarkBlue),
-                ServiceType.Http => (WpfBrushes.LightGreen, WpfBrushes.DarkGreen),
-                ServiceType.FileObserver => (WpfBrushes.LightSalmon, WpfBrushes.DarkSalmon),
-                ServiceType.Hid => (WpfBrushes.LightYellow, WpfBrushes.Goldenrod),
-                ServiceType.Heartbeat => (WpfBrushes.LightPink, WpfBrushes.DeepPink),
-                ServiceType.Scp => (WpfBrushes.LightCyan, WpfBrushes.CadetBlue),
-                ServiceType.Mqtt => (WpfBrushes.LightGoldenrodYellow, WpfBrushes.Goldenrod),
-                ServiceType.Ftp => (WpfBrushes.LightSteelBlue, WpfBrushes.SteelBlue),
-                ServiceType.Csv => (WpfBrushes.LightGray, WpfBrushes.Gray),
-                _ => (WpfBrushes.LightGray, WpfBrushes.Gray)
-            };
+                DescriptorId = descriptor.Id;
+                if (descriptor.LegacyType.HasValue)
+                {
+                    Type = descriptor.LegacyType.Value;
+                }
+            }
+
+            var presentation = descriptor?.Presentation ?? ServicePresentationMetadata.Empty;
+            var prefix = descriptor is not null ? ResolveDisplayPrefix(descriptor) : Type.ToLegacyString();
+
+            if (!string.IsNullOrWhiteSpace(nameSuffix))
+            {
+                DisplayName = $"{prefix} - {nameSuffix}";
+            }
+            else if (string.IsNullOrWhiteSpace(DisplayName))
+            {
+                DisplayName = prefix;
+            }
+
+            SetColorsByType(presentation);
+        }
+
+        public void SetColorsByType(ServicePresentationMetadata metadata)
+        {
+            if (!TryApplyMetadataColors(metadata))
+            {
+                (BackgroundColor, BorderColor) = LegacyColorMap.TryGetValue(Type, out var brushes)
+                    ? brushes
+                    : (WpfBrushes.LightGray, WpfBrushes.Gray);
+            }
+
             OnPropertyChanged(nameof(BackgroundColor));
             OnPropertyChanged(nameof(BorderColor));
         }
+
+        public TOptions? GetPayload<TOptions>() where TOptions : class => DescriptorPayload as TOptions;
+
+        public void SetPayload<TOptions>(TOptions? payload) where TOptions : class => DescriptorPayload = payload;
+
+        private static string ResolveDisplayPrefix(IServiceDescriptor descriptor)
+        {
+            if (!string.IsNullOrWhiteSpace(descriptor.Presentation.DisplayLabel))
+            {
+                return descriptor.Presentation.DisplayLabel!;
+            }
+
+            if (!string.IsNullOrWhiteSpace(descriptor.DisplayName))
+            {
+                return descriptor.DisplayName;
+            }
+
+            return descriptor.LegacyType?.ToLegacyString() ?? descriptor.Id;
+        }
+
+        private bool TryApplyMetadataColors(ServicePresentationMetadata metadata)
+        {
+            if (metadata is null)
+            {
+                return false;
+            }
+
+            var brushConverter = new System.Windows.Media.BrushConverter();
+            if (!string.IsNullOrWhiteSpace(metadata.PrimaryAccentColor)
+                && !string.IsNullOrWhiteSpace(metadata.SecondaryAccentColor))
+            {
+                try
+                {
+                    var background = (WpfBrush?)brushConverter.ConvertFromString(metadata.PrimaryAccentColor!);
+                    var border = (WpfBrush?)brushConverter.ConvertFromString(metadata.SecondaryAccentColor!);
+                    if (background is not null && border is not null)
+                    {
+                        BackgroundColor = background;
+                        BorderColor = border;
+                        return true;
+                    }
+                }
+                catch
+                {
+                    // Ignore conversion failures and fall back to legacy colors.
+                }
+            }
+
+            return false;
+        }
+
+        private static readonly IReadOnlyDictionary<ServiceType, (WpfBrush Background, WpfBrush Border)> LegacyColorMap =
+            new Dictionary<ServiceType, (WpfBrush, WpfBrush)>
+            {
+                [ServiceType.Tcp] = (WpfBrushes.LightBlue, WpfBrushes.DarkBlue),
+                [ServiceType.Http] = (WpfBrushes.LightGreen, WpfBrushes.DarkGreen),
+                [ServiceType.FileObserver] = (WpfBrushes.LightSalmon, WpfBrushes.DarkSalmon),
+                [ServiceType.Hid] = (WpfBrushes.LightYellow, WpfBrushes.Goldenrod),
+                [ServiceType.Heartbeat] = (WpfBrushes.LightPink, WpfBrushes.DeepPink),
+                [ServiceType.Scp] = (WpfBrushes.LightCyan, WpfBrushes.CadetBlue),
+                [ServiceType.Mqtt] = (WpfBrushes.LightGoldenrodYellow, WpfBrushes.Goldenrod),
+                [ServiceType.Ftp] = (WpfBrushes.LightSteelBlue, WpfBrushes.SteelBlue),
+                [ServiceType.Csv] = (WpfBrushes.LightGray, WpfBrushes.Gray)
+            };
     }
 }
 

@@ -5,6 +5,7 @@ using DesktopApplicationTemplate.UI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using DesktopApplicationTemplate.Models;
+using DesktopApplicationTemplate.Services.Common.Descriptors;
 
 namespace DesktopApplicationTemplate.UI.Factories
 {
@@ -24,16 +25,16 @@ namespace DesktopApplicationTemplate.UI.Factories
         public ServiceListModel Create(object optionsObj)
         {
             var ctx = (ServiceFactoryOptions<FtpServerOptions>)optionsObj;
-            var name = ctx.Name;
             var options = ctx.Options;
 
             var svc = new ServiceListModel
             {
-                DisplayName = $"FTP Server - {name}",
                 Type = ServiceType.Ftp,
-                IsActive = false,
-                FtpOptions = options
+                DescriptorId = FtpServiceDescriptor.DescriptorId,
+                IsActive = false
             };
+
+            svc.SetPayload(options);
 
             _getMainView().GetOrCreateServicePage(svc);
 

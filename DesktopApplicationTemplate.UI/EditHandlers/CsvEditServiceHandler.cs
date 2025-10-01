@@ -6,6 +6,8 @@ using DesktopApplicationTemplate.UI.ViewModels.Csv.Advanced;
 using DesktopApplicationTemplate.UI.Views.Csv.Edit;
 using DesktopApplicationTemplate.UI.Views.Csv.Advanced;
 using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Models;
+using DesktopApplicationTemplate.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -31,15 +33,24 @@ public class CsvEditServiceHandler : IEditServiceHandler
         var mainView = _getMainView();
         var mainViewModel = _getMainViewModel();
         var csvPage = mainView.GetOrCreateServicePage(service);
-        var options = service.CsvOptions ?? new CsvServiceOptions();
+        var payload = service.GetPayload<CsvServiceOptions>();
+        if (payload is null)
+        {
+            payload = new CsvServiceOptions();
+            service.SetPayload(payload);
+        }
+
+        var options = payload;
         var vm = _services.GetRequiredService<CsvServiceEditorViewModel>();
         vm.Load(service.DisplayName.Split(" - ").Last(), options);
         var editView = _services.GetRequiredService<CsvServiceEditorView>();
         editView.Initialize(vm);
         vm.ServiceSaved += (name, opts) =>
         {
-            service.DisplayName = $"CSV Creator - {name}";
-            service.CsvOptions = opts;
+            var catalog = _services.GetRequiredService<IServiceCatalog>();
+            var descriptor = ResolveDescriptor(catalog, service.DescriptorId, service.Type);
+            service.ApplyDescriptor(descriptor, name);
+            service.SetPayload(opts);
             if (csvPage != null)
                 mainView.ShowPage(csvPage);
             _ = mainViewModel.SaveServicesAsync();
@@ -60,6 +71,26 @@ public class CsvEditServiceHandler : IEditServiceHandler
         };
         mainView.ShowPage(editView);
         _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
+}
+
+    private static IServiceDescriptor? ResolveDescriptor(IServiceCatalog catalog, string descriptorId, ServiceType serviceType)
+    {
+        if (!string.IsNullOrWhiteSpace(descriptorId) && catalog.TryGetById(descriptorId, out var byId))
+        {
+            return byId;
+        }
+
+        if (catalog.TryGetByLegacyType(serviceType, out var legacy))
+        {
+            return legacy;
+        }
+
+        if (catalog.LegacyMap.TryGetValue(serviceType, out var fallbackId) && catalog.TryGetById(fallbackId, out var fallback))
+        {
+            return fallback;
+        }
+
+        return null;
     }
 }
 
