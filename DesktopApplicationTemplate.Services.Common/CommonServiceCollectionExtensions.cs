@@ -1,4 +1,5 @@
 using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Services.Common.Runtime;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DesktopApplicationTemplate.Services.Common;
@@ -16,6 +17,8 @@ public static class CommonServiceCollectionExtensions
         services.AddSingleton<IServiceRule, ServiceRule>();
         services.AddTransient(typeof(IServiceScreen<>), typeof(ServiceScreen<>));
         services.AddSingleton<IFileSearchService, FileSearchService>();
+        services.AddSingleton<HeartbeatRuntimeFactory>();
+        services.AddOptions<HeartbeatRuntimeOptions>();
         return services;
     }
 }

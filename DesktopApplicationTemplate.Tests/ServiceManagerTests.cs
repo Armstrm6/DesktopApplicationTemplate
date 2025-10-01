@@ -1,91 +1,200 @@
-using DesktopApplicationTemplate.Service;
-using DesktopApplicationTemplate.Models;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging.Abstractions;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
+using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Models;
+using DesktopApplicationTemplate.Service;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging.Abstractions;
+using TestCommon;
 using Xunit;
 
-namespace DesktopApplicationTemplate.Tests
+namespace DesktopApplicationTemplate.Tests;
+
+public class ServiceManagerTests
 {
-    public class ServiceManagerTests
+    [Fact]
+    public async Task Sync_StartsAndStopsServicesBasedOnConfiguration()
     {
-        [Fact]
-        public void Sync_StartsAndStopsServicesBasedOnFile()
+        using var tempDirectory = new TempDirectory();
+        var managerSetup = CreateManager(tempDirectory.Path, descriptorId: "service.test");
+        await using var manager = managerSetup.Manager;
+
+        await manager.SyncAsync(CancellationToken.None);
+
+        var factory = managerSetup.Factory;
+        var runtime = Assert.Single(factory.CreatedRuntimes);
+        Assert.Equal(1, runtime.StartCalls);
+        Assert.Equal(0, runtime.StopCalls);
+        Assert.Equal("Service One", Assert.Single(factory.Contexts).DisplayName);
+
+        managerSetup.Configuration["Services:0:IsActive"] = "false";
+
+        await manager.SyncAsync(CancellationToken.None);
+
+        Assert.Equal(1, runtime.StartCalls);
+        Assert.Equal(1, runtime.StopCalls);
+        Assert.Empty(manager.ActiveServices);
+
+        ConsoleTestLogger.LogPass();
+    }
+
+    [Theory]
+    [InlineData("HB")]
+    [InlineData("Heartbeat")]
+    public async Task Sync_ResolvesLegacyServiceCodes(string legacyCode)
+    {
+        using var tempDirectory = new TempDirectory();
+        var setup = CreateManager(tempDirectory.Path, descriptorId: "service.test", legacyCode: legacyCode, includeDescriptorId: false);
+        await using var manager = setup.Manager;
+
+        await manager.SyncAsync(CancellationToken.None);
+
+        var factory = setup.Factory;
+        Assert.Single(factory.CreatedRuntimes);
+        Assert.Equal("service.test", Assert.Single(factory.Contexts).DescriptorId);
+
+        ConsoleTestLogger.LogPass();
+    }
+
+    private static ManagerSetup CreateManager(string tempDirectory, string descriptorId, string legacyCode = "HB", bool includeDescriptorId = true)
+    {
+        var descriptor = new TestDescriptor(descriptorId);
+        var catalog = new ServiceCatalog(new[] { descriptor });
+
+        var services = new ServiceCollection();
+        services.AddSingleton<TestRuntimeFactory>();
+        var serviceProvider = services.BuildServiceProvider();
+        var scopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
+
+        var values = new Dictionary<string, string?>
         {
-            var tempFile = Path.GetTempFileName();
-            try
-            {
-                var services = new[]
-                {
-                    new ServiceInfo { DisplayName = "Svc1", ServiceType = ServiceType.Heartbeat, IsActive = true, Order = 0 },
-                    new ServiceInfo { DisplayName = "Svc2", ServiceType = ServiceType.Tcp, IsActive = false, Order = 1 }
-                };
-                File.WriteAllText(tempFile, JsonSerializer.Serialize(services));
+            ["Services:0:DisplayName"] = "Service One",
+            ["Services:0:IsActive"] = "true",
+            ["Services:0:Order"] = "0"
+        };
 
-                IConfiguration config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
-                {
-                    {"Heartbeat:Message", "HB"},
-                    {"Heartbeat:IntervalSeconds", "1"}
-                }).Build();
-
-                using var manager = new ServiceManager(NullLogger<ServiceManager>.Instance, config, tempFile);
-                manager.Sync();
-
-                var runningField = typeof(ServiceManager).GetField("_running", BindingFlags.Instance | BindingFlags.NonPublic)!;
-                var running = (IDictionary<string, object>)runningField.GetValue(manager)!;
-                Assert.Contains(running.Values, r =>
-                    (ServiceType)r.GetType().GetProperty("ServiceType")!.GetValue(r)! == ServiceType.Heartbeat);
-                Assert.DoesNotContain(running.Values, r =>
-                    (ServiceType)r.GetType().GetProperty("ServiceType")!.GetValue(r)! == ServiceType.Tcp);
-
-                services[0].IsActive = false;
-                File.WriteAllText(tempFile, JsonSerializer.Serialize(services));
-                manager.Sync();
-
-                running = (IDictionary<string, object>)runningField.GetValue(manager)!;
-                Assert.Empty(running);
-            }
-            finally
-            {
-                File.Delete(tempFile);
-            }
-            ConsoleTestLogger.LogPass();
+        if (includeDescriptorId)
+        {
+            values["Services:0:DescriptorId"] = descriptorId;
+        }
+        else
+        {
+            values["Services:0:ServiceType"] = legacyCode;
         }
 
-        [Theory]
-        [InlineData("HB", ServiceType.Heartbeat)]
-        [InlineData("Heartbeat", ServiceType.Heartbeat)]
-        public void Sync_LoadsServicesFromConfiguration(string typeValue, ServiceType expected)
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(values)
+            .Build();
+
+        var servicesFile = Path.Combine(tempDirectory, "services.json");
+        var manager = new ServiceManager(
+            NullLogger<ServiceManager>.Instance,
+            configuration,
+            catalog,
+            scopeFactory,
+            servicesFile);
+
+        var factory = serviceProvider.GetRequiredService<TestRuntimeFactory>();
+
+        return new ManagerSetup(manager, configuration, factory);
+    }
+
+    private sealed record ManagerSetup(ServiceManager Manager, IConfigurationRoot Configuration, TestRuntimeFactory Factory);
+
+    private sealed class TestRuntimeFactory : IServiceRuntimeFactory
+    {
+        private readonly List<TestRuntime> _runtimes = new();
+        private readonly List<ServiceRuntimeContext> _contexts = new();
+
+        public IReadOnlyList<TestRuntime> CreatedRuntimes => _runtimes;
+        public IReadOnlyList<ServiceRuntimeContext> Contexts => _contexts;
+
+        public IServiceRuntime Create(ServiceRuntimeContext context)
         {
-            var tempDir = Path.Combine(Path.GetTempPath(), System.Guid.NewGuid().ToString());
-            var tempFile = Path.Combine(tempDir, "services.json");
+            var runtime = new TestRuntime();
+            _runtimes.Add(runtime);
+            _contexts.Add(context);
+            return runtime;
+        }
+    }
 
-            var configValues = new Dictionary<string, string?>
+    private sealed class TestRuntime : IServiceRuntime
+    {
+        public int StartCalls { get; private set; }
+        public int StopCalls { get; private set; }
+
+        public Task StartAsync(CancellationToken cancellationToken)
+        {
+            StartCalls++;
+            return Task.CompletedTask;
+        }
+
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            StopCalls++;
+            return Task.CompletedTask;
+        }
+
+        public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    }
+
+    private sealed class TestDescriptor : IServiceDescriptor
+    {
+        private readonly IReadOnlyCollection<ServiceFactoryBinding> _factories;
+
+        public TestDescriptor(string id)
+        {
+            Id = id;
+            DisplayName = "Test Descriptor";
+            Category = "Test";
+            _factories = new[]
             {
-                {"Services:0:DisplayName", "Svc1"},
-                {"Services:0:ServiceType", typeValue},
-                {"Services:0:IsActive", "true"},
-                {"Services:0:Order", "0"},
-                {"Heartbeat:Message", "HB"},
-                {"Heartbeat:IntervalSeconds", "1"}
+                ServiceFactoryBinding.Create(
+                    ServiceFactoryKind.Runtime,
+                    typeof(IServiceRuntimeFactory),
+                    sp => sp.GetRequiredService<TestRuntimeFactory>())
             };
-            IConfiguration config = new ConfigurationBuilder()
-                .AddInMemoryCollection(configValues)
-                .Build();
+        }
 
-            using var manager = new ServiceManager(NullLogger<ServiceManager>.Instance, config, tempFile);
-            manager.Sync();
+        public string Id { get; }
+        public string DisplayName { get; }
+        public string Category { get; }
+        public string? Description => null;
+        public ServiceType? LegacyType => ServiceType.Heartbeat;
+        public IServiceOptionsSerializer? OptionsSerializer => null;
+        public IReadOnlyCollection<ServiceFactoryBinding> Factories => _factories;
+        public ServicePresentationMetadata Presentation => ServicePresentationMetadata.Empty;
+        public bool HasPayloadDescription => false;
+        public string? DescribePayload(object? payload) => null;
+    }
 
-            var load = typeof(ServiceManager).GetMethod("Load", BindingFlags.Instance | BindingFlags.NonPublic)!;
-            var infos = (List<ServiceInfo>)load.Invoke(manager, null)!;
-            var info = Assert.Single(infos);
-            Assert.Equal(expected, info.ServiceType);
-            Assert.True(info.IsActive);
-            ConsoleTestLogger.LogPass();
+    private sealed class TempDirectory : IDisposable
+    {
+        public TempDirectory()
+        {
+            Path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), System.Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(Path);
+        }
+
+        public string Path { get; }
+
+        public void Dispose()
+        {
+            try
+            {
+                if (Directory.Exists(Path))
+                {
+                    Directory.Delete(Path, recursive: true);
+                }
+            }
+            catch
+            {
+                // ignored for test cleanup
+            }
         }
     }
 }
