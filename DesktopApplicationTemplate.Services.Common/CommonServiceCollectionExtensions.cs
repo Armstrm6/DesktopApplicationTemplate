@@ -17,8 +17,6 @@ public static class CommonServiceCollectionExtensions
         services.AddSingleton<IServiceRule, ServiceRule>();
         services.AddTransient(typeof(IServiceScreen<>), typeof(ServiceScreen<>));
         services.AddSingleton<IFileSearchService, FileSearchService>();
-        services.AddSingleton<HeartbeatRuntimeFactory>();
-        services.AddOptions<HeartbeatRuntimeOptions>();
         return services;
     }
 }
