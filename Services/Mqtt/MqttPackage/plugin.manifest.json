@@ -1,0 +1,12 @@
+{
+  "id": "DesktopApplicationTemplate.Mqtt",
+  "name": "MQTT Service Package",
+  "version": "1.0.0",
+  "entryAssembly": "DesktopApplicationTemplate.Mqtt.dll",
+  "serviceAssemblies": [
+    "DesktopApplicationTemplate.Mqtt.dll"
+  ],
+  "probingPaths": [
+    "libs"
+  ]
+}

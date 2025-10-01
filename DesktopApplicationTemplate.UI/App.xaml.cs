@@ -126,7 +126,6 @@ namespace DesktopApplicationTemplate.UI
 
             // Load strongly typed settings
             services.Configure<AppSettings>(configuration.GetSection("AppSettings"));
-            services.Configure<MqttServiceOptions>(configuration.GetSection("MqttService"));
             services.Configure<TcpServiceOptions>(configuration.GetSection("TcpService"));
         }
 
