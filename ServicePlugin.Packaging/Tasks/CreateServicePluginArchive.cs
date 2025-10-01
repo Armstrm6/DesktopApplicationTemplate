@@ -14,6 +14,7 @@ namespace ServicePlugin.Packaging.Tasks;
 /// </summary>
 public sealed class CreateServicePluginArchive : Microsoft.Build.Utilities.Task
 {
+    private const string DefaultArchiveExtension = ".peakiot";
     private static readonly char[] ExtensionSeparators = [ ';' ];
 
     [Required]
@@ -29,7 +30,7 @@ public sealed class CreateServicePluginArchive : Microsoft.Build.Utilities.Task
     public string PackageVersion { get; set; } = string.Empty;
 
     /// <summary>
-    /// Gets or sets the archive extensions (e.g. ".ccp;.chapp").
+    /// Gets or sets the archive extensions (e.g. ".peakiot;.ccp").
     /// </summary>
     [Required]
     public string ArchiveExtensions { get; set; } = string.Empty;
@@ -98,22 +99,34 @@ public sealed class CreateServicePluginArchive : Microsoft.Build.Utilities.Task
     {
         var entries = (ArchiveExtensions ?? string.Empty)
             .Split(ExtensionSeparators, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .DefaultIfEmpty(".ccp")
             .Select(NormalizeExtension)
+            .Where(static value => !string.IsNullOrWhiteSpace(value))
+            .ToList();
+
+        if (entries.Count == 0)
+        {
+            entries.Add(DefaultArchiveExtension);
+        }
+
+        if (!entries.Contains(DefaultArchiveExtension, StringComparer.OrdinalIgnoreCase))
+        {
+            entries.Insert(0, DefaultArchiveExtension);
+        }
+
+        return entries
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToArray();
-
-        return entries;
     }
 
     private static string NormalizeExtension(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
         {
-            return ".ccp";
+            return DefaultArchiveExtension;
         }
 
-        return value.StartsWith('.') ? value : $".{value}";
+        var trimmed = value.Trim();
+        return trimmed.StartsWith('.', StringComparison.Ordinal) ? trimmed : FormattableString.Invariant($".{trimmed}");
     }
 
     private string? CreateArchive(string version, string extension, ref bool manifestFound)

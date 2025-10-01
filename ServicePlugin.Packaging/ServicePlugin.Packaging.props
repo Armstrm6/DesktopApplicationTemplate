@@ -4,7 +4,7 @@
     <ServicePluginPackageOutput Condition="'$(ServicePluginPackageOutput)' == ''">$(MSBuildProjectDirectory)\$(OutputPath)plugins\</ServicePluginPackageOutput>
     <ServicePluginPackageId Condition="'$(ServicePluginPackageId)' == ''">$(AssemblyName)</ServicePluginPackageId>
     <ServicePluginPackageVersion Condition="'$(ServicePluginPackageVersion)' == ''">$(Version)</ServicePluginPackageVersion>
-    <ServicePluginArchiveExtensions Condition="'$(ServicePluginArchiveExtensions)' == ''">.ccp</ServicePluginArchiveExtensions>
+    <ServicePluginArchiveExtensions Condition="'$(ServicePluginArchiveExtensions)' == ''">.peakiot;.ccp;.chapp</ServicePluginArchiveExtensions>
     <ServicePluginIncludeReferenceCopyLocal Condition="'$(ServicePluginIncludeReferenceCopyLocal)' == ''">true</ServicePluginIncludeReferenceCopyLocal>
     <ServicePluginIncludeEntryAssembly Condition="'$(ServicePluginIncludeEntryAssembly)' == ''">true</ServicePluginIncludeEntryAssembly>
   </PropertyGroup>

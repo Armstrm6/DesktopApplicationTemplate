@@ -4,7 +4,7 @@ Use this checklist to validate descriptor-based plug-ins before distributing the
 
 ## Import and catalog
 
-1. Import the `.ccp` or `.chapp` package through the plug-in import workflow and confirm the archive extracts without errors.
+1. Import the `.peakiot` package (or a legacy `.ccp`/`.chapp` archive if required) through the plug-in import workflow and confirm the archive extracts without errors.
 2. Inspect the log output to verify each descriptor id, version, and assembly was registered with `IServiceCatalog`.
 3. Restart the application (or trigger catalog refresh) to ensure descriptors survive reload and appear in the service creation list.
 

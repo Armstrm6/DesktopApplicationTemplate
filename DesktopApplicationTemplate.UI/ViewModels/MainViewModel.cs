@@ -189,7 +189,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private async Task ImportServiceAsync()
         {
             var selectedPath = _fileDialogService.OpenFile(
-                "Service Packages (*.ccp;*.chapp)|*.ccp;*.chapp|All Files (*.*)|*.*",
+                "Service Packages (*.peakiot;*.ccp;*.chapp)|*.peakiot;*.ccp;*.chapp|All Files (*.*)|*.*",
                 "Import Service Package");
 
             if (string.IsNullOrWhiteSpace(selectedPath))
