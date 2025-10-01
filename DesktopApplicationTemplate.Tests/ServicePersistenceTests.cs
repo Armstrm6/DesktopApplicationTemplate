@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
@@ -46,6 +47,37 @@ namespace DesktopApplicationTemplate.Tests
                 Assert.Equal("A", loaded[0].DisplayName);
                 Assert.Contains("B", loaded[0].AssociatedServices);
                 Assert.Equal(loaded.Count, loaded.Select(s => s.DisplayName).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+            }
+            finally
+            {
+                ServicePersistence.FilePath = oldPath;
+                Directory.Delete(tempDir, true);
+            }
+
+            ConsoleTestLogger.LogPass();
+        }
+
+        [Fact]
+        public void Save_WritesSerializedPayloadBlob()
+        {
+            var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(tempDir);
+            string oldPath = ServicePersistence.FilePath;
+            ServicePersistence.FilePath = Path.Combine(tempDir, "services.json");
+            try
+            {
+                var catalog = CreateCatalog();
+                var service = TestHelpers.CreateService(ServiceType.Tcp, "One");
+                service.SetPayload(new TcpServiceOptions { Host = "localhost", Port = 1234 });
+                ServicePersistence.Save(new[] { service }, catalog);
+
+                var json = File.ReadAllText(ServicePersistence.FilePath);
+                using var document = JsonDocument.Parse(json);
+                var record = Assert.Single(document.RootElement.EnumerateArray());
+                Assert.False(record.TryGetProperty("Payload", out _));
+                var serialized = record.GetProperty("SerializedPayload");
+                Assert.Equal(JsonValueKind.String, serialized.ValueKind);
+                Assert.Contains("\"Host\":\"localhost\"", serialized.GetString());
             }
             finally
             {
@@ -240,6 +272,85 @@ namespace DesktopApplicationTemplate.Tests
         }
 
         [Fact]
+        public void Load_DeserializesLegacyPayloadElement()
+        {
+            var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(tempDir);
+            string oldPath = ServicePersistence.FilePath;
+            ServicePersistence.FilePath = Path.Combine(tempDir, "services.json");
+
+            try
+            {
+                var catalog = CreateCatalog();
+                var legacyJson = @"[
+    {
+        ""DisplayName"": ""Legacy Tcp"",
+        ""DescriptorId"": ""service.tcp"",
+        ""LegacyType"": ""tcp"",
+        ""LegacyTypeName"": ""Tcp"",
+        ""Payload"": {
+            ""Host"": ""legacy-host"",
+            ""Port"": 55
+        }
+    }
+]";
+
+                File.WriteAllText(ServicePersistence.FilePath, legacyJson);
+                var loaded = ServicePersistence.Load(catalog);
+                var info = Assert.Single(loaded);
+                Assert.Equal(ServiceDescriptorIds.Tcp, info.DescriptorId);
+                var payload = Assert.IsType<TcpServiceOptions>(info.Payload);
+                Assert.Equal("legacy-host", payload.Host);
+                Assert.Equal(55, payload.Port);
+            }
+            finally
+            {
+                ServicePersistence.FilePath = oldPath;
+                Directory.Delete(tempDir, true);
+            }
+
+            ConsoleTestLogger.LogPass();
+        }
+
+        [Fact]
+        public void Load_UsesCompatibilityMapForLegacyCodes()
+        {
+            var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(tempDir);
+            string oldPath = ServicePersistence.FilePath;
+            ServicePersistence.FilePath = Path.Combine(tempDir, "services.json");
+
+            try
+            {
+                var descriptor = new CustomHttpDescriptor();
+                var catalog = new ServiceCatalog(new[] { descriptor });
+                var legacyJson = @"[
+    {
+        ""DisplayName"": ""HTTP Legacy"",
+        ""LegacyType"": ""http"",
+        ""LegacyTypeName"": ""Http"",
+        ""SerializedPayload"": ""{\\\"BaseUrl\\\":\\\"https://legacy.example\\\"}""
+    }
+]";
+
+                File.WriteAllText(ServicePersistence.FilePath, legacyJson);
+                var loaded = ServicePersistence.Load(catalog);
+                var info = Assert.Single(loaded);
+                Assert.Equal(descriptor.Id, info.DescriptorId);
+                Assert.Equal(ServiceType.Http, info.ServiceType);
+                var payload = Assert.IsType<HttpServiceOptions>(info.Payload);
+                Assert.Equal("https://legacy.example", payload.BaseUrl);
+            }
+            finally
+            {
+                ServicePersistence.FilePath = oldPath;
+                Directory.Delete(tempDir, true);
+            }
+
+            ConsoleTestLogger.LogPass();
+        }
+
+        [Fact]
         public void Load_PreservesLegacyFtpOptions()
         {
             var host = Host.CreateDefaultBuilder()
@@ -406,6 +517,31 @@ namespace DesktopApplicationTemplate.Tests
             public void Reload()
             {
             }
+        }
+
+        private sealed class CustomHttpDescriptor : IServiceDescriptor
+        {
+            private readonly IServiceOptionsSerializer _serializer = new JsonServiceOptionsSerializer<HttpServiceOptions>();
+
+            public string Id => "custom.http";
+
+            public string DisplayName => "Custom HTTP";
+
+            public string Category => "Networking";
+
+            public string? Description => null;
+
+            public ServiceType? LegacyType => ServiceType.Http;
+
+            public IServiceOptionsSerializer? OptionsSerializer => _serializer;
+
+            public IReadOnlyCollection<ServiceFactoryBinding> Factories => Array.Empty<ServiceFactoryBinding>();
+
+            public ServicePresentationMetadata Presentation => ServicePresentationMetadata.Empty;
+
+            public bool HasPayloadDescription => false;
+
+            public string? DescribePayload(object? payload) => null;
         }
     }
 }

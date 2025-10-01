@@ -187,7 +187,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
         }
 
-        public static Func<ServiceType, string, ServiceListModel?>? ResolveService { get; set; }
+        public static Func<string, string, ServiceListModel?>? ResolveService { get; set; }
 
         private bool _isActive;
         public bool IsActive
@@ -247,20 +247,17 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             var m = Regex.Match(message, @"^([^.]+)\.([^.]+)\.(.+)$");
             if (m.Success && ResolveService != null)
             {
-                var typeStr = m.Groups[1].Value;
+                var descriptorKey = m.Groups[1].Value;
                 var name = m.Groups[2].Value;
                 var msg = m.Groups[3].Value;
-                if (ServiceTypeExtensions.TryParse(typeStr, out var type))
+                var target = ResolveService(descriptorKey, name);
+                if (target != null && target != this)
                 {
-                    var target = ResolveService(type, name);
-                    if (target != null && target != this)
-                    {
-                        if (!AssociatedServices.Contains(target.DisplayName))
-                            AssociatedServices.Add(target.DisplayName);
-                        if (!target.AssociatedServices.Contains(DisplayName))
-                            target.AssociatedServices.Add(DisplayName);
-                        target.AddLog(msg, color, level, false);
-                    }
+                    if (!AssociatedServices.Contains(target.DisplayName))
+                        AssociatedServices.Add(target.DisplayName);
+                    if (!target.AssociatedServices.Contains(DisplayName))
+                        target.AssociatedServices.Add(DisplayName);
+                    target.AddLog(msg, color, level, false);
                 }
             }
         }
