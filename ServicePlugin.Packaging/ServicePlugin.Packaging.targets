@@ -1,7 +1,7 @@
 <Project>
   <UsingTask TaskName="ServicePlugin.Packaging.Tasks.CreateServicePluginArchive"
              TaskFactory="RoslynCodeTaskFactory"
-             AssemblyName="ServicePlugin.Packaging.Tasks">
+             AssemblyFile="$(MSBuildBinPath)/Microsoft.Build.Tasks.Core.dll">
     <Task>
       <Reference Include="System" />
       <Reference Include="System.Core" />
@@ -9,7 +9,7 @@
       <Reference Include="System.IO.Compression" />
       <Reference Include="Microsoft.Build.Framework" />
       <Reference Include="Microsoft.Build.Utilities.Core" />
-      <Code Type="Class" Source="$(MSBuildThisFileDirectory)Tasks\CreateServicePluginArchive.cs" />
+      <Code Type="Class" Source="$(MSBuildThisFileDirectory)Tasks/CreateServicePluginArchive.cs" />
     </Task>
   </UsingTask>
 

@@ -150,10 +150,10 @@ namespace DesktopApplicationTemplate.UI.Views
             ShowCreateServiceSelectionPage();
         }
 
-        private void OnImportFeedback(object? sender, ImportFeedbackEventArgs e)
+        private void OnImportFeedback(object? sender, MainViewModel.ImportFeedbackEventArgs e)
         {
-            var icon = e.Status == ImportFeedbackStatus.Success ? MessageBoxImage.Information : MessageBoxImage.Warning;
-            var title = e.Status == ImportFeedbackStatus.Success ? "Import Complete" : "Import Failed";
+            var icon = e.Status == MainViewModel.ImportFeedbackStatus.Success ? MessageBoxImage.Information : MessageBoxImage.Warning;
+            var title = e.Status == MainViewModel.ImportFeedbackStatus.Success ? "Import Complete" : "Import Failed";
             MessageBox.Show(this, e.Message, title, MessageBoxButton.OK, icon);
         }
 
