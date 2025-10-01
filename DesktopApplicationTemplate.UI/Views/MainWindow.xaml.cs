@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using DesktopApplicationTemplate.UI.Factories;
 using DesktopApplicationTemplate.UI.Navigation;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.Models;
@@ -218,30 +219,39 @@ namespace DesktopApplicationTemplate.UI.Views
 
 
 
-        internal async Task AddServiceAsync(string descriptorId, object options)
+        internal async Task AddServiceAsync(ServiceFactoryContext context)
         {
-            if (!_uiRegistry.Factories.TryGetValue(descriptorId, out var factoryFactory))
+            if (context is null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            if (!_uiRegistry.Factories.TryGetValue(context.DescriptorId, out var factoryFactory))
             {
                 return;
             }
 
-            var descriptor = ResolveDescriptor(descriptorId);
-            var name = ExtractFactoryName(options);
-            var payload = ExtractFactoryPayload(options);
-
             var factory = factoryFactory();
-            var svc = factory.Create(options);
-            if (payload is not null && svc.DescriptorPayload is null)
+            var svc = factory.Create(context);
+
+            if (string.IsNullOrWhiteSpace(svc.DescriptorId))
             {
-                svc.DescriptorPayload = payload;
+                svc.DescriptorId = context.DescriptorId;
             }
 
-            svc.ApplyDescriptor(descriptor, name);
+            if (svc.DescriptorPayload is null && context.Payload is not null)
+            {
+                svc.DescriptorPayload = context.Payload;
+            }
+
             svc.LogAdded += _viewModel.OnServiceLogAdded;
             svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
 
             _viewModel.Services.Add(svc);
-            _logger?.LogInformation("Service {Name} added", svc.DisplayName);
+            var displayName = string.IsNullOrWhiteSpace(svc.DisplayName)
+                ? context.ServiceName
+                : svc.DisplayName;
+            _logger?.LogInformation("Service {Name} added", displayName);
             _viewModel.SelectedService = svc;
             ServiceList.ScrollIntoView(svc);
             if (svc.ServicePage != null)
@@ -296,10 +306,6 @@ namespace DesktopApplicationTemplate.UI.Views
 
             return svc.Type.ToLegacyString();
         }
-
-        private static string? ExtractFactoryName(object? options) => options?.GetType().GetProperty("Name")?.GetValue(options) as string;
-
-        private static object? ExtractFactoryPayload(object? options) => options?.GetType().GetProperty("Options")?.GetValue(options);
 
         private bool TryGetDescriptorId(ServiceType serviceType, out string descriptorId)
         {

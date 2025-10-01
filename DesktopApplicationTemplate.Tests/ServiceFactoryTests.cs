@@ -3,6 +3,7 @@ using DesktopApplicationTemplate.UI;
 using DesktopApplicationTemplate.UI.Factories;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.Views;
+using DesktopApplicationTemplate.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -36,32 +37,41 @@ public class ServiceFactoryTests
     public void Create_ReturnsServicePage(ServiceType type)
     {
         var provider = App.AppHost.Services;
+        var catalog = provider.GetRequiredService<IServiceCatalog>();
         var factory = provider.GetKeyedService<IServiceFactory>(type);
         Assert.NotNull(factory);
 
-        object ctx = type switch
+        _ = catalog.TryGetByLegacyType(type, out var descriptor);
+        if (descriptor is null && catalog.LegacyMap.TryGetValue(type, out var legacyId) && catalog.TryGetById(legacyId, out var mapped))
         {
-            ServiceType.Mqtt => new ServiceFactoryOptions<MqttServiceOptions>("mqtt", new MqttServiceOptions
+            descriptor = mapped;
+        }
+
+        var descriptorId = descriptor?.Id ?? (catalog.LegacyMap.TryGetValue(type, out var fallbackId) ? fallbackId : type.ToLegacyString());
+
+        var (serviceName, payload) = type switch
+        {
+            ServiceType.Mqtt => ("mqtt", (object)new MqttServiceOptions
             {
                 Host = "localhost",
                 Port = 1883,
                 ClientId = "client"
             }),
-            ServiceType.Ftp => new ServiceFactoryOptions<FtpServerOptions>("ftp", new FtpServerOptions
+            ServiceType.Ftp => ("ftp", (object)new FtpServerOptions
             {
                 RootPath = "."
             }),
-            ServiceType.Http => new ServiceFactoryOptions<HttpServiceOptions>("http", new HttpServiceOptions
+            ServiceType.Http => ("http", (object)new HttpServiceOptions
             {
                 BaseUrl = "http://localhost"
             }),
-            ServiceType.Tcp => new ServiceFactoryOptions<TcpServiceOptions>("tcp", new TcpServiceOptions
+            ServiceType.Tcp => ("tcp", (object)new TcpServiceOptions
             {
                 Host = "localhost",
                 Port = 1
             }),
-            ServiceType.Hid => new ServiceFactoryOptions<HidServiceOptions>("hid", new HidServiceOptions()),
-            ServiceType.Scp => new ServiceFactoryOptions<ScpServiceOptions>("scp", new ScpServiceOptions
+            ServiceType.Hid => ("hid", (object)new HidServiceOptions()),
+            ServiceType.Scp => ("scp", (object)new ScpServiceOptions
             {
                 Host = "host",
                 Username = "user",
@@ -69,22 +79,24 @@ public class ServiceFactoryTests
                 LocalPath = "local",
                 RemotePath = "remote"
             }),
-            ServiceType.Csv => new ServiceFactoryOptions<CsvServiceOptions>("csv", new CsvServiceOptions
+            ServiceType.Csv => ("csv", (object)new CsvServiceOptions
             {
                 OutputPath = "."
             }),
-            ServiceType.FileObserver => new ServiceFactoryOptions<FileObserverServiceOptions>("fo", new FileObserverServiceOptions
+            ServiceType.FileObserver => ("fo", (object)new FileObserverServiceOptions
             {
                 FilePath = "."
             }),
-            ServiceType.Heartbeat => new ServiceFactoryOptions<HeartbeatServiceOptions>("hb", new HeartbeatServiceOptions
+            ServiceType.Heartbeat => ("hb", (object)new HeartbeatServiceOptions
             {
                 BaseMessage = "ping"
             }),
             _ => throw new NotSupportedException()
         };
 
-        var svc = factory!.Create(ctx);
+        var context = new ServiceFactoryContext(descriptorId, serviceName, payload, descriptor);
+
+        var svc = factory!.Create(context);
         Assert.NotNull(svc.ServicePage);
     }
 }

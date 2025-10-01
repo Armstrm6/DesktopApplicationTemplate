@@ -1,7 +1,7 @@
-using DesktopApplicationTemplate.UI.Views;
 using System;
 using System.Windows.Controls;
 using DesktopApplicationTemplate.UI.Factories;
+using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels.Csv.Edit;
 using DesktopApplicationTemplate.UI.ViewModels.Csv.Advanced;
@@ -9,6 +9,7 @@ using DesktopApplicationTemplate.UI.Views.Csv.Edit;
 using DesktopApplicationTemplate.UI.Views.Csv.Advanced;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
+using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Services.Common.Descriptors;
 using DesktopApplicationTemplate.UI.Configuration;
 
@@ -19,13 +20,15 @@ namespace DesktopApplicationTemplate.UI.Navigation
     {
         private readonly IServiceProvider _services;
         private readonly Func<MainView> _getMainView;
+        private readonly IServiceCatalog _catalog;
 
         public string DescriptorId => CsvServiceDescriptor.DescriptorId;
 
-        public CsvNavigationHandler(IServiceProvider services, Func<MainView> getMainView)
+        public CsvNavigationHandler(IServiceProvider services, Func<MainView> getMainView, IServiceCatalog catalog)
         {
             _services = services;
             _getMainView = getMainView;
+            _catalog = catalog;
         }
 
         public Page CreateView(string defaultName)
@@ -52,7 +55,9 @@ namespace DesktopApplicationTemplate.UI.Navigation
         public Task AddServiceAsync(string name, object options)
         {
             var mainView = _getMainView();
-            return mainView.AddServiceAsync(DescriptorId, new ServiceFactoryOptions<CsvServiceOptions>(name, (CsvServiceOptions)options));
+            _catalog.TryGetById(DescriptorId, out var descriptor);
+            var context = new ServiceFactoryContext(DescriptorId, name, options, descriptor);
+            return mainView.AddServiceAsync(context);
         }
     }
 }

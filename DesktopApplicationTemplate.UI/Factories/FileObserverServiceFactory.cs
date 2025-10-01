@@ -1,36 +1,48 @@
 using System;
+using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Views;
-using DesktopApplicationTemplate.Models;
-using DesktopApplicationTemplate.Services.Common.Descriptors;
 
 namespace DesktopApplicationTemplate.UI.Factories
 {
     public class FileObserverServiceFactory : IServiceFactory
     {
         private readonly Func<MainView> _getMainView;
+        private readonly IServiceCatalog _catalog;
 
         public ServiceType ServiceType => ServiceType.FileObserver;
 
-        public FileObserverServiceFactory(Func<MainView> getMainView)
+        public FileObserverServiceFactory(Func<MainView> getMainView, IServiceCatalog catalog)
         {
             _getMainView = getMainView;
+            _catalog = catalog;
         }
 
-        public ServiceListModel Create(object optionsObj)
+        public ServiceListModel Create(ServiceFactoryContext context)
         {
-            var ctx = (ServiceFactoryOptions<FileObserverServiceOptions>)optionsObj;
-            var options = ctx.Options;
+            if (context is null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            var descriptor = _catalog.TryGetById(context.DescriptorId, out var resolved)
+                ? resolved
+                : context.Descriptor;
+
+            var options = context.GetPayload<FileObserverServiceOptions>() ?? new FileObserverServiceOptions();
 
             var svc = new ServiceListModel
             {
                 Type = ServiceType.FileObserver,
-                DescriptorId = FileObserverServiceDescriptor.DescriptorId,
+                DescriptorId = context.DescriptorId,
                 IsActive = false
             };
 
             svc.SetPayload(options);
+
+            svc.ApplyDescriptor(descriptor, context.ServiceName);
 
             _getMainView().GetOrCreateServicePage(svc);
 
