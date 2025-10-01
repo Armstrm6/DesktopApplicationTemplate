@@ -265,7 +265,7 @@ public sealed class ServiceManager : IAsyncDisposable, IDisposable
                 resolution.LegacyType,
                 record.IsActive,
                 record.AssociatedServices ?? new List<string>(),
-                payload: null));
+                Payload: null));
         }
 
         return result;
