@@ -1,17 +1,19 @@
 <Project>
+  <PropertyGroup>
+    <ServicePluginPackagingTaskAssembly Condition="'$(ServicePluginPackagingTaskAssembly)' == '' and Exists('$(MSBuildThisFileDirectory)bin\\$(Configuration)\\net8.0\\ServicePlugin.Packaging.dll')">
+      $(MSBuildThisFileDirectory)bin\$(Configuration)\net8.0\ServicePlugin.Packaging.dll
+    </ServicePluginPackagingTaskAssembly>
+    <ServicePluginPackagingTaskAssembly Condition="'$(ServicePluginPackagingTaskAssembly)' == '' and Exists('$(MSBuildThisFileDirectory)bin\\Debug\\net8.0\\ServicePlugin.Packaging.dll')">
+      $(MSBuildThisFileDirectory)bin\Debug\net8.0\ServicePlugin.Packaging.dll
+    </ServicePluginPackagingTaskAssembly>
+    <ServicePluginPackagingTaskAssembly Condition="'$(ServicePluginPackagingTaskAssembly)' == '' and Exists('$(MSBuildThisFileDirectory)bin\\Release\\net8.0\\ServicePlugin.Packaging.dll')">
+      $(MSBuildThisFileDirectory)bin\Release\net8.0\ServicePlugin.Packaging.dll
+    </ServicePluginPackagingTaskAssembly>
+  </PropertyGroup>
+
   <UsingTask TaskName="ServicePlugin.Packaging.Tasks.CreateServicePluginArchive"
-             TaskFactory="RoslynCodeTaskFactory"
-             AssemblyFile="$(MSBuildBinPath)/Microsoft.Build.Tasks.Core.dll">
-    <Task>
-      <Reference Include="System" />
-      <Reference Include="System.Core" />
-      <Reference Include="System.Runtime" />
-      <Reference Include="System.IO.Compression" />
-      <Reference Include="Microsoft.Build.Framework" />
-      <Reference Include="Microsoft.Build.Utilities.Core" />
-      <Code Type="Class" Source="$(MSBuildThisFileDirectory)Tasks/CreateServicePluginArchive.cs" />
-    </Task>
-  </UsingTask>
+             AssemblyFile="$(ServicePluginPackagingTaskAssembly)"
+             Condition="Exists('$(ServicePluginPackagingTaskAssembly)')" />
 
   <Target Name="PackServicePlugin" AfterTargets="Build" Condition="'$(ServicePluginEnablePackaging)' != 'false'">
     <ItemGroup>
@@ -55,7 +57,10 @@
       <_ResolvedPackageVersion Condition="'$(ServicePluginPackageVersion)' != ''">$(ServicePluginPackageVersion)</_ResolvedPackageVersion>
     </PropertyGroup>
 
-    <CreateServicePluginArchive
+    <Error Condition="!Exists('$(ServicePluginPackagingTaskAssembly)')"
+           Text="The service plug-in packaging task assembly could not be located. Build the ServicePlugin.Packaging project to generate '$(ServicePluginPackagingTaskAssembly)'." />
+
+    <CreateServicePluginArchive Condition="Exists('$(ServicePluginPackagingTaskAssembly)')"
         Files="@(_ServicePluginFiles)"
         OutputDirectory="$(ServicePluginPackageOutput)"
         PackageId="$(ServicePluginPackageId)"
