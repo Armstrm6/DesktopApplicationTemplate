@@ -17,6 +17,7 @@
 - Migration routine converts legacy service type names to `ServiceType` and logs unmapped values.
 - `IServiceModule` interface enables service-specific DI registration and modules are discovered and registered automatically at startup.
 - Static `ServiceTypeExtensions` maps service types to short codes for reuse in serialization and configuration.
+- Documentation now outlines the descriptor-first plug-in workflow, enum-to-descriptor migration steps, QA verification checklist, and CI packaging guidance while noting legacy compatibility through `LegacyType` mappings.
 
 #### Changed
 - Clarified environment instruction precedence in `AGENTS.md`.

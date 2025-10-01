@@ -1,43 +1,32 @@
 # Custom Service Guide
 
-This guide explains how to extend the application with new services by reusing existing components and `IServiceModule`.
+This guide explains how to extend the application with descriptor-driven services, migrate legacy enum-based implementations, and package the result as a plug-in.
 
-## Reuse shared components
+## Understand the descriptor workflow
 
-- **ServiceRule**: central validation helper injected into create and edit view models for required field checks.
-- **ServiceScreen**: wraps user interactions for options models and exposes events that views can bind to.
-- **Base view models**: inherit from `ServiceCreateViewModelBase` and `ServiceEditViewModelBase` to get common save logic, logging, and navigation.
-- **Shared controls**: components such as `ServiceLogView` and `ServiceMessageTableView` provide consistent UI panels that can be embedded in new service pages.
+1. **Descriptors advertise capability** – implement `IServiceDescriptor` (or inherit from `ServiceDescriptorBase`) to describe presentation metadata, runtime factories, and serialization behavior. The descriptor identifier becomes the primary lookup key for persistence, navigation, and plug-in imports.
+2. **Modules bundle registrations** – each plug-in exposes one or more `IServiceModule` implementations. During host startup `services.AddServiceModules()` discovers these modules, registers their dependencies, and aggregates their descriptors into the shared `IServiceCatalog`.
+3. **Attributes connect UI handlers** – classes tagged with `ServiceDescriptorRegistrationAttribute` declare how view models, navigation handlers, and other UI assets bind to a descriptor identifier. The application maps descriptor ids to these registrations at boot.
+4. **Legacy services stay compatible** – descriptors may expose `LegacyType` values so persisted enum-based services load through the new catalog automatically.
 
-## Register dependencies with `IServiceModule`
+## Migrate an enum-based service
 
-`IServiceModule` allows each service to package its DI registrations. Implement the interface for your service and expose the corresponding `ServiceType`:
+Use this checklist when upgrading a service that previously depended on the `ServiceType` enum:
 
-```csharp
-public class SampleServiceModule : IServiceModule
-{
-    public ServiceType Type => ServiceType.Sample;
+1. **Create a descriptor** – add a new class that derives from `ServiceDescriptorBase`. Provide a stable `DescriptorId`, fill in presentation metadata, and pass the legacy enum value to the base constructor.
+2. **Expose factories** – populate the descriptor's `ServiceFactoryBinding` collection so runtime factories, editors, and navigation handlers can resolve through `IServiceCatalog`.
+3. **Register descriptor-aware handlers** – annotate edit, navigation, and runtime factory classes with `ServiceDescriptorRegistrationAttribute(DescriptorId, kind)` so dependency injection connects them to the descriptor instead of enum switches.
+4. **Update persistence hooks** – ensure the service's options serializer implements `IServiceOptionsSerializer` and is referenced by the descriptor. Persisted records should prefer `DescriptorId` while continuing to supply `LegacyType` for migrations.
+5. **Remove enum branches** – replace `switch` statements and lookup tables keyed by `ServiceType` with descriptor id dictionaries (for example, `IServiceCatalog.Descriptors`). When legacy values remain necessary, convert them with `ServiceTypeExtensions.ToDescriptorId()`.
+6. **Validate migrations** – load existing persisted data through `ServicePersistence` to confirm legacy enum values resolve to the descriptor id and that UI bindings display descriptor metadata.
 
-    public void RegisterServices(IServiceCollection services)
-    {
-        services.AddSingleton<SampleService>();
-        services.AddTransient<SampleCreateViewModel>();
-        services.AddTransient<SampleEditViewModel>();
-        services.AddTransient<SamplePage>();
-    }
-}
-```
+## Build a descriptor-first service
 
-Modules are discovered at startup by calling `services.AddServiceModules()` during host configuration.
-
-## Adding a new service type
-
-1. **Update the enum** – add a value to `ServiceType` to identify the service.
-2. **Create options and implementation** – define an options class and the runtime service that executes the work.
-3. **Build the UI** – create view models and views, reusing `ServiceRule`, `ServiceScreen`, and base classes for common behavior.
-4. **Implement an `IServiceModule`** – register the service, view models, and views with the DI container.
-5. **Wire up navigation** – add create and edit handlers or factory entries so the main window can navigate to the new views.
-6. **Test and document** – run `dotnet` commands and update docs as needed.
+1. **Define options and runtime logic** – create an options model, runtime service, and any supporting factories that perform the work.
+2. **Implement the descriptor** – derive from `ServiceDescriptorBase`, provide presentation metadata, wire in factories, and optionally supply a payload description delegate for UI tooltips.
+3. **Author UI bindings** – create view models and pages that reuse shared helpers (`ServiceRule`, `ServiceScreen`, `ServiceCreateViewModelBase`, `ServiceEditViewModelBase`, `ServiceLogView`, and `ServiceMessageTableView`). Decorate each class with `ServiceDescriptorRegistrationAttribute` so the host links it to the descriptor id.
+4. **Register via `IServiceModule`** – implement an `IServiceModule` that adds the runtime services, view models, and views to dependency injection and yields the descriptor from `DescribeServices()`.
+5. **Document and test** – update the README and changelog with the new descriptor, and rely on CI to execute descriptor-focused tests described in `Codex/CollaborationGuidelines.txt`.
 
 ## Package and distribute plug-ins
 
@@ -50,3 +39,4 @@ Modules are discovered at startup by calling `services.AddServiceModules()` duri
 
 - **Template** – `Templates/ServicePluginTemplate` exposes a `dotnet new codex-serviceplugin` template that scaffolds a descriptor, runtime factory, manifest, and packaging imports.
 - **Samples** – `Samples/TcpRelayPlugin` and `Samples/HttpRelayPlugin` provide ready-to-build examples that produce distributable archives during CI, making them ideal smoke tests for packaging changes.
+- **Verification** – follow the QA checklist in `Codex/docs/PluginVerificationChecklist.md` to confirm imports, descriptor rendering, and persistence migrations before releasing new plug-ins.
