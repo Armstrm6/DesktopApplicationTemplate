@@ -38,11 +38,31 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 LogViewModel.SetLogs(_selectedService?.Logs ?? AllLogs);
                 (RemoveServiceCommand as AsyncRelayCommand)?.RaiseCanExecuteChanged();
                 (EditServiceCommand as RelayCommand<ServiceListModel?>)?.RaiseCanExecuteChanged();
-            }
+}
+
+    public enum ImportFeedbackStatus
+    {
+        Success,
+        Error
+    }
+
+    public sealed class ImportFeedbackEventArgs : EventArgs
+    {
+        public ImportFeedbackEventArgs(ImportFeedbackStatus status, string message)
+        {
+            Status = status;
+            Message = message ?? throw new ArgumentNullException(nameof(message));
         }
+
+        public ImportFeedbackStatus Status { get; }
+
+        public string Message { get; }
+    }
+}
         public ICommand AddServiceCommand { get; }
         public ICommand RemoveServiceCommand { get; }
         public ICommand EditServiceCommand { get; }
+        public ICommand ImportServiceCommand { get; }
         public int ServicesCreated => Services.Count;
         public int CurrentActiveServices => Services.Count(s => s.IsActive);
 
@@ -61,10 +81,21 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private readonly INetworkConfigurationService _networkService;
         private readonly IServiceUiRegistry _uiRegistry;
         private readonly IServiceCatalog _catalog;
+        private readonly IFileDialogService _fileDialogService;
+        private readonly IPluginImportService _pluginImportService;
 
         public NetworkConfigurationViewModel NetworkConfig { get; }
 
-        public MainViewModel(CsvService csvService, NetworkConfigurationViewModel networkConfig, INetworkConfigurationService networkService, IServiceUiRegistry uiRegistry, IServiceCatalog catalog, ILoggingService? logger = null, string? servicesFilePath = null)
+        public MainViewModel(
+            CsvService csvService,
+            NetworkConfigurationViewModel networkConfig,
+            INetworkConfigurationService networkService,
+            IServiceUiRegistry uiRegistry,
+            IServiceCatalog catalog,
+            IFileDialogService fileDialogService,
+            IPluginImportService pluginImportService,
+            ILoggingService? logger = null,
+            string? servicesFilePath = null)
         {
             _csvService = csvService;
             _networkService = networkService;
@@ -72,6 +103,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             NetworkConfig = networkConfig;
             _uiRegistry = uiRegistry;
             _catalog = catalog;
+            _fileDialogService = fileDialogService ?? throw new ArgumentNullException(nameof(fileDialogService));
+            _pluginImportService = pluginImportService ?? throw new ArgumentNullException(nameof(pluginImportService));
             _ = NetworkConfig.LoadAsync();
             _networkService.ConfigurationChanged += (_, cfg) => ApplyNetworkConfiguration(cfg);
             ServiceListModel.ResolveService = (descriptorKey, name) =>
@@ -97,6 +130,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             AddServiceCommand = new RelayCommand(AddService);
             RemoveServiceCommand = new AsyncRelayCommand(RemoveSelectedServiceAsync, () => SelectedService != null);
             EditServiceCommand = new RelayCommand<ServiceListModel?>(EditService, svc => svc != null);
+            ImportServiceCommand = new AsyncRelayCommand(ImportServiceAsync);
             FilteredServices = CollectionViewSource.GetDefaultView(Services);
             Filters.PropertyChanged += (_, __) => ApplyFilters();
             LoadServices();
@@ -127,6 +161,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         }
 
         public event Action? AddServiceRequested;
+        public event EventHandler<ImportFeedbackEventArgs>? ImportFeedback;
         private void EditService(ServiceListModel? service)
         {
             var target = service ?? SelectedService;
@@ -148,6 +183,49 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             _logger?.Log("AddService invoked", LogLevel.Debug);
             AddServiceRequested?.Invoke();
             _logger?.Log("AddService completed", LogLevel.Debug);
+        }
+
+        private async Task ImportServiceAsync()
+        {
+            var selectedPath = _fileDialogService.OpenFile(
+                "Service Packages (*.ccp;*.chapp)|*.ccp;*.chapp|All Files (*.*)|*.*",
+                "Import Service Package");
+
+            if (string.IsNullOrWhiteSpace(selectedPath))
+            {
+                _logger?.Log("Service import cancelled by user.", LogLevel.Debug);
+                return;
+            }
+
+            _logger?.Log($"Importing service package from {selectedPath}.", LogLevel.Information);
+
+            PluginImportResult result;
+            try
+            {
+                result = await _pluginImportService.ImportAsync(selectedPath).ConfigureAwait(true);
+            }
+            catch (OperationCanceledException)
+            {
+                _logger?.Log("Service import cancelled.", LogLevel.Information);
+                return;
+            }
+            catch (Exception ex)
+            {
+                _logger?.Log($"Service import failed: {ex.Message}", LogLevel.Error);
+                ImportFeedback?.Invoke(this, new ImportFeedbackEventArgs(ImportFeedbackStatus.Error, "Import failed. Check logs for details."));
+                return;
+            }
+
+            if (result.Success)
+            {
+                _logger?.Log($"Imported service package '{Path.GetFileName(selectedPath)}'. {result.Message}", LogLevel.Information);
+                ImportFeedback?.Invoke(this, new ImportFeedbackEventArgs(ImportFeedbackStatus.Success, result.Message));
+            }
+            else
+            {
+                _logger?.Log($"Service import reported issues for '{selectedPath}': {result.Message}", LogLevel.Warning);
+                ImportFeedback?.Invoke(this, new ImportFeedbackEventArgs(ImportFeedbackStatus.Error, result.Message));
+            }
         }
 
         internal string GenerateServiceName(ServiceType serviceType)

@@ -17,7 +17,7 @@ namespace DesktopApplicationTemplate.Tests
                 "service.test",
                 "Test",
                 ServiceType.Tcp,
-                new ServicePresentationMetadata("🧪", null, null, "Catalog Label"));
+                new ServicePresentationMetadata("🧪", "#123456", "#654321", "Catalog Label"));
             var catalog = new StubCatalog(descriptor);
 
             var vm = new CreateServiceViewModel(catalog);
@@ -27,6 +27,10 @@ namespace DesktopApplicationTemplate.Tests
             Assert.Equal("Catalog Label", metadata.DisplayLabel);
             Assert.Equal("🧪", metadata.IconGlyph);
             Assert.Equal(ServiceType.Tcp, metadata.LegacyType);
+            Assert.Equal("Test", metadata.Category);
+            Assert.Null(metadata.Description);
+            Assert.Equal("#123456", metadata.PrimaryAccentColor);
+            Assert.Equal("#654321", metadata.SecondaryAccentColor);
             ConsoleTestLogger.LogPass();
         }
 
@@ -55,21 +59,39 @@ namespace DesktopApplicationTemplate.Tests
 
             public StubCatalog(params IServiceDescriptor[] descriptors)
             {
-                _descriptorsById = descriptors.ToDictionary(d => d.Id, StringComparer.Ordinal);
-                _descriptorsByType = descriptors
-                    .Where(d => d.LegacyType.HasValue)
-                    .ToDictionary(d => d.LegacyType!.Value, d => d, EqualityComparer<ServiceType>.Default);
-                Descriptors = _descriptorsById.Values.ToArray();
-                LegacyMap = _descriptorsByType.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Id);
+                _descriptorsById = new Dictionary<string, IServiceDescriptor>(StringComparer.Ordinal);
+                _descriptorsByType = new Dictionary<ServiceType, IServiceDescriptor>();
+                UpdateDescriptors(descriptors);
             }
 
-            public IReadOnlyCollection<IServiceDescriptor> Descriptors { get; }
+            public IReadOnlyCollection<IServiceDescriptor> Descriptors { get; private set; } = Array.Empty<IServiceDescriptor>();
 
-            public IReadOnlyDictionary<ServiceType, string> LegacyMap { get; }
+            public IReadOnlyDictionary<ServiceType, string> LegacyMap { get; private set; } = new Dictionary<ServiceType, string>();
+
+            public event EventHandler? DescriptorsChanged;
 
             public bool TryGetById(string id, out IServiceDescriptor descriptor) => _descriptorsById.TryGetValue(id, out descriptor!);
 
             public bool TryGetByLegacyType(ServiceType legacyType, out IServiceDescriptor descriptor) => _descriptorsByType.TryGetValue(legacyType, out descriptor!);
+
+            public void UpdateDescriptors(IEnumerable<IServiceDescriptor> descriptors)
+            {
+                _descriptorsById.Clear();
+                _descriptorsByType.Clear();
+                var snapshot = descriptors.ToArray();
+                foreach (var descriptor in snapshot)
+                {
+                    _descriptorsById[descriptor.Id] = descriptor;
+                    if (descriptor.LegacyType is { } legacy)
+                    {
+                        _descriptorsByType[legacy] = descriptor;
+                    }
+                }
+
+                Descriptors = snapshot;
+                LegacyMap = _descriptorsByType.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Id);
+                DescriptorsChanged?.Invoke(this, EventArgs.Empty);
+            }
         }
 
         private sealed class StubDescriptor : IServiceDescriptor

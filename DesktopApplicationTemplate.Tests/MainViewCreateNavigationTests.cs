@@ -145,9 +145,17 @@ internal sealed class StubCatalog : IServiceCatalog
 
     public IReadOnlyDictionary<ServiceType, string> LegacyMap { get; }
 
+    public event EventHandler? DescriptorsChanged
+    {
+        add { }
+        remove { }
+    }
+
     public bool TryGetById(string id, out IServiceDescriptor descriptor) => _descriptorsById.TryGetValue(id, out descriptor!);
 
     public bool TryGetByLegacyType(ServiceType legacyType, out IServiceDescriptor descriptor) => _descriptorsByType.TryGetValue(legacyType, out descriptor!);
+
+    public void UpdateDescriptors(IEnumerable<IServiceDescriptor> descriptors) => throw new NotSupportedException();
 
     private sealed class StubDescriptor : IServiceDescriptor
     {

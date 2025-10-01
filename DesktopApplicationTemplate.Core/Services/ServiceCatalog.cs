@@ -10,58 +10,73 @@ namespace DesktopApplicationTemplate.Core.Services;
 /// </summary>
 public sealed class ServiceCatalog : IServiceCatalog
 {
-    private readonly IReadOnlyDictionary<string, IServiceDescriptor> _descriptorsById;
-    private readonly IReadOnlyDictionary<ServiceType, IServiceDescriptor> _descriptorsByLegacy;
-    private readonly IReadOnlyDictionary<ServiceType, string> _legacyMap;
+    private readonly object _sync = new();
+    private IReadOnlyDictionary<string, IServiceDescriptor> _descriptorsById = new Dictionary<string, IServiceDescriptor>(StringComparer.Ordinal);
+    private IReadOnlyDictionary<ServiceType, IServiceDescriptor> _descriptorsByLegacy = new Dictionary<ServiceType, IServiceDescriptor>();
+    private IReadOnlyDictionary<ServiceType, string> _legacyMap = new Dictionary<ServiceType, string>();
+    private IReadOnlyCollection<IServiceDescriptor> _descriptors = Array.Empty<IServiceDescriptor>();
 
     public ServiceCatalog(IEnumerable<IServiceDescriptor> descriptors)
     {
-        if (descriptors is null)
-        {
-            throw new ArgumentNullException(nameof(descriptors));
-        }
-
-        var builders = new Dictionary<string, ServiceDescriptorBuilder>(StringComparer.Ordinal);
-        foreach (var descriptor in descriptors)
-        {
-            if (!builders.TryGetValue(descriptor.Id, out var builder))
-            {
-                builder = new ServiceDescriptorBuilder(descriptor.Id);
-                builders.Add(descriptor.Id, builder);
-            }
-
-            builder.Merge(descriptor);
-        }
-
-        var snapshots = builders.Values.Select(b => b.Build()).ToList();
-
-        _descriptorsById = snapshots.ToDictionary(d => d.Id, d => (IServiceDescriptor)d, StringComparer.Ordinal);
-        var legacyLookup = new Dictionary<ServiceType, IServiceDescriptor>();
-        foreach (var descriptor in snapshots)
-        {
-            if (descriptor.LegacyType is { } legacy)
-            {
-                if (!legacyLookup.TryAdd(legacy, descriptor))
-                {
-                    throw new InvalidOperationException($"Legacy service type '{legacy}' is already mapped to descriptor '{legacyLookup[legacy].Id}'.");
-                }
-            }
-        }
-
-        _descriptorsByLegacy = legacyLookup;
-        _legacyMap = legacyLookup.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Id, StringComparer.Ordinal);
-        Descriptors = snapshots;
+        UpdateDescriptors(descriptors);
     }
 
-    public IReadOnlyCollection<IServiceDescriptor> Descriptors { get; }
+    public IReadOnlyCollection<IServiceDescriptor> Descriptors => _descriptors;
 
     public IReadOnlyDictionary<ServiceType, string> LegacyMap => _legacyMap;
+
+    public event EventHandler? DescriptorsChanged;
 
     public bool TryGetById(string id, out IServiceDescriptor descriptor) =>
         _descriptorsById.TryGetValue(id, out descriptor!);
 
     public bool TryGetByLegacyType(ServiceType legacyType, out IServiceDescriptor descriptor) =>
         _descriptorsByLegacy.TryGetValue(legacyType, out descriptor!);
+
+    public void UpdateDescriptors(IEnumerable<IServiceDescriptor> descriptors)
+    {
+        if (descriptors is null)
+        {
+            throw new ArgumentNullException(nameof(descriptors));
+        }
+
+        lock (_sync)
+        {
+            var builders = new Dictionary<string, ServiceDescriptorBuilder>(StringComparer.Ordinal);
+            foreach (var descriptor in descriptors)
+            {
+                if (!builders.TryGetValue(descriptor.Id, out var builder))
+                {
+                    builder = new ServiceDescriptorBuilder(descriptor.Id);
+                    builders.Add(descriptor.Id, builder);
+                }
+
+                builder.Merge(descriptor);
+            }
+
+            var snapshots = builders.Values.Select(b => b.Build()).ToList();
+
+            var descriptorsById = snapshots.ToDictionary(d => d.Id, d => (IServiceDescriptor)d, StringComparer.Ordinal);
+            var legacyLookup = new Dictionary<ServiceType, IServiceDescriptor>();
+            foreach (var descriptor in snapshots)
+            {
+                if (descriptor.LegacyType is { } legacy)
+                {
+                    if (!legacyLookup.TryAdd(legacy, descriptor))
+                    {
+                        throw new InvalidOperationException($"Legacy service type '{legacy}' is already mapped to descriptor '{legacyLookup[legacy].Id}'.");
+                    }
+                }
+            }
+
+            _descriptorsById = descriptorsById;
+            _descriptorsByLegacy = legacyLookup;
+            _legacyMap = legacyLookup.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Id, StringComparer.Ordinal);
+            _descriptors = snapshots;
+        }
+
+        DescriptorsChanged?.Invoke(this, EventArgs.Empty);
+    }
 
     private sealed class ServiceDescriptorBuilder
     {
