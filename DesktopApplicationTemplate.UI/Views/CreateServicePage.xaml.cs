@@ -1,40 +1,46 @@
 using System;
 using System.Windows;
 using System.Windows.Controls;
-using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.Models;
+using DesktopApplicationTemplate.UI.Navigation;
+using DesktopApplicationTemplate.UI.ViewModels;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
     public partial class CreateServicePage : Page
     {
         private readonly CreateServiceViewModel _viewModel;
-        public event Action<string, ServiceType>? ServiceCreated;
-        public event Action<ServiceType>? ServiceTypeSelected;
+        private readonly IServiceUiRegistry _uiRegistry;
+        public event Action<string, string>? ServiceCreated;
+        public event Action<string>? ServiceDescriptorSelected;
         public event Action? Cancelled;
 
-        public CreateServicePage(CreateServiceViewModel viewModel)
+        public CreateServicePage(CreateServiceViewModel viewModel, IServiceUiRegistry uiRegistry)
         {
             InitializeComponent();
             _viewModel = viewModel;
+            _uiRegistry = uiRegistry;
             DataContext = _viewModel;
         }
 
         private void ServiceType_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button { DataContext: CreateServiceViewModel.ServiceTypeMetadata meta } button)
+            if (sender is Button { DataContext: CreateServiceViewModel.ServiceDescriptorMetadata meta })
             {
-                var name = _viewModel.GenerateDefaultName(meta.Type);
-                if (meta.Type is ServiceType.Mqtt or ServiceType.Tcp or ServiceType.Heartbeat or ServiceType.Ftp or ServiceType.Http or ServiceType.Hid or ServiceType.Csv or ServiceType.FileObserver or ServiceType.Scp)
+                var descriptorId = meta.DescriptorId;
+                var name = _viewModel.GenerateDefaultName(descriptorId);
+                if (_uiRegistry.NavigationHandlers.ContainsKey(descriptorId))
                 {
-                    ServiceTypeSelected?.Invoke(meta.Type);
+                    ServiceDescriptorSelected?.Invoke(descriptorId);
                     return;
                 }
-                ServiceCreated?.Invoke(name, meta.Type);
+                ServiceCreated?.Invoke(name, descriptorId);
             }
         }
 
-        public string GenerateDefaultName(ServiceType type) => _viewModel.GenerateDefaultName(type);
+        public string GenerateDefaultName(string descriptorId) => _viewModel.GenerateDefaultName(descriptorId);
+
+        public bool TryGetLegacyType(string descriptorId, out ServiceType serviceType) => _viewModel.TryGetLegacyType(descriptorId, out serviceType);
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {

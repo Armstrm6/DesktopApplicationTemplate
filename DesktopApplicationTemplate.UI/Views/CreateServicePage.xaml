@@ -13,7 +13,7 @@
 
         <TextBlock Grid.Row="0" Text="Select Service Type" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
 
-        <ItemsControl Grid.Row="1" ItemsSource="{Binding ServiceTypes}">
+        <ItemsControl Grid.Row="1" ItemsSource="{Binding ServiceDescriptors}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <WrapPanel Width="400" />
@@ -30,9 +30,9 @@
                                     </Border>
                                 </ControlTemplate>
                             </Button.Template>
-                            <TextBlock Text="{Binding Icon}" FontSize="40" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding IconGlyph}" FontSize="40" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Button>
-                        <TextBlock Text="{Binding DisplayText}" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                        <TextBlock Text="{Binding DisplayLabel}" HorizontalAlignment="Center" Margin="0,5,0,0"/>
                     </StackPanel>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>

@@ -149,13 +149,27 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             var page = App.AppHost.Services.GetRequiredService<CreateServicePage>();
             _createServicePage = page;
-            page.ServiceCreated += (name, type) =>
+            page.ServiceCreated += (name, descriptorId) =>
             {
-                var descriptor = ResolveDescriptor(type);
+                var descriptor = ResolveDescriptor(descriptorId);
+                ServiceType serviceType;
+                if (descriptor?.LegacyType is ServiceType resolvedType)
+                {
+                    serviceType = resolvedType;
+                }
+                else if (page.TryGetLegacyType(descriptorId, out var fallbackType))
+                {
+                    serviceType = fallbackType;
+                }
+                else
+                {
+                    _logger?.LogWarning("No legacy type registered for descriptor {DescriptorId}", descriptorId);
+                    return;
+                }
                 var svc = new ServiceListModel
                 {
-                    Type = descriptor?.LegacyType ?? type,
-                    DescriptorId = descriptor?.Id ?? type.ToDescriptorId(),
+                    Type = serviceType,
+                    DescriptorId = descriptor?.Id ?? descriptorId,
                     IsActive = false
                 };
 
@@ -173,20 +187,20 @@ namespace DesktopApplicationTemplate.UI.Views
                 }
                 _ = _viewModel.SaveServicesAsync();
             };
-            page.ServiceTypeSelected += NavigateTo;
+            page.ServiceDescriptorSelected += NavigateTo;
             page.Cancelled += ShowHome;
             ShowPage(page);
         }
 
         private CreateServicePage? _createServicePage;
 
-        private void NavigateTo(ServiceType serviceType)
+        private void NavigateTo(string descriptorId)
         {
-            var defaultName = _createServicePage?.GenerateDefaultName(serviceType) ?? serviceType.ToLegacyString();
-            if (!TryGetDescriptorId(serviceType, out var descriptorId))
-            {
-                return;
-            }
+            var descriptor = ResolveDescriptor(descriptorId);
+            var defaultName = _createServicePage?.GenerateDefaultName(descriptorId)
+                ?? descriptor?.LegacyType?.ToLegacyString()
+                ?? descriptor?.DisplayName
+                ?? descriptorId;
 
             if (_uiRegistry.NavigationHandlers.TryGetValue(descriptorId, out var handlerFactory))
             {
