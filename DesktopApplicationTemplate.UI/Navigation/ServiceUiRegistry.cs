@@ -6,6 +6,7 @@ using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.Configuration;
 using DesktopApplicationTemplate.UI.EditHandlers;
 using DesktopApplicationTemplate.UI.Factories;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DesktopApplicationTemplate.UI.Navigation;
 

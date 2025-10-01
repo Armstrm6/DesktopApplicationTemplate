@@ -330,8 +330,10 @@ namespace DesktopApplicationTemplate.UI.Views
                 return true;
             }
 
-            if (_catalog.LegacyMap.TryGetValue(serviceType, out descriptorId))
+            if (_catalog.LegacyMap.TryGetValue(serviceType, out var mappedId) &&
+                !string.IsNullOrWhiteSpace(mappedId))
             {
+                descriptorId = mappedId;
                 return true;
             }
 
