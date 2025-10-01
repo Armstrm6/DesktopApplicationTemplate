@@ -16,7 +16,7 @@
     <ProjectReference Include="..\..\DesktopApplicationTemplate.Core\DesktopApplicationTemplate.Core.csproj" />
     <ProjectReference Include="..\..\DesktopApplicationTemplate.Services.Common\DesktopApplicationTemplate.Services.Common.csproj" />
     <ProjectReference Include="..\..\ServicePlugin.Packaging\ServicePlugin.Packaging.csproj" ReferenceOutputAssembly="false" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
   </ItemGroup>
 
