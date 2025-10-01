@@ -44,6 +44,13 @@ Unit Testing Insights
 - Configure dependencies through DI to keep tests focused and deterministic.
 - Monitor GitHub Actions for the `dotnet test` run and summarize the CI outcome in `Codex/docs/CollaborationAndDebugTips.txt`. If CI cannot complete, coordinate with a Windows collaborator for follow-up diagnostics.
 
+Descriptor & Plug-in CI Tasks
+-----------------------------
+1. **Package sample plug-ins** – GitHub Actions builds `Samples/TcpRelayPlugin` and `Samples/HttpRelayPlugin` with `dotnet build` so the generated `.ccp`/`.chapp` archives verify packaging targets. Capture the CI log links when these builds surface errors.
+2. **Validate descriptor catalog tests** – CI executes `dotnet test DesktopApplicationTemplate.Core.Tests/DesktopApplicationTemplate.Core.Tests.csproj --filter ServiceCatalog` to confirm descriptors advertise presentation metadata, legacy mappings, and conflict detection. Reference this test output when reviewing descriptor or migration changes.
+3. **Exercise template scaffolds** – When the service plug-in template changes, add `dotnet new install Templates/ServicePluginTemplate` and a sample `dotnet build` invocation to the CI pipeline (or a one-off workflow run) to confirm descriptors scaffold correctly.
+4. **Record outcomes** – Note the status of these tasks in `Codex/docs/CollaborationAndDebugTips.txt`, especially when migrations affect persistence or descriptor bindings.
+
 Miscellaneous Tips
 ------------------
 - Validate all file paths, indexes, and dictionary keys before use to avoid runtime errors.
