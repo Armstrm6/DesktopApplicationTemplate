@@ -26,11 +26,10 @@
     <PackageReference Include="RoslynPad.Editor.Windows" Version="4.12.1" />
     <PackageReference Include="Microsoft.VisualStudio.Threading" Version="17.12.19" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\DesktopApplicationTemplate.Service\DesktopApplicationTemplate.Service.csproj" />
-    <ProjectReference Include="..\DesktopApplicationTemplate.Core\DesktopApplicationTemplate.Core.csproj" />
-    <ProjectReference Include="..\DesktopApplicationTemplate.Services.Common\DesktopApplicationTemplate.Services.Common.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\DesktopApplicationTemplate.Core\DesktopApplicationTemplate.Core.csproj" />
+      <ProjectReference Include="..\DesktopApplicationTemplate.Services.Common\DesktopApplicationTemplate.Services.Common.csproj" />
+    </ItemGroup>
 
   <ItemGroup>
     <Page Update="Views/**/*.xaml">

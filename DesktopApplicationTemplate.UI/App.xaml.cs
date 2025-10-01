@@ -16,9 +16,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using MQTTnet;
-using FubarDev.FtpServer;
-using FubarDev.FtpServer.FileSystem.DotNet;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -100,7 +97,7 @@ namespace DesktopApplicationTemplate.UI
 
             var assembliesForScanning = PluginLoader.CombineWithDefaultAssemblies(pluginAssemblies);
             var catalog = services.AddServiceModules(assembliesForScanning.ToArray());
-            var registrations = InitializeServices(services, catalog);
+            var registrations = InitializeServices(services, catalog, pluginAssemblies);
 
             services.AddSingleton<IServiceUiRegistry>(sp => ServiceUiRegistry.Create(sp, catalog, registrations));
 
@@ -120,10 +117,6 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<MainViewModel>();
             services.AddSingleton<ServiceMessageTableViewModel>();
             services.AddSingleton<DependencyChecker>();
-            services.AddFtpServer(builder => builder
-                .UseDotNetFileSystem()
-                .EnableAnonymousAuthentication());
-            services.AddSingleton<IFtpServerService, DesktopApplicationTemplate.Service.Services.FtpServerService>();
             services.AddSingleton<SettingsViewModel>();
             services.AddTransient<SplashWindow>();
             services.AddTransient<CreateServicePage>();
@@ -135,24 +128,56 @@ namespace DesktopApplicationTemplate.UI
             services.Configure<AppSettings>(configuration.GetSection("AppSettings"));
             services.Configure<MqttServiceOptions>(configuration.GetSection("MqttService"));
             services.Configure<TcpServiceOptions>(configuration.GetSection("TcpService"));
-            services.AddOptions<DesktopApplicationTemplate.UI.Services.FtpServerOptions>()
-                .BindConfiguration("FtpServer");
-            services.AddOptions<HidServiceOptions>();
-            services.AddOptions<HeartbeatServiceOptions>();
-            services.AddOptions<FileObserverServiceOptions>();
-            services.AddOptions<CsvServiceOptions>();
-            services.AddOptions<ScpServiceOptions>();
         }
 
-        private static IReadOnlyCollection<ServiceRegistrationInfo> InitializeServices(IServiceCollection services, IServiceCatalog catalog)
+        private static IReadOnlyCollection<ServiceRegistrationInfo> InitializeServices(
+            IServiceCollection services,
+            IServiceCatalog catalog,
+            IEnumerable<Assembly> pluginAssemblies)
         {
             var descriptorIds = new HashSet<string>(catalog.Descriptors.Select(d => d.Id), StringComparer.Ordinal);
             var registrations = new List<ServiceRegistrationInfo>();
             var registeredTypes = new HashSet<Type>();
             var registrationKeys = new HashSet<string>(StringComparer.Ordinal);
-            var assembly = typeof(App).Assembly;
+            var assemblies = BuildAssemblySet(pluginAssemblies);
 
-            foreach (var type in assembly.GetTypes())
+            foreach (var assembly in assemblies)
+            {
+                RegisterAttributedTypes(assembly, descriptorIds, services, registrations, registeredTypes, registrationKeys);
+            }
+
+            ApplyConventionRegistrations(services, catalog, registrations, registeredTypes, registrationKeys, assemblies);
+
+            return registrations;
+        }
+
+        private static IReadOnlyCollection<Assembly> BuildAssemblySet(IEnumerable<Assembly> pluginAssemblies)
+        {
+            var assemblies = new List<Assembly> { typeof(App).Assembly };
+
+            if (pluginAssemblies != null)
+            {
+                foreach (var assembly in pluginAssemblies)
+                {
+                    if (assembly is not null && assemblies.All(a => !string.Equals(a.FullName, assembly.FullName, StringComparison.Ordinal)))
+                    {
+                        assemblies.Add(assembly);
+                    }
+                }
+            }
+
+            return assemblies;
+        }
+
+        private static void RegisterAttributedTypes(
+            Assembly assembly,
+            ISet<string> descriptorIds,
+            IServiceCollection services,
+            ICollection<ServiceRegistrationInfo> registrations,
+            ISet<Type> registeredTypes,
+            ISet<string> registrationKeys)
+        {
+            foreach (var type in GetLoadableTypes(assembly))
             {
                 var attributes = type.GetCustomAttributes<ServiceDescriptorRegistrationAttribute>(inherit: false);
                 foreach (var attribute in attributes)
@@ -173,10 +198,6 @@ namespace DesktopApplicationTemplate.UI
                     }
                 }
             }
-
-            ApplyConventionRegistrations(services, catalog, registrations, registeredTypes, registrationKeys, assembly);
-
-            return registrations;
         }
 
         private static void RegisterType(IServiceCollection services, Type implementationType, ServiceLifetime lifetime)
@@ -201,8 +222,13 @@ namespace DesktopApplicationTemplate.UI
             ICollection<ServiceRegistrationInfo> registrations,
             ISet<Type> registeredTypes,
             ISet<string> registrationKeys,
-            Assembly assembly)
+            IReadOnlyCollection<Assembly> assemblies)
         {
+            var candidateTypes = assemblies
+                .SelectMany(GetLoadableTypes)
+                .Where(t => t.IsClass && !t.IsAbstract)
+                .ToList();
+
             foreach (var descriptor in catalog.Descriptors)
             {
                 if (!TryGetServicePrefix(descriptor, out var prefix))
@@ -210,8 +236,8 @@ namespace DesktopApplicationTemplate.UI
                     continue;
                 }
 
-                var matchingTypes = assembly.GetTypes()
-                    .Where(t => t.IsClass && !t.IsAbstract && t.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
+                var matchingTypes = candidateTypes
+                    .Where(t => t.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
 
                 foreach (var type in matchingTypes)
                 {
@@ -231,6 +257,18 @@ namespace DesktopApplicationTemplate.UI
                         }
                     }
                 }
+            }
+        }
+
+        private static IEnumerable<Type> GetLoadableTypes(Assembly assembly)
+        {
+            try
+            {
+                return assembly.GetTypes();
+            }
+            catch (ReflectionTypeLoadException ex)
+            {
+                return ex.Types.Where(type => type is not null).Cast<Type>();
             }
         }
 
