@@ -8,14 +8,35 @@
       mc:Ignorable="d">
     <Page.Resources>
         <helpers:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter" />
+        <helpers:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
     </Page.Resources>
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <StackPanel Margin="0 0 0 10">
+        <Border Grid.Row="0" CornerRadius="8" BorderThickness="1" Padding="10" Margin="0,0,0,10"
+                Background="{Binding Tag.BackgroundColor, RelativeSource={RelativeSource AncestorType=Page}}"
+                BorderBrush="{Binding Tag.BorderColor, RelativeSource={RelativeSource AncestorType=Page}}"
+                ToolTip="{Binding Tag.DescriptorTooltip, RelativeSource={RelativeSource AncestorType=Page}}">
+            <DockPanel>
+                <Border Width="40" Height="40" CornerRadius="20" Margin="0,0,10,0"
+                        Background="{Binding Tag.BorderColor, RelativeSource={RelativeSource AncestorType=Page}}"
+                        Visibility="{Binding Tag.IconGlyph, RelativeSource={RelativeSource AncestorType=Page}, Converter={StaticResource NullToVisibilityConverter}}">
+                    <TextBlock Text="{Binding Tag.IconGlyph, RelativeSource={RelativeSource AncestorType=Page}}"
+                               FontSize="22" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="{Binding Tag.DisplayName, RelativeSource={RelativeSource AncestorType=Page}}" FontWeight="Bold" />
+                    <TextBlock Text="{Binding Tag.DescriptorDescription, RelativeSource={RelativeSource AncestorType=Page}}"
+                               Foreground="Gray" TextWrapping="Wrap"
+                               Visibility="{Binding Tag.DescriptorDescription, RelativeSource={RelativeSource AncestorType=Page}, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+        <StackPanel Grid.Row="1" Margin="0 0 0 10">
             <StackPanel Orientation="Horizontal" Margin="0 0 0 10">
                 <TextBlock Text="Output Directory:" VerticalAlignment="Center" Margin="0,0,5,0"/>
                 <TextBox Text="{Binding Configuration.OutputDirectory}" Width="300"
@@ -33,14 +54,14 @@
                 </Grid>
             </StackPanel>
         </StackPanel>
-        <DataGrid Grid.Row="1" ItemsSource="{Binding Configuration.Columns}" AutoGenerateColumns="False" SelectedItem="{Binding SelectedColumn}">
+        <DataGrid Grid.Row="2" ItemsSource="{Binding Configuration.Columns}" AutoGenerateColumns="False" SelectedItem="{Binding SelectedColumn}">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
                 <DataGridTextColumn Header="Service" Binding="{Binding Service}" Width="*"/>
                 <DataGridTextColumn Header="Script" Binding="{Binding Script}" Width="*"/>
             </DataGrid.Columns>
         </DataGrid>
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
             <Button Content="Add Column" Command="{Binding AddColumnCommand}" Width="90"/>
             <Button Content="Remove" Command="{Binding RemoveColumnCommand}" Width="70" Margin="5,0,0,0"/>
             <Button Content="Save" Command="{Binding SaveCommand}" Width="60" Margin="5,0,0,0"/>

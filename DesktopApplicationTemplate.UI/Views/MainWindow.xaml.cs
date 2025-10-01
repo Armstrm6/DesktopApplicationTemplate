@@ -127,6 +127,8 @@ namespace DesktopApplicationTemplate.UI.Views
                     logHost.SetServiceContext(svc);
                 }
 
+                ApplyServicePresentationMetadata(svc);
+
             }
 
             return svc.ServicePage;
@@ -287,25 +289,28 @@ namespace DesktopApplicationTemplate.UI.Views
             return null;
         }
 
-        private string GetDisplayPrefix(ServiceListModel svc)
+        private void ApplyServicePresentationMetadata(ServiceListModel service)
         {
-            var descriptor = ResolveDescriptor(svc.DescriptorId, svc.Type);
-            if (descriptor is not null)
+            if (service.ServicePage is null)
             {
-                var presentation = descriptor.Presentation;
-                if (!string.IsNullOrWhiteSpace(presentation.DisplayLabel))
-                {
-                    return presentation.DisplayLabel!;
-                }
-
-                if (!string.IsNullOrWhiteSpace(descriptor.DisplayName))
-                {
-                    return descriptor.DisplayName;
-                }
+                return;
             }
 
-            return svc.Type.ToLegacyString();
+            var page = service.ServicePage;
+            page.Tag = service;
+            ToolTipService.SetToolTip(page, service.DescriptorTooltip);
+            page.Resources["ServiceDisplayName"] = service.DisplayName;
+            page.Resources["ServiceDescriptorLabel"] = service.DescriptorLabel;
+            page.Resources["ServiceDescriptorDescription"] = service.DescriptorDescription;
+            page.Resources["ServiceIconGlyph"] = service.IconGlyph;
+            page.Resources["ServiceBackgroundBrush"] = service.BackgroundColor;
+            page.Resources["ServiceBorderBrush"] = service.BorderColor;
         }
+
+        private string GetDisplayPrefix(ServiceListModel svc) =>
+            string.IsNullOrWhiteSpace(svc.DescriptorLabel)
+                ? svc.Type.ToLegacyString()
+                : svc.DescriptorLabel;
 
         private bool TryGetDescriptorId(ServiceType serviceType, out string descriptorId)
         {

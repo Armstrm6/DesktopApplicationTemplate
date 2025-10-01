@@ -9,9 +9,11 @@
       mc:Ignorable="d">
     <Page.Resources>
         <helpers:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter" />
+        <helpers:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
     </Page.Resources>
     <Grid Margin="20">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
@@ -21,8 +23,28 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
+        <Border Grid.Row="0" Grid.ColumnSpan="2" CornerRadius="8" BorderThickness="1" Padding="10" Margin="0,0,0,10"
+                Background="{Binding Tag.BackgroundColor, RelativeSource={RelativeSource AncestorType=Page}}"
+                BorderBrush="{Binding Tag.BorderColor, RelativeSource={RelativeSource AncestorType=Page}}"
+                ToolTip="{Binding Tag.DescriptorTooltip, RelativeSource={RelativeSource AncestorType=Page}}">
+            <DockPanel>
+                <Border Width="40" Height="40" CornerRadius="20" Margin="0,0,10,0"
+                        Background="{Binding Tag.BorderColor, RelativeSource={RelativeSource AncestorType=Page}}"
+                        Visibility="{Binding Tag.IconGlyph, RelativeSource={RelativeSource AncestorType=Page}, Converter={StaticResource NullToVisibilityConverter}}">
+                    <TextBlock Text="{Binding Tag.IconGlyph, RelativeSource={RelativeSource AncestorType=Page}}"
+                               FontSize="22" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="{Binding Tag.DisplayName, RelativeSource={RelativeSource AncestorType=Page}}" FontWeight="Bold" />
+                    <TextBlock Text="{Binding Tag.DescriptorDescription, RelativeSource={RelativeSource AncestorType=Page}}"
+                               Foreground="Gray" TextWrapping="Wrap"
+                               Visibility="{Binding Tag.DescriptorDescription, RelativeSource={RelativeSource AncestorType=Page}, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
         <!-- Observer List Panel -->
-        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+        <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,10,0">
             <TextBlock Text="File Observers" FontWeight="Bold" Margin="0 0 0 10"/>
             <ListBox ItemsSource="{Binding Observers}"
                      SelectedItem="{Binding SelectedObserver}"
@@ -35,7 +57,7 @@
         </StackPanel>
 
         <!-- Main Panel -->
-        <StackPanel Grid.Column="1" Margin="10 0 0 0">
+        <StackPanel Grid.Row="1" Grid.Column="1" Margin="10 0 0 0">
             <TextBlock Text="Chappie FTP File Observer" FontSize="16" FontWeight="Bold" TextAlignment="Center"/>
 
             <!-- File Path -->
@@ -97,7 +119,7 @@
             </Grid>
         </StackPanel>
 
-        <StackPanel Grid.ColumnSpan="2" Grid.Row="2" HorizontalAlignment="Right" Margin="0,10,0,0">
+        <StackPanel Grid.ColumnSpan="2" Grid.Row="3" HorizontalAlignment="Right" Margin="0,10,0,0">
             <Button Content="Save Configuration" Command="{Binding SaveCommand}" Width="150"/>
         </StackPanel>
     </Grid>
