@@ -52,21 +52,21 @@ public class MainViewCreateNavigationTests
             { ServiceType.Mqtt, ServiceDescriptorIds.Mqtt },
             { ServiceType.Ftp, ServiceDescriptorIds.Ftp }
         });
-        typeof(MainView).GetField("_uiRegistry", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!
+        typeof(MainView).GetField("_uiRegistry", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)! 
             .SetValue(view, registry);
-        typeof(MainView).GetField("_catalog", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!
+        typeof(MainView).GetField("_catalog", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)! 
             .SetValue(view, catalog);
-        typeof(MainView).GetField("_createServicePage", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!
+        typeof(MainView).GetField("_createServicePage", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)! 
             .SetValue(view, null);
         var method = typeof(MainView).GetMethod("NavigateTo", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
 
         // Act
-        method.Invoke(view, new object[] { type });
+        method.Invoke(view, new object[] { targetDescriptor });
 
         // Assert
         foreach (var kvp in handlerMocks)
         {
-            if (kvp.Key == type)
+            if (kvp.Key == targetDescriptor)
             {
                 kvp.Value.Verify(h => h.CreateView(type.ToLegacyString()), Times.Once);
             }
@@ -95,7 +95,7 @@ public class MainViewCreateNavigationTests
         var method = typeof(MainView).GetMethod("NavigateTo", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
 
         // Act
-        method.Invoke(view, new object[] { ServiceType.Http });
+        method.Invoke(view, new object[] { ServiceDescriptorIds.Http });
 
         // Assert
         var frame = (Frame)typeof(MainView).GetField("ContentFrame")!.GetValue(view)!;
