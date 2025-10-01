@@ -10,6 +10,7 @@ using System.Windows.Controls;
 using Xunit;
 using DesktopApplicationTemplate.Services.Common.Descriptors;
 using DesktopApplicationTemplate.UI.Factories;
+using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.EditHandlers;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Serialization;

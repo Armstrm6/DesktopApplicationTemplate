@@ -1,6 +1,6 @@
 using DesktopApplicationTemplate.UI.ViewModels;
 
-namespace DesktopApplicationTemplate.UI;
+namespace DesktopApplicationTemplate.UI.Services;
 
 /// <summary>
 /// Handles edit requests for a specific service type.

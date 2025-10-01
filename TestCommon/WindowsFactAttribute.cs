@@ -1,7 +1,7 @@
 using System;
 using Xunit;
 
-namespace DesktopApplicationTemplate.Tests;
+namespace TestCommon;
 
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
 public class WindowsFactAttribute : FactAttribute

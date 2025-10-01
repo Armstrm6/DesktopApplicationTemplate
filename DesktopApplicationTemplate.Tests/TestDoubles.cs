@@ -5,11 +5,12 @@ using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Factories;
 using DesktopApplicationTemplate.UI.Navigation;
+using DesktopApplicationTemplate.UI.Services;
 using System.Windows.Controls;
 
 namespace DesktopApplicationTemplate.Tests;
 
-internal sealed class FakeServiceCatalog : IServiceCatalog
+public sealed class FakeServiceCatalog : IServiceCatalog
 {
     private readonly Dictionary<string, IServiceDescriptor> descriptorsById = new(StringComparer.Ordinal);
     private readonly Dictionary<ServiceType, IServiceDescriptor> descriptorsByLegacy = new();
