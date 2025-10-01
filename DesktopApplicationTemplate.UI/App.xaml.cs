@@ -10,7 +10,6 @@ using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.Navigation;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
-using DesktopApplicationTemplate.UI.ViewModels.Hid;
 using DesktopApplicationTemplate.UI.Views;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -424,7 +423,7 @@ namespace DesktopApplicationTemplate.UI
         {
             var logger = AppHost.Services.GetService<ILogger<App>>();
             logger?.LogError(e.Exception, "Unhandled dispatcher exception");
-            HookReleaseHelper.Release();
+            HookReleaseHelper.Release(AppHost.Services);
             e.Handled = true;
             Shutdown();
         }
@@ -447,7 +446,7 @@ namespace DesktopApplicationTemplate.UI
                 logger?.LogError("Unhandled domain exception");
             }
 
-            HookReleaseHelper.Release();
+            HookReleaseHelper.Release(AppHost.Services);
             if (Current is not null)
             {
                 await Current.Dispatcher.InvokeAsync(() => Current.Shutdown());
@@ -511,8 +510,7 @@ namespace DesktopApplicationTemplate.UI
                 await vm.SaveServicesAsync().ConfigureAwait(false);
             }
 
-            var hid = AppHost.Services.GetService<HidViewModel>();
-            hid?.Dispose();
+            HookReleaseHelper.Release(AppHost.Services);
 
             await AppHost.StopAsync();
             AppHost.Dispose();

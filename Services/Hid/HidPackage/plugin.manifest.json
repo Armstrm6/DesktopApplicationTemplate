@@ -1,0 +1,12 @@
+{
+  "id": "DesktopApplicationTemplate.Hid",
+  "name": "HID Service Package",
+  "version": "1.0.0",
+  "entryAssembly": "DesktopApplicationTemplate.Hid.dll",
+  "serviceAssemblies": [
+    "DesktopApplicationTemplate.Hid.dll"
+  ],
+  "probingPaths": [
+    "libs"
+  ]
+}
