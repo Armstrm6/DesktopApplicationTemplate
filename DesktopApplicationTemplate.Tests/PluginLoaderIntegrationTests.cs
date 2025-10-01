@@ -67,42 +67,44 @@ public sealed class PluginLoaderIntegrationTests : IDisposable
 
     private static void CompilePluginAssembly(string outputPath)
     {
-        var syntaxTree = CSharpSyntaxTree.ParseText(@"
-using System;
-using System.Collections.Generic;
-using DesktopApplicationTemplate.Core.Modules;
-using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.Models;
-using Microsoft.Extensions.DependencyInjection;
+        var pluginSourceCode = string.Join(
+            Environment.NewLine,
+            "using System;",
+            "using System.Collections.Generic;",
+            "using DesktopApplicationTemplate.Core.Modules;",
+            "using DesktopApplicationTemplate.Core.Services;",
+            "using DesktopApplicationTemplate.Models;",
+            "using Microsoft.Extensions.DependencyInjection;",
+            string.Empty,
+            "namespace SamplePlugin;",
+            string.Empty,
+            "public sealed class SamplePluginModule : IServiceModule",
+            "{",
+            "    public void RegisterServices(IServiceCollection services)",
+            "    {",
+            "    }",
+            string.Empty,
+            "    public IEnumerable<IServiceDescriptor> DescribeServices()",
+            "    {",
+            "        yield return new SampleDescriptor();",
+            "    }",
+            string.Empty,
+            "    private sealed class SampleDescriptor : IServiceDescriptor",
+            "    {",
+            "        public string Id => \"Sample.Plugin.Service\";",
+            "        public string DisplayName => \"Sample Plugin Service\";",
+            "        public string Category => \"Plugins\";",
+            "        public string? Description => \"Sample descriptor\";",
+            "        public ServiceType? LegacyType => null;",
+            "        public IServiceOptionsSerializer? OptionsSerializer => null;",
+            "        public IReadOnlyCollection<ServiceFactoryBinding> Factories => Array.Empty<ServiceFactoryBinding>();",
+            "        public ServicePresentationMetadata Presentation => ServicePresentationMetadata.Empty;",
+            "        public bool HasPayloadDescription => false;",
+            "        public string? DescribePayload(object? payload) => null;",
+            "    }",
+            "}");
 
-namespace SamplePlugin;
-
-public sealed class SamplePluginModule : IServiceModule
-{
-    public void RegisterServices(IServiceCollection services)
-    {
-    }
-
-    public IEnumerable<IServiceDescriptor> DescribeServices()
-    {
-        yield return new SampleDescriptor();
-    }
-
-    private sealed class SampleDescriptor : IServiceDescriptor
-    {
-        public string Id => \"Sample.Plugin.Service\";
-        public string DisplayName => \"Sample Plugin Service\";
-        public string Category => \"Plugins\";
-        public string? Description => \"Sample descriptor\";
-        public ServiceType? LegacyType => null;
-        public IServiceOptionsSerializer? OptionsSerializer => null;
-        public IReadOnlyCollection<ServiceFactoryBinding> Factories => Array.Empty<ServiceFactoryBinding>();
-        public ServicePresentationMetadata Presentation => ServicePresentationMetadata.Empty;
-        public bool HasPayloadDescription => false;
-        public string? DescribePayload(object? payload) => null;
-    }
-}
-");
+        var syntaxTree = CSharpSyntaxTree.ParseText(pluginSourceCode);
 
         var references = GetCompilationReferences();
         var compilation = CSharpCompilation.Create(
@@ -128,11 +130,13 @@ public sealed class SamplePluginModule : IServiceModule
         return assemblies.Select(assembly => MetadataReference.CreateFromFile(assembly.Location));
     }
 
-    private static string CreateManifestJson() => @"{
-  \"id\": \"Sample.Plugin\",
-  \"name\": \"Sample Plugin\",
-  \"version\": \"1.0.0\",
-  \"entryAssembly\": \"SamplePlugin.dll\",
-  \"serviceAssemblies\": [ \"SamplePlugin.dll\" ]
-}";
+    private static string CreateManifestJson() => string.Join(
+        Environment.NewLine,
+        "{",
+        "  \"id\": \"Sample.Plugin\",",
+        "  \"name\": \"Sample Plugin\",",
+        "  \"version\": \"1.0.0\",",
+        "  \"entryAssembly\": \"SamplePlugin.dll\",",
+        "  \"serviceAssemblies\": [ \"SamplePlugin.dll\" ]",
+        "}");
 }
