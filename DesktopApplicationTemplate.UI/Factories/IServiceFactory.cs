@@ -7,6 +7,6 @@ namespace DesktopApplicationTemplate.UI.Factories
     public interface IServiceFactory
     {
         ServiceType ServiceType { get; }
-        ServiceListModel Create(object options);
+        ServiceListModel Create(ServiceFactoryContext context);
     }
 }

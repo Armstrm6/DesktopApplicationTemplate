@@ -1,35 +1,48 @@
 using System;
+using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Views;
-using DesktopApplicationTemplate.Models;
 
 namespace DesktopApplicationTemplate.UI.Factories
 {
     public class ScpServiceFactory : IServiceFactory
     {
         private readonly Func<MainView> _getMainView;
+        private readonly IServiceCatalog _catalog;
 
         public ServiceType ServiceType => ServiceType.Scp;
 
-        public ScpServiceFactory(Func<MainView> getMainView)
+        public ScpServiceFactory(Func<MainView> getMainView, IServiceCatalog catalog)
         {
             _getMainView = getMainView;
+            _catalog = catalog;
         }
 
-        public ServiceListModel Create(object optionsObj)
+        public ServiceListModel Create(ServiceFactoryContext context)
         {
-            var ctx = (ServiceFactoryOptions<ScpServiceOptions>)optionsObj;
-            var name = ctx.Name;
-            var options = ctx.Options;
+            if (context is null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            var descriptor = _catalog.TryGetById(context.DescriptorId, out var resolved)
+                ? resolved
+                : context.Descriptor;
+
+            var options = context.GetPayload<ScpServiceOptions>() ?? new ScpServiceOptions();
 
             var svc = new ServiceListModel
             {
-                DisplayName = $"{ServiceType.Scp.ToLegacyString()} - {name}",
                 Type = ServiceType.Scp,
-                IsActive = false,
-                ScpOptions = options
+                DescriptorId = context.DescriptorId,
+                IsActive = false
             };
+
+            svc.SetPayload(options);
+
+            svc.ApplyDescriptor(descriptor, context.ServiceName);
 
             _getMainView().GetOrCreateServicePage(svc);
 

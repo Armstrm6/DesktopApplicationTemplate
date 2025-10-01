@@ -1,4 +1,6 @@
 using System;
+using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.ViewModels.Mqtt;
@@ -8,8 +10,6 @@ using DesktopApplicationTemplate.UI.Views.Mqtt;
 using DesktopApplicationTemplate.UI.Views.Mqtt.Edit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using DesktopApplicationTemplate.Models;
-using DesktopApplicationTemplate.Services.Common.Descriptors;
 
 namespace DesktopApplicationTemplate.UI.Factories
 {
@@ -18,29 +18,41 @@ namespace DesktopApplicationTemplate.UI.Factories
         private readonly IServiceProvider _services;
         private readonly Func<MainView> _getMainView;
         private readonly MainViewModel _mainViewModel;
+        private readonly IServiceCatalog _catalog;
 
         public ServiceType ServiceType => ServiceType.Mqtt;
 
-        public MqttServiceFactory(IServiceProvider services, Func<MainView> getMainView, MainViewModel mainViewModel)
+        public MqttServiceFactory(IServiceProvider services, Func<MainView> getMainView, MainViewModel mainViewModel, IServiceCatalog catalog)
         {
             _services = services;
             _getMainView = getMainView;
             _mainViewModel = mainViewModel;
+            _catalog = catalog;
         }
 
-        public ServiceListModel Create(object optionsObj)
+        public ServiceListModel Create(ServiceFactoryContext context)
         {
-            var ctx = (ServiceFactoryOptions<MqttServiceOptions>)optionsObj;
-            var options = ctx.Options;
+            if (context is null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            var descriptor = _catalog.TryGetById(context.DescriptorId, out var resolved)
+                ? resolved
+                : context.Descriptor;
+
+            var options = context.GetPayload<MqttServiceOptions>() ?? new MqttServiceOptions();
 
             var newService = new ServiceListModel
             {
                 Type = ServiceType.Mqtt,
-                DescriptorId = MqttServiceDescriptor.DescriptorId,
+                DescriptorId = context.DescriptorId,
                 IsActive = false
             };
 
             newService.SetPayload(options);
+
+            newService.ApplyDescriptor(descriptor, context.ServiceName);
 
             _getMainView().GetOrCreateServicePage(newService);
 

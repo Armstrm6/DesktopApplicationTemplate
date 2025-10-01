@@ -7,6 +7,7 @@ using DesktopApplicationTemplate.UI.ViewModels.Tcp.Create;
 using DesktopApplicationTemplate.UI.Views.Tcp.Create;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
+using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Services.Common.Descriptors;
 using DesktopApplicationTemplate.UI.Configuration;
 
@@ -17,13 +18,15 @@ namespace DesktopApplicationTemplate.UI.Navigation
     {
         private readonly IServiceProvider _services;
         private readonly Func<MainView> _getMainView;
+        private readonly IServiceCatalog _catalog;
 
         public string DescriptorId => TcpServiceDescriptor.DescriptorId;
 
-        public TcpNavigationHandler(IServiceProvider services, Func<MainView> getMainView)
+        public TcpNavigationHandler(IServiceProvider services, Func<MainView> getMainView, IServiceCatalog catalog)
         {
             _services = services;
             _getMainView = getMainView;
+            _catalog = catalog;
         }
 
         public Page CreateView(string defaultName)
@@ -40,7 +43,9 @@ namespace DesktopApplicationTemplate.UI.Navigation
         public Task AddServiceAsync(string name, object options)
         {
             var mainView = _getMainView();
-            return mainView.AddServiceAsync(DescriptorId, new ServiceFactoryOptions<TcpServiceOptions>(name, (TcpServiceOptions)options));
+            _catalog.TryGetById(DescriptorId, out var descriptor);
+            var context = new ServiceFactoryContext(DescriptorId, name, options, descriptor);
+            return mainView.AddServiceAsync(context);
         }
     }
 }
