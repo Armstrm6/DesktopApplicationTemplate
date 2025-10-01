@@ -361,7 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-.codex-selfheal/
 
 # Auto-generated designer files
 *.designer.cs
