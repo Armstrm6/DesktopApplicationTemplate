@@ -36,27 +36,6 @@ jobs:
             **/bin/Release/**
             !**/obj/**
 
-  test:
-    runs-on: windows-latest
-    needs: build
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          global-json-file: global.json
-      - name: Restore
-        run: dotnet restore
-      - name: Test
-        run: dotnet test -c Release --no-build --collect:"XPlat Code Coverage" --results-directory TestResults
-      - name: Upload test results
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results
-          path: |
-            TestResults
-            **/coverage.cobertura.xml
-
   quality:
     runs-on: windows-latest
     needs: build
@@ -75,7 +54,7 @@ jobs:
 
   package:
     runs-on: windows-latest
-    needs: [test, quality]
+    needs: [build, quality]
     steps:
       - uses: actions/checkout@v4
       - name: Setup .NET

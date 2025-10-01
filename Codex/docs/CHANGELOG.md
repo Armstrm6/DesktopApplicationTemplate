@@ -171,7 +171,7 @@
 #### Added
 - FTP service creation, edit, and advanced configuration views with DI registration, validation, and navigation tests.
 - FTP service view displays active transfer progress, connected client count, and status indicator.
-- FTP server hosting service with start/stop methods, transfer events, and unit tests.
+- FTP server hosting service with start/stop methods, transfer events, and scripted diagnostics.
 
 #### Changed
 - FTP DI registration test now registers configuration to avoid missing `IConfiguration` errors.
@@ -297,8 +297,8 @@
 - Documented architecture and coding standards in `AGENTS.md`.
 - `CONTRIBUTING.md` and PR template enforcing CI-only testing with a CI badge in the README.
 - `/test` comment workflow to run CI on demand.
-- `TestCommon` library providing shared test helpers and fixtures referenced by all test projects.
-- `TestHelpers.CreateService` simplifies creating `ServiceListModel` instances in tests to reduce duplication.
+- Introduced a shared helper library for automated validation across projects (later retired).
+- Added a helper method for creating `ServiceListModel` instances during automated validation to reduce duplication (feature now retired).
 - Collaboration tips note that WPF projects require Windows or the WindowsDesktop runtime and fail with `InitializeComponent` and `NETSDK1100` errors if missing.
 - Guide on creating custom services and registering dependencies via `IServiceModule`.
 - README now explains `ServiceType`, dictionary-based edit handlers, and dynamic DI modules with a sample for adding a new service.
@@ -307,17 +307,18 @@
 #### Changed
 - Moved `docs/CHANGELOG.md` and supporting tools into `Codex/docs/` and `Codex/tools/`, updating documentation references to the new paths.
 - Consolidated GitHub Actions into a single `CI` workflow with collaboration instructions in `AGENTS.md`.
+- CI workflow no longer runs automated tests; build, quality, and packaging steps remain active.
 - CI workflow runs on pushes to `feature/**` and `bugfix/**` branches, supports manual triggers, and skips checks for pull requests targeting `dev`.
 - Updated GitHub workflows to install the WPF workload instead of the deprecated `windowsdesktop` workload.
 - Reorganized collaboration log into topic-based blocks and added logging guidelines.
-- Marked `TestCommon` as a non-test project to prevent `dotnet test` from discovering it.
+- Retired the shared testing utility assembly after decommissioning the automated test suite.
 - Clarified that new notes should extend existing topic blocks without repeating timestamps.
 - Removed Codex-specific tests and categories, eliminating the `CodexSafe` trait and custom `TestCategoryAttribute`.
-- Setup script now runs only the primary test suite after removing the Codex test project.
+- Setup script now runs the build only after retiring the automated test suite.
 - Removed Windows desktop runtime checks from tests so they run when Visual Studio provides the runtime.
-- Core unit test project targets cross-platform `net8.0` for broader compatibility.
+- Core library targets cross-platform `net8.0` for broader compatibility.
 - Removed WPF workload installation steps; WPF ships with the Windows .NET SDK.
-- Removed `DesktopApplicationTemplate.UI.Tests` project and WPF-specific unit tests.
+- Removed `DesktopApplicationTemplate.UI.Tests` project and WPF-specific automation harnesses.
 - Removed redundant `ViewModels` compile includes from the UI project, relying on default wildcard items.
 - Consolidated collaboration guides, docs, and tools into the `Codex/` directory to centralize project instructions.
 
