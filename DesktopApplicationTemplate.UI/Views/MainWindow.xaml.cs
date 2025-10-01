@@ -45,10 +45,12 @@ namespace DesktopApplicationTemplate.UI.Views
             }
             DataContext = _viewModel;
             _viewModel.AddServiceRequested += OnAddServiceRequested;
+            _viewModel.ImportFeedback += OnImportFeedback;
             MouseDown += MainView_MouseDown;
             CommandBindings.Add(new CommandBinding(SystemCommands.CloseWindowCommand, CloseCommand_Executed));
             CommandBindings.Add(new CommandBinding(SystemCommands.MinimizeWindowCommand, MinimizeCommand_Executed));
             Closing += (_, _) => _logger?.LogInformation("MainView closing");
+            Closed += (_, _) => _viewModel.ImportFeedback -= OnImportFeedback;
             ShowHome();
         }
 
@@ -146,6 +148,13 @@ namespace DesktopApplicationTemplate.UI.Views
         private void OnAddServiceRequested()
         {
             ShowCreateServiceSelectionPage();
+        }
+
+        private void OnImportFeedback(object? sender, ImportFeedbackEventArgs e)
+        {
+            var icon = e.Status == ImportFeedbackStatus.Success ? MessageBoxImage.Information : MessageBoxImage.Warning;
+            var title = e.Status == ImportFeedbackStatus.Success ? "Import Complete" : "Import Failed";
+            MessageBox.Show(this, e.Message, title, MessageBoxButton.OK, icon);
         }
 
         public void ShowCreateServiceSelectionPage()

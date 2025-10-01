@@ -5,9 +5,13 @@ namespace DesktopApplicationTemplate.UI.Services
 {
     public class FileDialogService : IFileDialogService
     {
-        public string? OpenFile()
+        public string? OpenFile(string? filter = null, string? title = null)
         {
-            var dialog = new Microsoft.Win32.OpenFileDialog();
+            var dialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Filter = string.IsNullOrWhiteSpace(filter) ? "All Files (*.*)|*.*" : filter,
+                Title = string.IsNullOrWhiteSpace(title) ? "Select File" : title
+            };
             return dialog.ShowDialog() == true ? dialog.FileName : null;
         }
 

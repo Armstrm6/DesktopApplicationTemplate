@@ -13,6 +13,6 @@ internal class StubFileDialogService : IFileDialogService
         _folderPath = folderPath;
     }
 
-    public string? OpenFile() => _filePath;
+    public string? OpenFile(string? filter = null, string? title = null) => _filePath;
     public string? SelectFolder() => _folderPath;
 }

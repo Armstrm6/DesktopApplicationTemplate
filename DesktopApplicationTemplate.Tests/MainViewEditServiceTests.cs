@@ -29,7 +29,7 @@ public class MainViewEditServiceTests
         var mocks = Enum.GetValues<ServiceType>()
             .ToDictionary(t => t, _ => new Mock<IEditServiceHandler>());
         var dict = mocks.ToDictionary(k => k.Key, v => v.Value.Object);
-        var vm = new MainViewModel(csv, networkVm, network.Object, dict);
+        var vm = TestHelpers.CreateMainViewModel(csv, networkVm, network.Object, dict);
         var service = TestHelpers.CreateService(type, "svc");
 
         vm.EditServiceCommand.Execute(service);
@@ -57,7 +57,7 @@ public class MainViewEditServiceTests
         var mocks = Enum.GetValues<ServiceType>()
             .ToDictionary(t => t, _ => new Mock<IEditServiceHandler>());
         var dict = mocks.ToDictionary(k => k.Key, v => v.Value.Object);
-        var vm = new MainViewModel(csv, networkVm, network.Object, dict);
+        var vm = TestHelpers.CreateMainViewModel(csv, networkVm, network.Object, dict);
         var service = new ServiceListModel { Type = (ServiceType)999, DisplayName = "Unknown" };
 
         vm.EditServiceCommand.Execute(service);

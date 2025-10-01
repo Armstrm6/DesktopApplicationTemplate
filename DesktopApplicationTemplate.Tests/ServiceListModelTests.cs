@@ -55,7 +55,7 @@ namespace DesktopApplicationTemplate.Tests
             var csv = new CsvService(csvVm);
             var net = new StubNetworkService();
             var netVm = new NetworkConfigurationViewModel(net);
-            var main = new MainViewModel(csv, netVm, net, new Dictionary<ServiceType, IEditServiceHandler>(), servicesFilePath: Path.Combine(tempDir, "services.json"));
+            var main = TestHelpers.CreateMainViewModel(csv, netVm, net, servicesFilePath: Path.Combine(tempDir, "services.json"));
 
             main.Services.Add(TestHelpers.CreateService(type, baseName));
             var secondName = baseName[..^1] + "2";
@@ -79,7 +79,7 @@ namespace DesktopApplicationTemplate.Tests
             var csv = new CsvService(csvVm);
             var net = new StubNetworkService();
             var netVm = new NetworkConfigurationViewModel(net);
-            var main = new MainViewModel(csv, netVm, net, new Dictionary<ServiceType, IEditServiceHandler>(), servicesFilePath: Path.Combine(tempDir, "services.json"));
+            var main = TestHelpers.CreateMainViewModel(csv, netVm, net, servicesFilePath: Path.Combine(tempDir, "services.json"));
 
             var svc1 = TestHelpers.CreateService(type, baseName);
             var svc2 = TestHelpers.CreateService(type, baseName[..^1] + "2");

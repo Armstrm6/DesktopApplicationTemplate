@@ -9,7 +9,15 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 {
     public class CreateServiceViewModel : ViewModelBase
     {
-        public record ServiceDescriptorMetadata(string DescriptorId, string DisplayLabel, string IconGlyph, ServiceType LegacyType);
+        public record ServiceDescriptorMetadata(
+            string DescriptorId,
+            string DisplayLabel,
+            string IconGlyph,
+            ServiceType? LegacyType,
+            string Category,
+            string? Description,
+            string PrimaryAccentColor,
+            string SecondaryAccentColor);
 
         private readonly IServiceCatalog _catalog;
         private readonly Dictionary<string, ServiceType> _descriptorLegacyTypes;
@@ -22,30 +30,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 ? new HashSet<string>(existingNames)
                 : new HashSet<string>();
 
-            var descriptorsWithLegacy = _catalog.Descriptors
-                .Where(descriptor => descriptor.LegacyType.HasValue)
-                .Select(descriptor =>
-                {
-                    var presentation = descriptor.Presentation;
-                    var displayLabel = !string.IsNullOrWhiteSpace(presentation.DisplayLabel)
-                        ? presentation.DisplayLabel!
-                        : descriptor.DisplayName;
-                    var iconGlyph = !string.IsNullOrWhiteSpace(presentation.IconGlyph)
-                        ? presentation.IconGlyph!
-                        : string.Empty;
-
-                    return new ServiceDescriptorMetadata(
-                        descriptor.Id,
-                        displayLabel,
-                        iconGlyph,
-                        descriptor.LegacyType!.Value);
-                })
-                .ToList();
-
-            _descriptorLegacyTypes = descriptorsWithLegacy
-                .ToDictionary(metadata => metadata.DescriptorId, metadata => metadata.LegacyType, StringComparer.Ordinal);
-
-            ServiceDescriptors = new ObservableCollection<ServiceDescriptorMetadata>(descriptorsWithLegacy);
+            _descriptorLegacyTypes = new Dictionary<string, ServiceType>(StringComparer.Ordinal);
+            ServiceDescriptors = new ObservableCollection<ServiceDescriptorMetadata>();
+            _catalog.DescriptorsChanged += (_, _) => RefreshServiceDescriptors();
+            RefreshServiceDescriptors();
         }
 
         public ObservableCollection<ServiceDescriptorMetadata> ServiceDescriptors { get; }
@@ -100,5 +88,52 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         }
 
         // OnPropertyChanged provided by ViewModelBase
+
+        private void RefreshServiceDescriptors()
+        {
+            var descriptorsWithLegacy = _catalog.Descriptors
+                .Select(descriptor =>
+                {
+                    var presentation = descriptor.Presentation;
+                    var displayLabel = !string.IsNullOrWhiteSpace(presentation.DisplayLabel)
+                        ? presentation.DisplayLabel!
+                        : descriptor.DisplayName;
+                    var iconGlyph = !string.IsNullOrWhiteSpace(presentation.IconGlyph)
+                        ? presentation.IconGlyph!
+                        : string.Empty;
+                    var primary = !string.IsNullOrWhiteSpace(presentation.PrimaryAccentColor)
+                        ? presentation.PrimaryAccentColor!
+                        : string.Empty;
+                    var secondary = !string.IsNullOrWhiteSpace(presentation.SecondaryAccentColor)
+                        ? presentation.SecondaryAccentColor!
+                        : string.Empty;
+
+                    return new ServiceDescriptorMetadata(
+                        descriptor.Id,
+                        displayLabel,
+                        iconGlyph,
+                        descriptor.LegacyType,
+                        descriptor.Category,
+                        descriptor.Description,
+                        primary,
+                        secondary);
+                })
+                .ToList();
+
+            _descriptorLegacyTypes.Clear();
+            foreach (var metadata in descriptorsWithLegacy)
+            {
+                if (metadata.LegacyType is { } legacyType)
+                {
+                    _descriptorLegacyTypes[metadata.DescriptorId] = legacyType;
+                }
+            }
+
+            ServiceDescriptors.Clear();
+            foreach (var metadata in descriptorsWithLegacy)
+            {
+                ServiceDescriptors.Add(metadata);
+            }
+        }
     }
 }

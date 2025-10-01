@@ -27,22 +27,9 @@ public static class ServiceModuleExtensions
             assemblies = AppDomain.CurrentDomain.GetAssemblies();
         }
 
-        var moduleType = typeof(IServiceModule);
-        var modules = assemblies
-            .SelectMany(a => a.GetTypes())
-            .Where(t => moduleType.IsAssignableFrom(t) && !t.IsAbstract && !t.IsInterface)
-            .Select(t => Activator.CreateInstance(t))
-            .OfType<IServiceModule>()
-            .ToList();
-
-        var descriptors = new List<IServiceDescriptor>();
-        foreach (var module in modules)
-        {
-            module.RegisterServices(services);
-            var moduleDescriptors = module.DescribeServices() ?? Enumerable.Empty<IServiceDescriptor>();
-            descriptors.AddRange(moduleDescriptors);
-        }
-
+        var modules = ServiceModuleDiscovery.InstantiateModules(assemblies);
+        ServiceModuleDiscovery.RegisterModules(modules, services);
+        var descriptors = ServiceModuleDiscovery.DescribeServices(modules);
         var catalog = new ServiceCatalog(descriptors);
         services.TryAddSingleton<IServiceCatalog>(_ => catalog);
         return catalog;

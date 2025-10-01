@@ -16,6 +16,7 @@ using MQTTnet.Client;
 using Microsoft.Extensions.Options;
 using MQTTnet;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace DesktopApplicationTemplate.Tests
 {
@@ -28,7 +29,7 @@ namespace DesktopApplicationTemplate.Tests
             var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
             var network = new Mock<INetworkConfigurationService>();
             var networkVm = new NetworkConfigurationViewModel(network.Object);
-            var vm = new MainViewModel(csv, networkVm, network.Object, new Dictionary<ServiceType, IEditServiceHandler>());
+            var vm = TestHelpers.CreateMainViewModel(csv, networkVm, network.Object);
             var s1 = TestHelpers.CreateService(ServiceType.Http, "HTTP1");
             s1.IsActive = false;
             s1.Order = 0;
@@ -59,7 +60,7 @@ namespace DesktopApplicationTemplate.Tests
             var oldPath = ServicePersistence.FilePath;
             try
             {
-                var vm = new MainViewModel(csv, networkVm, network.Object, new Dictionary<ServiceType, IEditServiceHandler>(), logger.Object, servicesPath);
+                var vm = TestHelpers.CreateMainViewModel(csv, networkVm, network.Object, loggingService: logger.Object, servicesFilePath: servicesPath);
                 var service = TestHelpers.CreateService(type, name);
                 vm.Services.Add(service);
                 vm.SelectedService = service;
@@ -87,7 +88,7 @@ namespace DesktopApplicationTemplate.Tests
             var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
             var network = new Mock<INetworkConfigurationService>();
             var networkVm = new NetworkConfigurationViewModel(network.Object);
-            var vm = new MainViewModel(csv, networkVm, network.Object, new Dictionary<ServiceType, IEditServiceHandler>());
+            var vm = TestHelpers.CreateMainViewModel(csv, networkVm, network.Object);
             var svc = TestHelpers.CreateService(type, name);
             svc.Logs.Add(new LogEntry { Message = "test" });
             vm.Services.Add(svc);
@@ -107,7 +108,7 @@ namespace DesktopApplicationTemplate.Tests
             var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
             var network = new Mock<INetworkConfigurationService>();
             var networkVm = new NetworkConfigurationViewModel(network.Object);
-            var vm = new MainViewModel(csv, networkVm, network.Object, new Dictionary<ServiceType, IEditServiceHandler>());
+            var vm = TestHelpers.CreateMainViewModel(csv, networkVm, network.Object);
             var svc = TestHelpers.CreateService(type, name);
             svc.Logs.Add(new LogEntry { Message = "first" });
             vm.Services.Add(svc);
@@ -130,7 +131,7 @@ namespace DesktopApplicationTemplate.Tests
             var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
             var network = new Mock<INetworkConfigurationService>();
             var networkVm = new NetworkConfigurationViewModel(network.Object);
-            var vm = new MainViewModel(csv, networkVm, network.Object, new Dictionary<ServiceType, IEditServiceHandler>());
+            var vm = TestHelpers.CreateMainViewModel(csv, networkVm, network.Object);
             bool raised = false;
             vm.PropertyChanged += (s, e) => { if (e.PropertyName == "DisplayLogs") raised = true; };
             var svc = TestHelpers.CreateService(type, name);
@@ -152,7 +153,7 @@ namespace DesktopApplicationTemplate.Tests
             var networkVm = new NetworkConfigurationViewModel(network.Object);
             var handler = new Mock<IEditServiceHandler>();
             var handlers = new Dictionary<ServiceType, IEditServiceHandler> { { ServiceType.Mqtt, handler.Object } };
-            var vm = new MainViewModel(csv, networkVm, network.Object, handlers);
+            var vm = TestHelpers.CreateMainViewModel(csv, networkVm, network.Object, handlers);
             var svc = TestHelpers.CreateService(ServiceType.Mqtt, "Test");
             vm.Services.Add(svc);
 
@@ -162,10 +163,10 @@ namespace DesktopApplicationTemplate.Tests
             ConsoleTestLogger.LogPass();
         }
 
-        private class TestMainViewModel : MainViewModel
+        private sealed class TestMainViewModel : MainViewModel
         {
             public TestMainViewModel(CsvService csv, NetworkConfigurationViewModel networkConfig, INetworkConfigurationService networkService)
-                : base(csv, networkConfig, networkService, new Dictionary<ServiceType, IEditServiceHandler>())
+                : base(csv, networkConfig, networkService, new FakeServiceUiRegistry(), FakeServiceCatalog.CreateWithAllLegacyTypes(), new StubFileDialogService(), new TestPluginImportService())
             {
             }
 
@@ -174,6 +175,12 @@ namespace DesktopApplicationTemplate.Tests
                 Services.Add(svc);
                 OnPropertyChanged(nameof(ServicesCreated));
                 OnPropertyChanged(nameof(CurrentActiveServices));
+            }
+
+            private sealed class TestPluginImportService : IPluginImportService
+            {
+                public Task<PluginImportResult> ImportAsync(string sourcePath, CancellationToken cancellationToken = default)
+                    => Task.FromResult(new PluginImportResult(false, string.Empty, null, Array.Empty<IServiceDescriptor>()));
             }
         }
 
@@ -234,7 +241,7 @@ namespace DesktopApplicationTemplate.Tests
             var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
             var network = new Mock<INetworkConfigurationService>();
             var networkVm = new NetworkConfigurationViewModel(network.Object);
-            var vm = new MainViewModel(csv, networkVm, network.Object, new Dictionary<ServiceType, IEditServiceHandler>());
+            var vm = TestHelpers.CreateMainViewModel(csv, networkVm, network.Object);
 
             bool raised = false;
             vm.AddServiceRequested += () => raised = true;

@@ -22,7 +22,7 @@ namespace DesktopApplicationTemplate.Tests
             var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
             var network = new Mock<INetworkConfigurationService>();
             var networkVm = new NetworkConfigurationViewModel(network.Object);
-            var vm = new MainViewModel(csv, networkVm, network.Object, new Dictionary<ServiceType, IEditServiceHandler>());
+            var vm = TestHelpers.CreateMainViewModel(csv, networkVm, network.Object);
             var svc1 = TestHelpers.CreateService(ServiceType.Http, "HTTP1");
             svc1.IsActive = true;
             svc1.Order = 0;

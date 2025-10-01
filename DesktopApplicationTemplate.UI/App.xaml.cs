@@ -111,6 +111,7 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<ILoggingService, LoggingService>();
             services.AddSingleton<IMessageRoutingService, MessageRoutingService>();
             services.AddSingleton<IFileDialogService, FileDialogService>();
+            services.AddSingleton<IPluginImportService, PluginImportService>();
             services.AddCommonServices();
             services.AddSingleton<SaveConfirmationHelper>();
             services.AddSingleton<CloseConfirmationHelper>();
