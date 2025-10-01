@@ -3,16 +3,14 @@ name: CI
 on:
   push:
     branches:
-      - main
-      - dev
-      - feature/**
-      - bugfix/**
+      - master
+      - beta
     tags:
       - 'v*'
   pull_request:
     branches:
-      - main
-      # dev branch intentionally excluded so PRs targeting dev skip CI checks
+      - master
+      - beta
   workflow_dispatch:
 
 jobs:
