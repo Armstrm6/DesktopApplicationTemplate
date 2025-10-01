@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Models;
 
 namespace ServicePluginTemplate.Descriptors;
 
