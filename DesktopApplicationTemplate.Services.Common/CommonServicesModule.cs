@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using DesktopApplicationTemplate.Core.Modules;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Services.Common.Descriptors;
+using DesktopApplicationTemplate.Services.Common.Runtime;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DesktopApplicationTemplate.Services.Common;
@@ -26,6 +27,13 @@ public sealed class CommonServicesModule : IServiceModule
         yield return new FileObserverServiceDescriptor();
         yield return new ScpServiceDescriptor();
         yield return new TcpServiceDescriptor();
-        yield return new HeartbeatServiceDescriptor();
+        yield return new HeartbeatServiceDescriptor(
+            factories: new[]
+            {
+                ServiceFactoryBinding.Create(
+                    ServiceFactoryKind.Runtime,
+                    typeof(IServiceRuntimeFactory),
+                    sp => sp.GetRequiredService<HeartbeatRuntimeFactory>())
+            });
     }
 }
