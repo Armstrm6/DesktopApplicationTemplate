@@ -38,3 +38,15 @@ Modules are discovered at startup by calling `services.AddServiceModules()` duri
 4. **Implement an `IServiceModule`** – register the service, view models, and views with the DI container.
 5. **Wire up navigation** – add create and edit handlers or factory entries so the main window can navigate to the new views.
 6. **Test and document** – run `dotnet` commands and update docs as needed.
+
+## Package and distribute plug-ins
+
+1. **Import the packaging targets** – reference `ServicePlugin.Packaging` by adding the props/targets pair to the plug-in `.csproj`. This enables the `PackServicePlugin` target after every build.
+2. **Author `plugin.manifest.json`** – populate the manifest with the plug-in id, name, version, entry assembly, and any assemblies that expose `IServiceModule` implementations. The loader validates the manifest against the schema documented in `Codex/docs/PluginManifestSchema.md`.
+3. **Build to create archives** – run `dotnet build` for the plug-in. The packaging target copies the manifest, compiled assemblies, and dependencies into `.ccp` and `.chapp` archives under `bin/<configuration>/<tfm>/plugins`.
+4. **Distribute the archive** – drop the generated archive into the host's plug-in directory (or publish it via your preferred channel). The loader extracts each archive into its versioned cache and automatically registers the descriptors.
+
+### Reusable resources
+
+- **Template** – `Templates/ServicePluginTemplate` exposes a `dotnet new codex-serviceplugin` template that scaffolds a descriptor, runtime factory, manifest, and packaging imports.
+- **Samples** – `Samples/TcpRelayPlugin` and `Samples/HttpRelayPlugin` provide ready-to-build examples that produce distributable archives during CI, making them ideal smoke tests for packaging changes.

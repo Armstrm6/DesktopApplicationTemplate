@@ -1,0 +1,11 @@
+<Project>
+  <PropertyGroup>
+    <ServicePluginManifest Condition="'$(ServicePluginManifest)' == ''">$(MSBuildProjectDirectory)\plugin.manifest.json</ServicePluginManifest>
+    <ServicePluginPackageOutput Condition="'$(ServicePluginPackageOutput)' == ''">$(MSBuildProjectDirectory)\$(OutputPath)plugins\</ServicePluginPackageOutput>
+    <ServicePluginPackageId Condition="'$(ServicePluginPackageId)' == ''">$(AssemblyName)</ServicePluginPackageId>
+    <ServicePluginPackageVersion Condition="'$(ServicePluginPackageVersion)' == ''">$(Version)</ServicePluginPackageVersion>
+    <ServicePluginArchiveExtensions Condition="'$(ServicePluginArchiveExtensions)' == ''">.ccp</ServicePluginArchiveExtensions>
+    <ServicePluginIncludeReferenceCopyLocal Condition="'$(ServicePluginIncludeReferenceCopyLocal)' == ''">true</ServicePluginIncludeReferenceCopyLocal>
+    <ServicePluginIncludeEntryAssembly Condition="'$(ServicePluginIncludeEntryAssembly)' == ''">true</ServicePluginIncludeEntryAssembly>
+  </PropertyGroup>
+</Project>
