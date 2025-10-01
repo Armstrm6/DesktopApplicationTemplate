@@ -324,14 +324,16 @@ namespace DesktopApplicationTemplate.Tests
             {
                 var descriptor = new CustomHttpDescriptor();
                 var catalog = new ServiceCatalog(new[] { descriptor });
-                var legacyJson = @"[
-    {
-        ""DisplayName"": ""HTTP Legacy"",
-        ""LegacyType"": ""http"",
-        ""LegacyTypeName"": ""Http"",
-        ""SerializedPayload"": ""{\\\"BaseUrl\\\":\\\"https://legacy.example\\\"}""
-    }
-]";
+                var legacyJson = """
+                [
+                    {
+                        "DisplayName": "HTTP Legacy",
+                        "LegacyType": "http",
+                        "LegacyTypeName": "Http",
+                        "SerializedPayload": "{\"BaseUrl\":\"https://legacy.example\"}"
+                    }
+                ]
+                """;
 
                 File.WriteAllText(ServicePersistence.FilePath, legacyJson);
                 var loaded = ServicePersistence.Load(catalog);
