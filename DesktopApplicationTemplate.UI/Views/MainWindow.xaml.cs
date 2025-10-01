@@ -14,6 +14,7 @@ using System.Windows.Controls.Primitives;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
@@ -86,7 +87,8 @@ namespace DesktopApplicationTemplate.UI.Views
 
         public Page? GetOrCreateServicePage(ServiceListModel svc)
         {
-            if (!TryGetDescriptorId(svc.Type, out var descriptorId))
+            var descriptorId = svc.DescriptorId;
+            if (string.IsNullOrWhiteSpace(descriptorId) && !TryGetDescriptorId(svc.Type, out descriptorId))
             {
                 return svc.ServicePage;
             }
@@ -149,13 +151,15 @@ namespace DesktopApplicationTemplate.UI.Views
             _createServicePage = page;
             page.ServiceCreated += (name, type) =>
             {
+                var descriptor = ResolveDescriptor(type);
                 var svc = new ServiceListModel
                 {
-                    DisplayName = $"{type.ToLegacyString()} - {name}",
-                    Type = type,
+                    Type = descriptor?.LegacyType ?? type,
+                    DescriptorId = descriptor?.Id ?? type.ToDescriptorId(),
                     IsActive = false
                 };
-                svc.SetColorsByType();
+
+                svc.ApplyDescriptor(descriptor, name);
                 svc.LogAdded += _viewModel.OnServiceLogAdded;
                 svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
                 GetOrCreateServicePage(svc);
@@ -164,7 +168,9 @@ namespace DesktopApplicationTemplate.UI.Views
                 _viewModel.SelectedService = svc;
                 ServiceList.ScrollIntoView(svc);
                 if (svc.ServicePage != null)
+                {
                     ShowPage(svc.ServicePage);
+                }
                 _ = _viewModel.SaveServicesAsync();
             };
             page.ServiceTypeSelected += NavigateTo;
@@ -205,9 +211,18 @@ namespace DesktopApplicationTemplate.UI.Views
                 return;
             }
 
+            var descriptor = ResolveDescriptor(descriptorId);
+            var name = ExtractFactoryName(options);
+            var payload = ExtractFactoryPayload(options);
+
             var factory = factoryFactory();
             var svc = factory.Create(options);
-            svc.SetColorsByType();
+            if (payload is not null && svc.DescriptorPayload is null)
+            {
+                svc.DescriptorPayload = payload;
+            }
+
+            svc.ApplyDescriptor(descriptor, name);
             svc.LogAdded += _viewModel.OnServiceLogAdded;
             svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
 
@@ -216,14 +231,66 @@ namespace DesktopApplicationTemplate.UI.Views
             _viewModel.SelectedService = svc;
             ServiceList.ScrollIntoView(svc);
             if (svc.ServicePage != null)
+            {
                 ShowPage(svc.ServicePage);
+            }
+
             await _viewModel.SaveServicesAsync();
             _logger?.LogDebug("AddService workflow completed");
         }
 
+        private IServiceDescriptor? ResolveDescriptor(ServiceType serviceType) => ResolveDescriptor(null, serviceType);
+
+        private IServiceDescriptor? ResolveDescriptor(string descriptorId) => ResolveDescriptor(descriptorId, null);
+
+        private IServiceDescriptor? ResolveDescriptor(string? descriptorId, ServiceType? serviceType)
+        {
+            if (!string.IsNullOrWhiteSpace(descriptorId) && _catalog.TryGetById(descriptorId!, out var descriptor))
+            {
+                return descriptor;
+            }
+
+            if (serviceType.HasValue && _catalog.TryGetByLegacyType(serviceType.Value, out descriptor))
+            {
+                return descriptor;
+            }
+
+            if (serviceType.HasValue && _catalog.LegacyMap.TryGetValue(serviceType.Value, out var fallbackId) && _catalog.TryGetById(fallbackId, out descriptor))
+            {
+                return descriptor;
+            }
+
+            return null;
+        }
+
+        private string GetDisplayPrefix(ServiceListModel svc)
+        {
+            var descriptor = ResolveDescriptor(svc.DescriptorId, svc.Type);
+            if (descriptor is not null)
+            {
+                var presentation = descriptor.Presentation;
+                if (!string.IsNullOrWhiteSpace(presentation.DisplayLabel))
+                {
+                    return presentation.DisplayLabel!;
+                }
+
+                if (!string.IsNullOrWhiteSpace(descriptor.DisplayName))
+                {
+                    return descriptor.DisplayName;
+                }
+            }
+
+            return svc.Type.ToLegacyString();
+        }
+
+        private static string? ExtractFactoryName(object? options) => options?.GetType().GetProperty("Name")?.GetValue(options) as string;
+
+        private static object? ExtractFactoryPayload(object? options) => options?.GetType().GetProperty("Options")?.GetValue(options);
+
         private bool TryGetDescriptorId(ServiceType serviceType, out string descriptorId)
         {
-            if (_catalog.TryGetByLegacyType(serviceType, out var descriptor))
+            var descriptor = ResolveDescriptor(serviceType);
+            if (descriptor is not null)
             {
                 descriptorId = descriptor.Id;
                 return true;
@@ -310,7 +377,7 @@ namespace DesktopApplicationTemplate.UI.Views
                     {
                         namePart = _viewModel.GenerateServiceName(svc.Type);
                     }
-                    svc.DisplayName = $"{svc.Type.ToLegacyString()} - {namePart}";
+                    svc.DisplayName = $"{GetDisplayPrefix(svc)} - {namePart}";
                     await _viewModel.SaveServicesAsync();
                 }
             }

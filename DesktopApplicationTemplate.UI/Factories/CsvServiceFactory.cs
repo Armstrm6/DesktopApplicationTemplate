@@ -3,6 +3,7 @@ using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.Models;
+using DesktopApplicationTemplate.Services.Common.Descriptors;
 
 namespace DesktopApplicationTemplate.UI.Factories
 {
@@ -20,16 +21,16 @@ namespace DesktopApplicationTemplate.UI.Factories
         public ServiceListModel Create(object optionsObj)
         {
             var ctx = (ServiceFactoryOptions<CsvServiceOptions>)optionsObj;
-            var name = ctx.Name;
             var options = ctx.Options;
 
             var svc = new ServiceListModel
             {
-                DisplayName = $"{ServiceType.Csv.ToLegacyString()} - {name}",
                 Type = ServiceType.Csv,
-                IsActive = false,
-                CsvOptions = options
+                DescriptorId = CsvServiceDescriptor.DescriptorId,
+                IsActive = false
             };
+
+            svc.SetPayload(options);
 
             _getMainView().GetOrCreateServicePage(svc);
 

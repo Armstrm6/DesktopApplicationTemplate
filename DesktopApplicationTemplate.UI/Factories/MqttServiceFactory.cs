@@ -9,6 +9,7 @@ using DesktopApplicationTemplate.UI.Views.Mqtt.Edit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using DesktopApplicationTemplate.Models;
+using DesktopApplicationTemplate.Services.Common.Descriptors;
 
 namespace DesktopApplicationTemplate.UI.Factories
 {
@@ -30,15 +31,16 @@ namespace DesktopApplicationTemplate.UI.Factories
         public ServiceListModel Create(object optionsObj)
         {
             var ctx = (ServiceFactoryOptions<MqttServiceOptions>)optionsObj;
-            var name = ctx.Name;
             var options = ctx.Options;
 
             var newService = new ServiceListModel
             {
-                DisplayName = $"MQTT - {name}",
                 Type = ServiceType.Mqtt,
+                DescriptorId = MqttServiceDescriptor.DescriptorId,
                 IsActive = false
             };
+
+            newService.SetPayload(options);
 
             _getMainView().GetOrCreateServicePage(newService);
 

@@ -6,6 +6,8 @@ using DesktopApplicationTemplate.UI.ViewModels.Ftp.Advanced;
 using DesktopApplicationTemplate.UI.Views.Ftp.Edit;
 using DesktopApplicationTemplate.UI.Views.Ftp.Advanced;
 using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Models;
+using DesktopApplicationTemplate.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -32,13 +34,22 @@ public class FtpEditServiceHandler : IEditServiceHandler
         var mainView = _getMainView();
         var mainViewModel = _getMainViewModel();
         var ftpPage = mainView.GetOrCreateServicePage(service);
-        var options = service.FtpOptions ?? new FtpServerOptions();
+        var payload = service.GetPayload<FtpServerOptions>();
+        if (payload is null)
+        {
+            payload = new FtpServerOptions();
+            service.SetPayload(payload);
+        }
+
+        var options = payload;
         var vm = ActivatorUtilities.CreateInstance<FtpServerEditViewModel>(_services, service.DisplayName.Split(" - ").Last(), options);
         var editView = ActivatorUtilities.CreateInstance<FtpServerEditView>(_services, vm);
         vm.ServiceSaved += (name, opts) =>
         {
-            service.DisplayName = $"FTP Server - {name}";
-            service.FtpOptions = opts;
+            var catalog = _services.GetRequiredService<IServiceCatalog>();
+            var descriptor = ResolveDescriptor(catalog, service.DescriptorId, service.Type);
+            service.ApplyDescriptor(descriptor, name);
+            service.SetPayload(opts);
             var opt = _services.GetRequiredService<IOptions<FtpServerOptions>>().Value;
             opt.Port = opts.Port;
             opt.RootPath = opts.RootPath;
@@ -65,6 +76,26 @@ public class FtpEditServiceHandler : IEditServiceHandler
         };
         mainView.ShowPage(editView);
         _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
+}
+
+    private static IServiceDescriptor? ResolveDescriptor(IServiceCatalog catalog, string descriptorId, ServiceType serviceType)
+    {
+        if (!string.IsNullOrWhiteSpace(descriptorId) && catalog.TryGetById(descriptorId, out var byId))
+        {
+            return byId;
+        }
+
+        if (catalog.TryGetByLegacyType(serviceType, out var legacy))
+        {
+            return legacy;
+        }
+
+        if (catalog.LegacyMap.TryGetValue(serviceType, out var fallbackId) && catalog.TryGetById(fallbackId, out var fallback))
+        {
+            return fallback;
+        }
+
+        return null;
     }
 }
 

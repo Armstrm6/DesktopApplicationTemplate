@@ -97,7 +97,7 @@ public class TcpServiceMessagesViewModelTests
     public void ServiceName_NoPriorMessage_UsesDefault()
     {
         var service = TestHelpers.CreateService(ServiceType.Tcp, "svc");
-        service.TcpOptions = new TcpServiceOptions();
+        service.SetPayload(new TcpServiceOptions());
         var routing = new MessageRoutingService();
         var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), routing);
         vm.SetService(service);
@@ -111,7 +111,7 @@ public class TcpServiceMessagesViewModelTests
     public void ServiceName_NoPriorMessage_UsesRoutingMessage()
     {
         var service = TestHelpers.CreateService(ServiceType.Tcp, "svc");
-        service.TcpOptions = new TcpServiceOptions();
+        service.SetPayload(new TcpServiceOptions());
         var routing = new MessageRoutingService();
         routing.UpdateMessage(ServiceType.Tcp, "svc", "last");
         var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), routing);
@@ -125,7 +125,7 @@ public class TcpServiceMessagesViewModelTests
     public void ServiceName_WithPriorMessage_UsesStored()
     {
         var service = TestHelpers.CreateService(ServiceType.Tcp, "svc");
-        service.TcpOptions = new TcpServiceOptions { LastTestMessage = "hello" };
+        service.SetPayload(new TcpServiceOptions { LastTestMessage = "hello" });
         var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
         vm.SetService(service);
 
@@ -137,7 +137,7 @@ public class TcpServiceMessagesViewModelTests
     {
         var options = new TcpServiceOptions();
         var service = TestHelpers.CreateService(ServiceType.Tcp, "svc");
-        service.TcpOptions = options;
+        service.SetPayload(options);
         var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
         vm.SetService(service);
         vm.TestMessage = "test";
@@ -152,7 +152,7 @@ public class TcpServiceMessagesViewModelTests
     {
         var options = new TcpServiceOptions();
         var service = TestHelpers.CreateService(ServiceType.Tcp, "svc");
-        service.TcpOptions = options;
+        service.SetPayload(options);
         var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
         vm.SetService(service);
         vm.Script = "return message;";
@@ -167,7 +167,7 @@ public class TcpServiceMessagesViewModelTests
     {
         var options = new TcpServiceOptions();
         var service = TestHelpers.CreateService(ServiceType.Tcp, "svc");
-        service.TcpOptions = options;
+        service.SetPayload(options);
         var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
         vm.SetService(service);
         vm.Script = "string Process(string message) => message + \"!\";";
@@ -183,7 +183,7 @@ public class TcpServiceMessagesViewModelTests
     public void SetService_LoadsScript()
     {
         var service = TestHelpers.CreateService(ServiceType.Tcp, "svc");
-        service.TcpOptions = new TcpServiceOptions { Script = "return message;" };
+        service.SetPayload(new TcpServiceOptions { Script = "return message;" });
         var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
 
         vm.SetService(service);
@@ -195,7 +195,7 @@ public class TcpServiceMessagesViewModelTests
     public void SetService_NoScript_UsesDefault()
     {
         var service = TestHelpers.CreateService(ServiceType.Tcp, "svc");
-        service.TcpOptions = new TcpServiceOptions();
+        service.SetPayload(new TcpServiceOptions());
         var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
 
         vm.SetService(service);
@@ -208,7 +208,7 @@ public class TcpServiceMessagesViewModelTests
     {
         var options = new TcpServiceOptions();
         var service = TestHelpers.CreateService(ServiceType.Tcp, "svc");
-        service.TcpOptions = options;
+        service.SetPayload(options);
         var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
         vm.SetService(service);
         vm.TestMessage = "ping";
@@ -225,7 +225,7 @@ public class TcpServiceMessagesViewModelTests
     {
         var options = new TcpServiceOptions();
         var service = TestHelpers.CreateService(ServiceType.Tcp, "svc");
-        service.TcpOptions = options;
+        service.SetPayload(options);
         var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), new MessageRoutingService());
         vm.SetService(service);
         vm.TestMessage = "ping";
@@ -285,7 +285,7 @@ public class TcpServiceMessagesViewModelTests
     {
         var options = new TcpServiceOptions();
         var service = TestHelpers.CreateService(ServiceType.Tcp, "svc");
-        service.TcpOptions = options;
+        service.SetPayload(options);
         var routing = new MessageRoutingService();
         var vm = new TcpServiceMessagesViewModel(new ServiceMessageTableViewModel(), routing);
         vm.SetService(service);
