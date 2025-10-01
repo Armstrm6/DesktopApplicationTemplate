@@ -11,6 +11,7 @@ using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -201,7 +202,7 @@ namespace DesktopApplicationTemplate.Persistence
         private static object? ResolveLegacyPayload(ServiceType type, LegacyServiceInfo record, IServiceDescriptor? descriptor, ILoggingService? logger) => type switch
         {
             ServiceType.Tcp => record.TcpOptions,
-            ServiceType.Ftp => record.FtpOptions,
+            ServiceType.Ftp => DeserializeLegacyPayload(record.FtpOptions, descriptor, logger),
             ServiceType.Http => DeserializeLegacyPayload(record.HttpOptions, descriptor, logger),
             ServiceType.Csv => record.CsvOptions,
             _ => null
@@ -470,7 +471,7 @@ namespace DesktopApplicationTemplate.Persistence
         public int Order { get; set; }
         public List<string>? AssociatedServices { get; set; }
         public TcpServiceOptions? TcpOptions { get; set; }
-        public FtpServerOptions? FtpOptions { get; set; }
+        public JsonElement? FtpOptions { get; set; }
         public JsonElement? HttpOptions { get; set; }
         public CsvServiceOptions? CsvOptions { get; set; }
         public double TotalExecutionTimeMs { get; set; }
