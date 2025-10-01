@@ -1,0 +1,12 @@
+{
+  "id": "DesktopApplicationTemplate.Http.UI",
+  "name": "HTTP Service UI",
+  "version": "1.0.0",
+  "entryAssembly": "DesktopApplicationTemplate.Http.UI.dll",
+  "serviceAssemblies": [
+    "DesktopApplicationTemplate.Http.UI.dll"
+  ],
+  "probingPaths": [
+    "libs"
+  ]
+}

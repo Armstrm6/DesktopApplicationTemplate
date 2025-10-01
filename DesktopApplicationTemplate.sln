@@ -27,6 +27,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MqttPackage", "Services\Mqt
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MqttUI", "Services\Mqtt\MqttUI\MqttUI.csproj", "{9D22FB33-5081-418F-961A-20CFEFD1C584}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpPackage", "Services\Http\HttpPackage\HttpPackage.csproj", "{53F0BA0F-77E0-432E-A0F6-0A09BEED1B40}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpUI", "Services\Http\HttpUI\HttpUI.csproj", "{A8B98B13-DA95-43BA-B2F4-8604368818E7}"
+EndProject
 
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -78,6 +82,14 @@ Global
                 {533D7FA1-8C3E-49AC-ACA2-E0D95F2C764D}.Debug|Any CPU.Build.0 = Debug|Any CPU
                 {533D7FA1-8C3E-49AC-ACA2-E0D95F2C764D}.Release|Any CPU.ActiveCfg = Release|Any CPU
                 {533D7FA1-8C3E-49AC-ACA2-E0D95F2C764D}.Release|Any CPU.Build.0 = Release|Any CPU
+                {53F0BA0F-77E0-432E-A0F6-0A09BEED1B40}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                {53F0BA0F-77E0-432E-A0F6-0A09BEED1B40}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                {53F0BA0F-77E0-432E-A0F6-0A09BEED1B40}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                {53F0BA0F-77E0-432E-A0F6-0A09BEED1B40}.Release|Any CPU.Build.0 = Release|Any CPU
+                {A8B98B13-DA95-43BA-B2F4-8604368818E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                {A8B98B13-DA95-43BA-B2F4-8604368818E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                {A8B98B13-DA95-43BA-B2F4-8604368818E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                {A8B98B13-DA95-43BA-B2F4-8604368818E7}.Release|Any CPU.Build.0 = Release|Any CPU
                 {9D22FB33-5081-418F-961A-20CFEFD1C584}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
                 {9D22FB33-5081-418F-961A-20CFEFD1C584}.Debug|Any CPU.Build.0 = Debug|Any CPU
                 {9D22FB33-5081-418F-961A-20CFEFD1C584}.Release|Any CPU.ActiveCfg = Release|Any CPU
