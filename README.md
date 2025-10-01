@@ -154,6 +154,28 @@ Dynamic DI modules are enabled by `services.AddServiceModules()`, which scans as
 
 4. Wire up navigation and edit handlers for the new `ServiceType` and document any changes.
 
+## Packaging service plug-ins
+
+The repository ships with an MSBuild packaging project that bundles plug-in assets into distributable `.ccp` and `.chapp` archives. To enable packaging in a plug-in project:
+
+1. Import `ServicePlugin.Packaging` before and after the project body:
+
+   ```xml
+   <Import Project="..\..\ServicePlugin.Packaging\ServicePlugin.Packaging.props" />
+   ...
+   <Import Project="..\..\ServicePlugin.Packaging\ServicePlugin.Packaging.targets" />
+   ```
+
+2. Author a `plugin.manifest.json` file at the project root. The manifest must identify the plug-in id, name, version, entry assembly, and any assemblies that expose `IServiceModule` implementations. See `Codex/docs/PluginManifestSchema.md` for field descriptions.
+3. Build the plug-in with `dotnet build`. The packaging targets run after compilation and emit archives to `bin/<configuration>/<tfm>/plugins`. Set `ServicePluginArchiveExtensions` to `.ccp`, `.chapp`, or both (the default).
+
+Each archive contains the manifest, compiled descriptors, and copy-local dependencies under `libs/`. Hosts can drop either archive into the plug-in directory and the loader will extract it into the cache configured by `PluginLoaderOptions`.
+
+### Templates and samples
+
+- **Template:** `Templates/ServicePluginTemplate` publishes a `dotnet new codex-serviceplugin` template that scaffolds a plug-in project with descriptor, runtime factory, manifest, and packaging imports. Install it locally with `dotnet new install Templates/ServicePluginTemplate` and scaffold new plug-ins under a folder where `..\..\ServicePlugin.Packaging` resolves to the repository root.
+- **Samples:** `Samples/TcpRelayPlugin` and `Samples/HttpRelayPlugin` demonstrate packaging refactored services. Both projects import `ServicePlugin.Packaging` and build `.ccp` / `.chapp` archives during CI. Use them as regression tests when evolving the packaging logic.
+
 ## Testing services locally
 
 After building the solution, run the UI project and navigate to the desired service page. Most services expose a test action (for example, "Send" on the HTTP page or "Test Script" on the TCP page) that can be executed locally. Logs for each service are displayed next to the editor fields.

@@ -1,0 +1,12 @@
+{
+  "id": "Sample.HttpRelay",
+  "name": "Sample HTTP Relay",
+  "version": "1.0.0",
+  "entryAssembly": "HttpRelayPlugin.dll",
+  "serviceAssemblies": [
+    "HttpRelayPlugin.dll"
+  ],
+  "probingPaths": [
+    "libs"
+  ]
+}

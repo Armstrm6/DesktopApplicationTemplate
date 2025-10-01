@@ -1,0 +1,68 @@
+<Project>
+  <UsingTask TaskName="ServicePlugin.Packaging.Tasks.CreateServicePluginArchive"
+             TaskFactory="RoslynCodeTaskFactory"
+             AssemblyName="ServicePlugin.Packaging.Tasks">
+    <Task>
+      <Reference Include="System" />
+      <Reference Include="System.Core" />
+      <Reference Include="System.Runtime" />
+      <Reference Include="System.IO.Compression" />
+      <Reference Include="Microsoft.Build.Framework" />
+      <Reference Include="Microsoft.Build.Utilities.Core" />
+      <Code Type="Class" Source="$(MSBuildThisFileDirectory)Tasks\CreateServicePluginArchive.cs" />
+    </Task>
+  </UsingTask>
+
+  <Target Name="PackServicePlugin" AfterTargets="Build" Condition="'$(ServicePluginEnablePackaging)' != 'false'">
+    <ItemGroup>
+      <_ServicePluginManifest Include="$(ServicePluginManifest)" Condition="Exists('$(ServicePluginManifest)')">
+        <PackagePath>plugin.manifest.json</PackagePath>
+        <Kind>Manifest</Kind>
+      </_ServicePluginManifest>
+
+      <_ServicePluginAssemblies Include="$(TargetPath)" Condition="'$(ServicePluginIncludeEntryAssembly)' == 'true' and Exists('$(TargetPath)')">
+        <PackagePath>%(Filename)%(Extension)</PackagePath>
+        <Kind>Assembly</Kind>
+      </_ServicePluginAssemblies>
+
+      <_ServicePluginAssemblies Include="@(ServicePluginDescriptorAssembly)" Condition="'%(Identity)' != ''">
+        <PackagePath Condition="'%(PackagePath)' == ''">%(Filename)%(Extension)</PackagePath>
+        <Kind Condition="'%(Kind)' == ''">Assembly</Kind>
+      </_ServicePluginAssemblies>
+
+      <_ServicePluginDependencies Include="@(ServicePluginDependency)" Condition="'%(Identity)' != ''">
+        <PackagePath Condition="'%(PackagePath)' == ''">libs/%(Filename)%(Extension)</PackagePath>
+        <Kind Condition="'%(Kind)' == ''">Dependency</Kind>
+      </_ServicePluginDependencies>
+
+      <_ServicePluginDependencies Include="@(ReferenceCopyLocalPaths)" Condition="'$(ServicePluginIncludeReferenceCopyLocal)' == 'true'">
+        <PackagePath>libs/%(Filename)%(Extension)</PackagePath>
+        <Kind>Dependency</Kind>
+      </_ServicePluginDependencies>
+
+      <_ServicePluginContent Include="@(ServicePluginContent)" Condition="'%(Identity)' != ''">
+        <PackagePath Condition="'%(PackagePath)' == ''">%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
+        <Kind Condition="'%(Kind)' == ''">Content</Kind>
+      </_ServicePluginContent>
+
+      <_ServicePluginFiles Include="@(_ServicePluginManifest);@(_ServicePluginAssemblies);@(_ServicePluginDependencies);@(_ServicePluginContent)">
+        <PackagePath Condition="'%(PackagePath)' == ''">%(Filename)%(Extension)</PackagePath>
+      </_ServicePluginFiles>
+    </ItemGroup>
+
+    <PropertyGroup>
+      <_ResolvedPackageVersion Condition="'$(ServicePluginPackageVersion)' == ''">1.0.0</_ResolvedPackageVersion>
+      <_ResolvedPackageVersion Condition="'$(ServicePluginPackageVersion)' != ''">$(ServicePluginPackageVersion)</_ResolvedPackageVersion>
+    </PropertyGroup>
+
+    <CreateServicePluginArchive
+        Files="@(_ServicePluginFiles)"
+        OutputDirectory="$(ServicePluginPackageOutput)"
+        PackageId="$(ServicePluginPackageId)"
+        PackageVersion="$(_ResolvedPackageVersion)"
+        ArchiveExtensions="$(ServicePluginArchiveExtensions)"
+        BuildMetadataTimestampFormat="$(ServicePluginBuildMetadataTimestampFormat)">
+      <Output TaskParameter="CreatedPackages" ItemName="ServicePluginPackages" />
+    </CreateServicePluginArchive>
+  </Target>
+</Project>

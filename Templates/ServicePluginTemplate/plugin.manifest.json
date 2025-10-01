@@ -1,0 +1,12 @@
+{
+  "id": "__PluginId__",
+  "name": "__PluginName__",
+  "version": "__PluginVersion__",
+  "entryAssembly": "ServicePluginTemplate.dll",
+  "serviceAssemblies": [
+    "ServicePluginTemplate.dll"
+  ],
+  "probingPaths": [
+    "libs"
+  ]
+}
