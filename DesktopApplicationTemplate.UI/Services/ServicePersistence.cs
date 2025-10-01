@@ -174,7 +174,7 @@ namespace DesktopApplicationTemplate.Persistence
                 }
 
                 var descriptor = ResolveDescriptor(record.DescriptorId, type, catalog) ?? ResolveDescriptor(type.ToDescriptorId(), type, catalog);
-                var payload = ResolveLegacyPayload(type, record);
+                var payload = ResolveLegacyPayload(type, record, descriptor, logger);
 
                 var info = new ServiceInfo
                 {
@@ -198,14 +198,36 @@ namespace DesktopApplicationTemplate.Persistence
             return result;
         }
 
-        private static object? ResolveLegacyPayload(ServiceType type, LegacyServiceInfo record) => type switch
+        private static object? ResolveLegacyPayload(ServiceType type, LegacyServiceInfo record, IServiceDescriptor? descriptor, ILoggingService? logger) => type switch
         {
             ServiceType.Tcp => record.TcpOptions,
             ServiceType.Ftp => record.FtpOptions,
-            ServiceType.Http => record.HttpOptions,
+            ServiceType.Http => DeserializeLegacyPayload(record.HttpOptions, descriptor, logger),
             ServiceType.Csv => record.CsvOptions,
             _ => null
         };
+
+        private static object? DeserializeLegacyPayload(JsonElement? payload, IServiceDescriptor? descriptor, ILoggingService? logger)
+        {
+            if (payload is null)
+            {
+                return null;
+            }
+
+            if (descriptor?.OptionsSerializer is IServiceOptionsSerializer serializer)
+            {
+                try
+                {
+                    return serializer.Deserialize(payload.Value);
+                }
+                catch (Exception ex)
+                {
+                    logger?.Log($"Failed to deserialize legacy payload for {descriptor.Id}: {ex.Message}", LogLevel.Warning);
+                }
+            }
+
+            return payload;
+        }
 
         private static IServiceDescriptor? ResolveDescriptor(string? descriptorId, ServiceType? legacyType, IServiceCatalog catalog)
         {
@@ -449,7 +471,7 @@ namespace DesktopApplicationTemplate.Persistence
         public List<string>? AssociatedServices { get; set; }
         public TcpServiceOptions? TcpOptions { get; set; }
         public FtpServerOptions? FtpOptions { get; set; }
-        public HttpServiceOptions? HttpOptions { get; set; }
+        public JsonElement? HttpOptions { get; set; }
         public CsvServiceOptions? CsvOptions { get; set; }
         public double TotalExecutionTimeMs { get; set; }
         public int ExecutionCount { get; set; }
