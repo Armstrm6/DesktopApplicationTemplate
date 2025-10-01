@@ -12,7 +12,7 @@ namespace ServicePlugin.Packaging.Tasks;
 /// <summary>
 /// Creates distributable plug-in archives containing descriptors, dependencies, and manifests.
 /// </summary>
-public sealed class CreateServicePluginArchive : Task
+public sealed class CreateServicePluginArchive : Microsoft.Build.Utilities.Task
 {
     private static readonly char[] ExtensionSeparators = [ ';' ];
 
