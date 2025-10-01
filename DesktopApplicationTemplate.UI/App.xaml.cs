@@ -59,7 +59,45 @@ namespace DesktopApplicationTemplate.UI
 
         private void ConfigureServices(IConfiguration configuration, IServiceCollection services)
         {
-            var catalog = services.AddServiceModules();
+            var loggerFactory = LoggerFactory.Create(builder =>
+            {
+                builder
+                    .AddConfiguration(configuration.GetSection("Logging"))
+                    .AddDebug()
+                    .AddConsole();
+            });
+
+            var pluginLoader = PluginLoader.Create(configuration, loggerFactory.CreateLogger<PluginLoader>());
+            IReadOnlyCollection<Assembly> pluginAssemblies;
+            try
+            {
+                pluginAssemblies = pluginLoader.LoadPluginAssemblies();
+                loggerFactory
+                    .CreateLogger<App>()
+                    .LogInformation(
+                        "Loaded {PluginAssemblyCount} plug-in assembly(ies) from {PluginDirectory}.",
+                        pluginAssemblies.Count,
+                        pluginLoader.Options.RootDirectory);
+            }
+            catch (Exception ex)
+            {
+                loggerFactory
+                    .CreateLogger<App>()
+                    .LogError(
+                        ex,
+                        "Failed to load plug-ins from {PluginDirectory}.",
+                        pluginLoader.Options.RootDirectory);
+                pluginAssemblies = Array.Empty<Assembly>();
+            }
+            finally
+            {
+                loggerFactory.Dispose();
+            }
+
+            services.AddSingleton(pluginLoader.Options);
+
+            var assembliesForScanning = PluginLoader.CombineWithDefaultAssemblies(pluginAssemblies);
+            var catalog = services.AddServiceModules(assembliesForScanning.ToArray());
             var registrations = InitializeServices(services, catalog);
 
             services.AddSingleton<IServiceUiRegistry>(sp => ServiceUiRegistry.Create(sp, catalog, registrations));
