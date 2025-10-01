@@ -18,8 +18,6 @@ public sealed class PluginImportService : IPluginImportService
     private static readonly string[] SupportedExtensionList =
     {
         ".peakiot",
-        ".ccp",
-        ".chapp",
     };
 
     private static readonly HashSet<string> SupportedExtensions = new(SupportedExtensionList, StringComparer.OrdinalIgnoreCase);
