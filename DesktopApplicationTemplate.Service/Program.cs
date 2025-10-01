@@ -3,6 +3,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Linq;
 using System;
+using System.Collections.Generic;
+using System.Reflection;
 using DesktopApplicationTemplate.Core.Modules;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Services.Common;
@@ -35,7 +37,46 @@ namespace DesktopApplicationTemplate.Service
 
             return builder.ConfigureServices((hostContext, services) =>
             {
-                services.AddServiceModules();
+                var configuration = hostContext.Configuration;
+                var loggerFactory = LoggerFactory.Create(loggingBuilder =>
+                {
+                    loggingBuilder
+                        .AddConfiguration(configuration.GetSection("Logging"))
+                        .AddDebug()
+                        .AddConsole();
+                });
+
+                var pluginLoader = PluginLoader.Create(configuration, loggerFactory.CreateLogger<PluginLoader>());
+                IReadOnlyCollection<Assembly> pluginAssemblies;
+                try
+                {
+                    pluginAssemblies = pluginLoader.LoadPluginAssemblies();
+                    loggerFactory
+                        .CreateLogger<Program>()
+                        .LogInformation(
+                            "Loaded {PluginAssemblyCount} plug-in assembly(ies) from {PluginDirectory}.",
+                            pluginAssemblies.Count,
+                            pluginLoader.Options.RootDirectory);
+                }
+                catch (Exception ex)
+                {
+                    loggerFactory
+                        .CreateLogger<Program>()
+                        .LogError(
+                            ex,
+                            "Failed to load plug-ins from {PluginDirectory}.",
+                            pluginLoader.Options.RootDirectory);
+                    pluginAssemblies = Array.Empty<Assembly>();
+                }
+                finally
+                {
+                    loggerFactory.Dispose();
+                }
+
+                services.AddSingleton(pluginLoader.Options);
+
+                var assembliesForScanning = PluginLoader.CombineWithDefaultAssemblies(pluginAssemblies);
+                services.AddServiceModules(assembliesForScanning.ToArray());
                 services.AddCommonServices();
                 services.AddOptions<HeartbeatRuntimeOptions>()
                     .BindConfiguration("Heartbeat");
