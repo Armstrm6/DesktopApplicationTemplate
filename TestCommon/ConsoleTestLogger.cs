@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace DesktopApplicationTemplate.Tests;
+namespace TestCommon;
 
 public static class ConsoleTestLogger
 {
