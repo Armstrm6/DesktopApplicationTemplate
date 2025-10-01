@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\..\ServicePlugin.Packaging\ServicePlugin.Packaging.props" Condition="Exists('..\..\..\ServicePlugin.Packaging\ServicePlugin.Packaging.props')" />
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>DesktopApplicationTemplate.Services.Hid.UI</RootNamespace>
+    <AssemblyName>DesktopApplicationTemplate.Hid.UI</AssemblyName>
+    <ServicePluginIncludeReferenceCopyLocal>false</ServicePluginIncludeReferenceCopyLocal>
+    <ServicePluginPackageId>DesktopApplicationTemplate.Hid.UI</ServicePluginPackageId>
+    <ServicePluginPackageVersion>1.0.0</ServicePluginPackageVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\DesktopApplicationTemplate.Core\DesktopApplicationTemplate.Core.csproj" />
+    <ProjectReference Include="..\..\..\DesktopApplicationTemplate.UI\DesktopApplicationTemplate.UI.csproj" />
+    <ProjectReference Include="..\HidPackage\HidPackage.csproj" />
+    <ProjectReference Include="..\..\..\ServicePlugin.Packaging\ServicePlugin.Packaging.csproj" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\**\*.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Update="Views\**\*.xaml.cs">
+      <DependentUpon>%(Filename).xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <Import Project="..\..\..\ServicePlugin.Packaging\ServicePlugin.Packaging.targets" Condition="Exists('..\..\..\ServicePlugin.Packaging\ServicePlugin.Packaging.targets')" />
+</Project>
