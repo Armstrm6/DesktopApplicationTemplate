@@ -8,8 +8,9 @@ using System.Text.Json.Serialization;
 using DesktopApplicationTemplate.Core.Models;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Models;
-using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI;
 using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.UI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -128,14 +129,22 @@ namespace DesktopApplicationTemplate.Persistence
             var result = new List<ServiceInfo>();
             foreach (var record in records.OrderBy(r => r.Order))
             {
-                var descriptor = ResolveDescriptor(record.DescriptorId, record.LegacyType ?? ParseLegacyType(record.LegacyTypeName), catalog);
+                var legacyType = record.LegacyType ?? ParseLegacyType(record.LegacyTypeName);
+                var descriptor = ResolveDescriptor(record.DescriptorId, legacyType, catalog);
                 var payload = DeserializePayload(record, descriptor);
+
+                var serviceType = descriptor?.LegacyType ?? legacyType;
+                if (serviceType is null)
+                {
+                    logger?.Log($"Unable to determine service type for '{record.DisplayName}'", LogLevel.Warning);
+                    continue;
+                }
 
                 var info = new ServiceInfo
                 {
                     DisplayName = record.DisplayName,
                     DescriptorId = descriptor?.Id ?? record.DescriptorId,
-                    ServiceType = descriptor?.LegacyType ?? record.LegacyType ?? ParseLegacyType(record.LegacyTypeName),
+                    ServiceType = serviceType.Value,
                     IsActive = record.IsActive,
                     Created = record.Created,
                     Order = record.Order,
