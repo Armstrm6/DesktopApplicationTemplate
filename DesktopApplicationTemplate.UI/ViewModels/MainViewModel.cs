@@ -38,27 +38,28 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 LogViewModel.SetLogs(_selectedService?.Logs ?? AllLogs);
                 (RemoveServiceCommand as AsyncRelayCommand)?.RaiseCanExecuteChanged();
                 (EditServiceCommand as RelayCommand<ServiceListModel?>)?.RaiseCanExecuteChanged();
-}
-
-    public enum ImportFeedbackStatus
-    {
-        Success,
-        Error
-    }
-
-    public sealed class ImportFeedbackEventArgs : EventArgs
-    {
-        public ImportFeedbackEventArgs(ImportFeedbackStatus status, string message)
-        {
-            Status = status;
-            Message = message ?? throw new ArgumentNullException(nameof(message));
+            }
         }
 
-        public ImportFeedbackStatus Status { get; }
+        public enum ImportFeedbackStatus
+        {
+            Success,
+            Error
+        }
 
-        public string Message { get; }
-    }
-}
+        public sealed class ImportFeedbackEventArgs : EventArgs
+        {
+            public ImportFeedbackEventArgs(ImportFeedbackStatus status, string message)
+            {
+                Status = status;
+                Message = message ?? throw new ArgumentNullException(nameof(message));
+            }
+
+            public ImportFeedbackStatus Status { get; }
+
+            public string Message { get; }
+        }
+
         public ICommand AddServiceCommand { get; }
         public ICommand RemoveServiceCommand { get; }
         public ICommand EditServiceCommand { get; }
