@@ -140,7 +140,7 @@ During startup `services.AddServiceModules()` discovers `IServiceModule` impleme
 
 ## Packaging service plug-ins
 
-The repository ships with an MSBuild packaging project that bundles plug-in assets into distributable `.peakiot` archives (and optional legacy `.ccp`/`.chapp` packages). To enable packaging in a plug-in project:
+The repository ships with an MSBuild packaging project that bundles plug-in assets into distributable `.peakiot` archives. To enable packaging in a plug-in project:
 
 1. Import `ServicePlugin.Packaging` before and after the project body:
 
@@ -151,7 +151,7 @@ The repository ships with an MSBuild packaging project that bundles plug-in asse
    ```
 
 2. Author a `plugin.manifest.json` file at the project root. The manifest must identify the plug-in id, name, version, entry assembly, and any assemblies that expose `IServiceModule` implementations. See `Codex/docs/PluginManifestSchema.md` for field descriptions.
-3. Build the plug-in with `dotnet build`. The packaging targets run after compilation and emit archives to `bin/<configuration>/<tfm>/plugins`. Set `ServicePluginArchiveExtensions` to `.peakiot` (the default) or include legacy extensions such as `.ccp`/`.chapp` when older hosts require them.
+3. Build the plug-in with `dotnet build`. The packaging targets run after compilation and emit archives to `bin/<configuration>/<tfm>/plugins`. `ServicePluginArchiveExtensions` defaults to `.peakiot` and rarely needs to be overridden.
 
 Each archive contains the manifest, compiled descriptors, and copy-local dependencies under `libs/`. Hosts can drop any supported archive into the plug-in directory and the loader will extract it into the cache configured by `PluginLoaderOptions`.
 

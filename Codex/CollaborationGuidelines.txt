@@ -39,7 +39,7 @@ Draw.io Integration
 
 Descriptor & Plug-in CI Tasks
 -----------------------------
-1. **Package sample plug-ins** – GitHub Actions builds `Samples/TcpRelayPlugin` and `Samples/HttpRelayPlugin` with `dotnet build` so the generated `.peakiot` (and legacy `.ccp`/`.chapp`) archives verify packaging targets. Capture the CI log links when these builds surface errors.
+1. **Package sample plug-ins** – GitHub Actions builds `Samples/TcpRelayPlugin` and `Samples/HttpRelayPlugin` with `dotnet build` so the generated `.peakiot` archives verify packaging targets. Capture the CI log links when these builds surface errors.
 2. **Exercise template scaffolds** – When the service plug-in template changes, add `dotnet new install Templates/ServicePluginTemplate` and a sample `dotnet build` invocation to the CI pipeline (or a one-off workflow run) to confirm descriptors scaffold correctly.
 3. **Record outcomes** – Note the status of these tasks in `Codex/docs/CollaborationAndDebugTips.txt`, especially when migrations affect persistence or descriptor bindings.
 

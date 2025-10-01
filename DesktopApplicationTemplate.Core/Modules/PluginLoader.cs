@@ -32,8 +32,6 @@ public sealed class PluginLoader
     private static readonly HashSet<string> SupportedArchiveExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
         ".peakiot",
-        ".ccp",
-        ".chapp",
         ".zip",
     };
 

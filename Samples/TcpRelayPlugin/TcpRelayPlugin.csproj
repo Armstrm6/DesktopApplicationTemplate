@@ -9,7 +9,7 @@
     <RootNamespace>TcpRelayPlugin</RootNamespace>
     <ServicePluginPackageId Condition="'$(ServicePluginPackageId)' == ''">Sample.TcpRelay</ServicePluginPackageId>
     <ServicePluginPackageVersion Condition="'$(ServicePluginPackageVersion)' == ''">1.0.0</ServicePluginPackageVersion>
-    <ServicePluginArchiveExtensions Condition="'$(ServicePluginArchiveExtensions)' == ''">.peakiot;.ccp;.chapp</ServicePluginArchiveExtensions>
+    <ServicePluginArchiveExtensions Condition="'$(ServicePluginArchiveExtensions)' == ''">.peakiot</ServicePluginArchiveExtensions>
   </PropertyGroup>
 
   <ItemGroup>

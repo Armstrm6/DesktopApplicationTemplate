@@ -30,7 +30,7 @@ public sealed class CreateServicePluginArchive : Microsoft.Build.Utilities.Task
     public string PackageVersion { get; set; } = string.Empty;
 
     /// <summary>
-    /// Gets or sets the archive extensions (e.g. ".peakiot;.ccp").
+    /// Gets or sets the archive extensions (e.g. ".peakiot").
     /// </summary>
     [Required]
     public string ArchiveExtensions { get; set; } = string.Empty;

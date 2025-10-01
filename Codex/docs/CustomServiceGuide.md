@@ -32,7 +32,7 @@ Use this checklist when upgrading a service that previously depended on the `Ser
 
 1. **Import the packaging targets** – reference `ServicePlugin.Packaging` by adding the props/targets pair to the plug-in `.csproj`. This enables the `PackServicePlugin` target after every build.
 2. **Author `plugin.manifest.json`** – populate the manifest with the plug-in id, name, version, entry assembly, and any assemblies that expose `IServiceModule` implementations. The loader validates the manifest against the schema documented in `Codex/docs/PluginManifestSchema.md`.
-3. **Build to create archives** – run `dotnet build` for the plug-in. The packaging target copies the manifest, compiled assemblies, and dependencies into `.peakiot` archives (alongside optional legacy `.ccp`/`.chapp` outputs) under `bin/<configuration>/<tfm>/plugins`.
+3. **Build to create archives** – run `dotnet build` for the plug-in. The packaging target copies the manifest, compiled assemblies, and dependencies into `.peakiot` archives under `bin/<configuration>/<tfm>/plugins`.
 4. **Distribute the archive** – drop the generated archive into the host's plug-in directory (or publish it via your preferred channel). The loader extracts each supported archive into its versioned cache and automatically registers the descriptors.
 
 ### Reusable resources

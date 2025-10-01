@@ -33,6 +33,7 @@
 - Service creation and navigation now resolve services via `ServiceType` enum lookups instead of string-based switches.
 - `ServiceManager` loads default services from configuration using `ServiceType` short codes and accepts legacy names.
 - `ServiceListModel` now exposes a `Type` enum property, removing string-based service comparisons.
+- Service plug-in packaging now emits only `.peakiot` archives and removes references to deprecated `.ccp`/`.chapp` formats across the tooling and documentation.
 
 #### Fixed
 - Event raising helpers in `ServiceEditorViewModelBase` invoked themselves recursively; now invoke events directly.

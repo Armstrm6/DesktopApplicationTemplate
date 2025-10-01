@@ -2,7 +2,7 @@
 
 This template demonstrates how to build a service plug-in that can be packaged with the `ServicePlugin.Packaging` project. It implements:
 
-1. A manifest (`plugin.manifest.json`) that is zipped into `.peakiot` archives (with optional legacy `.ccp`/`.chapp` outputs).
+1. A manifest (`plugin.manifest.json`) that is zipped into `.peakiot` archives.
 2. An `IServiceModule` (`TemplateServiceModule`) that registers runtime dependencies.
 3. A descriptor (`TemplateServiceDescriptor`) that advertises runtime bindings.
 4. A runtime factory (`TemplateRuntimeFactory`) that logs lifecycle events.
