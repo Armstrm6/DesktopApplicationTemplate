@@ -15,7 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\DesktopApplicationTemplate.Core\DesktopApplicationTemplate.Core.csproj" />
     <ProjectReference Include="..\..\ServicePlugin.Packaging\ServicePlugin.Packaging.csproj" ReferenceOutputAssembly="false" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3" />
   </ItemGroup>
 
   <Import Project="..\..\ServicePlugin.Packaging\ServicePlugin.Packaging.targets" Condition="Exists('..\..\ServicePlugin.Packaging\ServicePlugin.Packaging.targets')" />
