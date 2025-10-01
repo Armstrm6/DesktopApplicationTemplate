@@ -230,7 +230,7 @@ namespace DesktopApplicationTemplate.UI.Views
 
 
 
-        internal async Task AddServiceAsync(ServiceFactoryContext context)
+        public async Task AddServiceAsync(ServiceFactoryContext context)
         {
             if (context is null)
             {
