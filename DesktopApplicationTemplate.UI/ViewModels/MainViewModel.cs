@@ -17,6 +17,7 @@ using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI;
 using DesktopApplicationTemplate.UI.Navigation;
+using DesktopApplicationTemplate.UI.Factories;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -73,10 +74,21 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             _catalog = catalog;
             _ = NetworkConfig.LoadAsync();
             _networkService.ConfigurationChanged += (_, cfg) => ApplyNetworkConfiguration(cfg);
-            ServiceListModel.ResolveService = (type, name) =>
-                Services.FirstOrDefault(s =>
-                    s.Type == type &&
+            ServiceListModel.ResolveService = (descriptorKey, name) =>
+            {
+                var normalized = NormalizeDescriptorKey(descriptorKey);
+                ServiceType? legacyType = null;
+                if (ServiceTypeExtensions.TryParse(descriptorKey, out var parsed))
+                {
+                    legacyType = parsed;
+                }
+
+                return Services.FirstOrDefault(s =>
+                    (string.Equals(s.DescriptorId, normalized, StringComparison.OrdinalIgnoreCase) ||
+                     string.Equals(s.DescriptorId, descriptorKey, StringComparison.OrdinalIgnoreCase) ||
+                     (legacyType.HasValue && s.Type == legacyType.Value)) &&
                     s.DisplayName.Split(" - ").Last().Equals(name, StringComparison.OrdinalIgnoreCase));
+            };
             if (!string.IsNullOrWhiteSpace(servicesFilePath))
             {
                 ServicePersistence.FilePath = servicesFilePath!;
@@ -206,24 +218,47 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             foreach (var info in existing.OrderBy(i => i.Order))
             {
                 var descriptor = ResolveDescriptor(info.DescriptorId, info.ServiceType);
+                var descriptorId = descriptor?.Id ?? info.DescriptorId;
                 var serviceType = descriptor?.LegacyType ?? info.ServiceType;
-                var svc = new ServiceListModel
+                ServiceListModel svc;
+
+                if (!string.IsNullOrWhiteSpace(descriptorId) &&
+                    _uiRegistry.Factories.TryGetValue(descriptorId, out var factoryFactory))
                 {
-                    DisplayName = info.DisplayName,
-                    Type = serviceType,
-                    DescriptorId = descriptor?.Id ?? info.DescriptorId,
-                    DescriptorPayload = info.Payload,
-                    IsActive = info.IsActive,
-                    Order = info.Order,
-                    TotalExecutionTimeMs = info.TotalExecutionTimeMs,
-                    ExecutionCount = info.ExecutionCount
-                };
-                foreach (var a in info.AssociatedServices ?? new List<string>())
+                    var factory = factoryFactory();
+                    var context = new ServiceFactoryContext(descriptorId, info.DisplayName, info.Payload, descriptor);
+                    svc = factory.Create(context);
+                    svc.DisplayName = info.DisplayName;
+                }
+                else
                 {
-                    svc.AssociatedServices.Add(a);
+                    svc = new ServiceListModel
+                    {
+                        DescriptorId = descriptorId,
+                        Type = serviceType,
+                        DescriptorPayload = info.Payload
+                    };
+                    svc.ApplyDescriptor(descriptor);
                 }
 
-                svc.ApplyDescriptor(descriptor);
+                svc.IsActive = info.IsActive;
+                svc.Order = info.Order;
+                svc.TotalExecutionTimeMs = info.TotalExecutionTimeMs;
+                svc.ExecutionCount = info.ExecutionCount;
+
+                foreach (var a in info.AssociatedServices ?? new List<string>())
+                {
+                    if (!svc.AssociatedServices.Contains(a))
+                    {
+                        svc.AssociatedServices.Add(a);
+                    }
+                }
+
+                if (info.Payload is not null && svc.DescriptorPayload is null)
+                {
+                    svc.DescriptorPayload = info.Payload;
+                }
+
                 svc.LogAdded += OnServiceLogAdded;
                 svc.ActiveChanged += OnServiceActiveChanged;
                 if (svc.Type != ServiceType.Csv)
@@ -276,7 +311,43 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 return descriptor;
             }
 
+            if (_catalog.LegacyMap.TryGetValue(serviceType, out var mappedId) &&
+                _catalog.TryGetById(mappedId, out descriptor))
+            {
+                return descriptor;
+            }
+
             return null;
+        }
+
+        private string NormalizeDescriptorKey(string descriptorKey)
+        {
+            if (string.IsNullOrWhiteSpace(descriptorKey))
+            {
+                return descriptorKey;
+            }
+
+            if (_catalog.TryGetById(descriptorKey, out var descriptor))
+            {
+                return descriptor.Id;
+            }
+
+            if (ServiceTypeExtensions.TryParse(descriptorKey, out var legacy))
+            {
+                if (_catalog.LegacyMap.TryGetValue(legacy, out var mappedId))
+                {
+                    return mappedId;
+                }
+
+                if (_catalog.TryGetByLegacyType(legacy, out descriptor))
+                {
+                    return descriptor.Id;
+                }
+
+                return legacy.ToDescriptorId();
+            }
+
+            return descriptorKey;
         }
 
         private string GetDisplayPrefix(ServiceType serviceType)

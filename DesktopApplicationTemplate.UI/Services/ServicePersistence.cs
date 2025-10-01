@@ -32,18 +32,23 @@ namespace DesktopApplicationTemplate.Persistence
             foreach (var service in services)
             {
                 var descriptor = ResolveDescriptor(service.DescriptorId, service.Type, catalog);
-                var payload = CreatePayloadElement(service.DescriptorPayload, descriptor?.OptionsSerializer);
+                var legacyType = descriptor?.LegacyType ?? (service.Type != default ? service.Type : null);
+                var serializedPayload = SerializePayload(service.DescriptorPayload, descriptor);
+                var payloadElement = serializedPayload is null
+                    ? CreatePayloadElement(service.DescriptorPayload, descriptor?.OptionsSerializer)
+                    : null;
                 records.Add(new PersistedServiceRecord
                 {
                     DisplayName = service.DisplayName,
-                    DescriptorId = descriptor?.Id ?? ResolveDescriptorId(service),
-                    LegacyType = service.Type,
-                    LegacyTypeName = service.Type.ToString(),
+                    DescriptorId = descriptor?.Id ?? ResolveDescriptorId(service, catalog),
+                    LegacyType = legacyType,
+                    LegacyTypeName = legacyType?.ToString() ?? service.Type.ToString(),
                     IsActive = service.IsActive,
                     Created = DateTime.Now,
                     Order = index++,
                     AssociatedServices = new List<string>(service.AssociatedServices),
-                    Payload = payload,
+                    Payload = payloadElement,
+                    SerializedPayload = serializedPayload,
                     TotalExecutionTimeMs = service.TotalExecutionTimeMs,
                     ExecutionCount = service.ExecutionCount
                 });
@@ -124,7 +129,7 @@ namespace DesktopApplicationTemplate.Persistence
             foreach (var record in records.OrderBy(r => r.Order))
             {
                 var descriptor = ResolveDescriptor(record.DescriptorId, record.LegacyType ?? ParseLegacyType(record.LegacyTypeName), catalog);
-                var payload = DeserializePayload(record.Payload, descriptor?.OptionsSerializer);
+                var payload = DeserializePayload(record, descriptor);
 
                 var info = new ServiceInfo
                 {
@@ -205,10 +210,16 @@ namespace DesktopApplicationTemplate.Persistence
                 return descriptor;
             }
 
+            if (legacyType.HasValue && catalog.LegacyMap.TryGetValue(legacyType.Value, out var mappedId) &&
+                catalog.TryGetById(mappedId, out descriptor))
+            {
+                return descriptor;
+            }
+
             return null;
         }
 
-        private static string ResolveDescriptorId(ServiceListModel service)
+        private static string ResolveDescriptorId(ServiceListModel service, IServiceCatalog catalog)
         {
             if (!string.IsNullOrWhiteSpace(service.DescriptorId))
             {
@@ -217,6 +228,16 @@ namespace DesktopApplicationTemplate.Persistence
 
             if (service.Type != default)
             {
+                if (catalog.TryGetByLegacyType(service.Type, out var descriptor))
+                {
+                    return descriptor.Id;
+                }
+
+                if (catalog.LegacyMap.TryGetValue(service.Type, out var mappedId))
+                {
+                    return mappedId;
+                }
+
                 return service.Type.ToDescriptorId();
             }
 
@@ -256,25 +277,80 @@ namespace DesktopApplicationTemplate.Persistence
             return JsonSerializer.SerializeToElement(payload, payload.GetType(), SerializerOptions);
         }
 
-        private static object? DeserializePayload(JsonElement? element, IServiceOptionsSerializer? serializer)
+        private static object? DeserializePayload(PersistedServiceRecord record, IServiceDescriptor? descriptor)
         {
-            if (!element.HasValue)
+            if (descriptor?.OptionsSerializer is { } serializer && !string.IsNullOrWhiteSpace(record.SerializedPayload))
+            {
+                return serializer.Deserialize(record.SerializedPayload);
+            }
+
+            if (!string.IsNullOrWhiteSpace(record.SerializedPayload))
+            {
+                try
+                {
+                    return JsonSerializer.Deserialize<object>(record.SerializedPayload, SerializerOptions);
+                }
+                catch (JsonException)
+                {
+                    return record.SerializedPayload;
+                }
+            }
+
+            if (!record.Payload.HasValue)
             {
                 return null;
             }
 
-            var value = element.Value;
-            if (value.ValueKind == JsonValueKind.Null || value.ValueKind == JsonValueKind.Undefined)
+            var element = record.Payload.Value;
+            if (element.ValueKind == JsonValueKind.Null || element.ValueKind == JsonValueKind.Undefined)
             {
                 return null;
             }
 
-            if (serializer is not null)
+            if (descriptor?.OptionsSerializer is { } legacySerializer)
             {
-                return serializer.Deserialize(value);
+                return legacySerializer.Deserialize(element);
             }
 
-            return value.Deserialize<object>(SerializerOptions);
+            return element.Deserialize<object>(SerializerOptions);
+        }
+
+        private static string? SerializePayload(object? payload, IServiceDescriptor? descriptor)
+        {
+            if (payload is null)
+            {
+                return null;
+            }
+
+            var serializer = descriptor?.OptionsSerializer;
+            if (serializer is null)
+            {
+                return JsonSerializer.Serialize(payload, payload.GetType(), SerializerOptions);
+            }
+
+            var options = EnsureOptionsInstance(payload, serializer);
+            return serializer.Serialize(options);
+        }
+
+        private static object EnsureOptionsInstance(object payload, IServiceOptionsSerializer serializer)
+        {
+            if (payload is JsonElement element)
+            {
+                return serializer.Deserialize(element);
+            }
+
+            if (payload is JsonDocument document)
+            {
+                return serializer.Deserialize(document.RootElement);
+            }
+
+            if (serializer.OptionsType.IsInstanceOfType(payload))
+            {
+                return payload;
+            }
+
+            var json = JsonSerializer.Serialize(payload, payload.GetType(), SerializerOptions);
+            return serializer.Deserialize(json);
         }
 
         private static ServiceType? ParseLegacyType(string? value)
@@ -348,6 +424,7 @@ namespace DesktopApplicationTemplate.Persistence
         public int Order { get; set; }
         public List<string>? AssociatedServices { get; set; }
         public JsonElement? Payload { get; set; }
+        public string? SerializedPayload { get; set; }
         public double TotalExecutionTimeMs { get; set; }
         public int ExecutionCount { get; set; }
     }

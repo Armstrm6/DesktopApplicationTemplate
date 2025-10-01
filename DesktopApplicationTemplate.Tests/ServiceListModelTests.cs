@@ -23,8 +23,18 @@ namespace DesktopApplicationTemplate.Tests
             var a = TestHelpers.CreateService(ServiceType.Heartbeat, "A");
             var b = TestHelpers.CreateService(ServiceType.Tcp, "B");
             var services = new List<ServiceListModel> { a, b };
-            ServiceListModel.ResolveService = (type, name) =>
-                services.Find(s => s.Type == type && s.DisplayName.Split(" - ").Last() == name);
+            ServiceListModel.ResolveService = (descriptorKey, name) =>
+            {
+                var key = descriptorKey;
+                if (ServiceTypeExtensions.TryParse(descriptorKey, out var parsed))
+                {
+                    key = parsed.ToDescriptorId();
+                }
+
+                return services.Find(s =>
+                    string.Equals(s.DescriptorId, key, StringComparison.OrdinalIgnoreCase) &&
+                    s.DisplayName.Split(" - ").Last().Equals(name, StringComparison.OrdinalIgnoreCase));
+            };
 
             a.AddLog("TCP.B.Test message");
 
