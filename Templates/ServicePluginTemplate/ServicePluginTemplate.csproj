@@ -9,7 +9,7 @@
     <RootNamespace>ServicePluginTemplate</RootNamespace>
     <ServicePluginPackageId Condition="'$(ServicePluginPackageId)' == ''">__PluginId__</ServicePluginPackageId>
     <ServicePluginPackageVersion Condition="'$(ServicePluginPackageVersion)' == ''">__PluginVersion__</ServicePluginPackageVersion>
-    <ServicePluginArchiveExtensions Condition="'$(ServicePluginArchiveExtensions)' == ''">.ccp;.chapp</ServicePluginArchiveExtensions>
+    <ServicePluginArchiveExtensions Condition="'$(ServicePluginArchiveExtensions)' == ''">.peakiot;.ccp;.chapp</ServicePluginArchiveExtensions>
   </PropertyGroup>
 
   <ItemGroup>

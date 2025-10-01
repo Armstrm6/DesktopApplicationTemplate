@@ -29,6 +29,13 @@ public sealed class PluginLoader
     private static readonly StringComparison PathComparison = OperatingSystem.IsWindows()
         ? StringComparison.OrdinalIgnoreCase
         : StringComparison.Ordinal;
+    private static readonly HashSet<string> SupportedArchiveExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".peakiot",
+        ".ccp",
+        ".chapp",
+        ".zip",
+    };
 
     private readonly PluginLoaderOptions options;
     private readonly ILogger<PluginLoader> logger;
@@ -79,7 +86,7 @@ public sealed class PluginLoader
                 {
                     LoadFromDirectory(entry, assemblies);
                 }
-                else if (string.Equals(Path.GetExtension(entry), ".zip", StringComparison.OrdinalIgnoreCase))
+                else if (SupportedArchiveExtensions.Contains(Path.GetExtension(entry)))
                 {
                     LoadFromArchive(entry, assemblies);
                 }

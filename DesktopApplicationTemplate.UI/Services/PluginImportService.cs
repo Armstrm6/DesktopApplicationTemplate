@@ -15,11 +15,14 @@ namespace DesktopApplicationTemplate.UI.Services;
 /// </summary>
 public sealed class PluginImportService : IPluginImportService
 {
-    private static readonly HashSet<string> SupportedExtensions = new(StringComparer.OrdinalIgnoreCase)
+    private static readonly string[] SupportedExtensionList =
     {
+        ".peakiot",
         ".ccp",
         ".chapp",
     };
+
+    private static readonly HashSet<string> SupportedExtensions = new(SupportedExtensionList, StringComparer.OrdinalIgnoreCase);
 
     private readonly PluginLoaderOptions _options;
     private readonly IServiceCatalog _catalog;
@@ -48,7 +51,7 @@ public sealed class PluginImportService : IPluginImportService
         var extension = Path.GetExtension(sourcePath);
         if (!SupportedExtensions.Contains(extension))
         {
-            var message = $"Unsupported plug-in extension '{extension}'.";
+            var message = $"Unsupported plug-in extension '{extension}'. Supported extensions: {string.Join(", ", SupportedExtensionList)}.";
             _logger.LogWarning(message);
             return Task.FromResult(new PluginImportResult(false, message, null, Array.Empty<IServiceDescriptor>()));
         }
