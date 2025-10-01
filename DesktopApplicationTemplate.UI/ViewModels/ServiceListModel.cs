@@ -21,6 +21,83 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         [JsonIgnore] public Page? Page { get; set; }
         public int Order { get; set; }
 
+        private string _descriptorLabel = string.Empty;
+        public string DescriptorLabel
+        {
+            get => _descriptorLabel;
+            private set
+            {
+                if (_descriptorLabel != value)
+                {
+                    _descriptorLabel = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(DescriptorTooltip));
+                }
+            }
+        }
+
+        private string _descriptorDescription = string.Empty;
+        public string DescriptorDescription
+        {
+            get => _descriptorDescription;
+            private set
+            {
+                if (_descriptorDescription != value)
+                {
+                    _descriptorDescription = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(DescriptorTooltip));
+                }
+            }
+        }
+
+        private string _descriptorCategory = string.Empty;
+        public string DescriptorCategory
+        {
+            get => _descriptorCategory;
+            private set
+            {
+                if (_descriptorCategory != value)
+                {
+                    _descriptorCategory = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private string? _iconGlyph;
+        public string? IconGlyph
+        {
+            get => _iconGlyph;
+            private set
+            {
+                if (!string.Equals(_iconGlyph, value, StringComparison.Ordinal))
+                {
+                    _iconGlyph = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private ServicePresentationMetadata _presentationMetadata = ServicePresentationMetadata.Empty;
+        public ServicePresentationMetadata PresentationMetadata
+        {
+            get => _presentationMetadata;
+            private set
+            {
+                var normalized = ServicePresentationMetadata.Normalize(value);
+                if (_presentationMetadata != normalized)
+                {
+                    _presentationMetadata = normalized;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string DescriptorTooltip => string.IsNullOrWhiteSpace(DescriptorDescription)
+            ? DescriptorLabel
+            : $"{DescriptorLabel}: {DescriptorDescription}";
+
         private WpfBrush _backgroundColor = WpfBrushes.LightGray;
         public WpfBrush BackgroundColor
         {
@@ -197,10 +274,24 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 {
                     Type = descriptor.LegacyType.Value;
                 }
+                DescriptorCategory = descriptor.Category ?? string.Empty;
+                DescriptorDescription = descriptor.Description ?? string.Empty;
+                PresentationMetadata = descriptor.Presentation;
+                DescriptorLabel = ResolveDisplayPrefix(descriptor);
+                IconGlyph = !string.IsNullOrWhiteSpace(PresentationMetadata.IconGlyph)
+                    ? PresentationMetadata.IconGlyph
+                    : null;
+            }
+            else
+            {
+                DescriptorCategory = string.Empty;
+                DescriptorDescription = string.Empty;
+                PresentationMetadata = ServicePresentationMetadata.Empty;
+                DescriptorLabel = Type.ToLegacyString();
+                IconGlyph = null;
             }
 
-            var presentation = descriptor?.Presentation ?? ServicePresentationMetadata.Empty;
-            var prefix = descriptor is not null ? ResolveDisplayPrefix(descriptor) : Type.ToLegacyString();
+            var prefix = DescriptorLabel;
 
             if (!string.IsNullOrWhiteSpace(nameSuffix))
             {
@@ -211,7 +302,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 DisplayName = prefix;
             }
 
-            SetColorsByType(presentation);
+            SetColorsByType(PresentationMetadata);
         }
 
         public void SetColorsByType(ServicePresentationMetadata metadata)

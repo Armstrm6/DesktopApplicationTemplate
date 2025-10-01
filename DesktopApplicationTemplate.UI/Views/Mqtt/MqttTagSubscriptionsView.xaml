@@ -17,16 +17,38 @@
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
         <helpers:BooleanToBrushConverter x:Key="BoolToBrush" TrueBrush="Green" FalseBrush="Red" />
+        <helpers:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter" />
+        <helpers:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
     </Page.Resources>
     <Grid Margin="20">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
+        <Border Grid.Row="0" CornerRadius="8" BorderThickness="1" Padding="10" Margin="0,0,0,10"
+                Background="{Binding Tag.BackgroundColor, RelativeSource={RelativeSource AncestorType=Page}}"
+                BorderBrush="{Binding Tag.BorderColor, RelativeSource={RelativeSource AncestorType=Page}}"
+                ToolTip="{Binding Tag.DescriptorTooltip, RelativeSource={RelativeSource AncestorType=Page}}">
+            <DockPanel>
+                <Border Width="40" Height="40" CornerRadius="20" Margin="0,0,10,0"
+                        Background="{Binding Tag.BorderColor, RelativeSource={RelativeSource AncestorType=Page}}"
+                        Visibility="{Binding Tag.IconGlyph, RelativeSource={RelativeSource AncestorType=Page}, Converter={StaticResource NullToVisibilityConverter}}">
+                    <TextBlock Text="{Binding Tag.IconGlyph, RelativeSource={RelativeSource AncestorType=Page}}"
+                               FontSize="22" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="{Binding Tag.DisplayName, RelativeSource={RelativeSource AncestorType=Page}}" FontWeight="Bold" />
+                    <TextBlock Text="{Binding Tag.DescriptorDescription, RelativeSource={RelativeSource AncestorType=Page}}"
+                               Foreground="Gray" TextWrapping="Wrap"
+                               Visibility="{Binding Tag.DescriptorDescription, RelativeSource={RelativeSource AncestorType=Page}, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
         <!-- Connection bar -->
-        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,10">
             <Button Content="Connect" Command="{Binding ConnectCommand}" Width="80" AutomationProperties.Name="Connect MQTT"/>
             <Ellipse Width="10" Height="10" Margin="5,0,0,0" Fill="{Binding IsConnected, Converter={StaticResource BoolToBrush}}"/>
             <TextBox Text="{Binding NewTopic}" Width="200" Margin="10,0,0,0" x:Name="NewTopicBox" ToolTip="Topic to subscribe"
@@ -42,7 +64,7 @@
             <Button Content="Remove" Command="{Binding RemoveTopicCommand}" Width="70" Margin="5,0,0,0"/>
         </StackPanel>
         <!-- Subscriptions list -->
-        <DataGrid Grid.Row="1"
+        <DataGrid Grid.Row="2"
                   ItemsSource="{Binding Subscriptions}"
                   SelectedItem="{Binding SelectedSubscription}"
                   AutoGenerateColumns="False"
@@ -69,7 +91,7 @@
             </DataGrid.Columns>
         </DataGrid>
         <!-- Test message bar -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,10,0,0">
+        <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,10,0,0">
             <TextBox Text="{Binding SelectedSubscription.OutgoingMessage, UpdateSourceTrigger=PropertyChanged}"
                      Width="200"
                      x:Name="TestMessageBox"
@@ -89,6 +111,6 @@
         </StackPanel>
 
         <!-- Log entries -->
-        <shared:ServiceLogView Grid.Row="3" Margin="0,10,0,0" x:Name="LogView" />
+        <shared:ServiceLogView Grid.Row="4" Margin="0,10,0,0" x:Name="LogView" />
     </Grid>
 </Page>

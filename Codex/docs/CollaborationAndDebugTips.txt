@@ -9,6 +9,14 @@ Purpose: Running log of what worked, what broke, and why.
 - Always record environment limitations (e.g., missing dotnet runtime).
 - When Windows collaborators run builds or tests, capture the commands and summarize their results so Codex can reference them.
 
+[2025-10-07 12:00] Topic: Service descriptor presentation bindings
+Context: Updated service list entries and detail pages to consume descriptor metadata (labels, icons, accent colors) emitted by the shared catalog.
+Observations: `ServiceListModel` now exposes presentation properties, MainWindow binds icons/tooltip colors, and each detail page shows a descriptor banner. Added regression tests that snapshot built-in descriptor colors/icons. Local dotnet tooling still unavailable, so CI must validate.
+Effective Prompts / Instructions that worked: User request to propagate descriptor metadata through the UI.
+Decisions & Rationale: Centralize presentation data to reduce duplication and avoid stale legacy colors.
+Action Items: Monitor CI for WPF regressions on Windows.
+Related Commits/PRs:
+
 [2025-10-06 09:00] Topic: Self-heal automation removal
 Context: Disabled Codex's automated pipeline repair to avoid self-directed patch generation.
 Observations: Deleted `.github/workflows/self-heal.yml` and the `Codex/tools/selfheal` script, so CI failures now require manual triage.
