@@ -1,5 +1,5 @@
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.Services.Common;
+using DesktopApplicationTemplate.Services;
 using Moq;
 using Xunit;
 

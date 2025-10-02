@@ -10,7 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using DesktopApplicationTemplate.Models;
 
-namespace DesktopApplicationTemplate.Service
+namespace DesktopApplicationTemplate.Services
 {
     public class ServiceInfo
     {

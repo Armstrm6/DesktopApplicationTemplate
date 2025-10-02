@@ -8,7 +8,7 @@
 ### Core Framework
 #### Added
 - Reusable service rule and screen abstractions with DI registration and view model integration.
-- Shared service utilities moved into `DesktopApplicationTemplate.Services.Common` with logging base class and DI extension.
+- Shared service utilities moved into `DesktopApplicationTemplate.Services` with logging base class and DI extension.
 - Unified creation and edit workflows under `ServiceEditorViewModelBase<TOptions>` exposing `SaveCommand` and customizable `SaveButtonText`.
 - Service manager tracks task start times and writes statuses to `activeservices.txt` for running services.
 - Service factories convert options into initialized services and pages with a unified `AddServiceAsync` workflow.
@@ -24,6 +24,7 @@
 - Updated `global.json` to require the .NET 8 SDK version `8.0.404`.
 - Disabled default `AutoStart` and set environment configuration files to `"AutoStart": false`.
 - Core library targets `net8.0` to avoid Windows targeting pack restore errors.
+- Removed the Windows service host and installer projects in favor of the consolidated `DesktopApplicationTemplate.Services` library.
 - Adjusted solution and project references so cross-platform assemblies depend only on the core while Windows projects also reference `DesktopApplicationTemplate.Windows`.
 - Replaced `ServiceCreated`/`ServiceUpdated` with unified `ServiceSaved` events and centralized `ServiceName` validation in `ServiceEditorViewModelBase`.
 - Windows service host sets explicit `ServiceName` and `DisplayName` values with the application name and installer uses the same constant.

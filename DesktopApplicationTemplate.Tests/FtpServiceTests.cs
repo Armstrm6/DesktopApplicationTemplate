@@ -1,5 +1,5 @@
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.Service.Services;
+using DesktopApplicationTemplate.Services;
 using FluentFTP;
 using Moq;
 using System;

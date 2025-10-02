@@ -1,4 +1,4 @@
-using DesktopApplicationTemplate.Services.Common;
+using DesktopApplicationTemplate.Services;
 using Xunit;
 
 namespace DesktopApplicationTemplate.Tests;

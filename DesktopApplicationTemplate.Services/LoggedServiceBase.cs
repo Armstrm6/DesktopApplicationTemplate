@@ -1,7 +1,7 @@
 using System;
 using Microsoft.Extensions.Logging;
 
-namespace DesktopApplicationTemplate.Services.Common;
+namespace DesktopApplicationTemplate.Services;
 
 /// <summary>
 /// Provides a base class with a strongly typed logger.

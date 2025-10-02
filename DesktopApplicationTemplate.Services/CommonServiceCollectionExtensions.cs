@@ -1,7 +1,7 @@
 using DesktopApplicationTemplate.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DesktopApplicationTemplate.Services.Common;
+namespace DesktopApplicationTemplate.Services;
 
 /// <summary>
 /// Registers common service components.

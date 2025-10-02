@@ -72,7 +72,7 @@ To build a specific project:
 ```bash
 dotnet build DesktopApplicationTemplate.UI/DesktopApplicationTemplate.UI.csproj
 
-dotnet build DesktopApplicationTemplate.Service/DesktopApplicationTemplate.Service.csproj
+dotnet build DesktopApplicationTemplate.Services/DesktopApplicationTemplate.Services.csproj
 ```
 
 ## Run the projects
@@ -88,7 +88,7 @@ The UI supports both light and dark themes. Open **Settings** within the applica
 Run the background service (useful for development):
 
 ```bash
-dotnet run --project DesktopApplicationTemplate.Service/DesktopApplicationTemplate.Service.csproj
+dotnet run --project DesktopApplicationTemplate.Services/DesktopApplicationTemplate.Services.csproj
 ```
 
 ## Execute unit tests
@@ -102,12 +102,6 @@ when some tests fail:
 ```bash
 dotnet test DesktopApplicationTemplate.Tests/DesktopApplicationTemplate.Tests.csproj --settings tests.runsettings
 ```
-
-## Installer notes
-
-The installer copies all runtime dependencies based on the generated `.deps.json`
-file of the build output. New library references are automatically detected and
-no manual configuration is required.
 
 ## Services overview
 
@@ -161,7 +155,7 @@ After building the solution, run the UI project and navigate to the desired serv
 The background service can also be run from the command line:
 
 ```bash
-dotnet run --project DesktopApplicationTemplate.Service/DesktopApplicationTemplate.Service.csproj
+dotnet run --project DesktopApplicationTemplate.Services/DesktopApplicationTemplate.Services.csproj
 ```
 
 This launches the hosted service which periodically emits a heartbeat message using the settings from `appsettings.json`.

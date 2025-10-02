@@ -1,4 +1,4 @@
-using DesktopApplicationTemplate.Service;
+using DesktopApplicationTemplate.Services;
 using DesktopApplicationTemplate.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;

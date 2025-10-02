@@ -2,11 +2,10 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.Services.Common;
 using FubarDev.FtpServer;
 using Microsoft.Extensions.Logging;
 
-namespace DesktopApplicationTemplate.Service.Services;
+namespace DesktopApplicationTemplate.Services;
 
 /// <summary>
 /// Hosts an FTP server using the FubarDev FTP server library.
