@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
 using System.ComponentModel;
 using System.Threading.Tasks;
@@ -11,11 +10,7 @@ using DesktopApplicationTemplate.Core.Services.Protocols.Tcp;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Models;
-using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.Views;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Scripting;
-using Microsoft.CodeAnalysis.Scripting;
 
 namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
 {
@@ -93,7 +88,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
 
         private readonly IMessageRoutingService _routing;
         private TcpServiceOptions _options = new();
-
+        private TcpRuntimeContext? _runtimeContext;
+        
         /// <summary>Type of the service associated with these messages.</summary>
         public ServiceType ServiceType { get; private set; } = ServiceType.Tcp;
 
@@ -171,10 +167,13 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
         /// <summary>Whether UDP mode is enabled.</summary>
         public bool IsUdp { get; private set; }
 
-        public TcpServiceMessagesViewModel(ServiceMessageTableViewModel messageTable, IMessageRoutingService routing)
+        private readonly ITcpRuntime _tcpRuntime;
+
+        public TcpServiceMessagesViewModel(ServiceMessageTableViewModel messageTable, IMessageRoutingService routing, ITcpRuntime tcpRuntime)
         {
             MessageTable = messageTable ?? throw new ArgumentNullException(nameof(messageTable));
             _routing = routing ?? throw new ArgumentNullException(nameof(routing));
+            _tcpRuntime = tcpRuntime ?? throw new ArgumentNullException(nameof(tcpRuntime));
 
             Messages.CollectionChanged += (_, _) =>
             {
@@ -201,14 +200,24 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                 ? ScriptEditorViewModel.DefaultScript
                 : _options.Script;
             OutputMessage = _options.OutputMessage;
-            _ = RunInitialScriptAsync();
+            _runtimeContext = new TcpRuntimeContext(ServiceType, ServiceName, _options, ScriptEditorViewModel.DefaultScript);
+            _ = InitializeRuntimeAsync();
         }
 
-        private async Task RunInitialScriptAsync()
+        private async Task InitializeRuntimeAsync()
         {
+            if (_runtimeContext is null)
+            {
+                return;
+            }
+
             try
             {
-                OutputMessage = await RunScriptAsync().ConfigureAwait(false);
+                var state = await _tcpRuntime.InitializeAsync(_runtimeContext).ConfigureAwait(false);
+                Script = state.Script;
+                TestMessage = state.TestMessage;
+                OutputMessage = state.OutputMessage;
+                _options.OutputMessage = state.OutputMessage;
                 Logger?.Log($"Script executed successfully: {OutputMessage}", LogLevel.Information);
             }
             catch (Exception ex)
@@ -216,7 +225,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                 OutputMessage = ex.ToString();
                 Logger?.Log($"Script execution failed: {ex}", LogLevel.Error);
             }
-            _options.OutputMessage = OutputMessage;
         }
 
         /// <summary>Updates network and scripting settings.</summary>
@@ -255,12 +263,18 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
         /// <summary>Saves the current test message to options and routing.</summary>
         public async Task SaveAsync()
         {
-            _options.LastTestMessage = TestMessage;
-            _options.Script = Script;
-            _routing.UpdateMessage(ServiceType, ServiceName, TestMessage);
+            if (_runtimeContext is null)
+            {
+                return;
+            }
+
             try
             {
-                OutputMessage = await RunScriptAsync().ConfigureAwait(false);
+                var result = await _tcpRuntime.ExecuteAsync(new TcpRuntimeExecutionRequest(_runtimeContext, Script, TestMessage)).ConfigureAwait(false);
+                Script = result.Script;
+                TestMessage = result.TestMessage;
+                OutputMessage = result.OutputMessage;
+                _options.OutputMessage = result.OutputMessage;
                 Logger?.Log($"Script executed successfully: {OutputMessage}", LogLevel.Information);
             }
             catch (Exception ex)
@@ -268,39 +282,17 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                 OutputMessage = ex.ToString();
                 Logger?.Log($"Script execution failed: {ex}", LogLevel.Error);
             }
-            _options.OutputMessage = OutputMessage;
-        }
-
-        private async Task<string> RunScriptAsync()
-        {
-            var globals = new ScriptGlobals { Message = TestMessage };
-            var code = Script + "\nreturn Process(Message);";
-            var script = CSharpScript.Create<string>(code, ScriptOptions.Default, typeof(ScriptGlobals));
-            var diagnostics = script.Compile();
-            if (diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
-                return string.Join(Environment.NewLine, diagnostics.Select(d => d.ToString()));
-
-            var result = await script.RunAsync(globals).ConfigureAwait(false);
-            return result.ReturnValue ?? string.Empty;
         }
 
         private void InitializeTestMessage()
         {
             if (string.IsNullOrWhiteSpace(ServiceName))
+            {
                 return;
+            }
 
-            if (string.IsNullOrWhiteSpace(_options.LastTestMessage) &&
-                _routing.TryGetMessage(ServiceType, ServiceName, out var routed))
-            {
-                TestMessage = routed ?? string.Empty;
-            }
-            else
-            {
-                TestMessage = string.IsNullOrWhiteSpace(_options.LastTestMessage)
-                    ? $"{ServiceName}-PEAK-123456789"
-                    : _options.LastTestMessage;
-            }
-            _routing.UpdateMessage(ServiceType, ServiceName, TestMessage);
+            _runtimeContext = new TcpRuntimeContext(ServiceType, ServiceName, _options, ScriptEditorViewModel.DefaultScript);
+            _ = InitializeRuntimeAsync();
         }
 
         private async Task OpenScriptEditorAsync()
