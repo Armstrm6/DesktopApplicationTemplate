@@ -180,7 +180,7 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<ScpServiceViewModel>();
             services.AddSingleton<HidViewModel>();
             services.AddSingleton<HidViews>();
-            services.AddSingleton<MqttService>();
+            services.AddMqttClientService();
             services.AddSingleton<FTPServiceView>();
             services.AddSingleton<FtpServiceViewModel>();
             services.AddFtpServer(builder => builder

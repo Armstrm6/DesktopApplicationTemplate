@@ -7,7 +7,6 @@ using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Mqtt;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Models;
-using DesktopApplicationTemplate.UI.Services;
 using Microsoft.Extensions.Options;
 using MQTTnet.Protocol;
 
@@ -18,7 +17,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Mqtt;
 /// </summary>
 public class MqttServiceViewModel : ValidatableViewModelBase, ILoggingViewModel, INetworkAwareViewModel
 {
-    private readonly MqttService _service;
+    private readonly IMqttClientService _clientService;
     private readonly IMessageRoutingService _routing;
     private readonly SaveConfirmationHelper _saveHelper;
     private readonly MqttServiceOptions _options;
@@ -33,19 +32,19 @@ public class MqttServiceViewModel : ValidatableViewModelBase, ILoggingViewModel,
     /// Initializes a new instance of the <see cref="MqttServiceViewModel"/> class.
     /// </summary>
     public MqttServiceViewModel(
-        MqttService service,
+        IMqttClientService clientService,
         IMessageRoutingService routing,
         SaveConfirmationHelper saveHelper,
         IOptions<MqttServiceOptions> options,
         ILoggingService? logger = null)
     {
-        _service = service ?? throw new ArgumentNullException(nameof(service));
+        _clientService = clientService ?? throw new ArgumentNullException(nameof(clientService));
         _routing = routing ?? throw new ArgumentNullException(nameof(routing));
         _saveHelper = saveHelper ?? throw new ArgumentNullException(nameof(saveHelper));
         _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
         Logger = logger;
 
-        _service.ConnectionStateChanged += (_, connected) => IsConnected = connected;
+        _clientService.ConnectionStateChanged += (_, connected) => IsConnected = connected;
 
         Topics = new ObservableCollection<string>();
         Messages = new ObservableCollection<MqttEndpointMessage>();
@@ -457,7 +456,7 @@ public class MqttServiceViewModel : ValidatableViewModelBase, ILoggingViewModel,
         Logger?.Log("MQTT connect start", LogLevel.Debug);
         try
         {
-            await _service.ConnectAsync(options ?? _options).ConfigureAwait(false);
+            await _clientService.ConnectAsync(options ?? _options).ConfigureAwait(false);
             IsConnected = true;
             Logger?.Log("MQTT connect finished", LogLevel.Debug);
         }
@@ -477,16 +476,16 @@ public class MqttServiceViewModel : ValidatableViewModelBase, ILoggingViewModel,
             return;
         Logger?.Log("MQTT publish start", LogLevel.Debug);
         var topic = _routing.ResolveTokens(SelectedMessage.Endpoint);
-        await _service.PublishAsync(topic, SelectedMessage.Message).ConfigureAwait(false);
+        await _clientService.PublishAsync(topic, SelectedMessage.Message).ConfigureAwait(false);
         Logger?.Log("MQTT publish finished", LogLevel.Debug);
     }
 
     private void DisconnectIfConnected()
     {
-        if (!_service.IsConnected)
+        if (!_clientService.IsConnected)
             return;
         Logger?.Log("Disconnecting MQTT due to configuration change", LogLevel.Debug);
-        _ = _service.DisconnectAsync();
+        _ = _clientService.DisconnectAsync();
     }
 
     private void Save() => _saveHelper.Show();
