@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
-using DesktopApplicationTemplate.UI.Navigation;
+using DesktopApplicationTemplate.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
-using DesktopApplicationTemplate.UI.Factories;
 using DesktopApplicationTemplate.Models;
 using LogLevel = DesktopApplicationTemplate.Core.Services.LogLevel;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,7 +12,6 @@ using System.Windows.Input;
 using System.Windows.Controls.Primitives;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
@@ -25,22 +23,19 @@ namespace DesktopApplicationTemplate.UI.Views
     {
         private readonly MainViewModel _viewModel;
         private readonly ILogger<MainView>? _logger;
-        private readonly IDictionary<ServiceType, IServiceFactory> _serviceFactories;
-        private readonly IDictionary<ServiceType, INavigationHandler> _navigationHandlers;
-        private readonly IDictionary<ServiceType, Func<Page>> _pageResolvers;
+        private readonly IServiceUiRegistry<ServiceListModel, Page> _serviceRegistry;
+        private readonly IServiceProvider _serviceProvider;
 
         public MainView(
             MainViewModel viewModel,
-            IDictionary<ServiceType, IServiceFactory> serviceFactories,
-            IDictionary<ServiceType, INavigationHandler> navigationHandlers,
-            IDictionary<ServiceType, Func<Page>> pageResolvers)
+            IServiceUiRegistry<ServiceListModel, Page> serviceRegistry,
+            IServiceProvider serviceProvider)
         {
             InitializeComponent();
             _viewModel = viewModel;
-            _serviceFactories = serviceFactories;
-            _navigationHandlers = navigationHandlers;
-            _pageResolvers = pageResolvers;
-            if (App.AppHost.Services.GetService(typeof(ILoggerFactory)) is ILoggerFactory factory)
+            _serviceRegistry = serviceRegistry;
+            _serviceProvider = serviceProvider;
+            if (_serviceProvider.GetService(typeof(ILoggerFactory)) is ILoggerFactory factory)
             {
                 _logger = factory.CreateLogger<MainView>();
             }
@@ -89,9 +84,9 @@ namespace DesktopApplicationTemplate.UI.Views
 
         public Page? GetOrCreateServicePage(ServiceListModel svc)
         {
-            if (svc.ServicePage == null && _pageResolvers.TryGetValue(svc.Type, out var factory))
+            if (svc.ServicePage == null && _serviceRegistry.TryCreateServicePage(svc.Type, _serviceProvider, out var page))
             {
-                svc.ServicePage = factory();
+                svc.ServicePage = page;
             }
 
             if (svc.ServicePage != null)
@@ -143,7 +138,7 @@ namespace DesktopApplicationTemplate.UI.Views
 
         public void ShowCreateServiceSelectionPage()
         {
-            var page = App.AppHost.Services.GetRequiredService<CreateServicePage>();
+            var page = _serviceProvider.GetRequiredService<CreateServicePage>();
             _createServicePage = page;
             page.ServiceCreated += (name, type) =>
             {
@@ -175,9 +170,8 @@ namespace DesktopApplicationTemplate.UI.Views
         private void NavigateTo(ServiceType serviceType)
         {
             var defaultName = _createServicePage?.GenerateDefaultName(serviceType) ?? serviceType.ToLegacyString();
-            if (_navigationHandlers.TryGetValue(serviceType, out var handler))
+            if (_serviceRegistry.TryCreateNavigationPage(serviceType, _serviceProvider, defaultName, out var view))
             {
-                var view = handler.CreateView(defaultName);
                 ShowPage(view);
             }
         }
@@ -192,13 +186,15 @@ namespace DesktopApplicationTemplate.UI.Views
 
         internal async Task AddServiceAsync(ServiceType type, object options)
         {
-            if (!_serviceFactories.TryGetValue(type, out var factory))
+            if (!_serviceRegistry.TryCreateService(type, _serviceProvider, options, out var svc) || svc is null)
+            {
                 return;
-
-            var svc = factory.Create(options);
+            }
             svc.SetColorsByType();
             svc.LogAdded += _viewModel.OnServiceLogAdded;
             svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
+
+            GetOrCreateServicePage(svc);
 
             _viewModel.Services.Add(svc);
             _logger?.LogInformation("Service {Name} added", svc.DisplayName);
@@ -392,7 +388,7 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private void OpenSettings_Click(object sender, RoutedEventArgs e)
         {
-            var page = App.AppHost.Services.GetRequiredService<SettingsPage>();
+            var page = _serviceProvider.GetRequiredService<SettingsPage>();
             ShowPage(page);
         }
 

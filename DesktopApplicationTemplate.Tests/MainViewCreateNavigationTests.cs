@@ -1,11 +1,13 @@
-using DesktopApplicationTemplate.Models;
-using DesktopApplicationTemplate.UI.Navigation;
-using DesktopApplicationTemplate.UI.Views;
-using Moq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Controls;
+using DesktopApplicationTemplate.Models;
+using DesktopApplicationTemplate.Services;
+using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.UI.Views;
+using Moq;
 using Xunit;
 
 namespace DesktopApplicationTemplate.Tests;
@@ -26,20 +28,17 @@ public class MainViewCreateNavigationTests
         var view = (MainView)RuntimeHelpers.GetUninitializedObject(typeof(MainView));
         typeof(MainView).GetField("ContentFrame")!.SetValue(view, new Frame());
         typeof(MainView).GetField("HomeContentGrid")!.SetValue(view, new Grid());
-        var handlerMocks = new Dictionary<ServiceType, Mock<INavigationHandler>>
-        {
-            { ServiceType.Mqtt, new Mock<INavigationHandler>() },
-            { ServiceType.Ftp, new Mock<INavigationHandler>() }
-        };
-        foreach (var kvp in handlerMocks)
-        {
-            kvp.Value.Setup(h => h.CreateView(kvp.Key.ToLegacyString())).Returns(new Page());
-        }
         var expectedPage = new Page();
-        handlerMocks[type].Setup(h => h.CreateView(type.ToLegacyString())).Returns(expectedPage);
-        var dict = handlerMocks.ToDictionary(k => k.Key, v => v.Value.Object);
-        typeof(MainView).GetField("_navigationHandlers", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!
-            .SetValue(view, dict);
+        var registry = new RegistryStub(new Dictionary<ServiceType, Func<string, Page>>
+        {
+            { ServiceType.Mqtt, name => type == ServiceType.Mqtt && name == type.ToLegacyString() ? expectedPage : new Page() },
+            { ServiceType.Ftp, name => type == ServiceType.Ftp && name == type.ToLegacyString() ? expectedPage : new Page() }
+        });
+        typeof(MainView).GetField("_serviceRegistry", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!
+            .SetValue(view, registry);
+        var providerMock = new Mock<IServiceProvider>();
+        typeof(MainView).GetField("_serviceProvider", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!
+            .SetValue(view, providerMock.Object);
         typeof(MainView).GetField("_createServicePage", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!
             .SetValue(view, null);
         var method = typeof(MainView).GetMethod("NavigateTo", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
@@ -48,17 +47,8 @@ public class MainViewCreateNavigationTests
         method.Invoke(view, new object[] { type });
 
         // Assert
-        foreach (var kvp in handlerMocks)
-        {
-            if (kvp.Key == type)
-            {
-                kvp.Value.Verify(h => h.CreateView(type.ToLegacyString()), Times.Once);
-            }
-            else
-            {
-                kvp.Value.Verify(h => h.CreateView(It.IsAny<string>()), Times.Never);
-            }
-        }
+        Assert.Equal(type, registry.LastRequestedType);
+        Assert.Equal(type.ToLegacyString(), registry.LastDefaultName);
         var frame = (Frame)typeof(MainView).GetField("ContentFrame")!.GetValue(view)!;
         Assert.Same(expectedPage, frame.Content);
     }
@@ -70,8 +60,12 @@ public class MainViewCreateNavigationTests
         var view = (MainView)RuntimeHelpers.GetUninitializedObject(typeof(MainView));
         typeof(MainView).GetField("ContentFrame")!.SetValue(view, new Frame());
         typeof(MainView).GetField("HomeContentGrid")!.SetValue(view, new Grid());
-        typeof(MainView).GetField("_navigationHandlers", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!
-            .SetValue(view, new Dictionary<ServiceType, INavigationHandler>());
+        var registry = new RegistryStub(new Dictionary<ServiceType, Func<string, Page>>());
+        typeof(MainView).GetField("_serviceRegistry", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!
+            .SetValue(view, registry);
+        var providerMock = new Mock<IServiceProvider>();
+        typeof(MainView).GetField("_serviceProvider", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!
+            .SetValue(view, providerMock.Object);
         var method = typeof(MainView).GetMethod("NavigateTo", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
 
         // Act
@@ -80,5 +74,47 @@ public class MainViewCreateNavigationTests
         // Assert
         var frame = (Frame)typeof(MainView).GetField("ContentFrame")!.GetValue(view)!;
         Assert.Null(frame.Content);
+    }
+}
+
+file sealed class RegistryStub : IServiceUiRegistry<ServiceListModel, Page>
+{
+    private readonly Dictionary<ServiceType, Func<string, Page>> _navigation;
+
+    public RegistryStub(Dictionary<ServiceType, Func<string, Page>> navigation)
+    {
+        _navigation = navigation;
+    }
+
+    public IReadOnlyCollection<ServiceType> SupportedServices => _navigation.Keys;
+
+    public ServiceType? LastRequestedType { get; private set; }
+
+    public string? LastDefaultName { get; private set; }
+
+    public bool TryCreateService(ServiceType serviceType, IServiceProvider provider, object options, out ServiceListModel? service)
+    {
+        service = null;
+        return false;
+    }
+
+    public bool TryCreateServicePage(ServiceType serviceType, IServiceProvider provider, out Page? page)
+    {
+        page = null;
+        return false;
+    }
+
+    public bool TryCreateNavigationPage(ServiceType serviceType, IServiceProvider provider, string defaultName, out Page? page)
+    {
+        LastRequestedType = serviceType;
+        LastDefaultName = defaultName;
+        if (_navigation.TryGetValue(serviceType, out var factory))
+        {
+            page = factory(defaultName);
+            return true;
+        }
+
+        page = null;
+        return false;
     }
 }
