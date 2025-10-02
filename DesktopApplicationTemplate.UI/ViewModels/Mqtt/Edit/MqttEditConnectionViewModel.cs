@@ -4,7 +4,6 @@ using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Mqtt;
 using DesktopApplicationTemplate.UI.Helpers;
-using DesktopApplicationTemplate.UI.Services;
 using Microsoft.Extensions.Options;
 
 namespace DesktopApplicationTemplate.UI.ViewModels.Mqtt.Edit;
@@ -14,7 +13,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Mqtt.Edit;
 /// </summary>
 public class MqttEditConnectionViewModel : ValidatableViewModelBase, ILoggingViewModel
 {
-    private readonly MqttService _service;
+    private readonly IMqttClientService _clientService;
     private MqttServiceOptions _options;
 
     private string _host = string.Empty;
@@ -30,11 +29,11 @@ public class MqttEditConnectionViewModel : ValidatableViewModelBase, ILoggingVie
     /// Initializes a new instance of the <see cref="MqttEditConnectionViewModel"/> class.
     /// </summary>
     public MqttEditConnectionViewModel(
-        MqttService service,
+        IMqttClientService clientService,
         IOptions<MqttServiceOptions> options,
         ILoggingService? logger = null)
     {
-        _service = service ?? throw new ArgumentNullException(nameof(service));
+        _clientService = clientService ?? throw new ArgumentNullException(nameof(clientService));
         _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
         Logger = logger;
 
@@ -44,12 +43,12 @@ public class MqttEditConnectionViewModel : ValidatableViewModelBase, ILoggingVie
         CancelCommand = new RelayCommand(Cancel);
         ToggleSubscriptionCommand = new AsyncRelayCommand(ToggleSubscriptionAsync);
 
-        _service.ConnectionStateChanged += (_, c) =>
+        _clientService.ConnectionStateChanged += (_, c) =>
         {
             IsConnected = c;
             OnPropertyChanged(nameof(SubscriptionButtonText));
         };
-        IsConnected = _service.IsConnected;
+        IsConnected = _clientService.IsConnected;
     }
 
     /// <inheritdoc />
@@ -208,7 +207,7 @@ public class MqttEditConnectionViewModel : ValidatableViewModelBase, ILoggingVie
         _options.Password = _password;
         _options.ConnectionType = _connectionType;
         _options.WebSocketPath = _webSocketPath;
-        await _service.ConnectAsync(_options).ConfigureAwait(false);
+        await _clientService.ConnectAsync(_options).ConfigureAwait(false);
         Logger?.Log("MQTT connection update finished", LogLevel.Debug);
         RequestClose?.Invoke(this, EventArgs.Empty);
     }
@@ -230,13 +229,13 @@ public class MqttEditConnectionViewModel : ValidatableViewModelBase, ILoggingVie
         if (IsConnected)
         {
             Logger?.Log("MQTT unsubscribe start", LogLevel.Debug);
-            await _service.DisconnectAsync().ConfigureAwait(false);
+            await _clientService.DisconnectAsync().ConfigureAwait(false);
             Logger?.Log("MQTT unsubscribe finished", LogLevel.Debug);
         }
         else
         {
             Logger?.Log("MQTT subscribe start", LogLevel.Debug);
-            await _service.ConnectAsync().ConfigureAwait(false);
+            await _clientService.ConnectAsync().ConfigureAwait(false);
             Logger?.Log("MQTT subscribe finished", LogLevel.Debug);
         }
         RequestClose?.Invoke(this, EventArgs.Empty);

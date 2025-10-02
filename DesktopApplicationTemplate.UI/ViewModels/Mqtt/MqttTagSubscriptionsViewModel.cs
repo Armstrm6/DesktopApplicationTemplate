@@ -10,7 +10,6 @@ using DesktopApplicationTemplate.Core.Services.Protocols.Mqtt;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Models;
-using DesktopApplicationTemplate.UI.Services;
 using Microsoft.Extensions.Options;
 using MQTTnet.Protocol;
 
@@ -22,7 +21,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Mqtt;
 [SupportedOSPlatform("windows")]
 public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingViewModel
     {
-    private readonly MqttService _service;
+    private readonly IMqttClientService _clientService;
     private readonly MqttServiceOptions _options;
     private readonly AsyncRelayCommand _addTopicCommand;
     private readonly AsyncRelayCommand _removeTopicCommand;
@@ -38,17 +37,16 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
     /// <summary>
     /// Initializes a new instance of the <see cref="MqttTagSubscriptionsViewModel"/> class.
     /// </summary>
-    public MqttTagSubscriptionsViewModel(MqttService service, IOptions<MqttServiceOptions> options)
+    public MqttTagSubscriptionsViewModel(IMqttClientService clientService, IOptions<MqttServiceOptions> options)
     {
-        _service = service ?? throw new ArgumentNullException(nameof(service));
+        _clientService = clientService ?? throw new ArgumentNullException(nameof(clientService));
         _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
 
-        Subscriptions = new ObservableCollection<TagSubscription>(_service.TagSubscriptions);
+        Subscriptions = new ObservableCollection<TagSubscription>();
         SubscriptionResults = new ObservableCollection<SubscriptionResult>();
         LogEntries = new ObservableCollection<LogEntry>();
-        _service.TagSubscriptionChanged += OnTagSubscriptionChanged;
-        _service.ConnectionStateChanged += (_, c) => IsConnected = c;
-        IsConnected = _service.IsConnected;
+        _clientService.ConnectionStateChanged += (_, c) => IsConnected = c;
+        IsConnected = _clientService.IsConnected;
 
         _addTopicCommand = new AsyncRelayCommand(AddTopicAsync, () => CanAddTopic);
         _removeTopicCommand = new AsyncRelayCommand(RemoveTopicAsync, () => SelectedSubscription != null);
@@ -203,7 +201,7 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
 
         try
         {
-            await _service.SubscribeAsync(topic, NewQoS).ConfigureAwait(false);
+            await _clientService.SubscribeAsync(topic, NewQoS).ConfigureAwait(false);
             SubscriptionResults.Add(new SubscriptionResult(topic, true, $"Subscribed to {topic}"));
             NewTopic = string.Empty;
         }
@@ -222,7 +220,7 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
 
         try
         {
-            await _service.UnsubscribeAsync(SelectedSubscription.Topic).ConfigureAwait(false);
+            await _clientService.UnsubscribeAsync(SelectedSubscription.Topic).ConfigureAwait(false);
         }
         catch
         {
@@ -244,7 +242,7 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
             return;
 
         Logger?.Log("MQTT test publish start", LogLevel.Debug);
-        await _service.PublishAsync(SelectedSubscription!.Topic, SelectedSubscription.OutgoingMessage).ConfigureAwait(false);
+        await _clientService.PublishAsync(SelectedSubscription!.Topic, SelectedSubscription.OutgoingMessage).ConfigureAwait(false);
         Logger?.Log("MQTT test publish finished", LogLevel.Debug);
     }
 
@@ -257,7 +255,7 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
             return;
 
         Logger?.Log("MQTT tag test publish start", LogLevel.Debug);
-        await _service.PublishAsync(sub!.Endpoint, sub.OutgoingMessage).ConfigureAwait(false);
+        await _clientService.PublishAsync(sub!.Endpoint, sub.OutgoingMessage).ConfigureAwait(false);
         Logger?.Log("MQTT tag test publish finished", LogLevel.Debug);
     }
 
@@ -266,7 +264,7 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
         Logger?.Log("MQTT connect start", LogLevel.Debug);
         try
         {
-            await _service.ConnectAsync(_options).ConfigureAwait(false);
+            await _clientService.ConnectAsync(_options).ConfigureAwait(false);
             IsConnected = true;
             Logger?.Log("MQTT connect finished", LogLevel.Debug);
         }
@@ -280,20 +278,6 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
         {
             IsConnected = false;
             Logger?.Log($"MQTT connect failed: {ex.Message}", LogLevel.Error);
-        }
-    }
-
-    private void OnTagSubscriptionChanged(object? sender, TagSubscription subscription)
-    {
-        var existing = Subscriptions.FirstOrDefault(t => t.Topic == subscription.Topic);
-        if (existing is null)
-        {
-            Subscriptions.Add(subscription);
-        }
-        else
-        {
-            existing.StatusColor = subscription.StatusColor;
-            existing.Icon = subscription.Icon;
         }
     }
 

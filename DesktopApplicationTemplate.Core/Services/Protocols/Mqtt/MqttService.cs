@@ -1,29 +1,27 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.Core.Services.Protocols.Mqtt;
-using DesktopApplicationTemplate.UI.Models;
 using Microsoft.Extensions.Options;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Protocol;
 
-namespace DesktopApplicationTemplate.UI.Services;
+namespace DesktopApplicationTemplate.Core.Services.Protocols.Mqtt;
 
 /// <summary>
 /// Provides MQTT connectivity and tokenized message publishing.
 /// </summary>
-public class MqttService
+public class MqttService : IMqttClientService
 {
     private readonly IMqttClient _client;
     private readonly IMessageRoutingService _routingService;
     private readonly ILoggingService _logger;
     private readonly MqttServiceOptions _options;
-    private readonly Dictionary<string, TagSubscription> _tagSubscriptions = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MqttService"/> class.
@@ -59,47 +57,20 @@ public class MqttService
         };
     }
 
-    /// <summary>
-    /// Gets a value indicating whether the client is connected.
-    /// </summary>
+    /// <inheritdoc />
     public bool IsConnected => _client.IsConnected;
 
-    /// <summary>
-    /// Raised when the connection state changes.
-    /// </summary>
+    /// <inheritdoc />
     public event EventHandler<bool>? ConnectionStateChanged;
 
-    private void OnConnectionStateChanged(bool connected) => ConnectionStateChanged?.Invoke(this, connected);
-
-    /// <summary>
-    /// Raised when tag subscription metadata changes.
-    /// </summary>
-    public event EventHandler<TagSubscription>? TagSubscriptionChanged;
-
-    /// <summary>
-    /// Gets the current set of tag subscriptions.
-    /// </summary>
-    public IReadOnlyCollection<TagSubscription> TagSubscriptions => _tagSubscriptions.Values;
-
-    /// <summary>
-    /// Adds or updates a tag subscription and notifies listeners.
-    /// </summary>
-    /// <param name="subscription">The subscription to upsert.</param>
-    public void UpdateTagSubscription(TagSubscription subscription)
-    {
-        ArgumentNullException.ThrowIfNull(subscription);
-        _tagSubscriptions[subscription.Topic] = subscription;
-        TagSubscriptionChanged?.Invoke(this, subscription);
-    }
-
-    /// <summary>
-    /// Connects to the MQTT broker using configured or override options.
-    /// </summary>
+    /// <inheritdoc />
     public async Task ConnectAsync(MqttServiceOptions? overrideOptions = null, CancellationToken token = default)
     {
         var opts = overrideOptions ?? _options;
         if (string.IsNullOrWhiteSpace(opts.Host))
+        {
             throw new ArgumentException("Host cannot be null or whitespace.", nameof(overrideOptions));
+        }
 
         _logger.Log("MQTT connect start", LogLevel.Debug);
 
@@ -193,19 +164,13 @@ public class MqttService
         }
     }
 
-    /// <summary>
-    /// Subscribes to a topic with the specified quality of service level.
-    /// </summary>
-    /// <param name="topic">The topic to subscribe to.</param>
-    /// <param name="qos">The desired QoS level.</param>
-    /// <param name="token">Cancellation token.</param>
-    /// <returns>The MQTT subscribe result when successful.</returns>
-    /// <exception cref="ArgumentException">Thrown when <paramref name="topic"/> is null or whitespace.</exception>
-    /// <exception cref="InvalidOperationException">Thrown when the broker rejects the subscription.</exception>
+    /// <inheritdoc />
     public async Task<MqttClientSubscribeResult> SubscribeAsync(string topic, MqttQualityOfServiceLevel qos, CancellationToken token = default)
     {
         if (string.IsNullOrWhiteSpace(topic))
+        {
             throw new ArgumentException("Topic cannot be null or whitespace.", nameof(topic));
+        }
 
         _logger.Log("MQTT subscribe start", LogLevel.Debug);
 
@@ -219,17 +184,10 @@ public class MqttService
 
         var result = await _client.SubscribeAsync(options, token).ConfigureAwait(false);
 
-        var success = true;
-        foreach (var item in result.Items)
-        {
-            if (item.ResultCode != MqttClientSubscribeResultCode.GrantedQoS0 &&
-                item.ResultCode != MqttClientSubscribeResultCode.GrantedQoS1 &&
-                item.ResultCode != MqttClientSubscribeResultCode.GrantedQoS2)
-            {
-                success = false;
-                break;
-            }
-        }
+        var success = result.Items.All(item =>
+            item.ResultCode == MqttClientSubscribeResultCode.GrantedQoS0 ||
+            item.ResultCode == MqttClientSubscribeResultCode.GrantedQoS1 ||
+            item.ResultCode == MqttClientSubscribeResultCode.GrantedQoS2);
 
         if (!success)
         {
@@ -242,18 +200,13 @@ public class MqttService
         return result;
     }
 
-    /// <summary>
-    /// Unsubscribes from a topic.
-    /// </summary>
-    /// <param name="topic">The topic to unsubscribe from.</param>
-    /// <param name="token">Cancellation token.</param>
-    /// <returns>The MQTT unsubscribe result when successful.</returns>
-    /// <exception cref="ArgumentException">Thrown when <paramref name="topic"/> is null or whitespace.</exception>
-    /// <exception cref="InvalidOperationException">Thrown when the broker rejects the request.</exception>
+    /// <inheritdoc />
     public async Task<MqttClientUnsubscribeResult> UnsubscribeAsync(string topic, CancellationToken token = default)
     {
         if (string.IsNullOrWhiteSpace(topic))
+        {
             throw new ArgumentException("Topic cannot be null or whitespace.", nameof(topic));
+        }
 
         _logger.Log("MQTT unsubscribe start", LogLevel.Debug);
 
@@ -267,9 +220,7 @@ public class MqttService
         return result;
     }
 
-    /// <summary>
-    /// Publishes a single message to an endpoint.
-    /// </summary>
+    /// <inheritdoc />
     public async Task PublishAsync(string topic, string message, CancellationToken token = default)
     {
         ArgumentNullException.ThrowIfNull(topic);
@@ -285,9 +236,7 @@ public class MqttService
         _logger.Log("MQTT publish finished", LogLevel.Debug);
     }
 
-    /// <summary>
-    /// Publishes multiple messages per endpoint.
-    /// </summary>
+    /// <inheritdoc />
     public async Task PublishAsync(IDictionary<string, IEnumerable<string>> endpointMessages, CancellationToken token = default)
     {
         ArgumentNullException.ThrowIfNull(endpointMessages);
@@ -300,9 +249,7 @@ public class MqttService
         }
     }
 
-    /// <summary>
-    /// Disconnects from the broker if connected.
-    /// </summary>
+    /// <inheritdoc />
     public async Task DisconnectAsync(CancellationToken token = default)
     {
         if (_client.IsConnected)
@@ -310,4 +257,6 @@ public class MqttService
             await _client.DisconnectAsync(cancellationToken: token).ConfigureAwait(false);
         }
     }
+
+    private void OnConnectionStateChanged(bool connected) => ConnectionStateChanged?.Invoke(this, connected);
 }
