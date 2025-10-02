@@ -1,17 +1,17 @@
 using System;
-using DesktopApplicationTemplate.UI.Views;
-using DesktopApplicationTemplate.UI.ViewModels;
-using DesktopApplicationTemplate.UI.ViewModels.Csv.Edit;
-using DesktopApplicationTemplate.UI.ViewModels.Csv.Advanced;
-using DesktopApplicationTemplate.UI.Views.Csv.Edit;
-using DesktopApplicationTemplate.UI.Views.Csv.Advanced;
-using DesktopApplicationTemplate.UI.Services;
-using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Models;
+using DesktopApplicationTemplate.Services.Csv.Options;
+using DesktopApplicationTemplate.Services.Csv.UI.ViewModels.Csv.Advanced;
+using DesktopApplicationTemplate.Services.Csv.UI.ViewModels.Csv.Edit;
+using DesktopApplicationTemplate.Services.Csv.UI.Views.Csv.Advanced;
+using DesktopApplicationTemplate.Services.Csv.UI.Views.Csv.Edit;
+using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI.Views;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace DesktopApplicationTemplate.UI.EditHandlers;
+namespace DesktopApplicationTemplate.Services.Csv.UI.EditHandlers;
 
 public class CsvEditServiceHandler : IEditServiceHandler
 {
@@ -41,37 +41,42 @@ public class CsvEditServiceHandler : IEditServiceHandler
         }
 
         var options = payload;
-        var vm = _services.GetRequiredService<CsvServiceEditorViewModel>();
-        vm.Load(service.DisplayName.Split(" - ").Last(), options);
+        var viewModel = _services.GetRequiredService<CsvServiceEditorViewModel>();
+        viewModel.Load(service.DisplayName.Split(" - ").Last(), options);
         var editView = _services.GetRequiredService<CsvServiceEditorView>();
-        editView.Initialize(vm);
-        vm.ServiceSaved += (name, opts) =>
+        editView.Initialize(viewModel);
+        viewModel.ServiceSaved += (name, opts) =>
         {
             var catalog = _services.GetRequiredService<IServiceCatalog>();
             var descriptor = ResolveDescriptor(catalog, service.DescriptorId, service.Type);
             service.ApplyDescriptor(descriptor, name);
             service.SetPayload(opts);
             if (csvPage != null)
+            {
                 mainView.ShowPage(csvPage);
+            }
+
             _ = mainViewModel.SaveServicesAsync();
         };
-        vm.EditCancelled += () =>
+        viewModel.EditCancelled += () =>
         {
             if (csvPage != null)
+            {
                 mainView.ShowPage(csvPage);
+            }
         };
-        vm.AdvancedConfigRequested += opts =>
+        viewModel.AdvancedConfigRequested += opts =>
         {
-            var advVm = ActivatorUtilities.CreateInstance<CsvAdvancedConfigViewModel>(_services, opts);
-            var advView = _services.GetRequiredService<CsvAdvancedConfigView>();
-            advView.Initialize(advVm);
-            advVm.Saved += _ => mainView.ShowPage(editView);
-            advVm.BackRequested += () => mainView.ShowPage(editView);
-            mainView.ShowPage(advView);
+            var advancedViewModel = ActivatorUtilities.CreateInstance<CsvAdvancedConfigViewModel>(_services, opts);
+            var advancedView = _services.GetRequiredService<CsvAdvancedConfigView>();
+            advancedView.Initialize(advancedViewModel);
+            advancedViewModel.Saved += _ => mainView.ShowPage(editView);
+            advancedViewModel.BackRequested += () => mainView.ShowPage(editView);
+            mainView.ShowPage(advancedView);
         };
         mainView.ShowPage(editView);
         _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
-}
+    }
 
     private static IServiceDescriptor? ResolveDescriptor(IServiceCatalog catalog, string descriptorId, ServiceType serviceType)
     {
@@ -93,4 +98,3 @@ public class CsvEditServiceHandler : IEditServiceHandler
         return null;
     }
 }
-

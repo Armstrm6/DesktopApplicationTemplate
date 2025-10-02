@@ -1,8 +1,8 @@
 using System.Windows.Controls;
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.UI.ViewModels.Csv.Advanced;
+using DesktopApplicationTemplate.Services.Csv.UI.ViewModels.Csv.Advanced;
 
-namespace DesktopApplicationTemplate.UI.Views.Csv.Advanced;
+namespace DesktopApplicationTemplate.Services.Csv.UI.Views.Csv.Advanced;
 
 public partial class CsvAdvancedConfigView : Page
 {
@@ -14,9 +14,9 @@ public partial class CsvAdvancedConfigView : Page
         _logger = logger;
     }
 
-    public void Initialize(CsvAdvancedConfigViewModel vm)
+    public void Initialize(CsvAdvancedConfigViewModel viewModel)
     {
-        DataContext = vm;
-        vm.Logger = _logger;
+        DataContext = viewModel;
+        viewModel.Logger = _logger;
     }
 }

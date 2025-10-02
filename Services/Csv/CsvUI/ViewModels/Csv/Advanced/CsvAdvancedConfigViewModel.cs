@@ -1,8 +1,9 @@
 using System;
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Services.Csv.Options;
+using DesktopApplicationTemplate.UI.ViewModels;
 
-namespace DesktopApplicationTemplate.UI.ViewModels.Csv.Advanced;
+namespace DesktopApplicationTemplate.Services.Csv.UI.ViewModels.Csv.Advanced;
 
 /// <summary>
 /// View model for editing advanced CSV creator configuration.
@@ -30,7 +31,11 @@ public class CsvAdvancedConfigViewModel : AdvancedConfigViewModelBase<CsvService
     public string Delimiter
     {
         get => _delimiter;
-        set { _delimiter = value; OnPropertyChanged(); }
+        set
+        {
+            _delimiter = value;
+            OnPropertyChanged();
+        }
     }
 
     /// <summary>
@@ -39,7 +44,11 @@ public class CsvAdvancedConfigViewModel : AdvancedConfigViewModelBase<CsvService
     public bool IncludeHeaders
     {
         get => _includeHeaders;
-        set { _includeHeaders = value; OnPropertyChanged(); }
+        set
+        {
+            _includeHeaders = value;
+            OnPropertyChanged();
+        }
     }
 
     protected override CsvServiceOptions OnSave()

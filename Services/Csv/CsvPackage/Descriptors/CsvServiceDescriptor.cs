@@ -1,9 +1,13 @@
 using System.Collections.Generic;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Models;
+using DesktopApplicationTemplate.Services.Csv.Serialization;
 
-namespace DesktopApplicationTemplate.Services.Common.Descriptors;
+namespace DesktopApplicationTemplate.Services.Csv.Descriptors;
 
+/// <summary>
+/// Describes the CSV creator service for the catalog.
+/// </summary>
 public sealed class CsvServiceDescriptor : ServiceDescriptorBase
 {
     public const string DescriptorId = ServiceDescriptorIds.Csv;
@@ -17,7 +21,7 @@ public sealed class CsvServiceDescriptor : ServiceDescriptorBase
             "File",
             "Generate CSV output from message payloads.",
             ServiceType.Csv,
-            optionsSerializer,
+            optionsSerializer ?? new CsvServiceOptionsSerializer(),
             factories,
             new ServicePresentationMetadata(
                 "📄",

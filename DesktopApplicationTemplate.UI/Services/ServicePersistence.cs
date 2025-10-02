@@ -9,7 +9,6 @@ using DesktopApplicationTemplate.Core.Models;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI;
-using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
@@ -473,7 +472,7 @@ namespace DesktopApplicationTemplate.Persistence
         public TcpServiceOptions? TcpOptions { get; set; }
         public JsonElement? FtpOptions { get; set; }
         public JsonElement? HttpOptions { get; set; }
-        public CsvServiceOptions? CsvOptions { get; set; }
+        public JsonElement? CsvOptions { get; set; }
         public double TotalExecutionTimeMs { get; set; }
         public int ExecutionCount { get; set; }
     }

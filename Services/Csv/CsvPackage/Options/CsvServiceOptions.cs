@@ -1,4 +1,4 @@
-namespace DesktopApplicationTemplate.UI.Services
+namespace DesktopApplicationTemplate.Services.Csv.Options
 {
     /// <summary>
     /// Configuration options for CSV creator services.

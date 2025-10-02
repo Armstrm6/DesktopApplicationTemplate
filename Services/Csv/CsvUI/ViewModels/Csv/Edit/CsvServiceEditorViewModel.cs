@@ -1,8 +1,9 @@
 using System;
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Services.Csv.Options;
+using DesktopApplicationTemplate.UI.ViewModels;
 
-namespace DesktopApplicationTemplate.UI.ViewModels.Csv.Edit;
+namespace DesktopApplicationTemplate.Services.Csv.UI.ViewModels.Csv.Edit;
 
 /// <summary>
 /// View model for creating or editing a CSV creator service.
@@ -21,7 +22,7 @@ public class CsvServiceEditorViewModel : ServiceEditorViewModelBase<CsvServiceOp
     {
         _screen = screen ?? throw new ArgumentNullException(nameof(screen));
         SaveButtonText = "Create";
-        Options = new();
+        Options = new CsvServiceOptions();
         _screen.ServiceSaved += (_, o) => RaiseServiceSaved(o);
         _screen.EditCancelled += () => RaiseEditCancelled();
         _screen.AdvancedConfigRequested += o => RaiseAdvancedConfigRequested(o);
@@ -38,9 +39,14 @@ public class CsvServiceEditorViewModel : ServiceEditorViewModelBase<CsvServiceOp
             _outputPath = value;
             var error = Rule.ValidateRequired(value, "Output path");
             if (error is not null)
+            {
                 AddError(nameof(OutputPath), error);
+            }
             else
+            {
                 ClearErrors(nameof(OutputPath));
+            }
+
             OnPropertyChanged();
         }
     }
@@ -67,7 +73,10 @@ public class CsvServiceEditorViewModel : ServiceEditorViewModelBase<CsvServiceOp
     protected override void OnSave()
     {
         if (HasErrors)
+        {
             return;
+        }
+
         Options.OutputPath = OutputPath;
         _screen.Save(ServiceName, Options);
     }

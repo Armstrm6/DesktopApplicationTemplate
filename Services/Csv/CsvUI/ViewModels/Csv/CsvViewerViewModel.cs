@@ -1,0 +1,134 @@
+using System;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Windows.Input;
+using DesktopApplicationTemplate.UI.Helpers;
+using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.UI.ViewModels;
+
+namespace DesktopApplicationTemplate.Services.Csv.UI.ViewModels.Csv;
+
+public class CsvColumnConfig
+{
+    public string Name { get; set; } = "Column";
+    public string Service { get; set; } = string.Empty;
+    public string Script { get; set; } = string.Empty;
+}
+
+public class CsvConfiguration
+{
+    public string FileNamePattern { get; set; } = "output_{index}.csv";
+    public string OutputDirectory { get; set; } = string.Empty;
+    public ObservableCollection<CsvColumnConfig> Columns { get; set; } = new();
+}
+
+public class CsvViewerViewModel : ViewModelBase
+{
+    private readonly string _configPath;
+    private readonly IFileDialogService _fileDialog;
+
+    public CsvConfiguration Configuration { get; private set; } = new();
+    public CsvColumnConfig? SelectedColumn { get; set; }
+
+    public ICommand AddColumnCommand { get; }
+    public ICommand RemoveColumnCommand { get; }
+    public ICommand SaveCommand { get; }
+    public ICommand CloseCommand { get; }
+    public ICommand BrowseCommand { get; }
+#if DEBUG
+    public ICommand DebugSaveCommand { get; }
+#endif
+
+    public event Action? RequestClose;
+
+    public CsvViewerViewModel(IFileDialogService fileDialog, string? configPath = null)
+    {
+        _fileDialog = fileDialog;
+        _configPath = configPath ?? "csv_config.json";
+        Load();
+        AddColumnCommand = new RelayCommand(() => Configuration.Columns.Add(new CsvColumnConfig()));
+        RemoveColumnCommand = new RelayCommand(() =>
+        {
+            if (SelectedColumn != null)
+            {
+                Configuration.Columns.Remove(SelectedColumn);
+            }
+        });
+        SaveCommand = new RelayCommand(Save);
+        CloseCommand = new RelayCommand(() => RequestClose?.Invoke());
+        BrowseCommand = new RelayCommand(BrowseDirectory);
+#if DEBUG
+        DebugSaveCommand = new RelayCommand(Save);
+#endif
+    }
+
+    private void Load()
+    {
+        if (File.Exists(_configPath))
+        {
+            var json = File.ReadAllText(_configPath);
+            if (!string.IsNullOrWhiteSpace(json))
+            {
+                Configuration = JsonSerializer.Deserialize<CsvConfiguration>(json) ?? new CsvConfiguration();
+            }
+        }
+    }
+
+    public void Save()
+    {
+        if (Configuration is null)
+        {
+            return;
+        }
+
+        try
+        {
+            var snapshot = new CsvConfiguration
+            {
+                FileNamePattern = Configuration.FileNamePattern,
+                OutputDirectory = Configuration.OutputDirectory,
+                Columns = new ObservableCollection<CsvColumnConfig>(Configuration.Columns.Select(c => new CsvColumnConfig
+                {
+                    Name = c.Name,
+                    Service = c.Service,
+                    Script = c.Script
+                }))
+            };
+
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                ReferenceHandler = ReferenceHandler.IgnoreCycles,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            };
+
+            var json = JsonSerializer.Serialize(snapshot, options);
+            File.WriteAllText(_configPath, json);
+        }
+        catch (StackOverflowException)
+        {
+            var dumpOptions = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                ReferenceHandler = ReferenceHandler.Preserve
+            };
+            var dump = JsonSerializer.Serialize(Configuration, dumpOptions);
+            var temp = Path.Combine(Path.GetTempPath(), "csv_config_dump.json");
+            File.WriteAllText(temp, dump);
+            Environment.FailFast($"Stack overflow while saving CSV configuration. Dump written to {temp}");
+        }
+    }
+
+    private void BrowseDirectory()
+    {
+        var path = _fileDialog.SelectFolder();
+        if (!string.IsNullOrWhiteSpace(path))
+        {
+            Configuration.OutputDirectory = path;
+            OnPropertyChanged(nameof(Configuration));
+        }
+    }
+}
