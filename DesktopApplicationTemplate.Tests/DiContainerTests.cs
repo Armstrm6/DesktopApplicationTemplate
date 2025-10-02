@@ -6,7 +6,7 @@ using DesktopApplicationTemplate.UI.ViewModels.Mqtt;
 using DesktopApplicationTemplate.UI.ViewModels.Tcp;
 using DesktopApplicationTemplate.UI.ViewModels.Tcp.Create;
 using DesktopApplicationTemplate.UI.ViewModels.Tcp.Edit;
-using DesktopApplicationTemplate.Services.Common;
+using DesktopApplicationTemplate.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 

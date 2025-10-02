@@ -92,7 +92,7 @@ using System.Windows.Threading;
 using System.Collections.Generic;
 using DesktopApplicationTemplate.Models;
 using System.Threading.Tasks;
-using DesktopApplicationTemplate.Services.Common;
+using DesktopApplicationTemplate.Services;
 
 
 namespace DesktopApplicationTemplate.UI
@@ -181,7 +181,7 @@ namespace DesktopApplicationTemplate.UI
             services.AddFtpServer(builder => builder
                 .UseDotNetFileSystem()
                 .EnableAnonymousAuthentication());
-            services.AddSingleton<IFtpServerService, DesktopApplicationTemplate.Service.Services.FtpServerService>();
+            services.AddSingleton<IFtpServerService, DesktopApplicationTemplate.Services.FtpServerService>();
             services.AddSingleton<CsvViewerViewModel>();
             services.AddSingleton<CsvService>();
             services.AddSingleton<CsvServiceView>();

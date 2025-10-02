@@ -44,7 +44,7 @@ public class FtpServerDiRegistrationTests
         services.AddFtpServer(builder => builder
             .UseDotNetFileSystem()
             .EnableAnonymousAuthentication());
-        services.AddSingleton<IFtpServerService, DesktopApplicationTemplate.Service.Services.FtpServerService>();
+        services.AddSingleton<IFtpServerService, DesktopApplicationTemplate.Services.FtpServerService>();
         services.AddSingleton<FtpServiceViewModel>();
 
         using var provider = services.BuildServiceProvider();

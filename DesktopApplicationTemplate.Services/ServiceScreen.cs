@@ -1,7 +1,7 @@
 using System.Runtime.Versioning;
 using DesktopApplicationTemplate.Core.Services;
 
-namespace DesktopApplicationTemplate.Services.Common;
+namespace DesktopApplicationTemplate.Services;
 
 /// <summary>
 /// Default implementation of <see cref="IServiceScreen{TOptions}"/>.

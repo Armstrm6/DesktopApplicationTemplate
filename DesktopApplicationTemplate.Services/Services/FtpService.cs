@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DesktopApplicationTemplate.Core.Services;
 
-namespace DesktopApplicationTemplate.Service.Services
+namespace DesktopApplicationTemplate.Services
 {
     public class FtpService : IFtpService
     {

@@ -2,7 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.Service.Services;
+using DesktopApplicationTemplate.Services;
 using FubarDev.FtpServer;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using DesktopApplicationTemplate.Core.Services;
 using Microsoft.Extensions.Logging;
 
-namespace DesktopApplicationTemplate.Services.Common;
+namespace DesktopApplicationTemplate.Services;
 
 /// <summary>
 /// Searches for files using <see cref="Directory.EnumerateFiles"/> with simple in-memory caching.
