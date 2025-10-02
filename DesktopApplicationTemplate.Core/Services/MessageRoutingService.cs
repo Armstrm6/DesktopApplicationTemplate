@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
-using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Models;
 
-namespace DesktopApplicationTemplate.UI.Services;
+namespace DesktopApplicationTemplate.Core.Services;
 
 /// <summary>
 /// Tracks the latest messages per service and resolves token placeholders.

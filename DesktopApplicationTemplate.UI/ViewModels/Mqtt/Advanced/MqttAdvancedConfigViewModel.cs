@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Core.Services.Protocols.Mqtt;
 using MQTTnet.Protocol;
 
 namespace DesktopApplicationTemplate.UI.ViewModels.Mqtt.Advanced;

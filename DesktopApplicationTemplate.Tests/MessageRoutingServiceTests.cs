@@ -1,5 +1,5 @@
+using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Models;
-using DesktopApplicationTemplate.UI.Services;
 using Xunit;
 
 namespace DesktopApplicationTemplate.Tests

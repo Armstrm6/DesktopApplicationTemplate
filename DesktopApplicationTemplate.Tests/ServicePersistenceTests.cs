@@ -1,9 +1,9 @@
-using DesktopApplicationTemplate.Persistence;
-using DesktopApplicationTemplate.UI.Services;
-using DesktopApplicationTemplate.UI.ViewModels;
-using DesktopApplicationTemplate.UI;
-using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Core.Services.Protocols.Ftp;
+using DesktopApplicationTemplate.Models;
+using DesktopApplicationTemplate.Persistence;
+using DesktopApplicationTemplate.UI;
+using DesktopApplicationTemplate.UI.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.IO;

@@ -1,6 +1,6 @@
 using DesktopApplicationTemplate.Models;
 
-namespace DesktopApplicationTemplate.UI.Services;
+namespace DesktopApplicationTemplate.Core.Services;
 
 /// <summary>
 /// Provides message storage and token resolution for inter-service communication.

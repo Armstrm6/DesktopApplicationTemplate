@@ -1,6 +1,6 @@
 using System;
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Core.Services.Protocols.FileObserver;
 
 namespace DesktopApplicationTemplate.UI.ViewModels.FileObserver.Advanced;
 

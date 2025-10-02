@@ -1,12 +1,12 @@
 using System.Collections.Generic;
 using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Core.Services.Protocols.Ftp;
 using DesktopApplicationTemplate.UI.Helpers;
-using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.ViewModels.Ftp;
+using DesktopApplicationTemplate.UI.ViewModels.Ftp.Advanced;
 using DesktopApplicationTemplate.UI.ViewModels.Ftp.Create;
 using DesktopApplicationTemplate.UI.ViewModels.Ftp.Edit;
-using DesktopApplicationTemplate.UI.ViewModels.Ftp.Advanced;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -39,7 +39,7 @@ public class FtpServerDiRegistrationTests
         services.AddSingleton<IRichTextLogger, NullRichTextLogger>();
         services.AddSingleton<ILoggingService, LoggingService>();
         services.AddSingleton<IMessageRoutingService, MessageRoutingService>();
-        services.AddOptions<DesktopApplicationTemplate.UI.Services.FtpServerOptions>()
+        services.AddOptions<FtpServerOptions>()
             .BindConfiguration("FtpServer");
         services.AddFtpServer(builder => builder
             .UseDotNetFileSystem()
@@ -52,7 +52,7 @@ public class FtpServerDiRegistrationTests
         provider.GetRequiredService<FtpServiceViewModel>().Should().NotBeNull();
 
         var options = provider
-            .GetRequiredService<IOptions<DesktopApplicationTemplate.UI.Services.FtpServerOptions>>()
+            .GetRequiredService<IOptions<FtpServerOptions>>()
             .Value;
         options.Port.Should().Be(2121);
         options.RootPath.Should().Be("/tmp");

@@ -1,4 +1,4 @@
-namespace DesktopApplicationTemplate.UI.Services;
+namespace DesktopApplicationTemplate.Core.Services.Protocols.FileObserver;
 
 /// <summary>
 /// Configuration options for File Observer services.
