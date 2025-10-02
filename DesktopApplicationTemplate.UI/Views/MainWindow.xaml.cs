@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
-using DesktopApplicationTemplate.UI.Factories;
 using DesktopApplicationTemplate.UI.Navigation;
 using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI.Factories;
 using DesktopApplicationTemplate.Models;
-using DesktopApplicationTemplate.Core.Services;
 using LogLevel = DesktopApplicationTemplate.Core.Services.LogLevel;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -15,7 +14,6 @@ using System.Windows.Controls.Primitives;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
@@ -27,30 +25,31 @@ namespace DesktopApplicationTemplate.UI.Views
     {
         private readonly MainViewModel _viewModel;
         private readonly ILogger<MainView>? _logger;
-        private readonly IServiceUiRegistry _uiRegistry;
-        private readonly IServiceCatalog _catalog;
+        private readonly IDictionary<ServiceType, IServiceFactory> _serviceFactories;
+        private readonly IDictionary<ServiceType, INavigationHandler> _navigationHandlers;
+        private readonly IDictionary<ServiceType, Func<Page>> _pageResolvers;
 
         public MainView(
             MainViewModel viewModel,
-            IServiceUiRegistry uiRegistry,
-            IServiceCatalog catalog)
+            IDictionary<ServiceType, IServiceFactory> serviceFactories,
+            IDictionary<ServiceType, INavigationHandler> navigationHandlers,
+            IDictionary<ServiceType, Func<Page>> pageResolvers)
         {
             InitializeComponent();
             _viewModel = viewModel;
-            _uiRegistry = uiRegistry;
-            _catalog = catalog;
+            _serviceFactories = serviceFactories;
+            _navigationHandlers = navigationHandlers;
+            _pageResolvers = pageResolvers;
             if (App.AppHost.Services.GetService(typeof(ILoggerFactory)) is ILoggerFactory factory)
             {
                 _logger = factory.CreateLogger<MainView>();
             }
             DataContext = _viewModel;
             _viewModel.AddServiceRequested += OnAddServiceRequested;
-            _viewModel.ImportFeedback += OnImportFeedback;
             MouseDown += MainView_MouseDown;
             CommandBindings.Add(new CommandBinding(SystemCommands.CloseWindowCommand, CloseCommand_Executed));
             CommandBindings.Add(new CommandBinding(SystemCommands.MinimizeWindowCommand, MinimizeCommand_Executed));
             Closing += (_, _) => _logger?.LogInformation("MainView closing");
-            Closed += (_, _) => _viewModel.ImportFeedback -= OnImportFeedback;
             ShowHome();
         }
 
@@ -90,13 +89,7 @@ namespace DesktopApplicationTemplate.UI.Views
 
         public Page? GetOrCreateServicePage(ServiceListModel svc)
         {
-            var descriptorId = svc.DescriptorId;
-            if (string.IsNullOrWhiteSpace(descriptorId) && !TryGetDescriptorId(svc.Type, out descriptorId))
-            {
-                return svc.ServicePage;
-            }
-
-            if (svc.ServicePage == null && _uiRegistry.ServicePages.TryGetValue(descriptorId, out var factory))
+            if (svc.ServicePage == null && _pageResolvers.TryGetValue(svc.Type, out var factory))
             {
                 svc.ServicePage = factory();
             }
@@ -129,8 +122,6 @@ namespace DesktopApplicationTemplate.UI.Views
                     logHost.SetServiceContext(svc);
                 }
 
-                ApplyServicePresentationMetadata(svc);
-
             }
 
             return svc.ServicePage;
@@ -150,42 +141,19 @@ namespace DesktopApplicationTemplate.UI.Views
             ShowCreateServiceSelectionPage();
         }
 
-        private void OnImportFeedback(object? sender, MainViewModel.ImportFeedbackEventArgs e)
-        {
-            var icon = e.Status == MainViewModel.ImportFeedbackStatus.Success ? MessageBoxImage.Information : MessageBoxImage.Warning;
-            var title = e.Status == MainViewModel.ImportFeedbackStatus.Success ? "Import Complete" : "Import Failed";
-            MessageBox.Show(this, e.Message, title, MessageBoxButton.OK, icon);
-        }
-
         public void ShowCreateServiceSelectionPage()
         {
             var page = App.AppHost.Services.GetRequiredService<CreateServicePage>();
             _createServicePage = page;
-            page.ServiceCreated += (name, descriptorId) =>
+            page.ServiceCreated += (name, type) =>
             {
-                var descriptor = ResolveDescriptor(descriptorId);
-                ServiceType serviceType;
-                if (descriptor?.LegacyType is ServiceType resolvedType)
-                {
-                    serviceType = resolvedType;
-                }
-                else if (page.TryGetLegacyType(descriptorId, out var fallbackType))
-                {
-                    serviceType = fallbackType;
-                }
-                else
-                {
-                    _logger?.LogWarning("No legacy type registered for descriptor {DescriptorId}", descriptorId);
-                    return;
-                }
                 var svc = new ServiceListModel
                 {
-                    Type = serviceType,
-                    DescriptorId = descriptor?.Id ?? descriptorId,
+                    DisplayName = $"{type.ToLegacyString()} - {name}",
+                    Type = type,
                     IsActive = false
                 };
-
-                svc.ApplyDescriptor(descriptor, name);
+                svc.SetColorsByType();
                 svc.LogAdded += _viewModel.OnServiceLogAdded;
                 svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
                 GetOrCreateServicePage(svc);
@@ -194,29 +162,21 @@ namespace DesktopApplicationTemplate.UI.Views
                 _viewModel.SelectedService = svc;
                 ServiceList.ScrollIntoView(svc);
                 if (svc.ServicePage != null)
-                {
                     ShowPage(svc.ServicePage);
-                }
                 _ = _viewModel.SaveServicesAsync();
             };
-            page.ServiceDescriptorSelected += NavigateTo;
+            page.ServiceTypeSelected += NavigateTo;
             page.Cancelled += ShowHome;
             ShowPage(page);
         }
 
         private CreateServicePage? _createServicePage;
 
-        private void NavigateTo(string descriptorId)
+        private void NavigateTo(ServiceType serviceType)
         {
-            var descriptor = ResolveDescriptor(descriptorId);
-            var defaultName = _createServicePage?.GenerateDefaultName(descriptorId)
-                ?? descriptor?.LegacyType?.ToLegacyString()
-                ?? descriptor?.DisplayName
-                ?? descriptorId;
-
-            if (_uiRegistry.NavigationHandlers.TryGetValue(descriptorId, out var handlerFactory))
+            var defaultName = _createServicePage?.GenerateDefaultName(serviceType) ?? serviceType.ToLegacyString();
+            if (_navigationHandlers.TryGetValue(serviceType, out var handler))
             {
-                var handler = handlerFactory();
                 var view = handler.CreateView(defaultName);
                 ShowPage(view);
             }
@@ -230,115 +190,24 @@ namespace DesktopApplicationTemplate.UI.Views
 
 
 
-        public async Task AddServiceAsync(ServiceFactoryContext context)
+        internal async Task AddServiceAsync(ServiceType type, object options)
         {
-            if (context is null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
-            if (!_uiRegistry.Factories.TryGetValue(context.DescriptorId, out var factoryFactory))
-            {
+            if (!_serviceFactories.TryGetValue(type, out var factory))
                 return;
-            }
 
-            var factory = factoryFactory();
-            var svc = factory.Create(context);
-
-            if (string.IsNullOrWhiteSpace(svc.DescriptorId))
-            {
-                svc.DescriptorId = context.DescriptorId;
-            }
-
-            if (svc.DescriptorPayload is null && context.Payload is not null)
-            {
-                svc.DescriptorPayload = context.Payload;
-            }
-
+            var svc = factory.Create(options);
+            svc.SetColorsByType();
             svc.LogAdded += _viewModel.OnServiceLogAdded;
             svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
 
             _viewModel.Services.Add(svc);
-            var displayName = string.IsNullOrWhiteSpace(svc.DisplayName)
-                ? context.ServiceName
-                : svc.DisplayName;
-            _logger?.LogInformation("Service {Name} added", displayName);
+            _logger?.LogInformation("Service {Name} added", svc.DisplayName);
             _viewModel.SelectedService = svc;
             ServiceList.ScrollIntoView(svc);
             if (svc.ServicePage != null)
-            {
                 ShowPage(svc.ServicePage);
-            }
-
             await _viewModel.SaveServicesAsync();
             _logger?.LogDebug("AddService workflow completed");
-        }
-
-        private IServiceDescriptor? ResolveDescriptor(ServiceType serviceType) => ResolveDescriptor(null, serviceType);
-
-        private IServiceDescriptor? ResolveDescriptor(string descriptorId) => ResolveDescriptor(descriptorId, null);
-
-        private IServiceDescriptor? ResolveDescriptor(string? descriptorId, ServiceType? serviceType)
-        {
-            if (!string.IsNullOrWhiteSpace(descriptorId) && _catalog.TryGetById(descriptorId!, out var descriptor))
-            {
-                return descriptor;
-            }
-
-            if (serviceType.HasValue && _catalog.TryGetByLegacyType(serviceType.Value, out descriptor))
-            {
-                return descriptor;
-            }
-
-            if (serviceType.HasValue && _catalog.LegacyMap.TryGetValue(serviceType.Value, out var fallbackId) && _catalog.TryGetById(fallbackId, out descriptor))
-            {
-                return descriptor;
-            }
-
-            return null;
-        }
-
-        private void ApplyServicePresentationMetadata(ServiceListModel service)
-        {
-            if (service.ServicePage is null)
-            {
-                return;
-            }
-
-            var page = service.ServicePage;
-            page.Tag = service;
-            ToolTipService.SetToolTip(page, service.DescriptorTooltip);
-            page.Resources["ServiceDisplayName"] = service.DisplayName;
-            page.Resources["ServiceDescriptorLabel"] = service.DescriptorLabel;
-            page.Resources["ServiceDescriptorDescription"] = service.DescriptorDescription;
-            page.Resources["ServiceIconGlyph"] = service.IconGlyph;
-            page.Resources["ServiceBackgroundBrush"] = service.BackgroundColor;
-            page.Resources["ServiceBorderBrush"] = service.BorderColor;
-        }
-
-        private string GetDisplayPrefix(ServiceListModel svc) =>
-            string.IsNullOrWhiteSpace(svc.DescriptorLabel)
-                ? svc.Type.ToLegacyString()
-                : svc.DescriptorLabel;
-
-        private bool TryGetDescriptorId(ServiceType serviceType, out string descriptorId)
-        {
-            var descriptor = ResolveDescriptor(serviceType);
-            if (descriptor is not null)
-            {
-                descriptorId = descriptor.Id;
-                return true;
-            }
-
-            if (_catalog.LegacyMap.TryGetValue(serviceType, out var mappedId) &&
-                !string.IsNullOrWhiteSpace(mappedId))
-            {
-                descriptorId = mappedId;
-                return true;
-            }
-
-            descriptorId = serviceType.ToDescriptorId();
-            return false;
         }
 
 
@@ -413,7 +282,7 @@ namespace DesktopApplicationTemplate.UI.Views
                     {
                         namePart = _viewModel.GenerateServiceName(svc.Type);
                     }
-                    svc.DisplayName = $"{GetDisplayPrefix(svc)} - {namePart}";
+                    svc.DisplayName = $"{svc.Type.ToLegacyString()} - {namePart}";
                     await _viewModel.SaveServicesAsync();
                 }
             }

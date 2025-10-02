@@ -1,0 +1,22 @@
+using System.Windows.Controls;
+using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.UI.ViewModels.Mqtt.Edit;
+
+namespace DesktopApplicationTemplate.UI.Views.Mqtt.Edit;
+
+public partial class MqttEditServiceView : Page
+{
+    private readonly ILoggingService _logger;
+
+    public MqttEditServiceView(ILoggingService logger)
+    {
+        InitializeComponent();
+        _logger = logger;
+    }
+
+    public void Initialize(MqttEditServiceViewModel vm)
+    {
+        DataContext = vm;
+        vm.Logger = _logger;
+    }
+}

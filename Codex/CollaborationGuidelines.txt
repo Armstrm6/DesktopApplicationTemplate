@@ -5,31 +5,31 @@ Environment Setup
 -----------------
 - Install the .NET SDK version `8.0.404` (pinned via `global.json`).
 - On Windows, the .NET SDK includes WPF by default; no additional workload installation is needed.
-- Monitor GitHub Actions for the solution build workflow. Codex cannot execute these commands in the Linux container, so capture CI logs (or maintainer-provided summaries) in `Codex/docs/CollaborationAndDebugTips.txt`.
+- Monitor GitHub Actions for the solution build and test workflow. Codex cannot execute these commands in the Linux container, so capture CI logs (or maintainer-provided summaries) in `Codex/docs/CollaborationAndDebugTips.txt`.
 
 Effective Collaboration Techniques
 ----------------------------------
 - Provide clear goals, file paths, and context for each task.
-- Prefer small, incremental changes that compile quickly.
+- Prefer small, incremental changes that compile and test quickly.
 - Review GitHub Actions results after modifications and summarize the output in `Codex/docs/CollaborationAndDebugTips.txt`. Coordinate with Windows collaborators only when a CI issue requires additional diagnostics.
 - Use `rg` or targeted `find` commands instead of recursive `ls` or `grep`.
 
 Reference Documents
 -------------------
 - Review `Codex/docs/CHANGELOG.md` for release-level summaries that describe why notable changes shipped.
-- Capture troubleshooting details and CI build outcomes (plus any collaborator-provided diagnostics) in `Codex/docs/CollaborationAndDebugTips.txt`.
+- Capture troubleshooting details and CI build/test outcomes (plus any collaborator-provided diagnostics) in `Codex/docs/CollaborationAndDebugTips.txt`.
 - When updating either document, extend the relevant entry when applicable or start a new timestamped section only when introducing a distinct topic.
 
 GitHub Workflow Notes
 ---------------------
 - Keep changes on the main branch and make atomic commits with descriptive messages.
-- After code updates, rely on GitHub Actions to run the full solution build (and other checks). Reference the CI results when drafting the PR, noting any limitations that prevented completion.
+- After code updates, rely on GitHub Actions to run `dotnet test --settings tests.runsettings` (and other checks). Reference the CI results when drafting the PR, noting any limitations that prevented completion.
 - Only committed code is evaluated, so ensure the working tree is clean before calling `make_pr`.
 
 Documentation Style
 -------------------
 - Cross-link new instructions to the appropriate sections in this document, `Codex/docs/CHANGELOG.md`, or `Codex/docs/CollaborationAndDebugTips.txt` so contributors can find them later.
-- Summaries of CI build runs (and any collaborator follow-up diagnostics) belong in `Codex/docs/CollaborationAndDebugTips.txt`, not inline in pull request descriptions.
+- Summaries of CI test runs (and any collaborator follow-up diagnostics) belong in `Codex/docs/CollaborationAndDebugTips.txt`, not inline in pull request descriptions.
 
 Draw.io Integration
 -------------------
@@ -37,11 +37,12 @@ Draw.io Integration
 - Export diagrams to `.png` for quick review while keeping the editable `.drawio` source under version control.
 - Describe diagram updates in commit messages or pull requests so reviewers understand their purpose.
 
-Descriptor & Plug-in CI Tasks
------------------------------
-1. **Package sample plug-ins** – GitHub Actions builds `Samples/TcpRelayPlugin` and `Samples/HttpRelayPlugin` with `dotnet build` so the generated `.peakiot` archives verify packaging targets. Capture the CI log links when these builds surface errors.
-2. **Exercise template scaffolds** – When the service plug-in template changes, add `dotnet new install Templates/ServicePluginTemplate` and a sample `dotnet build` invocation to the CI pipeline (or a one-off workflow run) to confirm descriptors scaffold correctly.
-3. **Record outcomes** – Note the status of these tasks in `Codex/docs/CollaborationAndDebugTips.txt`, especially when migrations affect persistence or descriptor bindings.
+Unit Testing Insights
+---------------------
+- Tests use xUnit with Moq for mocking and reside in `DesktopApplicationTemplate.Tests`.
+- Prefer isolated tests that validate one behavior and use expressive method names.
+- Configure dependencies through DI to keep tests focused and deterministic.
+- Monitor GitHub Actions for the `dotnet test` run and summarize the CI outcome in `Codex/docs/CollaborationAndDebugTips.txt`. If CI cannot complete, coordinate with a Windows collaborator for follow-up diagnostics.
 
 Miscellaneous Tips
 ------------------
@@ -53,4 +54,4 @@ Miscellaneous Tips
 Working in restricted environments
 ----------------------------------
 - Review `Codex/AGENTS.md` and the resources under `Codex/docs/`.
-- Note limitations (builds, writes) in PRs or in `Codex/docs/CollaborationAndDebugTips.txt`.
+- Note limitations (tests, writes) in PRs or in `Codex/docs/CollaborationAndDebugTips.txt`.

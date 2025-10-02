@@ -1,0 +1,63 @@
+using System.Collections.Generic;
+using DesktopApplicationTemplate.UI.Models;
+using DesktopApplicationTemplate.UI.Services;
+using Microsoft.Extensions.Configuration;
+using Xunit;
+
+namespace DesktopApplicationTemplate.Tests
+{
+    public class StartupServiceTests
+    {
+        [Fact]
+        public void GetSettings_ReturnsExpectedValues()
+        {
+            var inMemorySettings = new Dictionary<string, string?>
+            {
+                {"AppSettings:Environment", "Test"},
+                {"AppSettings:ServerIP", "192.168.1.1"},
+                {"AppSettings:ServerPort", "1234"},
+                {"AppSettings:LogLevel", "Information"},
+                {"AppSettings:AutoStart", "false"},
+                {"AppSettings:DefaultCSharpScriptPath", "/path/script.cs"}
+            };
+
+            IConfiguration configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(inMemorySettings)
+                .Build();
+
+            var startupService = new StartupService(configuration);
+
+            AppSettings settings = startupService.GetSettings();
+
+            Assert.Equal("Test", settings.Environment);
+            Assert.Equal("192.168.1.1", settings.ServerIP);
+            Assert.Equal(1234, settings.ServerPort);
+            Assert.Equal("Information", settings.LogLevel);
+            Assert.False(settings.AutoStart);
+            Assert.Equal("/path/script.cs", settings.DefaultCSharpScriptPath);
+
+            ConsoleTestLogger.LogPass();
+        }
+
+        [Fact]
+        public void AutoStart_DefaultsToFalse_WhenNotConfigured()
+        {
+            var inMemorySettings = new Dictionary<string, string?>
+            {
+                {"AppSettings:Environment", "Test"}
+            };
+
+            IConfiguration configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(inMemorySettings)
+                .Build();
+
+            var startupService = new StartupService(configuration);
+
+            AppSettings settings = startupService.GetSettings();
+
+            Assert.False(settings.AutoStart);
+
+            ConsoleTestLogger.LogPass();
+        }
+    }
+}

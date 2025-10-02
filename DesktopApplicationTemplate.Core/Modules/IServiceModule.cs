@@ -1,5 +1,4 @@
-using System.Collections.Generic;
-using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Models;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DesktopApplicationTemplate.Core.Modules;
@@ -10,13 +9,13 @@ namespace DesktopApplicationTemplate.Core.Modules;
 public interface IServiceModule
 {
     /// <summary>
+    /// Gets the service type represented by this module.
+    /// </summary>
+    ServiceType Type { get; }
+
+    /// <summary>
     /// Registers services with the provided service collection.
     /// </summary>
     /// <param name="services">The service collection to register with.</param>
     void RegisterServices(IServiceCollection services);
-
-    /// <summary>
-    /// Describes the services provided by this module for catalog registration.
-    /// </summary>
-    IEnumerable<IServiceDescriptor> DescribeServices();
 }

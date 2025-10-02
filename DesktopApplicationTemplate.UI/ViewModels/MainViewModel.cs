@@ -16,8 +16,6 @@ using DesktopApplicationTemplate.UI.ViewModels.Tcp;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI;
-using DesktopApplicationTemplate.UI.Navigation;
-using DesktopApplicationTemplate.UI.Factories;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -40,30 +38,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 (EditServiceCommand as RelayCommand<ServiceListModel?>)?.RaiseCanExecuteChanged();
             }
         }
-
-        public enum ImportFeedbackStatus
-        {
-            Success,
-            Error
-        }
-
-        public sealed class ImportFeedbackEventArgs : EventArgs
-        {
-            public ImportFeedbackEventArgs(ImportFeedbackStatus status, string message)
-            {
-                Status = status;
-                Message = message ?? throw new ArgumentNullException(nameof(message));
-            }
-
-            public ImportFeedbackStatus Status { get; }
-
-            public string Message { get; }
-        }
-
         public ICommand AddServiceCommand { get; }
         public ICommand RemoveServiceCommand { get; }
         public ICommand EditServiceCommand { get; }
-        public ICommand ImportServiceCommand { get; }
         public int ServicesCreated => Services.Count;
         public int CurrentActiveServices => Services.Count(s => s.IsActive);
 
@@ -77,52 +54,26 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public IEnumerable<LogEntry> DisplayLogs => LogViewModel.DisplayLogs;
 
-        private readonly ICsvService? _csvService;
+        private readonly CsvService _csvService;
         private readonly ILoggingService? _logger;
         private readonly INetworkConfigurationService _networkService;
-        private readonly IServiceUiRegistry _uiRegistry;
-        private readonly IServiceCatalog _catalog;
-        private readonly IFileDialogService _fileDialogService;
-        private readonly IPluginImportService _pluginImportService;
+        private readonly IDictionary<ServiceType, IEditServiceHandler> _editHandlers;
 
         public NetworkConfigurationViewModel NetworkConfig { get; }
 
-        public MainViewModel(
-            IEnumerable<ICsvService> csvServices,
-            NetworkConfigurationViewModel networkConfig,
-            INetworkConfigurationService networkService,
-            IServiceUiRegistry uiRegistry,
-            IServiceCatalog catalog,
-            IFileDialogService fileDialogService,
-            IPluginImportService pluginImportService,
-            ILoggingService? logger = null,
-            string? servicesFilePath = null)
+        public MainViewModel(CsvService csvService, NetworkConfigurationViewModel networkConfig, INetworkConfigurationService networkService, IDictionary<ServiceType, IEditServiceHandler> editHandlers, ILoggingService? logger = null, string? servicesFilePath = null)
         {
-            _csvService = csvServices?.FirstOrDefault();
+            _csvService = csvService;
             _networkService = networkService;
             _logger = logger;
             NetworkConfig = networkConfig;
-            _uiRegistry = uiRegistry;
-            _catalog = catalog;
-            _fileDialogService = fileDialogService ?? throw new ArgumentNullException(nameof(fileDialogService));
-            _pluginImportService = pluginImportService ?? throw new ArgumentNullException(nameof(pluginImportService));
+            _editHandlers = editHandlers;
             _ = NetworkConfig.LoadAsync();
             _networkService.ConfigurationChanged += (_, cfg) => ApplyNetworkConfiguration(cfg);
-            ServiceListModel.ResolveService = (descriptorKey, name) =>
-            {
-                var normalized = NormalizeDescriptorKey(descriptorKey);
-                ServiceType? legacyType = null;
-                if (ServiceTypeExtensions.TryParse(descriptorKey, out var parsed))
-                {
-                    legacyType = parsed;
-                }
-
-                return Services.FirstOrDefault(s =>
-                    (string.Equals(s.DescriptorId, normalized, StringComparison.OrdinalIgnoreCase) ||
-                     string.Equals(s.DescriptorId, descriptorKey, StringComparison.OrdinalIgnoreCase) ||
-                     (legacyType.HasValue && s.Type == legacyType.Value)) &&
+            ServiceListModel.ResolveService = (type, name) =>
+                Services.FirstOrDefault(s =>
+                    s.Type == type &&
                     s.DisplayName.Split(" - ").Last().Equals(name, StringComparison.OrdinalIgnoreCase));
-            };
             if (!string.IsNullOrWhiteSpace(servicesFilePath))
             {
                 ServicePersistence.FilePath = servicesFilePath!;
@@ -131,7 +82,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             AddServiceCommand = new RelayCommand(AddService);
             RemoveServiceCommand = new AsyncRelayCommand(RemoveSelectedServiceAsync, () => SelectedService != null);
             EditServiceCommand = new RelayCommand<ServiceListModel?>(EditService, svc => svc != null);
-            ImportServiceCommand = new AsyncRelayCommand(ImportServiceAsync);
             FilteredServices = CollectionViewSource.GetDefaultView(Services);
             Filters.PropertyChanged += (_, __) => ApplyFilters();
             LoadServices();
@@ -162,16 +112,15 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         }
 
         public event Action? AddServiceRequested;
-        public event EventHandler<ImportFeedbackEventArgs>? ImportFeedback;
         private void EditService(ServiceListModel? service)
         {
             var target = service ?? SelectedService;
             if (target == null)
                 return;
 
-            if (TryGetDescriptorId(target.Type, out var descriptorId) && _uiRegistry.EditHandlers.TryGetValue(descriptorId, out var handlerFactory))
+            if (_editHandlers.TryGetValue(target.Type, out var handler))
             {
-                handlerFactory().Edit(target);
+                handler.Edit(target);
             }
             else
             {
@@ -186,52 +135,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             _logger?.Log("AddService completed", LogLevel.Debug);
         }
 
-        private async Task ImportServiceAsync()
-        {
-            var selectedPath = _fileDialogService.OpenFile(
-                "Service Packages (*.peakiot)|*.peakiot|All Files (*.*)|*.*",
-                "Import Service Package");
-
-            if (string.IsNullOrWhiteSpace(selectedPath))
-            {
-                _logger?.Log("Service import cancelled by user.", LogLevel.Debug);
-                return;
-            }
-
-            _logger?.Log($"Importing service package from {selectedPath}.", LogLevel.Information);
-
-            PluginImportResult result;
-            try
-            {
-                result = await _pluginImportService.ImportAsync(selectedPath).ConfigureAwait(true);
-            }
-            catch (OperationCanceledException)
-            {
-                _logger?.Log("Service import cancelled.", LogLevel.Information);
-                return;
-            }
-            catch (Exception ex)
-            {
-                _logger?.Log($"Service import failed: {ex.Message}", LogLevel.Error);
-                ImportFeedback?.Invoke(this, new ImportFeedbackEventArgs(ImportFeedbackStatus.Error, "Import failed. Check logs for details."));
-                return;
-            }
-
-            if (result.Success)
-            {
-                _logger?.Log($"Imported service package '{Path.GetFileName(selectedPath)}'. {result.Message}", LogLevel.Information);
-                ImportFeedback?.Invoke(this, new ImportFeedbackEventArgs(ImportFeedbackStatus.Success, result.Message));
-            }
-            else
-            {
-                _logger?.Log($"Service import reported issues for '{selectedPath}': {result.Message}", LogLevel.Warning);
-                ImportFeedback?.Invoke(this, new ImportFeedbackEventArgs(ImportFeedbackStatus.Error, result.Message));
-            }
-        }
-
         internal string GenerateServiceName(ServiceType serviceType)
         {
-            var typeName = GetDisplayPrefix(serviceType);
+            var typeName = serviceType.ToLegacyString();
             int index = 1;
             foreach (var svc in Services.Where(s => s.Type == serviceType))
             {
@@ -253,9 +159,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 var index = Services.IndexOf(SelectedService);
                 SelectedService.AddLog("Service removed", WpfBrushes.Red);
                 if (SelectedService.Type != ServiceType.Csv)
-                {
-                    _csvService?.RemoveColumnsForService(SelectedService.DisplayName);
-                }
+                    _csvService.RemoveColumnsForService(SelectedService.DisplayName);
                 SelectedService.LogAdded -= OnServiceLogAdded;
                 SelectedService.ActiveChanged -= OnServiceActiveChanged;
                 Services.Remove(SelectedService);
@@ -290,63 +194,34 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     await tcpVm.SaveAsync().ConfigureAwait(false);
                 }
             }
-            ServicePersistence.Save(Services, _catalog, _logger);
+            ServicePersistence.Save(Services);
         }
 
         private void LoadServices()
         {
-            var existing = ServicePersistence.Load(_catalog, _logger);
+            var existing = ServicePersistence.Load(_logger);
             foreach (var info in existing.OrderBy(i => i.Order))
             {
-                var descriptor = ResolveDescriptor(info.DescriptorId, info.ServiceType);
-                var descriptorId = descriptor?.Id ?? info.DescriptorId;
-                var serviceType = descriptor?.LegacyType ?? info.ServiceType;
-                ServiceListModel svc;
-
-                if (!string.IsNullOrWhiteSpace(descriptorId) &&
-                    _uiRegistry.Factories.TryGetValue(descriptorId, out var factoryFactory))
+                var svc = new ServiceListModel
                 {
-                    var factory = factoryFactory();
-                    var context = new ServiceFactoryContext(descriptorId, info.DisplayName, info.Payload, descriptor);
-                    svc = factory.Create(context);
-                    svc.DisplayName = info.DisplayName;
-                }
-                else
-                {
-                    svc = new ServiceListModel
-                    {
-                        DescriptorId = descriptorId,
-                        Type = serviceType,
-                        DescriptorPayload = info.Payload
-                    };
-                    svc.ApplyDescriptor(descriptor);
-                }
-
-                svc.IsActive = info.IsActive;
-                svc.Order = info.Order;
-                svc.TotalExecutionTimeMs = info.TotalExecutionTimeMs;
-                svc.ExecutionCount = info.ExecutionCount;
-
+                    DisplayName = info.DisplayName,
+                    Type = info.ServiceType,
+                    IsActive = info.IsActive,
+                    Order = info.Order,
+                    TcpOptions = info.TcpOptions,
+                    FtpOptions = info.FtpOptions,
+                    HttpOptions = info.HttpOptions,
+                    CsvOptions = info.CsvOptions,
+                    TotalExecutionTimeMs = info.TotalExecutionTimeMs,
+                    ExecutionCount = info.ExecutionCount
+                };
                 foreach (var a in info.AssociatedServices ?? new List<string>())
-                {
-                    if (!svc.AssociatedServices.Contains(a))
-                    {
-                        svc.AssociatedServices.Add(a);
-                    }
-                }
-
-                if (info.Payload is not null && svc.DescriptorPayload is null)
-                {
-                    svc.DescriptorPayload = info.Payload;
-                }
-
+                    svc.AssociatedServices.Add(a);
+                svc.SetColorsByType();
                 svc.LogAdded += OnServiceLogAdded;
                 svc.ActiveChanged += OnServiceActiveChanged;
                 if (svc.Type != ServiceType.Csv)
-                {
-                    _csvService?.EnsureColumnsForService(svc.DisplayName);
-                }
-
+                    _csvService.EnsureColumnsForService(svc.DisplayName);
                 Services.Add(svc);
                 _logger?.Log($"Loaded service {svc.DisplayName}", LogLevel.Debug);
             }
@@ -380,77 +255,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             FilteredServices.Refresh();
         }
 
-        private IServiceDescriptor? ResolveDescriptor(string? descriptorId, ServiceType serviceType)
-        {
-            if (!string.IsNullOrWhiteSpace(descriptorId) && _catalog.TryGetById(descriptorId!, out var descriptor))
-            {
-                return descriptor;
-            }
-
-            if (_catalog.TryGetByLegacyType(serviceType, out descriptor))
-            {
-                return descriptor;
-            }
-
-            if (_catalog.LegacyMap.TryGetValue(serviceType, out var mappedId) &&
-                _catalog.TryGetById(mappedId, out descriptor))
-            {
-                return descriptor;
-            }
-
-            return null;
-        }
-
-        private string NormalizeDescriptorKey(string descriptorKey)
-        {
-            if (string.IsNullOrWhiteSpace(descriptorKey))
-            {
-                return descriptorKey;
-            }
-
-            if (_catalog.TryGetById(descriptorKey, out var descriptor))
-            {
-                return descriptor.Id;
-            }
-
-            if (ServiceTypeExtensions.TryParse(descriptorKey, out var legacy))
-            {
-                if (_catalog.LegacyMap.TryGetValue(legacy, out var mappedId))
-                {
-                    return mappedId;
-                }
-
-                if (_catalog.TryGetByLegacyType(legacy, out descriptor))
-                {
-                    return descriptor.Id;
-                }
-
-                return legacy.ToDescriptorId();
-            }
-
-            return descriptorKey;
-        }
-
-        private string GetDisplayPrefix(ServiceType serviceType)
-        {
-            var descriptor = ResolveDescriptor(null, serviceType);
-            if (descriptor is not null)
-            {
-                var presentation = descriptor.Presentation;
-                if (!string.IsNullOrWhiteSpace(presentation.DisplayLabel))
-                {
-                    return presentation.DisplayLabel!;
-                }
-
-                if (!string.IsNullOrWhiteSpace(descriptor.DisplayName))
-                {
-                    return descriptor.DisplayName;
-                }
-            }
-
-            return serviceType.ToLegacyString();
-        }
-
         public void OnServiceLogAdded(ServiceListModel svc, LogEntry entry)
         {
             AllLogs.Insert(0, entry);
@@ -458,7 +262,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             {
                 try
                 {
-                    _csvService?.RecordLog(svc.DisplayName, entry.Message);
+                    _csvService.RecordLog(svc.DisplayName, entry.Message);
                 }
                 catch
                 {
@@ -478,25 +282,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         {
             LogViewModel.ClearLogs();
             _logger?.Log("Logs cleared", LogLevel.Debug);
-        }
-
-        private bool TryGetDescriptorId(ServiceType serviceType, out string descriptorId)
-        {
-            if (_catalog.TryGetByLegacyType(serviceType, out var descriptor))
-            {
-                descriptorId = descriptor.Id;
-                return true;
-            }
-
-            if (_catalog.LegacyMap.TryGetValue(serviceType, out var mappedId) &&
-                !string.IsNullOrWhiteSpace(mappedId))
-            {
-                descriptorId = mappedId;
-                return true;
-            }
-
-            descriptorId = serviceType.ToDescriptorId();
-            return false;
         }
 
         public void ExportDisplayedLogs(string filePath)

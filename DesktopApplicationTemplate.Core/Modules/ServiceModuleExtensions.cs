@@ -1,10 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using DesktopApplicationTemplate.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace DesktopApplicationTemplate.Core.Modules;
 
@@ -19,7 +16,7 @@ public static class ServiceModuleExtensions
     /// </summary>
     /// <param name="services">The service collection to populate.</param>
     /// <param name="assemblies">Assemblies to scan. If none are provided, the current app domain assemblies are used.</param>
-    public static IServiceCatalog AddServiceModules(this IServiceCollection services, params Assembly[] assemblies)
+    public static void AddServiceModules(this IServiceCollection services, params Assembly[] assemblies)
     {
         assemblies ??= Array.Empty<Assembly>();
         if (assemblies.Length == 0)
@@ -27,11 +24,16 @@ public static class ServiceModuleExtensions
             assemblies = AppDomain.CurrentDomain.GetAssemblies();
         }
 
-        var modules = ServiceModuleDiscovery.InstantiateModules(assemblies);
-        ServiceModuleDiscovery.RegisterModules(modules, services);
-        var descriptors = ServiceModuleDiscovery.DescribeServices(modules);
-        var catalog = new ServiceCatalog(descriptors);
-        services.TryAddSingleton<IServiceCatalog>(_ => catalog);
-        return catalog;
+        var moduleType = typeof(IServiceModule);
+        var modules = assemblies
+            .SelectMany(a => a.GetTypes())
+            .Where(t => moduleType.IsAssignableFrom(t) && !t.IsAbstract && !t.IsInterface)
+            .Select(t => Activator.CreateInstance(t))
+            .OfType<IServiceModule>();
+
+        foreach (var module in modules)
+        {
+            module.RegisterServices(services);
+        }
     }
 }

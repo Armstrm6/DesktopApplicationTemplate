@@ -2,7 +2,7 @@
 
 ![CI](https://github.com/OWNER/REPO/actions/workflows/ci.yml/badge.svg)
 
-This repository contains a basic WPF UI application and a Windows Service.
+This repository contains a basic WPF UI application, a Windows Service and unit tests.
 
 See `Codex/CollaborationGuidelines.txt` for tips on working with the repository. A running log of past collaboration decisions lives in `Codex/docs/CollaborationAndDebugTips.txt`.
 
@@ -35,7 +35,7 @@ repository root will automatically respect this setting.
 
 After cloning the repository:
 
-- Rely on GitHub Actions to run the standard `dotnet restore` and `dotnet build DesktopApplicationTemplate.sln` commands documented below. Codex runs inside a Linux container without the WindowsDesktop runtime, so capture the CI logs (or maintainer summaries) when documenting build results.
+- Rely on GitHub Actions to run the standard `dotnet restore`, `dotnet build DesktopApplicationTemplate.sln`, and `dotnet test --settings tests.runsettings` commands documented below. Codex runs inside a Linux container without the WindowsDesktop runtime, so capture the CI logs (or maintainer summaries) when documenting build and test results.
 - Run the setup script to configure the Git hooks and [Git LFS](https://git-lfs.com/):
 
   ```bash
@@ -61,7 +61,7 @@ there is no need to switch manually when working inside this
 repository.
 
 You can also execute `setup.sh` to configure Git hooks and Git LFS, restore
-dependencies, and build the solution in a single step:
+dependencies, build the solution and run the unit tests in a single step:
 
 ```bash
 ./setup.sh
@@ -91,6 +91,18 @@ Run the background service (useful for development):
 dotnet run --project DesktopApplicationTemplate.Service/DesktopApplicationTemplate.Service.csproj
 ```
 
+## Execute unit tests
+
+> **Note:** Codex cannot run WPF tests in the container environment. GitHub Actions runs the command below; review the CI logs for the outcome and only request a Windows collaborator's help if additional diagnostics are required.
+
+Use `dotnet test` to run the xUnit tests. The repository includes a
+`tests.runsettings` file that ensures the entire test suite runs even
+when some tests fail:
+
+```bash
+dotnet test DesktopApplicationTemplate.Tests/DesktopApplicationTemplate.Tests.csproj --settings tests.runsettings
+```
+
 ## Installer notes
 
 The installer copies all runtime dependencies based on the generated `.deps.json`
@@ -111,55 +123,36 @@ The UI exposes several built in service types. A brief description of each is sh
 
 Each service has an editor page where the parameters and test messages can be modified.  A **Help** button is available on these pages to display common ASCII commands (ACK, NAK, ENQ, ETX) which can be inserted when building protocol messages.
 
-## Descriptor-based plug-in workflow
+## Extending the application
 
-Descriptors replace the legacy `ServiceType` enum as the primary identifier for services. Each descriptor:
+`ServiceType` is an enum that identifies each supported service category. It is serialized using short codes and still recognizes legacy names so existing configurations continue to load.
 
-1. Supplies metadata (label, category, description, icon glyphs, and accent colors) displayed throughout the UI.
-2. Advertises runtime factories and serializers through `ServiceFactoryBinding` entries.
-3. Optionally exposes a `LegacyType` so persisted enum-based services migrate seamlessly.
+Dictionary-based edit handlers are registered for each `ServiceType` and injected into the main view model as a lookup. When a user edits a service, the view model resolves the handler from that dictionary instead of relying on large switch statements, making it easy to plug in new handlers.
 
-During startup `services.AddServiceModules()` discovers `IServiceModule` implementations, registers their dependencies, and gathers descriptors into the shared `IServiceCatalog`. Classes decorated with `ServiceDescriptorRegistrationAttribute` expose navigation handlers, editors, and runtime factories keyed by descriptor id—no manual switch statements required.
+Dynamic DI modules are enabled by `services.AddServiceModules()`, which scans assemblies for `IServiceModule` implementations and calls their `RegisterServices` methods. Dropping a new module into the application automatically registers its services without manual wiring.
 
-### Migrate an enum-based service
+### Adding a new service example
 
-1. Create a descriptor class (for example, derive from `ServiceDescriptorBase`) that exposes a stable `DescriptorId`, presentation metadata, and the previous enum value via the base constructor.
-2. Update runtime factories, view models, and navigation handlers to depend on descriptor ids. Decorate each class with `ServiceDescriptorRegistrationAttribute` so dependency injection binds it to the descriptor.
-3. Ensure persistence emits the descriptor id and, when applicable, the legacy enum value. `ServicePersistence` automatically upgrades records by consulting `IServiceCatalog` and `ServiceTypeExtensions.ToDescriptorId()`.
-4. Remove enum-driven `switch` statements in favor of descriptor lookups from `IServiceCatalog` or descriptor id dictionaries.
-5. Validate the migration with the QA checklist in `Codex/docs/PluginVerificationChecklist.md` before releasing the change.
+1. Add a value to the `ServiceType` enum.
+2. Implement the service and its UI components.
+3. Create an `IServiceModule` for DI registration:
 
-### Add a descriptor-first service
+   ```csharp
+   public class SampleServiceModule : IServiceModule
+   {
+       public ServiceType Type => ServiceType.Sample;
 
-1. Build the runtime: define options, runtime services, and supporting dependencies.
-2. Implement the descriptor with presentation metadata and factory bindings.
-3. Create view models and XAML pages that reuse shared helpers such as `ServiceCreateViewModelBase`, `ServiceEditViewModelBase`, `ServiceRule`, and `ServiceLogView`.
-4. Annotate navigation handlers, editors, and runtime factories with `ServiceDescriptorRegistrationAttribute(DescriptorId, kind)` so the app wires them automatically.
-5. Register everything inside an `IServiceModule` by returning the descriptor from `DescribeServices()` and adding dependencies in `RegisterServices`.
-6. Package and test the plug-in as described below.
-
-## Packaging service plug-ins
-
-The repository ships with an MSBuild packaging project that bundles plug-in assets into distributable `.peakiot` archives. To enable packaging in a plug-in project:
-
-1. Import `ServicePlugin.Packaging` before and after the project body:
-
-   ```xml
-   <Import Project="..\..\ServicePlugin.Packaging\ServicePlugin.Packaging.props" />
-   ...
-   <Import Project="..\..\ServicePlugin.Packaging\ServicePlugin.Packaging.targets" />
+       public void RegisterServices(IServiceCollection services)
+       {
+           services.AddSingleton<SampleService>();
+           services.AddTransient<SampleCreateViewModel>();
+           services.AddTransient<SampleEditViewModel>();
+           services.AddTransient<SamplePage>();
+       }
+   }
    ```
 
-2. Author a `plugin.manifest.json` file at the project root. The manifest must identify the plug-in id, name, version, entry assembly, and any assemblies that expose `IServiceModule` implementations. See `Codex/docs/PluginManifestSchema.md` for field descriptions.
-3. Build the plug-in with `dotnet build`. The packaging targets run after compilation and emit archives to `bin/<configuration>/<tfm>/plugins`. `ServicePluginArchiveExtensions` defaults to `.peakiot` and rarely needs to be overridden.
-
-Each archive contains the manifest, compiled descriptors, and copy-local dependencies under `libs/`. Hosts can drop any supported archive into the plug-in directory and the loader will extract it into the cache configured by `PluginLoaderOptions`.
-
-### Templates and samples
-
-- **Template:** `Templates/ServicePluginTemplate` publishes a `dotnet new codex-serviceplugin` template that scaffolds a plug-in project with descriptor, runtime factory, manifest, and packaging imports. Install it locally with `dotnet new install Templates/ServicePluginTemplate` and scaffold new plug-ins under a folder where `..\..\ServicePlugin.Packaging` resolves to the repository root.
-- **Samples:** `Samples/TcpRelayPlugin` and `Samples/HttpRelayPlugin` demonstrate packaging descriptor-based services. Both projects import `ServicePlugin.Packaging`, emit archives during CI, and exercise descriptor metadata during packaging validation.
-- **Verification:** Follow `Codex/docs/PluginVerificationChecklist.md` to confirm import flows, descriptor rendering, and persistence migrations prior to distributing new packages.
+4. Wire up navigation and edit handlers for the new `ServiceType` and document any changes.
 
 ## Testing services locally
 
@@ -203,7 +196,8 @@ the script template will be loaded automatically.
 
 ## Running startup scripts
 
-To configure Git hooks and Git LFS, restore dependencies, and build the solution from a shell environment use:
+To configure Git hooks and Git LFS, restore dependencies, build the solution
+and run the unit tests from a shell environment use:
 
 ```bash
 chmod +x setup.sh

@@ -6,8 +6,6 @@ using DesktopApplicationTemplate.UI.ViewModels.Scp.Advanced;
 using DesktopApplicationTemplate.UI.Views.Scp.Edit;
 using DesktopApplicationTemplate.UI.Views.Scp.Advanced;
 using DesktopApplicationTemplate.UI.Services;
-using DesktopApplicationTemplate.Models;
-using DesktopApplicationTemplate.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -33,39 +31,28 @@ public class ScpEditServiceHandler : IEditServiceHandler
         var mainView = _getMainView();
         var mainViewModel = _getMainViewModel();
         var scpPage = mainView.GetOrCreateServicePage(service);
-        var payload = service.GetPayload<ScpServiceOptions>();
-        if (payload is null)
-        {
-            payload = new ScpServiceOptions();
-            service.SetPayload(payload);
-        }
-
-        var vm = ActivatorUtilities.CreateInstance<ScpEditServiceViewModel>(_services, service.DisplayName.Split(" - ").Last(), payload);
+        var options = service.ScpOptions ?? new ScpServiceOptions();
+        var vm = _services.GetRequiredService<ScpEditServiceViewModel>();
+        vm.Load(service.DisplayName.Split(" - ").Last(), options);
         var editView = _services.GetRequiredService<ScpEditServiceView>();
         editView.Initialize(vm);
         vm.ServiceSaved += (name, opts) =>
         {
-            var catalog = _services.GetRequiredService<IServiceCatalog>();
-            var descriptor = ResolveDescriptor(catalog, service.DescriptorId, service.Type);
-            service.ApplyDescriptor(descriptor, name);
-            service.SetPayload(opts);
+            service.DisplayName = $"SCP - {name}";
+            service.ScpOptions = opts;
             if (scpPage != null)
-            {
                 mainView.ShowPage(scpPage);
-            }
-
             _ = mainViewModel.SaveServicesAsync();
         };
         vm.EditCancelled += () =>
         {
             if (scpPage != null)
-            {
                 mainView.ShowPage(scpPage);
-            }
         };
         vm.AdvancedConfigRequested += opts =>
         {
-            var advVm = ActivatorUtilities.CreateInstance<ScpAdvancedConfigViewModel>(_services, opts);
+            var advVm = _services.GetRequiredService<ScpAdvancedConfigViewModel>();
+            advVm.Load(opts);
             var advView = _services.GetRequiredService<ScpAdvancedConfigView>();
             advView.Initialize(advVm);
             advVm.Saved += _ => mainView.ShowPage(editView);
@@ -75,24 +62,5 @@ public class ScpEditServiceHandler : IEditServiceHandler
         mainView.ShowPage(editView);
         _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
     }
-
-    private static IServiceDescriptor? ResolveDescriptor(IServiceCatalog catalog, string descriptorId, ServiceType serviceType)
-    {
-        if (!string.IsNullOrWhiteSpace(descriptorId) && catalog.TryGetById(descriptorId, out var byId))
-        {
-            return byId;
-        }
-
-        if (catalog.TryGetByLegacyType(serviceType, out var legacy))
-        {
-            return legacy;
-        }
-
-        if (catalog.LegacyMap.TryGetValue(serviceType, out var fallbackId) && catalog.TryGetById(fallbackId, out var fallback))
-        {
-            return fallback;
-        }
-
-        return null;
-    }
 }
+

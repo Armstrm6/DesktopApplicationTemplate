@@ -8,27 +8,22 @@ using DesktopApplicationTemplate.UI.ViewModels.Heartbeat.Advanced;
 using DesktopApplicationTemplate.UI.Views.Heartbeat.Create;
 using DesktopApplicationTemplate.UI.Views.Heartbeat.Advanced;
 using Microsoft.Extensions.DependencyInjection;
+using DesktopApplicationTemplate.Models;
 using System.Threading.Tasks;
-using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.Services.Common.Descriptors;
-using DesktopApplicationTemplate.UI.Configuration;
 
 namespace DesktopApplicationTemplate.UI.Navigation
 {
-    [ServiceDescriptorRegistration(HeartbeatServiceDescriptor.DescriptorId, ServiceRegistrationKind.NavigationHandler)]
     public class HeartbeatNavigationHandler : INavigationHandler
     {
         private readonly IServiceProvider _services;
         private readonly Func<MainView> _getMainView;
-        private readonly IServiceCatalog _catalog;
 
-        public string DescriptorId => HeartbeatServiceDescriptor.DescriptorId;
+        public ServiceType ServiceType => ServiceType.Heartbeat;
 
-        public HeartbeatNavigationHandler(IServiceProvider services, Func<MainView> getMainView, IServiceCatalog catalog)
+        public HeartbeatNavigationHandler(IServiceProvider services, Func<MainView> getMainView)
         {
             _services = services;
             _getMainView = getMainView;
-            _catalog = catalog;
         }
 
         public Page CreateView(string defaultName)
@@ -54,9 +49,7 @@ namespace DesktopApplicationTemplate.UI.Navigation
         public Task AddServiceAsync(string name, object options)
         {
             var mainView = _getMainView();
-            _catalog.TryGetById(DescriptorId, out var descriptor);
-            var context = new ServiceFactoryContext(DescriptorId, name, options, descriptor);
-            return mainView.AddServiceAsync(context);
+            return mainView.AddServiceAsync(ServiceType, new ServiceFactoryOptions<HeartbeatServiceOptions>(name, (HeartbeatServiceOptions)options));
         }
     }
 }

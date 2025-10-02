@@ -1,6 +1,5 @@
 using System;
-using DesktopApplicationTemplate.Core.Services;
-using Microsoft.Extensions.DependencyInjection;
+using DesktopApplicationTemplate.UI.Services;
 
 namespace DesktopApplicationTemplate.UI.Helpers
 {
@@ -17,19 +16,11 @@ namespace DesktopApplicationTemplate.UI.Helpers
         /// <summary>
         /// Releases any installed HID or keyboard hooks.
         /// </summary>
-        public static void Release(IServiceProvider? serviceProvider = null)
+        public static void Release()
         {
             try
             {
-                serviceProvider ??= App.AppHost?.Services;
-                if (serviceProvider is not null)
-                {
-                    var releaseServices = serviceProvider.GetServices<IHookReleaseService>();
-                    foreach (var releaseService in releaseServices)
-                    {
-                        releaseService?.Release();
-                    }
-                }
+                KeyboardSimulator.Reset();
             }
             finally
             {

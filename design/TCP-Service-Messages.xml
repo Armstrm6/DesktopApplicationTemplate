@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.7.17 Chrome/128.0.6613.36 Electron/32.0.1 Safari/537.36" version="24.7.17">
+  <diagram name="Page-1" id="eisYpk9Txko3tTnuPjfW">
+    <mxGraphModel dx="9000" dy="6490" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <object label="" ID="background-MainWindowBackground" id="2">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#99FFFF;strokeColor=#80FF00;strokeWidth=13;arcSize=3;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" vertex="1" parent="1">
+            <mxGeometry x="-2130" y="-1800" width="5160" height="3000" as="geometry" />
+          </mxCell>
+        </object>
+        <object label="" ID="background-navigationbar" id="3">
+          <mxCell style="group;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" vertex="1" connectable="0" parent="1">
+            <mxGeometry x="-2120" y="-1790" width="5120" height="160" as="geometry" />
+          </mxCell>
+        </object>
+        <mxCell id="4" value="" style="rounded=1;whiteSpace=wrap;html=1;arcSize=46;fillColor=#00C2C2;strokeColor=none;" vertex="1" parent="3">
+          <mxGeometry width="5120" height="160" as="geometry" />
+        </mxCell>
+        <object label="" ID="background-navigationbar" id="5">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=1;arcSize=0;fillColor=#00C2C2;strokeColor=none;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" vertex="1" parent="3">
+            <mxGeometry y="70" width="5120" height="90" as="geometry" />
+          </mxCell>
+        </object>
+        <mxCell id="6" value="X" style="rounded=1;html=1;shadow=0;dashed=0;whiteSpace=wrap;fontSize=68;fillColor=#E6E6E6;align=center;strokeColor=#E6E6E6;fontColor=#333333;arcSize=33;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" vertex="1" parent="3">
+          <mxGeometry x="4970" y="30" width="90" height="86.88" as="geometry" />
+        </mxCell>
+        <mxCell id="7" value="&lt;div style=&quot;&quot;&gt;—&lt;br&gt;&lt;/div&gt;" style="rounded=1;html=1;shadow=0;dashed=0;whiteSpace=wrap;fontSize=68;fillColor=#E6E6E6;align=center;strokeColor=#E6E6E6;fontColor=#333333;verticalAlign=middle;arcSize=40;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" vertex="1" parent="3">
+          <mxGeometry x="4860" y="30" width="90" height="86.88" as="geometry" />
+        </mxCell>
+        <object label="" ID="DesktopApp-Logo" id="8">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=1;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" vertex="1" parent="1">
+            <mxGeometry x="-2110" y="-1780" width="1450" height="620" as="geometry" />
+          </mxCell>
+        </object>
+        <object label="" ID="listbox-servicescontainer-list" id="9">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E6E6E6;arcSize=3;" vertex="1" parent="1">
+            <mxGeometry x="-2090" y="-1040" width="1400" height="2190" as="geometry" />
+          </mxCell>
+        </object>
+        <object label="+" ID="button-add-service" id="10">
+          <mxCell style="rounded=1;html=1;shadow=0;dashed=0;whiteSpace=wrap;fontSize=68;fillColor=#E6E6E6;align=center;strokeColor=#E6E6E6;fontColor=#333333;" vertex="1" parent="1">
+            <mxGeometry x="-800" y="-1146.56" width="100" height="86.88" as="geometry" />
+          </mxCell>
+        </object>
+        <object label="-" ID="button-delete-service" id="11">
+          <mxCell style="rounded=1;html=1;shadow=0;dashed=0;whiteSpace=wrap;fontSize=68;fillColor=#E6E6E6;align=center;strokeColor=#E6E6E6;fontColor=#333333;" vertex="1" parent="1">
+            <mxGeometry x="-920" y="-1148.44" width="100" height="86.88" as="geometry" />
+          </mxCell>
+        </object>
+        <object label="☰" id="12">
+          <mxCell style="rounded=1;html=1;shadow=0;dashed=0;whiteSpace=wrap;fontSize=68;fillColor=#E6E6E6;align=center;strokeColor=#E6E6E6;fontColor=#333333;" vertex="1" parent="1">
+            <mxGeometry x="-1050" y="-1146.56" width="100" height="86.88" as="geometry" />
+          </mxCell>
+        </object>
+        <object label="ACTIVE SERVICES:" ID="text-ActiveServices-Label" id="13">
+          <mxCell style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=68;fontStyle=1" vertex="1" parent="1">
+            <mxGeometry x="-2100" y="-1146.56" width="640" height="80" as="geometry" />
+          </mxCell>
+        </object>
+        <object label="12/16" id="14">
+          <mxCell style="strokeWidth=1;shadow=0;dashed=0;align=left;html=1;shape=mxgraph.mockup.text.textBox;fontColor=#666666;align=left;fontSize=68;spacingLeft=4;spacingTop=-3;whiteSpace=wrap;strokeColor=#666666;mainText=;verticalAlign=middle;" vertex="1" parent="1">
+            <mxGeometry x="-1450" y="-1150" width="340" height="90" as="geometry" />
+          </mxCell>
+        </object>
+        <object label="" ID="Log-Output-Textbox" condition="Logs test results of the MQTT connections ontop of regular loging" id="15">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E6E6E6;arcSize=5;" vertex="1" parent="1">
+            <mxGeometry x="-610" y="460" width="3570" height="690" as="geometry" />
+          </mxCell>
+        </object>
+        <object label="LOG LEVEL" ID="text-Logoutput-Title" id="16">
+          <mxCell style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=68;fontStyle=1" vertex="1" parent="1">
+            <mxGeometry x="-590" y="335" width="390" height="80" as="geometry" />
+          </mxCell>
+        </object>
+        <object label="Debug" ID="combo-box-logoutput-debug-level" id="17">
+          <mxCell style="strokeWidth=1;shadow=0;dashed=0;align=center;html=1;shape=mxgraph.mockup.forms.comboBox;strokeColor=#999999;fillColor=#ddeeff;align=left;fillColor2=#aaddff;mainText=;fontColor=#666666;fontSize=68;spacingLeft=3;" vertex="1" parent="1">
+            <mxGeometry x="-160" y="340" width="450" height="80" as="geometry" />
+          </mxCell>
+        </object>
+        <object label="&lt;div style=&quot;&quot;&gt;Export Log&lt;/div&gt;" ID="button-export-log" id="18">
+          <mxCell style="rounded=1;html=1;shadow=0;dashed=0;whiteSpace=wrap;fontSize=68;fillColor=#CCCCFF;align=center;strokeColor=#000000;fontColor=#333333;verticalAlign=middle;arcSize=17;fontStyle=1" vertex="1" parent="1">
+            <mxGeometry x="1010" y="315" width="560" height="110" as="geometry" />
+          </mxCell>
+        </object>
+        <object label="&lt;div style=&quot;&quot;&gt;Clear Log&lt;/div&gt;" id="19">
+          <mxCell style="rounded=1;html=1;shadow=0;dashed=0;whiteSpace=wrap;fontSize=68;fillColor=#FFCCCC;align=center;strokeColor=#000000;fontColor=#333333;verticalAlign=middle;arcSize=17;fontStyle=1" vertex="1" parent="1">
+            <mxGeometry x="1650" y="315" width="490" height="110" as="geometry" />
+          </mxCell>
+        </object>
+        <object label="&lt;div style=&quot;&quot;&gt;Update Log&lt;/div&gt;" ID="button-refresh-logoutput" id="20">
+          <mxCell style="rounded=1;html=1;shadow=0;dashed=0;whiteSpace=wrap;fontSize=68;fillColor=#FFFFCC;align=center;strokeColor=#000000;fontColor=#333333;verticalAlign=middle;arcSize=17;fontStyle=1" vertex="1" parent="1">
+            <mxGeometry x="460" y="320" width="490" height="110" as="geometry" />
+          </mxCell>
+        </object>
+        <object label="" name="MQTT-Topic-Subscription-Container" condition="This will host the tags that the MQTT service is subscribed to, and the associated messages they are passing to that topic. Topics can be referanced multiple times, for different messages." tooltip="List of subscribed Topics with their associated messages" id="21">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=1;arcSize=5;fontSize=90;" vertex="1" parent="1">
+            <mxGeometry x="-620" y="-1580" width="3590" height="1860" as="geometry" />
+          </mxCell>
+        </object>
+        <mxCell id="22" value="" style="shape=table;startSize=0;container=1;collapsible=0;childLayout=tableLayout;fontSize=90;" vertex="1" parent="1">
+          <mxGeometry x="-533" y="-1310" width="3416" height="443" as="geometry" />
+        </mxCell>
+        <mxCell id="23" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;strokeColor=inherit;top=0;left=0;bottom=0;right=0;collapsible=0;dropTarget=0;fillColor=none;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=16;" vertex="1" parent="22">
+          <mxGeometry width="3416" height="240" as="geometry" />
+        </mxCell>
+        <mxCell id="24" value="Incoming Message" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;strokeColor=inherit;overflow=hidden;fillColor=none;top=0;left=0;bottom=0;right=0;pointerEvents=1;fontSize=90;" vertex="1" parent="23">
+          <mxGeometry width="683" height="240" as="geometry">
+            <mxRectangle width="683" height="240" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="25" value="Incoming IP" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;strokeColor=inherit;overflow=hidden;fillColor=none;top=0;left=0;bottom=0;right=0;pointerEvents=1;fontSize=90;" vertex="1" parent="23">
+          <mxGeometry x="683" width="747" height="240" as="geometry">
+            <mxRectangle width="747" height="240" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="26" value="Outgoing Message" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;strokeColor=inherit;overflow=hidden;fillColor=none;top=0;left=0;bottom=0;right=0;pointerEvents=1;fontSize=90;" vertex="1" parent="23">
+          <mxGeometry x="1430" width="620" height="240" as="geometry">
+            <mxRectangle width="620" height="240" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="27" value="Connected Service" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;strokeColor=inherit;overflow=hidden;fillColor=none;top=0;left=0;bottom=0;right=0;pointerEvents=1;fontSize=90;" vertex="1" parent="23">
+          <mxGeometry x="2050" width="683" height="240" as="geometry">
+            <mxRectangle width="683" height="240" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="28" value="Outgoing message results" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;strokeColor=inherit;overflow=hidden;fillColor=none;top=0;left=0;bottom=0;right=0;pointerEvents=1;fontSize=90;" vertex="1" parent="23">
+          <mxGeometry x="2733" width="683" height="240" as="geometry">
+            <mxRectangle width="683" height="240" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="29" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;strokeColor=inherit;top=0;left=0;bottom=0;right=0;collapsible=0;dropTarget=0;fillColor=none;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=16;" vertex="1" parent="22">
+          <mxGeometry y="240" width="3416" height="203" as="geometry" />
+        </mxCell>
+        <mxCell id="30" value="" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;strokeColor=inherit;overflow=hidden;fillColor=none;top=0;left=0;bottom=0;right=0;pointerEvents=1;fontSize=90;" vertex="1" parent="29">
+          <mxGeometry width="683" height="203" as="geometry">
+            <mxRectangle width="683" height="203" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="31" value="" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;strokeColor=inherit;overflow=hidden;fillColor=none;top=0;left=0;bottom=0;right=0;pointerEvents=1;fontSize=90;" vertex="1" parent="29">
+          <mxGeometry x="683" width="747" height="203" as="geometry">
+            <mxRectangle width="747" height="203" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="32" value="" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;strokeColor=inherit;overflow=hidden;fillColor=none;top=0;left=0;bottom=0;right=0;pointerEvents=1;fontSize=90;" vertex="1" parent="29">
+          <mxGeometry x="1430" width="620" height="203" as="geometry">
+            <mxRectangle width="620" height="203" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="33" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;strokeColor=inherit;overflow=hidden;fillColor=none;top=0;left=0;bottom=0;right=0;pointerEvents=1;fontSize=90;" vertex="1" parent="29">
+          <mxGeometry x="2050" width="683" height="203" as="geometry">
+            <mxRectangle width="683" height="203" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="34" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;strokeColor=inherit;overflow=hidden;fillColor=none;top=0;left=0;bottom=0;right=0;pointerEvents=1;fontSize=90;" vertex="1" parent="29">
+          <mxGeometry x="2733" width="683" height="203" as="geometry">
+            <mxRectangle width="683" height="203" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <object label="Export Table to CSV" name="button-export-tcpservice-csv" conditions="opens a window for them to browse and save the TCP table as a csv file. They can edit the name, but the default should be {ServiceName}_{Date}_Messages.csv" id="35">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=1;fontSize=90;" vertex="1" parent="1">
+            <mxGeometry x="1980" y="-1510" width="890" height="150" as="geometry" />
+          </mxCell>
+        </object>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

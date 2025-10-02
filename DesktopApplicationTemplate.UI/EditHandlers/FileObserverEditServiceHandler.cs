@@ -6,8 +6,6 @@ using DesktopApplicationTemplate.UI.ViewModels.FileObserver.Advanced;
 using DesktopApplicationTemplate.UI.Views.FileObserver.Edit;
 using DesktopApplicationTemplate.UI.Views.FileObserver.Advanced;
 using DesktopApplicationTemplate.UI.Services;
-using DesktopApplicationTemplate.Models;
-using DesktopApplicationTemplate.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -32,36 +30,23 @@ public class FileObserverEditServiceHandler : IEditServiceHandler
     {
         var mainView = _getMainView();
         var mainViewModel = _getMainViewModel();
-        var observerPage = mainView.GetOrCreateServicePage(service);
-        var payload = service.GetPayload<FileObserverServiceOptions>();
-        if (payload is null)
-        {
-            payload = new FileObserverServiceOptions();
-            service.SetPayload(payload);
-        }
-
-        var vm = ActivatorUtilities.CreateInstance<FileObserverEditServiceViewModel>(_services, service.DisplayName.Split(" - ").Last(), payload);
+        var foPage = mainView.GetOrCreateServicePage(service);
+        var options = service.FileObserverOptions ?? new FileObserverServiceOptions();
+        var vm = ActivatorUtilities.CreateInstance<FileObserverEditServiceViewModel>(_services, service.DisplayName.Split(" - ").Last(), options);
         var editView = _services.GetRequiredService<FileObserverEditServiceView>();
         editView.Initialize(vm);
         vm.ServiceSaved += (name, opts) =>
         {
-            var catalog = _services.GetRequiredService<IServiceCatalog>();
-            var descriptor = ResolveDescriptor(catalog, service.DescriptorId, service.Type);
-            service.ApplyDescriptor(descriptor, name);
-            service.SetPayload(opts);
-            if (observerPage != null)
-            {
-                mainView.ShowPage(observerPage);
-            }
-
+            service.DisplayName = $"File Observer - {name}";
+            service.FileObserverOptions = opts;
+            if (foPage != null)
+                mainView.ShowPage(foPage);
             _ = mainViewModel.SaveServicesAsync();
         };
         vm.EditCancelled += () =>
         {
-            if (observerPage != null)
-            {
-                mainView.ShowPage(observerPage);
-            }
+            if (foPage != null)
+                mainView.ShowPage(foPage);
         };
         vm.AdvancedConfigRequested += opts =>
         {
@@ -75,24 +60,5 @@ public class FileObserverEditServiceHandler : IEditServiceHandler
         mainView.ShowPage(editView);
         _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
     }
-
-    private static IServiceDescriptor? ResolveDescriptor(IServiceCatalog catalog, string descriptorId, ServiceType serviceType)
-    {
-        if (!string.IsNullOrWhiteSpace(descriptorId) && catalog.TryGetById(descriptorId, out var byId))
-        {
-            return byId;
-        }
-
-        if (catalog.TryGetByLegacyType(serviceType, out var legacy))
-        {
-            return legacy;
-        }
-
-        if (catalog.LegacyMap.TryGetValue(serviceType, out var fallbackId) && catalog.TryGetById(fallbackId, out var fallback))
-        {
-            return fallback;
-        }
-
-        return null;
-    }
 }
+

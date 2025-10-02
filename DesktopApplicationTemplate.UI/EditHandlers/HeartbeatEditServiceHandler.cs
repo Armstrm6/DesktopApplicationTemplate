@@ -2,10 +2,10 @@ using System;
 using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.ViewModels.Heartbeat.Edit;
+using DesktopApplicationTemplate.UI.ViewModels.Heartbeat.Advanced;
 using DesktopApplicationTemplate.UI.Views.Heartbeat.Edit;
+using DesktopApplicationTemplate.UI.Views.Heartbeat.Advanced;
 using DesktopApplicationTemplate.UI.Services;
-using DesktopApplicationTemplate.Models;
-using DesktopApplicationTemplate.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -30,58 +30,35 @@ public class HeartbeatEditServiceHandler : IEditServiceHandler
     {
         var mainView = _getMainView();
         var mainViewModel = _getMainViewModel();
-        var heartbeatPage = mainView.GetOrCreateServicePage(service);
-        var payload = service.GetPayload<HeartbeatServiceOptions>();
-        if (payload is null)
-        {
-            payload = new HeartbeatServiceOptions();
-            service.SetPayload(payload);
-        }
-
-        var vm = ActivatorUtilities.CreateInstance<HeartbeatEditServiceViewModel>(_services, service.DisplayName.Split(" - ").Last(), payload);
+        var hbPage = mainView.GetOrCreateServicePage(service);
+        var options = service.HeartbeatOptions ?? new HeartbeatServiceOptions();
+        var vm = ActivatorUtilities.CreateInstance<HeartbeatEditServiceViewModel>(_services, service.DisplayName.Split(" - ").Last(), options);
         var editView = _services.GetRequiredService<HeartbeatEditServiceView>();
         editView.Initialize(vm);
         vm.ServiceSaved += (name, opts) =>
         {
-            var catalog = _services.GetRequiredService<IServiceCatalog>();
-            var descriptor = ResolveDescriptor(catalog, service.DescriptorId, service.Type);
-            service.ApplyDescriptor(descriptor, name);
-            service.SetPayload(opts);
-            if (heartbeatPage != null)
-            {
-                mainView.ShowPage(heartbeatPage);
-            }
-
+            service.DisplayName = $"Heartbeat - {name}";
+            service.HeartbeatOptions = opts;
+            if (hbPage != null)
+                mainView.ShowPage(hbPage);
             _ = mainViewModel.SaveServicesAsync();
         };
         vm.EditCancelled += () =>
         {
-            if (heartbeatPage != null)
-            {
-                mainView.ShowPage(heartbeatPage);
-            }
+            if (hbPage != null)
+                mainView.ShowPage(hbPage);
+        };
+        vm.AdvancedConfigRequested += opts =>
+        {
+            var advVm = ActivatorUtilities.CreateInstance<HeartbeatAdvancedConfigViewModel>(_services, opts);
+            var advView = _services.GetRequiredService<HeartbeatAdvancedConfigView>();
+            advView.Initialize(advVm);
+            advVm.Saved += _ => mainView.ShowPage(editView);
+            advVm.BackRequested += () => mainView.ShowPage(editView);
+            mainView.ShowPage(advView);
         };
         mainView.ShowPage(editView);
         _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
     }
-
-    private static IServiceDescriptor? ResolveDescriptor(IServiceCatalog catalog, string descriptorId, ServiceType serviceType)
-    {
-        if (!string.IsNullOrWhiteSpace(descriptorId) && catalog.TryGetById(descriptorId, out var byId))
-        {
-            return byId;
-        }
-
-        if (catalog.TryGetByLegacyType(serviceType, out var legacy))
-        {
-            return legacy;
-        }
-
-        if (catalog.LegacyMap.TryGetValue(serviceType, out var fallbackId) && catalog.TryGetById(fallbackId, out var fallback))
-        {
-            return fallback;
-        }
-
-        return null;
-    }
 }
+

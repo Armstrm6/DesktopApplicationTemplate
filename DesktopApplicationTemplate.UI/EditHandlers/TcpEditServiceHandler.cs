@@ -5,7 +5,6 @@ using DesktopApplicationTemplate.UI.ViewModels.Tcp.Edit;
 using DesktopApplicationTemplate.UI.Views.Tcp.Edit;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.Models;
-using DesktopApplicationTemplate.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -31,7 +30,7 @@ public class TcpEditServiceHandler : IEditServiceHandler
         var mainView = _getMainView();
         var mainViewModel = _getMainViewModel();
         var tcpPage = mainView.GetOrCreateServicePage(service);
-        var options = service.GetPayload<TcpServiceOptions>() ?? new TcpServiceOptions();
+        var options = service.TcpOptions ?? new TcpServiceOptions();
         var vm = _services.GetRequiredService<TcpEditServiceViewModel>();
         vm.ServiceType = service.Type;
         vm.Load(service.DisplayName.Split(" - ").Last(), options);
@@ -39,12 +38,9 @@ public class TcpEditServiceHandler : IEditServiceHandler
         editView.Initialize(vm);
         vm.ServiceSaved += (name, opts) =>
         {
-            var catalog = _services.GetRequiredService<IServiceCatalog>();
-            var descriptor = ResolveDescriptor(catalog, service.DescriptorId, vm.ServiceType);
-            service.Type = descriptor?.LegacyType ?? vm.ServiceType;
-            service.ApplyDescriptor(descriptor, name);
-
-            service.SetPayload(opts);
+            service.DisplayName = $"{vm.ServiceType.ToLegacyString()} - {name}";
+            service.Type = vm.ServiceType;
+            service.TcpOptions = opts;
             if (tcpPage != null)
                 mainView.ShowPage(tcpPage);
             _ = mainViewModel.SaveServicesAsync();
@@ -57,25 +53,5 @@ public class TcpEditServiceHandler : IEditServiceHandler
         mainView.ShowPage(editView);
         _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
     }
-    private static IServiceDescriptor? ResolveDescriptor(IServiceCatalog catalog, string descriptorId, ServiceType serviceType)
-    {
-        if (!string.IsNullOrWhiteSpace(descriptorId) && catalog.TryGetById(descriptorId, out var byId))
-        {
-            return byId;
-        }
-
-        if (catalog.TryGetByLegacyType(serviceType, out var legacy))
-        {
-            return legacy;
-        }
-
-        if (catalog.LegacyMap.TryGetValue(serviceType, out var fallbackId) && catalog.TryGetById(fallbackId, out var fallback))
-        {
-            return fallback;
-        }
-
-        return null;
-    }
-
 }
 

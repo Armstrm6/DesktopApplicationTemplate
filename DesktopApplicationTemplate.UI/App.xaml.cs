@@ -1,30 +1,98 @@
-using DesktopApplicationTemplate.Core.Models;
-using DesktopApplicationTemplate.Core.Modules;
-using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.Models;
-using DesktopApplicationTemplate.Services.Common;
-using DesktopApplicationTemplate.UI.Configuration;
-using DesktopApplicationTemplate.UI.Factories;
-using DesktopApplicationTemplate.UI.Helpers;
-using DesktopApplicationTemplate.UI.Models;
-using DesktopApplicationTemplate.UI.Navigation;
 using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.UI.EditHandlers;
+using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Core.Modules;
 using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI.ViewModels.Http;
+using DesktopApplicationTemplate.UI.ViewModels.Http.Create;
+using DesktopApplicationTemplate.UI.ViewModels.Http.Edit;
+using DesktopApplicationTemplate.UI.ViewModels.Http.Advanced;
+using DesktopApplicationTemplate.UI.ViewModels.Tcp;
+using DesktopApplicationTemplate.UI.ViewModels.Tcp.Create;
+using DesktopApplicationTemplate.UI.ViewModels.Tcp.Edit;
+using DesktopApplicationTemplate.UI.ViewModels.Hid;
+using DesktopApplicationTemplate.UI.ViewModels.Hid.Create;
+using DesktopApplicationTemplate.UI.ViewModels.Hid.Edit;
+using DesktopApplicationTemplate.UI.ViewModels.Hid.Advanced;
+using DesktopApplicationTemplate.UI.ViewModels.Scp;
+using DesktopApplicationTemplate.UI.ViewModels.Scp.Create;
+using DesktopApplicationTemplate.UI.ViewModels.Scp.Edit;
+using DesktopApplicationTemplate.UI.ViewModels.Scp.Advanced;
+using DesktopApplicationTemplate.UI.ViewModels.Csv;
+using DesktopApplicationTemplate.UI.ViewModels.Csv.Edit;
+using DesktopApplicationTemplate.UI.ViewModels.Csv.Advanced;
+using DesktopApplicationTemplate.UI.ViewModels.FileObserver;
+using DesktopApplicationTemplate.UI.ViewModels.FileObserver.Create;
+using DesktopApplicationTemplate.UI.ViewModels.FileObserver.Edit;
+using DesktopApplicationTemplate.UI.ViewModels.FileObserver.Advanced;
+using DesktopApplicationTemplate.UI.ViewModels.Heartbeat;
+using DesktopApplicationTemplate.UI.ViewModels.Heartbeat.Create;
+using DesktopApplicationTemplate.UI.ViewModels.Heartbeat.Edit;
+using DesktopApplicationTemplate.UI.ViewModels.Heartbeat.Advanced;
+using DesktopApplicationTemplate.UI.ViewModels.Mqtt;
+using DesktopApplicationTemplate.UI.ViewModels.Mqtt.Create;
+using DesktopApplicationTemplate.UI.ViewModels.Mqtt.Edit;
+using DesktopApplicationTemplate.UI.ViewModels.Mqtt.Advanced;
+using DesktopApplicationTemplate.UI.ViewModels.Ftp;
+using DesktopApplicationTemplate.UI.ViewModels.Ftp.Create;
+using DesktopApplicationTemplate.UI.ViewModels.Ftp.Edit;
+using DesktopApplicationTemplate.UI.ViewModels.Ftp.Advanced;
 using DesktopApplicationTemplate.UI.Views;
+using DesktopApplicationTemplate.UI.Views.Http;
+using DesktopApplicationTemplate.UI.Views.Http.Create;
+using DesktopApplicationTemplate.UI.Views.Http.Edit;
+using DesktopApplicationTemplate.UI.Views.Http.Advanced;
+using DesktopApplicationTemplate.UI.Views.Tcp;
+using DesktopApplicationTemplate.UI.Views.Tcp.Create;
+using DesktopApplicationTemplate.UI.Views.Tcp.Edit;
+using DesktopApplicationTemplate.UI.Views.Hid;
+using DesktopApplicationTemplate.UI.Views.Hid.Create;
+using DesktopApplicationTemplate.UI.Views.Hid.Edit;
+using DesktopApplicationTemplate.UI.Views.Hid.Advanced;
+using DesktopApplicationTemplate.UI.Views.Scp;
+using DesktopApplicationTemplate.UI.Views.Scp.Create;
+using DesktopApplicationTemplate.UI.Views.Scp.Edit;
+using DesktopApplicationTemplate.UI.Views.Scp.Advanced;
+using DesktopApplicationTemplate.UI.Views.Csv;
+using DesktopApplicationTemplate.UI.Views.Csv.Edit;
+using DesktopApplicationTemplate.UI.Views.Csv.Advanced;
+using DesktopApplicationTemplate.UI.Views.FileObserver;
+using DesktopApplicationTemplate.UI.Views.FileObserver.Create;
+using DesktopApplicationTemplate.UI.Views.FileObserver.Edit;
+using DesktopApplicationTemplate.UI.Views.FileObserver.Advanced;
+using DesktopApplicationTemplate.UI.Views.Heartbeat;
+using DesktopApplicationTemplate.UI.Views.Heartbeat.Create;
+using DesktopApplicationTemplate.UI.Views.Heartbeat.Edit;
+using DesktopApplicationTemplate.UI.Views.Heartbeat.Advanced;
+using DesktopApplicationTemplate.UI.Views.Mqtt;
+using DesktopApplicationTemplate.UI.Views.Mqtt.Create;
+using DesktopApplicationTemplate.UI.Views.Mqtt.Edit;
+using DesktopApplicationTemplate.UI.Views.Mqtt.Advanced;
+using DesktopApplicationTemplate.UI.Views.Ftp;
+using DesktopApplicationTemplate.UI.Views.Ftp.Create;
+using DesktopApplicationTemplate.UI.Views.Ftp.Edit;
+using DesktopApplicationTemplate.UI.Views.Ftp.Advanced;
+using DesktopApplicationTemplate.Core.Models;
+using DesktopApplicationTemplate.UI.Models;
+using DesktopApplicationTemplate.UI.Helpers;
+using Factories = DesktopApplicationTemplate.UI.Factories;
+// Qualify service-layer types explicitly to avoid name clashes with UI services
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using MQTTnet;
+using FubarDev.FtpServer;
+using FubarDev.FtpServer.FileSystem.DotNet;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System;
 using System.Windows.Threading;
 using System.Collections.Generic;
+using DesktopApplicationTemplate.Models;
 using System.Threading.Tasks;
-using System.Globalization;
+using DesktopApplicationTemplate.Services.Common;
 
 
 namespace DesktopApplicationTemplate.UI
@@ -57,49 +125,29 @@ namespace DesktopApplicationTemplate.UI
 
         private void ConfigureServices(IConfiguration configuration, IServiceCollection services)
         {
-            var loggerFactory = LoggerFactory.Create(builder =>
+            services.AddServiceModules();
+            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Mqtt, (sp, _) => new MqttEditServiceHandler(() => sp.GetRequiredService<MainView>(), () => sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<MqttEditServiceHandler>>()));
+            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Heartbeat, (sp, _) => new HeartbeatEditServiceHandler(() => sp.GetRequiredService<MainView>(), () => sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<HeartbeatEditServiceHandler>>()));
+            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Hid, (sp, _) => new HidEditServiceHandler(() => sp.GetRequiredService<MainView>(), () => sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<HidEditServiceHandler>>()));
+            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Csv, (sp, _) => new CsvEditServiceHandler(() => sp.GetRequiredService<MainView>(), () => sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<CsvEditServiceHandler>>()));
+            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.FileObserver, (sp, _) => new FileObserverEditServiceHandler(() => sp.GetRequiredService<MainView>(), () => sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<FileObserverEditServiceHandler>>()));
+            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Scp, (sp, _) => new ScpEditServiceHandler(() => sp.GetRequiredService<MainView>(), () => sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<ScpEditServiceHandler>>()));
+            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Tcp, (sp, _) => new TcpEditServiceHandler(() => sp.GetRequiredService<MainView>(), () => sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<TcpEditServiceHandler>>()));
+            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Http, (sp, _) => new HttpEditServiceHandler(() => sp.GetRequiredService<MainView>(), () => sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<HttpEditServiceHandler>>()));
+            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Ftp, (sp, _) => new FtpEditServiceHandler(() => sp.GetRequiredService<MainView>(), () => sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<FtpEditServiceHandler>>()));
+            services.AddSingleton<IDictionary<ServiceType, IEditServiceHandler>>(sp =>
             {
-                builder
-                    .AddConfiguration(configuration.GetSection("Logging"))
-                    .AddDebug()
-                    .AddConsole();
+                var handlers = new Dictionary<ServiceType, IEditServiceHandler>();
+                foreach (ServiceType type in Enum.GetValues<ServiceType>())
+                {
+                    var handler = sp.GetKeyedService<IEditServiceHandler>(type);
+                    if (handler != null)
+                    {
+                        handlers[type] = handler;
+                    }
+                }
+                return handlers;
             });
-
-            var pluginLoader = PluginLoader.Create(configuration, loggerFactory.CreateLogger<PluginLoader>());
-            IReadOnlyCollection<Assembly> pluginAssemblies;
-            try
-            {
-                pluginAssemblies = pluginLoader.LoadPluginAssemblies();
-                loggerFactory
-                    .CreateLogger<App>()
-                    .LogInformation(
-                        "Loaded {PluginAssemblyCount} plug-in assembly(ies) from {PluginDirectory}.",
-                        pluginAssemblies.Count,
-                        pluginLoader.Options.RootDirectory);
-            }
-            catch (Exception ex)
-            {
-                loggerFactory
-                    .CreateLogger<App>()
-                    .LogError(
-                        ex,
-                        "Failed to load plug-ins from {PluginDirectory}.",
-                        pluginLoader.Options.RootDirectory);
-                pluginAssemblies = Array.Empty<Assembly>();
-            }
-            finally
-            {
-                loggerFactory.Dispose();
-            }
-
-            services.AddSingleton(pluginLoader.Options);
-
-            var assembliesForScanning = PluginLoader.CombineWithDefaultAssemblies(pluginAssemblies);
-            var catalog = services.AddServiceModules(assembliesForScanning.ToArray());
-            var registrations = InitializeServices(services, catalog, pluginAssemblies);
-
-            services.AddSingleton<IServiceUiRegistry>(sp => ServiceUiRegistry.Create(sp, catalog, registrations));
-
             services.AddSingleton<MainView>();
             services.AddSingleton<IStartupService, StartupService>();
             services.AddSingleton<IProcessRunner, ProcessRunner>();
@@ -109,321 +157,195 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<ILoggingService, LoggingService>();
             services.AddSingleton<IMessageRoutingService, MessageRoutingService>();
             services.AddSingleton<IFileDialogService, FileDialogService>();
-            services.AddSingleton<IPluginImportService, PluginImportService>();
             services.AddCommonServices();
             services.AddSingleton<SaveConfirmationHelper>();
             services.AddSingleton<CloseConfirmationHelper>();
             services.AddSingleton<MainViewModel>();
             services.AddSingleton<ServiceMessageTableViewModel>();
+            services.AddSingleton<TcpServiceMessagesView>();
+            services.AddTransient<TcpServiceMessagesViewModel>();
             services.AddSingleton<DependencyChecker>();
+            services.AddSingleton<HttpServiceView>();
+            services.AddSingleton<HttpServiceViewModel>();
+            services.AddSingleton<FileObserverView>();
+            services.AddSingleton<FileObserverViewModel>();
+            services.AddSingleton<HeartbeatView>();
+            services.AddSingleton<HeartbeatViewModel>();
+            services.AddSingleton<SCPServiceView>();
+            services.AddSingleton<ScpServiceViewModel>();
+            services.AddSingleton<HidViewModel>();
+            services.AddSingleton<HidViews>();
+            services.AddSingleton<MqttService>();
+            services.AddSingleton<FTPServiceView>();
+            services.AddSingleton<FtpServiceViewModel>();
+            services.AddFtpServer(builder => builder
+                .UseDotNetFileSystem()
+                .EnableAnonymousAuthentication());
+            services.AddSingleton<IFtpServerService, DesktopApplicationTemplate.Service.Services.FtpServerService>();
+            services.AddSingleton<CsvViewerViewModel>();
+            services.AddSingleton<CsvService>();
+            services.AddSingleton<CsvServiceView>();
             services.AddSingleton<SettingsViewModel>();
+            services.AddKeyedTransient<Page>(ServiceType.Tcp, (sp, _) => sp.GetRequiredService<TcpServiceMessagesView>());
+            services.AddKeyedTransient<Page>(ServiceType.Http, (sp, _) => sp.GetRequiredService<HttpServiceView>());
+            services.AddKeyedTransient<Page>(ServiceType.FileObserver, (sp, _) => sp.GetRequiredService<FileObserverView>());
+            services.AddKeyedTransient<Page>(ServiceType.Hid, (sp, _) => sp.GetRequiredService<HidViews>());
+            services.AddKeyedTransient<Page>(ServiceType.Heartbeat, (sp, _) => sp.GetRequiredService<HeartbeatView>());
+            services.AddKeyedTransient<Page>(ServiceType.Scp, (sp, _) => sp.GetRequiredService<SCPServiceView>());
+            services.AddKeyedTransient<Page>(ServiceType.Mqtt, (sp, _) => sp.GetRequiredService<MqttTagSubscriptionsView>());
+            services.AddKeyedTransient<Page>(ServiceType.Ftp, (sp, _) => sp.GetRequiredService<FTPServiceView>());
+            services.AddKeyedTransient<Page>(ServiceType.Csv, (sp, _) => sp.GetRequiredService<CsvServiceView>());
+            services.AddSingleton<IDictionary<ServiceType, Func<Page>>>(sp => new Dictionary<ServiceType, Func<Page>>
+            {
+                [ServiceType.Tcp] = () => sp.GetKeyedService<Page>(ServiceType.Tcp)!,
+                [ServiceType.Http] = () => sp.GetKeyedService<Page>(ServiceType.Http)!,
+                [ServiceType.FileObserver] = () => sp.GetKeyedService<Page>(ServiceType.FileObserver)!,
+                [ServiceType.Hid] = () => sp.GetKeyedService<Page>(ServiceType.Hid)!,
+                [ServiceType.Heartbeat] = () => sp.GetKeyedService<Page>(ServiceType.Heartbeat)!,
+                [ServiceType.Scp] = () => sp.GetKeyedService<Page>(ServiceType.Scp)!,
+                [ServiceType.Mqtt] = () => sp.GetKeyedService<Page>(ServiceType.Mqtt)!,
+                [ServiceType.Ftp] = () => sp.GetKeyedService<Page>(ServiceType.Ftp)!,
+                [ServiceType.Csv] = () => sp.GetKeyedService<Page>(ServiceType.Csv)!,
+            });
             services.AddTransient<SplashWindow>();
             services.AddTransient<CreateServicePage>();
             services.AddTransient<CreateServiceViewModel>();
+            services.AddTransient<MqttCreateServiceView>();
+            services.AddTransient<MqttCreateServiceViewModel>();
+            services.AddTransient<ServiceCreateViewModelBase<MqttServiceOptions>, MqttCreateServiceViewModel>();
+            services.AddTransient<MqttEditServiceView>();
+            services.AddTransient<MqttEditServiceViewModel>();
+            services.AddTransient<ServiceEditViewModelBase<MqttServiceOptions>, MqttEditServiceViewModel>();
+            services.AddTransient<MqttAdvancedConfigView>();
+            services.AddTransient<MqttAdvancedConfigViewModel>();
+            services.AddTransient<TcpCreateServiceView>();
+            services.AddTransient<TcpCreateServiceViewModel>();
+            services.AddTransient<ServiceCreateViewModelBase<TcpServiceOptions>, TcpCreateServiceViewModel>();
+            services.AddTransient<TcpEditServiceView>();
+            services.AddTransient<TcpEditServiceViewModel>();
+            services.AddTransient<ServiceEditViewModelBase<TcpServiceOptions>, TcpEditServiceViewModel>();
+            services.AddTransient<FtpServerCreateView>();
+            services.AddTransient<FtpServerCreateViewModel>();
+            services.AddTransient<ServiceCreateViewModelBase<DesktopApplicationTemplate.UI.Services.FtpServerOptions>, FtpServerCreateViewModel>();
+            services.AddTransient<FtpServerAdvancedConfigView>();
+            services.AddTransient<FtpServerAdvancedConfigViewModel>();
+            services.AddTransient<FtpServerEditView>();
+            services.AddTransient<FtpServerEditViewModel>();
+            services.AddTransient<ServiceEditViewModelBase<DesktopApplicationTemplate.UI.Services.FtpServerOptions>, FtpServerEditViewModel>();
+            services.AddTransient<HttpCreateServiceView>();
+            services.AddTransient<HttpCreateServiceViewModel>();
+            services.AddTransient<ServiceCreateViewModelBase<HttpServiceOptions>, HttpCreateServiceViewModel>();
+            services.AddTransient<HttpEditServiceView>();
+            services.AddTransient<HttpEditServiceViewModel>();
+            services.AddTransient<ServiceEditViewModelBase<HttpServiceOptions>, HttpEditServiceViewModel>();
+            services.AddTransient<HttpAdvancedConfigView>();
+            services.AddTransient<HttpAdvancedConfigViewModel>();
+            services.AddTransient<MqttEditConnectionView>();
+            services.AddTransient<MqttEditConnectionViewModel>();
+            services.AddTransient<MqttTagSubscriptionsView>();
+            services.AddTransient<MqttTagSubscriptionsViewModel>();
+            services.AddTransient<HidCreateServiceView>();
+            services.AddTransient<HidCreateServiceViewModel>();
+            services.AddTransient<ServiceCreateViewModelBase<HidServiceOptions>, HidCreateServiceViewModel>();
+            services.AddTransient<HidEditServiceView>();
+            services.AddTransient<HidEditServiceViewModel>();
+            services.AddTransient<ServiceEditViewModelBase<HidServiceOptions>, HidEditServiceViewModel>();
+            services.AddTransient<HidAdvancedConfigView>();
+            services.AddTransient<HidAdvancedConfigViewModel>();
+            services.AddTransient<HeartbeatCreateServiceView>();
+            services.AddTransient<HeartbeatCreateServiceViewModel>();
+            services.AddTransient<ServiceCreateViewModelBase<HeartbeatServiceOptions>, HeartbeatCreateServiceViewModel>();
+            services.AddTransient<HeartbeatEditServiceView>();
+            services.AddTransient<HeartbeatEditServiceViewModel>();
+            services.AddTransient<ServiceEditViewModelBase<HeartbeatServiceOptions>, HeartbeatEditServiceViewModel>();
+            services.AddTransient<HeartbeatAdvancedConfigView>();
+            services.AddTransient<HeartbeatAdvancedConfigViewModel>();
+            services.AddTransient<FileObserverCreateServiceView>();
+            services.AddTransient<FileObserverCreateServiceViewModel>();
+            services.AddTransient<ServiceCreateViewModelBase<FileObserverServiceOptions>, FileObserverCreateServiceViewModel>();
+            services.AddTransient<FileObserverEditServiceView>();
+            services.AddTransient<FileObserverEditServiceViewModel>();
+            services.AddTransient<ServiceEditViewModelBase<FileObserverServiceOptions>, FileObserverEditServiceViewModel>();
+            services.AddTransient<FileObserverAdvancedConfigView>();
+            services.AddTransient<FileObserverAdvancedConfigViewModel>();
+            services.AddTransient<CsvServiceEditorView>();
+            services.AddTransient<CsvServiceEditorViewModel>();
+            services.AddTransient<ServiceEditorViewModelBase<CsvServiceOptions>, CsvServiceEditorViewModel>();
+            services.AddTransient<CsvAdvancedConfigView>();
+            services.AddTransient<CsvAdvancedConfigViewModel>();
+            services.AddTransient<ScpCreateServiceView>();
+            services.AddTransient<ScpCreateServiceViewModel>();
+            services.AddTransient<ServiceCreateViewModelBase<ScpServiceOptions>, ScpCreateServiceViewModel>();
+            services.AddTransient<ScpEditServiceView>();
+            services.AddTransient<ScpEditServiceViewModel>();
+            services.AddTransient<ServiceEditViewModelBase<ScpServiceOptions>, ScpEditServiceViewModel>();
+            services.AddTransient<ScpAdvancedConfigView>();
+            services.AddTransient<ScpAdvancedConfigViewModel>();
             services.AddTransient<SettingsPage>();
+            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Mqtt, (sp, _) => new Navigation.MqttNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Ftp, (sp, _) => new Navigation.FtpNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Http, (sp, _) => new Navigation.HttpNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Tcp, (sp, _) => new Navigation.TcpNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Hid, (sp, _) => new Navigation.HidNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Scp, (sp, _) => new Navigation.ScpNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Csv, (sp, _) => new Navigation.CsvNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.FileObserver, (sp, _) => new Navigation.FileObserverNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Heartbeat, (sp, _) => new Navigation.HeartbeatNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
+            services.AddSingleton<IDictionary<ServiceType, Navigation.INavigationHandler>>(sp =>
+            {
+                var handlers = new Dictionary<ServiceType, Navigation.INavigationHandler>();
+                foreach (ServiceType type in Enum.GetValues<ServiceType>())
+                {
+                    var handler = sp.GetKeyedService<Navigation.INavigationHandler>(type);
+                    if (handler != null)
+                    {
+                        handlers[type] = handler;
+                    }
+                }
+                return handlers;
+            });
+            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Mqtt, (sp, _) => new Factories.MqttServiceFactory(sp, () => sp.GetRequiredService<MainView>(), sp.GetRequiredService<MainViewModel>()));
+            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Ftp, (sp, _) => new Factories.FtpServiceFactory(sp, () => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Http, (sp, _) => new Factories.HttpServiceFactory(() => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Tcp, (sp, _) => new Factories.TcpServiceFactory(() => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Hid, (sp, _) => new Factories.HidServiceFactory(() => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Scp, (sp, _) => new Factories.ScpServiceFactory(() => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Csv, (sp, _) => new Factories.CsvServiceFactory(() => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.FileObserver, (sp, _) => new Factories.FileObserverServiceFactory(() => sp.GetRequiredService<MainView>()));
+            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Heartbeat, (sp, _) => new Factories.HeartbeatServiceFactory(() => sp.GetRequiredService<MainView>()));
+            services.AddSingleton<IDictionary<ServiceType, Factories.IServiceFactory>>(sp =>
+            {
+                var factories = new Dictionary<ServiceType, Factories.IServiceFactory>();
+                foreach (ServiceType type in Enum.GetValues<ServiceType>())
+                {
+                    var factory = sp.GetKeyedService<Factories.IServiceFactory>(type);
+                    if (factory != null)
+                    {
+                        factories[type] = factory;
+                    }
+                }
+                return factories;
+            });
 
 
             // Load strongly typed settings
             services.Configure<AppSettings>(configuration.GetSection("AppSettings"));
+            services.Configure<MqttServiceOptions>(configuration.GetSection("MqttService"));
             services.Configure<TcpServiceOptions>(configuration.GetSection("TcpService"));
-        }
-
-        private static IReadOnlyCollection<ServiceRegistrationInfo> InitializeServices(
-            IServiceCollection services,
-            IServiceCatalog catalog,
-            IEnumerable<Assembly> pluginAssemblies)
-        {
-            var descriptorIds = new HashSet<string>(catalog.Descriptors.Select(d => d.Id), StringComparer.Ordinal);
-            var registrations = new List<ServiceRegistrationInfo>();
-            var registeredTypes = new HashSet<Type>();
-            var registrationKeys = new HashSet<string>(StringComparer.Ordinal);
-            var assemblies = BuildAssemblySet(pluginAssemblies);
-
-            foreach (var assembly in assemblies)
-            {
-                RegisterAttributedTypes(assembly, descriptorIds, services, registrations, registeredTypes, registrationKeys);
-            }
-
-            ApplyConventionRegistrations(services, catalog, registrations, registeredTypes, registrationKeys, assemblies);
-
-            return registrations;
-        }
-
-        private static IReadOnlyCollection<Assembly> BuildAssemblySet(IEnumerable<Assembly> pluginAssemblies)
-        {
-            var assemblies = new List<Assembly> { typeof(App).Assembly };
-
-            if (pluginAssemblies != null)
-            {
-                foreach (var assembly in pluginAssemblies)
-                {
-                    if (assembly is not null && assemblies.All(a => !string.Equals(a.FullName, assembly.FullName, StringComparison.Ordinal)))
-                    {
-                        assemblies.Add(assembly);
-                    }
-                }
-            }
-
-            return assemblies;
-        }
-
-        private static void RegisterAttributedTypes(
-            Assembly assembly,
-            ISet<string> descriptorIds,
-            IServiceCollection services,
-            ICollection<ServiceRegistrationInfo> registrations,
-            ISet<Type> registeredTypes,
-            ISet<string> registrationKeys)
-        {
-            foreach (var type in GetLoadableTypes(assembly))
-            {
-                var attributes = type.GetCustomAttributes<ServiceDescriptorRegistrationAttribute>(inherit: false);
-                foreach (var attribute in attributes)
-                {
-                    if (!descriptorIds.Contains(attribute.DescriptorId))
-                    {
-                        continue;
-                    }
-
-                    if (registrationKeys.Add(CreateRegistrationKey(attribute.DescriptorId, type, attribute.Kind)))
-                    {
-                        registrations.Add(new ServiceRegistrationInfo(attribute.DescriptorId, type, attribute.Kind, attribute.Lifetime));
-                    }
-
-                    if (registeredTypes.Add(type))
-                    {
-                        RegisterType(services, type, attribute.Lifetime);
-                    }
-                }
-            }
-        }
-
-        private static void RegisterType(IServiceCollection services, Type implementationType, ServiceLifetime lifetime)
-        {
-            switch (lifetime)
-            {
-                case ServiceLifetime.Singleton:
-                    services.AddSingleton(implementationType);
-                    break;
-                case ServiceLifetime.Scoped:
-                    services.AddScoped(implementationType);
-                    break;
-                default:
-                    services.AddTransient(implementationType);
-                    break;
-            }
-        }
-
-        private static void ApplyConventionRegistrations(
-            IServiceCollection services,
-            IServiceCatalog catalog,
-            ICollection<ServiceRegistrationInfo> registrations,
-            ISet<Type> registeredTypes,
-            ISet<string> registrationKeys,
-            IReadOnlyCollection<Assembly> assemblies)
-        {
-            var candidateTypes = assemblies
-                .SelectMany(GetLoadableTypes)
-                .Where(t => t.IsClass && !t.IsAbstract)
-                .ToList();
-
-            foreach (var descriptor in catalog.Descriptors)
-            {
-                if (!TryGetServicePrefix(descriptor, out var prefix))
-                {
-                    continue;
-                }
-
-                var matchingTypes = candidateTypes
-                    .Where(t => t.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
-
-                foreach (var type in matchingTypes)
-                {
-                    var kind = DetermineRegistrationKind(type);
-                    var lifetime = DetermineLifetime(type, prefix);
-
-                    if (registeredTypes.Add(type))
-                    {
-                        RegisterType(services, type, lifetime);
-                    }
-
-                    if (kind is ServiceRegistrationKind.NavigationHandler or ServiceRegistrationKind.EditHandler or ServiceRegistrationKind.ServiceFactory or ServiceRegistrationKind.ServicePage)
-                    {
-                        if (registrationKeys.Add(CreateRegistrationKey(descriptor.Id, type, kind.Value)))
-                        {
-                            registrations.Add(new ServiceRegistrationInfo(descriptor.Id, type, kind.Value, lifetime));
-                        }
-                    }
-                }
-            }
-        }
-
-        private static IEnumerable<Type> GetLoadableTypes(Assembly assembly)
-        {
-            try
-            {
-                return assembly.GetTypes();
-            }
-            catch (ReflectionTypeLoadException ex)
-            {
-                return ex.Types.Where(type => type is not null).Cast<Type>();
-            }
-        }
-
-        private static string CreateRegistrationKey(string descriptorId, Type implementationType, ServiceRegistrationKind kind)
-        {
-            var typeName = implementationType.FullName ?? implementationType.Name;
-            return FormattableString.Invariant($"{descriptorId}|{typeName}|{(int)kind}");
-        }
-
-        private static bool TryGetServicePrefix(IServiceDescriptor descriptor, out string prefix)
-        {
-            if (descriptor.LegacyType is { } legacy)
-            {
-                prefix = legacy.ToString();
-                return true;
-            }
-
-            prefix = descriptor.Id.Split('.').LastOrDefault() ?? descriptor.Id;
-            return true;
-        }
-
-        private static ServiceRegistrationKind? DetermineRegistrationKind(Type type)
-        {
-            if (typeof(INavigationHandler).IsAssignableFrom(type))
-            {
-                return ServiceRegistrationKind.NavigationHandler;
-            }
-
-            if (typeof(IEditServiceHandler).IsAssignableFrom(type))
-            {
-                return ServiceRegistrationKind.EditHandler;
-            }
-
-            if (typeof(IServiceFactory).IsAssignableFrom(type))
-            {
-                return ServiceRegistrationKind.ServiceFactory;
-            }
-
-            if (typeof(Page).IsAssignableFrom(type))
-            {
-                if (type.Name.Contains("Create", StringComparison.OrdinalIgnoreCase))
-                {
-                    return ServiceRegistrationKind.CreateView;
-                }
-
-                if (type.Name.Contains("Edit", StringComparison.OrdinalIgnoreCase))
-                {
-                    return ServiceRegistrationKind.EditView;
-                }
-
-                if (type.Name.Contains("Advanced", StringComparison.OrdinalIgnoreCase))
-                {
-                    return ServiceRegistrationKind.AdvancedView;
-                }
-
-                return ServiceRegistrationKind.ServicePage;
-            }
-
-            if (IsViewModel(type))
-            {
-                if (InheritsFromGeneric(type, typeof(ServiceCreateViewModelBase<>)))
-                {
-                    return ServiceRegistrationKind.CreateViewModel;
-                }
-
-                if (InheritsFromGeneric(type, typeof(ServiceEditViewModelBase<>)))
-                {
-                    return ServiceRegistrationKind.EditViewModel;
-                }
-
-                if (InheritsFromGeneric(type, typeof(AdvancedConfigViewModelBase<>)))
-                {
-                    return ServiceRegistrationKind.AdvancedViewModel;
-                }
-
-                return ServiceRegistrationKind.ServicePageViewModel;
-            }
-
-            return null;
-        }
-
-        private static ServiceLifetime DetermineLifetime(Type type, string prefix)
-        {
-            if (typeof(IEditServiceHandler).IsAssignableFrom(type))
-            {
-                return ServiceLifetime.Singleton;
-            }
-
-            if (typeof(IServiceFactory).IsAssignableFrom(type) || typeof(INavigationHandler).IsAssignableFrom(type))
-            {
-                return ServiceLifetime.Transient;
-            }
-
-            if (typeof(Page).IsAssignableFrom(type))
-            {
-                if (type.Name.Contains("Create", StringComparison.OrdinalIgnoreCase) ||
-                    type.Name.Contains("Edit", StringComparison.OrdinalIgnoreCase) ||
-                    type.Name.Contains("Advanced", StringComparison.OrdinalIgnoreCase))
-                {
-                    return ServiceLifetime.Transient;
-                }
-
-                return ServiceLifetime.Singleton;
-            }
-
-            if (IsViewModel(type))
-            {
-                if (type.Name.Contains("Create", StringComparison.OrdinalIgnoreCase) ||
-                    type.Name.Contains("Edit", StringComparison.OrdinalIgnoreCase) ||
-                    type.Name.Contains("Advanced", StringComparison.OrdinalIgnoreCase))
-                {
-                    return ServiceLifetime.Transient;
-                }
-
-                if (type.Name.Contains("Service", StringComparison.OrdinalIgnoreCase) ||
-                    type.Name.Contains("Viewer", StringComparison.OrdinalIgnoreCase) ||
-                    type.Name.Equals($"{prefix}ViewModel", StringComparison.OrdinalIgnoreCase))
-                {
-                    return ServiceLifetime.Singleton;
-                }
-
-                return ServiceLifetime.Transient;
-            }
-
-            if (type.Namespace is { } serviceNamespace && serviceNamespace.Contains(".Services", StringComparison.Ordinal))
-            {
-                return ServiceLifetime.Singleton;
-            }
-
-            return ServiceLifetime.Transient;
-        }
-
-        private static bool IsViewModel(Type type) =>
-            type.Name.EndsWith("ViewModel", StringComparison.Ordinal) ||
-            typeof(ViewModelBase).IsAssignableFrom(type);
-
-        private static bool InheritsFromGeneric(Type type, Type genericDefinition)
-        {
-            var current = type;
-            while (current != null && current != typeof(object))
-            {
-                if (current.IsGenericType && current.GetGenericTypeDefinition() == genericDefinition)
-                {
-                    return true;
-                }
-
-                current = current.BaseType!;
-            }
-
-            return false;
+            services.AddOptions<DesktopApplicationTemplate.UI.Services.FtpServerOptions>()
+                .BindConfiguration("FtpServer");
+            services.AddOptions<HidServiceOptions>();
+            services.AddOptions<HeartbeatServiceOptions>();
+            services.AddOptions<FileObserverServiceOptions>();
+            services.AddOptions<CsvServiceOptions>();
+            services.AddOptions<ScpServiceOptions>();
         }
 
         internal void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
             var logger = AppHost.Services.GetService<ILogger<App>>();
             logger?.LogError(e.Exception, "Unhandled dispatcher exception");
-            HookReleaseHelper.Release(AppHost.Services);
+            HookReleaseHelper.Release();
             e.Handled = true;
             Shutdown();
         }
@@ -446,7 +368,7 @@ namespace DesktopApplicationTemplate.UI
                 logger?.LogError("Unhandled domain exception");
             }
 
-            HookReleaseHelper.Release(AppHost.Services);
+            HookReleaseHelper.Release();
             if (Current is not null)
             {
                 await Current.Dispatcher.InvokeAsync(() => Current.Shutdown());
@@ -510,7 +432,8 @@ namespace DesktopApplicationTemplate.UI
                 await vm.SaveServicesAsync().ConfigureAwait(false);
             }
 
-            HookReleaseHelper.Release(AppHost.Services);
+            var hid = AppHost.Services.GetService<HidViewModel>();
+            hid?.Dispose();
 
             await AppHost.StopAsync();
             AppHost.Dispose();

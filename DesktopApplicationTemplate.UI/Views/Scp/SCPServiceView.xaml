@@ -8,37 +8,13 @@
       mc:Ignorable="d">
     <Page.Resources>
         <helpers:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter" />
-        <helpers:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
     </Page.Resources>
     <Grid Margin="10">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"/>
             <ColumnDefinition Width="3*"/>
         </Grid.ColumnDefinitions>
-        <Border Grid.Row="0" Grid.ColumnSpan="2" CornerRadius="8" BorderThickness="1" Padding="10" Margin="0,0,0,10"
-                Background="{Binding Tag.BackgroundColor, RelativeSource={RelativeSource AncestorType=Page}}"
-                BorderBrush="{Binding Tag.BorderColor, RelativeSource={RelativeSource AncestorType=Page}}"
-                ToolTip="{Binding Tag.DescriptorTooltip, RelativeSource={RelativeSource AncestorType=Page}}">
-            <DockPanel>
-                <Border Width="40" Height="40" CornerRadius="20" Margin="0,0,10,0"
-                        Background="{Binding Tag.BorderColor, RelativeSource={RelativeSource AncestorType=Page}}"
-                        Visibility="{Binding Tag.IconGlyph, RelativeSource={RelativeSource AncestorType=Page}, Converter={StaticResource NullToVisibilityConverter}}">
-                    <TextBlock Text="{Binding Tag.IconGlyph, RelativeSource={RelativeSource AncestorType=Page}}"
-                               FontSize="22" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                </Border>
-                <StackPanel>
-                    <TextBlock Text="{Binding Tag.DisplayName, RelativeSource={RelativeSource AncestorType=Page}}" FontWeight="Bold" />
-                    <TextBlock Text="{Binding Tag.DescriptorDescription, RelativeSource={RelativeSource AncestorType=Page}}"
-                               Foreground="Gray" TextWrapping="Wrap"
-                               Visibility="{Binding Tag.DescriptorDescription, RelativeSource={RelativeSource AncestorType=Page}, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}" />
-                </StackPanel>
-            </DockPanel>
-        </Border>
-        <StackPanel Grid.Row="1" Grid.Column="0" Margin="10">
+        <StackPanel Grid.Column="0" Margin="10">
             <Grid Margin="0,0,0,5">
                 <TextBox Text="{Binding Host}" x:Name="HostBox" behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
                 <TextBlock Text="Host (e.g. 192.168.1.30)" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0"
@@ -75,7 +51,7 @@
             </Grid>
             <Button Content="Send" Command="{Binding TransferCommand}" Width="100"/>
         </StackPanel>
-        <Border Grid.Row="1" Grid.Column="1" Margin="10" Background="#E6E6E6" CornerRadius="5" Padding="10">
+        <Border Grid.Column="1" Margin="10" Background="#E6E6E6" CornerRadius="5" Padding="10">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>

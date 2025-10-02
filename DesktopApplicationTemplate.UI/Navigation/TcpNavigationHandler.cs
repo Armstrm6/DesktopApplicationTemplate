@@ -6,27 +6,22 @@ using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels.Tcp.Create;
 using DesktopApplicationTemplate.UI.Views.Tcp.Create;
 using Microsoft.Extensions.DependencyInjection;
+using DesktopApplicationTemplate.Models;
 using System.Threading.Tasks;
-using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.Services.Common.Descriptors;
-using DesktopApplicationTemplate.UI.Configuration;
 
 namespace DesktopApplicationTemplate.UI.Navigation
 {
-    [ServiceDescriptorRegistration(TcpServiceDescriptor.DescriptorId, ServiceRegistrationKind.NavigationHandler)]
     public class TcpNavigationHandler : INavigationHandler
     {
         private readonly IServiceProvider _services;
         private readonly Func<MainView> _getMainView;
-        private readonly IServiceCatalog _catalog;
 
-        public string DescriptorId => TcpServiceDescriptor.DescriptorId;
+        public ServiceType ServiceType => ServiceType.Tcp;
 
-        public TcpNavigationHandler(IServiceProvider services, Func<MainView> getMainView, IServiceCatalog catalog)
+        public TcpNavigationHandler(IServiceProvider services, Func<MainView> getMainView)
         {
             _services = services;
             _getMainView = getMainView;
-            _catalog = catalog;
         }
 
         public Page CreateView(string defaultName)
@@ -43,9 +38,7 @@ namespace DesktopApplicationTemplate.UI.Navigation
         public Task AddServiceAsync(string name, object options)
         {
             var mainView = _getMainView();
-            _catalog.TryGetById(DescriptorId, out var descriptor);
-            var context = new ServiceFactoryContext(DescriptorId, name, options, descriptor);
-            return mainView.AddServiceAsync(context);
+            return mainView.AddServiceAsync(ServiceType, new ServiceFactoryOptions<TcpServiceOptions>(name, (TcpServiceOptions)options));
         }
     }
 }

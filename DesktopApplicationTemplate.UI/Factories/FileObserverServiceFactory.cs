@@ -1,48 +1,35 @@
 using System;
-using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Views;
+using DesktopApplicationTemplate.Models;
 
 namespace DesktopApplicationTemplate.UI.Factories
 {
     public class FileObserverServiceFactory : IServiceFactory
     {
         private readonly Func<MainView> _getMainView;
-        private readonly IServiceCatalog _catalog;
 
         public ServiceType ServiceType => ServiceType.FileObserver;
 
-        public FileObserverServiceFactory(Func<MainView> getMainView, IServiceCatalog catalog)
+        public FileObserverServiceFactory(Func<MainView> getMainView)
         {
             _getMainView = getMainView;
-            _catalog = catalog;
         }
 
-        public ServiceListModel Create(ServiceFactoryContext context)
+        public ServiceListModel Create(object optionsObj)
         {
-            if (context is null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
-            var descriptor = _catalog.TryGetById(context.DescriptorId, out var resolved)
-                ? resolved
-                : context.Descriptor;
-
-            var options = context.GetPayload<FileObserverServiceOptions>() ?? new FileObserverServiceOptions();
+            var ctx = (ServiceFactoryOptions<FileObserverServiceOptions>)optionsObj;
+            var name = ctx.Name;
+            var options = ctx.Options;
 
             var svc = new ServiceListModel
             {
+                DisplayName = $"{ServiceType.FileObserver.ToLegacyString()} - {name}",
                 Type = ServiceType.FileObserver,
-                DescriptorId = context.DescriptorId,
-                IsActive = false
+                IsActive = false,
+                FileObserverOptions = options
             };
-
-            svc.SetPayload(options);
-
-            svc.ApplyDescriptor(descriptor, context.ServiceName);
 
             _getMainView().GetOrCreateServicePage(svc);
 

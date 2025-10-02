@@ -3,12 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
         mc:Ignorable="d">
-    <Page.Resources>
-        <helpers:StringToBrushConverter x:Key="StringToBrushConverter" />
-        <helpers:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter" />
-    </Page.Resources>
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -18,50 +13,27 @@
 
         <TextBlock Grid.Row="0" Text="Select Service Type" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
 
-        <ItemsControl Grid.Row="1" ItemsSource="{Binding ServiceDescriptors}">
+        <ItemsControl Grid.Row="1" ItemsSource="{Binding ServiceTypes}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <WrapPanel Width="600" />
+                    <WrapPanel Width="400" />
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Button Click="ServiceType_Click"
-                            Padding="0"
-                            Background="Transparent"
-                            BorderThickness="0"
-                            Cursor="Hand">
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Border CornerRadius="12"
-                                        Background="{Binding SecondaryAccentColor, Converter={StaticResource StringToBrushConverter}, ConverterParameter=#FFF1F5F9}"
-                                        BorderBrush="{Binding PrimaryAccentColor, Converter={StaticResource StringToBrushConverter}, ConverterParameter=#FF38BDF8}"
-                                        BorderThickness="1"
-                                        Padding="12">
-                                    <StackPanel>
-                                        <Border Width="48"
-                                                Height="48"
-                                                CornerRadius="24"
-                                                Background="{Binding PrimaryAccentColor, Converter={StaticResource StringToBrushConverter}, ConverterParameter=#FF38BDF8}"
-                                                HorizontalAlignment="Left"
-                                                VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding IconGlyph}"
-                                                       FontSize="28"
-                                                       HorizontalAlignment="Center"
-                                                       VerticalAlignment="Center" />
-                                        </Border>
-                                        <TextBlock Text="{Binding DisplayLabel}" FontWeight="Bold" FontSize="16" Margin="0,12,0,0" />
-                                        <TextBlock Text="{Binding Category}" Foreground="#FF1F2937" Margin="0,4,0,0" />
-                                        <TextBlock Text="{Binding Description}"
-                                                   Margin="0,6,0,0"
-                                                   TextWrapping="Wrap"
-                                                   Foreground="#FF4B5563"
-                                                   Visibility="{Binding Description, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}" />
-                                    </StackPanel>
-                                </Border>
-                            </ControlTemplate>
-                        </Button.Template>
-                    </Button>
+                    <StackPanel Margin="10" HorizontalAlignment="Center">
+                        <Button Width="80" Height="80" Click="ServiceType_Click">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border CornerRadius="40" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                            <TextBlock Text="{Binding Icon}" FontSize="40" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Button>
+                        <TextBlock Text="{Binding DisplayText}" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                    </StackPanel>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>

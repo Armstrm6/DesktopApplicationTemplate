@@ -1,34 +1,29 @@
+using DesktopApplicationTemplate.UI.Views;
 using System;
 using System.Windows.Controls;
 using DesktopApplicationTemplate.UI.Factories;
-using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels.FileObserver.Create;
 using DesktopApplicationTemplate.UI.ViewModels.FileObserver.Advanced;
 using DesktopApplicationTemplate.UI.Views.FileObserver.Create;
 using DesktopApplicationTemplate.UI.Views.FileObserver.Advanced;
 using Microsoft.Extensions.DependencyInjection;
+using DesktopApplicationTemplate.Models;
 using System.Threading.Tasks;
-using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.Services.Common.Descriptors;
-using DesktopApplicationTemplate.UI.Configuration;
 
 namespace DesktopApplicationTemplate.UI.Navigation
 {
-    [ServiceDescriptorRegistration(FileObserverServiceDescriptor.DescriptorId, ServiceRegistrationKind.NavigationHandler)]
     public class FileObserverNavigationHandler : INavigationHandler
     {
         private readonly IServiceProvider _services;
         private readonly Func<MainView> _getMainView;
-        private readonly IServiceCatalog _catalog;
 
-        public string DescriptorId => FileObserverServiceDescriptor.DescriptorId;
+        public ServiceType ServiceType => ServiceType.FileObserver;
 
-        public FileObserverNavigationHandler(IServiceProvider services, Func<MainView> getMainView, IServiceCatalog catalog)
+        public FileObserverNavigationHandler(IServiceProvider services, Func<MainView> getMainView)
         {
             _services = services;
             _getMainView = getMainView;
-            _catalog = catalog;
         }
 
         public Page CreateView(string defaultName)
@@ -54,9 +49,7 @@ namespace DesktopApplicationTemplate.UI.Navigation
         public Task AddServiceAsync(string name, object options)
         {
             var mainView = _getMainView();
-            _catalog.TryGetById(DescriptorId, out var descriptor);
-            var context = new ServiceFactoryContext(DescriptorId, name, options, descriptor);
-            return mainView.AddServiceAsync(context);
+            return mainView.AddServiceAsync(ServiceType, new ServiceFactoryOptions<FileObserverServiceOptions>(name, (FileObserverServiceOptions)options));
         }
     }
 }

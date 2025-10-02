@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using DesktopApplicationTemplate.Core.Services;
 
 namespace DesktopApplicationTemplate.Models;
 
@@ -21,19 +20,6 @@ public static class ServiceTypeExtensions
         { ServiceType.Scp, "SC" },
         { ServiceType.Tcp, "TC" },
         { ServiceType.Heartbeat, "HB" }
-    };
-
-    private static readonly Dictionary<ServiceType, string> DescriptorMap = new()
-    {
-        { ServiceType.Mqtt, ServiceDescriptorIds.Mqtt },
-        { ServiceType.Http, ServiceDescriptorIds.Http },
-        { ServiceType.Ftp, ServiceDescriptorIds.Ftp },
-        { ServiceType.Hid, ServiceDescriptorIds.Hid },
-        { ServiceType.Csv, ServiceDescriptorIds.Csv },
-        { ServiceType.FileObserver, ServiceDescriptorIds.FileObserver },
-        { ServiceType.Scp, ServiceDescriptorIds.Scp },
-        { ServiceType.Tcp, ServiceDescriptorIds.Tcp },
-        { ServiceType.Heartbeat, ServiceDescriptorIds.Heartbeat }
     };
 
     private static readonly Dictionary<string, ServiceType> LegacyMap = new(StringComparer.OrdinalIgnoreCase)
@@ -97,11 +83,5 @@ public static class ServiceTypeExtensions
             ServiceType.Heartbeat => "Heartbeat",
             _ => type.ToCode()
         };
-
-    /// <summary>
-    /// Gets the stable descriptor identifier for the service type.
-    /// </summary>
-    public static string ToDescriptorId(this ServiceType type) =>
-        DescriptorMap.TryGetValue(type, out var id) ? id : type.ToString();
 }
 

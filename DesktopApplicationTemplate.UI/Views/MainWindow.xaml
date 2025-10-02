@@ -3,11 +3,12 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:DesktopApplicationTemplate.UI.Views"
-        xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
+        xmlns:local="clr-namespace:DesktopApplicationTemplate.UI.Views;assembly=DesktopApplicationTemplate.UI"
+        xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers;assembly=DesktopApplicationTemplate.UI"
         xmlns:sys="clr-namespace:System.Windows;assembly=PresentationFramework"
-        xmlns:behaviors="clr-namespace:DesktopApplicationTemplate.UI.Behaviors"
-        xmlns:shared="clr-namespace:DesktopApplicationTemplate.UI.Views.Shared"
+        xmlns:behaviors="clr-namespace:DesktopApplicationTemplate.UI.Behaviors;assembly=DesktopApplicationTemplate.UI"
+
+        xmlns:shared="clr-namespace:DesktopApplicationTemplate.UI.Views.Shared;assembly=DesktopApplicationTemplate.UI"
         mc:Ignorable="d"
         Title="MainView"
         MinWidth="800" MinHeight="600" Height="600"
@@ -22,7 +23,6 @@
                 <ResourceDictionary Source="../Themes/BubblyWindow.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <helpers:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
-            <helpers:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter" />
         </ResourceDictionary>
     </Window.Resources>
 
@@ -69,7 +69,6 @@
                     <Button Content="+" Width="30" Click="AddService_Click" Background="#E6E6E6" Foreground="#333333"/>
                     <Button Content="-" Width="30" Margin="5,0,0,0" Click="RemoveService_Click" Background="#E6E6E6" Foreground="#333333"/>
                     <Button x:Name="FilterButton" Content="☰" Width="30" Margin="5,0,0,0" Click="FilterButton_Click" Background="#E6E6E6" Foreground="#333333"/>
-                    <Button Content="Import" Margin="5,0,0,0" Background="#E6E6E6" Foreground="#333333" Command="{Binding ImportServiceCommand}"/>
                     <Popup x:Name="FilterPopup" PlacementTarget="{Binding ElementName=FilterButton}" Placement="Bottom" StaysOpen="False" DataContext="{Binding DataContext, ElementName=FilterButton}">
                         <Border Background="White" CornerRadius="5" Padding="10">
                             <local:FilterPanel DataContext="{Binding Filters}"/>
@@ -86,8 +85,7 @@
                             <DataTemplate>
                                 <Border CornerRadius="8" BorderBrush="{Binding BorderColor}" Background="{Binding BackgroundColor}" BorderThickness="2" Padding="5" Margin="2"
                                         PreviewMouseLeftButtonDown="ServiceItem_PreviewMouseLeftButtonDown" PreviewMouseMove="ServiceItem_PreviewMouseMove"
-                                        AllowDrop="True" Drop="ServiceItem_Drop" MouseLeftButtonDown="ServiceItem_MouseLeftButtonDown"
-                                        ToolTip="{Binding DescriptorTooltip}">
+                                        AllowDrop="True" Drop="ServiceItem_Drop" MouseLeftButtonDown="ServiceItem_MouseLeftButtonDown">
                                     <Border CornerRadius="8" BorderBrush="Gray" BorderThickness="1" Padding="5" Margin="2">
                                         <Border.ContextMenu>
                                             <ContextMenu>
@@ -101,24 +99,15 @@
                                         </Border.ContextMenu>
                                         <Grid>
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
-                                            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
-                                                <Border Width="36" Height="36" CornerRadius="18" Background="{Binding BackgroundColor}" BorderBrush="{Binding BorderColor}" BorderThickness="1"
-                                                        Visibility="{Binding IconGlyph, Converter={StaticResource NullToVisibilityConverter}}">
-                                                    <TextBlock Text="{Binding IconGlyph}" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                </Border>
-                                            </StackPanel>
-                                            <StackPanel Grid.Column="1">
+                                            <StackPanel>
                                                 <TextBlock FontWeight="Bold" Text="{Binding DisplayName}" />
                                                 <TextBlock Text="{Binding ExecutionTimeText}" />
-                                                <TextBlock Text="{Binding DescriptorDescription}" Foreground="Gray" TextWrapping="Wrap"
-                                                           Visibility="{Binding DescriptorDescription, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}" />
                                                 <TextBlock Text="{Binding LastInputMessage}" TextTrimming="CharacterEllipsis" />
                                             </StackPanel>
-                                            <ToggleButton Grid.Column="2" IsChecked="{Binding IsActive, Mode=TwoWay}" Style="{StaticResource ToggleSwitchStyle}"/>
+                                            <ToggleButton Grid.Column="1" IsChecked="{Binding IsActive, Mode=TwoWay}" Style="{StaticResource ToggleSwitchStyle}"/>
                                         </Grid>
                                     </Border>
                                 </Border>
