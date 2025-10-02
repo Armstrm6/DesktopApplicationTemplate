@@ -1,7 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Windows.Input;
 using System.Threading.Tasks;
 using System.Windows;
@@ -10,6 +9,7 @@ using System.IO;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Helpers;
+using DesktopApplicationTemplate.Core.Services.Protocols.Http;
 
 namespace DesktopApplicationTemplate.UI.ViewModels.Http
 {
@@ -137,10 +137,12 @@ public class HttpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel
         public HttpMessageHandler? MessageHandler { get; set; }
 
         private readonly SaveConfirmationHelper _saveHelper;
+        private readonly IHttpClientService _httpClientService;
 
-        public HttpServiceViewModel(SaveConfirmationHelper saveHelper)
+        public HttpServiceViewModel(SaveConfirmationHelper saveHelper, IHttpClientService httpClientService)
         {
             _saveHelper = saveHelper;
+            _httpClientService = httpClientService ?? throw new ArgumentNullException(nameof(httpClientService));
             SendCommand = new AsyncRelayCommand(SendRequestAsync);
             AddHeaderCommand = new RelayCommand(() => Headers.Add(new HeaderItem()));
             RemoveHeaderCommand = new RelayCommand(() =>
@@ -167,30 +169,37 @@ public class HttpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel
 
             Logger?.Log("Starting HTTP request", LogLevel.Debug);
 
-            using HttpClient client = MessageHandler != null ? new HttpClient(MessageHandler) : new HttpClient();
             try
             {
                 Logger?.Log($"Preparing {SelectedMethod} request to {Url}", LogLevel.Debug);
-                var request = new HttpRequestMessage(new HttpMethod(SelectedMethod), Url);
+                var request = new HttpExecutionRequest
+                {
+                    RequestUri = new Uri(Url),
+                    Method = new HttpMethod(SelectedMethod),
+                    MessageHandler = MessageHandler
+                };
 
                 foreach (var h in Headers)
                 {
                     if (!string.IsNullOrWhiteSpace(h.Key))
-                        request.Headers.TryAddWithoutValidation(h.Key, h.Value);
+                    {
+                        request.Headers[h.Key] = h.Value;
+                    }
                 }
+
+                if (SelectedMethod != "GET" && SelectedMethod != "DELETE")
+                {
+                    request.Body = RequestBody ?? string.Empty;
+                    Logger?.Log($"Request Body: {RequestBody}", LogLevel.Debug);
+                }
+
                 var headerSummary = string.Join(", ", Headers.Where(h => !string.IsNullOrWhiteSpace(h.Key)).Select(h => $"{h.Key}:{h.Value}"));
                 if (!string.IsNullOrWhiteSpace(headerSummary))
                     Logger?.Log($"Headers: {headerSummary}", LogLevel.Debug);
 
-                if (SelectedMethod != "GET" && SelectedMethod != "DELETE")
-                {
-                    request.Content = new StringContent(RequestBody ?? string.Empty, Encoding.UTF8, "application/json");
-                    Logger?.Log($"Request Body: {RequestBody}", LogLevel.Debug);
-                }
-
-                HttpResponseMessage response = await client.SendAsync(request);
-                StatusCode = (int)response.StatusCode;
-                ResponseBody = await response.Content.ReadAsStringAsync();
+                HttpExecutionResult result = await _httpClientService.ExecuteAsync(request).ConfigureAwait(false);
+                StatusCode = (int)result.StatusCode;
+                ResponseBody = result.Body;
                 Logger?.Log($"Received response with status {StatusCode}", LogLevel.Debug);
                 Logger?.Log($"Response Body: {ResponseBody}", LogLevel.Debug);
                 Logger?.Log("HTTP request completed", LogLevel.Debug);

@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using System.Windows;
+using DesktopApplicationTemplate.Core.Services.Protocols.Heartbeat;
 using DesktopApplicationTemplate.UI.Helpers;
 
 namespace DesktopApplicationTemplate.UI.ViewModels.Heartbeat
@@ -51,26 +52,26 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Heartbeat
         public ICommand SaveCommand { get; }
 
         private readonly SaveConfirmationHelper _saveHelper;
+        private readonly IHeartbeatService _heartbeatService;
 
-        public HeartbeatViewModel(SaveConfirmationHelper saveHelper)
+        public HeartbeatViewModel(SaveConfirmationHelper saveHelper, IHeartbeatService heartbeatService)
         {
             _saveHelper = saveHelper;
+            _heartbeatService = heartbeatService ?? throw new ArgumentNullException(nameof(heartbeatService));
             BuildCommand = new RelayCommand(BuildMessage);
             SaveCommand = new RelayCommand(Save);
         }
 
         private void BuildMessage()
         {
-            var msg = BaseMessage;
-            if (IncludePing)
+            var options = new HeartbeatServiceOptions
             {
-                msg += " | PING";
-            }
-            if (IncludeStatus)
-            {
-                msg += " | STATUS";
-            }
-            FinalMessage = msg;
+                BaseMessage = BaseMessage,
+                IncludePing = IncludePing,
+                IncludeStatus = IncludeStatus
+            };
+
+            FinalMessage = _heartbeatService.BuildHeartbeatMessage(options);
         }
 
         private void Save() => _saveHelper.Show();
