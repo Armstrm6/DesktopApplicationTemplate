@@ -1,6 +1,6 @@
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI;
-using DesktopApplicationTemplate.UI.Navigation;
+using DesktopApplicationTemplate.Services;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.ViewModels.Http.Create;
@@ -26,8 +26,9 @@ public class NavigationHandlerTests
     {
         var provider = App.AppHost.Services;
         var mainView = provider.GetRequiredService<MainView>();
-        var handler = provider.GetKeyedService<INavigationHandler>(ServiceType.Http)!;
-        var createPage = handler.CreateView("svc");
+        var registry = provider.GetRequiredService<IServiceUiRegistry<ServiceListModel, Page>>();
+        var created = registry.TryCreateNavigationPage(ServiceType.Http, provider, "svc", out var createPage);
+        Assert.True(created);
         var vm = (HttpCreateServiceViewModel)createPage.DataContext!;
 
         var mainVm = (MainViewModel)typeof(MainView).GetField("_viewModel", BindingFlags.NonPublic | BindingFlags.Instance)!
@@ -47,12 +48,12 @@ public class NavigationHandlerTests
     {
         var provider = App.AppHost.Services;
         var mainView = provider.GetRequiredService<MainView>();
-        var handler = provider.GetKeyedService<INavigationHandler>(ServiceType.Http)!;
         var mainVm = (MainViewModel)typeof(MainView).GetField("_viewModel", BindingFlags.NonPublic | BindingFlags.Instance)!
             .GetValue(mainView)!;
         mainVm.Services.Clear();
 
-        await handler.AddServiceAsync("svc", new HttpServiceOptions { BaseUrl = "http://example" });
+        await mainView.AddServiceAsync(ServiceType.Http,
+            new ServiceFactoryOptions<HttpServiceOptions>("svc", new HttpServiceOptions { BaseUrl = "http://example" }));
 
         Assert.Single(mainVm.Services);
     }
@@ -62,8 +63,9 @@ public class NavigationHandlerTests
     {
         var provider = App.AppHost.Services;
         var mainView = provider.GetRequiredService<MainView>();
-        var handler = provider.GetKeyedService<INavigationHandler>(ServiceType.Http)!;
-        var createPage = handler.CreateView("svc");
+        var registry = provider.GetRequiredService<IServiceUiRegistry<ServiceListModel, Page>>();
+        var created = registry.TryCreateNavigationPage(ServiceType.Http, provider, "svc", out var createPage);
+        Assert.True(created);
         mainView.ShowPage(createPage);
         var vm = (HttpCreateServiceViewModel)createPage.DataContext!;
         var frame = (Frame)typeof(MainView).GetField("ContentFrame", BindingFlags.NonPublic | BindingFlags.Instance)!

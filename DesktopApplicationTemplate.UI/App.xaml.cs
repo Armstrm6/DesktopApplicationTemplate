@@ -75,12 +75,12 @@ using DesktopApplicationTemplate.UI.Views.Ftp.Advanced;
 using DesktopApplicationTemplate.Core.Models;
 using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.Helpers;
-using Factories = DesktopApplicationTemplate.UI.Factories;
 // Qualify service-layer types explicitly to avoid name clashes with UI services
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using MQTTnet;
 using FubarDev.FtpServer;
 using FubarDev.FtpServer.FileSystem.DotNet;
@@ -186,27 +186,19 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<CsvService>();
             services.AddSingleton<CsvServiceView>();
             services.AddSingleton<SettingsViewModel>();
-            services.AddKeyedTransient<Page>(ServiceType.Tcp, (sp, _) => sp.GetRequiredService<TcpServiceMessagesView>());
-            services.AddKeyedTransient<Page>(ServiceType.Http, (sp, _) => sp.GetRequiredService<HttpServiceView>());
-            services.AddKeyedTransient<Page>(ServiceType.FileObserver, (sp, _) => sp.GetRequiredService<FileObserverView>());
-            services.AddKeyedTransient<Page>(ServiceType.Hid, (sp, _) => sp.GetRequiredService<HidViews>());
-            services.AddKeyedTransient<Page>(ServiceType.Heartbeat, (sp, _) => sp.GetRequiredService<HeartbeatView>());
-            services.AddKeyedTransient<Page>(ServiceType.Scp, (sp, _) => sp.GetRequiredService<SCPServiceView>());
-            services.AddKeyedTransient<Page>(ServiceType.Mqtt, (sp, _) => sp.GetRequiredService<MqttTagSubscriptionsView>());
-            services.AddKeyedTransient<Page>(ServiceType.Ftp, (sp, _) => sp.GetRequiredService<FTPServiceView>());
-            services.AddKeyedTransient<Page>(ServiceType.Csv, (sp, _) => sp.GetRequiredService<CsvServiceView>());
-            services.AddSingleton<IDictionary<ServiceType, Func<Page>>>(sp => new Dictionary<ServiceType, Func<Page>>
-            {
-                [ServiceType.Tcp] = () => sp.GetKeyedService<Page>(ServiceType.Tcp)!,
-                [ServiceType.Http] = () => sp.GetKeyedService<Page>(ServiceType.Http)!,
-                [ServiceType.FileObserver] = () => sp.GetKeyedService<Page>(ServiceType.FileObserver)!,
-                [ServiceType.Hid] = () => sp.GetKeyedService<Page>(ServiceType.Hid)!,
-                [ServiceType.Heartbeat] = () => sp.GetKeyedService<Page>(ServiceType.Heartbeat)!,
-                [ServiceType.Scp] = () => sp.GetKeyedService<Page>(ServiceType.Scp)!,
-                [ServiceType.Mqtt] = () => sp.GetKeyedService<Page>(ServiceType.Mqtt)!,
-                [ServiceType.Ftp] = () => sp.GetKeyedService<Page>(ServiceType.Ftp)!,
-                [ServiceType.Csv] = () => sp.GetKeyedService<Page>(ServiceType.Csv)!,
-            });
+            services.AddSingleton<IServiceUiRegistry<ServiceListModel, Page>>(_ =>
+                new ServiceUiRegistry<ServiceListModel, Page>(new[]
+                {
+                    BuildCsvRegistration(),
+                    BuildFileObserverRegistration(),
+                    BuildHeartbeatRegistration(),
+                    BuildHidRegistration(),
+                    BuildHttpRegistration(),
+                    BuildMqttRegistration(),
+                    BuildScpRegistration(),
+                    BuildTcpRegistration(),
+                    BuildFtpRegistration(),
+                }));
             services.AddTransient<SplashWindow>();
             services.AddTransient<CreateServicePage>();
             services.AddTransient<CreateServiceViewModel>();
@@ -282,50 +274,6 @@ namespace DesktopApplicationTemplate.UI
             services.AddTransient<ScpAdvancedConfigView>();
             services.AddTransient<ScpAdvancedConfigViewModel>();
             services.AddTransient<SettingsPage>();
-            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Mqtt, (sp, _) => new Navigation.MqttNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
-            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Ftp, (sp, _) => new Navigation.FtpNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
-            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Http, (sp, _) => new Navigation.HttpNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
-            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Tcp, (sp, _) => new Navigation.TcpNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
-            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Hid, (sp, _) => new Navigation.HidNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
-            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Scp, (sp, _) => new Navigation.ScpNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
-            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Csv, (sp, _) => new Navigation.CsvNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
-            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.FileObserver, (sp, _) => new Navigation.FileObserverNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
-            services.AddKeyedTransient<Navigation.INavigationHandler>(ServiceType.Heartbeat, (sp, _) => new Navigation.HeartbeatNavigationHandler(sp, () => sp.GetRequiredService<MainView>()));
-            services.AddSingleton<IDictionary<ServiceType, Navigation.INavigationHandler>>(sp =>
-            {
-                var handlers = new Dictionary<ServiceType, Navigation.INavigationHandler>();
-                foreach (ServiceType type in Enum.GetValues<ServiceType>())
-                {
-                    var handler = sp.GetKeyedService<Navigation.INavigationHandler>(type);
-                    if (handler != null)
-                    {
-                        handlers[type] = handler;
-                    }
-                }
-                return handlers;
-            });
-            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Mqtt, (sp, _) => new Factories.MqttServiceFactory(sp, () => sp.GetRequiredService<MainView>(), sp.GetRequiredService<MainViewModel>()));
-            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Ftp, (sp, _) => new Factories.FtpServiceFactory(sp, () => sp.GetRequiredService<MainView>()));
-            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Http, (sp, _) => new Factories.HttpServiceFactory(() => sp.GetRequiredService<MainView>()));
-            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Tcp, (sp, _) => new Factories.TcpServiceFactory(() => sp.GetRequiredService<MainView>()));
-            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Hid, (sp, _) => new Factories.HidServiceFactory(() => sp.GetRequiredService<MainView>()));
-            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Scp, (sp, _) => new Factories.ScpServiceFactory(() => sp.GetRequiredService<MainView>()));
-            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Csv, (sp, _) => new Factories.CsvServiceFactory(() => sp.GetRequiredService<MainView>()));
-            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.FileObserver, (sp, _) => new Factories.FileObserverServiceFactory(() => sp.GetRequiredService<MainView>()));
-            services.AddKeyedTransient<Factories.IServiceFactory>(ServiceType.Heartbeat, (sp, _) => new Factories.HeartbeatServiceFactory(() => sp.GetRequiredService<MainView>()));
-            services.AddSingleton<IDictionary<ServiceType, Factories.IServiceFactory>>(sp =>
-            {
-                var factories = new Dictionary<ServiceType, Factories.IServiceFactory>();
-                foreach (ServiceType type in Enum.GetValues<ServiceType>())
-                {
-                    var factory = sp.GetKeyedService<Factories.IServiceFactory>(type);
-                    if (factory != null)
-                    {
-                        factories[type] = factory;
-                    }
-                }
-                return factories;
-            });
 
 
             // Load strongly typed settings
@@ -339,6 +287,443 @@ namespace DesktopApplicationTemplate.UI
             services.AddOptions<FileObserverServiceOptions>();
             services.AddOptions<CsvServiceOptions>();
             services.AddOptions<ScpServiceOptions>();
+        }
+
+        private static ServiceUiRegistration<ServiceListModel, Page> BuildMqttRegistration()
+        {
+            return new ServiceUiRegistration<ServiceListModel, Page>(
+                ServiceType.Mqtt,
+                (provider, optionsObj) =>
+                {
+                    var ctx = (ServiceFactoryOptions<MqttServiceOptions>)optionsObj;
+                    var mainView = provider.GetRequiredService<MainView>();
+                    var mainViewModel = provider.GetRequiredService<MainViewModel>();
+                    var newService = new ServiceListModel
+                    {
+                        DisplayName = $"MQTT - {ctx.Name}",
+                        Type = ServiceType.Mqtt,
+                        IsActive = false
+                    };
+
+                    mainView.GetOrCreateServicePage(newService);
+
+                    var options = ctx.Options;
+                    var resolved = provider.GetRequiredService<IOptions<MqttServiceOptions>>().Value;
+                    resolved.Host = options.Host;
+                    resolved.Port = options.Port;
+                    resolved.ClientId = options.ClientId;
+                    resolved.Username = options.Username;
+                    resolved.Password = options.Password;
+                    resolved.ConnectionType = options.ConnectionType;
+                    resolved.WillTopic = options.WillTopic;
+                    resolved.WillPayload = options.WillPayload;
+                    resolved.WillQualityOfService = options.WillQualityOfService;
+                    resolved.WillRetain = options.WillRetain;
+                    resolved.KeepAliveSeconds = options.KeepAliveSeconds;
+                    resolved.CleanSession = options.CleanSession;
+                    resolved.ReconnectDelay = options.ReconnectDelay;
+
+                    if (newService.ServicePage is MqttTagSubscriptionsView mqttView &&
+                        mqttView.DataContext is MqttTagSubscriptionsViewModel mqttVm)
+                    {
+                        newService.ActiveChanged += active =>
+                        {
+                            if (active)
+                            {
+                                _ = mqttVm.ConnectAsync();
+                            }
+                        };
+
+                        mqttVm.EditConnectionRequested += (_, _) =>
+                        {
+                            var editView = provider.GetRequiredService<MqttEditConnectionView>();
+                            if (editView.DataContext is MqttEditConnectionViewModel vm)
+                            {
+                                var opt = provider.GetRequiredService<IOptions<MqttServiceOptions>>().Value;
+                                vm.Load(opt);
+                                vm.HighlightMissingFields();
+                                vm.RequestClose += (_, _) =>
+                                {
+                                    if (newService.ServicePage != null)
+                                    {
+                                        mainView.ShowPage(newService.ServicePage);
+                                    }
+
+                                    _ = mainViewModel.SaveServicesAsync();
+                                };
+                            }
+
+                            mainView.ShowPage(editView);
+                        };
+                    }
+
+                    return newService;
+                },
+                provider => provider.GetRequiredService<MqttTagSubscriptionsView>(),
+                (provider, defaultName) =>
+                {
+                    var vm = provider.GetRequiredService<MqttCreateServiceViewModel>();
+                    vm.ServiceName = defaultName;
+                    var mainView = provider.GetRequiredService<MainView>();
+                    vm.ServiceSaved += (name, options) =>
+                        _ = mainView.AddServiceAsync(ServiceType.Mqtt,
+                            new ServiceFactoryOptions<MqttServiceOptions>(name, (MqttServiceOptions)options));
+                    vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
+                    var view = ActivatorUtilities.CreateInstance<MqttCreateServiceView>(provider, vm);
+                    vm.AdvancedConfigRequested += opts =>
+                    {
+                        var advVm = ActivatorUtilities.CreateInstance<MqttAdvancedConfigViewModel>(provider, opts);
+                        var advView = provider.GetRequiredService<MqttAdvancedConfigView>();
+                        advView.Initialize(advVm);
+                        advVm.Saved += _ => mainView.ShowPage(view);
+                        advVm.BackRequested += () => mainView.ShowPage(view);
+                        mainView.ShowPage(advView);
+                    };
+                    return view;
+                });
+        }
+
+        private static ServiceUiRegistration<ServiceListModel, Page> BuildFtpRegistration()
+        {
+            return new ServiceUiRegistration<ServiceListModel, Page>(
+                ServiceType.Ftp,
+                (provider, optionsObj) =>
+                {
+                    var ctx = (ServiceFactoryOptions<FtpServerOptions>)optionsObj;
+                    var mainView = provider.GetRequiredService<MainView>();
+                    var svc = new ServiceListModel
+                    {
+                        DisplayName = $"FTP Server - {ctx.Name}",
+                        Type = ServiceType.Ftp,
+                        IsActive = false,
+                        FtpOptions = ctx.Options
+                    };
+
+                    mainView.GetOrCreateServicePage(svc);
+
+                    var resolved = provider.GetRequiredService<IOptions<FtpServerOptions>>().Value;
+                    resolved.Port = ctx.Options.Port;
+                    resolved.RootPath = ctx.Options.RootPath;
+                    resolved.AllowAnonymous = ctx.Options.AllowAnonymous;
+                    resolved.Username = ctx.Options.Username;
+                    resolved.Password = ctx.Options.Password;
+
+                    return svc;
+                },
+                provider => provider.GetRequiredService<FTPServiceView>(),
+                (provider, defaultName) =>
+                {
+                    var vm = provider.GetRequiredService<FtpServerCreateViewModel>();
+                    vm.ServiceName = defaultName;
+                    var mainView = provider.GetRequiredService<MainView>();
+                    vm.ServiceSaved += (name, options) =>
+                        _ = mainView.AddServiceAsync(ServiceType.Ftp,
+                            new ServiceFactoryOptions<FtpServerOptions>(name, (FtpServerOptions)options));
+                    vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
+                    var view = ActivatorUtilities.CreateInstance<FtpServerCreateView>(provider, vm);
+                    vm.AdvancedConfigRequested += opts =>
+                    {
+                        var advVm = ActivatorUtilities.CreateInstance<FtpServerAdvancedConfigViewModel>(provider, opts);
+                        var advView = provider.GetRequiredService<FtpServerAdvancedConfigView>();
+                        advView.Initialize(advVm);
+                        advVm.Saved += _ => mainView.ShowPage(view);
+                        advVm.BackRequested += () => mainView.ShowPage(view);
+                        mainView.ShowPage(advView);
+                    };
+                    return view;
+                });
+        }
+
+        private static ServiceUiRegistration<ServiceListModel, Page> BuildHttpRegistration()
+        {
+            return new ServiceUiRegistration<ServiceListModel, Page>(
+                ServiceType.Http,
+                (provider, optionsObj) =>
+                {
+                    var ctx = (ServiceFactoryOptions<HttpServiceOptions>)optionsObj;
+                    var mainView = provider.GetRequiredService<MainView>();
+                    var svc = new ServiceListModel
+                    {
+                        DisplayName = $"{ServiceType.Http.ToLegacyString()} - {ctx.Name}",
+                        Type = ServiceType.Http,
+                        IsActive = false,
+                        HttpOptions = ctx.Options
+                    };
+
+                    mainView.GetOrCreateServicePage(svc);
+                    return svc;
+                },
+                provider => provider.GetRequiredService<HttpServiceView>(),
+                (provider, defaultName) =>
+                {
+                    var vm = provider.GetRequiredService<HttpCreateServiceViewModel>();
+                    vm.ServiceName = defaultName;
+                    var mainView = provider.GetRequiredService<MainView>();
+                    vm.ServiceSaved += (name, options) =>
+                        _ = mainView.AddServiceAsync(ServiceType.Http,
+                            new ServiceFactoryOptions<HttpServiceOptions>(name, (HttpServiceOptions)options));
+                    vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
+                    var view = ActivatorUtilities.CreateInstance<HttpCreateServiceView>(provider, vm);
+                    vm.AdvancedConfigRequested += opts =>
+                    {
+                        var advVm = ActivatorUtilities.CreateInstance<HttpAdvancedConfigViewModel>(provider, opts);
+                        var advView = provider.GetRequiredService<HttpAdvancedConfigView>();
+                        advView.Initialize(advVm);
+                        advVm.Saved += _ => mainView.ShowPage(view);
+                        advVm.BackRequested += () => mainView.ShowPage(view);
+                        mainView.ShowPage(advView);
+                    };
+                    return view;
+                });
+        }
+
+        private static ServiceUiRegistration<ServiceListModel, Page> BuildTcpRegistration()
+        {
+            return new ServiceUiRegistration<ServiceListModel, Page>(
+                ServiceType.Tcp,
+                (provider, optionsObj) =>
+                {
+                    var ctx = (ServiceFactoryOptions<TcpServiceOptions>)optionsObj;
+                    var mainView = provider.GetRequiredService<MainView>();
+                    var svc = new ServiceListModel
+                    {
+                        DisplayName = $"{ServiceType.Tcp.ToLegacyString()} - {ctx.Name}",
+                        Type = ServiceType.Tcp,
+                        IsActive = false,
+                        TcpOptions = ctx.Options
+                    };
+
+                    mainView.GetOrCreateServicePage(svc);
+                    return svc;
+                },
+                provider => provider.GetRequiredService<TcpServiceMessagesView>(),
+                (provider, defaultName) =>
+                {
+                    var vm = provider.GetRequiredService<TcpCreateServiceViewModel>();
+                    vm.ServiceName = defaultName;
+                    var mainView = provider.GetRequiredService<MainView>();
+                    vm.ServiceSaved += (name, options) =>
+                        _ = mainView.AddServiceAsync(ServiceType.Tcp,
+                            new ServiceFactoryOptions<TcpServiceOptions>(name, (TcpServiceOptions)options));
+                    vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
+                    return ActivatorUtilities.CreateInstance<TcpCreateServiceView>(provider, vm);
+                });
+        }
+
+        private static ServiceUiRegistration<ServiceListModel, Page> BuildHidRegistration()
+        {
+            return new ServiceUiRegistration<ServiceListModel, Page>(
+                ServiceType.Hid,
+                (provider, optionsObj) =>
+                {
+                    var ctx = (ServiceFactoryOptions<HidServiceOptions>)optionsObj;
+                    var mainView = provider.GetRequiredService<MainView>();
+                    var svc = new ServiceListModel
+                    {
+                        DisplayName = $"{ServiceType.Hid.ToLegacyString()} - {ctx.Name}",
+                        Type = ServiceType.Hid,
+                        IsActive = false,
+                        HidOptions = ctx.Options
+                    };
+
+                    mainView.GetOrCreateServicePage(svc);
+                    return svc;
+                },
+                provider => provider.GetRequiredService<HidViews>(),
+                (provider, defaultName) =>
+                {
+                    var vm = provider.GetRequiredService<HidCreateServiceViewModel>();
+                    vm.ServiceName = defaultName;
+                    var mainView = provider.GetRequiredService<MainView>();
+                    vm.ServiceSaved += (name, options) =>
+                        _ = mainView.AddServiceAsync(ServiceType.Hid,
+                            new ServiceFactoryOptions<HidServiceOptions>(name, (HidServiceOptions)options));
+                    vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
+                    var view = ActivatorUtilities.CreateInstance<HidCreateServiceView>(provider, vm);
+                    vm.AdvancedConfigRequested += opts =>
+                    {
+                        var advVm = ActivatorUtilities.CreateInstance<HidAdvancedConfigViewModel>(provider, opts);
+                        var advView = provider.GetRequiredService<HidAdvancedConfigView>();
+                        advView.Initialize(advVm);
+                        advVm.Saved += _ => mainView.ShowPage(view);
+                        advVm.BackRequested += () => mainView.ShowPage(view);
+                        mainView.ShowPage(advView);
+                    };
+                    return view;
+                });
+        }
+
+        private static ServiceUiRegistration<ServiceListModel, Page> BuildScpRegistration()
+        {
+            return new ServiceUiRegistration<ServiceListModel, Page>(
+                ServiceType.Scp,
+                (provider, optionsObj) =>
+                {
+                    var ctx = (ServiceFactoryOptions<ScpServiceOptions>)optionsObj;
+                    var mainView = provider.GetRequiredService<MainView>();
+                    var svc = new ServiceListModel
+                    {
+                        DisplayName = $"{ServiceType.Scp.ToLegacyString()} - {ctx.Name}",
+                        Type = ServiceType.Scp,
+                        IsActive = false,
+                        ScpOptions = ctx.Options
+                    };
+
+                    mainView.GetOrCreateServicePage(svc);
+                    return svc;
+                },
+                provider => provider.GetRequiredService<SCPServiceView>(),
+                (provider, defaultName) =>
+                {
+                    var vm = provider.GetRequiredService<ScpCreateServiceViewModel>();
+                    vm.ServiceName = defaultName;
+                    var mainView = provider.GetRequiredService<MainView>();
+                    vm.ServiceSaved += (name, options) =>
+                        _ = mainView.AddServiceAsync(ServiceType.Scp,
+                            new ServiceFactoryOptions<ScpServiceOptions>(name, (ScpServiceOptions)options));
+                    vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
+                    var view = ActivatorUtilities.CreateInstance<ScpCreateServiceView>(provider, vm);
+                    vm.AdvancedConfigRequested += opts =>
+                    {
+                        var advVm = ActivatorUtilities.CreateInstance<ScpAdvancedConfigViewModel>(provider, opts);
+                        var advView = provider.GetRequiredService<ScpAdvancedConfigView>();
+                        advView.Initialize(advVm);
+                        advVm.Saved += _ => mainView.ShowPage(view);
+                        advVm.BackRequested += () => mainView.ShowPage(view);
+                        mainView.ShowPage(advView);
+                    };
+                    return view;
+                });
+        }
+
+        private static ServiceUiRegistration<ServiceListModel, Page> BuildFileObserverRegistration()
+        {
+            return new ServiceUiRegistration<ServiceListModel, Page>(
+                ServiceType.FileObserver,
+                (provider, optionsObj) =>
+                {
+                    var ctx = (ServiceFactoryOptions<FileObserverServiceOptions>)optionsObj;
+                    var mainView = provider.GetRequiredService<MainView>();
+                    var svc = new ServiceListModel
+                    {
+                        DisplayName = $"{ServiceType.FileObserver.ToLegacyString()} - {ctx.Name}",
+                        Type = ServiceType.FileObserver,
+                        IsActive = false,
+                        FileObserverOptions = ctx.Options
+                    };
+
+                    mainView.GetOrCreateServicePage(svc);
+                    return svc;
+                },
+                provider => provider.GetRequiredService<FileObserverView>(),
+                (provider, defaultName) =>
+                {
+                    var vm = provider.GetRequiredService<FileObserverCreateServiceViewModel>();
+                    vm.ServiceName = defaultName;
+                    var mainView = provider.GetRequiredService<MainView>();
+                    vm.ServiceSaved += (name, options) =>
+                        _ = mainView.AddServiceAsync(ServiceType.FileObserver,
+                            new ServiceFactoryOptions<FileObserverServiceOptions>(name, (FileObserverServiceOptions)options));
+                    vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
+                    var view = ActivatorUtilities.CreateInstance<FileObserverCreateServiceView>(provider, vm);
+                    vm.AdvancedConfigRequested += opts =>
+                    {
+                        var advVm = ActivatorUtilities.CreateInstance<FileObserverAdvancedConfigViewModel>(provider, opts);
+                        var advView = provider.GetRequiredService<FileObserverAdvancedConfigView>();
+                        advView.Initialize(advVm);
+                        advVm.Saved += _ => mainView.ShowPage(view);
+                        advVm.BackRequested += () => mainView.ShowPage(view);
+                        mainView.ShowPage(advView);
+                    };
+                    return view;
+                });
+        }
+
+        private static ServiceUiRegistration<ServiceListModel, Page> BuildCsvRegistration()
+        {
+            return new ServiceUiRegistration<ServiceListModel, Page>(
+                ServiceType.Csv,
+                (provider, optionsObj) =>
+                {
+                    var ctx = (ServiceFactoryOptions<CsvServiceOptions>)optionsObj;
+                    var mainView = provider.GetRequiredService<MainView>();
+                    var svc = new ServiceListModel
+                    {
+                        DisplayName = $"{ServiceType.Csv.ToLegacyString()} - {ctx.Name}",
+                        Type = ServiceType.Csv,
+                        IsActive = false,
+                        CsvOptions = ctx.Options
+                    };
+
+                    mainView.GetOrCreateServicePage(svc);
+                    return svc;
+                },
+                provider => provider.GetRequiredService<CsvServiceView>(),
+                (provider, defaultName) =>
+                {
+                    var vm = provider.GetRequiredService<CsvServiceEditorViewModel>();
+                    vm.ServiceName = defaultName;
+                    var mainView = provider.GetRequiredService<MainView>();
+                    vm.ServiceSaved += (name, options) =>
+                        _ = mainView.AddServiceAsync(ServiceType.Csv,
+                            new ServiceFactoryOptions<CsvServiceOptions>(name, (CsvServiceOptions)options));
+                    vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
+                    var view = provider.GetRequiredService<CsvServiceEditorView>();
+                    view.Initialize(vm);
+                    vm.AdvancedConfigRequested += opts =>
+                    {
+                        var advVm = ActivatorUtilities.CreateInstance<CsvAdvancedConfigViewModel>(provider, opts);
+                        var advView = provider.GetRequiredService<CsvAdvancedConfigView>();
+                        advView.Initialize(advVm);
+                        advVm.Saved += _ => mainView.ShowPage(view);
+                        advVm.BackRequested += () => mainView.ShowPage(view);
+                        mainView.ShowPage(advView);
+                    };
+                    return view;
+                });
+        }
+
+        private static ServiceUiRegistration<ServiceListModel, Page> BuildHeartbeatRegistration()
+        {
+            return new ServiceUiRegistration<ServiceListModel, Page>(
+                ServiceType.Heartbeat,
+                (provider, optionsObj) =>
+                {
+                    var ctx = (ServiceFactoryOptions<HeartbeatServiceOptions>)optionsObj;
+                    var mainView = provider.GetRequiredService<MainView>();
+                    var svc = new ServiceListModel
+                    {
+                        DisplayName = $"{ServiceType.Heartbeat.ToLegacyString()} - {ctx.Name}",
+                        Type = ServiceType.Heartbeat,
+                        IsActive = false,
+                        HeartbeatOptions = ctx.Options
+                    };
+
+                    mainView.GetOrCreateServicePage(svc);
+                    return svc;
+                },
+                provider => provider.GetRequiredService<HeartbeatView>(),
+                (provider, defaultName) =>
+                {
+                    var vm = provider.GetRequiredService<HeartbeatCreateServiceViewModel>();
+                    vm.ServiceName = defaultName;
+                    var mainView = provider.GetRequiredService<MainView>();
+                    vm.ServiceSaved += (name, options) =>
+                        _ = mainView.AddServiceAsync(ServiceType.Heartbeat,
+                            new ServiceFactoryOptions<HeartbeatServiceOptions>(name, (HeartbeatServiceOptions)options));
+                    vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
+                    var view = ActivatorUtilities.CreateInstance<HeartbeatCreateServiceView>(provider, vm);
+                    vm.AdvancedConfigRequested += opts =>
+                    {
+                        var advVm = ActivatorUtilities.CreateInstance<HeartbeatAdvancedConfigViewModel>(provider, opts);
+                        var advView = provider.GetRequiredService<HeartbeatAdvancedConfigView>();
+                        advView.Initialize(advVm);
+                        advVm.Saved += _ => mainView.ShowPage(view);
+                        advVm.BackRequested += () => mainView.ShowPage(view);
+                        mainView.ShowPage(advView);
+                    };
+                    return view;
+                });
         }
 
         internal void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)

@@ -1,6 +1,6 @@
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI;
-using DesktopApplicationTemplate.UI.Factories;
+using DesktopApplicationTemplate.Services;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.Views;
 using Microsoft.Extensions.DependencyInjection;
@@ -36,8 +36,7 @@ public class ServiceFactoryTests
     public void Create_ReturnsServicePage(ServiceType type)
     {
         var provider = App.AppHost.Services;
-        var factory = provider.GetKeyedService<IServiceFactory>(type);
-        Assert.NotNull(factory);
+        var registry = provider.GetRequiredService<IServiceUiRegistry<ServiceListModel, Page>>();
 
         object ctx = type switch
         {
@@ -84,7 +83,12 @@ public class ServiceFactoryTests
             _ => throw new NotSupportedException()
         };
 
-        var svc = factory!.Create(ctx);
-        Assert.NotNull(svc.ServicePage);
+        var created = registry.TryCreateService(type, provider, ctx, out var svc);
+        Assert.True(created);
+        Assert.NotNull(svc);
+
+        var mainView = provider.GetRequiredService<MainView>();
+        var page = mainView.GetOrCreateServicePage(svc!);
+        Assert.NotNull(page);
     }
 }
