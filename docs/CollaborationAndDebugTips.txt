@@ -553,3 +553,62 @@ Effective Prompts / Instructions that worked: User request to expose more log te
 Decisions & Rationale: Improve log readability; document missing tooling and rely on CI for validation.
 Action Items: Rely on CI for verification.
 Related Commits/PRs:
+Related Commits/PRs: (this PR)
+
+[2025-08-13 17:52] Topic: Logo resource path fix
+Context: Navigation bar logo failed to render because image path was relative to the view folder.
+Observations: Using a root-relative path loads the embedded image correctly.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: Providing exact asset location.
+Decisions & Rationale: Use root-relative resource paths for WPF assets.
+Action Items: Ensure future asset references include leading slash.
+Related Commits/PRs: (this PR)
+
+[2025-08-13 18:09] Topic: CI runs on feature branches
+Context: Enabled GitHub Actions to execute tests on pushes to `feature/**` and `bugfix/**` branches.
+Observations: Codex can push code to trigger remote tests without local execution.
+Codex Limitations noticed: `dotnet test` cannot run `net8.0-windows` tests on Linux.
+Effective Prompts / Instructions that worked: Configuring push patterns and `workflow_dispatch`.
+Decisions & Rationale: Use GitHub-hosted runners to centralize validation.
+Action Items: Monitor CI runs for unexpected failures.
+Related Commits/PRs: (this PR)
+[2025-08-13 18:28] Topic: CI workflow consolidation
+Context: Unified multiple GitHub workflows into a single pipeline and added AGENTS instructions to review changelog and collaboration tips.
+Observations: Centralized CI reduces maintenance overhead.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: n/a
+Decisions & Rationale: Single pipeline with build, test, quality, and packaging jobs.
+Action Items: Monitor self-heal integration with new pipeline.
+Related Commits/PRs: (this PR)
+[2025-08-13 18:50] Topic: On-demand CI via /test comment
+Context: Enabled `/test` comment workflow and documented CI-only testing policy.
+Observations: CI can run without local test execution.
+Codex Limitations noticed: Tests cannot run on Linux container; rely on GitHub Actions.
+Effective Prompts / Instructions that worked: Using comment trigger pattern from user guidance.
+Decisions & Rationale: Centralize validation in CI and enforce via docs and PR template.
+Action Items: Ensure branch protection requires CI.
+Related Commits/PRs: (this PR)
+[2025-08-13 19:01] Topic: Async command refactor
+Context: Introduced AsyncRelayCommand and async script evaluation to prevent UI blocking.
+Observations: Async command simplifies long-running actions and avoids deadlocks.
+Codex Limitations noticed: PowerShell unavailable; tip appended manually.
+Effective Prompts / Instructions that worked: n/a
+Decisions & Rationale: Use AsyncRelayCommand for operations needing await without blocking.
+Action Items: Monitor for unhandled exceptions in async commands.
+Related Commits/PRs: (this PR)
+[2025-08-13 19:42] Topic: Remove unused classes
+Context: Cleaned up obsolete logging and template control types.
+Observations: Deleting `RichTextLogger` and installer `CustomControl1` simplified the codebase with no build impact.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: n/a
+Decisions & Rationale: Prefer removing stale classes to reduce maintenance and confusion.
+Action Items: Monitor builds for any lingering references.
+Related Commits/PRs: (this PR)
+[2025-08-26 14:44] Topic: Create service window icon layout
+Context: FTP service icon didn't create the service and icons overflowed outside the window.
+Observations: Wrapping icons within a fixed-width panel keeps them visible and clicking FTP now closes the window as expected.
+Codex Limitations noticed: none
+Effective Prompts / Instructions that worked: Provided explicit WrapPanel width and icon template guidance.
+Decisions & Rationale: Added width-constrained WrapPanel and converter-based icons for consistent selection behavior.
+Action Items: none
+Related Commits/PRs: (this PR)
