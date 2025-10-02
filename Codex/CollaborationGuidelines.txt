@@ -23,7 +23,7 @@ Reference Documents
 GitHub Workflow Notes
 ---------------------
 - Keep changes on the main branch and make atomic commits with descriptive messages.
-- After code updates, rely on GitHub Actions to run `dotnet test --settings tests.runsettings` (and other checks). Reference the CI results when drafting the PR, noting any limitations that prevented completion.
+- After code updates, rely on GitHub Actions to run the solution build and related checks. Reference the CI results when drafting the PR, noting any limitations that prevented completion.
 - Only committed code is evaluated, so ensure the working tree is clean before calling `make_pr`.
 
 Documentation Style
@@ -39,10 +39,8 @@ Draw.io Integration
 
 Unit Testing Insights
 ---------------------
-- Tests use xUnit with Moq for mocking and reside in `DesktopApplicationTemplate.Tests`.
-- Prefer isolated tests that validate one behavior and use expressive method names.
-- Configure dependencies through DI to keep tests focused and deterministic.
-- Monitor GitHub Actions for the `dotnet test` run and summarize the CI outcome in `Codex/docs/CollaborationAndDebugTips.txt`. If CI cannot complete, coordinate with a Windows collaborator for follow-up diagnostics.
+- The solution currently ships without automated test projects. Coordinate with maintainers before introducing new tests so the CI process and documentation can be updated alongside the code.
+- If tests return in the future, prefer isolated xUnit cases with descriptive method names and configure dependencies through DI to keep them focused and deterministic.
 
 Miscellaneous Tips
 ------------------
