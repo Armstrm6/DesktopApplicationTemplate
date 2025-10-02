@@ -1,34 +1,22 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Windows.Input;
+using DesktopApplicationTemplate.Core.Services.Protocols.Csv;
 using DesktopApplicationTemplate.UI.Services;
 
 namespace DesktopApplicationTemplate.UI.ViewModels.Csv
 {
-    public class CsvColumnConfig
-    {
-        public string Name { get; set; } = "Column";
-        public string Service { get; set; } = string.Empty;
-        public string Script { get; set; } = string.Empty;
-    }
-
-    public class CsvConfiguration
-    {
-        public string FileNamePattern { get; set; } = "output_{index}.csv";
-        public string OutputDirectory { get; set; } = string.Empty;
-        public ObservableCollection<CsvColumnConfig> Columns { get; set; } = new();
-    }
-
     public class CsvViewerViewModel : ViewModelBase
     {
         private readonly string _configPath;
         private readonly IFileDialogService _fileDialog;
 
-        public CsvConfiguration Configuration { get; private set; } = new();
-        public CsvColumnConfig? SelectedColumn { get; set; }
+        public CsvConfiguration Configuration { get; private set; } = CreateDefaultConfiguration();
+        public CsvColumnDefinition? SelectedColumn { get; set; }
 
         public ICommand AddColumnCommand { get; }
         public ICommand RemoveColumnCommand { get; }
@@ -46,7 +34,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Csv
             _fileDialog = fileDialog;
             _configPath = configPath ?? "csv_config.json";
             Load();
-            AddColumnCommand = new RelayCommand(() => Configuration.Columns.Add(new CsvColumnConfig()));
+            AddColumnCommand = new RelayCommand(() => Configuration.Columns.Add(new CsvColumnDefinition()));
             RemoveColumnCommand = new RelayCommand(() => { if (SelectedColumn != null) Configuration.Columns.Remove(SelectedColumn); });
             SaveCommand = new RelayCommand(Save);
             CloseCommand = new RelayCommand(() => RequestClose?.Invoke());
@@ -63,9 +51,14 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Csv
                 var json = System.IO.File.ReadAllText(_configPath);
                 if (!string.IsNullOrWhiteSpace(json))
                 {
-                    Configuration = JsonSerializer.Deserialize<CsvConfiguration>(json) ?? new CsvConfiguration();
+                    Configuration = JsonSerializer.Deserialize<CsvConfiguration>(json) ?? CreateDefaultConfiguration();
+                    EnsureObservableColumns();
+                    OnPropertyChanged(nameof(Configuration));
+                    return;
                 }
             }
+
+            EnsureObservableColumns();
         }
 
         public void Save()
@@ -79,12 +72,14 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Csv
                 {
                     FileNamePattern = Configuration.FileNamePattern,
                     OutputDirectory = Configuration.OutputDirectory,
-                    Columns = new ObservableCollection<CsvColumnConfig>(Configuration.Columns.Select(c => new CsvColumnConfig
-                    {
-                        Name = c.Name,
-                        Service = c.Service,
-                        Script = c.Script
-                    }))
+                    Columns = Configuration.Columns
+                        .Select(c => new CsvColumnDefinition
+                        {
+                            Name = c.Name,
+                            Service = c.Service,
+                            Script = c.Script
+                        })
+                        .ToList()
                 };
 
                 var options = new JsonSerializerOptions
@@ -122,5 +117,24 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Csv
         }
 
         // Uses OnPropertyChanged from ViewModelBase
+
+        private static CsvConfiguration CreateDefaultConfiguration()
+        {
+            return new CsvConfiguration
+            {
+                Columns = new ObservableCollection<CsvColumnDefinition>()
+            };
+        }
+
+        private void EnsureObservableColumns()
+        {
+            if (Configuration.Columns is ObservableCollection<CsvColumnDefinition>)
+            {
+                return;
+            }
+
+            var columns = Configuration.Columns ?? new List<CsvColumnDefinition>();
+            Configuration.Columns = new ObservableCollection<CsvColumnDefinition>(columns);
+        }
     }
 }

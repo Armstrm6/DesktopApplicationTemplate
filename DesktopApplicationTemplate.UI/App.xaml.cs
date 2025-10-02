@@ -191,7 +191,9 @@ namespace DesktopApplicationTemplate.UI
                 .EnableAnonymousAuthentication());
             services.AddSingleton<IFtpServerService, DesktopApplicationTemplate.Services.FtpServerService>();
             services.AddSingleton<CsvViewerViewModel>();
-            services.AddSingleton<CsvService>();
+            services.AddSingleton<ICsvService, CsvService>();
+            services.AddSingleton<ICsvOutput, FileCsvOutput>();
+            services.AddSingleton<CsvServiceAdapter>();
             services.AddSingleton<CsvServiceView>();
             services.AddSingleton<SettingsViewModel>();
             services.AddSingleton<IServiceUiRegistry<ServiceListModel, Page>>(_ =>
