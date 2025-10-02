@@ -314,6 +314,7 @@
 - Clarified that new notes should extend existing topic blocks without repeating timestamps.
 - Removed Codex-specific tests and categories, eliminating the `CodexSafe` trait and custom `TestCategoryAttribute`.
 - Setup script now runs only the primary test suite after removing the Codex test project.
+- Removed `DesktopApplicationTemplate.Core.Tests`, `DesktopApplicationTemplate.Tests`, `TestCommon`, and coverage configuration to streamline the solution and CI pipeline.
 - Removed Windows desktop runtime checks from tests so they run when Visual Studio provides the runtime.
 - Core unit test project targets cross-platform `net8.0` for broader compatibility.
 - Removed WPF workload installation steps; WPF ships with the Windows .NET SDK.

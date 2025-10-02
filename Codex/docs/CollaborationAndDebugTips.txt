@@ -18,6 +18,15 @@ Decisions & Rationale: Keep Codex changes human-directed and ensure collaborator
 Action Items: 1) Share CI logs manually whenever pipelines fail.
 Related Commits/PRs:
 
+[2025-10-06 12:00] Topic: Test infrastructure retirement
+Context: Removed DesktopApplicationTemplate.Core.Tests, DesktopApplicationTemplate.Tests, TestCommon, and the shared test configuration.
+Observations: Deleted the test projects, coverage settings, and `tests.runsettings` to reflect the trimmed solution. Updated repository docs and workflows to reference build verification only.
+Codex Limitations noticed: dotnet CLI remains unavailable in the container, so validation still depends on CI builds.
+Effective Prompts / Instructions that worked: User request to remove unused test assets and simplify CI triggers.
+Decisions & Rationale: Streamline the solution by dropping unused test infrastructure and associated configuration.
+Action Items: None.
+Related Commits/PRs:
+
 [2025-08-27 04:05] Topic: Documentation restructuring
 Context: Grouped changelog entries under feature headings and clarified topic-based logging.
 Observations: CHANGELOG now organizes items by feature; collaboration tips emphasize one block per topic.
