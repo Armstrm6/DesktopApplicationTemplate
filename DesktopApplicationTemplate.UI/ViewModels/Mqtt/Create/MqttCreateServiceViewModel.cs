@@ -1,5 +1,5 @@
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Core.Services.Protocols.Mqtt;
 
 namespace DesktopApplicationTemplate.UI.ViewModels.Mqtt.Create;
 

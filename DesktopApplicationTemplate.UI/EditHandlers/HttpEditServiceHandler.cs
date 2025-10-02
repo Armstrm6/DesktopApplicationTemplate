@@ -1,4 +1,5 @@
 using System;
+using DesktopApplicationTemplate.Core.Services.Protocols.Http;
 using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.ViewModels.Http.Edit;

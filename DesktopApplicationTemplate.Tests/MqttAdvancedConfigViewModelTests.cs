@@ -1,6 +1,6 @@
 using System.IO;
 using System.Linq;
-using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Core.Services.Protocols.Mqtt;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.ViewModels.Mqtt.Advanced;
 using MQTTnet.Protocol;

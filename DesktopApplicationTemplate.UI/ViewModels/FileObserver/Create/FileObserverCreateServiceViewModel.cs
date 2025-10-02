@@ -1,6 +1,7 @@
 using System;
 using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Core.Services.Protocols.FileObserver;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Services;
 

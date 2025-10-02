@@ -1,3 +1,10 @@
+using DesktopApplicationTemplate.Core.Services.Protocols.Csv;
+using DesktopApplicationTemplate.Core.Services.Protocols.FileObserver;
+using DesktopApplicationTemplate.Core.Services.Protocols.Ftp;
+using DesktopApplicationTemplate.Core.Services.Protocols.Heartbeat;
+using DesktopApplicationTemplate.Core.Services.Protocols.Http;
+using DesktopApplicationTemplate.Core.Services.Protocols.Mqtt;
+using DesktopApplicationTemplate.Core.Services.Protocols.Tcp;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.EditHandlers;
 using DesktopApplicationTemplate.Core.Services;
@@ -218,12 +225,12 @@ namespace DesktopApplicationTemplate.UI
             services.AddTransient<ServiceEditViewModelBase<TcpServiceOptions>, TcpEditServiceViewModel>();
             services.AddTransient<FtpServerCreateView>();
             services.AddTransient<FtpServerCreateViewModel>();
-            services.AddTransient<ServiceCreateViewModelBase<DesktopApplicationTemplate.UI.Services.FtpServerOptions>, FtpServerCreateViewModel>();
+            services.AddTransient<ServiceCreateViewModelBase<FtpServerOptions>, FtpServerCreateViewModel>();
             services.AddTransient<FtpServerAdvancedConfigView>();
             services.AddTransient<FtpServerAdvancedConfigViewModel>();
             services.AddTransient<FtpServerEditView>();
             services.AddTransient<FtpServerEditViewModel>();
-            services.AddTransient<ServiceEditViewModelBase<DesktopApplicationTemplate.UI.Services.FtpServerOptions>, FtpServerEditViewModel>();
+            services.AddTransient<ServiceEditViewModelBase<FtpServerOptions>, FtpServerEditViewModel>();
             services.AddTransient<HttpCreateServiceView>();
             services.AddTransient<HttpCreateServiceViewModel>();
             services.AddTransient<ServiceCreateViewModelBase<HttpServiceOptions>, HttpCreateServiceViewModel>();
@@ -280,7 +287,7 @@ namespace DesktopApplicationTemplate.UI
             services.Configure<AppSettings>(configuration.GetSection("AppSettings"));
             services.Configure<MqttServiceOptions>(configuration.GetSection("MqttService"));
             services.Configure<TcpServiceOptions>(configuration.GetSection("TcpService"));
-            services.AddOptions<DesktopApplicationTemplate.UI.Services.FtpServerOptions>()
+            services.AddOptions<FtpServerOptions>()
                 .BindConfiguration("FtpServer");
             services.AddOptions<HidServiceOptions>();
             services.AddOptions<HeartbeatServiceOptions>();

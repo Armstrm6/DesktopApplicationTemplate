@@ -1,6 +1,7 @@
+using DesktopApplicationTemplate.Core.Services.Protocols.Http;
 using DesktopApplicationTemplate.Models;
-using DesktopApplicationTemplate.UI;
 using DesktopApplicationTemplate.Services;
+using DesktopApplicationTemplate.UI;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.ViewModels.Http.Create;

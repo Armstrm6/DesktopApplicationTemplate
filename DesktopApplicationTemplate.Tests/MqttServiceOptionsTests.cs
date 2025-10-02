@@ -1,4 +1,4 @@
-using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Core.Services.Protocols.Mqtt;
 using Xunit;
 
 namespace DesktopApplicationTemplate.Tests;
