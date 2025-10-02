@@ -77,7 +77,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public IEnumerable<LogEntry> DisplayLogs => LogViewModel.DisplayLogs;
 
-        private readonly CsvService _csvService;
+        private readonly ICsvService? _csvService;
         private readonly ILoggingService? _logger;
         private readonly INetworkConfigurationService _networkService;
         private readonly IServiceUiRegistry _uiRegistry;
@@ -88,7 +88,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public NetworkConfigurationViewModel NetworkConfig { get; }
 
         public MainViewModel(
-            CsvService csvService,
+            IEnumerable<ICsvService> csvServices,
             NetworkConfigurationViewModel networkConfig,
             INetworkConfigurationService networkService,
             IServiceUiRegistry uiRegistry,
@@ -98,7 +98,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             ILoggingService? logger = null,
             string? servicesFilePath = null)
         {
-            _csvService = csvService;
+            _csvService = csvServices?.FirstOrDefault();
             _networkService = networkService;
             _logger = logger;
             NetworkConfig = networkConfig;
@@ -253,7 +253,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 var index = Services.IndexOf(SelectedService);
                 SelectedService.AddLog("Service removed", WpfBrushes.Red);
                 if (SelectedService.Type != ServiceType.Csv)
-                    _csvService.RemoveColumnsForService(SelectedService.DisplayName);
+                {
+                    _csvService?.RemoveColumnsForService(SelectedService.DisplayName);
+                }
                 SelectedService.LogAdded -= OnServiceLogAdded;
                 SelectedService.ActiveChanged -= OnServiceActiveChanged;
                 Services.Remove(SelectedService);
@@ -342,7 +344,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 svc.ActiveChanged += OnServiceActiveChanged;
                 if (svc.Type != ServiceType.Csv)
                 {
-                    _csvService.EnsureColumnsForService(svc.DisplayName);
+                    _csvService?.EnsureColumnsForService(svc.DisplayName);
                 }
 
                 Services.Add(svc);
@@ -456,7 +458,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             {
                 try
                 {
-                    _csvService.RecordLog(svc.DisplayName, entry.Message);
+                    _csvService?.RecordLog(svc.DisplayName, entry.Message);
                 }
                 catch
                 {

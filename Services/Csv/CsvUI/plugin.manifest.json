@@ -1,0 +1,12 @@
+{
+  "id": "DesktopApplicationTemplate.Csv.UI",
+  "name": "CSV Service UI",
+  "version": "1.0.0",
+  "entryAssembly": "DesktopApplicationTemplate.Csv.UI.dll",
+  "serviceAssemblies": [
+    "DesktopApplicationTemplate.Csv.UI.dll"
+  ],
+  "probingPaths": [
+    "libs"
+  ]
+}
