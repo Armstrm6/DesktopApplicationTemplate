@@ -186,7 +186,7 @@ namespace DesktopApplicationTemplate.UI
             services.AddFtpServer(builder => builder
                 .UseDotNetFileSystem()
                 .EnableAnonymousAuthentication());
-            services.AddSingleton<IFtpServerService, DesktopApplicationTemplate.Services.FtpServerService>();
+            services.AddSingleton<IFtpServerService, FtpServerService>();
             services.AddSingleton<CsvViewerViewModel>();
             services.AddSingleton<CsvService>();
             services.AddSingleton<CsvServiceView>();

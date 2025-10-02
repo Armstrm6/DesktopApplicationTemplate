@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Core.Services.Protocols.Ftp;
 using DesktopApplicationTemplate.UI.Helpers;
 
 namespace DesktopApplicationTemplate.UI.ViewModels.Ftp
@@ -36,6 +37,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Ftp
 
             _startCommand = new AsyncRelayCommand(StartAsync, () => !IsServerRunning);
             _stopCommand = new AsyncRelayCommand(StopAsync, () => IsServerRunning);
+
+            IsServerRunning = _ftpServerService.IsRunning;
+            ConnectedClients = _ftpServerService.ConnectedClients;
         }
 
         /// <summary>Files uploaded to the server.</summary>
