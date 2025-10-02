@@ -13,7 +13,7 @@
         </ResourceDictionary>
     </Window.Resources>
     <Grid>
-        <toolkit:ColorCanvas x:Name="ColorCanvas"/>
+        <toolkit:ColorPicker x:Name="ColorPicker" />
         <Button Content="OK" Width="80" HorizontalAlignment="Right" VerticalAlignment="Bottom"
                 Margin="0,0,10,10" Click="Ok_Click"/>
     </Grid>

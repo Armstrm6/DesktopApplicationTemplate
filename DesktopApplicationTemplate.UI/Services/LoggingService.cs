@@ -20,8 +20,8 @@ namespace DesktopApplicationTemplate.UI.Services
             get => _minimumLevel;
             set
             {
+                if (_minimumLevel == value) return;
                 _minimumLevel = value;
-                Log($"Minimum level changed to {value}", LogLevel.Debug);
                 UpdateLogDisplay();
             }
         }
@@ -32,6 +32,7 @@ namespace DesktopApplicationTemplate.UI.Services
         {
             _richTextLogger = richTextLogger;
             _logFilePath = logFilePath;
+            Reload();
         }
 
         public void Log(string message, LogLevel level)
@@ -55,14 +56,70 @@ namespace DesktopApplicationTemplate.UI.Services
             _ = WriteToFileAsync(entry.Message + Environment.NewLine);
         }
 
-        private static System.Windows.Media.Brush LevelToColor(LogLevel level) => level switch
+        private static string LevelToColor(LogLevel level) => level switch
         {
-            LogLevel.Debug => System.Windows.Media.Brushes.Black,
-            LogLevel.Warning => System.Windows.Media.Brushes.Orange,
-            LogLevel.Error => System.Windows.Media.Brushes.Red,
-            LogLevel.Critical => System.Windows.Media.Brushes.DarkRed,
-            _ => System.Windows.Media.Brushes.Black
+            LogLevel.Debug => "#000000",
+            LogLevel.Information => "#0000FF",
+            LogLevel.Warning => "#FFA500",
+            LogLevel.Error => "#FF0000",
+            LogLevel.Critical => "#8B0000",
+            _ => "#000000"
         };
+
+        public void Reload()
+        {
+            _logEntries.Clear();
+            try
+            {
+                if (File.Exists(_logFilePath))
+                {
+                    foreach (var line in File.ReadLines(_logFilePath))
+                    {
+                        if (string.IsNullOrWhiteSpace(line))
+                            continue;
+                        var entry = ParseLine(line);
+                        _logEntries.Add(entry);
+                    }
+                }
+            }
+            catch
+            {
+                // ignore loading errors
+            }
+
+            UpdateLogDisplay();
+            foreach (var entry in _logEntries.Where(e => e.Level >= MinimumLevel))
+            {
+                LogAdded?.Invoke(entry);
+            }
+        }
+
+        private static LogEntry ParseLine(string line)
+        {
+            var level = LogLevel.Debug;
+            try
+            {
+                var firstClose = line.IndexOf(']');
+                var secondOpen = line.IndexOf('[', firstClose + 1);
+                var secondClose = line.IndexOf(']', secondOpen + 1);
+                if (secondOpen >= 0 && secondClose > secondOpen)
+                {
+                    var levelText = line.Substring(secondOpen + 1, secondClose - secondOpen - 1);
+                    Enum.TryParse(levelText, out level);
+                }
+            }
+            catch
+            {
+                // ignore parsing errors
+            }
+
+            return new LogEntry
+            {
+                Message = line,
+                Level = level,
+                Color = LevelToColor(level)
+            };
+        }
 
         private void UpdateLogDisplay()
         {

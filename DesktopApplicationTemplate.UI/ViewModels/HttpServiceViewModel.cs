@@ -5,7 +5,10 @@ using System.Text;
 using System.Windows.Input;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Linq;
+using System.IO;
 using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Helpers;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
@@ -92,7 +95,41 @@ public class HttpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel
         public ICommand SendCommand { get; }
         public ICommand SaveCommand { get; }
 
-        public ILoggingService? Logger { get; set; }
+        private ILoggingService? _logger;
+        public ILoggingService? Logger
+        {
+            get => _logger;
+            set
+            {
+                if (_logger == value) return;
+                if (_logger is not null)
+                    _logger.LogAdded -= OnLogAdded;
+                _logger = value;
+                if (_logger is not null)
+                    _logger.LogAdded += OnLogAdded;
+            }
+        }
+
+        public ObservableCollection<LogEntry> Logs { get; } = new();
+
+        private LogLevel _logLevelFilter = LogLevel.Debug;
+        public LogLevel LogLevelFilter
+        {
+            get => _logLevelFilter;
+            set
+            {
+                if (_logLevelFilter == value) return;
+                _logLevelFilter = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(DisplayLogs));
+            }
+        }
+
+        public IEnumerable<LogEntry> DisplayLogs => Logs.Where(l => l.Level >= LogLevelFilter);
+
+        public ICommand RefreshLogCommand { get; }
+        public ICommand ExportLogCommand { get; }
+        public ICommand ClearLogCommand { get; }
 
         /// <summary>
         /// Optional handler used for testing to intercept HTTP requests.
@@ -104,7 +141,7 @@ public class HttpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel
         public HttpServiceViewModel(SaveConfirmationHelper saveHelper)
         {
             _saveHelper = saveHelper;
-            SendCommand = new RelayCommand(async () => await SendRequestAsync());
+            SendCommand = new AsyncRelayCommand(SendRequestAsync);
             AddHeaderCommand = new RelayCommand(() => Headers.Add(new HeaderItem()));
             RemoveHeaderCommand = new RelayCommand(() =>
             {
@@ -112,6 +149,9 @@ public class HttpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel
                     Headers.Remove(SelectedHeader);
             });
             SaveCommand = new RelayCommand(Save);
+            RefreshLogCommand = new RelayCommand(() => OnPropertyChanged(nameof(DisplayLogs)));
+            ExportLogCommand = new RelayCommand(ExportLogs);
+            ClearLogCommand = new RelayCommand(ClearLogs);
         }
 
         private void Save() => _saveHelper.Show();
@@ -170,6 +210,22 @@ public class HttpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel
                 Logger?.Log("SendRequestAsync finished", LogLevel.Debug);
             }
         }
+
+        private void ClearLogs()
+        {
+            Logs.Clear();
+            OnPropertyChanged(nameof(DisplayLogs));
+            Logger?.Log("HTTP logs cleared", LogLevel.Debug);
+        }
+
+        private void ExportLogs()
+        {
+            var path = Path.Combine(Path.GetTempPath(), "http_logs.txt");
+            File.WriteAllLines(path, DisplayLogs.Select(l => l.Message));
+            Logger?.Log($"HTTP logs exported to {path}", LogLevel.Debug);
+        }
+
+        private void OnLogAdded(LogEntry entry) => Logs.Insert(0, entry);
 
         // OnPropertyChanged is inherited from ViewModelBase
     }

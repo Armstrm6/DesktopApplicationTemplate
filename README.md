@@ -4,11 +4,16 @@
 
 This repository contains a basic WPF UI application, a Windows Service and unit tests.
 
+See `CollaborationGuidelines.txt` for tips on working with the repository. A running log of past collaboration decisions lives in `docs/CollaborationAndDebugTips.txt`.
+
 ## Prerequisites
 
 - [.NET 8 SDK](https://dotnet.microsoft.com/download) (8.0.404)
 - [Git LFS](https://git-lfs.com) for large binary assets
 - Windows OS is required to run the WPF UI and service projects.
+- WPF is included with the Windows .NET SDK; no separate workload installation is required on Windows.
+
+Ensure the 8.0.404 SDK is installed so the pinned `global.json` version resolves correctly.
 
 ### Git LFS
 
@@ -28,13 +33,21 @@ repository root will automatically respect this setting.
 
 ## Initial setup
 
-After cloning the repository, run the setup script to configure the Git
-hooks and [Git LFS](https://git-lfs.com/). The script also restores
-dependencies, builds the solution, and executes the unit tests:
+After cloning the repository:
 
-```bash
-./setup.sh
-```
+- Run a full build and test cycle:
+
+  ```bash
+  dotnet restore
+  dotnet build DesktopApplicationTemplate.sln
+  dotnet test --settings tests.runsettings
+  ```
+
+- Run the setup script to configure the Git hooks and [Git LFS](https://git-lfs.com/):
+
+  ```bash
+  ./setup.sh
+  ```
 
 Run the script any time the project dependencies or hooks need to be refreshed.
 

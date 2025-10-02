@@ -3,13 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
         mc:Ignorable="d">
-
-    <Page.Resources>
-        <local:ServiceTypeToIconConverter x:Key="ServiceTypeToIconConverter" />
-    </Page.Resources>
-
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -27,12 +21,19 @@
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Button Tag="{Binding}" Click="ServiceButton_Click" Margin="5" Width="100" Height="100">
-                        <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                            <TextBlock Text="{Binding Converter={StaticResource ServiceTypeToIconConverter}}" FontSize="32" HorizontalAlignment="Center"/>
-                            <TextBlock Text="{Binding}" HorizontalAlignment="Center" Margin="0,5,0,0"/>
-                        </StackPanel>
-                    </Button>
+                    <StackPanel Margin="10" HorizontalAlignment="Center">
+                        <Button Width="80" Height="80" Click="ServiceType_Click">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border CornerRadius="40" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                            <TextBlock Text="{Binding Icon}" FontSize="40" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Button>
+                        <TextBlock Text="{Binding DisplayText}" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                    </StackPanel>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>

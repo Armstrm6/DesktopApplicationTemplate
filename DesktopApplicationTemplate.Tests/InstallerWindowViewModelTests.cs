@@ -9,8 +9,6 @@ namespace DesktopApplicationTemplate.Tests;
 public class InstallerWindowViewModelTests
 {
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void InstallCommand_LogsAndRaisesEvent()
     {
         var logger = new Mock<ILoggingService>();
@@ -27,8 +25,6 @@ public class InstallerWindowViewModelTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void UninstallCommand_LogsAndRaisesEvent()
     {
         var temp = Path.Combine(Path.GetTempPath(), "installer_test" + Path.GetRandomFileName());
@@ -48,8 +44,6 @@ public class InstallerWindowViewModelTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public void CheckUpdatesCommand_LogsAndRaisesEvent()
     {
         var logger = new Mock<ILoggingService>();

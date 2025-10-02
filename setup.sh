@@ -8,20 +8,19 @@ git config core.hooksPath .githooks
 git lfs install
 
 dotnet restore
+# Determine the host operating system
+OS_FAMILY=""
+if [ -n "$OSTYPE" ]; then
+    case "$OSTYPE" in
+        msys*|cygwin*|win32*) OS_FAMILY="Windows" ;;
+        *) OS_FAMILY="" ;;
+    esac
+fi
 
-if [ -z "$SKIP_WORKLOAD" ]; then
-    echo "Checking for windowsdesktop workload..."
-    if ! dotnet workload list | grep -q windowsdesktop; then
-        echo "Installing windowsdesktop workload..."
-        dotnet workload install windowsdesktop
-    else
-        echo "windowsdesktop workload already installed."
-    fi
-else
-    echo "SKIP_WORKLOAD set - skipping windowsdesktop workload installation." 
+if [ -z "$OS_FAMILY" ]; then
+    OS_FAMILY=$(dotnet --info | grep -m 1 '^OS Name:' | cut -d: -f2 | xargs)
 fi
 dotnet build DesktopApplicationTemplate.sln
 dotnet test DesktopApplicationTemplate.Tests/DesktopApplicationTemplate.Tests.csproj
-dotnet test DesktopApplicationTemplate.Tests.Codex/DesktopApplicationTemplate.Tests.Codex.csproj
 
 echo "Setup complete."

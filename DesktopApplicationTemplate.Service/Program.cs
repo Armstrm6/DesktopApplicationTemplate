@@ -5,6 +5,8 @@ using System.Linq;
 using System;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Service.Services;
+using FubarDev.FtpServer;
+using FubarDev.FtpServer.FileSystem.DotNet;
 
 namespace DesktopApplicationTemplate.Service
 {
@@ -18,16 +20,26 @@ namespace DesktopApplicationTemplate.Service
         public static IHostBuilder CreateHostBuilder(string[] args)
         {
             bool runAsService = !args.Contains("--console");
-            var builder = Host.CreateDefaultBuilder(args);
+            var builder = Host.CreateDefaultBuilder(args)
+                .ConfigureLogging(logging => logging.AddConsole().AddDebug());
             if (runAsService && OperatingSystem.IsWindows())
             {
-                builder = builder.UseWindowsService(); // Enables Windows Service behavior
+                builder = builder.UseWindowsService(options =>
+                {
+                    options.ServiceName = WindowsServiceInfo.ServiceName;
+                }); // Enables Windows Service behavior
             }
 
             return builder.ConfigureServices((hostContext, services) =>
             {
                 services.AddHostedService<Worker>(); // register the background service
-                services.AddSingleton<ILoggingService, LoggingService>();
+                services.AddSingleton<IServiceRule, ServiceRule>();
+                services.AddTransient(typeof(IServiceScreen<>), typeof(ServiceScreen<>));
+                services.AddSingleton<IFileSearchService, FileSearchService>();
+                services.AddFtpServer(builder => builder
+                    .UseDotNetFileSystem()
+                    .EnableAnonymousAuthentication());
+                services.AddSingleton<IFtpServerService, FtpServerService>();
             });
         }
     }

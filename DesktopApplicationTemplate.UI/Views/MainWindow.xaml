@@ -5,8 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DesktopApplicationTemplate.UI.Views"
         xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
+        xmlns:sys="clr-namespace:System.Windows;assembly=PresentationFramework"
+        xmlns:behaviors="clr-namespace:DesktopApplicationTemplate.UI.Behaviors"
+
+        xmlns:shared="clr-namespace:DesktopApplicationTemplate.UI.Views.Shared"
         mc:Ignorable="d"
-        Title="MainView" Width="800" Height="600"
+        Title="MainView"
+        MinWidth="800" MinHeight="600" Height="600"
+        SizeToContent="Width"
+        MaxHeight="{Binding Source={x:Static sys:SystemParameters.WorkArea}, Path=Height}"
         Style="{DynamicResource BubblyWindowStyle}"
         Background="#99FFFF" BorderBrush="#80FF00" BorderThickness="13">
 
@@ -26,13 +33,17 @@
         </Grid.RowDefinitions>
 
         <!-- Navigation Bar -->
-        <Grid Grid.Row="0" Background="#00C2C2">
+        <Grid x:Name="HeaderBar"
+              Grid.Row="0"
+             Background="#00C2C2"
+             MouseLeftButtonDown="HeaderBar_MouseLeftButtonDown">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="Peak Analytics IoT Application" FontSize="24" FontWeight="Bold" VerticalAlignment="Center" Margin="10,0,0,0"/>
             <Button Grid.Column="2" Content="_" Width="40" Height="40" Margin="0,25,10,25" Command="SystemCommands.MinimizeWindowCommand"/>
             <Button Grid.Column="3" Content="X" Width="40" Height="40" Margin="0,25,10,25" Command="SystemCommands.CloseWindowCommand"/>
         </Grid>
@@ -52,9 +63,17 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,5">
+                    <TextBlock VerticalAlignment="Center" Margin="0,0,5,0">
+                        Active Services: <Run Text="{Binding CurrentActiveServices, Mode=OneWay}"/>/<Run Text="{Binding ServicesCreated, Mode=OneWay}"/>
+                    </TextBlock>
                     <Button Content="+" Width="30" Click="AddService_Click" Background="#E6E6E6" Foreground="#333333"/>
                     <Button Content="-" Width="30" Margin="5,0,0,0" Click="RemoveService_Click" Background="#E6E6E6" Foreground="#333333"/>
-                    <Button Content="☰" Width="30" Margin="5,0,0,0" Click="OpenFilter_Click" Background="#E6E6E6" Foreground="#333333"/>
+                    <Button x:Name="FilterButton" Content="☰" Width="30" Margin="5,0,0,0" Click="FilterButton_Click" Background="#E6E6E6" Foreground="#333333"/>
+                    <Popup x:Name="FilterPopup" PlacementTarget="{Binding ElementName=FilterButton}" Placement="Bottom" StaysOpen="False" DataContext="{Binding DataContext, ElementName=FilterButton}">
+                        <Border Background="White" CornerRadius="5" Padding="10">
+                            <local:FilterPanel DataContext="{Binding Filters}"/>
+                        </Border>
+                    </Popup>
                 </StackPanel>
                 <Border Grid.Row="1" Background="#E6E6E6" CornerRadius="3" Padding="5">
                     <ListBox x:Name="ServiceList" ItemsSource="{Binding FilteredServices}" SelectedItem="{Binding SelectedService}"
@@ -70,7 +89,9 @@
                                     <Border CornerRadius="8" BorderBrush="Gray" BorderThickness="1" Padding="5" Margin="2">
                                         <Border.ContextMenu>
                                             <ContextMenu>
-                                                <MenuItem Header="Edit Service" Click="EditServiceMenu_Click" />
+                                                <MenuItem Header="Edit Service"
+                                                          Command="{Binding DataContext.EditServiceCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                          CommandParameter="{Binding}" />
                                                 <MenuItem Header="Rename Service" Click="RenameServiceMenu_Click" />
                                                 <MenuItem Header="Delete Service" Click="DeleteServiceMenu_Click" />
                                                 <MenuItem Header="Change Color" Click="ChangeColorMenu_Click" />
@@ -81,7 +102,11 @@
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" FontWeight="Bold"/>
+                                            <StackPanel>
+                                                <TextBlock FontWeight="Bold" Text="{Binding DisplayName}" />
+                                                <TextBlock Text="{Binding ExecutionTimeText}" />
+                                                <TextBlock Text="{Binding LastInputMessage}" TextTrimming="CharacterEllipsis" />
+                                            </StackPanel>
                                             <ToggleButton Grid.Column="1" IsChecked="{Binding IsActive, Mode=TwoWay}" Style="{StaticResource ToggleSwitchStyle}"/>
                                         </Grid>
                                     </Border>
@@ -94,7 +119,7 @@
 
             <!-- Content and Logs Panel -->
             <Grid Grid.Column="1">
-                <Frame x:Name="ContentFrame" NavigationUIVisibility="Hidden" Visibility="Collapsed" />
+                <Frame x:Name="ContentFrame" x:FieldModifier="public" NavigationUIVisibility="Hidden" Visibility="Collapsed" />
 
                 <Grid x:Name="HomeContentGrid">
                     <Grid.RowDefinitions>
@@ -124,55 +149,24 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="IP Address:" Grid.Row="0" Grid.Column="0" Margin="0,5"/>
-                                <TextBox Text="{Binding NetworkConfig.IpAddress}" Grid.Row="0" Grid.Column="1" Margin="5,5" IsEnabled="False" Background="#EDEDED"/>
+                                <TextBox Text="{Binding NetworkConfig.IpAddress}" Grid.Row="0" Grid.Column="1" Margin="5,5" IsEnabled="False" Background="#EDEDED" behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
                                 <TextBlock Text="Subnet:" Grid.Row="1" Grid.Column="0" Margin="0,5"/>
-                                <TextBox Text="{Binding NetworkConfig.SubnetMask}" Grid.Row="1" Grid.Column="1" Margin="5,5" IsEnabled="False" Background="#EDEDED"/>
+                                <TextBox Text="{Binding NetworkConfig.SubnetMask}" Grid.Row="1" Grid.Column="1" Margin="5,5" IsEnabled="False" Background="#EDEDED" behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
                                 <TextBlock Text="Gateway:" Grid.Row="2" Grid.Column="0" Margin="0,5"/>
-                                <TextBox Text="{Binding NetworkConfig.Gateway}" Grid.Row="2" Grid.Column="1" Margin="5,5" IsEnabled="False" Background="#EDEDED"/>
+                                <TextBox Text="{Binding NetworkConfig.Gateway}" Grid.Row="2" Grid.Column="1" Margin="5,5" IsEnabled="False" Background="#EDEDED" behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
                                 <TextBlock Text="DNS 1:" Grid.Row="3" Grid.Column="0" Margin="0,5"/>
-                                <TextBox Text="{Binding NetworkConfig.DnsPrimary}" Grid.Row="3" Grid.Column="1" Margin="5,5" IsEnabled="False" Background="#EDEDED"/>
+                                <TextBox Text="{Binding NetworkConfig.DnsPrimary}" Grid.Row="3" Grid.Column="1" Margin="5,5" IsEnabled="False" Background="#EDEDED" behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
                                 <TextBlock Text="DNS 2:" Grid.Row="4" Grid.Column="0" Margin="0,5"/>
-                                <TextBox Text="{Binding NetworkConfig.DnsSecondary}" Grid.Row="4" Grid.Column="1" Margin="5,5" IsEnabled="False" Background="#EDEDED"/>
+                                <TextBox Text="{Binding NetworkConfig.DnsSecondary}" Grid.Row="4" Grid.Column="1" Margin="5,5" IsEnabled="False" Background="#EDEDED" behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
                             </Grid>
                         </Grid>
                     </Border>
 
                     <!-- Logs -->
-                    <Border Grid.Row="1" Background="#E6E6E6" CornerRadius="5" Margin="0,10,0,0" Padding="10">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
-                            <StackPanel Orientation="Horizontal" Grid.Row="0" VerticalAlignment="Center">
-                                <TextBlock Text="LOG LEVEL" FontWeight="Bold" Margin="0,0,10,0"/>
-                                <ComboBox x:Name="GlobalLogLevelBox" Width="120" SelectionChanged="GlobalLogLevelBox_SelectionChanged" SelectedIndex="0">
-                                    <ComboBoxItem Content="All"/>
-                                    <ComboBoxItem Content="Debug"/>
-                                    <ComboBoxItem Content="Warning"/>
-                                    <ComboBoxItem Content="Error"/>
-                                </ComboBox>
-                                <Button Content="Update Log" Width="100" Margin="10,0,0,0" Click="RefreshLog_Click" Background="#FFFFCC"/>
-                                <Button Content="Export Log" Width="100" Margin="10,0,0,0" Click="ExportLog_Click" Background="#CCCCFF"/>
-                                <Button Content="Clear Log" Width="100" Margin="10,0,0,0" Click="ClearLog_Click" Background="#FFCCCC"/>
-                            </StackPanel>
-                            <ListBox Grid.Row="1" ItemsSource="{Binding DisplayLogs}">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding Message}" Foreground="{Binding Color}"/>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
-                        </Grid>
-                    </Border>
+                    <shared:ServiceLogView Grid.Row="1" Margin="0,10,0,0" DataContext="{Binding LogViewModel}" />
                 </Grid>
 
             </Grid>
         </Grid>
-        <Image Source="/Assets/DesktopTemplateLayout-Logo.png"
-                   Height="109"
-                   Margin="-38,-19,511,0"
-                   VerticalAlignment="Top"
-                   Stretch="Uniform" />
     </Grid>
 </Window>

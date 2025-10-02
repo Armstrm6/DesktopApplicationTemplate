@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.7.17 Chrome/128.0.6613.36 Electron/32.0.1 Safari/537.36" version="24.7.17">
+  <diagram name="Page-1" id="bMx4ZVSmqr0Mp4rgnOPS">
+    <mxGraphModel dx="7300" dy="5505" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <object label="" ID="background-MainWindowBackground" id="2">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#99FFFF;strokeColor=#80FF00;strokeWidth=13;arcSize=3;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" vertex="1" parent="1">
+            <mxGeometry x="-2130" y="-1800" width="4160" height="3000" as="geometry" />
+          </mxCell>
+        </object>
+        <object label="" ID="background-navigationbar" id="3">
+          <mxCell style="group;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" vertex="1" connectable="0" parent="1">
+            <mxGeometry x="-2120" y="-1790" width="4130" height="160" as="geometry" />
+          </mxCell>
+        </object>
+        <mxCell id="4" value="" style="rounded=1;whiteSpace=wrap;html=1;arcSize=46;fillColor=#00C2C2;strokeColor=none;" vertex="1" parent="3">
+          <mxGeometry width="4130" height="160" as="geometry" />
+        </mxCell>
+        <object label="" ID="background-navigationbar" id="5">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=1;arcSize=0;fillColor=#00C2C2;strokeColor=none;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" vertex="1" parent="3">
+            <mxGeometry y="70" width="4130" height="90" as="geometry" />
+          </mxCell>
+        </object>
+        <object label="" ID="DesktopApp-Logo" id="6">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=1;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" vertex="1" parent="1">
+            <mxGeometry x="-2110" y="-1780" width="1450" height="620" as="geometry" />
+          </mxCell>
+        </object>
+        <object label="" ID="listbox-servicescontainer-list" id="7">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E6E6E6;arcSize=3;" vertex="1" parent="1">
+            <mxGeometry x="-2090" y="-1040" width="1400" height="2190" as="geometry" />
+          </mxCell>
+        </object>
+        <object label="+" ID="button-add-service" id="8">
+          <mxCell style="rounded=1;html=1;shadow=0;dashed=0;whiteSpace=wrap;fontSize=68;fillColor=#E6E6E6;align=center;strokeColor=#E6E6E6;fontColor=#333333;" vertex="1" parent="1">
+            <mxGeometry x="-800" y="-1146.56" width="100" height="86.88" as="geometry" />
+          </mxCell>
+        </object>
+        <object label="-" ID="button-delete-service" id="9">
+          <mxCell style="rounded=1;html=1;shadow=0;dashed=0;whiteSpace=wrap;fontSize=68;fillColor=#E6E6E6;align=center;strokeColor=#E6E6E6;fontColor=#333333;" vertex="1" parent="1">
+            <mxGeometry x="-920" y="-1148.44" width="100" height="86.88" as="geometry" />
+          </mxCell>
+        </object>
+        <object label="☰" id="10">
+          <mxCell style="rounded=1;html=1;shadow=0;dashed=0;whiteSpace=wrap;fontSize=68;fillColor=#E6E6E6;align=center;strokeColor=#E6E6E6;fontColor=#333333;" vertex="1" parent="1">
+            <mxGeometry x="-1050" y="-1146.56" width="100" height="86.88" as="geometry" />
+          </mxCell>
+        </object>
+        <object label="ACTIVE SERVICES:" ID="text-ActiveServices-Label" id="11">
+          <mxCell style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=68;fontStyle=1" vertex="1" parent="1">
+            <mxGeometry x="-2100" y="-1146.56" width="640" height="80" as="geometry" />
+          </mxCell>
+        </object>
+        <object label="12/16" id="12">
+          <mxCell style="strokeWidth=1;shadow=0;dashed=0;align=left;html=1;shape=mxgraph.mockup.text.textBox;fontColor=#666666;align=left;fontSize=68;spacingLeft=4;spacingTop=-3;whiteSpace=wrap;strokeColor=#666666;mainText=;verticalAlign=middle;" vertex="1" parent="1">
+            <mxGeometry x="-1450" y="-1150" width="340" height="90" as="geometry" />
+          </mxCell>
+        </object>
+        <object label="" ID="Log-Output-Textbox" condition="Logs test results of the MQTT connections ontop of regular loging" id="13">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E6E6E6;arcSize=5;" vertex="1" parent="1">
+            <mxGeometry x="-610" y="460" width="2600" height="690" as="geometry" />
+          </mxCell>
+        </object>
+        <object label="LOG LEVEL" ID="text-Logoutput-Title" id="14">
+          <mxCell style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=68;fontStyle=1" vertex="1" parent="1">
+            <mxGeometry x="-590" y="335" width="390" height="80" as="geometry" />
+          </mxCell>
+        </object>
+        <object label="Debug" ID="combo-box-logoutput-debug-level" id="15">
+          <mxCell style="strokeWidth=1;shadow=0;dashed=0;align=center;html=1;shape=mxgraph.mockup.forms.comboBox;strokeColor=#999999;fillColor=#ddeeff;align=left;fillColor2=#aaddff;mainText=;fontColor=#666666;fontSize=68;spacingLeft=3;" vertex="1" parent="1">
+            <mxGeometry x="-160" y="340" width="450" height="80" as="geometry" />
+          </mxCell>
+        </object>
+        <object label="&lt;div style=&quot;&quot;&gt;Export Log&lt;/div&gt;" ID="button-export-log" id="16">
+          <mxCell style="rounded=1;html=1;shadow=0;dashed=0;whiteSpace=wrap;fontSize=68;fillColor=#CCCCFF;align=center;strokeColor=#000000;fontColor=#333333;verticalAlign=middle;arcSize=17;fontStyle=1" vertex="1" parent="1">
+            <mxGeometry x="870" y="320" width="560" height="110" as="geometry" />
+          </mxCell>
+        </object>
+        <object label="&lt;div style=&quot;&quot;&gt;Clear Log&lt;/div&gt;" id="17">
+          <mxCell style="rounded=1;html=1;shadow=0;dashed=0;whiteSpace=wrap;fontSize=68;fillColor=#FFCCCC;align=center;strokeColor=#000000;fontColor=#333333;verticalAlign=middle;arcSize=17;fontStyle=1" vertex="1" parent="1">
+            <mxGeometry x="1480" y="320" width="490" height="110" as="geometry" />
+          </mxCell>
+        </object>
+        <object label="&lt;div style=&quot;&quot;&gt;Update Log&lt;/div&gt;" ID="button-refresh-logoutput" id="18">
+          <mxCell style="rounded=1;html=1;shadow=0;dashed=0;whiteSpace=wrap;fontSize=68;fillColor=#FFFFCC;align=center;strokeColor=#000000;fontColor=#333333;verticalAlign=middle;arcSize=17;fontStyle=1" vertex="1" parent="1">
+            <mxGeometry x="315" y="320" width="490" height="110" as="geometry" />
+          </mxCell>
+        </object>
+        <mxCell id="19" value="X" style="rounded=1;html=1;shadow=0;dashed=0;whiteSpace=wrap;fontSize=68;fillColor=#E6E6E6;align=center;strokeColor=#E6E6E6;fontColor=#333333;arcSize=33;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="910" y="-1770" width="90" height="86.88" as="geometry" />
+        </mxCell>
+        <mxCell id="20" value="&lt;div style=&quot;&quot;&gt;—&lt;br&gt;&lt;/div&gt;" style="rounded=1;html=1;shadow=0;dashed=0;whiteSpace=wrap;fontSize=68;fillColor=#E6E6E6;align=center;strokeColor=#E6E6E6;fontColor=#333333;verticalAlign=middle;arcSize=40;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="800" y="-1770" width="90" height="86.88" as="geometry" />
+        </mxCell>
+        <mxCell id="21" value="" style="rounded=1;whiteSpace=wrap;html=1;arcSize=28;" vertex="1" parent="1">
+          <mxGeometry x="-2040" y="-980" width="1280" height="270" as="geometry" />
+        </mxCell>
+        <mxCell id="22" value="TCP" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=79;" vertex="1" parent="1">
+          <mxGeometry x="-1990" y="-900" width="520" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="23" value="" style="group" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="-990" y="-895" width="200" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="24" value="" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;fillColor=#99FF99;strokeColor=none;" vertex="1" parent="23">
+          <mxGeometry width="200" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="25" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeColor=default;" vertex="1" parent="23">
+          <mxGeometry x="100" width="100" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="26" value="&lt;span style=&quot;font-size: 42px;&quot;&gt;Port: 25252&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="-1420" y="-945" width="390" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="27" value="&lt;span style=&quot;font-size: 42px;&quot;&gt;Connected Steps:&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="-1420" y="-830" width="390" height="85" as="geometry" />
+        </mxCell>
+        <object label="" name="MQTT-Topic-Subscription-Container" condition="This will host the tags that the MQTT service is subscribed to, and the associated messages they are passing to that topic. Topics can be referanced multiple times, for different messages." tooltip="List of subscribed Topics with their associated messages" id="28">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=1;arcSize=5;fontSize=90;" vertex="1" parent="1">
+            <mxGeometry x="-620" y="-1580" width="2590" height="1860" as="geometry" />
+          </mxCell>
+        </object>
+        <mxCell id="29" value="Sever port" style="rounded=1;whiteSpace=wrap;html=1;fontSize=90;" vertex="1" parent="1">
+          <mxGeometry x="-450" y="-1460" width="1030" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="30" value="Server IP" style="rounded=1;whiteSpace=wrap;html=1;fontSize=90;" vertex="1" parent="1">
+          <mxGeometry x="760" y="-1470" width="1030" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="31" value="TCP" style="html=1;shadow=0;dashed=0;shape=mxgraph.bootstrap.radioButton2;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;gradientColor=#DEDEDE;fillColor=#EDEDED;checked=0;spacing=5;checkedFill=#0085FC;checkedStroke=#ffffff;fontSize=90;" vertex="1" parent="1">
+          <mxGeometry x="-310" y="-1200" width="40" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="32" value="UDP" style="html=1;shadow=0;dashed=0;shape=mxgraph.bootstrap.radioButton2;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;gradientColor=#DEDEDE;fillColor=#EDEDED;checked=0;spacing=5;checkedFill=#0085FC;checkedStroke=#ffffff;fontSize=90;" vertex="1" parent="1">
+          <mxGeometry x="270" y="-1210" width="40" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="33" value="Select TCP Service" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=120;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fontSize=90;" vertex="1" parent="1">
+          <mxGeometry x="750" y="-1230" width="1110" height="440" as="geometry" />
+        </mxCell>
+        <mxCell id="34" value="Listening" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=90;" vertex="1" parent="33">
+          <mxGeometry y="120" width="1110" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="35" value="Sending" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=90;" vertex="1" parent="33">
+          <mxGeometry y="240" width="1110" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="36" value="Recieving and Sending" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=90;" vertex="1" parent="33">
+          <mxGeometry y="340" width="1110" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="37" value="Test Message&amp;nbsp;" style="rounded=0;whiteSpace=wrap;html=1;fontSize=90;" vertex="1" parent="1">
+          <mxGeometry x="-420" y="-1040" width="1100" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="38" value="C# Script" style="rounded=0;whiteSpace=wrap;html=1;fontSize=90;" vertex="1" parent="1">
+          <mxGeometry x="-480" y="-660" width="1120" height="790" as="geometry" />
+        </mxCell>
+        <mxCell id="39" value="Example output message" style="rounded=0;whiteSpace=wrap;html=1;fontSize=90;" vertex="1" parent="1">
+          <mxGeometry x="860" y="-670" width="1070" height="790" as="geometry" />
+        </mxCell>
+        <mxCell id="40" value="Advanced Configuration" style="rounded=1;whiteSpace=wrap;html=1;fontSize=90;" vertex="1" parent="1">
+          <mxGeometry x="930" y="150" width="1010" height="100" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

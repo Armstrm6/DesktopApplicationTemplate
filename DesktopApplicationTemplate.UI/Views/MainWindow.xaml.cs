@@ -4,22 +4,26 @@ using System.Windows.Controls;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using LogLevel = DesktopApplicationTemplate.Core.Services.LogLevel;
-using Microsoft.VisualBasic;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Microsoft.VisualBasic;
 using DesktopApplicationTemplate.UI.Helpers;
 using System.Linq;
 using System.Windows.Media;
 using DesktopApplicationTemplate.Models;
-using DesktopApplicationTemplate.UI.Views;
 using System.Windows.Input;
 using System.Windows.Controls.Primitives;
+using DesktopApplicationTemplate.UI;
+using System.Runtime.Versioning;
+using System.Threading.Tasks;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
+    [SupportedOSPlatform("windows")]
     public partial class MainView : Window
     {
         private readonly MainViewModel _viewModel;
@@ -29,11 +33,13 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             InitializeComponent();
             _viewModel = viewModel;
-            var factory = App.AppHost.Services.GetService(typeof(ILoggerFactory)) as ILoggerFactory;
-            _logger = factory?.CreateLogger<MainView>();
+            if (App.AppHost.Services.GetService(typeof(ILoggerFactory)) is ILoggerFactory factory)
+            {
+                _logger = factory.CreateLogger<MainView>();
+            }
             DataContext = _viewModel;
             _viewModel.EditRequested += OnEditRequested;
-            KeyDown += MainView_KeyDown;
+            _viewModel.AddServiceRequested += OnAddServiceRequested;
             MouseDown += MainView_MouseDown;
             CommandBindings.Add(new CommandBinding(SystemCommands.CloseWindowCommand, CloseCommand_Executed));
             CommandBindings.Add(new CommandBinding(SystemCommands.MinimizeWindowCommand, MinimizeCommand_Executed));
@@ -74,21 +80,22 @@ namespace DesktopApplicationTemplate.UI.Views
             ShowHome();
         }
 
-        private Page? GetOrCreateServicePage(ServiceViewModel svc)
+        private Page? GetOrCreateServicePage(ServiceListModel svc)
         {
             if (svc.ServicePage != null)
                 return svc.ServicePage;
 
             svc.ServicePage = svc.ServiceType switch
             {
-                "TCP" => App.AppHost.Services.GetRequiredService<TcpServiceView>(),
+                "TCP" => App.AppHost.Services.GetRequiredService<TcpServiceMessagesView>(),
                 "HTTP" => App.AppHost.Services.GetRequiredService<HttpServiceView>(),
                 "File Observer" => App.AppHost.Services.GetRequiredService<FileObserverView>(),
                 "HID" => App.AppHost.Services.GetRequiredService<HidViews>(),
                 "Heartbeat" => App.AppHost.Services.GetRequiredService<HeartbeatView>(),
                 "SCP" => App.AppHost.Services.GetRequiredService<SCPServiceView>(),
-                "MQTT" => App.AppHost.Services.GetRequiredService<MQTTServiceView>(),
-                "FTP" => App.AppHost.Services.GetRequiredService<FTPServiceView>(),
+                "MQTT" => App.AppHost.Services.GetRequiredService<MqttTagSubscriptionsView>(),
+                "FTP Server" or "FTP" => App.AppHost.Services.GetRequiredService<FTPServiceView>(),
+                "CSV Creator" => App.AppHost.Services.GetRequiredService<CsvServiceView>(),
                 _ => null
             };
 
@@ -96,15 +103,57 @@ namespace DesktopApplicationTemplate.UI.Views
             {
                 if (svc.ServicePage.DataContext is ILoggingViewModel vm && vm.Logger is LoggingService logger)
                 {
-                    if (vm.Logger != null)
+                    if (svc.ServiceType == "MQTT")
                     {
-                        logger.LogAdded += entry => svc.AddLog(entry.Message, entry.Color, entry.Level);
+                        logger.LogAdded += entry => _viewModel.OnServiceLogAdded(svc, entry);
+                    }
+                    else
+                    {
+                        logger.LogAdded += entry =>
+                        {
+                            var brush = (Brush?)new BrushConverter().ConvertFromString(entry.Color);
+                            svc.AddLog(entry.Message, brush, entry.Level);
+                        };
                     }
                 }
 
                 if (svc.ServicePage.DataContext is INetworkAwareViewModel navm)
                 {
                     navm.UpdateNetworkConfiguration(_viewModel.NetworkConfig.CurrentConfiguration);
+                }
+
+                if (svc.ServicePage is IServiceLogHost logHost)
+                {
+                    logHost.SetServiceContext(svc);
+                }
+
+                if (svc.ServiceType == "TCP" && svc.ServicePage.DataContext is TcpServiceMessagesViewModel tcpVm)
+                {
+                    tcpVm.AdvancedSettingsRequested += (_, _) =>
+                    {
+                        var vm = App.AppHost.Services.GetRequiredService<TcpEditServiceViewModel>();
+                        vm.ServiceType = svc.ServiceType;
+                        vm.Load(svc.DisplayName.Split(" - ").Last(), svc.TcpOptions ?? new TcpServiceOptions());
+                        var editView = App.AppHost.Services.GetRequiredService<TcpEditServiceView>();
+                        editView.Initialize(vm);
+
+                        vm.ServiceSaved += (name, opts) =>
+                        {
+                            svc.DisplayName = $"{vm.ServiceType} - {name}";
+                            svc.ServiceType = vm.ServiceType;
+                            svc.TcpOptions = opts;
+                            if (svc.ServicePage != null)
+                                ShowPage(svc.ServicePage);
+                            _ = _viewModel.SaveServicesAsync();
+                        };
+                        vm.EditCancelled += () =>
+                        {
+                            if (svc.ServicePage != null)
+                                ShowPage(svc.ServicePage);
+                        };
+
+                        ShowPage(editView);
+                    };
                 }
             }
 
@@ -114,65 +163,794 @@ namespace DesktopApplicationTemplate.UI.Views
         private void AddService_Click(object sender, RoutedEventArgs e)
         {
             _logger?.LogDebug("AddService button clicked");
-            // Open the service creation workflow in its own window
-            var window = App.AppHost.Services.GetRequiredService<CreateServiceWindow>();
-
-            if (window.ShowDialog() == true)
+            if (_viewModel.AddServiceCommand.CanExecute(null))
             {
-                var name = window.CreatedServiceName;
-                var type = window.CreatedServiceType;
+                _viewModel.AddServiceCommand.Execute(null);
+            }
+        }
 
-                var newService = new ServiceViewModel
+        private void OnAddServiceRequested()
+        {
+            ShowCreateServiceSelectionPage();
+        }
+
+        private void ShowCreateServiceSelectionPage()
+        {
+            var page = App.AppHost.Services.GetRequiredService<CreateServicePage>();
+            page.ServiceCreated += (name, type) =>
+            {
+                var svc = new ServiceListModel
                 {
                     DisplayName = $"{type} - {name}",
                     ServiceType = type,
                     IsActive = false
                 };
-
-                newService.SetColorsByType();
-                newService.LogAdded += _viewModel.OnServiceLogAdded;
-                newService.ActiveChanged += _viewModel.OnServiceActiveChanged;
-
-                GetOrCreateServicePage(newService);
-
-                _viewModel.Services.Add(newService);
-                _logger?.LogInformation("Service {Name} added", newService.DisplayName);
-                _viewModel.SelectedService = newService;
-                ServiceList.ScrollIntoView(newService);
-
-                if (type == "MQTT" && newService.ServicePage is MQTTServiceView mqttView)
-                {
-                    var vm = (MqttServiceViewModel)mqttView.DataContext!;
-                    newService.ActiveChanged += async active =>
-                    {
-                        if (active)
-                            await vm.ConnectAsync();
-                    };
-                }
-
-                if (type == "CSV Creator")
-                {
-                    var csvVm = App.AppHost.Services.GetRequiredService<CsvViewerViewModel>();
-                    var csvWindow = new CsvViewerWindow(csvVm);
-                    csvVm.RequestClose += () => csvWindow.Close();
-                    csvWindow.ShowDialog();
-                }
-                else if (newService.ServicePage != null)
-                {
-                    ShowPage(newService.ServicePage);
-                }
-                _viewModel.SaveServices();
-                _logger?.LogDebug("AddService workflow completed");
-            }
+                svc.SetColorsByType();
+                svc.LogAdded += _viewModel.OnServiceLogAdded;
+                svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
+                GetOrCreateServicePage(svc);
+                _viewModel.Services.Add(svc);
+                _logger?.LogInformation("Service {Name} added", svc.DisplayName);
+                _viewModel.SelectedService = svc;
+                ServiceList.ScrollIntoView(svc);
+                if (svc.ServicePage != null)
+                    ShowPage(svc.ServicePage);
+                _ = _viewModel.SaveServicesAsync();
+            };
+            page.MqttSelected += NavigateToMqtt;
+            page.TcpSelected += NavigateToTcp;
+            page.HeartbeatSelected += NavigateToHeartbeat;
+            page.FtpServerSelected += NavigateToFtpServer;
+            page.HttpSelected += NavigateToHttp;
+            page.HidSelected += NavigateToHid;
+            page.CsvSelected += NavigateToCsvCreator;
+            page.FileObserverSelected += NavigateToFileObserver;
+            page.ScpSelected += NavigateToScp;
+            page.Cancelled += ShowHome;
+            ShowPage(page);
         }
 
-        private void OnEditRequested(ServiceViewModel service)
+        private void NavigateToMqtt(string defaultName)
+        {
+            var vm = App.AppHost.Services.GetRequiredService<MqttCreateServiceViewModel>();
+            vm.ServiceName = defaultName;
+            vm.ServiceSaved += (name, options) => _ = AddMqttServiceAsync(name, options);
+            vm.EditCancelled += ShowCreateServiceSelectionPage;
+            var view = ActivatorUtilities.CreateInstance<MqttCreateServiceView>(App.AppHost.Services, vm);
+            vm.AdvancedConfigRequested += opts =>
+            {
+                var advVm = ActivatorUtilities.CreateInstance<MqttAdvancedConfigViewModel>(App.AppHost.Services, opts);
+                var advView = App.AppHost.Services.GetRequiredService<MqttAdvancedConfigView>();
+                advView.Initialize(advVm);
+                advVm.Saved += _ => ShowPage(view);
+                advVm.BackRequested += () => ShowPage(view);
+                ShowPage(advView);
+            };
+            ShowPage(view);
+        }
+
+        private void NavigateToHid(string defaultName)
+        {
+            var vm = App.AppHost.Services.GetRequiredService<HidCreateServiceViewModel>();
+            vm.ServiceName = defaultName;
+            vm.ServiceSaved += (name, options) =>
+            {
+                var svc = new ServiceListModel
+                {
+                    DisplayName = $"HID - {name}",
+                    ServiceType = "HID",
+                    IsActive = false,
+                    HidOptions = options
+                };
+                svc.SetColorsByType();
+                svc.LogAdded += _viewModel.OnServiceLogAdded;
+                svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
+                GetOrCreateServicePage(svc);
+                _viewModel.Services.Add(svc);
+                _logger?.LogInformation("Service {Name} added", svc.DisplayName);
+                _viewModel.SelectedService = svc;
+                ServiceList.ScrollIntoView(svc);
+                if (svc.ServicePage != null)
+                    ShowPage(svc.ServicePage);
+                _ = _viewModel.SaveServicesAsync();
+            };
+            vm.EditCancelled += ShowCreateServiceSelectionPage;
+            var view = ActivatorUtilities.CreateInstance<HidCreateServiceView>(App.AppHost.Services, vm);
+            vm.AdvancedConfigRequested += opts =>
+            {
+                var advVm = ActivatorUtilities.CreateInstance<HidAdvancedConfigViewModel>(App.AppHost.Services, opts);
+                var advView = App.AppHost.Services.GetRequiredService<HidAdvancedConfigView>();
+                advView.Initialize(advVm);
+                advVm.Saved += _ => ShowPage(view);
+                advVm.BackRequested += () => ShowPage(view);
+                ShowPage(advView);
+            };
+            ShowPage(view);
+        }
+
+        private void NavigateToScp(string defaultName)
+        {
+            var vm = App.AppHost.Services.GetRequiredService<ScpCreateServiceViewModel>();
+            vm.ServiceName = defaultName;
+            vm.ServiceSaved += (name, options) =>
+            {
+                var svc = new ServiceListModel
+                {
+                    DisplayName = $"SCP - {name}",
+                    ServiceType = "SCP",
+                    IsActive = false,
+                    ScpOptions = options
+                };
+                svc.SetColorsByType();
+                svc.LogAdded += _viewModel.OnServiceLogAdded;
+                svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
+                GetOrCreateServicePage(svc);
+                _viewModel.Services.Add(svc);
+                _logger?.LogInformation("Service {Name} added", svc.DisplayName);
+                _viewModel.SelectedService = svc;
+                ServiceList.ScrollIntoView(svc);
+                if (svc.ServicePage != null)
+                    ShowPage(svc.ServicePage);
+                _ = _viewModel.SaveServicesAsync();
+            };
+            vm.EditCancelled += ShowCreateServiceSelectionPage;
+            var view = ActivatorUtilities.CreateInstance<ScpCreateServiceView>(App.AppHost.Services, vm);
+            vm.AdvancedConfigRequested += opts =>
+            {
+                var advVm = App.AppHost.Services.GetRequiredService<ScpAdvancedConfigViewModel>();
+                advVm.Load(opts);
+                var advView = App.AppHost.Services.GetRequiredService<ScpAdvancedConfigView>();
+                advView.Initialize(advVm);
+                advVm.Saved += _ => ShowPage(view);
+                advVm.BackRequested += () => ShowPage(view);
+                ShowPage(advView);
+            };
+            ShowPage(view);
+        }
+
+        private void NavigateToHeartbeat(string defaultName)
+        {
+            var vm = App.AppHost.Services.GetRequiredService<HeartbeatCreateServiceViewModel>();
+            vm.ServiceName = defaultName;
+            vm.ServiceSaved += (name, options) =>
+            {
+                var svc = new ServiceListModel
+                {
+                    DisplayName = $"Heartbeat - {name}",
+                    ServiceType = "Heartbeat",
+                    IsActive = false,
+                    HeartbeatOptions = options
+                };
+                svc.SetColorsByType();
+                svc.LogAdded += _viewModel.OnServiceLogAdded;
+                svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
+                GetOrCreateServicePage(svc);
+                _viewModel.Services.Add(svc);
+                _logger?.LogInformation("Service {Name} added", svc.DisplayName);
+                _viewModel.SelectedService = svc;
+                ServiceList.ScrollIntoView(svc);
+                if (svc.ServicePage != null)
+                    ShowPage(svc.ServicePage);
+                _ = _viewModel.SaveServicesAsync();
+            };
+            vm.EditCancelled += ShowCreateServiceSelectionPage;
+            var view = ActivatorUtilities.CreateInstance<HeartbeatCreateServiceView>(App.AppHost.Services, vm);
+            vm.AdvancedConfigRequested += opts =>
+            {
+                var advVm = ActivatorUtilities.CreateInstance<HeartbeatAdvancedConfigViewModel>(App.AppHost.Services, opts);
+                var advView = App.AppHost.Services.GetRequiredService<HeartbeatAdvancedConfigView>();
+                advView.Initialize(advVm);
+                advVm.Saved += _ => ShowPage(view);
+                advVm.BackRequested += () => ShowPage(view);
+                ShowPage(advView);
+            };
+            ShowPage(view);
+        }
+
+        private void NavigateToFileObserver(string defaultName)
+        {
+            var vm = App.AppHost.Services.GetRequiredService<FileObserverCreateServiceViewModel>();
+            vm.ServiceName = defaultName;
+            vm.ServiceSaved += (name, options) =>
+            {
+                var svc = new ServiceListModel
+                {
+                    DisplayName = $"File Observer - {name}",
+                    ServiceType = "File Observer",
+                    IsActive = false,
+                    FileObserverOptions = options
+                };
+                svc.SetColorsByType();
+                svc.LogAdded += _viewModel.OnServiceLogAdded;
+                svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
+                GetOrCreateServicePage(svc);
+                _viewModel.Services.Add(svc);
+                _logger?.LogInformation("Service {Name} added", svc.DisplayName);
+                _viewModel.SelectedService = svc;
+                ServiceList.ScrollIntoView(svc);
+                if (svc.ServicePage != null)
+                    ShowPage(svc.ServicePage);
+                _ = _viewModel.SaveServicesAsync();
+            };
+            vm.EditCancelled += ShowCreateServiceSelectionPage;
+            var view = ActivatorUtilities.CreateInstance<FileObserverCreateServiceView>(App.AppHost.Services, vm);
+            vm.AdvancedConfigRequested += opts =>
+            {
+                var advVm = ActivatorUtilities.CreateInstance<FileObserverAdvancedConfigViewModel>(App.AppHost.Services, opts);
+                var advView = App.AppHost.Services.GetRequiredService<FileObserverAdvancedConfigView>();
+                advView.Initialize(advVm);
+                advVm.Saved += _ => ShowPage(view);
+                advVm.BackRequested += () => ShowPage(view);
+                ShowPage(advView);
+            };
+            ShowPage(view);
+        }
+
+        private void NavigateToCsvCreator(string defaultName)
+        {
+            var vm = App.AppHost.Services.GetRequiredService<CsvServiceEditorViewModel>();
+            vm.ServiceName = defaultName;
+            vm.ServiceSaved += (name, options) =>
+            {
+                var svc = new ServiceListModel
+                {
+                    DisplayName = $"CSV Creator - {name}",
+                    ServiceType = "CSV Creator",
+                    IsActive = false,
+                    CsvOptions = options
+                };
+                svc.SetColorsByType();
+                svc.LogAdded += _viewModel.OnServiceLogAdded;
+                svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
+                GetOrCreateServicePage(svc);
+                _viewModel.Services.Add(svc);
+                _logger?.LogInformation("Service {Name} added", svc.DisplayName);
+                _viewModel.SelectedService = svc;
+                ServiceList.ScrollIntoView(svc);
+                if (svc.ServicePage != null)
+                    ShowPage(svc.ServicePage);
+                _ = _viewModel.SaveServicesAsync();
+            };
+            vm.EditCancelled += ShowCreateServiceSelectionPage;
+            var view = App.AppHost.Services.GetRequiredService<CsvServiceEditorView>();
+            view.Initialize(vm);
+            vm.AdvancedConfigRequested += opts =>
+            {
+                var advVm = ActivatorUtilities.CreateInstance<CsvAdvancedConfigViewModel>(App.AppHost.Services, opts);
+                var advView = App.AppHost.Services.GetRequiredService<CsvAdvancedConfigView>();
+                advView.Initialize(advVm);
+                advVm.Saved += _ => ShowPage(view);
+                advVm.BackRequested += () => ShowPage(view);
+                ShowPage(advView);
+            };
+            ShowPage(view);
+        }
+
+        private void NavigateToTcp(string defaultName)
+        {
+            var vm = App.AppHost.Services.GetRequiredService<TcpCreateServiceViewModel>();
+            vm.ServiceName = defaultName;
+            vm.ServiceSaved += (name, options) =>
+            {
+                var svc = new ServiceListModel
+                {
+                    DisplayName = $"{vm.ServiceType} - {name}",
+                    ServiceType = vm.ServiceType,
+                    IsActive = false,
+                    TcpOptions = options
+                };
+                svc.SetColorsByType();
+                svc.LogAdded += _viewModel.OnServiceLogAdded;
+                svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
+                GetOrCreateServicePage(svc);
+                _viewModel.Services.Add(svc);
+                _logger?.LogInformation("Service {Name} added", svc.DisplayName);
+                _viewModel.SelectedService = svc;
+                ServiceList.ScrollIntoView(svc);
+                if (svc.ServicePage != null)
+                    ShowPage(svc.ServicePage);
+                _ = _viewModel.SaveServicesAsync();
+            };
+            vm.EditCancelled += ShowCreateServiceSelectionPage;
+            var view = ActivatorUtilities.CreateInstance<TcpCreateServiceView>(App.AppHost.Services, vm);
+            ShowPage(view);
+        }
+
+        private void NavigateToHttp(string defaultName)
+        {
+            var vm = App.AppHost.Services.GetRequiredService<HttpCreateServiceViewModel>();
+            vm.ServiceName = defaultName;
+            vm.ServiceSaved += (name, options) =>
+            {
+                var svc = new ServiceListModel
+                {
+                    DisplayName = $"HTTP - {name}",
+                    ServiceType = "HTTP",
+                    IsActive = false,
+                    HttpOptions = options
+                };
+                svc.SetColorsByType();
+                svc.LogAdded += _viewModel.OnServiceLogAdded;
+                svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
+                GetOrCreateServicePage(svc);
+                _viewModel.Services.Add(svc);
+                _logger?.LogInformation("Service {Name} added", svc.DisplayName);
+                _viewModel.SelectedService = svc;
+                ServiceList.ScrollIntoView(svc);
+                if (svc.ServicePage != null)
+                    ShowPage(svc.ServicePage);
+                _ = _viewModel.SaveServicesAsync();
+            };
+            vm.EditCancelled += ShowCreateServiceSelectionPage;
+            var view = ActivatorUtilities.CreateInstance<HttpCreateServiceView>(App.AppHost.Services, vm);
+            vm.AdvancedConfigRequested += opts =>
+            {
+                var advVm = ActivatorUtilities.CreateInstance<HttpAdvancedConfigViewModel>(App.AppHost.Services, opts);
+                var advView = App.AppHost.Services.GetRequiredService<HttpAdvancedConfigView>();
+                advView.Initialize(advVm);
+                advVm.Saved += _ => ShowPage(view);
+                advVm.BackRequested += () => ShowPage(view);
+                ShowPage(advView);
+            };
+            ShowPage(view);
+        }
+
+        private void NavigateToFtpServer(string defaultName)
+        {
+            var vm = App.AppHost.Services.GetRequiredService<FtpServerCreateViewModel>();
+            vm.ServiceName = defaultName;
+
+            var opts = App.AppHost.Services.GetRequiredService<IOptions<FtpServerOptions>>().Value;
+            vm.Options.Port = opts.Port;
+            vm.Options.RootPath = opts.RootPath;
+            vm.Options.AllowAnonymous = opts.AllowAnonymous;
+            vm.Options.Username = opts.Username;
+            vm.Options.Password = opts.Password;
+
+            var view = ActivatorUtilities.CreateInstance<FtpServerCreateView>(App.AppHost.Services, vm);
+            vm.ServiceSaved += (name, options) =>
+            {
+                _logger?.LogInformation("FTP server {Name} created", name);
+                AddFtpService(name, options);
+                _ = _viewModel.SaveServicesAsync();
+            };
+            vm.AdvancedConfigRequested += opts2 =>
+            {
+                var advVm = ActivatorUtilities.CreateInstance<FtpServerAdvancedConfigViewModel>(App.AppHost.Services, opts2);
+                var advView = App.AppHost.Services.GetRequiredService<FtpServerAdvancedConfigView>();
+                advView.Initialize(advVm);
+                advVm.Saved += _ => ShowPage(view);
+                advVm.BackRequested += () => ShowPage(view);
+                ShowPage(advView);
+            };
+            vm.EditCancelled += ShowCreateServiceSelectionPage;
+            ShowPage(view);
+        }
+
+        private async Task AddMqttServiceAsync(string name, MqttServiceOptions options)
+        {
+            var newService = new ServiceListModel
+            {
+                DisplayName = $"MQTT - {name}",
+                ServiceType = "MQTT",
+                IsActive = false
+            };
+
+            newService.SetColorsByType();
+            newService.LogAdded += _viewModel.OnServiceLogAdded;
+            newService.ActiveChanged += _viewModel.OnServiceActiveChanged;
+
+            GetOrCreateServicePage(newService);
+
+            var opt = App.AppHost.Services.GetRequiredService<IOptions<MqttServiceOptions>>().Value;
+            opt.Host = options.Host;
+            opt.Port = options.Port;
+            opt.ClientId = options.ClientId;
+            opt.Username = options.Username;
+            opt.Password = options.Password;
+            opt.ConnectionType = options.ConnectionType;
+            opt.WillTopic = options.WillTopic;
+            opt.WillPayload = options.WillPayload;
+            opt.WillQualityOfService = options.WillQualityOfService;
+            opt.WillRetain = options.WillRetain;
+            opt.KeepAliveSeconds = options.KeepAliveSeconds;
+            opt.CleanSession = options.CleanSession;
+            opt.ReconnectDelay = options.ReconnectDelay;
+
+            _viewModel.Services.Add(newService);
+            _logger?.LogInformation("Service {Name} added", newService.DisplayName);
+            _viewModel.SelectedService = newService;
+            ServiceList.ScrollIntoView(newService);
+
+            if (newService.ServicePage is MqttTagSubscriptionsView mqttView)
+            {
+                var mqttVm = (MqttTagSubscriptionsViewModel)mqttView.DataContext!;
+                newService.ActiveChanged += HandleActiveChanged;
+
+                void HandleActiveChanged(bool active)
+                {
+                    if (active)
+                    {
+                        _ = mqttVm.ConnectAsync();
+                    }
+                }
+
+                mqttVm.EditConnectionRequested += (_, _) =>
+                {
+                    var editView = App.AppHost.Services.GetRequiredService<MqttEditConnectionView>();
+                    if (editView.DataContext is MqttEditConnectionViewModel vm)
+                    {
+                        var options = App.AppHost.Services.GetRequiredService<IOptions<MqttServiceOptions>>().Value;
+                        vm.Load(options);
+                        vm.HighlightMissingFields();
+                        vm.RequestClose += (_, _) =>
+                        {
+                            if (newService.ServicePage != null)
+                                ShowPage(newService.ServicePage);
+                            _ = _viewModel.SaveServicesAsync();
+                        };
+                    }
+                    ShowPage(editView);
+                };
+            }
+
+            if (newService.ServicePage != null)
+            {
+                ShowPage(newService.ServicePage);
+            }
+
+            await _viewModel.SaveServicesAsync();
+            _logger?.LogDebug("AddService workflow completed");
+        }
+
+        internal void AddFtpService(string name, FtpServerOptions options)
+        {
+            var svc = new ServiceListModel
+            {
+                DisplayName = $"FTP Server - {name}",
+                ServiceType = "FTP Server",
+                IsActive = false,
+                FtpOptions = options
+            };
+
+            svc.SetColorsByType();
+            svc.LogAdded += _viewModel.OnServiceLogAdded;
+            svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
+
+            var opt = App.AppHost.Services.GetRequiredService<IOptions<FtpServerOptions>>().Value;
+            opt.Port = options.Port;
+            opt.RootPath = options.RootPath;
+            opt.AllowAnonymous = options.AllowAnonymous;
+            opt.Username = options.Username;
+            opt.Password = options.Password;
+
+            GetOrCreateServicePage(svc);
+
+            _viewModel.Services.Add(svc);
+            _logger?.LogInformation("Service {Name} added", svc.DisplayName);
+            _viewModel.SelectedService = svc;
+            ServiceList.ScrollIntoView(svc);
+            if (svc.ServicePage != null)
+                ShowPage(svc.ServicePage);
+        }
+
+        private void OnEditRequested(ServiceListModel service)
         {
             _logger?.LogDebug("Edit requested for {Name}", service.DisplayName);
-            var page = GetOrCreateServicePage(service);
-            if (page != null)
+
+            if (service.ServiceType == "MQTT")
             {
-                ShowPage(page);
+                var tagPage = GetOrCreateServicePage(service);
+                var options = App.AppHost.Services.GetRequiredService<IOptions<MqttServiceOptions>>().Value;
+                var vm = ActivatorUtilities.CreateInstance<MqttEditServiceViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
+                var editView = App.AppHost.Services.GetRequiredService<MqttEditServiceView>();
+                editView.Initialize(vm);
+                vm.ServiceSaved += (name, opts) =>
+                {
+                    service.DisplayName = $"MQTT - {name}";
+                    if (tagPage != null)
+                        ShowPage(tagPage);
+                    _ = _viewModel.SaveServicesAsync();
+                };
+                vm.EditCancelled += () =>
+                {
+                    if (tagPage != null)
+                        ShowPage(tagPage);
+                };
+                vm.AdvancedConfigRequested += opts =>
+                {
+                    var advVm = ActivatorUtilities.CreateInstance<MqttAdvancedConfigViewModel>(App.AppHost.Services, opts);
+                    var advView = App.AppHost.Services.GetRequiredService<MqttAdvancedConfigView>();
+                    advView.Initialize(advVm);
+                    advVm.Saved += _ => ShowPage(editView);
+                    advVm.BackRequested += () => ShowPage(editView);
+                    ShowPage(advView);
+                };
+                ShowPage(editView);
+            _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
+            return;
+        }
+
+        if (service.ServiceType == "Heartbeat")
+        {
+            var hbPage = GetOrCreateServicePage(service);
+            var options = service.HeartbeatOptions ?? new HeartbeatServiceOptions();
+            var vm = ActivatorUtilities.CreateInstance<HeartbeatEditServiceViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
+            var editView = App.AppHost.Services.GetRequiredService<HeartbeatEditServiceView>();
+            editView.Initialize(vm);
+            vm.ServiceSaved += (name, opts) =>
+            {
+                service.DisplayName = $"Heartbeat - {name}";
+                service.HeartbeatOptions = opts;
+                if (hbPage != null)
+                    ShowPage(hbPage);
+                _ = _viewModel.SaveServicesAsync();
+            };
+            vm.EditCancelled += () =>
+            {
+                if (hbPage != null)
+                    ShowPage(hbPage);
+            };
+            vm.AdvancedConfigRequested += opts =>
+            {
+                var advVm = ActivatorUtilities.CreateInstance<HeartbeatAdvancedConfigViewModel>(App.AppHost.Services, opts);
+                var advView = App.AppHost.Services.GetRequiredService<HeartbeatAdvancedConfigView>();
+                advView.Initialize(advVm);
+                advVm.Saved += _ => ShowPage(editView);
+                advVm.BackRequested += () => ShowPage(editView);
+                ShowPage(advView);
+            };
+            ShowPage(editView);
+            _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
+            return;
+        }
+
+        if (service.ServiceType == "HID")
+        {
+            var hidPage = GetOrCreateServicePage(service);
+            var options = service.HidOptions ?? new HidServiceOptions();
+            var vm = ActivatorUtilities.CreateInstance<HidEditServiceViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
+            var editView = App.AppHost.Services.GetRequiredService<HidEditServiceView>();
+            editView.Initialize(vm);
+            vm.ServiceSaved += (name, opts) =>
+            {
+                service.DisplayName = $"HID - {name}";
+                service.HidOptions = opts;
+                if (hidPage != null)
+                    ShowPage(hidPage);
+                _ = _viewModel.SaveServicesAsync();
+            };
+            vm.EditCancelled += () =>
+            {
+                if (hidPage != null)
+                    ShowPage(hidPage);
+            };
+            vm.AdvancedConfigRequested += opts =>
+            {
+                var advVm = ActivatorUtilities.CreateInstance<HidAdvancedConfigViewModel>(App.AppHost.Services, opts);
+                var advView = App.AppHost.Services.GetRequiredService<HidAdvancedConfigView>();
+                advView.Initialize(advVm);
+                advVm.Saved += _ => ShowPage(editView);
+                advVm.BackRequested += () => ShowPage(editView);
+                ShowPage(advView);
+            };
+            ShowPage(editView);
+            _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
+            return;
+        }
+
+        if (service.ServiceType == "CSV Creator")
+        {
+            var csvPage = GetOrCreateServicePage(service);
+            var options = service.CsvOptions ?? new CsvServiceOptions();
+            var vm = App.AppHost.Services.GetRequiredService<CsvServiceEditorViewModel>();
+            vm.Load(service.DisplayName.Split(" - ").Last(), options);
+            var editView = App.AppHost.Services.GetRequiredService<CsvServiceEditorView>();
+            editView.Initialize(vm);
+            vm.ServiceSaved += (name, opts) =>
+            {
+                service.DisplayName = $"CSV Creator - {name}";
+                service.CsvOptions = opts;
+                if (csvPage != null)
+                    ShowPage(csvPage);
+                _ = _viewModel.SaveServicesAsync();
+            };
+            vm.EditCancelled += () =>
+            {
+                if (csvPage != null)
+                    ShowPage(csvPage);
+            };
+            vm.AdvancedConfigRequested += opts =>
+            {
+                var advVm = ActivatorUtilities.CreateInstance<CsvAdvancedConfigViewModel>(App.AppHost.Services, opts);
+                var advView = App.AppHost.Services.GetRequiredService<CsvAdvancedConfigView>();
+                advView.Initialize(advVm);
+                advVm.Saved += _ => ShowPage(editView);
+                advVm.BackRequested += () => ShowPage(editView);
+                ShowPage(advView);
+            };
+            ShowPage(editView);
+            _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
+            return;
+        }
+
+        if (service.ServiceType == "File Observer")
+        {
+            var foPage = GetOrCreateServicePage(service);
+            var options = service.FileObserverOptions ?? new FileObserverServiceOptions();
+            var vm = ActivatorUtilities.CreateInstance<FileObserverEditServiceViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
+            var editView = App.AppHost.Services.GetRequiredService<FileObserverEditServiceView>();
+            editView.Initialize(vm);
+            vm.ServiceSaved += (name, opts) =>
+            {
+                service.DisplayName = $"File Observer - {name}";
+                service.FileObserverOptions = opts;
+                if (foPage != null)
+                    ShowPage(foPage);
+                _ = _viewModel.SaveServicesAsync();
+            };
+            vm.EditCancelled += () =>
+            {
+                if (foPage != null)
+                    ShowPage(foPage);
+            };
+            vm.AdvancedConfigRequested += opts =>
+            {
+            var advVm = ActivatorUtilities.CreateInstance<FileObserverAdvancedConfigViewModel>(App.AppHost.Services, opts);
+            var advView = App.AppHost.Services.GetRequiredService<FileObserverAdvancedConfigView>();
+            advView.Initialize(advVm);
+                advVm.Saved += _ => ShowPage(editView);
+                advVm.BackRequested += () => ShowPage(editView);
+                ShowPage(advView);
+            };
+            ShowPage(editView);
+            _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
+            return;
+        }
+
+        if (service.ServiceType == "SCP")
+        {
+            var scpPage = GetOrCreateServicePage(service);
+            var options = service.ScpOptions ?? new ScpServiceOptions();
+            var vm = App.AppHost.Services.GetRequiredService<ScpEditServiceViewModel>();
+            vm.Load(service.DisplayName.Split(" - ").Last(), options);
+            var editView = App.AppHost.Services.GetRequiredService<ScpEditServiceView>();
+            editView.Initialize(vm);
+            vm.ServiceSaved += (name, opts) =>
+            {
+                service.DisplayName = $"SCP - {name}";
+                service.ScpOptions = opts;
+                if (scpPage != null)
+                    ShowPage(scpPage);
+                _ = _viewModel.SaveServicesAsync();
+            };
+            vm.EditCancelled += () =>
+            {
+                if (scpPage != null)
+                    ShowPage(scpPage);
+            };
+            vm.AdvancedConfigRequested += opts =>
+            {
+                var advVm = App.AppHost.Services.GetRequiredService<ScpAdvancedConfigViewModel>();
+                advVm.Load(opts);
+                var advView = App.AppHost.Services.GetRequiredService<ScpAdvancedConfigView>();
+                advView.Initialize(advVm);
+                advVm.Saved += _ => ShowPage(editView);
+                advVm.BackRequested += () => ShowPage(editView);
+                ShowPage(advView);
+            };
+            ShowPage(editView);
+            _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
+            return;
+        }
+
+            if (service.ServiceType == "TCP")
+            {
+                var tcpPage = GetOrCreateServicePage(service);
+                var options = service.TcpOptions ?? new TcpServiceOptions();
+                var vm = App.AppHost.Services.GetRequiredService<TcpEditServiceViewModel>();
+                vm.ServiceType = service.ServiceType;
+                vm.Load(service.DisplayName.Split(" - ").Last(), options);
+                var editView = App.AppHost.Services.GetRequiredService<TcpEditServiceView>();
+                editView.Initialize(vm);
+
+                vm.ServiceSaved += (name, opts) =>
+                {
+                    service.DisplayName = $"{vm.ServiceType} - {name}";
+                    service.ServiceType = vm.ServiceType;
+                    service.TcpOptions = opts;
+                    if (tcpPage != null)
+                        ShowPage(tcpPage);
+                    _ = _viewModel.SaveServicesAsync();
+                };
+                vm.EditCancelled += () =>
+                {
+                    if (tcpPage != null)
+                        ShowPage(tcpPage);
+                };
+                ShowPage(editView);
+                _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
+                return;
+            }
+
+            if (service.ServiceType == "HTTP")
+            {
+                var httpPage = GetOrCreateServicePage(service);
+                var options = service.HttpOptions ?? new HttpServiceOptions();
+                var vm = ActivatorUtilities.CreateInstance<HttpEditServiceViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
+                var editView = App.AppHost.Services.GetRequiredService<HttpEditServiceView>();
+                editView.Initialize(vm);
+                vm.ServiceSaved += (name, opts) =>
+                {
+                    service.DisplayName = $"HTTP - {name}";
+                    service.HttpOptions = opts;
+                    if (httpPage != null)
+                        ShowPage(httpPage);
+                    _ = _viewModel.SaveServicesAsync();
+                };
+                vm.EditCancelled += () =>
+                {
+                    if (httpPage != null)
+                        ShowPage(httpPage);
+                };
+                vm.AdvancedConfigRequested += opts =>
+                {
+                    var advVm = ActivatorUtilities.CreateInstance<HttpAdvancedConfigViewModel>(App.AppHost.Services, opts);
+                    var advView = App.AppHost.Services.GetRequiredService<HttpAdvancedConfigView>();
+                    advView.Initialize(advVm);
+
+                    advVm.Saved += _ => ShowPage(editView);
+                    advVm.BackRequested += () => ShowPage(editView);
+                    ShowPage(advView);
+                };
+                ShowPage(editView);
+                _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
+                return;
+            }
+
+            if (service.ServiceType == "FTP Server" || service.ServiceType == "FTP")
+            {
+                var ftpPage = GetOrCreateServicePage(service);
+                var options = service.FtpOptions ?? new FtpServerOptions();
+                var vm = ActivatorUtilities.CreateInstance<FtpServerEditViewModel>(App.AppHost.Services, service.DisplayName.Split(" - ").Last(), options);
+                var editView = ActivatorUtilities.CreateInstance<FtpServerEditView>(App.AppHost.Services, vm);
+                vm.ServiceSaved += (name, opts) =>
+                {
+                    service.DisplayName = $"FTP Server - {name}";
+                    service.FtpOptions = opts;
+                    var opt = App.AppHost.Services.GetRequiredService<IOptions<FtpServerOptions>>().Value;
+                    opt.Port = opts.Port;
+                    opt.RootPath = opts.RootPath;
+                    opt.AllowAnonymous = opts.AllowAnonymous;
+                    opt.Username = opts.Username;
+                    opt.Password = opts.Password;
+                    if (ftpPage != null)
+                        ShowPage(ftpPage);
+                    _ = _viewModel.SaveServicesAsync();
+                };
+                vm.EditCancelled += () =>
+                {
+                    if (ftpPage != null)
+                        ShowPage(ftpPage);
+                };
+                vm.AdvancedConfigRequested += opts =>
+                {
+                    var advVm = ActivatorUtilities.CreateInstance<FtpServerAdvancedConfigViewModel>(App.AppHost.Services, opts);
+                    var advView = App.AppHost.Services.GetRequiredService<FtpServerAdvancedConfigView>();
+                    advView.Initialize(advVm);
+                    advVm.Saved += _ => ShowPage(editView);
+                    advVm.BackRequested += () => ShowPage(editView);
+                    ShowPage(advView);
+                };
+                ShowPage(editView);
+                _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
+                return;
+            }
+
+            var servicePage = GetOrCreateServicePage(service);
+            if (servicePage != null)
+            {
+                ShowPage(servicePage);
                 _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);
             }
         }
@@ -187,15 +965,6 @@ namespace DesktopApplicationTemplate.UI.Views
                 _logger?.LogDebug("RemoveService command executed");
             }
         }
-        private void EditService_Click(object sender, RoutedEventArgs e)
-        {
-            if (_viewModel.SelectedService == null)
-                return;
-
-            _logger?.LogDebug("EditService button clicked for {Name}", _viewModel.SelectedService.DisplayName);
-            OpenServiceEditor(_viewModel.SelectedService);
-        }
-
         private void ServiceList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             _logger?.LogDebug("Service selection changed");
@@ -213,34 +982,19 @@ namespace DesktopApplicationTemplate.UI.Views
             }
         }
 
-        private void OpenCsvViewer_Click(object sender, RoutedEventArgs e)
+        private void FilterButton_Click(object sender, RoutedEventArgs e)
         {
-            var vm = App.AppHost.Services.GetRequiredService<CsvViewerViewModel>();
-            var window = new CsvViewerWindow(vm);
-            vm.RequestClose += () => window.Close();
-            window.ShowDialog();
-        }
-
-        private void OpenFilter_Click(object sender, RoutedEventArgs e)
-        {
-            var window = new FilterWindow { DataContext = _viewModel.Filters };
-            if (window.ShowDialog() == true)
+            if (FilterPopup != null)
             {
-                // filters already applied via PropertyChanged event
+                FilterPopup.IsOpen = !FilterPopup.IsOpen;
             }
         }
 
-        private void EditServiceMenu_Click(object sender, RoutedEventArgs e)
-        {
-            if ((sender as MenuItem)?.DataContext is ServiceViewModel svc)
-            {
-                OpenServiceEditor(svc);
-            }
-        }
+        private void DeleteServiceMenu_Click(object sender, RoutedEventArgs e) => _ = DeleteServiceMenuAsync(sender, e);
 
-        private void DeleteServiceMenu_Click(object sender, RoutedEventArgs e)
+        private async Task DeleteServiceMenuAsync(object sender, RoutedEventArgs e)
         {
-            if ((sender as MenuItem)?.DataContext is ServiceViewModel svc)
+            if (sender is MenuItem { DataContext: ServiceListModel svc })
             {
                 var index = _viewModel.Services.IndexOf(svc);
                 svc.LogAdded -= _viewModel.OnServiceLogAdded;
@@ -254,26 +1008,35 @@ namespace DesktopApplicationTemplate.UI.Views
                 {
                     _viewModel.SelectedService = null;
                 }
-                _viewModel.SaveServices();
+                await _viewModel.SaveServicesAsync();
             }
         }
 
-        private void RenameServiceMenu_Click(object sender, RoutedEventArgs e)
+        private void RenameServiceMenu_Click(object sender, RoutedEventArgs e) => _ = RenameServiceMenuAsync(sender, e);
+
+        private async Task RenameServiceMenuAsync(object sender, RoutedEventArgs e)
         {
-            if ((sender as MenuItem)?.DataContext is ServiceViewModel svc)
+            if (sender is MenuItem { DataContext: ServiceListModel svc })
             {
                 string input = Interaction.InputBox("Enter new service name:", "Rename Service", svc.DisplayName);
                 if (!string.IsNullOrWhiteSpace(input))
                 {
-                    svc.DisplayName = input;
-                    _viewModel.SaveServices();
+                    var namePart = input.Contains(" - ") ? input.Split(" - ").Last() : input;
+                    if (_viewModel.Services.Any(s => s != svc && s.DisplayName.Split(" - ").Last().Equals(namePart, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        namePart = _viewModel.GenerateServiceName(svc.ServiceType);
+                    }
+                    svc.DisplayName = $"{svc.ServiceType} - {namePart}";
+                    await _viewModel.SaveServicesAsync();
                 }
             }
         }
 
-        private void ChangeColorMenu_Click(object sender, RoutedEventArgs e)
+        private void ChangeColorMenu_Click(object sender, RoutedEventArgs e) => _ = ChangeColorMenuAsync(sender, e);
+
+        private async Task ChangeColorMenuAsync(object sender, RoutedEventArgs e)
         {
-            if ((sender as MenuItem)?.DataContext is ServiceViewModel svc)
+            if (sender is MenuItem { DataContext: ServiceListModel svc })
             {
                 var dlg = new ColorPickerWindow { Owner = this };
                 if (dlg.ShowDialog() == true)
@@ -285,23 +1048,54 @@ namespace DesktopApplicationTemplate.UI.Views
                         s.BackgroundColor = brush;
                         s.BorderColor = brush;
                     }
-                    _viewModel.SaveServices();
+                    await _viewModel.SaveServicesAsync();
                 }
             }
         }
 
-        private void MainView_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        private void HeaderBar_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            if (e.Key == System.Windows.Input.Key.Escape)
+            if (e.ClickCount == 2)
             {
-                _viewModel.SelectedService = null;
-                ShowHome();
+                HeaderBar_MouseDoubleClick(sender, e);
+                e.Handled = true;
+                return;
             }
+
+            if (e.OriginalSource is not DependencyObject element ||
+                Helpers.VisualTreeHelperExtensions.FindParent<ButtonBase>(element) == null)
+            {
+                try
+                {
+                    DragMove();
+                }
+                catch (InvalidOperationException ex)
+                {
+                    _logger?.LogWarning(ex, "DragMove failed");
+                }
+            }
+            e.Handled = true;
+        }
+
+        private void HeaderBar_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (e.OriginalSource is DependencyObject element &&
+                Helpers.VisualTreeHelperExtensions.FindParent<ButtonBase>(element) != null)
+                return;
+
+            WindowState = WindowState == WindowState.Maximized
+                ? WindowState.Normal
+                : WindowState.Maximized;
+
+            _logger?.LogInformation("Window state changed to {State}", WindowState);
+            e.Handled = true;
         }
 
         private void MainView_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            var element = e.OriginalSource as DependencyObject;
+            if (e.OriginalSource is not DependencyObject element)
+                return;
+
             bool clickedListItem = Helpers.VisualTreeHelperExtensions.FindParent<ListBoxItem>(element) != null;
             bool clickedFrame = Helpers.VisualTreeHelperExtensions.FindParent<Frame>(element) != null;
             bool clickedButton = Helpers.VisualTreeHelperExtensions.FindParent<ButtonBase>(element) != null;
@@ -330,30 +1124,12 @@ namespace DesktopApplicationTemplate.UI.Views
             if (e.ClickCount < 2)
                 return;
 
-            if ((sender as Border)?.DataContext is ServiceViewModel svc)
+            if (sender is Border { DataContext: ServiceListModel svc })
             {
                 _logger?.LogDebug("Service {Name} double-clicked", svc.DisplayName);
-                OpenServiceEditor(svc);
-            }
-        }
-
-        private void OpenServiceEditor(ServiceViewModel svc)
-        {
-            if (svc.ServiceType == "CSV Creator")
-            {
-                var vm = App.AppHost.Services.GetRequiredService<CsvViewerViewModel>();
-                var window = new CsvViewerWindow(vm);
-                vm.RequestClose += () => window.Close();
-                window.ShowDialog();
-            }
-            else
-            {
-                var page = GetOrCreateServicePage(svc);
-                if (page != null)
+                if (_viewModel.EditServiceCommand.CanExecute(svc))
                 {
-                    svc.IsActive = false;
-                    ShowPage(page);
-                    _logger?.LogDebug("EditService workflow completed for {Name}", svc.DisplayName);
+                    _viewModel.EditServiceCommand.Execute(svc);
                 }
             }
         }
@@ -379,21 +1155,22 @@ namespace DesktopApplicationTemplate.UI.Views
             if (Math.Abs(position.X - _dragStart.X) > SystemParameters.MinimumHorizontalDragDistance ||
                 Math.Abs(position.Y - _dragStart.Y) > SystemParameters.MinimumVerticalDragDistance)
             {
-                if (sender is Border border && border.DataContext is ServiceViewModel svc)
+                if (sender is Border { DataContext: ServiceListModel svc } border)
                 {
                     DragDrop.DoDragDrop(border, svc, System.Windows.DragDropEffects.Move);
                 }
             }
         }
 
-        private void ServiceItem_Drop(object sender, System.Windows.DragEventArgs e)
+        private void ServiceItem_Drop(object sender, System.Windows.DragEventArgs e) => _ = ServiceItemDropAsync(sender, e);
+
+        private async Task ServiceItemDropAsync(object sender, System.Windows.DragEventArgs e)
         {
-            if (!e.Data.GetDataPresent(typeof(ServiceViewModel)))
+            if (!e.Data.GetDataPresent(typeof(ServiceListModel)))
                 return;
 
-            var source = (ServiceViewModel)e.Data.GetData(typeof(ServiceViewModel))!;
-            var target = (sender as Border)?.DataContext as ServiceViewModel;
-            if (source == null || target == null || source == target)
+            var source = (ServiceListModel)e.Data.GetData(typeof(ServiceListModel))!;
+            if (sender is not Border { DataContext: ServiceListModel target } || source == target)
                 return;
 
             int oldIndex = _viewModel.Services.IndexOf(source);
@@ -401,31 +1178,11 @@ namespace DesktopApplicationTemplate.UI.Views
             if (oldIndex != newIndex)
             {
                 _viewModel.Services.Move(oldIndex, newIndex);
-                _viewModel.SaveServices();
+                await _viewModel.SaveServicesAsync();
             }
         }
 
-        private void GlobalLogLevelBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (_viewModel == null)
-            {
-                _logger?.LogWarning("Log level changed before view model initialization");
-                return;
-            }
-
-            if (GlobalLogLevelBox.SelectedItem is ComboBoxItem item && item.Content != null)
-            {
-                _viewModel.LogLevelFilter = item.Content.ToString() switch
-                {
-                    "Warning" => LogLevel.Warning,
-                    "Error" => LogLevel.Error,
-                    "Debug" => LogLevel.Debug,
-                    _ => LogLevel.Debug
-                };
-
-                _logger?.LogInformation("Global log level set to {Level}", _viewModel.LogLevelFilter);
-            }
-        }
+        // Legacy handler removed; log level selection is now managed by ServiceLogView.
 
         private void ClearLog_Click(object sender, RoutedEventArgs e)
         {

@@ -11,7 +11,8 @@
         </ResourceDictionary>
     </Window.Resources>
     <Grid Margin="10">
-        <TextBlock TextWrapping="Wrap" Width="300">
+        <Button Content="X" Width="25" Height="25" HorizontalAlignment="Right" VerticalAlignment="Top" Click="Close_Click"/>
+        <TextBlock TextWrapping="Wrap" Width="300" Margin="0,30,0,0">
             <Run Text="Common ASCII commands:"/>
             <LineBreak/>
             <Run Text="ACK (0x06) - acknowledge"/>

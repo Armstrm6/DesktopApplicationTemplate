@@ -1,0 +1,37 @@
+<UserControl x:Class="DesktopApplicationTemplate.UI.Views.DataFlowDiagram"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="100" d:DesignWidth="300">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Border Grid.Column="0" Style="{DynamicResource FlowSectionBorderStyle}">
+            <StackPanel>
+                <TextBlock Text="Incoming Data" FontWeight="Bold" />
+                <TextBlock x:Name="IncomingText" Text="{Binding IncomingData}" />
+            </StackPanel>
+        </Border>
+        <TextBlock Grid.Column="1" Text="➔" VerticalAlignment="Center" Margin="10" />
+        <Border Grid.Column="2" Style="{DynamicResource FlowSectionBorderStyle}">
+            <StackPanel>
+                <TextBlock Text="Processing/Transformations" FontWeight="Bold" />
+                <TextBlock x:Name="ProcessingText" Text="{Binding ProcessingData}" />
+            </StackPanel>
+        </Border>
+        <TextBlock Grid.Column="3" Text="➔" VerticalAlignment="Center" Margin="10" />
+        <Border Grid.Column="4" Style="{DynamicResource FlowSectionBorderStyle}">
+            <StackPanel>
+                <TextBlock Text="Outgoing Data" FontWeight="Bold" />
+                <TextBlock x:Name="OutgoingText" Text="{Binding OutgoingData}" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

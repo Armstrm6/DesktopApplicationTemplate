@@ -1,22 +1,558 @@
 # Collaboration & Debug Tips (Codex <-> Matt)
 Purpose: Running log of what worked, what broke, and why.
 
-[2025-08-13 17:00] Topic: Logging DI refactor
-Context: Introduced constructor injection for logging services and confirmation helpers.
-Observations: Simplifies testing and removes static logger state.
-Codex Limitations noticed: Unable to execute Windows-specific tests in container.
-Effective Prompts / Instructions that worked: n/a
-Decisions & Rationale: Use DI to share single logging service and helpers.
-Action Items: Monitor CI for Windows-specific behaviors.
-Related Commits/PRs: (this PR)
+## How to Log
+- Keep a single block per topic or feature.
+- To expand an existing topic, update its block instead of creating a new one.
+- Append commit hashes or PR numbers to the **Related Commits/PRs** line as work continues.
+- Use `tools/add-tip.ps1` with the same `-Topic` value to generate a block, then merge it into the existing entry.
+- Always record environment limitations (e.g., missing dotnet runtime).
 
-[2025-08-13 17:40] Topic: Navigation bar logo
-Context: Replaced placeholder text with application logo in main window.
-Observations: Logo displays brand and cleans up header.
-Codex Limitations noticed: none
-Effective Prompts / Instructions that worked: n/a
-Decisions & Rationale: Use embedded image resource for branding.
+[2025-08-27 04:05] Topic: Documentation restructuring
+Context: Grouped changelog entries under feature headings and clarified topic-based logging.
+Observations: CHANGELOG now organizes items by feature; collaboration tips emphasize one block per topic.
+Codex Limitations noticed: PowerShell unavailable; appended tips manually.
+Effective Prompts / Instructions that worked: User request to clarify docs and logging.
+Decisions & Rationale: Improve readability and future contributions.
 Action Items: none
+Related Commits/PRs: c04f33a, 7a0c542
+
+[2025-08-27 04:00] Topic: Service rule and screen abstractions
+Context: Introduced IServiceRule/IServiceScreen services and refactored CSV and FTP create view models to use them.
+Observations: Validation and screen events are centralized, reducing duplication across service workflows.
+Effective Prompts / Instructions that worked: Followed AGENTS guidelines for DI and tests.
+Decisions & Rationale: Promote reuse and consistent screen behavior.
+Action Items: Monitor CI for Windows-specific issues.
+Related Commits/PRs: 7a3f881, 1effa28
+
+[2025-08-27 03:58] Topic: File search service
+Context: Added cached async file search integrated with File Observer to load image names through DI.
+Observations: Service caches `Directory.EnumerateFiles` results to speed lookups; view model loads names via DI.
+Effective Prompts / Instructions that worked: User request to centralize file enumeration.
+Decisions & Rationale: Provide reusable async search to support File Observer features.
+Action Items: Validate on Windows CI.
+Related Commits/PRs: 23548cf
+
+[2025-08-27 02:57] Topic: Test reliability and service persistence
+Context: Stabilized failing tests by ensuring options reload, awaiting file writes, and isolating static settings.
+Observations: Added directory creation before saving, restored TCP options, registered pack URI, and ran settings sequentially.
+Effective Prompts / Instructions that worked: AGENTS guidance on async/await and DI-safe constructors.
+Decisions & Rationale: Ensure deterministic tests and reliable service persistence.
+Action Items: Monitor CI for Windows-specific failures.
+Related Commits/PRs: c80804f, 1cb79cf, b5dc2f1, 4c139ec, 6db84db
+
+[2025-08-26 18:51] Topic: MQTT service enhancements
+Context: Consolidated subscription view, added connection editor, will options, per-topic QoS, and advanced settings.
+Observations: View models expose a single subscriptions collection, support per-topic QoS, and visualize subscribe results.
+Effective Prompts / Instructions that worked: Follow AGENTS for MVVM and DI.
+Decisions & Rationale: Simplify MQTT workflow and ensure options propagate to client.
+Action Items: Verify UI behavior on Windows CI.
+Related Commits/PRs: 07beb7c, 90841c1, 40c79dc
+
+[2025-08-26 12:00] Topic: Service creation navigation
+Context: Embedded service creation flows in the main window and added navigation helpers with tests.
+Observations: Double-clicking entries opens edit views; main window hosts service creation, removing separate window.
+Effective Prompts / Instructions that worked: User request to streamline navigation.
+Decisions & Rationale: Keep workflows within main window and validate navigation via tests.
+Action Items: Confirm via CI.
+Related Commits/PRs: 63d70dd, 40c79dc, 75c5e87
+
+[2025-08-26 11:00] Topic: FTP service fixes
+Context: Resolved service selection freeze, added cancel support, and fixed edit view constructor.
+Observations: FTP create/edit views preload options, close correctly, and constructor guards against null view model.
+Effective Prompts / Instructions that worked: Review build errors and follow DI guidelines.
+Decisions & Rationale: Improve FTP UX and ensure DI-friendly constructors.
+Action Items: Monitor CI for regressions.
+Related Commits/PRs: b6b4e9d, 5787356, ca07bb8
+
+[2025-08-27 05:30] Topic: Logging refactor
+Context: Began removing legacy `ILoggingService` in favor of built-in logging providers.
+Observations: Initial DI cleanup and configuration in `Program.cs` complete; remaining view models still reference old interface.
+Codex Limitations noticed: Extensive references make full migration time-consuming.
+Effective Prompts / Instructions that worked: Use `AddConsole()` and `AddDebug()` for provider setup.
+Decisions & Rationale: Start with infrastructure pieces before addressing individual view models.
+Action Items: Migrate remaining classes to `ILogger<T>` and update tests.
+Related Commits/PRs:
+
+[2025-09-15 14:00] Topic: Platform-specific test execution
+Context: Documented SDK prerequisites and standard build/test commands.
+Observations: Installed the .NET SDK 8.0.404 via script; `dotnet restore` and `dotnet build DesktopApplicationTemplate.sln` succeed, but `dotnet test --settings tests.runsettings --no-build` aborts because the Microsoft.WindowsDesktop.App 8.0.0 runtime and `xunit.abstractions` package are missing on Linux. WPF ships with the Windows SDK so no additional workload installation is required. In the current container, the `dotnet` CLI itself is not available, so restore, build, and test commands cannot run.
+Codex Limitations noticed: WindowsDesktop runtime unavailable, so test hosts for `DesktopApplicationTemplate.Tests` and `DesktopApplicationTemplate.UI.Tests` fail to launch. The .NET SDK is also missing, preventing `dotnet` commands from executing.
+Effective Prompts / Instructions that worked: Repository guidelines to log environment constraints and rely on CI for verification.
+Decisions & Rationale: Highlight prerequisites and note that CI or a Windows host is required for full test execution.
+Action Items: Rely on CI for Windows-specific build and test.
+Notes: Documented convention to append updates within existing topic blocks and omit redundant timestamps. After adding `Forms.xaml`, `dotnet test --settings tests.runsettings` still aborts because the Microsoft.WindowsDesktop.App 8.0.0 runtime is missing and WPF workloads are unavailable on Linux. WPF projects require Windows or the WindowsDesktop runtime; without it, builds produce `InitializeComponent` and `NETSDK1100` errors.
+Additional Notes: Installed .NET SDK 8.0.404 via dotnet-install; `dotnet restore` now succeeds, but `dotnet build DesktopApplicationTemplate.sln` fails with NETSDK1022 for duplicate `Themes/Forms.xaml`, and WPF test projects cannot run. Rely on CI for verification.
+Clarification: WPF workload installation is no longer required; related setup checks have been removed.
+Updated UI tests to remove collection fixtures; each test initializes Application via helper and assembly disables parallel execution.
+Latest Attempt: `dotnet restore` and `dotnet build` succeeded, but `dotnet test --settings tests.runsettings` aborted because the Microsoft.WindowsDesktop.App 8.0.0 runtime is missing.
+Current Attempt: `dotnet` CLI not found; unable to run restore, build, or tests locally. Rely on CI for verification.
+Newest Attempt: After ServiceManager updates, `dotnet restore`, `dotnet build`, and `dotnet test --settings tests.runsettings` all reported the `dotnet` command is missing; relying on CI.
+Another Attempt: After removing legacy WPF test fixtures, `dotnet` commands remain unavailable; continue relying on CI.
+Most Recent Attempt: `dotnet --version` still reports command not found; tests skipped and CI used for validation.
+Latest Attempt: After adjusting App startup to tolerate missing MainView registration, the `dotnet` CLI remains unavailable and tests could not run.
+Newest Attempt: After handling missing MainViewModel on exit, the `dotnet` CLI remains unavailable and tests could not run.
+Another Attempt: After expanding MQTT connection types, the `dotnet` CLI is still missing; restore, build, and test commands cannot execute.
+Latest Attempt: After updating MQTT topic subscription handling, the `dotnet` command remains unavailable; restore, build, and test cannot run and CI is required.
+Recent Attempt: `dotnet` command still missing; unable to run restore, build, or tests locally and will rely on CI.
+Newest Attempt: After adding MQTT log view, `dotnet` CLI remains missing; relying on CI for build and test.
+Another Attempt: After embedding a collapsible MQTT log panel and wiring global log handling, the `dotnet` CLI remains unavailable; relying on CI for build and test.
+Latest Attempt: After removing assembly-qualified namespaces and wiring MQTT subscriptions view to the shared log control, the `dotnet` CLI remains missing; relying on CI for build and test.
+Another Attempt: After updating TcpEditServiceViewModel advanced config and installing the .NET SDK 8.0.404, `dotnet restore` succeeded but `dotnet build` failed with MqttService.cs missing `ConnectingFailedAsync`; relying on CI for validation.
+Another Attempt: After adding TCP view placeholders, the `dotnet` command is still missing; restore, build, and tests cannot run locally, so CI will verify.
+Another Attempt: After extending TCP advanced configuration with script fields, the `dotnet` CLI remains unavailable; relying on CI.
+Another Attempt: After adding SCP service validation, the `dotnet` command is still missing; will rely on CI.
+Another Attempt: After injecting IServiceRule into create/edit view models and updating XAML validation, the `dotnet` CLI remains unavailable; relying on CI.
+Latest Attempt: After registering service screen for FTP options and adding DI resolution test, the `dotnet` command is still missing; relying on CI.
+Latest Attempt: Installed the .NET SDK 8.0.404; `dotnet restore` and `dotnet build` succeeded, but `dotnet test --settings tests.runsettings` failed because the Microsoft.WindowsDesktop.App 8.0.0 runtime is missing.
+Newest Attempt: After introducing shared ServiceEditorView, the `dotnet` command remains unavailable; relying on CI for verification.
+Another Attempt: After exposing AdvancedConfigCommand directly in HTTP service views, the `dotnet` CLI remains unavailable; relying on CI for build and test.
+Latest Attempt: After consolidating editor buttons into a shared control, the `dotnet` CLI is still missing; relying on CI for verification.
+Latest Attempt: After adding ServiceMessageTableView, `dotnet restore` and `dotnet build` succeeded, but `dotnet test --settings tests.runsettings` aborted because the Microsoft.WindowsDesktop.App 8.0.0 runtime is missing; relying on CI.
+Current Attempt: After centralizing advanced config view models and button bars, the `dotnet` command remains unavailable; build and tests deferred to CI.
+Latest Attempt: Installed SDK 8.0 via apt and dotnet-install to satisfy global.json; restore succeeded, but build and tests fail with missing `ILoggingService` and WPF-generated code errors. Rely on CI for verification.
+Newest Attempt: After unifying service editor events, the `dotnet` command remains unavailable; build and tests deferred to CI.
+Another Attempt: After adding Service.Services using to FtpServerEditViewModelTests, `dotnet build DesktopApplicationTemplate.sln` and `dotnet test --settings tests.runsettings` failed because the `dotnet` command is missing; relying on CI.
+Newest Attempt: Installed .NET SDK 8.0.404 and ran `dotnet build DesktopApplicationTemplate.Tests/DesktopApplicationTemplate.Tests.csproj`; build failed with CS0108/CS0067 errors in generated WPF code and ServiceEditorViewModelBase, so CI will handle verification.
+Another Attempt: After adding a missing `DesktopApplicationTemplate.UI.Services` using to CsvServiceEditorViewModelTests, `dotnet build DesktopApplicationTemplate.Tests/DesktopApplicationTemplate.Tests.csproj` still fails with CS0108 errors in generated `CsvServiceEditorView.g.cs`; will rely on CI.
+Another Attempt: After safeguarding `CsvServiceOptions` access with null-conditionals, the `dotnet` command remains unavailable; build and tests deferred to CI.
+Another Attempt: After typing view-model dependencies as interfaces, the `dotnet` command is still missing; build and test rely on CI.
+Another Attempt: After relocating logging abstractions to the core library, the `dotnet` CLI remains unavailable; relying on CI for build and tests.
+Another Attempt: After qualifying helper namespaces for StringNullOrEmptyToVisibilityConverter, the `dotnet` command is still missing; relying on CI.
+Latest Attempt: After guarding client certificate usage for cross-platform support, the `dotnet` command is still missing; build and tests deferred to CI.
+Newest Attempt: After qualifying HttpServiceView helper namespace and installing the .NET SDK 8.0.404, `dotnet build DesktopApplicationTemplate.sln` failed with missing `MqttConnectionType`, and `dotnet test --settings tests.runsettings --no-build` ran only core tests due to the absent WindowsDesktop runtime.
+Another Attempt: After replacing explicit null checks with throw helpers in MqttService, the `dotnet` CLI remains unavailable; restore, build, and tests cannot run locally, so CI will verify.
+Another Attempt: After adding a reusable ServiceLogView component, the `dotnet` command is still missing; relying on CI for build and test.
+Latest Attempt: After replacing event-handler casts with property pattern matching, the `dotnet` CLI is still missing; restore, build, and test commands cannot run locally and CI will verify.
+Latest Attempt: During object and collection initializer refactor, the `dotnet` command remained unavailable; restore, build, and test commands could not run and CI will verify.
+Another Attempt: After removing the keyboard release call, the `dotnet` command remains unavailable; build and tests deferred to CI.
+Latest Attempt: After implementing the SendInput-based keyboard helper, the `dotnet` CLI is still missing; build and tests deferred to CI.
+Latest Attempt: After correcting XAML namespace qualifiers for converters and shared controls, the `dotnet` CLI is still missing; build and test commands cannot run locally and verification is deferred to CI.
+Current Attempt: After adding keyboard release hooks for process exit and unhandled exceptions, installed .NET SDK 8.0.404; `dotnet restore` and `dotnet build` succeed but `dotnet test --settings tests.runsettings` aborts because the Microsoft.WindowsDesktop.App runtime is missing.
+Latest Attempt: After removing `KeyboardHelper` and its tests, the `dotnet` command remains unavailable; restore, build, and test commands cannot run locally, so CI will verify.
+Latest Attempt: After removing the MainView key handler, the `dotnet` command is still missing; build and tests deferred to CI.
+Another Attempt: After confirming `KeyboardHelperTests.cs` is absent, the `dotnet` CLI remains unavailable; build and tests deferred to CI.
+Another Attempt: After adding explicit Windows service name options, the `dotnet` command is still missing; build and tests rely on CI.
+Latest Attempt: After removing the unsupported DisplayName option and correcting TextBoxHintBehavior signatures, the `dotnet` command remains unavailable; relying on CI for verification.
+Latest Attempt: After importing the Helpers namespace into App startup to resolve missing helper types, the `dotnet` CLI is still missing; restore, build, and test commands cannot run locally, so CI will verify.
+Newest Attempt: While unifying log views, the `dotnet` command remained unavailable; build and tests deferred to CI.
+Latest Attempt: After correcting LogEntry namespaces and removing the global log level handler, the `dotnet` CLI is still missing; relying on CI for build and test.
+Another Attempt: After fixing ServiceLogView namespace bindings and command delegates, the `dotnet` command remains unavailable; restore, build, and tests must run in CI.
+Latest Attempt: Installed .NET SDK 8.0.404; `dotnet restore` and `dotnet build` succeeded, but `dotnet test --settings tests.runsettings` aborted because the Microsoft.WindowsDesktop.App 8.0.0 runtime is missing; relying on CI.
+Latest Attempt: After converting TcpServiceMessagesViewModel script execution to async and updating related tests, the `dotnet` CLI is still missing; `dotnet restore`, `dotnet build DesktopApplicationTemplate.sln`, and `dotnet test --settings tests.runsettings` all report command not found.
+Newest Attempt: After qualifying XAML namespaces and marking MQTT subscription view model as Windows-only, the `dotnet` CLI is still missing; relying on CI for build and test.
+Latest Attempt: After aligning log view model with shared log entry and adding assembly-qualified namespaces, the `dotnet` command remains unavailable; build and tests will run in CI.
+Latest Attempt: After including ServiceLogView.xaml as a Page and qualifying the HttpServiceView shared namespace, the `dotnet` CLI is still missing; restore, build, and test commands cannot run locally, so CI will verify.
+Latest Attempt: Installed .NET SDK 8.0.404 and explicitly included ServiceLogView.xaml; build fails with XAML error MC3074 for ServiceLogView, so CI will need to confirm the fix.
+Latest Attempt: After removing remaining assembly qualifiers from service view namespaces to fix converter errors, the dotnet CLI remains unavailable; build and tests deferred to CI.
+Latest Attempt: After adding a parameterless constructor to HttpServiceView, the dotnet CLI remains unavailable; rebuild and tests deferred to CI.
+Latest Attempt: Installed the .NET SDK 8.0.404 and removed assembly qualifiers from HTTP and MQTT views; `dotnet build DesktopApplicationTemplate.sln` succeeded, but `dotnet test --settings tests.runsettings --no-build` aborted because the Microsoft.WindowsDesktop.App 8.0.0 runtime is missing.
+Latest Attempt: After updating ServiceLogView build metadata and reverting HttpServiceView to the project-local shared namespace, `dotnet build DesktopApplicationTemplate.sln` succeeded but `dotnet test --settings tests.runsettings` aborted because the Microsoft.WindowsDesktop.App runtime is missing.
+Latest Attempt: After removing TCP script controls and adding a test message property, the `dotnet` command is still missing; build and tests will run in CI.
+Latest Attempt: After adding the script editor window, the `dotnet` command remains unavailable; build and tests will run in CI.
+Newest Attempt: After updating TCP service persistence and tests, the `dotnet` command is still missing; restore, build, and test commands could not run locally so CI will verify.
+Current Attempt: Installed .NET SDK 8.0.404; `dotnet restore` and `dotnet build` succeeded, but `dotnet workload install wpf` is unrecognized and `dotnet test --settings tests.runsettings` aborted because the Microsoft.WindowsDesktop.App 8.0.0 runtime is missing.
+Latest Attempt: After limiting ServiceMessageTableViewModel to five rows, the `dotnet` command is still missing; restore, build, and tests cannot run locally and CI will verify.
+Another Attempt: After wrapping the TCP service messages view in a ScrollViewer and capping table height, the `dotnet` command remains unavailable; build and tests are deferred to CI.
+Latest Attempt: After moving script editing to an ICommand, the `dotnet` CLI remains unavailable; restore, build, and tests could not run locally and CI will verify.
+Newest Attempt: `dotnet` command still missing; restore, build, and tests cannot run locally and CI will verify.
+Latest Attempt: After removing the application logo and adding header text, `dotnet restore` succeeded but `dotnet build DesktopApplicationTemplate.sln` failed with XAML errors and `dotnet test --settings tests.runsettings` produced similar errors; relying on CI for validation.
+Latest Attempt: Installed .NET SDK 8.0.404 and built successfully, but `dotnet test --settings tests.runsettings` aborted because the Microsoft.WindowsDesktop.App runtime is missing; relying on CI.
+Newest Attempt: After extracting ScriptGlobals into its own class for TCP script execution, the `dotnet` command remains unavailable; restore, build, and test steps could not run locally and CI will verify.
+Latest Attempt: After fixing the script editor binding error, the `dotnet` command remains unavailable; restore, build, and tests cannot run locally, so CI will verify.
+Latest Attempt: After adding script execution logging to TcpServiceMessagesViewModel, the `dotnet` command is still missing; restore, build, and tests cannot run locally and CI will verify.
+Latest Attempt: After exposing the default TCP script and adding tests, the `dotnet` command remains unavailable; restore, build, and test commands cannot run locally, so CI will verify.
+Latest Attempt: After wiring script output events to the TCP messages view, the `dotnet` CLI is still missing; restore, build, and test steps could not run and will be validated in CI.
+Latest Attempt: After exposing `ScriptGlobals` for TCP scripting, the `dotnet` command remains unavailable; relying on CI for build and test.
+Latest Attempt: After making the script editor `Globals` class public, the `dotnet` command remains unavailable; restore, build, and test commands cannot run locally so CI will verify.
+Latest Attempt: After mirroring script editor test message updates in the TCP messages view and cleaning up subscriptions on close, the `dotnet` command remains unavailable; restore, build, and test commands cannot run locally, so CI will verify.
+Latest Attempt: After adding an Information log level and logging tests, the `dotnet` command is still missing; restore, build, and test commands cannot run locally and CI will verify.
+Latest Attempt: Renamed SaveServices to SaveServicesAsync, but the `dotnet` command remains unavailable; build and tests deferred to CI.
+Latest Attempt: After restricting TcpServiceMessagesViewModel.OutputMessage setter to internal, the `dotnet` command remains unavailable; restore, build, and tests cannot run locally and CI will verify.
+Latest Attempt: After ensuring TCP scripts return their results, the `dotnet` command is still missing; restore, build, and test commands could not run locally, so CI will verify.
+Latest Attempt: After confirming TcpServiceMessagesViewModel.SaveAsync usage, `dotnet restore` succeeded but `dotnet build` reported VSTHRD100/101 analyzer errors; tests could not run locally and CI will verify.
+Latest Attempt: After ensuring TcpServiceMessagesViewModel.OutputMessage setter always raises PropertyChanged, the `dotnet` command remains unavailable; restore, build, and test steps will run in CI.
+Latest Attempt: After converting RunInitialScript to async and updating SetService, the `dotnet` CLI is still missing; `dotnet build DesktopApplicationTemplate.sln` and `dotnet test --settings tests.runsettings` could not run locally and will be verified in CI.
+Current Attempt: Installed .NET SDK 8.0.404; `dotnet restore` and `dotnet build DesktopApplicationTemplate.sln` succeeded, but `dotnet test --settings tests.runsettings` aborted because the Microsoft.WindowsDesktop.App 8.0.0 runtime is missing.
+Latest Attempt: While verifying TcpServiceMessagesView log host implementation, the `dotnet` command remains unavailable; restore, build, and test commands cannot run locally, so CI will verify.
+Latest Attempt: After disabling auto-generated columns in ServiceMessageTableView, the `dotnet` CLI remains unavailable; restore, build, and test commands could not run locally, so CI will verify.
+Latest Attempt: After renaming ServiceViewModel to ServiceListModel, `dotnet workload install wpf` reported the workload ID not recognized. `dotnet restore` and `dotnet build DesktopApplicationTemplate.sln` succeeded, but `dotnet test --settings tests.runsettings` aborted because the Microsoft.WindowsDesktop.App runtime is missing; relying on CI.
+Latest Attempt: After adding execution duration and message tracking to ServiceListModel and installing the .NET SDK 8.0.404, `dotnet restore` and `dotnet build` succeeded but `dotnet test --settings tests.runsettings` failed because the Microsoft.WindowsDesktop.App 8.0.0 runtime is missing; relying on CI.
+Latest Attempt: After guarding HID message formatting with try/catch, the `dotnet` command is still missing; restore, build, and tests deferred to CI.
+Latest Attempt: After replacing ColorCanvas with ColorPicker to resolve color picker crashes, the `dotnet` command is still missing; restore, build, and tests deferred to CI.
+Latest Attempt: After updating VisualTreeHelperExtensions to traverse the logical tree when an element is not a Visual, installed the .NET SDK 8.0.404 and ran `dotnet test --settings tests.runsettings`; core tests passed but DesktopApplicationTemplate.Tests aborted because the Microsoft.WindowsDesktop.App 8.0.0 runtime is missing, and `dotnet workload install wpf` reports the workload ID is not recognized on Linux.
+Latest Attempt: After extending FindParent<T> to handle non-visual elements like `Run` without throwing and adding tests, the `dotnet` command remains unavailable; restore, build, and test steps cannot run locally and CI will verify.
+Latest Attempt: After ensuring the SCP DI test registers `IServiceRule`, the `dotnet` command remains unavailable; restore, build, and test commands cannot run locally, so CI will verify.
+Related Commits/PRs: 8517691, 4c0dbb5, 1b5b0ec, 739abbe, 4f74a36, ff70210, 272560a, 26960dc, 7e9096b, 6454680, a70fb18, f1e064e
+[2025-08-27 04:25] Topic: Logging interface restoration
+Context: Introduced core logging abstractions and refactored edit view models to support DI.
+Observations: Added ILoggingService, LogLevel enum, moved LogEntry to core, and implemented Load methods on TCP and SCP edit view models.
+Codex Limitations noticed: PowerShell unavailable; appended tip manually.
+Effective Prompts / Instructions that worked: User request to fix logging build errors and target .NET 8.0.404.
+Decisions & Rationale: Centralize logging for reuse and simplify DI by removing constructor parameters.
+Action Items: none
+Related Commits/PRs:
+[2025-08-27 04:34] Topic: Logging service DI
+Context: Save confirmation dialog failed because ILoggingService was not registered.
+Observations: Added LoggingService to DI, added tests verifying SaveConfirmationHelper resolves only when logger is registered.
+Codex Limitations noticed: pwsh unavailable for add-tip script.
+Effective Prompts / Instructions that worked: Use DI registration guidelines and error message from runtime.
+Decisions & Rationale: Register logging service to satisfy helper dependency and avoid runtime exceptions.
+Action Items: Run tests.
+Related Commits/PRs:
+
+[2025-08-27 06:00] Topic: Main window bounds and service metrics
+Context: Limited main window height to the work area and displayed average execution time in the service list.
+Observations: Window no longer overlaps the taskbar; services show performance metrics beside their names.
+Effective Prompts / Instructions that worked: User request to cap window size and reveal execution averages.
+Decisions & Rationale: Preserve screen real estate and provide quick insight into service performance.
+Action Items: Validate on Windows CI.
+Related Commits/PRs:
+
+[2025-08-27 04:50] Topic: Service average binding mode
+Context: Launching the app threw a parse exception because `AverageExecutionTimeMs` was bound two-way despite being read-only.
+Observations: Explicit `Mode=OneWay` prevents the binding engine from treating the property as writable.
+Effective Prompts / Instructions that worked: Error log in issue description highlighted the binding mode mismatch.
+Decisions & Rationale: Set binding to one-way to align with read-only property and avoid startup crash.
+Action Items: Verify behavior on Windows CI.
+Related Commits/PRs:
+[2025-08-27 05:00] Topic: FTP advanced config DI
+Context: FtpServerAdvancedConfigView failed to construct due to mismatched constructor arguments.
+Observations: Added code-behind with logger injection and Initialize pattern; MainWindow now resolves view from DI and sets DataContext.
+Effective Prompts / Instructions that worked: Align view initialization with existing advanced config patterns and DI guidelines.
+Decisions & Rationale: Use logger-injected constructor and separate Initialize method to match other services and avoid extraneous constructor arguments.
+Related Commits/PRs:
+
+[2025-08-27 07:00] Topic: MQTT field tooltips
+Context: Added tooltips to MQTT create and edit views to indicate expected text input.
+Observations: Tooltips mirror field labels so users know what to enter.
+Effective Prompts / Instructions that worked: User request to insert text guidance.
+Decisions & Rationale: Use `ToolTip` attributes for immediate user feedback without altering bindings.
+Action Items: Extend tooltips to remaining service views.
+Related Commits/PRs:
+[2025-08-28 12:00] Topic: Auto tooltips for text inputs
+Context: Added behavior to generate tooltips from bound property names and applied across views.
+Observations: Users now see expected field names when hovering over any text box.
+Effective Prompts / Instructions that worked: Request to insert guidance text for all text inputs.
+Decisions & Rationale: Use attached behavior to avoid manual per-field maintenance and ensure consistency.
+Action Items: Verify behavior on Windows CI.
+Related Commits/PRs:
+[2025-08-28 14:30] Topic: Behavior namespace and logging annotations
+Context: Fixed missing behaviors namespace in MainWindow and marked log types as Windows-only to suppress warnings.
+Observations: XAML parse error resolved; platform analyzer warnings reduced with SupportedOSPlatform attributes.
+Effective Prompts / Instructions that worked: Use AGENTS guidelines for XAML and platform attributes.
+Decisions & Rationale: Explicitly declare namespaces and OS support to ensure build stability.
+Action Items: Monitor CI for Windows-specific issues.
+Related Commits/PRs:
+[2025-08-28 15:00] Topic: TextBox hint behavior parse error
+Context: Application startup failed with a XAML parse exception for TextBoxHintBehavior in Forms.xaml.
+Observations: Adding an explicit assembly reference in Forms.xaml's behaviors namespace resolved the missing type error.
+Effective Prompts / Instructions that worked: Exception message highlighted the missing type and line number.
+Decisions & Rationale: Specify the UI assembly to ensure the XAML parser locates the behavior regardless of load context.
+Action Items: Monitor CI for any remaining XAML parse issues.
+Related Commits/PRs:
+[2025-08-27 17:47] Topic: System namespace and FormField style
+Context: XAML errors for missing System.Object and FormField style.
+Observations: Removed explicit assembly qualifier in Forms.xaml and compiled it as a Page to ensure FormField style loads.
+Additional Notes: Later removed the manual Page include since the SDK already includes XAML files implicitly, avoiding duplicate item errors.
+Effective Prompts / Instructions that worked: User request to resolve assembly and resource errors.
+Decisions & Rationale: Use project namespaces and compile resources to avoid runtime parse failures.
+Action Items: Validate changes on Windows CI.
+Related Commits/PRs:
+[2025-08-27 17:57] Topic: CodexSafe test categories
+Context: Removed all TestCategory attributes, including CodexSafe markers, and deleted the custom TestCategoryAttribute.
+Observations: Tests no longer include custom category traits; redundant attribute file removed.
+Effective Prompts / Instructions that worked: User request to clean up obsolete test categories.
+Decisions & Rationale: Simplify test suite and remove unused trait infrastructure.
+Action Items: Monitor CI for Windows-specific issues.
+Related Commits/PRs:
+
+[2025-08-27 18:11] Topic: Setup script cleanup
+Context: Removed Codex test project invocation from setup script.
+Observations: Script now restores, builds, and runs primary tests only.
+Effective Prompts / Instructions that worked: User request to simplify setup.
+Decisions & Rationale: Streamline setup by excluding Codex-specific tests.
+Related Commits/PRs:
+[2025-08-27 18:28] Topic: DesktopApplicationTemplate.Tests.Codex cleanup
+Context: Confirmed solution and filesystem contain no DesktopApplicationTemplate.Tests.Codex entries.
+Observations: No deletions required; tests could not run because dotnet CLI is unavailable.
+Codex Limitations noticed: Missing .NET SDK; unable to build or run tests.
+Effective Prompts / Instructions that worked: `rg` and `find` searches for Codex entries.
+Decisions & Rationale: No action needed beyond verification.
+Action Items: Rely on CI for test execution.
+Related Commits/PRs:
+[2025-08-27 19:20] Topic: TCP options GetService fix
+Context: Replaced GetRequiredService with null-checked GetService and removed exception suppression in ServicePersistence.
+Observations: TCP options now update only when available via DI.
+Codex Limitations noticed: .NET SDK not installed; unable to run restore, build, or tests locally.
+Effective Prompts / Instructions that worked: User request to handle missing TCP options without throwing.
+Decisions & Rationale: Avoid InvalidOperationException during startup by checking for registered options.
+Action Items: Rely on CI for test coverage.
+Related Commits/PRs: f37e904
+[2025-09-06 09:00] Topic: Test parallelization attribute
+Context: Added assembly-level attribute to disable xUnit parallelization.
+Observations: Installed .NET SDK but WindowsDesktop runtime is unavailable; tests abort.
+Codex Limitations noticed: Missing WindowsDesktop runtime in container.
+Effective Prompts / Instructions that worked: Root instructions to run tests sequentially.
+Decisions & Rationale: Use CollectionBehavior attribute to enforce sequential execution.
+Action Items: Rely on CI for Windows execution.
+Related Commits/PRs:
+
+[2025-08-27 21:16] Topic: WPF test attributes
+Context: Added custom WindowsFact/WindowsTheory to run UI tests on STA threads and updated existing WPF tests to use them.
+Observations: .NET SDK 8.0.404 installed successfully, but Microsoft.WindowsDesktop runtime is unavailable so tests abort.
+Codex Limitations noticed: Missing WindowsDesktop runtime prevents executing WPF tests on Linux.
+Effective Prompts / Instructions that worked: User request to replace Fact with WindowsFact in UI tests.
+Decisions & Rationale: Provide reusable attributes so UI tests no longer manage threads manually.
+Action Items: Rely on CI for Windows-specific test execution.
+Related Commits/PRs:
+[2025-09-07 00:00] Topic: .NET SDK version mismatch
+Context: Attempted to run tests after moving network services to Core and adding skippable facts.
+Observations: Installed dotnet-sdk-8.0 (8.0.119) but global.json requires 8.0.404; `dotnet test` fails with SDK not found and Windows desktop runtime remains unavailable.
+Codex Limitations noticed: Missing required .NET SDK and WindowsDesktop runtime.
+Effective Prompts / Instructions that worked: `apt-get install dotnet-sdk-8.0` to install available SDK.
+Decisions & Rationale: Rely on CI for full test execution.
+Action Items: none
+Related Commits/PRs:
+
+[2025-09-07 10:30] Topic: Logging package references
+Context: Build errors for System.Windows.Media and ILogger due to missing WPF and logging assemblies.
+Observations: Core targeted net8.0 without WPF; UI lacked logging abstractions reference.
+Codex Limitations noticed: dotnet CLI not installed; unable to restore, build, or run tests.
+Effective Prompts / Instructions that worked: Compiler errors highlighted missing references.
+Decisions & Rationale: Target net8.0-windows with UseWPF and add Microsoft.Extensions.Logging.Abstractions to resolve errors.
+Action Items: Rely on CI for verification.
+Related Commits/PRs:
+
+[2025-09-08 12:00] Topic: Build error fixes
+Context: Removed duplicate using directives and added missing namespaces to resolve build failures.
+Observations: Solution now builds, but tests abort due to missing Microsoft.WindowsDesktop runtime.
+Codex Limitations noticed: WindowsDesktop runtime unavailable in container.
+Effective Prompts / Instructions that worked: Compiler errors highlighting missing types and namespace conflicts.
+Decisions & Rationale: Clean up using statements and import model namespaces to restore compilation.
+Action Items: Rely on CI for Windows-specific test execution.
+Related Commits/PRs:
+
+[2025-09-09 00:00] Topic: Windows runtime test skips removal
+Context: Removed Windows desktop runtime checks and SkippableFact attributes so tests run when Visual Studio provides the runtime.
+Observations: Tests still cannot execute in the container because the Microsoft.WindowsDesktop runtime is absent.
+Codex Limitations noticed: Missing WindowsDesktop runtime prevents local test execution.
+Effective Prompts / Instructions that worked: User request to remove environment check.
+Decisions & Rationale: Allow tests to run on capable machines and rely on CI for verification.
+Action Items: Rely on CI for full test run.
+Related Commits/PRs:
+[2025-09-09 12:30] Topic: Core tests cross-platform compatibility
+Context: Changed test project to target net8.0 and removed UseWPF so it can run on non-Windows hosts.
+Observations: Installing .NET SDK 8.0.404 succeeded, but `dotnet restore` fails because the core library targets net8.0-windows.
+Codex Limitations noticed: Core project requires Windows-specific framework preventing local test execution.
+Effective Prompts / Instructions that worked: User request to drop Windows-specific framework from tests.
+Decisions & Rationale: Update tests to target net8.0; rely on CI or future core refactor for full cross-platform support.
+Action Items: none
+Related Commits/PRs:
+
+[2025-09-10 12:30] Topic: WPF logging refactor
+Context: Moved `LogEntry`, `LogLevel`, and `ILoggingService` into a new `DesktopApplicationTemplate.Windows` project and retargeted core to `net8.0`.
+Observations: Core no longer requires WPF; UI and service apps reference the new Windows library.
+Codex Limitations noticed: Linux container lacks the Microsoft.WindowsDesktop runtime, so build and test commands cannot run locally.
+Effective Prompts / Instructions that worked: User request to isolate WPF-specific types from the core library.
+Decisions & Rationale: Introduced a dedicated Windows project while preserving existing namespaces to minimize code changes.
+Action Items: Rely on CI for verification.
+Related Commits/PRs:
+
+[2025-09-10 17:00] Topic: Cross-platform log colors
+Context: Replaced `System.Windows.Media.Brush` usage with hex color strings in `LogEntry` and related services.
+Observations: Logging now avoids WPF types; UI converts hex strings back to brushes for display.
+Codex Limitations noticed: `dotnet` CLI missing; restore/build/test cannot run in container.
+Effective Prompts / Instructions that worked: User request to remove WPF dependencies and multi-target core project.
+Decisions & Rationale: Use hex strings to represent colors for platform neutrality.
+Action Items: Rely on CI for full test execution.
+Related Commits/PRs:
+
+[2025-09-11 09:00] Topic: Project reference alignment
+Context: Added core dependency to `DesktopApplicationTemplate.Windows` and updated changelog to clarify project references.
+Observations: Non-Windows assemblies now depend solely on the cross-platform core; Windows projects reference both core and Windows library.
+Codex Limitations noticed: Installed dotnet-sdk-8.0 (8.0.119) but global.json requires 8.0.404; restore/build/test commands fail.
+Effective Prompts / Instructions that worked: Repository guidance on logging limitations and project reference adjustments.
+Decisions & Rationale: Tie Windows library to core to unify shared services.
+Action Items: Rely on CI for verification.
+Related Commits/PRs:
+[2025-09-12 10:00] Topic: Core test targeting
+Context: Set DesktopApplicationTemplate.Core.Tests to target cross-platform .NET 8.
+Observations: `dotnet restore` and `dotnet build` succeeded; `dotnet test` aborted when running Windows-specific tests due to missing Microsoft.WindowsDesktop runtime.
+Codex Limitations noticed: WPF workload unsupported on Linux and WindowsDesktop runtime unavailable.
+Effective Prompts / Instructions that worked: Followed setup guidance to document environment limitations after running tests.
+Decisions & Rationale: Rely on CI for Windows-only test coverage.
+Action Items: none
+Related Commits/PRs:
+[2025-09-13 12:00] Topic: UI test project split
+Context: Created DesktopApplicationTemplate.UI.Tests and moved WPF-specific tests from the main test project.
+Observations: dotnet commands failed because the required 8.0.404 SDK and WindowsDesktop runtime are missing on Linux.
+Effective Prompts / Instructions that worked: User request to isolate WPF tests into a dedicated assembly.
+Decisions & Rationale: Separate UI tests to keep non-WPF tests independent and clarify responsibilities.
+Action Items: Rely on CI for WPF test execution.
+Related Commits/PRs:
+[2025-09-14 09:00] Topic: Windows-only test attributes
+Context: Added WindowsFact/WindowsTheory for UI tests on STA threads.
+Observations: Attributes skip on non-Windows hosts so UI tests rely on CI.
+Codex Limitations noticed: Linux container lacks Microsoft.WindowsDesktop runtime and the `dotnet` CLI; build and test commands fail.
+Effective Prompts / Instructions that worked: User request to skip Windows-only tests and simplify WPF fixtures.
+Decisions & Rationale: Use WindowsFact to avoid annotating each test with platform checks.
+Action Items: Rely on CI for verification.
+Related Commits/PRs:
+[2025-09-15 10:00] Topic: Shared test utilities
+Context: Introduced TestCommon library for reusable fixtures and consolidated ConsoleTestLogger and Windows-specific test attributes.
+Observations: All test projects reference TestCommon to remove duplicated code and now skip it as a test project; tests still cannot run due to missing WindowsDesktop runtime.
+Codex Limitations noticed: Windows desktop runtime unavailable in the container.
+Effective Prompts / Instructions that worked: User request to centralize shared test helpers.
+Decisions & Rationale: Reduce duplication and simplify maintenance by sharing fixtures.
+Action Items: Rely on CI for test execution.
+Related Commits/PRs: e6a90a3, ed1d219
+Latest Attempt: After limiting service creation options, the `dotnet` command remains unavailable; tests could not run locally and CI will verify.
+Another Attempt: After inlining TCP advanced options into create/edit views, the `dotnet` command is still missing; restore, build, and test commands could not run and CI will verify.
+
+Latest Attempt: After removing TcpServiceView and updating navigation, the `dotnet` command remains unavailable; relying on CI for tests.
+
+Another Attempt: After persisting the TCP last test message, the `dotnet` command is still missing; will rely on CI for build and test.
+
+[2025-09-16 10:00] Topic: WindowsFact CA1416 guard
+Context: Build failed due to Windows-only `Thread.SetApartmentState` usage in a WindowsFact test case.
+Observations: Wrapped `SetApartmentState` call in `OperatingSystem.IsWindows` check; CA1416 no longer triggers but UI tests still fail to compile because the WPF workload isn't available on Linux.
+Codex Limitations noticed: WPF workload and WindowsDesktop runtime unavailable; test builds fail with missing WPF members and packages.
+Effective Prompts / Instructions that worked: User request to guard Windows-specific API.
+Decisions & Rationale: Guard thread setup to silence analyzer while WindowsFact skips tests on non-Windows hosts.
+Action Items: Rely on CI for Windows build and test.
+Related Commits/PRs: e91c00d
+[2025-08-28 15:44] Topic: UI project build on Linux
+Context: Attempted to build DesktopApplicationTemplate.UI project alone as requested.
+Observations: `dotnet build DesktopApplicationTemplate.UI/DesktopApplicationTemplate.UI.csproj` and `dotnet test --settings tests.runsettings` failed because the `dotnet` CLI is not installed. Latest attempt after event invocation refactor still reports `command not found: dotnet`.
+Codex Limitations noticed: .NET SDK and WindowsDesktop runtime are missing, so build and tests cannot run in the container.
+Effective Prompts / Instructions that worked: Build command supplied by user instructions.
+Decisions & Rationale: Log the missing tooling and rely on CI for Windows-specific build and test.
+Action Items: Rely on CI for verification.
+Related Commits/PRs:
+[2025-09-17 09:00] Topic: AsyncRelayCommand build verification
+Context: Verified AsyncRelayCommand usages and attempted solution build and test.
+Observations: All files using AsyncRelayCommand already include DesktopApplicationTemplate.UI.Helpers and consuming projects reference DesktopApplicationTemplate.UI. Installing the .NET SDK 8.0.404 still left WPF components unavailable on Linux; subsequent build and test commands failed with WPF control reference errors.
+Codex Limitations noticed: WPF workload unavailable on Linux; build/test fail due to missing WindowsDesktop dependencies.
+Effective Prompts / Instructions that worked: Repository instructions for dotnet installation and logging limitations.
+Decisions & Rationale: Confirmed references, documented environment constraints, and will rely on CI for Windows validation.
+Action Items: Rely on CI.
+Related Commits/PRs:
+
+[2025-09-20 10:00] Topic: Console test logger usings
+Context: Added global using statements for ConsoleTestLogger across test projects.
+Observations: Installed .NET SDK 8.0.404 and replaced escape sequences with plain text; `dotnet restore` and `dotnet build` succeeded, but `dotnet test` aborted because the Microsoft.WindowsDesktop.App runtime is missing.
+Codex Limitations noticed: WindowsDesktop runtime absent on Linux so tests cannot run after building.
+Effective Prompts / Instructions that worked: Repository guidance on logging limitations and updating shared test utilities.
+Decisions & Rationale: Consolidate logger access with global usings while documenting environment constraints.
+Action Items: Rely on CI for verification.
+Related Commits/PRs:
+[2025-09-21 12:00] Topic: Core targeting fix
+Context: Windows builds failed with NETSDK1005 due to net8.0-windows target in Core.
+Observations: Removing the windows target avoids missing targeting pack errors and allows dependent projects to compile.
+Codex Limitations noticed: Linux container lacks WindowsDesktop runtime so build/test still fail.
+Effective Prompts / Instructions that worked: User provided error list highlighting missing net8.0-windows assets.
+Decisions & Rationale: Target only net8.0 because Windows-specific code lives in the Windows library.
+Action Items: Rely on CI for WPF validation.
+Related Commits/PRs:
+[2025-09-22 10:00] Topic: TextBox hint behavior namespace
+Context: Verified TextBoxHintBehavior is public and ensured Forms.xaml and all views reference the behaviors namespace with an explicit assembly qualifier.
+Observations: Reintroduced the assembly-qualified namespace in Forms.xaml and views using TextBoxHintBehavior. Attempted `dotnet restore`, `dotnet build DesktopApplicationTemplate.sln`, and `dotnet test --settings tests.runsettings`, but the `dotnet` CLI is unavailable in this container.
+Codex Limitations noticed: .NET SDK and WindowsDesktop runtime missing previously; build and tests cannot run without the CLI.
+Effective Prompts / Instructions that worked: User request to confirm UI build references and behavior visibility.
+Decisions & Rationale: Explicit assembly qualifiers ensure TextBoxHintBehavior resolves across projects; rely on CI for validation.
+Action Items: Rely on CI.
+Related Commits/PRs:
+
+[2025-09-23 10:00] Topic: ThemeManager test removal
+Context: ThemeManager UI test caused dispatcher access exceptions and failed locally.
+Observations: Removed the test and attempted `dotnet restore`, `dotnet build`, and `dotnet test` after installing SDK 8.0.404; build failed with missing `Microsoft.NETCore.App.Ref` assemblies.
+Codex Limitations noticed: Linux environment lacks required reference assemblies and WindowsDesktop runtime, so builds and tests cannot run.
+Effective Prompts / Instructions that worked: User request to temporarily remove failing test and repository guidance on documenting limitations.
+Decisions & Rationale: Delete unstable test and rely on CI for verification.
+Action Items: Rely on CI for Windows-specific validation.
+Related Commits/PRs:
+[2025-09-27 12:00] Topic: Dispatcher helper deadlock
+Context: UI navigation test for File Observer hung because dispatcher queue wasn't processed.
+Observations: Updated RunOnDispatcher to invoke actions asynchronously and run the message loop so queued work completes.
+Codex Limitations noticed: .NET SDK and WindowsDesktop runtime are unavailable; restore/build/test commands cannot run locally.
+Effective Prompts / Instructions that worked: User report of deadlock and AGENTS guidance on async patterns.
+Decisions & Rationale: Pump dispatcher and shut down after action to avoid deadlocks.
+Action Items: Rely on CI for verification.
+Related Commits/PRs:
+
+[2025-09-27 13:00] Topic: File Observer browse command
+Context: Added folder selection support to File Observer service creation.
+Observations: Injected IFileDialogService and Browse command to update the path.
+Codex Limitations noticed: dotnet CLI missing; restore, build, and test commands could not run.
+Effective Prompts / Instructions that worked: User request to add Browse button.
+Decisions & Rationale: Enable users to pick directories when configuring the service.
+Action Items: Rely on CI for verification.
+Related Commits/PRs:
+
+[2025-08-29 16:00] Topic: UI test removal
+Context: Removed DesktopApplicationTemplate.UI.Tests project and WPF UI tests that hung due to initialization issues.
+Observations: Deleting UI tests leaves only data-focused tests; solution no longer references the UI test project.
+Codex Limitations noticed: PowerShell and the .NET SDK are unavailable, so `tools/add-tip.ps1` and `dotnet test` could not run.
+Effective Prompts / Instructions that worked: User request to eliminate unstable UI unit tests.
+Decisions & Rationale: Drop UI tests to avoid infinite loops and rely on CI or manual verification for UI behavior.
+Action Items: Rely on CI for any UI validation.
+Related Commits/PRs:
+
+[2025-09-28 10:00] Topic: Installer build verification
+Context: Attempted to rebuild installer after verifying TextBoxHintBehavior.AutoToolTip.
+Observations: Replaced inheritance from ServiceEditorView with a Page and EditorButtonBar composition to remove CS0108 warnings; UI and installer projects now build.
+Codex Limitations noticed: Microsoft.WindowsDesktop runtime missing so tests abort after building.
+Effective Prompts / Instructions that worked: User request to confirm behavior and rebuild.
+Decisions & Rationale: Avoid InitializeComponent name conflicts by composing EditorButtonBar directly; rely on CI for Windows-specific tests.
+Action Items: none
+Related Commits/PRs:
+[2025-09-05 14:24] Topic: Pattern matching conversions
+Context: Updated SettingsPage.NavigateBack to use pattern matching.
+Observations: Replaced 'as' cast null check with 'is not' pattern, improving readability.
+Codex Limitations noticed: dotnet CLI not installed; restore/build/test cannot run.
+Effective Prompts / Instructions that worked: User request to adopt modern pattern matching.
+Decisions & Rationale: Use 'is not' pattern with early return.
+Action Items: Rely on CI for validation.
+Related Commits/PRs:
+[2025-09-30 10:00] Topic: Script editor dependency conflict
+Context: Tried restoring, building, and testing after adding TCP script editing.
+Observations: dotnet restore/build/test failed with Microsoft.CodeAnalysis.Common version conflicts; `dotnet workload install wpf` reports Workload ID not recognized.
+Codex Limitations noticed: Dependency mismatch blocks local validation; will depend on CI.
+Effective Prompts / Instructions that worked: Repository instructions to log limitations.
+Decisions & Rationale: Note conflict and proceed with code changes relying on CI verification.
+Action Items: Resolve package versions in future work.
+Latest Attempt: After bumping Microsoft.CodeAnalysis packages to 4.12.0, `dotnet restore` succeeded but `dotnet build DesktopApplicationTemplate.sln` failed with CS1061 'DocumentLine' missing `BackgroundColor` and VSTHRD100/101 analyzer errors; `dotnet workload install wpf` still reports Workload ID not recognized. Relying on CI for validation.
+Next Attempt: Installed .NET SDK 8.0.404, replaced `DocumentLine.BackgroundColor` with a line transformer, and converted async lambdas to `AsyncRelayCommand`; `dotnet build DesktopApplicationTemplate.sln` now succeeds but `dotnet test --settings tests.runsettings` aborts because the Microsoft.WindowsDesktop.App runtime is missing.
+Current Attempt: `dotnet restore`, `dotnet build DesktopApplicationTemplate.sln`, and `dotnet test --settings tests.runsettings` report command not found; relying on CI for validation.
+Latest Attempt: After updating ScriptEditorViewModel to use JoinableTaskFactory, `dotnet restore` and `dotnet build DesktopApplicationTemplate.sln` succeeded. `dotnet workload install wpf` still reports Workload ID not recognized, and `dotnet test --settings tests.runsettings` aborts because the Microsoft.WindowsDesktop.App runtime is missing.
+Newest Attempt: After adding a test for ScriptEditor RunCommand updating TcpServiceMessagesViewModel without saving, the `dotnet` command is still missing; restore, build, and test commands cannot run locally and CI will handle verification.
+Latest Attempt: Removed async lambdas in MainWindow to satisfy VSTHRD analyzers; `dotnet restore` and `dotnet build DesktopApplicationTemplate.sln` succeed, but `dotnet test --settings tests.runsettings` fails because the Microsoft.WindowsDesktop.App runtime is missing.
+Current Attempt: After persisting script editor test messages, `dotnet` CLI remains unavailable; restore, build, and test commands could not run locally and CI will verify.
+Newest Attempt: After ensuring the script editor returns processed output, `dotnet` CLI is still missing; restore, build, and test commands cannot run locally and CI will verify.
+Latest Attempt: Exception handler tests added, but `dotnet` command remains unavailable so restore, build, and test steps could not execute; relying on CI for verification.
+Latest Attempt: After implementing HID cleanup disposal, the `dotnet` command remains unavailable; restore, build, and test commands could not run locally and CI will verify.
+Latest Attempt: After replacing Moq event raises with direct MQTT client event invocations in MqttServiceTests, `dotnet test --settings tests.runsettings` aborted because the Microsoft.WindowsDesktop.App 8.0.0 runtime is missing; relying on CI.
+Latest Attempt: `dotnet workload install wpf` reported the workload ID is not recognized. After adding `IServiceRule` registration to `ScpDiRegistrationTests`, `dotnet test --settings tests.runsettings` aborted because the Microsoft.WindowsDesktop.App 8.0.0 runtime is missing; relying on CI.
+Latest Attempt: After moving script editor globals to a top-level class and adjusting RunAsync, the `dotnet` command was initially missing; installing the .NET SDK 8.0.404 enabled restore and build, but `dotnet test --settings tests.runsettings` aborted because the Microsoft.WindowsDesktop.App runtime is missing.
+Newest Attempt: Installed the .NET SDK 8.0.404 via script; `dotnet restore` and `dotnet build DesktopApplicationTemplate.sln` succeeded, but `dotnet test --settings tests.runsettings` aborted because the Microsoft.WindowsDesktop.App 8.0.0 runtime is missing; relying on CI.
+Related Commits/PRs:
+[2025-10-01 09:00] Topic: EditorButtonBar namespace
+Context: Verified EditorButtonBar build action and updated consuming views to use an assembly-qualified namespace.
+Observations: Added Page/DependentUpon entries and ensured all references use `views` with assembly qualifier.
+Codex Limitations noticed: `dotnet` CLI not installed; restore/build/test commands could not run.
+Effective Prompts / Instructions that worked: User request to confirm control references and build settings.
+Decisions & Rationale: Explicit project entries and namespace qualification ensure the control loads across views.
+Action Items: Rely on CI for validation.
+Related Commits/PRs:
+[2025-10-02 09:00] Topic: Service log view scrollbars
+Context: Adjusted ServiceLogView ListBox to show scrollbars and wrap text.
+Observations: Updated XAML with auto scrollbars, text wrapping, and margin for clearer log entries.
+Codex Limitations noticed: dotnet CLI is unavailable; unable to run restore, build, or tests.
+Effective Prompts / Instructions that worked: User request to expose more log text in the UI.
+Decisions & Rationale: Improve log readability; document missing tooling and rely on CI for validation.
+Action Items: Rely on CI for verification.
+Related Commits/PRs:
 Related Commits/PRs: (this PR)
 
 [2025-08-13 17:52] Topic: Logo resource path fix

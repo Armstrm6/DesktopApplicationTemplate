@@ -1,47 +1,24 @@
 using System.Windows.Controls;
-using DesktopApplicationTemplate.UI.ViewModels;
-using DesktopApplicationTemplate.UI.Services;
-
 using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.UI.ViewModels;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
-    public partial class FTPServiceView : Page
+    /// <summary>
+    /// View displaying FTP server status and transfers.
+    /// </summary>
+    public partial class FTPServiceView : Page, IServiceLogHost
     {
-        private readonly FtpServiceViewModel _viewModel;
-        private readonly ILoggingService _logger;
-        public FTPServiceView(FtpServiceViewModel vm, ILoggingService logger)
+        public FTPServiceView(FtpServiceViewModel viewModel, ILoggingService logger)
         {
             InitializeComponent();
-            _viewModel = vm;
-            DataContext = vm;
-            _logger = logger;
-            _viewModel.Logger = _logger;
+            DataContext = viewModel;
+            viewModel.Logger = logger;
         }
 
-        private void LogLevelBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        public void SetServiceContext(ServiceListModel service)
         {
-            if (LogLevelBox.SelectedItem is ComboBoxItem item)
-            {
-                if (_logger is LoggingService concrete)
-                {
-                    switch (item.Content?.ToString())
-                    {
-                        case "Warning":
-                            concrete.MinimumLevel = LogLevel.Warning;
-                            break;
-                        case "Error":
-                            concrete.MinimumLevel = LogLevel.Error;
-                            break;
-                        case "Debug":
-                            concrete.MinimumLevel = LogLevel.Debug;
-                            break;
-                        default:
-                            concrete.MinimumLevel = LogLevel.Debug;
-                            break;
-                    }
-                }
-            }
+            LogView.DataContext = new ServiceLogViewModel(service.DisplayName, service.ServiceType, service.Logs);
         }
     }
 }

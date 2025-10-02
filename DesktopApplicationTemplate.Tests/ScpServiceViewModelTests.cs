@@ -9,7 +9,6 @@ namespace DesktopApplicationTemplate.Tests
     public class ScpServiceViewModelTests
     {
         [Fact]
-        [TestCategory("CodexSafe")]
         public void DefaultPort_Is22()
         {
             var helper = new SaveConfirmationHelper(new Mock<ILoggingService>().Object);

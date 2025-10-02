@@ -1,16 +1,14 @@
+using System.Collections.Generic;
+using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.Services;
-using DesktopApplicationTemplate.Models;
 using Microsoft.Extensions.Configuration;
 using Xunit;
-using System.Collections.Generic;
 
 namespace DesktopApplicationTemplate.Tests
 {
     public class StartupServiceTests
     {
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public void GetSettings_ReturnsExpectedValues()
         {
             var inMemorySettings = new Dictionary<string, string?>
@@ -37,6 +35,27 @@ namespace DesktopApplicationTemplate.Tests
             Assert.Equal("Information", settings.LogLevel);
             Assert.False(settings.AutoStart);
             Assert.Equal("/path/script.cs", settings.DefaultCSharpScriptPath);
+
+            ConsoleTestLogger.LogPass();
+        }
+
+        [Fact]
+        public void AutoStart_DefaultsToFalse_WhenNotConfigured()
+        {
+            var inMemorySettings = new Dictionary<string, string?>
+            {
+                {"AppSettings:Environment", "Test"}
+            };
+
+            IConfiguration configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(inMemorySettings)
+                .Build();
+
+            var startupService = new StartupService(configuration);
+
+            AppSettings settings = startupService.GetSettings();
+
+            Assert.False(settings.AutoStart);
 
             ConsoleTestLogger.LogPass();
         }

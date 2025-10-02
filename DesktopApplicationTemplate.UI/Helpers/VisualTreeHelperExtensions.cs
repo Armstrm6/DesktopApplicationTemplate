@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Media.Media3D;
 
 namespace DesktopApplicationTemplate.UI.Helpers
 {
@@ -12,8 +13,17 @@ namespace DesktopApplicationTemplate.UI.Helpers
             {
                 if (parent is T correctlyTyped)
                     return correctlyTyped;
-                parent = VisualTreeHelper.GetParent(parent);
+
+                parent = parent switch
+                {
+                    FrameworkElement fe => fe.Parent,
+                    FrameworkContentElement fce => fce.Parent,
+                    ContentElement ce => ContentOperations.GetParent(ce),
+                    Visual or Visual3D => VisualTreeHelper.GetParent(parent),
+                    _ => LogicalTreeHelper.GetParent(parent)
+                };
             }
+
             return null;
         }
     }

@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+using System;
+using System.Collections.ObjectModel;
 using System.Windows.Input;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Services;
@@ -6,7 +7,7 @@ using DesktopApplicationTemplate.Core.Services;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
-    public class HidViewModel : ViewModelBase
+    public class HidViewModel : ViewModelBase, IDisposable
     {
         private string _messageTemplate = string.Empty;
         public string MessageTemplate
@@ -63,6 +64,30 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             set { _finalMessage = value; OnPropertyChanged(); }
         }
 
+        private string _incomingData = string.Empty;
+        /// <summary>Raw data received before processing.</summary>
+        public string IncomingData
+        {
+            get => _incomingData;
+            set { _incomingData = value; OnPropertyChanged(); }
+        }
+
+        private string _processingData = string.Empty;
+        /// <summary>Intermediate representation used during transformations.</summary>
+        public string ProcessingData
+        {
+            get => _processingData;
+            set { _processingData = value; OnPropertyChanged(); }
+        }
+
+        private string _outgoingData = string.Empty;
+        /// <summary>Resulting data after processing.</summary>
+        public string OutgoingData
+        {
+            get => _outgoingData;
+            set { _outgoingData = value; OnPropertyChanged(); }
+        }
+
         public ICommand BuildCommand { get; }
         public ICommand SaveCommand { get; }
 
@@ -78,12 +103,27 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private void BuildMessage()
         {
             Logger?.Log("Building HID message", LogLevel.Debug);
-            FinalMessage = string.Format(FormatTemplate ?? "{0}", MessageTemplate);
-            Logger?.Log($"Final HID message: {FinalMessage}", LogLevel.Debug);
-            if (!string.IsNullOrWhiteSpace(AttachedService))
+            IncomingData = MessageTemplate;
+            ProcessingData = FormatTemplate ?? "{0}";
+            try
             {
-                Logger?.Log($"Forwarding message to {AttachedService}", LogLevel.Debug);
-                MessageForwarder.Forward(AttachedService, FinalMessage);
+                FinalMessage = string.Format(ProcessingData, IncomingData);
+                OutgoingData = FinalMessage;
+                Logger?.Log($"Final HID message: {FinalMessage}", LogLevel.Debug);
+                if (!string.IsNullOrWhiteSpace(AttachedService))
+                {
+                    Logger?.Log($"Forwarding message to {AttachedService}", LogLevel.Debug);
+                    MessageForwarder.Forward(AttachedService, FinalMessage);
+                }
+            }
+            catch (FormatException ex)
+            {
+                Logger?.Log($"HID message formatting failed: {ex.Message}", LogLevel.Error);
+                return;
+            }
+            finally
+            {
+                KeyboardSimulator.Reset();
             }
         }
 
@@ -91,6 +131,14 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         {
             Logger?.Log("Saving HID configuration", LogLevel.Debug);
             _saveHelper.Show();
+        }
+
+        /// <summary>
+        /// Releases any simulated key presses.
+        /// </summary>
+        public void Dispose()
+        {
+            KeyboardSimulator.Reset();
         }
     }
 }

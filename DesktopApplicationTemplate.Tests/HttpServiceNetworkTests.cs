@@ -16,8 +16,6 @@ namespace DesktopApplicationTemplate.Tests;
 public class HttpServiceNetworkTests
 {
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public async Task SendRequest_ReceivesLocalResponse()
     {
         var portPicker = new TcpListener(IPAddress.Loopback, 0);
@@ -29,7 +27,7 @@ public class HttpServiceNetworkTests
         listener.Prefixes.Add($"http://localhost:{port}/");
         listener.Start();
 
-        var respondTask = Task.Run(async () =>
+        var listenerTask = Task.Run(async () =>
         {
             var ctx = await listener.GetContextAsync();
             var buffer = Encoding.UTF8.GetBytes("ok");
@@ -43,7 +41,7 @@ public class HttpServiceNetworkTests
         var vm = new HttpServiceViewModel(helper) { Url = $"http://localhost:{port}/" };
         await vm.SendRequestAsync();
 
-        await respondTask;
+        await listenerTask;
 
         Assert.Equal(200, vm.StatusCode);
         Assert.Equal("ok", vm.ResponseBody);
@@ -52,8 +50,6 @@ public class HttpServiceNetworkTests
     }
 
     [Fact]
-    [TestCategory("CodexSafe")]
-    [TestCategory("WindowsSafe")]
     public async Task SendRequest_SendsCorrectData()
     {
         var handlerMock = new Mock<HttpMessageHandler>();
@@ -67,8 +63,14 @@ public class HttpServiceNetworkTests
             });
 
         var helper = new SaveConfirmationHelper(new Mock<ILoggingService>().Object);
-        var vm = new HttpServiceViewModel(helper) { Url = "http://localhost/", SelectedMethod = "POST", RequestBody = "data", MessageHandler = handlerMock.Object };
-        vm.Headers.Add(new HttpServiceViewModel.HeaderItem { Key = "X-Test", Value = "1" });
+        var vm = new HttpServiceViewModel(helper)
+        {
+            Url = "http://localhost/",
+            SelectedMethod = "POST",
+            RequestBody = "data",
+            MessageHandler = handlerMock.Object,
+            Headers = { new HttpServiceViewModel.HeaderItem { Key = "X-Test", Value = "1" } }
+        };
 
         await vm.SendRequestAsync();
 

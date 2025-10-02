@@ -1,9 +1,5 @@
-﻿using DesktopApplicationTemplate.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using DesktopApplicationTemplate.UI.Models;
 
 namespace DesktopApplicationTemplate.UI.Services
 {
@@ -12,5 +8,4 @@ namespace DesktopApplicationTemplate.UI.Services
         Task RunStartupChecksAsync();
         AppSettings GetSettings();
     }
-
 }

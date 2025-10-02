@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
-using DesktopApplicationTemplate.UI.Models;
-using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Core.Models;
+using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using Moq;
 using Xunit;
@@ -10,8 +10,6 @@ namespace DesktopApplicationTemplate.Tests
     public class NetworkConfigurationViewModelTests
     {
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public async Task LoadAndApplyConfiguration_UsesService()
         {
             var service = new Mock<INetworkConfigurationService>();

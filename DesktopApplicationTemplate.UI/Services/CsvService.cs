@@ -11,34 +11,39 @@ namespace DesktopApplicationTemplate.UI.Services
     public class CsvService
     {
         private readonly CsvViewerViewModel _viewModel;
-        private readonly ILoggingService? _logger;
         private int _index = 0;
         private bool _headerWritten;
 
-        public CsvService(CsvViewerViewModel vm, ILoggingService? logger = null)
+        public CsvService(CsvViewerViewModel vm)
         {
             _viewModel = vm;
-            _logger = logger;
         }
+
+        private static bool IsCsvService(string serviceName) =>
+            serviceName.Contains("CSV", System.StringComparison.OrdinalIgnoreCase);
 
         public void EnsureColumnsForService(string serviceName)
         {
+            if (IsCsvService(serviceName))
+                return;
+
             if (!_viewModel.Configuration.Columns.Any(c => c.Name == serviceName))
             {
                 _viewModel.Configuration.Columns.Add(new CsvColumnConfig { Name = serviceName, Service = serviceName });
-                _logger?.Log($"Added CSV column for service {serviceName}", LogLevel.Debug);
             }
             string sent = $"{serviceName} Sent";
             if (!_viewModel.Configuration.Columns.Any(c => c.Name == sent))
             {
                 _viewModel.Configuration.Columns.Add(new CsvColumnConfig { Name = sent, Service = serviceName });
-                _logger?.Log($"Added CSV column for service {sent}", LogLevel.Debug);
             }
             _viewModel.Save();
         }
 
         public void RemoveColumnsForService(string serviceName)
         {
+            if (IsCsvService(serviceName))
+                return;
+
             var sent = $"{serviceName} Sent";
             var toRemove = _viewModel.Configuration.Columns
                 .Where(c => c.Name == serviceName || c.Name == sent)
@@ -46,16 +51,21 @@ namespace DesktopApplicationTemplate.UI.Services
             foreach (var col in toRemove)
             {
                 _viewModel.Configuration.Columns.Remove(col);
-                _logger?.Log($"Removed CSV column {col.Name}", LogLevel.Debug);
             }
+
             if (toRemove.Count > 0)
             {
                 _viewModel.Save();
+                _index++;
+                _headerWritten = false;
             }
         }
 
         public void RecordLog(string serviceName, string message)
         {
+            if (IsCsvService(serviceName))
+                return;
+
             EnsureColumnsForService(serviceName);
             EnsureHeader();
             var columns = _viewModel.Configuration.Columns.Select(_ => string.Empty).ToArray();
@@ -66,7 +76,6 @@ namespace DesktopApplicationTemplate.UI.Services
             if (index >= 0)
                 columns[index] = message.Replace(',', ' ');
             AppendRow(columns);
-            _logger?.Log($"Recorded log for {serviceName}: {message}", LogLevel.Debug);
         }
 
         public void AppendRow(IEnumerable<string?> values)
@@ -74,7 +83,6 @@ namespace DesktopApplicationTemplate.UI.Services
             string fileName = BuildFileName();
             var line = string.Join(',', values.Select(v => v ?? string.Empty));
             File.AppendAllText(fileName, line + System.Environment.NewLine, Encoding.UTF8);
-            _logger?.Log($"Appended row to {fileName}", LogLevel.Debug);
         }
 
         private void EnsureHeader()
@@ -86,7 +94,6 @@ namespace DesktopApplicationTemplate.UI.Services
             {
                 var header = string.Join(',', _viewModel.Configuration.Columns.Select(c => c.Name));
                 File.AppendAllText(fileName, header + System.Environment.NewLine, Encoding.UTF8);
-                _logger?.Log($"Wrote CSV header to {fileName}", LogLevel.Debug);
             }
             _headerWritten = true;
         }
@@ -95,9 +102,15 @@ namespace DesktopApplicationTemplate.UI.Services
         {
             string pattern = _viewModel.Configuration.FileNamePattern;
             string name = pattern.Replace("{index}", _index.ToString());
-            if (!name.Contains("{index}"))
+            if (pattern.Contains("{index}"))
                 _index++;
-            return name;
+            var directory = _viewModel.Configuration.OutputDirectory ?? string.Empty;
+            var path = Path.Combine(directory, name);
+            var folder = Path.GetDirectoryName(path);
+            if (!string.IsNullOrEmpty(folder))
+                Directory.CreateDirectory(folder);
+            return path;
         }
+
     }
 }

@@ -3,8 +3,12 @@ using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.Helpers;
-using DesktopApplicationTemplate.UI.Models;
+using DesktopApplicationTemplate.Core.Models;
 using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Models;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.IO;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -16,7 +20,7 @@ public class ScpServiceViewModel : ViewModelBase, ILoggingViewModel, INetworkAwa
             get => _host;
             set
             {
-                if (InputValidators.IsValidPartialIp(value))
+                if (InputValidators.IsValidHost(value))
                     _host = value;
                 OnPropertyChanged();
             }
@@ -50,7 +54,41 @@ public class ScpServiceViewModel : ViewModelBase, ILoggingViewModel, INetworkAwa
         public ICommand TransferCommand { get; }
         public ICommand SaveCommand { get; }
 
-        public ILoggingService? Logger { get; set; }
+        private ILoggingService? _logger;
+        public ILoggingService? Logger
+        {
+            get => _logger;
+            set
+            {
+                if (_logger == value) return;
+                if (_logger is not null)
+                    _logger.LogAdded -= OnLogAdded;
+                _logger = value;
+                if (_logger is not null)
+                    _logger.LogAdded += OnLogAdded;
+            }
+        }
+
+        public ObservableCollection<LogEntry> Logs { get; } = new();
+
+        private LogLevel _logLevelFilter = LogLevel.Debug;
+        public LogLevel LogLevelFilter
+        {
+            get => _logLevelFilter;
+            set
+            {
+                if (_logLevelFilter == value) return;
+                _logLevelFilter = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(DisplayLogs));
+            }
+        }
+
+        public IEnumerable<LogEntry> DisplayLogs => Logs.Where(l => l.Level >= LogLevelFilter);
+
+        public ICommand RefreshLogCommand { get; }
+        public ICommand ExportLogCommand { get; }
+        public ICommand ClearLogCommand { get; }
 
         private readonly SaveConfirmationHelper _saveHelper;
 
@@ -58,8 +96,11 @@ public class ScpServiceViewModel : ViewModelBase, ILoggingViewModel, INetworkAwa
         {
             _saveHelper = saveHelper;
             BrowseCommand = new RelayCommand(Browse);
-            TransferCommand = new RelayCommand(async () => await TransferAsync());
+            TransferCommand = new AsyncRelayCommand(TransferAsync);
             SaveCommand = new RelayCommand(Save);
+            RefreshLogCommand = new RelayCommand(() => OnPropertyChanged(nameof(DisplayLogs)));
+            ExportLogCommand = new RelayCommand(ExportLogs);
+            ClearLogCommand = new RelayCommand(ClearLogs);
         }
 
         private void Browse()
@@ -86,6 +127,22 @@ public class ScpServiceViewModel : ViewModelBase, ILoggingViewModel, INetworkAwa
         {
             Host = configuration.IpAddress;
         }
+
+        private void ClearLogs()
+        {
+            Logs.Clear();
+            OnPropertyChanged(nameof(DisplayLogs));
+            Logger?.Log("SCP logs cleared", LogLevel.Debug);
+        }
+
+        private void ExportLogs()
+        {
+            var path = Path.Combine(Path.GetTempPath(), "scp_logs.txt");
+            File.WriteAllLines(path, DisplayLogs.Select(l => l.Message));
+            Logger?.Log($"SCP logs exported to {path}", LogLevel.Debug);
+        }
+
+        private void OnLogAdded(LogEntry entry) => Logs.Insert(0, entry);
 
         // OnPropertyChanged provided by ViewModelBase
     }

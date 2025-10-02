@@ -4,11 +4,10 @@ using DesktopApplicationTemplate.UI.ViewModels;
 
 namespace DesktopApplicationTemplate.Tests
 {
+    [Collection("NonParallel")]
     public class SettingsViewModelPersistenceTests
     {
         [Fact]
-        [TestCategory("CodexSafe")]
-        [TestCategory("WindowsSafe")]
         public void SaveAndLoad_PersistsFirstRunAndSuppression()
         {
             var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
@@ -19,8 +18,7 @@ namespace DesktopApplicationTemplate.Tests
             SettingsViewModel.FilePath = Path.Combine(tempDir, "userSettings.json");
             try
             {
-                var vm = new SettingsViewModel();
-                vm.FirstRun = false;
+                var vm = new SettingsViewModel { FirstRun = false };
                 SettingsViewModel.SaveConfirmationSuppressed = true;
                 SettingsViewModel.CloseConfirmationSuppressed = true;
                 vm.Save();
