@@ -4,6 +4,7 @@ using DesktopApplicationTemplate.Core.Services.Protocols.Ftp;
 using DesktopApplicationTemplate.Core.Services.Protocols.Heartbeat;
 using DesktopApplicationTemplate.Core.Services.Protocols.Http;
 using DesktopApplicationTemplate.Core.Services.Protocols.Mqtt;
+using DesktopApplicationTemplate.Core.Services.Protocols.Scp;
 using DesktopApplicationTemplate.Core.Services.Protocols.Tcp;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.EditHandlers;
@@ -163,6 +164,8 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<ILoggingService, LoggingService>();
             services.AddSingleton<IMessageRoutingService, MessageRoutingService>();
             services.AddSingleton<IFileDialogService, FileDialogService>();
+            services.AddSingleton<IScpClientFactory, ScpClientFactory>();
+            services.AddSingleton<IScpUploadService, ScpService>();
             services.AddCommonServices();
             services.AddSingleton<SaveConfirmationHelper>();
             services.AddSingleton<CloseConfirmationHelper>();
@@ -188,7 +191,9 @@ namespace DesktopApplicationTemplate.UI
                 .EnableAnonymousAuthentication());
             services.AddSingleton<IFtpServerService, FtpServerService>();
             services.AddSingleton<CsvViewerViewModel>();
-            services.AddSingleton<CsvService>();
+            services.AddSingleton<ICsvService, CsvService>();
+            services.AddSingleton<ICsvOutput, FileCsvOutput>();
+            services.AddSingleton<CsvServiceAdapter>();
             services.AddSingleton<CsvServiceView>();
             services.AddSingleton<SettingsViewModel>();
             services.AddSingleton<IServiceUiRegistry<ServiceListModel, Page>>(_ =>

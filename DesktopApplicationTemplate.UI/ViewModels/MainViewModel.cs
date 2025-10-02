@@ -54,14 +54,14 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public IEnumerable<LogEntry> DisplayLogs => LogViewModel.DisplayLogs;
 
-        private readonly CsvService _csvService;
+        private readonly CsvServiceAdapter _csvService;
         private readonly ILoggingService? _logger;
         private readonly INetworkConfigurationService _networkService;
         private readonly IDictionary<ServiceType, IEditServiceHandler> _editHandlers;
 
         public NetworkConfigurationViewModel NetworkConfig { get; }
 
-        public MainViewModel(CsvService csvService, NetworkConfigurationViewModel networkConfig, INetworkConfigurationService networkService, IDictionary<ServiceType, IEditServiceHandler> editHandlers, ILoggingService? logger = null, string? servicesFilePath = null)
+        public MainViewModel(CsvServiceAdapter csvService, NetworkConfigurationViewModel networkConfig, INetworkConfigurationService networkService, IDictionary<ServiceType, IEditServiceHandler> editHandlers, ILoggingService? logger = null, string? servicesFilePath = null)
         {
             _csvService = csvService;
             _networkService = networkService;
