@@ -156,7 +156,6 @@ namespace DesktopApplicationTemplate.UI
                 return handlers;
             });
             services.AddSingleton<MainView>();
-            services.AddSingleton<IStartupService, StartupService>();
             services.AddSingleton<IProcessRunner, ProcessRunner>();
             services.AddSingleton<INetworkConfigurationService, NetworkConfigurationService>();
             services.AddSingleton<NetworkConfigurationViewModel>();
@@ -171,7 +170,6 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<ServiceMessageTableViewModel>();
             services.AddSingleton<TcpServiceMessagesView>();
             services.AddTransient<TcpServiceMessagesViewModel>();
-            services.AddSingleton<DependencyChecker>();
             services.AddSingleton<HttpServiceView>();
             services.AddSingleton<HttpServiceViewModel>();
             services.AddSingleton<FileObserverView>();
@@ -737,7 +735,7 @@ namespace DesktopApplicationTemplate.UI
         {
             var logger = AppHost.Services.GetService<ILogger<App>>();
             logger?.LogError(e.Exception, "Unhandled dispatcher exception");
-            HookReleaseHelper.Release();
+            KeyboardSimulator.Reset();
             e.Handled = true;
             Shutdown();
         }
@@ -760,7 +758,7 @@ namespace DesktopApplicationTemplate.UI
                 logger?.LogError("Unhandled domain exception");
             }
 
-            HookReleaseHelper.Release();
+            KeyboardSimulator.Reset();
             if (Current is not null)
             {
                 await Current.Dispatcher.InvokeAsync(() => Current.Shutdown());
@@ -783,9 +781,6 @@ namespace DesktopApplicationTemplate.UI
                 splash = AppHost.Services.GetRequiredService<SplashWindow>();
                 splash.Show();
             }
-
-            var startupService = AppHost.Services.GetRequiredService<IStartupService>();
-            await startupService.RunStartupChecksAsync();
 
             splash?.Close();
             if (splash != null)
