@@ -1,7 +1,7 @@
+using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
-using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.Core.Models;
 using DesktopApplicationTemplate.Core.Services;
@@ -9,6 +9,7 @@ using DesktopApplicationTemplate.Models;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.IO;
+using DesktopApplicationTemplate.Core.Services.Protocols.Scp;
 
 namespace DesktopApplicationTemplate.UI.ViewModels.Scp
 {
@@ -91,10 +92,12 @@ public class ScpServiceViewModel : ViewModelBase, ILoggingViewModel, INetworkAwa
         public ICommand ClearLogCommand { get; }
 
         private readonly SaveConfirmationHelper _saveHelper;
+        private readonly IScpUploadService _scpUploadService;
 
-        public ScpServiceViewModel(SaveConfirmationHelper saveHelper)
+        public ScpServiceViewModel(SaveConfirmationHelper saveHelper, IScpUploadService scpUploadService)
         {
-            _saveHelper = saveHelper;
+            _saveHelper = saveHelper ?? throw new ArgumentNullException(nameof(saveHelper));
+            _scpUploadService = scpUploadService ?? throw new ArgumentNullException(nameof(scpUploadService));
             BrowseCommand = new RelayCommand(Browse);
             TransferCommand = new AsyncRelayCommand(TransferAsync);
             SaveCommand = new RelayCommand(Save);
@@ -115,8 +118,7 @@ public class ScpServiceViewModel : ViewModelBase, ILoggingViewModel, INetworkAwa
             if (string.IsNullOrWhiteSpace(LocalPath) || string.IsNullOrWhiteSpace(RemotePath))
                 return;
             Logger?.Log("SCP transfer start", LogLevel.Debug);
-            var svc = new ScpService(Host, int.Parse(Port), Username, Password, Logger);
-            await svc.UploadAsync(LocalPath, RemotePath);
+            await _scpUploadService.UploadAsync(Host, int.Parse(Port), Username, Password, LocalPath, RemotePath);
             Logger?.Log("File transferred", LogLevel.Debug);
             Logger?.Log("SCP transfer finished", LogLevel.Debug);
         }
