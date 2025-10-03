@@ -2,7 +2,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 
-namespace DesktopApplicationTemplate.UI.Views.Shared
+namespace DesktopApplicationTemplate.UI.Views
 {
     /// <summary>
     /// Interaction logic for ServiceMessageTableView.xaml

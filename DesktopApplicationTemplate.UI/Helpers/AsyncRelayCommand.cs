@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
+using System.Windows;
 using System.Windows.Threading;
 
 namespace DesktopApplicationTemplate.UI.Helpers
@@ -46,7 +46,6 @@ namespace DesktopApplicationTemplate.UI.Helpers
     {
         private readonly Func<T?, Task> _execute;
         private readonly Predicate<T?>? _canExecute;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="AsyncRelayCommand{T}"/> class.
         /// </summary>
