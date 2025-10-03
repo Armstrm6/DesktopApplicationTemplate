@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Windows.Input;
 using DesktopApplicationTemplate.UI.Helpers;
 
@@ -34,6 +35,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         /// <summary>
         /// Raises the <see cref="CanExecuteChanged"/> event.
         /// </summary>
-        public void RaiseCanExecuteChanged() => CommandDispatcher.RaiseCanExecuteChanged(CanExecuteChanged, this);
+        public void RaiseCanExecuteChanged()
+        {
+            CommandDispatcher.FireAndForget(SynchronizationContext.Current, CanExecuteChanged, this);
+        }
     }
 }
