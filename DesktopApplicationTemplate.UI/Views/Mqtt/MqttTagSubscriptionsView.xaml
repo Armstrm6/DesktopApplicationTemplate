@@ -8,7 +8,7 @@
       xmlns:sys="clr-namespace:System;assembly=System.Runtime"
       xmlns:behaviors="clr-namespace:DesktopApplicationTemplate.UI.Behaviors"
       xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
-      xmlns:shared="clr-namespace:DesktopApplicationTemplate.UI.Views.Shared"
+      xmlns:shared="clr-namespace:DesktopApplicationTemplate.UI.Views.Shared;assembly=DesktopApplicationTemplate.UI"
       mc:Ignorable="d">
     <Page.Resources>
         <ObjectDataProvider x:Key="QoSValues" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
