@@ -1,3 +1,4 @@
+using System;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols;
 using DesktopApplicationTemplate.Core.Services.Protocols.FileObserver;
@@ -27,6 +28,9 @@ public static class CommonServiceCollectionExtensions
         services.AddTransient<ITcpRuntime, TcpRuntime>();
         services.AddTransient<IHeartbeatService, HeartbeatService>();
         services.AddTransient<IFileObserverService, FileObserverService>();
+        services.AddSingleton<IServiceCatalog>(_ => new ServiceCatalog(Array.Empty<IServiceDescriptor>()));
+        services.AddSingleton<IServiceRuntimeFactory, DescriptorRuntimeFactory>();
+        services.AddSingleton(typeof(ServiceManager<,>));
         return services;
     }
 }

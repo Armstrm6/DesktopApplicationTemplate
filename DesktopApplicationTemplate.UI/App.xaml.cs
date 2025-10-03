@@ -196,19 +196,24 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<CsvServiceAdapter>();
             services.AddSingleton<CsvServiceView>();
             services.AddSingleton<SettingsViewModel>();
-            services.AddSingleton<IServiceUiRegistry<ServiceListModel, Page>>(_ =>
-                new ServiceUiRegistry<ServiceListModel, Page>(new[]
-                {
-                    BuildCsvRegistration(),
-                    BuildFileObserverRegistration(),
-                    BuildHeartbeatRegistration(),
-                    BuildHidRegistration(),
-                    BuildHttpRegistration(),
-                    BuildMqttRegistration(),
-                    BuildScpRegistration(),
-                    BuildTcpRegistration(),
-                    BuildFtpRegistration(),
-                }));
+            services.AddSingleton<IServiceUiRegistry<ServiceListModel, Page>>(sp =>
+            {
+                var catalog = sp.GetRequiredService<IServiceCatalog>();
+                return new ServiceUiRegistry<ServiceListModel, Page>(
+                    catalog,
+                    new[]
+                    {
+                        BuildCsvRegistration(),
+                        BuildFileObserverRegistration(),
+                        BuildHeartbeatRegistration(),
+                        BuildHidRegistration(),
+                        BuildHttpRegistration(),
+                        BuildMqttRegistration(),
+                        BuildScpRegistration(),
+                        BuildTcpRegistration(),
+                        BuildFtpRegistration(),
+                    });
+            });
             services.AddTransient<SplashWindow>();
             services.AddTransient<CreateServicePage>();
             services.AddTransient<CreateServiceViewModel>();
@@ -302,7 +307,7 @@ namespace DesktopApplicationTemplate.UI
         private static ServiceUiRegistration<ServiceListModel, Page> BuildMqttRegistration()
         {
             return new ServiceUiRegistration<ServiceListModel, Page>(
-                ServiceType.Mqtt,
+                ServiceDescriptorIds.Mqtt,
                 (provider, optionsObj) =>
                 {
                     var ctx = (ServiceFactoryOptions<MqttServiceOptions>)optionsObj;
@@ -390,13 +395,14 @@ namespace DesktopApplicationTemplate.UI
                         mainView.ShowPage(advView);
                     };
                     return view;
-                });
+                },
+                legacyServiceType: ServiceType.Mqtt);
         }
 
         private static ServiceUiRegistration<ServiceListModel, Page> BuildFtpRegistration()
         {
             return new ServiceUiRegistration<ServiceListModel, Page>(
-                ServiceType.Ftp,
+                ServiceDescriptorIds.Ftp,
                 (provider, optionsObj) =>
                 {
                     var ctx = (ServiceFactoryOptions<FtpServerOptions>)optionsObj;
@@ -441,13 +447,14 @@ namespace DesktopApplicationTemplate.UI
                         mainView.ShowPage(advView);
                     };
                     return view;
-                });
+                },
+                legacyServiceType: ServiceType.Ftp);
         }
 
         private static ServiceUiRegistration<ServiceListModel, Page> BuildHttpRegistration()
         {
             return new ServiceUiRegistration<ServiceListModel, Page>(
-                ServiceType.Http,
+                ServiceDescriptorIds.Http,
                 (provider, optionsObj) =>
                 {
                     var ctx = (ServiceFactoryOptions<HttpServiceOptions>)optionsObj;
@@ -484,13 +491,14 @@ namespace DesktopApplicationTemplate.UI
                         mainView.ShowPage(advView);
                     };
                     return view;
-                });
+                },
+                legacyServiceType: ServiceType.Http);
         }
 
         private static ServiceUiRegistration<ServiceListModel, Page> BuildTcpRegistration()
         {
             return new ServiceUiRegistration<ServiceListModel, Page>(
-                ServiceType.Tcp,
+                ServiceDescriptorIds.Tcp,
                 (provider, optionsObj) =>
                 {
                     var ctx = (ServiceFactoryOptions<TcpServiceOptions>)optionsObj;
@@ -517,13 +525,14 @@ namespace DesktopApplicationTemplate.UI
                             new ServiceFactoryOptions<TcpServiceOptions>(name, (TcpServiceOptions)options));
                     vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
                     return ActivatorUtilities.CreateInstance<TcpCreateServiceView>(provider, vm);
-                });
+                },
+                legacyServiceType: ServiceType.Tcp);
         }
 
         private static ServiceUiRegistration<ServiceListModel, Page> BuildHidRegistration()
         {
             return new ServiceUiRegistration<ServiceListModel, Page>(
-                ServiceType.Hid,
+                ServiceDescriptorIds.Hid,
                 (provider, optionsObj) =>
                 {
                     var ctx = (ServiceFactoryOptions<HidServiceOptions>)optionsObj;
@@ -560,13 +569,14 @@ namespace DesktopApplicationTemplate.UI
                         mainView.ShowPage(advView);
                     };
                     return view;
-                });
+                },
+                legacyServiceType: ServiceType.Hid);
         }
 
         private static ServiceUiRegistration<ServiceListModel, Page> BuildScpRegistration()
         {
             return new ServiceUiRegistration<ServiceListModel, Page>(
-                ServiceType.Scp,
+                ServiceDescriptorIds.Scp,
                 (provider, optionsObj) =>
                 {
                     var ctx = (ServiceFactoryOptions<ScpServiceOptions>)optionsObj;
@@ -603,13 +613,14 @@ namespace DesktopApplicationTemplate.UI
                         mainView.ShowPage(advView);
                     };
                     return view;
-                });
+                },
+                legacyServiceType: ServiceType.Scp);
         }
 
         private static ServiceUiRegistration<ServiceListModel, Page> BuildFileObserverRegistration()
         {
             return new ServiceUiRegistration<ServiceListModel, Page>(
-                ServiceType.FileObserver,
+                ServiceDescriptorIds.FileObserver,
                 (provider, optionsObj) =>
                 {
                     var ctx = (ServiceFactoryOptions<FileObserverServiceOptions>)optionsObj;
@@ -646,13 +657,14 @@ namespace DesktopApplicationTemplate.UI
                         mainView.ShowPage(advView);
                     };
                     return view;
-                });
+                },
+                legacyServiceType: ServiceType.FileObserver);
         }
 
         private static ServiceUiRegistration<ServiceListModel, Page> BuildCsvRegistration()
         {
             return new ServiceUiRegistration<ServiceListModel, Page>(
-                ServiceType.Csv,
+                ServiceDescriptorIds.Csv,
                 (provider, optionsObj) =>
                 {
                     var ctx = (ServiceFactoryOptions<CsvServiceOptions>)optionsObj;
@@ -690,13 +702,14 @@ namespace DesktopApplicationTemplate.UI
                         mainView.ShowPage(advView);
                     };
                     return view;
-                });
+                },
+                legacyServiceType: ServiceType.Csv);
         }
 
         private static ServiceUiRegistration<ServiceListModel, Page> BuildHeartbeatRegistration()
         {
             return new ServiceUiRegistration<ServiceListModel, Page>(
-                ServiceType.Heartbeat,
+                ServiceDescriptorIds.Heartbeat,
                 (provider, optionsObj) =>
                 {
                     var ctx = (ServiceFactoryOptions<HeartbeatServiceOptions>)optionsObj;
@@ -733,7 +746,8 @@ namespace DesktopApplicationTemplate.UI
                         mainView.ShowPage(advView);
                     };
                     return view;
-                });
+                },
+                legacyServiceType: ServiceType.Heartbeat);
         }
 
         internal void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
