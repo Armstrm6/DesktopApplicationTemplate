@@ -49,6 +49,7 @@ namespace DesktopApplicationTemplate.UI.Helpers
     {
         private readonly Func<T?, Task> _execute;
         private readonly Predicate<T?>? _canExecute;
+        private readonly SynchronizationContext? _synchronizationContext;
         /// <summary>
         /// Initializes a new instance of the <see cref="AsyncRelayCommand{T}"/> class.
         /// </summary>
