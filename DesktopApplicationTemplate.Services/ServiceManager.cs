@@ -210,7 +210,6 @@ public sealed class ServiceManager<TService, TPage> : IDisposable
 
     private static Microsoft.Extensions.Logging.LogLevel MapLevel(LogLevel level) => level switch
     {
-        LogLevel.Trace => Microsoft.Extensions.Logging.LogLevel.Trace,
         LogLevel.Debug => Microsoft.Extensions.Logging.LogLevel.Debug,
         LogLevel.Information => Microsoft.Extensions.Logging.LogLevel.Information,
         LogLevel.Warning => Microsoft.Extensions.Logging.LogLevel.Warning,
