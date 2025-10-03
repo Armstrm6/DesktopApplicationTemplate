@@ -84,6 +84,9 @@ using DesktopApplicationTemplate.Core.Models;
 using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.Helpers;
 // Qualify service-layer types explicitly to avoid name clashes with UI services
+using CoreFtpServerOptions = DesktopApplicationTemplate.Core.Services.Protocols.Ftp.FtpServerOptions;
+using ProtocolCsvService = DesktopApplicationTemplate.Core.Services.Protocols.Csv.ICsvService;
+using ProtocolCsvServiceImplementation = DesktopApplicationTemplate.Core.Services.Protocols.Csv.CsvService;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -192,7 +195,7 @@ namespace DesktopApplicationTemplate.UI
                 .EnableAnonymousAuthentication());
             services.AddSingleton<IFtpServerService, FtpServerService>();
             services.AddSingleton<CsvViewerViewModel>();
-            services.AddSingleton<ICsvService, CsvService>();
+            services.AddSingleton<ProtocolCsvService, ProtocolCsvServiceImplementation>();
             services.AddSingleton<ICsvOutput, FileCsvOutput>();
             services.AddSingleton<CsvServiceAdapter>();
             services.AddSingleton<CsvServiceView>();
@@ -234,12 +237,12 @@ namespace DesktopApplicationTemplate.UI
             services.AddTransient<ServiceEditViewModelBase<TcpServiceOptions>, TcpEditServiceViewModel>();
             services.AddTransient<FtpServerCreateView>();
             services.AddTransient<FtpServerCreateViewModel>();
-            services.AddTransient<ServiceCreateViewModelBase<FtpServerOptions>, FtpServerCreateViewModel>();
+            services.AddTransient<ServiceCreateViewModelBase<CoreFtpServerOptions>, FtpServerCreateViewModel>();
             services.AddTransient<FtpServerAdvancedConfigView>();
             services.AddTransient<FtpServerAdvancedConfigViewModel>();
             services.AddTransient<FtpServerEditView>();
             services.AddTransient<FtpServerEditViewModel>();
-            services.AddTransient<ServiceEditViewModelBase<FtpServerOptions>, FtpServerEditViewModel>();
+            services.AddTransient<ServiceEditViewModelBase<CoreFtpServerOptions>, FtpServerEditViewModel>();
             services.AddTransient<HttpCreateServiceView>();
             services.AddTransient<HttpCreateServiceViewModel>();
             services.AddTransient<ServiceCreateViewModelBase<HttpServiceOptions>, HttpCreateServiceViewModel>();
@@ -296,7 +299,7 @@ namespace DesktopApplicationTemplate.UI
             services.Configure<AppSettings>(configuration.GetSection("AppSettings"));
             services.Configure<MqttServiceOptions>(configuration.GetSection("MqttService"));
             services.Configure<TcpServiceOptions>(configuration.GetSection("TcpService"));
-            services.AddOptions<FtpServerOptions>()
+            services.AddOptions<CoreFtpServerOptions>()
                 .BindConfiguration("FtpServer");
             services.AddOptions<HidServiceOptions>();
             services.AddOptions<HeartbeatServiceOptions>();
@@ -397,7 +400,7 @@ namespace DesktopApplicationTemplate.UI
                     };
                     return view;
                 },
-                legacyServiceType: ServiceType.Mqtt);
+                LegacyServiceType: ServiceType.Mqtt);
         }
 
         private static ServiceUiRegistration<ServiceListModel, Page> BuildFtpRegistration()
@@ -406,7 +409,7 @@ namespace DesktopApplicationTemplate.UI
                 ServiceDescriptorIds.Ftp,
                 (provider, optionsObj) =>
                 {
-                    var ctx = (ServiceFactoryOptions<FtpServerOptions>)optionsObj;
+                    var ctx = (ServiceFactoryOptions<CoreFtpServerOptions>)optionsObj;
                     var mainView = provider.GetRequiredService<MainView>();
                     var svc = new ServiceListModel
                     {
@@ -418,7 +421,7 @@ namespace DesktopApplicationTemplate.UI
 
                     mainView.GetOrCreateServicePage(svc);
 
-                    var resolved = provider.GetRequiredService<IOptions<FtpServerOptions>>().Value;
+                    var resolved = provider.GetRequiredService<IOptions<CoreFtpServerOptions>>().Value;
                     resolved.Port = ctx.Options.Port;
                     resolved.RootPath = ctx.Options.RootPath;
                     resolved.AllowAnonymous = ctx.Options.AllowAnonymous;
@@ -435,7 +438,7 @@ namespace DesktopApplicationTemplate.UI
                     var mainView = provider.GetRequiredService<MainView>();
                     vm.ServiceSaved += (name, options) =>
                         _ = mainView.AddServiceAsync(ServiceType.Ftp,
-                            new ServiceFactoryOptions<FtpServerOptions>(name, (FtpServerOptions)options));
+                            new ServiceFactoryOptions<CoreFtpServerOptions>(name, (CoreFtpServerOptions)options));
                     vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
                     var view = ActivatorUtilities.CreateInstance<FtpServerCreateView>(provider, vm);
                     vm.AdvancedConfigRequested += opts =>
@@ -449,7 +452,7 @@ namespace DesktopApplicationTemplate.UI
                     };
                     return view;
                 },
-                legacyServiceType: ServiceType.Ftp);
+                LegacyServiceType: ServiceType.Ftp);
         }
 
         private static ServiceUiRegistration<ServiceListModel, Page> BuildHttpRegistration()
@@ -493,7 +496,7 @@ namespace DesktopApplicationTemplate.UI
                     };
                     return view;
                 },
-                legacyServiceType: ServiceType.Http);
+                LegacyServiceType: ServiceType.Http);
         }
 
         private static ServiceUiRegistration<ServiceListModel, Page> BuildTcpRegistration()
@@ -527,7 +530,7 @@ namespace DesktopApplicationTemplate.UI
                     vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
                     return ActivatorUtilities.CreateInstance<TcpCreateServiceView>(provider, vm);
                 },
-                legacyServiceType: ServiceType.Tcp);
+                LegacyServiceType: ServiceType.Tcp);
         }
 
         private static ServiceUiRegistration<ServiceListModel, Page> BuildHidRegistration()
@@ -571,7 +574,7 @@ namespace DesktopApplicationTemplate.UI
                     };
                     return view;
                 },
-                legacyServiceType: ServiceType.Hid);
+                LegacyServiceType: ServiceType.Hid);
         }
 
         private static ServiceUiRegistration<ServiceListModel, Page> BuildScpRegistration()
@@ -615,7 +618,7 @@ namespace DesktopApplicationTemplate.UI
                     };
                     return view;
                 },
-                legacyServiceType: ServiceType.Scp);
+                LegacyServiceType: ServiceType.Scp);
         }
 
         private static ServiceUiRegistration<ServiceListModel, Page> BuildFileObserverRegistration()
@@ -659,7 +662,7 @@ namespace DesktopApplicationTemplate.UI
                     };
                     return view;
                 },
-                legacyServiceType: ServiceType.FileObserver);
+                LegacyServiceType: ServiceType.FileObserver);
         }
 
         private static ServiceUiRegistration<ServiceListModel, Page> BuildCsvRegistration()
@@ -704,7 +707,7 @@ namespace DesktopApplicationTemplate.UI
                     };
                     return view;
                 },
-                legacyServiceType: ServiceType.Csv);
+                LegacyServiceType: ServiceType.Csv);
         }
 
         private static ServiceUiRegistration<ServiceListModel, Page> BuildHeartbeatRegistration()
@@ -748,7 +751,7 @@ namespace DesktopApplicationTemplate.UI
                     };
                     return view;
                 },
-                legacyServiceType: ServiceType.Heartbeat);
+                LegacyServiceType: ServiceType.Heartbeat);
         }
 
         internal void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
