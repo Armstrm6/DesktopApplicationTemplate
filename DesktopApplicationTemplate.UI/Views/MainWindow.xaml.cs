@@ -74,9 +74,17 @@ namespace DesktopApplicationTemplate.UI.Views
             SystemCommands.MinimizeWindow(this);
         }
 
-        private void HomeButton_Click(object sender, RoutedEventArgs e)
+        private void HomeButton_Click(object sender, RoutedEventArgs e) => NavigateHome("Home button");
+
+        private void AppTitle_Click(object sender, RoutedEventArgs e)
         {
-            _logger?.LogInformation("Home button clicked");
+            NavigateHome("Application title");
+            e.Handled = true;
+        }
+
+        private void NavigateHome(string source)
+        {
+            _logger?.LogInformation("{Source} clicked", source);
             _viewModel.SelectedService = null;
             ShowHome();
         }
@@ -365,11 +373,6 @@ namespace DesktopApplicationTemplate.UI.Views
                 }
             }
 
-            if (_viewModel.SelectedService != null && !clickedListItem && !clickedFrame)
-            {
-                _viewModel.SelectedService = null;
-                ShowHome();
-            }
         }
 
         private void ServiceItem_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
