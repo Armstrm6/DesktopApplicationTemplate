@@ -114,25 +114,22 @@ namespace DesktopApplicationTemplate.UI.Helpers
 
         public static void FireAndForget(EventHandler? handler, object sender)
         {
-            ObserveFailure(RaiseCanExecuteChanged(handler, sender));
+            _ = ObserveFailureAsync(RaiseCanExecuteChanged(handler, sender));
         }
 
-        private static void ObserveFailure(Task task)
+        private static async Task ObserveFailureAsync(Task task)
         {
-            if (task.IsCompleted)
+            try
+            {
+                await task.ConfigureAwait(false);
+            }
+            catch
             {
                 if (task.IsFaulted)
                 {
                     _ = task.Exception;
                 }
-
-                return;
             }
-
-            task.ContinueWith(static t =>
-            {
-                _ = t.Exception;
-            }, TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
         }
     }
 }
