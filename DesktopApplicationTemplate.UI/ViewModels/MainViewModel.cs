@@ -212,6 +212,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     FtpOptions = info.FtpOptions,
                     HttpOptions = info.HttpOptions,
                     CsvOptions = info.CsvOptions,
+                    HeartbeatOptions = info.HeartbeatOptions,
+                    FileObserverOptions = info.FileObserverOptions,
+                    HidOptions = info.HidOptions,
+                    ScpOptions = info.ScpOptions,
                     TotalExecutionTimeMs = info.TotalExecutionTimeMs,
                     ExecutionCount = info.ExecutionCount
                 };
