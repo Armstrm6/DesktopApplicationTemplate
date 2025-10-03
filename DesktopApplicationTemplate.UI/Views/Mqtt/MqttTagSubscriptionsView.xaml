@@ -22,7 +22,6 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <!-- Connection bar -->
@@ -47,48 +46,45 @@
                   SelectedItem="{Binding SelectedSubscription}"
                   AutoGenerateColumns="False"
                   HeadersVisibility="Column"
-                  CanUserAddRows="False">
+                  CanUserAddRows="False"
+                  EnableRowVirtualization="False">
             <DataGrid.Columns>
+                <DataGridTemplateColumn Header="Status" Width="150">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate DataType="{x:Type models:TagSubscription}">
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse Width="10"
+                                         Height="10"
+                                         Fill="{Binding IsSubscribed, Converter={StaticResource BoolToBrush}}"
+                                         ToolTip="{Binding StatusMessage}"/>
+                                <TextBlock Text="{Binding StatusMessage}" Margin="6,0,0,0" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
                 <DataGridTextColumn Header="Topic" Binding="{Binding Topic}" IsReadOnly="True"/>
                 <DataGridComboBoxColumn Header="QoS"
-                                        SelectedItemBinding="{Binding QoS}"
+                                        SelectedItemBinding="{Binding QoS, Mode=TwoWay}"
                                         ItemsSource="{Binding Source={StaticResource QoSValues}}"/>
-                <DataGridTextColumn Header="Endpoint"
-                                    Binding="{Binding Endpoint, UpdateSourceTrigger=PropertyChanged}"/>
-                <DataGridTextColumn Header="Message"
-                                    Binding="{Binding OutgoingMessage, UpdateSourceTrigger=PropertyChanged}"/>
+                <DataGridTemplateColumn Header="Message" Width="*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate DataType="{x:Type models:TagSubscription}">
+                            <TextBox Text="{Binding OutgoingMessage, UpdateSourceTrigger=PropertyChanged}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
                 <DataGridTemplateColumn Header="Test">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate DataType="{x:Type models:TagSubscription}">
                             <Button Content="Test" Width="50"
-                                    Command="{Binding DataContext.TestTagEndpointCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                    Command="{Binding DataContext.SendTestMessageCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                     CommandParameter="{Binding}"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
-        <!-- Test message bar -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,10,0,0">
-            <TextBox Text="{Binding SelectedSubscription.OutgoingMessage, UpdateSourceTrigger=PropertyChanged}"
-                     Width="200"
-                     x:Name="TestMessageBox"
-                     ToolTip="Message to send"
-                     behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
-            <Button x:Name="SendButton"
-                    Content="Send"
-                    Command="{Binding PublishTestMessageCommand}"
-                    Width="60"
-                    Margin="5,0,0,0"
-                    AutomationProperties.Name="Send Test Message"/>
-            <Button Content="Test"
-                    Command="{Binding TestTagEndpointCommand}"
-                    CommandParameter="{Binding SelectedSubscription}"
-                    Width="60"
-                    Margin="5,0,0,0"/>
-        </StackPanel>
-
         <!-- Log entries -->
-        <shared:ServiceLogView Grid.Row="3" Margin="0,10,0,0" x:Name="LogView" />
+        <shared:ServiceLogView Grid.Row="2" Margin="0,10,0,0" x:Name="LogView" />
     </Grid>
 </Page>

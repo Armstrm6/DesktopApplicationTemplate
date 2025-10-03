@@ -23,7 +23,20 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Text="Client Certificate" Style="{StaticResource FormLabel}"/>
-        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ClientCertificatePath}" Style="{StaticResource FormField}"/>
+        <Grid Grid.Row="0" Grid.Column="1" Margin="0,0,0,5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBox Grid.Column="0"
+                     Text="{Binding ClientCertificatePath}"
+                     Margin="0,0,5,0"
+                     Style="{StaticResource FormField}"/>
+            <Button Grid.Column="1"
+                    Content="Browse..."
+                    Padding="12,2"
+                    Command="{Binding BrowseClientCertificateCommand}"/>
+        </Grid>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Text="Will Topic" Style="{StaticResource FormLabel}"/>
         <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding WillTopic}" Style="{StaticResource FormField}"/>

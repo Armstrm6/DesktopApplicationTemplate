@@ -12,10 +12,9 @@ public class TagSubscription : INotifyPropertyChanged
 {
     private string _topic = string.Empty;
     private MqttQualityOfServiceLevel _qoS;
-    private string _endpoint = string.Empty;
     private string _outgoingMessage = string.Empty;
-    private string? _statusColor;
-    private string? _icon;
+    private bool _isSubscribed;
+    private string _statusMessage = string.Empty;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TagSubscription"/> class.
@@ -61,20 +60,6 @@ public class TagSubscription : INotifyPropertyChanged
     }
 
     /// <summary>
-    /// Gets or sets the endpoint for test publishing.
-    /// </summary>
-    public string Endpoint
-    {
-        get => _endpoint;
-        set
-        {
-            if (_endpoint == value) return;
-            _endpoint = value;
-            OnPropertyChanged();
-        }
-    }
-
-    /// <summary>
     /// Gets or sets the outgoing test message.
     /// </summary>
     public string OutgoingMessage
@@ -89,29 +74,29 @@ public class TagSubscription : INotifyPropertyChanged
     }
 
     /// <summary>
-    /// Gets or sets the status color for UI display.
+    /// Gets or sets a value indicating whether the subscription is active on the broker.
     /// </summary>
-    public string? StatusColor
+    public bool IsSubscribed
     {
-        get => _statusColor;
+        get => _isSubscribed;
         set
         {
-            if (_statusColor == value) return;
-            _statusColor = value;
+            if (_isSubscribed == value) return;
+            _isSubscribed = value;
             OnPropertyChanged();
         }
     }
 
     /// <summary>
-    /// Gets or sets the icon for UI display.
+    /// Gets or sets the status message describing the subscription state.
     /// </summary>
-    public string? Icon
+    public string StatusMessage
     {
-        get => _icon;
+        get => _statusMessage;
         set
         {
-            if (_icon == value) return;
-            _icon = value;
+            if (_statusMessage == value) return;
+            _statusMessage = value;
             OnPropertyChanged();
         }
     }
