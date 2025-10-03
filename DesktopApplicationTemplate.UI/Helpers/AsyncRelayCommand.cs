@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
-using Microsoft.VisualStudio.Threading;
 
 namespace DesktopApplicationTemplate.UI.Helpers
 {
@@ -83,8 +82,6 @@ namespace DesktopApplicationTemplate.UI.Helpers
 
     internal static class CommandDispatcher
     {
-        private static readonly Lazy<JoinableTaskFactory?> UiThreadFactory = new Lazy<JoinableTaskFactory?>(CreateUiThreadFactory);
-
         public static void RaiseCanExecuteChanged(EventHandler? handler, object sender)
         {
             if (handler is null)
@@ -92,42 +89,16 @@ namespace DesktopApplicationTemplate.UI.Helpers
                 return;
             }
 
-            var factory = UiThreadFactory.Value;
-
-            if (factory is null)
-            {
-                handler(sender, EventArgs.Empty);
-                return;
-            }
-
-            if (factory.Context.IsOnMainThread)
-            {
-                handler(sender, EventArgs.Empty);
-                return;
-            }
-
-            factory.Run(async () =>
-            {
-                await factory.SwitchToMainThreadAsync();
-                handler(sender, EventArgs.Empty);
-            });
-        }
-
-        private static JoinableTaskFactory? CreateUiThreadFactory()
-        {
             var dispatcher = Application.Current?.Dispatcher;
 
-            if (dispatcher is null)
+            if (dispatcher is null || dispatcher.CheckAccess())
             {
-                return null;
+                handler(sender, EventArgs.Empty);
             }
-
-            return dispatcher.Invoke(() =>
+            else
             {
-                var synchronizationContext = SynchronizationContext.Current ?? new DispatcherSynchronizationContext(dispatcher);
-                var context = new JoinableTaskContext(dispatcher.Thread, synchronizationContext);
-                return context.Factory;
-            });
+                _ = dispatcher.BeginInvoke(new Action(() => handler(sender, EventArgs.Empty)), DispatcherPriority.Normal);
+            }
         }
     }
 }
