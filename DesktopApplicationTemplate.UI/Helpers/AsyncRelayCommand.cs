@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using DesktopApplicationTemplate.UI;
+using Microsoft.VisualStudio.Threading;
 
 namespace DesktopApplicationTemplate.UI.Helpers
 {
@@ -37,7 +38,13 @@ namespace DesktopApplicationTemplate.UI.Helpers
 
         public event EventHandler? CanExecuteChanged;
 
-        public void RaiseCanExecuteChanged() => CommandDispatcher.RaiseCanExecuteChanged(_synchronizationContext, CanExecuteChanged, this);
+        public void RaiseCanExecuteChanged()
+        {
+            CommandDispatcher.FireAndForget(
+                _synchronizationContext,
+                CanExecuteChanged,
+                this);
+        }
     }
 
     /// <summary>
@@ -79,12 +86,18 @@ namespace DesktopApplicationTemplate.UI.Helpers
         /// <summary>
         /// Notifies that the ability to execute has changed.
         /// </summary>
-        public void RaiseCanExecuteChanged() => CommandDispatcher.RaiseCanExecuteChanged(_synchronizationContext, CanExecuteChanged, this);
+        public void RaiseCanExecuteChanged()
+        {
+            CommandDispatcher.FireAndForget(
+                _synchronizationContext,
+                CanExecuteChanged,
+                this);
+        }
     }
 
     internal static class CommandDispatcher
     {
-        public static void RaiseCanExecuteChanged(SynchronizationContext? synchronizationContext, EventHandler? handler, object sender)
+        public static async Task RaiseCanExecuteChanged(SynchronizationContext? synchronizationContext, EventHandler? handler, object sender)
         {
             if (handler is null)
             {
@@ -104,16 +117,41 @@ namespace DesktopApplicationTemplate.UI.Helpers
                 return;
             }
 
-            _ = joinableTaskFactory.RunAsync(async () =>
-            {
-                await joinableTaskFactory.SwitchToMainThreadAsync();
-                handler(sender, EventArgs.Empty);
-            });
+            await joinableTaskFactory.SwitchToMainThreadAsync();
+            handler(sender, EventArgs.Empty);
         }
 
-        public static void RaiseCanExecuteChanged(EventHandler? handler, object sender)
+        public static Task RaiseCanExecuteChanged(EventHandler? handler, object sender)
         {
-            RaiseCanExecuteChanged(SynchronizationContext.Current, handler, sender);
+            return RaiseCanExecuteChanged(SynchronizationContext.Current, handler, sender);
+        }
+
+        public static void FireAndForget(SynchronizationContext? synchronizationContext, EventHandler? handler, object sender)
+        {
+            var joinableTaskFactory = App.UiThreadTaskFactory;
+            var task = joinableTaskFactory is not null
+                ? joinableTaskFactory.RunAsync(() => RaiseCanExecuteChanged(synchronizationContext, handler, sender)).Task
+                : RaiseCanExecuteChanged(synchronizationContext, handler, sender);
+
+            ObserveFailure(task);
+        }
+
+        private static void ObserveFailure(Task task)
+        {
+            if (task.IsCompleted)
+            {
+                if (task.IsFaulted)
+                {
+                    _ = task.Exception;
+                }
+
+                return;
+            }
+
+            task.ContinueWith(static t =>
+            {
+                _ = t.Exception;
+            }, TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
         }
     }
 }

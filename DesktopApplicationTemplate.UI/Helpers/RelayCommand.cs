@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Windows.Input;
 using DesktopApplicationTemplate.UI.Helpers;
 
@@ -21,6 +22,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public event EventHandler? CanExecuteChanged;
 
-        public void RaiseCanExecuteChanged() => CommandDispatcher.RaiseCanExecuteChanged(CanExecuteChanged, this);
+        public void RaiseCanExecuteChanged()
+        {
+            CommandDispatcher.FireAndForget(SynchronizationContext.Current, CanExecuteChanged, this);
+        }
     }
 }
