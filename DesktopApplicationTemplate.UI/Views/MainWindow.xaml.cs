@@ -45,12 +45,14 @@ namespace DesktopApplicationTemplate.UI.Views
                 _logger = factory.CreateLogger<MainView>();
             }
             DataContext = _viewModel;
+            _viewModel.ConfigurationChangeBlocked += OnConfigurationChangeBlocked;
             _viewModel.AddServiceRequested += OnAddServiceRequested;
             _viewModel.Services.CollectionChanged += Services_CollectionChanged;
             MouseDown += MainView_MouseDown;
             CommandBindings.Add(new CommandBinding(SystemCommands.CloseWindowCommand, CloseCommand_Executed));
             CommandBindings.Add(new CommandBinding(SystemCommands.MinimizeWindowCommand, MinimizeCommand_Executed));
             Closing += (_, _) => _logger?.LogInformation("MainView closing");
+            Closed += (_, _) => _viewModel.ConfigurationChangeBlocked -= OnConfigurationChangeBlocked;
             ShowHome();
             PreloadServicePages();
         }
@@ -67,6 +69,15 @@ namespace DesktopApplicationTemplate.UI.Views
             HomeContentGrid.Visibility = Visibility.Collapsed;
             ContentFrame.Visibility = Visibility.Visible;
             ContentFrame.Content = page;
+        }
+
+        private void OnConfigurationChangeBlocked()
+        {
+            MessageBox.Show(this,
+                "Stop the active services before making any changes.",
+                "Services Running",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
         }
 
         private void CloseCommand_Executed(object sender, ExecutedRoutedEventArgs e)
@@ -342,6 +353,11 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             if (sender is MenuItem { DataContext: ServiceListModel svc })
             {
+                if (!_viewModel.RequestConfigurationChange())
+                {
+                    return;
+                }
+
                 var index = _viewModel.Services.IndexOf(svc);
                 svc.LogAdded -= _viewModel.OnServiceLogAdded;
                 _viewModel.Services.Remove(svc);
@@ -364,6 +380,11 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             if (sender is MenuItem { DataContext: ServiceListModel svc })
             {
+                if (!_viewModel.RequestConfigurationChange())
+                {
+                    return;
+                }
+
                 string input = Microsoft.VisualBasic.Interaction.InputBox("Enter new service name:", "Rename Service", svc.DisplayName);
                 if (!string.IsNullOrWhiteSpace(input))
                 {
@@ -384,6 +405,11 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             if (sender is MenuItem { DataContext: ServiceListModel svc })
             {
+                if (!_viewModel.RequestConfigurationChange())
+                {
+                    return;
+                }
+
                 var dlg = new ColorPickerWindow { Owner = this };
                 if (dlg.ShowDialog() == true)
                 {
@@ -477,6 +503,11 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private void OpenSettings_Click(object sender, RoutedEventArgs e)
         {
+            if (!_viewModel.RequestConfigurationChange())
+            {
+                return;
+            }
+
             var page = _serviceProvider.GetRequiredService<SettingsPage>();
             ShowPage(page);
         }
@@ -509,6 +540,12 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             if (!e.Data.GetDataPresent(typeof(ServiceListModel)))
                 return;
+
+            if (!_viewModel.RequestConfigurationChange())
+            {
+                e.Handled = true;
+                return;
+            }
 
             var source = (ServiceListModel)e.Data.GetData(typeof(ServiceListModel))!;
             if (sender is not Border { DataContext: ServiceListModel target } || source == target)

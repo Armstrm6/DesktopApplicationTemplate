@@ -18,6 +18,14 @@ using WpfBrushes = System.Windows.Media.Brushes;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
+    public enum ServiceRuntimeState
+    {
+        Inactive,
+        Activating,
+        Active,
+        Error
+    }
+
     public class ServiceListModel : ViewModelBase
     {
         public string DisplayName { get; set; } = string.Empty;
@@ -167,10 +175,37 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     _isActive = value;
                     OnPropertyChanged();
                     if (_isActive)
+                    {
                         AddLog("[Service Activated]", WpfBrushes.Green);
+                    }
                     else
+                    {
+                        if (RuntimeState != ServiceRuntimeState.Error)
+                        {
+                            RuntimeState = ServiceRuntimeState.Inactive;
+                        }
                         AddLog("[Service Deactivated]", WpfBrushes.Red);
+                    }
                     ActiveChanged?.Invoke(_isActive);
+                }
+            }
+        }
+
+        public void SetRuntimeState(ServiceRuntimeState state)
+        {
+            RuntimeState = state;
+        }
+
+        private ServiceRuntimeState _runtimeState = ServiceRuntimeState.Inactive;
+        public ServiceRuntimeState RuntimeState
+        {
+            get => _runtimeState;
+            private set
+            {
+                if (_runtimeState != value)
+                {
+                    _runtimeState = value;
+                    OnPropertyChanged();
                 }
             }
         }
