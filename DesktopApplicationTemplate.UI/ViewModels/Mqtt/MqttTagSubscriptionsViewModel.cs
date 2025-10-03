@@ -26,12 +26,14 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
     private readonly MqttServiceOptions _options;
     private readonly AsyncRelayCommand _addTopicCommand;
     private readonly AsyncRelayCommand _removeTopicCommand;
+    private readonly AsyncRelayCommand _connectCommand;
     private readonly AsyncRelayCommand<TagSubscription> _sendTestMessageCommand;
 
     private TagSubscription? _selectedSubscription;
     private string _newTopic = string.Empty;
     private MqttQualityOfServiceLevel _newQoS = MqttQualityOfServiceLevel.AtMostOnce;
     private bool _isConnected;
+    private bool _isBusy;
     private ILoggingService? _logger;
 
     /// <summary>
@@ -45,13 +47,14 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
         Subscriptions = new ObservableCollection<TagSubscription>();
         Subscriptions.CollectionChanged += OnSubscriptionsChanged;
         LogEntries = new ObservableCollection<LogEntry>();
-        _clientService.ConnectionStateChanged += OnConnectionStateChanged;
-        IsConnected = _clientService.IsConnected;
 
         _addTopicCommand = new AsyncRelayCommand(AddTopicAsync, () => CanAddTopic);
         _removeTopicCommand = new AsyncRelayCommand(RemoveTopicAsync, () => SelectedSubscription != null);
-        ConnectCommand = new AsyncRelayCommand(ConnectAsync);
+        _connectCommand = new AsyncRelayCommand(ConnectAsync, () => !_isBusy);
         _sendTestMessageCommand = new AsyncRelayCommand<TagSubscription>(SendTestMessageAsync, CanSendTestMessage);
+
+        _clientService.ConnectionStateChanged += OnConnectionStateChanged;
+        IsConnected = _clientService.IsConnected;
     }
 
     /// <inheritdoc />
@@ -96,6 +99,8 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
 
             _isConnected = value;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(ConnectionActionLabel));
+            _connectCommand.RaiseCanExecuteChanged();
             _sendTestMessageCommand.RaiseCanExecuteChanged();
 
             if (!value)
@@ -108,6 +113,11 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
             }
         }
     }
+
+    /// <summary>
+    /// Gets the label for the connection button based on the connection state.
+    /// </summary>
+    public string ConnectionActionLabel => IsConnected ? "Disconnect" : "Connect";
 
     /// <summary>
     /// Gets or sets the new topic to subscribe.
@@ -165,9 +175,9 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
     public ICommand RemoveTopicCommand => _removeTopicCommand;
 
     /// <summary>
-    /// Command to connect to the MQTT broker.
+    /// Command to connect to or disconnect from the MQTT broker.
     /// </summary>
-        public ICommand ConnectCommand { get; }
+    public ICommand ConnectCommand => _connectCommand;
 
     /// <summary>
     /// Command to publish a test message for a subscription.
@@ -246,24 +256,46 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
 
     public async Task ConnectAsync()
     {
-        Logger?.Log("MQTT connect start", LogLevel.Debug);
+        if (_isBusy)
+        {
+            return;
+        }
+
+        _isBusy = true;
+        _connectCommand.RaiseCanExecuteChanged();
+
         try
         {
-            await _clientService.ConnectAsync(_options);
-            IsConnected = true;
-            await SubscribeAllAsync();
-            Logger?.Log("MQTT connect finished", LogLevel.Debug);
+            if (IsConnected)
+            {
+                await DisconnectAsync();
+                return;
+            }
+
+            Logger?.Log("MQTT connect start", LogLevel.Debug);
+            try
+            {
+                await _clientService.ConnectAsync(_options);
+                IsConnected = true;
+                await SubscribeAllAsync();
+                Logger?.Log("MQTT connect finished", LogLevel.Debug);
+            }
+            catch (ArgumentException ex)
+            {
+                IsConnected = false;
+                Logger?.Log(ex.Message, LogLevel.Warning);
+                EditConnectionRequested?.Invoke(this, EventArgs.Empty);
+            }
+            catch (Exception ex)
+            {
+                IsConnected = false;
+                Logger?.Log($"MQTT connect failed: {ex.Message}", LogLevel.Error);
+            }
         }
-        catch (ArgumentException ex)
+        finally
         {
-            IsConnected = false;
-            Logger?.Log(ex.Message, LogLevel.Warning);
-            EditConnectionRequested?.Invoke(this, EventArgs.Empty);
-        }
-        catch (Exception ex)
-        {
-            IsConnected = false;
-            Logger?.Log($"MQTT connect failed: {ex.Message}", LogLevel.Error);
+            _isBusy = false;
+            _connectCommand.RaiseCanExecuteChanged();
         }
     }
 
@@ -300,6 +332,64 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
         foreach (var subscription in Subscriptions)
         {
             await SubscribeTopicAsync(subscription);
+        }
+    }
+
+    private async Task DisconnectAsync()
+    {
+        if (!IsConnected)
+        {
+            return;
+        }
+
+        Logger?.Log("MQTT disconnect start", LogLevel.Debug);
+
+        try
+        {
+            await UnsubscribeAllAsync();
+            await _clientService.DisconnectAsync();
+            Logger?.Log("MQTT disconnect finished", LogLevel.Debug);
+        }
+        catch (Exception ex)
+        {
+            Logger?.Log($"MQTT disconnect failed: {ex.Message}", LogLevel.Error);
+        }
+        finally
+        {
+            IsConnected = _clientService.IsConnected;
+        }
+    }
+
+    private async Task UnsubscribeAllAsync()
+    {
+        if (!IsConnected)
+        {
+            foreach (var subscription in Subscriptions)
+            {
+                subscription.IsSubscribed = false;
+                subscription.StatusMessage = "Disconnected";
+            }
+
+            return;
+        }
+
+        foreach (var subscription in Subscriptions)
+        {
+            subscription.StatusMessage = "Unsubscribing...";
+
+            try
+            {
+                await _clientService.UnsubscribeAsync(subscription.Topic);
+            }
+            catch (Exception ex)
+            {
+                Logger?.Log($"MQTT unsubscribe failed for {subscription.Topic}: {ex.Message}", LogLevel.Warning);
+            }
+            finally
+            {
+                subscription.IsSubscribed = false;
+                subscription.StatusMessage = "Disconnected";
+            }
         }
     }
 

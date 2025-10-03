@@ -1,6 +1,8 @@
 using System;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace DesktopApplicationTemplate.UI.Helpers
 {
@@ -33,7 +35,7 @@ namespace DesktopApplicationTemplate.UI.Helpers
 
         public event EventHandler? CanExecuteChanged;
 
-        public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+        public void RaiseCanExecuteChanged() => CommandDispatcher.RaiseCanExecuteChanged(CanExecuteChanged, this);
     }
 
     /// <summary>
@@ -74,6 +76,28 @@ namespace DesktopApplicationTemplate.UI.Helpers
         /// <summary>
         /// Notifies that the ability to execute has changed.
         /// </summary>
-        public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+        public void RaiseCanExecuteChanged() => CommandDispatcher.RaiseCanExecuteChanged(CanExecuteChanged, this);
+    }
+
+    internal static class CommandDispatcher
+    {
+        public static void RaiseCanExecuteChanged(EventHandler? handler, object sender)
+        {
+            if (handler is null)
+            {
+                return;
+            }
+
+            var dispatcher = Application.Current?.Dispatcher;
+
+            if (dispatcher is null || dispatcher.CheckAccess())
+            {
+                handler(sender, EventArgs.Empty);
+            }
+            else
+            {
+                _ = dispatcher.BeginInvoke(new Action(() => handler(sender, EventArgs.Empty)), DispatcherPriority.Normal);
+            }
+        }
     }
 }

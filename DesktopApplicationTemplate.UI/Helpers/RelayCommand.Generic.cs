@@ -1,5 +1,6 @@
 using System;
 using System.Windows.Input;
+using DesktopApplicationTemplate.UI.Helpers;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -33,6 +34,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         /// <summary>
         /// Raises the <see cref="CanExecuteChanged"/> event.
         /// </summary>
-        public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+        public void RaiseCanExecuteChanged() => CommandDispatcher.RaiseCanExecuteChanged(CanExecuteChanged, this);
     }
 }
