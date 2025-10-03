@@ -1,6 +1,9 @@
 using System;
+using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Csv;
+using DesktopApplicationTemplate.UI.Helpers;
+using DesktopApplicationTemplate.UI.Services;
 
 namespace DesktopApplicationTemplate.UI.ViewModels.Csv.Edit;
 
@@ -10,21 +13,31 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Csv.Edit;
 public class CsvServiceEditorViewModel : ServiceEditorViewModelBase<CsvServiceOptions>
 {
     private readonly IServiceScreen<CsvServiceOptions> _screen;
+    private readonly IFileDialogService _fileDialog;
     private string _outputPath = string.Empty;
+    private string _delimiter = ",";
+    private bool _includeHeaders = true;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CsvServiceEditorViewModel"/> class.
     /// Defaults to create mode with Save button labeled "Create".
     /// </summary>
-    public CsvServiceEditorViewModel(IServiceRule rule, IServiceScreen<CsvServiceOptions> screen, ILoggingService? logger = null)
+    public CsvServiceEditorViewModel(
+        IServiceRule rule,
+        IServiceScreen<CsvServiceOptions> screen,
+        IFileDialogService fileDialog,
+        ILoggingService? logger = null)
         : base(rule, logger)
     {
         _screen = screen ?? throw new ArgumentNullException(nameof(screen));
+        _fileDialog = fileDialog ?? throw new ArgumentNullException(nameof(fileDialog));
         SaveButtonText = "Create";
         Options = new();
+        _delimiter = Options.Delimiter;
+        _includeHeaders = Options.IncludeHeaders;
         _screen.ServiceSaved += (_, o) => RaiseServiceSaved(o);
         _screen.EditCancelled += () => RaiseEditCancelled();
-        _screen.AdvancedConfigRequested += o => RaiseAdvancedConfigRequested(o);
+        BrowseCommand = new RelayCommand(BrowseForOutputPath);
     }
 
     /// <summary>
@@ -46,6 +59,51 @@ public class CsvServiceEditorViewModel : ServiceEditorViewModelBase<CsvServiceOp
     }
 
     /// <summary>
+    /// Delimiter used between values.
+    /// </summary>
+    public string Delimiter
+    {
+        get => _delimiter;
+        set
+        {
+            _delimiter = value;
+            var error = Rule.ValidateRequired(value, "Delimiter");
+            if (error is not null)
+                AddError(nameof(Delimiter), error);
+            else
+                ClearErrors(nameof(Delimiter));
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>
+    /// Indicates whether headers should be included in generated files.
+    /// </summary>
+    public bool IncludeHeaders
+    {
+        get => _includeHeaders;
+        set
+        {
+            _includeHeaders = value;
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>
+    /// Command that allows the user to browse for an output directory.
+    /// </summary>
+    public ICommand BrowseCommand { get; }
+
+    private void BrowseForOutputPath()
+    {
+        var path = _fileDialog.SelectFolder();
+        if (!string.IsNullOrWhiteSpace(path))
+        {
+            OutputPath = path;
+        }
+    }
+
+    /// <summary>
     /// Current configuration options.
     /// </summary>
     public CsvServiceOptions Options { get; private set; }
@@ -57,10 +115,11 @@ public class CsvServiceEditorViewModel : ServiceEditorViewModelBase<CsvServiceOp
     {
         SaveButtonText = "Save";
         ServiceName = serviceName;
-        _outputPath = options.OutputPath;
         Options = options;
+        OutputPath = options.OutputPath;
+        Delimiter = options.Delimiter;
+        IncludeHeaders = options.IncludeHeaders;
         OnPropertyChanged(nameof(ServiceName));
-        OnPropertyChanged(nameof(OutputPath));
     }
 
     /// <inheritdoc />
@@ -69,6 +128,8 @@ public class CsvServiceEditorViewModel : ServiceEditorViewModelBase<CsvServiceOp
         if (HasErrors)
             return;
         Options.OutputPath = OutputPath;
+        Options.Delimiter = Delimiter;
+        Options.IncludeHeaders = IncludeHeaders;
         _screen.Save(ServiceName, Options);
     }
 
@@ -78,7 +139,6 @@ public class CsvServiceEditorViewModel : ServiceEditorViewModelBase<CsvServiceOp
     /// <inheritdoc />
     protected override void OnAdvancedConfig()
     {
-        Options.OutputPath = OutputPath;
-        _screen.OpenAdvanced(Options);
+        // CSV services no longer expose a separate advanced configuration view.
     }
 }

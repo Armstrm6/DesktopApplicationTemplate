@@ -28,7 +28,6 @@ using DesktopApplicationTemplate.UI.ViewModels.Scp.Edit;
 using DesktopApplicationTemplate.UI.ViewModels.Scp.Advanced;
 using DesktopApplicationTemplate.UI.ViewModels.Csv;
 using DesktopApplicationTemplate.UI.ViewModels.Csv.Edit;
-using DesktopApplicationTemplate.UI.ViewModels.Csv.Advanced;
 using DesktopApplicationTemplate.UI.ViewModels.FileObserver;
 using DesktopApplicationTemplate.UI.ViewModels.FileObserver.Create;
 using DesktopApplicationTemplate.UI.ViewModels.FileObserver.Edit;
@@ -63,7 +62,6 @@ using DesktopApplicationTemplate.UI.Views.Scp.Edit;
 using DesktopApplicationTemplate.UI.Views.Scp.Advanced;
 using DesktopApplicationTemplate.UI.Views.Csv;
 using DesktopApplicationTemplate.UI.Views.Csv.Edit;
-using DesktopApplicationTemplate.UI.Views.Csv.Advanced;
 using DesktopApplicationTemplate.UI.Views.FileObserver;
 using DesktopApplicationTemplate.UI.Views.FileObserver.Create;
 using DesktopApplicationTemplate.UI.Views.FileObserver.Edit;
@@ -282,8 +280,6 @@ namespace DesktopApplicationTemplate.UI
             services.AddTransient<CsvServiceEditorView>();
             services.AddTransient<CsvServiceEditorViewModel>();
             services.AddTransient<ServiceEditorViewModelBase<CsvServiceOptions>, CsvServiceEditorViewModel>();
-            services.AddTransient<CsvAdvancedConfigView>();
-            services.AddTransient<CsvAdvancedConfigViewModel>();
             services.AddTransient<ScpCreateServiceView>();
             services.AddTransient<ScpCreateServiceViewModel>();
             services.AddTransient<ServiceCreateViewModelBase<ScpServiceOptions>, ScpCreateServiceViewModel>();
@@ -696,15 +692,6 @@ namespace DesktopApplicationTemplate.UI
                     vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
                     var view = provider.GetRequiredService<CsvServiceEditorView>();
                     view.Initialize(vm);
-                    vm.AdvancedConfigRequested += opts =>
-                    {
-                        var advVm = ActivatorUtilities.CreateInstance<CsvAdvancedConfigViewModel>(provider, opts);
-                        var advView = provider.GetRequiredService<CsvAdvancedConfigView>();
-                        advView.Initialize(advVm);
-                        advVm.Saved += _ => mainView.ShowPage(view);
-                        advVm.BackRequested += () => mainView.ShowPage(view);
-                        mainView.ShowPage(advView);
-                    };
                     return view;
                 },
                 LegacyServiceType: ServiceType.Csv);

@@ -1,8 +1,9 @@
-using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows.Input;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Models;
 
@@ -14,6 +15,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
     public class ServiceLogViewModel : ViewModelBase
     {
         private ObservableCollection<LogEntry> _logs;
+        private NotifyCollectionChangedEventHandler? _logsChangedHandler;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ServiceLogViewModel"/> class
@@ -33,6 +35,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         {
             Type = type;
             _logs = logs;
+            AttachLogCollection(_logs);
             RefreshLogCommand = new RelayCommand(RefreshLogs);
             ExportLogCommand = new RelayCommand(() => ExportLogs(Path.Combine(Path.GetTempPath(), "exported_logs.txt")));
             ClearLogCommand = new RelayCommand(ClearLogs);
@@ -79,7 +82,15 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         /// <param name="logs">The new log collection.</param>
         public void SetLogs(ObservableCollection<LogEntry> logs)
         {
+            if (_logs == logs)
+            {
+                RefreshLogs();
+                return;
+            }
+
+            DetachLogCollection();
             _logs = logs;
+            AttachLogCollection(_logs);
             OnPropertyChanged(nameof(DisplayLogs));
         }
 
@@ -106,5 +117,21 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         /// Forces the display to refresh.
         /// </summary>
         public void RefreshLogs() => OnPropertyChanged(nameof(DisplayLogs));
+
+        private void AttachLogCollection(ObservableCollection<LogEntry> logs)
+        {
+            _logsChangedHandler ??= (_, __) => OnPropertyChanged(nameof(DisplayLogs));
+            logs.CollectionChanged += _logsChangedHandler;
+        }
+
+        private void DetachLogCollection()
+        {
+            if (_logsChangedHandler is null)
+            {
+                return;
+            }
+
+            _logs.CollectionChanged -= _logsChangedHandler;
+        }
     }
 }

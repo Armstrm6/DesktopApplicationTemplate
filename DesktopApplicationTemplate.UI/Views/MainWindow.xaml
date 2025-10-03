@@ -11,9 +11,10 @@
         xmlns:shared="clr-namespace:DesktopApplicationTemplate.UI.Views.Shared"
         mc:Ignorable="d"
         Title="MainView"
-        MinWidth="800" MinHeight="600" Height="600"
-        SizeToContent="Width"
+        MinWidth="800" MinHeight="600" Height="600" Width="1200"
+        SizeToContent="Manual"
         MaxHeight="{Binding Source={x:Static sys:SystemParameters.WorkArea}, Path=Height}"
+        MaxWidth="{Binding Source={x:Static sys:SystemParameters.WorkArea}, Path=Width}"
         Style="{DynamicResource BubblyWindowStyle}"
         Background="#99FFFF" BorderBrush="#80FF00" BorderThickness="13">
 

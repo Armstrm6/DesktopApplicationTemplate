@@ -73,4 +73,13 @@ public partial class EditorButtonBar : UserControl
 
     public static readonly DependencyProperty CancelAutomationNameProperty =
         DependencyProperty.Register(nameof(CancelAutomationName), typeof(string), typeof(EditorButtonBar), new PropertyMetadata("Cancel"));
+
+    public bool IsAdvancedVisible
+    {
+        get => (bool)GetValue(IsAdvancedVisibleProperty);
+        set => SetValue(IsAdvancedVisibleProperty, value);
+    }
+
+    public static readonly DependencyProperty IsAdvancedVisibleProperty =
+        DependencyProperty.Register(nameof(IsAdvancedVisible), typeof(bool), typeof(EditorButtonBar), new PropertyMetadata(true));
 }
