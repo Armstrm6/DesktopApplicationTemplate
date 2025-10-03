@@ -28,8 +28,8 @@ namespace DesktopApplicationTemplate.UI.Helpers
         /// <summary>
         /// Executes the command asynchronously.
         /// </summary>
-        /// <param name="parameter">Unused parameter for signature compatibility.</param>
-        public async Task ExecuteAsync(object? parameter = null)
+        /// <param name="_">Unused parameter kept for signature compatibility.</param>
+        public async Task ExecuteAsync(object? _ = null)
         {
             await _execute().ConfigureAwait(false);
         }
@@ -82,6 +82,8 @@ namespace DesktopApplicationTemplate.UI.Helpers
 
     internal static class CommandDispatcher
     {
+        private static SynchronizationContext? _synchronizationContext = SynchronizationContext.Current;
+
         public static void RaiseCanExecuteChanged(EventHandler? handler, object sender)
         {
             if (handler is null)
@@ -89,16 +91,24 @@ namespace DesktopApplicationTemplate.UI.Helpers
                 return;
             }
 
-            var dispatcher = Application.Current?.Dispatcher;
+            var context = _synchronizationContext ?? GetSynchronizationContext();
 
-            if (dispatcher is null || dispatcher.CheckAccess())
+            if (context is null || ReferenceEquals(SynchronizationContext.Current, context))
             {
                 handler(sender, EventArgs.Empty);
+                return;
             }
-            else
-            {
-                _ = dispatcher.BeginInvoke(new Action(() => handler(sender, EventArgs.Empty)), DispatcherPriority.Normal);
-            }
+
+            context.Post(_ => handler(sender, EventArgs.Empty), null);
+        }
+
+        private static SynchronizationContext? GetSynchronizationContext()
+        {
+            _synchronizationContext = Application.Current is null
+                ? SynchronizationContext.Current
+                : new DispatcherSynchronizationContext(Application.Current.Dispatcher);
+
+            return _synchronizationContext;
         }
     }
 }
