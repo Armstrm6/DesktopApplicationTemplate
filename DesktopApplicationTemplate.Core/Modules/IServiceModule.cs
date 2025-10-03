@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Models;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -18,4 +20,10 @@ public interface IServiceModule
     /// </summary>
     /// <param name="services">The service collection to register with.</param>
     void RegisterServices(IServiceCollection services);
+
+    /// <summary>
+    /// Describes services exposed by the module without registering them in the container.
+    /// </summary>
+    /// <returns>The descriptors defined by the module.</returns>
+    IEnumerable<IServiceDescriptor> DescribeServices();
 }
