@@ -37,7 +37,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         /// </summary>
         public void RaiseCanExecuteChanged()
         {
-            CommandDispatcher.FireAndForget(SynchronizationContext.Current, CanExecuteChanged, this);
+            CommandDispatcher.RaiseCanExecuteChanged(SynchronizationContext.Current, CanExecuteChanged, this);
         }
     }
 }
