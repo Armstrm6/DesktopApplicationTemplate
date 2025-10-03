@@ -170,7 +170,8 @@ namespace DesktopApplicationTemplate.UI.Views
         private void NavigateTo(ServiceType serviceType)
         {
             var defaultName = _createServicePage?.GenerateDefaultName(serviceType) ?? serviceType.ToLegacyString();
-            if (_serviceRegistry.TryCreateNavigationPage(serviceType, _serviceProvider, defaultName, out var view))
+            if (_serviceRegistry.TryCreateNavigationPage(serviceType, _serviceProvider, defaultName, out var view) &&
+                view is not null)
             {
                 ShowPage(view);
             }

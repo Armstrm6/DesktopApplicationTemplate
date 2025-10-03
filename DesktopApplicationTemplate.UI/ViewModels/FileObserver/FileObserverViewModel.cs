@@ -235,15 +235,24 @@ public class FileObserverViewModel : ViewModelBase
 
     private void OnFileChanged(object? sender, FileObserverChangedEventArgs e)
     {
-        Application.Current?.Dispatcher?.Invoke(() =>
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher is null)
         {
-            if (SelectedObserver is not null)
-            {
-                SelectedObserver.Contents = e.Contents;
-            }
+            ApplyFileContents(e.Contents);
+            return;
+        }
 
-            Contents = e.Contents;
-        });
+        _ = dispatcher.InvokeAsync(() => ApplyFileContents(e.Contents));
+    }
+
+    private void ApplyFileContents(string contents)
+    {
+        if (SelectedObserver is not null)
+        {
+            SelectedObserver.Contents = contents;
+        }
+
+        Contents = contents;
     }
 }
 
