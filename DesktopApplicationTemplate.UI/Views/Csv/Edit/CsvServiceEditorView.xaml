@@ -10,26 +10,70 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <TextBlock Grid.Row="0" Grid.Column="0" Text="Service Name" Style="{StaticResource FormLabel}"/>
-            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ServiceName}" Style="{StaticResource FormField}"/>
+            <TextBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"
+                     Text="{Binding ServiceName, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
+                <TextBox.Style>
+                    <Style TargetType="TextBox" BasedOn="{StaticResource FormField}">
+                        <Style.Triggers>
+                            <Trigger Property="Validation.HasError" Value="True">
+                                <Setter Property="ToolTip" Value="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Self}}"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBox.Style>
+            </TextBox>
 
             <TextBlock Grid.Row="1" Grid.Column="0" Text="Output Path" Style="{StaticResource FormLabel}"/>
-            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding OutputPath}" Style="{StaticResource FormField}"/>
+            <TextBox Grid.Row="1" Grid.Column="1"
+                     Text="{Binding OutputPath, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
+                <TextBox.Style>
+                    <Style TargetType="TextBox" BasedOn="{StaticResource FormField}">
+                        <Style.Triggers>
+                            <Trigger Property="Validation.HasError" Value="True">
+                                <Setter Property="ToolTip" Value="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Self}}"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBox.Style>
+            </TextBox>
+            <Button Grid.Row="1" Grid.Column="2" Content="Browse" Width="90" Margin="5,0,0,0" Command="{Binding BrowseCommand}"/>
 
-            <views:EditorButtonBar Grid.Row="2" Grid.ColumnSpan="2"
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="Delimiter" Style="{StaticResource FormLabel}"/>
+            <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
+                     Text="{Binding Delimiter, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
+                <TextBox.Style>
+                    <Style TargetType="TextBox" BasedOn="{StaticResource FormField}">
+                        <Style.Triggers>
+                            <Trigger Property="Validation.HasError" Value="True">
+                                <Setter Property="ToolTip" Value="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Self}}"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBox.Style>
+            </TextBox>
+
+            <TextBlock Grid.Row="3" Grid.Column="0" Text="Include Headers" Style="{StaticResource FormLabel}"/>
+            <CheckBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" IsChecked="{Binding IncludeHeaders}" Style="{StaticResource FormField}"/>
+
+            <views:EditorButtonBar Grid.Row="4" Grid.ColumnSpan="3"
                                    AdvancedConfigCommand="{Binding AdvancedConfigCommand}"
                                    SaveCommand="{Binding SaveCommand}"
                                    CancelCommand="{Binding CancelCommand}"
                                    AdvancedAutomationName="Open CSV Advanced Configuration"
                                    SaveAutomationName="Save CSV Service"
-                                   CancelAutomationName="Cancel CSV Edit" />
+                                   CancelAutomationName="Cancel CSV Edit"
+                                   IsAdvancedVisible="False" />
         </Grid>
     </ScrollViewer>
 </Page>
