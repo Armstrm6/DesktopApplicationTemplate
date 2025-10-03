@@ -236,7 +236,9 @@ public class FileObserverViewModel : ViewModelBase
         }
     }
 
-    private async void OnFileChanged(object? sender, FileObserverChangedEventArgs e)
+    private void OnFileChanged(object? sender, FileObserverChangedEventArgs e) => _ = HandleFileChangedAsync(e);
+
+    private async Task HandleFileChangedAsync(FileObserverChangedEventArgs e)
     {
         var application = Application.Current;
         if (application?.Dispatcher is null)
