@@ -1,6 +1,10 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
+using Microsoft.VisualStudio.Threading;
 
 namespace DesktopApplicationTemplate.UI.Helpers
 {
@@ -33,7 +37,7 @@ namespace DesktopApplicationTemplate.UI.Helpers
 
         public event EventHandler? CanExecuteChanged;
 
-        public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+        public void RaiseCanExecuteChanged() => CommandDispatcher.RaiseCanExecuteChanged(CanExecuteChanged, this);
     }
 
     /// <summary>
@@ -74,6 +78,56 @@ namespace DesktopApplicationTemplate.UI.Helpers
         /// <summary>
         /// Notifies that the ability to execute has changed.
         /// </summary>
-        public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+        public void RaiseCanExecuteChanged() => CommandDispatcher.RaiseCanExecuteChanged(CanExecuteChanged, this);
+    }
+
+    internal static class CommandDispatcher
+    {
+        private static readonly Lazy<JoinableTaskFactory?> UiThreadFactory = new Lazy<JoinableTaskFactory?>(CreateUiThreadFactory);
+
+        public static void RaiseCanExecuteChanged(EventHandler? handler, object sender)
+        {
+            if (handler is null)
+            {
+                return;
+            }
+
+            var factory = UiThreadFactory.Value;
+
+            if (factory is null)
+            {
+                handler(sender, EventArgs.Empty);
+                return;
+            }
+
+            if (factory.Context.IsOnMainThread)
+            {
+                handler(sender, EventArgs.Empty);
+                return;
+            }
+
+            factory.Run(async () =>
+            {
+                await factory.SwitchToMainThreadAsync();
+                handler(sender, EventArgs.Empty);
+            });
+        }
+
+        private static JoinableTaskFactory? CreateUiThreadFactory()
+        {
+            var dispatcher = Application.Current?.Dispatcher;
+
+            if (dispatcher is null)
+            {
+                return null;
+            }
+
+            return dispatcher.Invoke(() =>
+            {
+                var synchronizationContext = SynchronizationContext.Current ?? new DispatcherSynchronizationContext(dispatcher);
+                var context = new JoinableTaskContext(dispatcher.Thread, synchronizationContext);
+                return context.Factory;
+            });
+        }
     }
 }

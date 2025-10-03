@@ -26,7 +26,10 @@
         </Grid.RowDefinitions>
         <!-- Connection bar -->
         <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-            <Button Content="Connect" Command="{Binding ConnectCommand}" Width="80" AutomationProperties.Name="Connect MQTT"/>
+            <Button Content="{Binding ConnectionActionLabel}"
+                    Command="{Binding ConnectCommand}"
+                    Width="80"
+                    AutomationProperties.Name="{Binding ConnectionActionLabel, StringFormat={}{0} MQTT}"/>
             <Ellipse Width="10" Height="10" Margin="5,0,0,0" Fill="{Binding IsConnected, Converter={StaticResource BoolToBrush}}"/>
             <TextBox Text="{Binding NewTopic, UpdateSourceTrigger=PropertyChanged}" Width="200" Margin="10,0,0,0" x:Name="NewTopicBox" ToolTip="Topic to subscribe"
                      behaviors:TextBoxHintBehavior.AutoToolTip="True"/>

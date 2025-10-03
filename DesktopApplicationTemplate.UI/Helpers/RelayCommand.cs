@@ -1,5 +1,6 @@
 using System;
 using System.Windows.Input;
+using DesktopApplicationTemplate.UI.Helpers;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -20,9 +21,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public event EventHandler? CanExecuteChanged;
 
-        public void RaiseCanExecuteChanged()
-        {
-            CanExecuteChanged?.Invoke(this, EventArgs.Empty);
-        }
+        public void RaiseCanExecuteChanged() => CommandDispatcher.RaiseCanExecuteChanged(CanExecuteChanged, this);
     }
 }
