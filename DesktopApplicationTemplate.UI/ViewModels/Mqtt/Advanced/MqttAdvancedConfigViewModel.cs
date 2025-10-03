@@ -2,8 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Mqtt;
+using DesktopApplicationTemplate.UI.Helpers;
+using DesktopApplicationTemplate.UI.Services;
 using MQTTnet.Protocol;
 
 namespace DesktopApplicationTemplate.UI.ViewModels.Mqtt.Advanced;
@@ -14,6 +17,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Mqtt.Advanced;
 public class MqttAdvancedConfigViewModel : AdvancedConfigViewModelBase<MqttServiceOptions>
 {
     private readonly MqttServiceOptions _options;
+    private readonly IFileDialogService _fileDialogService;
     private string? _clientCertificatePath;
     private string? _willTopic;
     private string? _willPayload;
@@ -26,10 +30,11 @@ public class MqttAdvancedConfigViewModel : AdvancedConfigViewModelBase<MqttServi
     /// <summary>
     /// Initializes a new instance of the <see cref="MqttAdvancedConfigViewModel"/> class.
     /// </summary>
-    public MqttAdvancedConfigViewModel(MqttServiceOptions options, ILoggingService? logger = null)
+    public MqttAdvancedConfigViewModel(MqttServiceOptions options, IFileDialogService fileDialogService, ILoggingService? logger = null)
         : base(logger)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
+        _fileDialogService = fileDialogService ?? throw new ArgumentNullException(nameof(fileDialogService));
         _willTopic = options.WillTopic;
         _willPayload = options.WillPayload;
         _willQualityOfService = options.WillQualityOfService;
@@ -38,6 +43,7 @@ public class MqttAdvancedConfigViewModel : AdvancedConfigViewModelBase<MqttServi
         _cleanSession = options.CleanSession;
         _reconnectDelaySeconds = options.ReconnectDelay?.Seconds ?? 0;
         QoSLevels = Enum.GetValues(typeof(MqttQualityOfServiceLevel)).Cast<MqttQualityOfServiceLevel>().ToArray();
+        BrowseClientCertificateCommand = new RelayCommand(BrowseForClientCertificate);
     }
 
     /// <summary>
@@ -53,6 +59,11 @@ public class MqttAdvancedConfigViewModel : AdvancedConfigViewModelBase<MqttServi
         get => _clientCertificatePath;
         set { _clientCertificatePath = value; OnPropertyChanged(); }
     }
+
+    /// <summary>
+    /// Command that allows browsing for a client certificate file.
+    /// </summary>
+    public ICommand BrowseClientCertificateCommand { get; }
 
     /// <summary>
     /// Will topic published on unexpected disconnect.
@@ -142,5 +153,14 @@ public class MqttAdvancedConfigViewModel : AdvancedConfigViewModelBase<MqttServi
     protected override void OnBack()
     {
         Logger?.Log("MQTT advanced options back", LogLevel.Debug);
+    }
+
+    private void BrowseForClientCertificate()
+    {
+        var path = _fileDialogService.OpenFile();
+        if (!string.IsNullOrWhiteSpace(path))
+        {
+            ClientCertificatePath = path;
+        }
     }
 }

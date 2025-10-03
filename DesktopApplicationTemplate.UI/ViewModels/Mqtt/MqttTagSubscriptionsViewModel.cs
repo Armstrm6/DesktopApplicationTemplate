@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -25,8 +26,7 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
     private readonly MqttServiceOptions _options;
     private readonly AsyncRelayCommand _addTopicCommand;
     private readonly AsyncRelayCommand _removeTopicCommand;
-    private readonly AsyncRelayCommand _publishTestMessageCommand;
-    private readonly AsyncRelayCommand<TagSubscription> _testTagEndpointCommand;
+    private readonly AsyncRelayCommand<TagSubscription> _sendTestMessageCommand;
 
     private TagSubscription? _selectedSubscription;
     private string _newTopic = string.Empty;
@@ -43,16 +43,15 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
         _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
 
         Subscriptions = new ObservableCollection<TagSubscription>();
-        SubscriptionResults = new ObservableCollection<SubscriptionResult>();
+        Subscriptions.CollectionChanged += OnSubscriptionsChanged;
         LogEntries = new ObservableCollection<LogEntry>();
-        _clientService.ConnectionStateChanged += (_, c) => IsConnected = c;
+        _clientService.ConnectionStateChanged += OnConnectionStateChanged;
         IsConnected = _clientService.IsConnected;
 
         _addTopicCommand = new AsyncRelayCommand(AddTopicAsync, () => CanAddTopic);
         _removeTopicCommand = new AsyncRelayCommand(RemoveTopicAsync, () => SelectedSubscription != null);
-        _publishTestMessageCommand = new AsyncRelayCommand(PublishTestMessageAsync, CanPublishTestMessage);
         ConnectCommand = new AsyncRelayCommand(ConnectAsync);
-        _testTagEndpointCommand = new AsyncRelayCommand<TagSubscription>(TestTagEndpointAsync, CanTestTagEndpoint);
+        _sendTestMessageCommand = new AsyncRelayCommand<TagSubscription>(SendTestMessageAsync, CanSendTestMessage);
     }
 
     /// <inheritdoc />
@@ -80,11 +79,6 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
     public ObservableCollection<TagSubscription> Subscriptions { get; }
 
     /// <summary>
-    /// Gets the results of subscription attempts for UI feedback.
-    /// </summary>
-    public ObservableCollection<SubscriptionResult> SubscriptionResults { get; }
-
-    /// <summary>
     /// Gets log entries from the logger.
     /// </summary>
     public ObservableCollection<LogEntry> LogEntries { get; }
@@ -95,7 +89,24 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
     public bool IsConnected
     {
         get => _isConnected;
-        private set { _isConnected = value; OnPropertyChanged(); }
+        private set
+        {
+            if (_isConnected == value)
+                return;
+
+            _isConnected = value;
+            OnPropertyChanged();
+            _sendTestMessageCommand.RaiseCanExecuteChanged();
+
+            if (!value)
+            {
+                foreach (var subscription in Subscriptions)
+                {
+                    subscription.IsSubscribed = false;
+                    subscription.StatusMessage = "Disconnected";
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -137,21 +148,9 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
         set
         {
             if (_selectedSubscription == value) return;
-
-            if (_selectedSubscription is not null)
-            {
-                _selectedSubscription.PropertyChanged -= SelectedSubscriptionOnPropertyChanged;
-            }
-
             _selectedSubscription = value;
             OnPropertyChanged();
             _removeTopicCommand.RaiseCanExecuteChanged();
-            _publishTestMessageCommand.RaiseCanExecuteChanged();
-
-            if (_selectedSubscription is not null)
-            {
-                _selectedSubscription.PropertyChanged += SelectedSubscriptionOnPropertyChanged;
-            }
         }
     }
 
@@ -166,19 +165,14 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
     public ICommand RemoveTopicCommand => _removeTopicCommand;
 
     /// <summary>
-    /// Command to publish the selected subscription's test message.
-    /// </summary>
-    public ICommand PublishTestMessageCommand => _publishTestMessageCommand;
-
-    /// <summary>
     /// Command to connect to the MQTT broker.
     /// </summary>
         public ICommand ConnectCommand { get; }
 
     /// <summary>
-    /// Command to test publishing to a tag's endpoint.
+    /// Command to publish a test message for a subscription.
     /// </summary>
-    public ICommand TestTagEndpointCommand => _testTagEndpointCommand;
+    public ICommand SendTestMessageCommand => _sendTestMessageCommand;
 
     /// <summary>
     /// Raised when connection settings are invalid and need editing.
@@ -195,22 +189,26 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
         if (!CanAddTopic)
             return;
 
-        var topic = NewTopic;
-        var sub = new TagSubscription(topic) { QoS = NewQoS };
-        Subscriptions.Add(sub);
+        var topic = NewTopic.Trim();
+        if (Subscriptions.Any(s => string.Equals(s.Topic, topic, StringComparison.OrdinalIgnoreCase)))
+        {
+            Logger?.Log($"MQTT topic '{topic}' already exists", LogLevel.Warning);
+            return;
+        }
 
-        try
+        var subscription = new TagSubscription(topic)
         {
-            await _clientService.SubscribeAsync(topic, NewQoS).ConfigureAwait(false);
-            SubscriptionResults.Add(new SubscriptionResult(topic, true, $"Subscribed to {topic}"));
-            NewTopic = string.Empty;
-        }
-        catch (Exception ex)
-        {
-            Logger?.Log($"MQTT subscribe failed for {topic}: {ex.Message}", LogLevel.Error);
-            SubscriptionResults.Add(new SubscriptionResult(topic, false, ex.Message));
-            Subscriptions.Remove(sub);
-        }
+            QoS = NewQoS,
+            StatusMessage = IsConnected ? "Subscribing..." : "Waiting for connection"
+        };
+
+        Subscriptions.Add(subscription);
+        NewTopic = string.Empty;
+
+        if (!IsConnected)
+            return;
+
+        await SubscribeTopicAsync(subscription);
     }
 
     private async Task RemoveTopicAsync()
@@ -220,7 +218,7 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
 
         try
         {
-            await _clientService.UnsubscribeAsync(SelectedSubscription.Topic).ConfigureAwait(false);
+            await _clientService.UnsubscribeAsync(SelectedSubscription.Topic);
         }
         catch
         {
@@ -233,30 +231,17 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
         SelectedSubscription = null;
     }
 
-    private bool CanPublishTestMessage()
-        => SelectedSubscription is not null && !string.IsNullOrWhiteSpace(SelectedSubscription.OutgoingMessage);
+    private bool CanSendTestMessage(TagSubscription? subscription)
+        => subscription is not null && IsConnected && !string.IsNullOrWhiteSpace(subscription.OutgoingMessage);
 
-    private async Task PublishTestMessageAsync()
+    private async Task SendTestMessageAsync(TagSubscription? subscription)
     {
-        if (!CanPublishTestMessage())
+        if (!CanSendTestMessage(subscription))
             return;
 
-        Logger?.Log("MQTT test publish start", LogLevel.Debug);
-        await _clientService.PublishAsync(SelectedSubscription!.Topic, SelectedSubscription.OutgoingMessage).ConfigureAwait(false);
-        Logger?.Log("MQTT test publish finished", LogLevel.Debug);
-    }
-
-    private bool CanTestTagEndpoint(TagSubscription? sub)
-        => sub is not null && !string.IsNullOrWhiteSpace(sub.Endpoint) && !string.IsNullOrWhiteSpace(sub.OutgoingMessage);
-
-    private async Task TestTagEndpointAsync(TagSubscription? sub)
-    {
-        if (!CanTestTagEndpoint(sub))
-            return;
-
-        Logger?.Log("MQTT tag test publish start", LogLevel.Debug);
-        await _clientService.PublishAsync(sub!.Endpoint, sub.OutgoingMessage).ConfigureAwait(false);
-        Logger?.Log("MQTT tag test publish finished", LogLevel.Debug);
+        Logger?.Log("MQTT topic test publish start", LogLevel.Debug);
+        await _clientService.PublishAsync(subscription!.Topic, subscription.OutgoingMessage);
+        Logger?.Log("MQTT topic test publish finished", LogLevel.Debug);
     }
 
     public async Task ConnectAsync()
@@ -264,8 +249,9 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
         Logger?.Log("MQTT connect start", LogLevel.Debug);
         try
         {
-            await _clientService.ConnectAsync(_options).ConfigureAwait(false);
+            await _clientService.ConnectAsync(_options);
             IsConnected = true;
+            await SubscribeAllAsync();
             Logger?.Log("MQTT connect finished", LogLevel.Debug);
         }
         catch (ArgumentException ex)
@@ -281,11 +267,94 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
         }
     }
 
-    private void SelectedSubscriptionOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    private async Task SubscribeTopicAsync(TagSubscription subscription)
     {
-        if (e.PropertyName == nameof(TagSubscription.OutgoingMessage))
+        if (!IsConnected)
         {
-            _publishTestMessageCommand.RaiseCanExecuteChanged();
+            subscription.IsSubscribed = false;
+            subscription.StatusMessage = "Waiting for connection";
+            return;
+        }
+
+        subscription.StatusMessage = "Subscribing...";
+
+        try
+        {
+            await _clientService.SubscribeAsync(subscription.Topic, subscription.QoS);
+            subscription.IsSubscribed = true;
+            subscription.StatusMessage = "Subscribed";
+        }
+        catch (Exception ex)
+        {
+            subscription.IsSubscribed = false;
+            subscription.StatusMessage = $"Subscribe failed: {ex.Message}";
+            Logger?.Log($"MQTT subscribe failed for {subscription.Topic}: {ex.Message}", LogLevel.Error);
+        }
+    }
+
+    private async Task SubscribeAllAsync()
+    {
+        if (!IsConnected)
+            return;
+
+        foreach (var subscription in Subscriptions)
+        {
+            await SubscribeTopicAsync(subscription);
+        }
+    }
+
+    private void OnSubscriptionsChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (e.NewItems is not null)
+        {
+            foreach (var item in e.NewItems.OfType<TagSubscription>())
+            {
+                item.PropertyChanged += OnSubscriptionPropertyChanged;
+            }
+        }
+
+        if (e.OldItems is not null)
+        {
+            foreach (var item in e.OldItems.OfType<TagSubscription>())
+            {
+                item.PropertyChanged -= OnSubscriptionPropertyChanged;
+            }
+        }
+
+        _sendTestMessageCommand.RaiseCanExecuteChanged();
+    }
+
+    private void OnSubscriptionPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (sender is not TagSubscription subscription)
+            return;
+
+        switch (e.PropertyName)
+        {
+            case nameof(TagSubscription.OutgoingMessage):
+                _sendTestMessageCommand.RaiseCanExecuteChanged();
+                break;
+            case nameof(TagSubscription.QoS):
+                if (IsConnected)
+                {
+                    _ = SubscribeTopicAsync(subscription);
+                }
+                else
+                {
+                    subscription.StatusMessage = "Waiting for connection";
+                }
+
+                break;
+        }
+    }
+
+    private void OnConnectionStateChanged(object? sender, bool connected)
+    {
+        IsConnected = connected;
+
+        if (connected)
+        {
+            _ = SubscribeAllAsync();
         }
     }
 
