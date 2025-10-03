@@ -8,11 +8,14 @@ using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.FileObserver;
 using DesktopApplicationTemplate.UI.Helpers;
+using Microsoft.VisualStudio.Threading;
 
 namespace DesktopApplicationTemplate.UI.ViewModels.FileObserver;
 
 public class FileObserverViewModel : ViewModelBase
 {
+    private static readonly JoinableTaskFactory _jtf = new(new JoinableTaskContext());
+
     public ObservableCollection<FileObserver> Observers { get; } = new();
 
     private FileObserver? _selectedObserver;
@@ -233,16 +236,21 @@ public class FileObserverViewModel : ViewModelBase
         }
     }
 
-    private void OnFileChanged(object? sender, FileObserverChangedEventArgs e)
+    private async void OnFileChanged(object? sender, FileObserverChangedEventArgs e)
     {
-        var dispatcher = Application.Current?.Dispatcher;
-        if (dispatcher is null)
+        var application = Application.Current;
+        if (application?.Dispatcher is null)
         {
             ApplyFileContents(e.Contents);
             return;
         }
 
-        _ = dispatcher.InvokeAsync(() => ApplyFileContents(e.Contents));
+        if (!application.Dispatcher.CheckAccess())
+        {
+            await _jtf.SwitchToMainThreadAsync();
+        }
+
+        ApplyFileContents(e.Contents);
     }
 
     private void ApplyFileContents(string contents)
