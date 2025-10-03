@@ -12,13 +12,30 @@
               IsReadOnly="True"
               HeadersVisibility="Column"
               RowHeaderWidth="0"
-                MaxHeight="200"
-                ScrollViewer.VerticalScrollBarVisibility="Auto">
+              MaxHeight="200"
+              ColumnWidth="*"
+              MinColumnWidth="100"
+              ScrollViewer.HorizontalScrollBarVisibility="Auto"
+              ScrollViewer.VerticalScrollBarVisibility="Auto">
+        <DataGrid.ColumnHeaderStyle>
+            <Style TargetType="DataGridColumnHeader">
+                <EventSetter Event="PreviewMouseDoubleClick"
+                             Handler="ColumnHeaderPreviewMouseDoubleClick" />
+            </Style>
+        </DataGrid.ColumnHeaderStyle>
         <DataGrid.Columns>
-            <DataGridTextColumn Header="Incoming" Binding="{Binding IncomingMessage}" Width="*"/>
-            <DataGridTextColumn Header="Outgoing" Binding="{Binding OutgoingMessage}" Width="*"/>
-            <DataGridTextColumn Header="Destination" Binding="{Binding Destination}" Width="*"/>
-            <DataGridTextColumn Header="Timestamp" Binding="{Binding Timestamp}" Width="Auto"/>
+            <DataGridTextColumn Header="Incoming"
+                                 Binding="{Binding IncomingMessage}"
+                                 Width="2*"
+                                 MinWidth="150" />
+            <DataGridTextColumn Header="Outgoing"
+                                 Binding="{Binding OutgoingMessage}"
+                                 Width="2*"
+                                 MinWidth="150" />
+            <DataGridTextColumn Header="Destination"
+                                 Binding="{Binding Destination}"
+                                 Width="*"
+                                 MinWidth="120" />
         </DataGrid.Columns>
     </DataGrid>
 </UserControl>
