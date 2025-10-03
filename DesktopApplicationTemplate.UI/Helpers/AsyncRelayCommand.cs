@@ -96,7 +96,9 @@ namespace DesktopApplicationTemplate.UI.Helpers
                 return;
             }
 
-            _ = dispatcher.InvokeAsync(() => handler(sender, EventArgs.Empty), DispatcherPriority.Normal);
+            _ = dispatcher.BeginInvoke(
+                new Action(() => handler(sender, EventArgs.Empty)),
+                DispatcherPriority.Normal);
         }
     }
 }
