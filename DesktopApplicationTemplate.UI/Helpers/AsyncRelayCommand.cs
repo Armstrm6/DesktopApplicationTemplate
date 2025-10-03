@@ -2,8 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using System.Windows;
-using System.Windows.Threading;
+using DesktopApplicationTemplate.UI;
 
 namespace DesktopApplicationTemplate.UI.Helpers
 {
@@ -97,11 +96,23 @@ namespace DesktopApplicationTemplate.UI.Helpers
                 return;
             }
 
-            synchronizationContext.Post(static state =>
+            var joinableTaskFactory = App.UiThreadTaskFactory;
+            if (joinableTaskFactory is null)
             {
-                var (callback, callbackSender) = ((EventHandler Handler, object Sender))state!;
-                callback(callbackSender, EventArgs.Empty);
-            }, (handler, sender));
+                handler(sender, EventArgs.Empty);
+                return;
+            }
+
+            _ = joinableTaskFactory.RunAsync(async () =>
+            {
+                await joinableTaskFactory.SwitchToMainThreadAsync();
+                handler(sender, EventArgs.Empty);
+            });
+        }
+
+        public static void RaiseCanExecuteChanged(EventHandler? handler, object sender)
+        {
+            RaiseCanExecuteChanged(SynchronizationContext.Current, handler, sender);
         }
     }
 }

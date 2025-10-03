@@ -90,6 +90,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.VisualStudio.Threading;
 using MQTTnet;
 using FubarDev.FtpServer;
 using FubarDev.FtpServer.FileSystem.DotNet;
@@ -99,6 +100,7 @@ using System.Windows.Controls;
 using System;
 using System.Windows.Threading;
 using System.Collections.Generic;
+using System.Threading;
 using DesktopApplicationTemplate.Models;
 using System.Threading.Tasks;
 using DesktopApplicationTemplate.Services;
@@ -109,9 +111,15 @@ namespace DesktopApplicationTemplate.UI
     public partial class App : System.Windows.Application
     {
         public static IHost AppHost { get; private set; } = null!;
+        private static JoinableTaskContext UiThreadTaskContext { get; set; } = null!;
+        public static JoinableTaskFactory UiThreadTaskFactory { get; private set; } = null!;
 
         public App()
         {
+            var synchronizationContext = SynchronizationContext.Current ?? new DispatcherSynchronizationContext(Dispatcher);
+            UiThreadTaskContext = new JoinableTaskContext(Thread.CurrentThread, synchronizationContext);
+            UiThreadTaskFactory = UiThreadTaskContext.Factory;
+
             DispatcherUnhandledException += OnDispatcherUnhandledException;
             AppDomain.CurrentDomain.UnhandledException += HandleAppDomainUnhandledException;
 
