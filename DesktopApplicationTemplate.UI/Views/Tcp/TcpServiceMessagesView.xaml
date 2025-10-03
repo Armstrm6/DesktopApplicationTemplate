@@ -20,12 +20,32 @@
 
                 <StackPanel Grid.Column="0">
                     <TextBlock Text="Incoming Data" FontWeight="Bold" Margin="0,0,0,5"/>
-                    <ListBox ItemsSource="{Binding IncomingData}"/>
+                    <ListBox ItemsSource="{Binding IncomingData}"
+                             ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                             HorizontalContentAlignment="Stretch">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}"
+                                           TextWrapping="Wrap"
+                                           TextTrimming="CharacterEllipsis"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
                 </StackPanel>
 
                 <StackPanel Grid.Column="1">
                     <TextBlock Text="Outgoing Results" FontWeight="Bold" Margin="0,0,0,5"/>
-                    <ListBox ItemsSource="{Binding OutgoingResults}"/>
+                    <ListBox ItemsSource="{Binding OutgoingResults}"
+                             ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                             HorizontalContentAlignment="Stretch">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}"
+                                           TextWrapping="Wrap"
+                                           TextTrimming="CharacterEllipsis"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
                 </StackPanel>
             </Grid>
 
