@@ -55,6 +55,7 @@ namespace DesktopApplicationTemplate.UI.Helpers
     {
         private readonly Func<T?, Task> _execute;
         private readonly Predicate<T?>? _canExecute;
+        // Capture the synchronization context so UI notifications mirror the non-generic command.
         private readonly SynchronizationContext? _synchronizationContext;
         /// <summary>
         /// Initializes a new instance of the <see cref="AsyncRelayCommand{T}"/> class.
