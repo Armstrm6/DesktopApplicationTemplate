@@ -1,5 +1,4 @@
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -82,8 +81,6 @@ namespace DesktopApplicationTemplate.UI.Helpers
 
     internal static class CommandDispatcher
     {
-        private static SynchronizationContext? _synchronizationContext = SynchronizationContext.Current;
-
         public static void RaiseCanExecuteChanged(EventHandler? handler, object sender)
         {
             if (handler is null)
@@ -91,24 +88,15 @@ namespace DesktopApplicationTemplate.UI.Helpers
                 return;
             }
 
-            var context = _synchronizationContext ?? GetSynchronizationContext();
+            var dispatcher = Application.Current?.Dispatcher;
 
-            if (context is null || ReferenceEquals(SynchronizationContext.Current, context))
+            if (dispatcher is null || dispatcher.CheckAccess())
             {
                 handler(sender, EventArgs.Empty);
                 return;
             }
 
-            context.Post(_ => handler(sender, EventArgs.Empty), null);
-        }
-
-        private static SynchronizationContext? GetSynchronizationContext()
-        {
-            _synchronizationContext = Application.Current is null
-                ? SynchronizationContext.Current
-                : new DispatcherSynchronizationContext(Application.Current.Dispatcher);
-
-            return _synchronizationContext;
+            _ = dispatcher.InvokeAsync(() => handler(sender, EventArgs.Empty), DispatcherPriority.Normal);
         }
     }
 }
