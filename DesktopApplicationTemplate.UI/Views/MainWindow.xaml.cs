@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Linq;
 using DesktopApplicationTemplate.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.Models;
@@ -25,6 +28,8 @@ namespace DesktopApplicationTemplate.UI.Views
         private readonly ILogger<MainView>? _logger;
         private readonly IServiceUiRegistry<ServiceListModel, Page> _serviceRegistry;
         private readonly IServiceProvider _serviceProvider;
+        private readonly Dictionary<ServiceListModel, Action<LogEntry>> _serviceLogHandlers = new();
+        private readonly BrushConverter _brushConverter = new();
 
         public MainView(
             MainViewModel viewModel,
@@ -41,11 +46,13 @@ namespace DesktopApplicationTemplate.UI.Views
             }
             DataContext = _viewModel;
             _viewModel.AddServiceRequested += OnAddServiceRequested;
+            _viewModel.Services.CollectionChanged += Services_CollectionChanged;
             MouseDown += MainView_MouseDown;
             CommandBindings.Add(new CommandBinding(SystemCommands.CloseWindowCommand, CloseCommand_Executed));
             CommandBindings.Add(new CommandBinding(SystemCommands.MinimizeWindowCommand, MinimizeCommand_Executed));
             Closing += (_, _) => _logger?.LogInformation("MainView closing");
             ShowHome();
+            PreloadServicePages();
         }
 
         public void ShowHome()
@@ -99,20 +106,9 @@ namespace DesktopApplicationTemplate.UI.Views
 
             if (svc.ServicePage != null)
             {
-                if (svc.ServicePage.DataContext is ILoggingViewModel vm && vm.Logger is not null)
+                if (svc.ServicePage.DataContext is ILoggingViewModel vm)
                 {
-                    if (svc.Type == ServiceType.Mqtt)
-                    {
-                        vm.Logger.LogAdded += entry => _viewModel.OnServiceLogAdded(svc, entry);
-                    }
-                    else
-                    {
-                        vm.Logger.LogAdded += entry =>
-                        {
-                            var brush = (Brush?)new BrushConverter().ConvertFromString(entry.Color);
-                            svc.AddLog(entry.Message, brush, entry.Level);
-                        };
-                    }
+                    AttachServiceLogger(svc, vm);
                 }
 
                 if (svc.ServicePage.DataContext is INetworkAwareViewModel navm)
@@ -124,10 +120,99 @@ namespace DesktopApplicationTemplate.UI.Views
                 {
                     logHost.SetServiceContext(svc);
                 }
-
             }
 
             return svc.ServicePage;
+        }
+
+        private void AttachServiceLogger(ServiceListModel svc, ILoggingViewModel vm)
+        {
+            if (vm.Logger is null || _serviceLogHandlers.ContainsKey(svc))
+            {
+                return;
+            }
+
+            Action<LogEntry> handler;
+
+            if (svc.Type == ServiceType.Mqtt)
+            {
+                handler = entry => _viewModel.OnServiceLogAdded(svc, entry);
+            }
+            else
+            {
+                handler = entry =>
+                {
+                    Brush? brush = null;
+                    try
+                    {
+                        brush = _brushConverter.ConvertFromString(entry.Color) as Brush;
+                    }
+                    catch
+                    {
+                        brush = null;
+                    }
+
+                    svc.AddLog(entry.Message, brush ?? Brushes.Black, entry.Level);
+                };
+            }
+
+            vm.Logger.LogAdded += handler;
+            _serviceLogHandlers[svc] = handler;
+
+            if (svc.Logs.Count == 0)
+            {
+                vm.Logger.Reload();
+            }
+        }
+
+        private void DetachServiceLogger(ServiceListModel svc)
+        {
+            if (!_serviceLogHandlers.TryGetValue(svc, out var handler))
+            {
+                return;
+            }
+
+            if (svc.ServicePage?.DataContext is ILoggingViewModel vm && vm.Logger is not null)
+            {
+                vm.Logger.LogAdded -= handler;
+            }
+
+            _serviceLogHandlers.Remove(svc);
+        }
+
+        private void Services_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action is NotifyCollectionChangedAction.Remove or NotifyCollectionChangedAction.Replace)
+            {
+                foreach (ServiceListModel svc in e.OldItems?.OfType<ServiceListModel>() ?? Enumerable.Empty<ServiceListModel>())
+                {
+                    DetachServiceLogger(svc);
+                }
+            }
+
+            if (e.Action is NotifyCollectionChangedAction.Add or NotifyCollectionChangedAction.Replace)
+            {
+                foreach (ServiceListModel svc in e.NewItems?.OfType<ServiceListModel>() ?? Enumerable.Empty<ServiceListModel>())
+                {
+                    GetOrCreateServicePage(svc);
+                }
+            }
+
+            if (e.Action == NotifyCollectionChangedAction.Reset)
+            {
+                foreach (var svc in _serviceLogHandlers.Keys.ToList())
+                {
+                    DetachServiceLogger(svc);
+                }
+            }
+        }
+
+        private void PreloadServicePages()
+        {
+            foreach (var svc in _viewModel.Services)
+            {
+                GetOrCreateServicePage(svc);
+            }
         }
 
         private void AddService_Click(object sender, RoutedEventArgs e)

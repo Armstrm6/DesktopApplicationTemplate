@@ -125,7 +125,13 @@ public class ScriptEditorViewModel : ViewModelBase
         }
     }
 
-    private void Save() => RequestClose?.Invoke(this, new ScriptSavedEventArgs(ScriptText, _lastTestMessage));
+    private void Save()
+    {
+        var messageToPersist = string.IsNullOrWhiteSpace(_lastTestMessage)
+            ? TestMessage
+            : _lastTestMessage;
+        RequestClose?.Invoke(this, new ScriptSavedEventArgs(ScriptText, messageToPersist));
+    }
 }
 
 public class Globals
