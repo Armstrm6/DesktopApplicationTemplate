@@ -1,8 +1,7 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
-using System.Windows.Threading;
 
 namespace DesktopApplicationTemplate.UI.Helpers
 {
@@ -13,11 +12,13 @@ namespace DesktopApplicationTemplate.UI.Helpers
     {
         private readonly Func<Task> _execute;
         private readonly Func<bool>? _canExecute;
+        private readonly SynchronizationContext? _synchronizationContext;
 
         public AsyncRelayCommand(Func<Task> execute, Func<bool>? canExecute = null)
         {
             _execute = execute ?? throw new ArgumentNullException(nameof(execute));
             _canExecute = canExecute;
+            _synchronizationContext = SynchronizationContext.Current;
         }
 
         public bool CanExecute(object? parameter) => _canExecute?.Invoke() ?? true;
@@ -35,7 +36,7 @@ namespace DesktopApplicationTemplate.UI.Helpers
 
         public event EventHandler? CanExecuteChanged;
 
-        public void RaiseCanExecuteChanged() => CommandDispatcher.RaiseCanExecuteChanged(CanExecuteChanged, this);
+        public void RaiseCanExecuteChanged() => CommandDispatcher.RaiseCanExecuteChanged(_synchronizationContext, CanExecuteChanged, this);
     }
 
     /// <summary>
@@ -46,6 +47,7 @@ namespace DesktopApplicationTemplate.UI.Helpers
     {
         private readonly Func<T?, Task> _execute;
         private readonly Predicate<T?>? _canExecute;
+        private readonly SynchronizationContext? _synchronizationContext;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AsyncRelayCommand{T}"/> class.
@@ -54,6 +56,7 @@ namespace DesktopApplicationTemplate.UI.Helpers
         {
             _execute = execute ?? throw new ArgumentNullException(nameof(execute));
             _canExecute = canExecute;
+            _synchronizationContext = SynchronizationContext.Current;
         }
 
         /// <inheritdoc />
@@ -76,27 +79,29 @@ namespace DesktopApplicationTemplate.UI.Helpers
         /// <summary>
         /// Notifies that the ability to execute has changed.
         /// </summary>
-        public void RaiseCanExecuteChanged() => CommandDispatcher.RaiseCanExecuteChanged(CanExecuteChanged, this);
+        public void RaiseCanExecuteChanged() => CommandDispatcher.RaiseCanExecuteChanged(_synchronizationContext, CanExecuteChanged, this);
     }
 
     internal static class CommandDispatcher
     {
-        public static void RaiseCanExecuteChanged(EventHandler? handler, object sender)
+        public static void RaiseCanExecuteChanged(SynchronizationContext? synchronizationContext, EventHandler? handler, object sender)
         {
             if (handler is null)
             {
                 return;
             }
 
-            var dispatcher = Application.Current?.Dispatcher;
-
-            if (dispatcher is null || dispatcher.CheckAccess())
+            if (synchronizationContext is null || synchronizationContext == SynchronizationContext.Current)
             {
                 handler(sender, EventArgs.Empty);
                 return;
             }
 
-            _ = dispatcher.InvokeAsync(() => handler(sender, EventArgs.Empty), DispatcherPriority.Normal);
+            synchronizationContext.Post(static state =>
+            {
+                var (callback, callbackSender) = ((EventHandler Handler, object Sender))state!;
+                callback(callbackSender, EventArgs.Empty);
+            }, (handler, sender));
         }
     }
 }
