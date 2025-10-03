@@ -1,9 +1,7 @@
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using DesktopApplicationTemplate.UI;
-using Microsoft.VisualStudio.Threading;
 
 namespace DesktopApplicationTemplate.UI.Helpers
 {
@@ -14,13 +12,10 @@ namespace DesktopApplicationTemplate.UI.Helpers
     {
         private readonly Func<Task> _execute;
         private readonly Func<bool>? _canExecute;
-        private readonly SynchronizationContext? _synchronizationContext;
-
         public AsyncRelayCommand(Func<Task> execute, Func<bool>? canExecute = null)
         {
             _execute = execute ?? throw new ArgumentNullException(nameof(execute));
             _canExecute = canExecute;
-            _synchronizationContext = SynchronizationContext.Current;
         }
 
         public bool CanExecute(object? parameter) => _canExecute?.Invoke() ?? true;
@@ -41,7 +36,6 @@ namespace DesktopApplicationTemplate.UI.Helpers
         public void RaiseCanExecuteChanged()
         {
             CommandDispatcher.FireAndForget(
-                _synchronizationContext,
                 CanExecuteChanged,
                 this);
         }
@@ -55,8 +49,6 @@ namespace DesktopApplicationTemplate.UI.Helpers
     {
         private readonly Func<T?, Task> _execute;
         private readonly Predicate<T?>? _canExecute;
-        // Capture the synchronization context so UI notifications mirror the non-generic command.
-        private readonly SynchronizationContext? _synchronizationContext;
         /// <summary>
         /// Initializes a new instance of the <see cref="AsyncRelayCommand{T}"/> class.
         /// </summary>
@@ -64,7 +56,6 @@ namespace DesktopApplicationTemplate.UI.Helpers
         {
             _execute = execute ?? throw new ArgumentNullException(nameof(execute));
             _canExecute = canExecute;
-            _synchronizationContext = SynchronizationContext.Current;
         }
 
         /// <inheritdoc />
@@ -90,7 +81,6 @@ namespace DesktopApplicationTemplate.UI.Helpers
         public void RaiseCanExecuteChanged()
         {
             CommandDispatcher.FireAndForget(
-                _synchronizationContext,
                 CanExecuteChanged,
                 this);
         }
@@ -98,43 +88,33 @@ namespace DesktopApplicationTemplate.UI.Helpers
 
     internal static class CommandDispatcher
     {
-        public static async Task RaiseCanExecuteChanged(SynchronizationContext? synchronizationContext, EventHandler? handler, object sender)
+        public static Task RaiseCanExecuteChanged(EventHandler? handler, object sender)
         {
             if (handler is null)
             {
-                return;
+                return Task.CompletedTask;
             }
 
-            if (synchronizationContext is null || synchronizationContext == SynchronizationContext.Current)
+            if (App.UiThreadTaskFactory is null)
             {
-                handler(sender, EventArgs.Empty);
-                return;
+                return Task.CompletedTask;
             }
 
-            var joinableTaskFactory = App.UiThreadTaskFactory;
-            if (joinableTaskFactory is null)
+            return App.UiThreadTaskFactory.RunAsync(async () =>
             {
-                handler(sender, EventArgs.Empty);
-                return;
-            }
+                if (App.UiThreadTaskFactory is null)
+                {
+                    return;
+                }
 
-            await joinableTaskFactory.SwitchToMainThreadAsync();
-            handler(sender, EventArgs.Empty);
+                await App.UiThreadTaskFactory.SwitchToMainThreadAsync();
+                handler(sender, EventArgs.Empty);
+            }).Task;
         }
 
-        public static Task RaiseCanExecuteChanged(EventHandler? handler, object sender)
+        public static void FireAndForget(EventHandler? handler, object sender)
         {
-            return RaiseCanExecuteChanged(SynchronizationContext.Current, handler, sender);
-        }
-
-        public static void FireAndForget(SynchronizationContext? synchronizationContext, EventHandler? handler, object sender)
-        {
-            var joinableTaskFactory = App.UiThreadTaskFactory;
-            var task = joinableTaskFactory is not null
-                ? joinableTaskFactory.RunAsync(() => RaiseCanExecuteChanged(synchronizationContext, handler, sender)).Task
-                : RaiseCanExecuteChanged(synchronizationContext, handler, sender);
-
-            ObserveFailure(task);
+            ObserveFailure(RaiseCanExecuteChanged(handler, sender));
         }
 
         private static void ObserveFailure(Task task)
