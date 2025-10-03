@@ -8,11 +8,14 @@ using DesktopApplicationTemplate.Core.Services.Protocols.Csv;
 using DesktopApplicationTemplate.Core.Services.Protocols.Ftp;
 using DesktopApplicationTemplate.Core.Services.Protocols.Http;
 using DesktopApplicationTemplate.Core.Services.Protocols.Tcp;
+using DesktopApplicationTemplate.Core.Services.Protocols.FileObserver;
+using DesktopApplicationTemplate.Core.Services.Protocols.Heartbeat;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.ViewModels;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
 using DesktopApplicationTemplate.UI;
+using DesktopApplicationTemplate.UI.Services;
 
 namespace DesktopApplicationTemplate.Persistence
 {
@@ -30,6 +33,10 @@ namespace DesktopApplicationTemplate.Persistence
                 CsvServiceOptions? csv = null;
                 FtpServerOptions? ftp = null;
                 HttpServiceOptions? http = null;
+                HeartbeatServiceOptions? heartbeat = null;
+                FileObserverServiceOptions? fileObserver = null;
+                HidServiceOptions? hid = null;
+                ScpServiceOptions? scp = null;
                 if (s.Type == ServiceType.Tcp && s.TcpOptions != null)
                 {
                     tcp = new TcpServiceOptions
@@ -77,6 +84,55 @@ namespace DesktopApplicationTemplate.Persistence
                     };
                 }
 
+                if (s.Type == ServiceType.Heartbeat && s.HeartbeatOptions != null)
+                {
+                    heartbeat = new HeartbeatServiceOptions
+                    {
+                        BaseMessage = s.HeartbeatOptions.BaseMessage,
+                        IncludePing = s.HeartbeatOptions.IncludePing,
+                        IncludeStatus = s.HeartbeatOptions.IncludeStatus
+                    };
+                }
+
+                if (s.Type == ServiceType.FileObserver && s.FileObserverOptions != null)
+                {
+                    fileObserver = new FileObserverServiceOptions
+                    {
+                        FilePath = s.FileObserverOptions.FilePath,
+                        ImageNames = s.FileObserverOptions.ImageNames,
+                        SendAllImages = s.FileObserverOptions.SendAllImages,
+                        SendFirstX = s.FileObserverOptions.SendFirstX,
+                        XCount = s.FileObserverOptions.XCount,
+                        SendTcpCommand = s.FileObserverOptions.SendTcpCommand,
+                        TcpCommand = s.FileObserverOptions.TcpCommand
+                    };
+                }
+
+                if (s.Type == ServiceType.Hid && s.HidOptions != null)
+                {
+                    hid = new HidServiceOptions
+                    {
+                        MessageTemplate = s.HidOptions.MessageTemplate,
+                        UsbProtocol = s.HidOptions.UsbProtocol,
+                        AttachedService = s.HidOptions.AttachedService,
+                        DebounceTimeMs = s.HidOptions.DebounceTimeMs,
+                        KeyDownTimeMs = s.HidOptions.KeyDownTimeMs
+                    };
+                }
+
+                if (s.Type == ServiceType.Scp && s.ScpOptions != null)
+                {
+                    scp = new ScpServiceOptions
+                    {
+                        Host = s.ScpOptions.Host,
+                        Port = s.ScpOptions.Port,
+                        Username = s.ScpOptions.Username,
+                        Password = s.ScpOptions.Password,
+                        LocalPath = s.ScpOptions.LocalPath,
+                        RemotePath = s.ScpOptions.RemotePath
+                    };
+                }
+
                 data.Add(new ServiceInfo
                 {
                     DisplayName = s.DisplayName,
@@ -89,6 +145,10 @@ namespace DesktopApplicationTemplate.Persistence
                     FtpOptions = ftp,
                     HttpOptions = http,
                     CsvOptions = csv,
+                    HeartbeatOptions = heartbeat,
+                    FileObserverOptions = fileObserver,
+                    HidOptions = hid,
+                    ScpOptions = scp,
                     TotalExecutionTimeMs = s.TotalExecutionTimeMs,
                     ExecutionCount = s.ExecutionCount
                 });
@@ -166,6 +226,10 @@ namespace DesktopApplicationTemplate.Persistence
                             FtpOptions = info.FtpOptions,
                             HttpOptions = info.HttpOptions,
                             CsvOptions = info.CsvOptions,
+                            HeartbeatOptions = info.HeartbeatOptions,
+                            FileObserverOptions = info.FileObserverOptions,
+                            HidOptions = info.HidOptions,
+                            ScpOptions = info.ScpOptions,
                             TotalExecutionTimeMs = info.TotalExecutionTimeMs,
                             ExecutionCount = info.ExecutionCount
                         });
@@ -214,6 +278,62 @@ namespace DesktopApplicationTemplate.Persistence
                             // ignore missing options during tests or early startup
                         }
                     }
+                    if (info.ServiceType == ServiceType.Heartbeat && info.HeartbeatOptions != null)
+                    {
+                        var opt = App.AppHost?.Services.GetService<IOptions<HeartbeatServiceOptions>>();
+                        if (opt != null)
+                        {
+                            var value = opt.Value;
+                            value.BaseMessage = info.HeartbeatOptions.BaseMessage;
+                            value.IncludePing = info.HeartbeatOptions.IncludePing;
+                            value.IncludeStatus = info.HeartbeatOptions.IncludeStatus;
+                        }
+                    }
+
+                    if (info.ServiceType == ServiceType.FileObserver && info.FileObserverOptions != null)
+                    {
+                        var opt = App.AppHost?.Services.GetService<IOptions<FileObserverServiceOptions>>();
+                        if (opt != null)
+                        {
+                            var value = opt.Value;
+                            value.FilePath = info.FileObserverOptions.FilePath;
+                            value.ImageNames = info.FileObserverOptions.ImageNames;
+                            value.SendAllImages = info.FileObserverOptions.SendAllImages;
+                            value.SendFirstX = info.FileObserverOptions.SendFirstX;
+                            value.XCount = info.FileObserverOptions.XCount;
+                            value.SendTcpCommand = info.FileObserverOptions.SendTcpCommand;
+                            value.TcpCommand = info.FileObserverOptions.TcpCommand;
+                        }
+                    }
+
+                    if (info.ServiceType == ServiceType.Hid && info.HidOptions != null)
+                    {
+                        var opt = App.AppHost?.Services.GetService<IOptions<HidServiceOptions>>();
+                        if (opt != null)
+                        {
+                            var value = opt.Value;
+                            value.MessageTemplate = info.HidOptions.MessageTemplate;
+                            value.UsbProtocol = info.HidOptions.UsbProtocol;
+                            value.AttachedService = info.HidOptions.AttachedService;
+                            value.DebounceTimeMs = info.HidOptions.DebounceTimeMs;
+                            value.KeyDownTimeMs = info.HidOptions.KeyDownTimeMs;
+                        }
+                    }
+
+                    if (info.ServiceType == ServiceType.Scp && info.ScpOptions != null)
+                    {
+                        var opt = App.AppHost?.Services.GetService<IOptions<ScpServiceOptions>>();
+                        if (opt != null)
+                        {
+                            var value = opt.Value;
+                            value.Host = info.ScpOptions.Host;
+                            value.Port = info.ScpOptions.Port;
+                            value.Username = info.ScpOptions.Username;
+                            value.Password = info.ScpOptions.Password;
+                            value.LocalPath = info.ScpOptions.LocalPath;
+                            value.RemotePath = info.ScpOptions.RemotePath;
+                        }
+                    }
                 }
 
                 logger?.Log($"Loaded {result.Count} services", LogLevel.Debug);
@@ -239,6 +359,10 @@ namespace DesktopApplicationTemplate.Persistence
         public FtpServerOptions? FtpOptions { get; set; }
         public HttpServiceOptions? HttpOptions { get; set; }
         public CsvServiceOptions? CsvOptions { get; set; }
+        public HeartbeatServiceOptions? HeartbeatOptions { get; set; }
+        public FileObserverServiceOptions? FileObserverOptions { get; set; }
+        public HidServiceOptions? HidOptions { get; set; }
+        public ScpServiceOptions? ScpOptions { get; set; }
         public double TotalExecutionTimeMs { get; set; }
         public int ExecutionCount { get; set; }
     }
@@ -255,6 +379,10 @@ namespace DesktopApplicationTemplate.Persistence
         public FtpServerOptions? FtpOptions { get; set; }
         public HttpServiceOptions? HttpOptions { get; set; }
         public CsvServiceOptions? CsvOptions { get; set; }
+        public HeartbeatServiceOptions? HeartbeatOptions { get; set; }
+        public FileObserverServiceOptions? FileObserverOptions { get; set; }
+        public HidServiceOptions? HidOptions { get; set; }
+        public ScpServiceOptions? ScpOptions { get; set; }
         public double TotalExecutionTimeMs { get; set; }
         public int ExecutionCount { get; set; }
     }

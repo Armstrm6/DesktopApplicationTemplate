@@ -24,6 +24,8 @@ public static class CommonServiceCollectionExtensions
         services.AddTransient(typeof(IServiceScreen<>), typeof(ServiceScreen<>));
         services.AddSingleton<IFileSearchService, FileSearchService>();
         services.AddSingleton<IProtocolLogger, LoggingServiceProtocolLogger>();
+        services.AddSingleton<IProtocolEventPublisher, ProtocolEventPublisherFacade>();
+        services.AddSingleton<IProtocolLifecycleObserver, ProtocolLifecycleObserverFacade>();
         services.AddSingleton<IHttpClientService, HttpClientService>();
         services.AddTransient<ITcpRuntime, TcpRuntime>();
         services.AddTransient<IHeartbeatService, HeartbeatService>();
