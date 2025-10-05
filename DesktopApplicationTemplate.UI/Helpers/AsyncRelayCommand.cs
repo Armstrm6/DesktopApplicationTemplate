@@ -3,6 +3,7 @@ using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using DesktopApplicationTemplate.UI;
+using Microsoft.VisualStudio.Threading;
 
 namespace DesktopApplicationTemplate.UI.Helpers
 {
@@ -90,16 +91,18 @@ namespace DesktopApplicationTemplate.UI.Helpers
     [SupportedOSPlatform("windows")]
     internal static class CommandDispatcher
     {
-        public static Task RaiseCanExecuteChanged(EventHandler? handler, object sender)
+        private static readonly JoinableTaskFactory BackgroundTaskFactory = new(new JoinableTaskContext());
+
+        public static JoinableTask RaiseCanExecuteChangedAsync(EventHandler? handler, object sender)
         {
             if (handler is null)
             {
-                return Task.CompletedTask;
+                return BackgroundTaskFactory.RunAsync(static () => Task.CompletedTask);
             }
 
             if (App.UiThreadTaskFactory is null)
             {
-                return Task.CompletedTask;
+                return BackgroundTaskFactory.RunAsync(static () => Task.CompletedTask);
             }
 
             return App.UiThreadTaskFactory.RunAsync(async () =>
@@ -111,25 +114,26 @@ namespace DesktopApplicationTemplate.UI.Helpers
 
                 await App.UiThreadTaskFactory.SwitchToMainThreadAsync();
                 handler(sender, EventArgs.Empty);
-            }).Task;
+            });
         }
 
         public static void FireAndForget(EventHandler? handler, object sender)
         {
-            _ = ObserveFailureAsync(RaiseCanExecuteChanged(handler, sender));
+            var joinableTask = RaiseCanExecuteChangedAsync(handler, sender);
+            _ = ObserveFailureAsync(joinableTask);
         }
 
-        private static async Task ObserveFailureAsync(Task task)
+        private static async Task ObserveFailureAsync(JoinableTask joinableTask)
         {
             try
             {
-                await task.ConfigureAwait(false);
+                await joinableTask.JoinAsync().ConfigureAwait(false);
             }
             catch
             {
-                if (task.IsFaulted)
+                if (joinableTask.Task.IsFaulted)
                 {
-                    _ = task.Exception;
+                    _ = joinableTask.Task.Exception;
                 }
             }
         }
