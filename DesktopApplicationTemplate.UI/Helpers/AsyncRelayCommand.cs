@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using DesktopApplicationTemplate.UI;
@@ -86,6 +87,7 @@ namespace DesktopApplicationTemplate.UI.Helpers
         }
     }
 
+    [SupportedOSPlatform("windows")]
     internal static class CommandDispatcher
     {
         public static Task RaiseCanExecuteChanged(EventHandler? handler, object sender)
