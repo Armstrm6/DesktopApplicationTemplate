@@ -14,6 +14,10 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
     private int _port;
     private bool _useUdp;
     private TcpServiceMode _mode;
+    private TcpConnectionRole _connectionRole = TcpConnectionRole.Server;
+    private string _serverHost = NetworkUtilities.GetLocalIpAddress();
+    private string _clientHost = string.Empty;
+    private bool _suppressRoleHostUpdate;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TcpEditServiceViewModel"/> class.
@@ -30,10 +34,21 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
         ServiceName = serviceName ?? throw new ArgumentNullException(nameof(serviceName));
+        _suppressRoleHostUpdate = true;
+        ConnectionRole = _options.ConnectionRole;
         Host = _options.Host;
         Port = _options.Port;
         UseUdp = _options.UseUdp;
         Mode = _options.Mode;
+        if (ConnectionRole == TcpConnectionRole.Server)
+        {
+            _serverHost = _options.Host;
+        }
+        else
+        {
+            _clientHost = _options.Host;
+        }
+        _suppressRoleHostUpdate = false;
     }
 
 
@@ -52,6 +67,14 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
             else
                 ClearErrors(nameof(Host));
             OnPropertyChanged();
+            if (_connectionRole == TcpConnectionRole.Server)
+            {
+                _serverHost = value;
+            }
+            else
+            {
+                _clientHost = value;
+            }
         }
     }
 
@@ -96,6 +119,49 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
     /// </summary>
     public TcpServiceMode[] Modes { get; } = (TcpServiceMode[])Enum.GetValues(typeof(TcpServiceMode));
 
+    /// <summary>
+    /// Available TCP connection roles.
+    /// </summary>
+    public TcpConnectionRole[] ConnectionRoles { get; } = (TcpConnectionRole[])Enum.GetValues(typeof(TcpConnectionRole));
+
+    /// <summary>
+    /// Selected TCP connection role.
+    /// </summary>
+    public TcpConnectionRole ConnectionRole
+    {
+        get => _connectionRole;
+        set
+        {
+            if (_connectionRole == value)
+            {
+                return;
+            }
+
+            _connectionRole = value;
+            OnPropertyChanged();
+            if (_suppressRoleHostUpdate)
+            {
+                return;
+            }
+
+            if (_connectionRole == TcpConnectionRole.Server)
+            {
+                _clientHost = _host;
+                if (string.IsNullOrWhiteSpace(_serverHost))
+                {
+                    _serverHost = NetworkUtilities.GetLocalIpAddress();
+                }
+                Host = _serverHost;
+            }
+            else
+            {
+                _serverHost = _host;
+                Host = _clientHost;
+            }
+            Logger?.Log($"TCP connection role set to {_connectionRole}", LogLevel.Debug);
+        }
+    }
+
     /// <inheritdoc />
     protected override void OnSave()
     {
@@ -108,6 +174,7 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
         _options.Port = Port;
         _options.UseUdp = UseUdp;
         _options.Mode = Mode;
+        _options.ConnectionRole = ConnectionRole;
         RaiseServiceSaved(_options);
     }
 

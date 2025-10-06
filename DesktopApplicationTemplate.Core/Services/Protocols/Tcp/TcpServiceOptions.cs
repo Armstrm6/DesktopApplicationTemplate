@@ -13,6 +13,15 @@ public enum TcpServiceMode
 }
 
 /// <summary>
+/// Indicates whether the TCP service should behave as a client or server.
+/// </summary>
+public enum TcpConnectionRole
+{
+    Server,
+    Client
+}
+
+/// <summary>
 /// Configuration options for creating a TCP service.
 /// </summary>
 public class TcpServiceOptions
@@ -36,6 +45,11 @@ public class TcpServiceOptions
     /// Operating mode for the service.
     /// </summary>
     public TcpServiceMode Mode { get; set; } = TcpServiceMode.Listening;
+
+    /// <summary>
+    /// Role of the TCP connection (client or server).
+    /// </summary>
+    public TcpConnectionRole ConnectionRole { get; set; } = TcpConnectionRole.Server;
 
     /// <summary>
     /// Sample message used for testing script transformations.

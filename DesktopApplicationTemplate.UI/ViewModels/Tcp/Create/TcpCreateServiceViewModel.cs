@@ -13,6 +13,9 @@ public class TcpCreateServiceViewModel : ServiceCreateViewModelBase<TcpServiceOp
     private int _port;
     private bool _useUdp;
     private TcpServiceMode _mode;
+    private TcpConnectionRole _connectionRole = TcpConnectionRole.Server;
+    private string _serverHost = NetworkUtilities.GetLocalIpAddress();
+    private string _clientHost = string.Empty;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TcpCreateServiceViewModel"/> class.
@@ -20,6 +23,7 @@ public class TcpCreateServiceViewModel : ServiceCreateViewModelBase<TcpServiceOp
     public TcpCreateServiceViewModel(IServiceRule rule, ILoggingService? logger = null)
         : base(rule, logger: logger)
     {
+        Host = _serverHost;
     }
 
     /// <summary>
@@ -37,6 +41,14 @@ public class TcpCreateServiceViewModel : ServiceCreateViewModelBase<TcpServiceOp
             else
                 ClearErrors(nameof(Host));
             OnPropertyChanged();
+            if (_connectionRole == TcpConnectionRole.Server)
+            {
+                _serverHost = value;
+            }
+            else
+            {
+                _clientHost = value;
+            }
         }
     }
 
@@ -81,6 +93,44 @@ public class TcpCreateServiceViewModel : ServiceCreateViewModelBase<TcpServiceOp
     /// </summary>
     public TcpServiceMode[] Modes { get; } = (TcpServiceMode[])Enum.GetValues(typeof(TcpServiceMode));
 
+    /// <summary>
+    /// Available TCP connection roles.
+    /// </summary>
+    public TcpConnectionRole[] ConnectionRoles { get; } = (TcpConnectionRole[])Enum.GetValues(typeof(TcpConnectionRole));
+
+    /// <summary>
+    /// Selected TCP connection role.
+    /// </summary>
+    public TcpConnectionRole ConnectionRole
+    {
+        get => _connectionRole;
+        set
+        {
+            if (_connectionRole == value)
+            {
+                return;
+            }
+
+            _connectionRole = value;
+            OnPropertyChanged();
+            if (_connectionRole == TcpConnectionRole.Server)
+            {
+                _clientHost = _host;
+                if (string.IsNullOrWhiteSpace(_serverHost))
+                {
+                    _serverHost = NetworkUtilities.GetLocalIpAddress();
+                }
+                Host = _serverHost;
+            }
+            else
+            {
+                _serverHost = _host;
+                Host = _clientHost;
+            }
+            Logger?.Log($"TCP connection role set to {_connectionRole}", LogLevel.Debug);
+        }
+    }
+
     /// <inheritdoc />
     protected override void ApplyOptions(TcpServiceOptions options)
     {
@@ -88,5 +138,6 @@ public class TcpCreateServiceViewModel : ServiceCreateViewModelBase<TcpServiceOp
         options.Port = Port;
         options.UseUdp = UseUdp;
         options.Mode = Mode;
+        options.ConnectionRole = ConnectionRole;
     }
 }

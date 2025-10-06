@@ -1,9 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.ComponentModel;
+using System.Net;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
@@ -90,7 +95,13 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
         private readonly IMessageRoutingService _routing;
         private TcpServiceOptions _options = new();
         private TcpRuntimeContext? _runtimeContext;
-        
+        private const int MaxTcpMessageRows = 50;
+        private ServiceListModel? _service;
+        private CancellationTokenSource? _networkLoopCancellation;
+        private Task? _networkLoopTask;
+        private readonly SynchronizationContext? _uiContext;
+        private static readonly TimeSpan PingTimeout = TimeSpan.FromSeconds(2);
+
         /// <summary>Type of the service associated with these messages.</summary>
         public ServiceType ServiceType { get; private set; } = ServiceType.Tcp;
 
@@ -175,6 +186,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             MessageTable = messageTable ?? throw new ArgumentNullException(nameof(messageTable));
             _routing = routing ?? throw new ArgumentNullException(nameof(routing));
             _tcpRuntime = tcpRuntime ?? throw new ArgumentNullException(nameof(tcpRuntime));
+            _uiContext = SynchronizationContext.Current;
 
             Messages.CollectionChanged += (_, _) =>
             {
@@ -194,6 +206,14 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
         public void SetService(ServiceListModel service)
         {
             if (service == null) throw new ArgumentNullException(nameof(service));
+            StopNetwork();
+            if (_service is not null)
+            {
+                _service.ActiveChanged -= OnServiceActiveChanged;
+            }
+
+            _service = service;
+            _service.ActiveChanged += OnServiceActiveChanged;
             _options = service.TcpOptions ?? new TcpServiceOptions();
             ServiceType = service.Type;
             ServiceName = service.DisplayName;
@@ -202,7 +222,15 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                 : _options.Script;
             OutputMessage = _options.OutputMessage;
             _runtimeContext = new TcpRuntimeContext(ServiceType, ServiceName, _options, ScriptEditorViewModel.DefaultScript);
+            Messages.Clear();
+            MessageTable.Messages.Clear();
+            OnPropertyChanged(nameof(IncomingData));
+            OnPropertyChanged(nameof(OutgoingResults));
             _ = InitializeRuntimeAsync();
+            if (_service.IsActive)
+            {
+                _ = StartNetworkAsync();
+            }
         }
 
         private async Task InitializeRuntimeAsync()
@@ -243,6 +271,307 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             OnPropertyChanged(nameof(ServerGateway));
             OnPropertyChanged(nameof(ServerPort));
             OnPropertyChanged(nameof(IsUdp));
+        }
+
+        private void OnServiceActiveChanged(bool isActive)
+        {
+            if (isActive)
+            {
+                _ = StartNetworkAsync();
+            }
+            else
+            {
+                StopNetwork();
+            }
+        }
+
+        private async Task StartNetworkAsync()
+        {
+            StopNetwork();
+
+            if (_options.Port <= 0)
+            {
+                Logger?.Log("TCP port is not configured; skipping network startup.", LogLevel.Warning);
+                return;
+            }
+
+            _networkLoopCancellation = new CancellationTokenSource();
+            var token = _networkLoopCancellation.Token;
+            var protocol = _options.UseUdp ? "UDP" : "TCP";
+            Logger?.Log($"Starting TCP {_options.ConnectionRole} on {_options.Host}:{_options.Port} ({protocol})", LogLevel.Information);
+
+            _networkLoopTask = _options.ConnectionRole == TcpConnectionRole.Server
+                ? RunServerLoopAsync(token)
+                : RunClientLoopAsync(token);
+
+            if (_options.ConnectionRole == TcpConnectionRole.Server && !string.IsNullOrWhiteSpace(_options.Host))
+            {
+                await PingRemoteAsync().ConfigureAwait(false);
+            }
+        }
+
+        private void StopNetwork()
+        {
+            var cts = _networkLoopCancellation;
+            var task = _networkLoopTask;
+            if (cts == null && task == null)
+            {
+                return;
+            }
+
+            if (cts != null)
+            {
+                _networkLoopCancellation = null;
+                try
+                {
+                    cts.Cancel();
+                }
+                catch
+                {
+                    // ignore cancellation errors
+                }
+                finally
+                {
+                    cts.Dispose();
+                }
+            }
+
+            if (task != null)
+            {
+                _networkLoopTask = null;
+                task.ContinueWith(t =>
+                {
+                    if (t.IsFaulted && Logger is not null)
+                    {
+                        Logger.Log($"TCP network loop faulted: {t.Exception?.GetBaseException().Message}", LogLevel.Error);
+                    }
+                }, TaskScheduler.Default);
+            }
+
+            Logger?.Log("TCP network loop stopped", LogLevel.Debug);
+        }
+
+        private async Task RunServerLoopAsync(CancellationToken cancellationToken)
+        {
+            TcpListener? listener = null;
+            try
+            {
+                var listenAddress = ResolveListenAddress(_options.Host);
+                listener = new TcpListener(listenAddress, _options.Port);
+                listener.Start();
+                Logger?.Log($"Listening on {listenAddress}:{_options.Port}", LogLevel.Information);
+
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    TcpClient client;
+                    try
+                    {
+                        client = await listener.AcceptTcpClientAsync(cancellationToken).ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
+
+                    _ = HandleClientAsync(client, cancellationToken);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger?.Log($"TCP listener failed: {ex.Message}", LogLevel.Error);
+            }
+            finally
+            {
+                try
+                {
+                    listener?.Stop();
+                }
+                catch
+                {
+                    // ignore errors during shutdown
+                }
+                Logger?.Log("TCP listener stopped", LogLevel.Debug);
+            }
+        }
+
+        private async Task RunClientLoopAsync(CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(_options.Host))
+            {
+                Logger?.Log("TCP client host is not configured.", LogLevel.Warning);
+                return;
+            }
+
+            try
+            {
+                using var client = new TcpClient();
+                await client.ConnectAsync(_options.Host, _options.Port, cancellationToken).ConfigureAwait(false);
+                Logger?.Log($"Connected to {_options.Host}:{_options.Port}", LogLevel.Information);
+
+                using var stream = client.GetStream();
+                var message = _options.InputMessage ?? string.Empty;
+                if (!string.IsNullOrWhiteSpace(message))
+                {
+                    var payload = Encoding.UTF8.GetBytes(message);
+                    await stream.WriteAsync(payload.AsMemory(0, payload.Length), cancellationToken).ConfigureAwait(false);
+                    Logger?.Log($"Sent message to {_options.Host}:{_options.Port}: {message}", LogLevel.Information);
+                }
+
+                var buffer = new byte[4096];
+                var bytesRead = await stream.ReadAsync(buffer.AsMemory(0, buffer.Length), cancellationToken).ConfigureAwait(false);
+                var endpoint = $"{_options.Host}:{_options.Port}";
+                if (bytesRead > 0)
+                {
+                    var response = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                    Logger?.Log($"Received response from {endpoint}: {response}", LogLevel.Information);
+                    AppendMessage(message, response, endpoint);
+                }
+                else
+                {
+                    AppendMessage(message, string.Empty, endpoint);
+                    Logger?.Log($"No response received from {endpoint}", LogLevel.Warning);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // graceful cancellation
+            }
+            catch (Exception ex)
+            {
+                Logger?.Log($"TCP client error: {ex.Message}", LogLevel.Error);
+            }
+        }
+
+        private async Task HandleClientAsync(TcpClient client, CancellationToken cancellationToken)
+        {
+            using (client)
+            {
+                var endpoint = client.Client.RemoteEndPoint?.ToString() ?? "unknown";
+                Logger?.Log($"Client connected from {endpoint}", LogLevel.Information);
+
+                try
+                {
+                    using var stream = client.GetStream();
+                    var buffer = new byte[4096];
+
+                    while (!cancellationToken.IsCancellationRequested)
+                    {
+                        var bytesRead = await stream.ReadAsync(buffer.AsMemory(0, buffer.Length), cancellationToken).ConfigureAwait(false);
+                        if (bytesRead == 0)
+                        {
+                            break;
+                        }
+
+                        var incoming = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                        Logger?.Log($"Received message from {endpoint}: {incoming}", LogLevel.Information);
+                        AppendMessage(incoming, _options.OutputMessage, endpoint);
+
+                        if (!string.IsNullOrWhiteSpace(_options.OutputMessage))
+                        {
+                            var response = Encoding.UTF8.GetBytes(_options.OutputMessage);
+                            await stream.WriteAsync(response.AsMemory(0, response.Length), cancellationToken).ConfigureAwait(false);
+                            Logger?.Log($"Sent response to {endpoint}: {_options.OutputMessage}", LogLevel.Debug);
+                        }
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    // graceful cancellation
+                }
+                catch (Exception ex)
+                {
+                    Logger?.Log($"Error handling client {endpoint}: {ex.Message}", LogLevel.Error);
+                }
+                finally
+                {
+                    Logger?.Log($"Client disconnected: {endpoint}", LogLevel.Information);
+                }
+            }
+        }
+
+        private async Task PingRemoteAsync()
+        {
+            if (string.IsNullOrWhiteSpace(_options.Host))
+            {
+                return;
+            }
+
+            try
+            {
+                using var ping = new Ping();
+                var reply = await ping.SendPingAsync(_options.Host, (int)PingTimeout.TotalMilliseconds);
+                if (reply.Status == IPStatus.Success)
+                {
+                    Logger?.Log($"Ping to {_options.Host} succeeded in {reply.RoundtripTime} ms", LogLevel.Information);
+                }
+                else
+                {
+                    Logger?.Log($"Ping to {_options.Host} failed with status {reply.Status}", LogLevel.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger?.Log($"Ping to {_options.Host} failed: {ex.Message}", LogLevel.Error);
+            }
+        }
+
+        private void AppendMessage(string incoming, string outgoing, string endpoint)
+        {
+            RunOnUiThread(() =>
+            {
+                Messages.Insert(0, new TcpMessageRow
+                {
+                    IncomingMessage = incoming ?? string.Empty,
+                    IncomingIp = endpoint ?? string.Empty,
+                    OutgoingMessage = outgoing ?? string.Empty,
+                    ConnectedService = endpoint ?? string.Empty,
+                    Result = string.IsNullOrWhiteSpace(outgoing) ? string.Empty : outgoing
+                });
+
+                while (Messages.Count > MaxTcpMessageRows)
+                {
+                    Messages.RemoveAt(Messages.Count - 1);
+                }
+
+                MessageTable.AddMessage(incoming, outgoing, endpoint);
+
+                OnPropertyChanged(nameof(IncomingData));
+                OnPropertyChanged(nameof(OutgoingResults));
+            });
+        }
+
+        private void RunOnUiThread(Action action)
+        {
+            if (_uiContext is null || SynchronizationContext.Current == _uiContext)
+            {
+                action();
+            }
+            else
+            {
+                _uiContext.Post(_ => action(), null);
+            }
+        }
+
+        private static IPAddress ResolveListenAddress(string host)
+        {
+            if (string.IsNullOrWhiteSpace(host) || string.Equals(host, "0.0.0.0", StringComparison.Ordinal))
+            {
+                return IPAddress.Any;
+            }
+
+            if (IPAddress.TryParse(host, out var address))
+            {
+                return address;
+            }
+
+            try
+            {
+                return Dns.GetHostAddresses(host).FirstOrDefault(a => a.AddressFamily == AddressFamily.InterNetwork) ?? IPAddress.Any;
+            }
+            catch
+            {
+                return IPAddress.Any;
+            }
         }
 
         private void ClearLogs()

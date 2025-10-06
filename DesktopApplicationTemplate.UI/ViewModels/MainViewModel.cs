@@ -297,6 +297,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 };
                 foreach (var a in info.AssociatedServices ?? new List<string>())
                     svc.AssociatedServices.Add(a);
+                svc.LoadPersistedLogs(info.Logs ?? new List<LogEntry>());
                 var normalizedName = NormalizeDisplayName(svc.Type, svc.DisplayName);
                 if (Services.Any(existing => existing.DisplayName.Equals(normalizedName, StringComparison.OrdinalIgnoreCase)))
                 {
@@ -310,6 +311,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 if (svc.Type != ServiceType.Csv)
                     _csvService.EnsureColumnsForService(svc.DisplayName);
                 Services.Add(svc);
+                foreach (var log in svc.Logs.Reverse())
+                {
+                    AllLogs.Insert(0, log);
+                }
                 _logger?.Log($"Loaded service {svc.DisplayName}", LogLevel.Debug);
             }
             OnPropertyChanged(nameof(ServicesCreated));
@@ -340,7 +345,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
             var codePrefix = type.ToCode();
             if (!string.Equals(codePrefix, baseName, StringComparison.OrdinalIgnoreCase) &&
-                trimmed.StartsWith(codePrefix, StringComparison.OrdinalIgnoreCase))
+                trimmed.StartsWith(codePrefix, StringComparison.OrdinalIgnoreCase) &&
+                !trimmed.StartsWith(baseName, StringComparison.OrdinalIgnoreCase))
             {
                 trimmed = baseName + trimmed[codePrefix.Length..];
             }

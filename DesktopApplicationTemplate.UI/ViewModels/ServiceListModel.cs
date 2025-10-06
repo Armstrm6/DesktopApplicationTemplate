@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Windows.Controls;
@@ -28,6 +30,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
     public class ServiceListModel : ViewModelBase
     {
+        internal const int MaxLogEntries = 200;
+
         public string DisplayName { get; set; } = string.Empty;
         public ServiceType Type { get; set; }
         [JsonIgnore] public Page? Page { get; set; }
@@ -249,10 +253,14 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public void AddLog(string message, WpfBrush? color = null, LogLevel level = LogLevel.Debug, bool checkReference = true)
         {
-            LastInputMessage = message;
             var ts = DateTime.Now.ToString("MM.dd.yyyy - HH:mm:ss.fffffff");
             var entry = new LogEntry { Message = $"{ts} {message}", Color = (color ?? WpfBrushes.Black).ToString(), Level = level };
+            LastInputMessage = entry.Message;
             Logs.Insert(0, entry);
+            if (Logs.Count > MaxLogEntries)
+            {
+                Logs.RemoveAt(Logs.Count - 1);
+            }
             LogAdded?.Invoke(this, entry);
             if (checkReference)
             {
@@ -261,6 +269,17 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             if (checkReference)
             {
                 HandleReference(message, color ?? WpfBrushes.Black, level);
+            }
+        }
+
+        public void LoadPersistedLogs(IEnumerable<LogEntry> entries)
+        {
+            var materialized = entries?.Where(e => !string.IsNullOrWhiteSpace(e.Message)).Take(MaxLogEntries).ToList() ?? new List<LogEntry>();
+            Logs = new ObservableCollection<LogEntry>(materialized);
+            OnPropertyChanged(nameof(Logs));
+            if (Logs.FirstOrDefault() is { } latest)
+            {
+                LastInputMessage = latest.Message;
             }
         }
 

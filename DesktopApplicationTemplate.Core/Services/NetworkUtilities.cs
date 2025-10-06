@@ -1,6 +1,7 @@
 using System;
-using System.Net;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 
 namespace DesktopApplicationTemplate.Core.Services
 {
@@ -17,6 +18,28 @@ namespace DesktopApplicationTemplate.Core.Services
                 count += Convert.ToString(b, 2).Count(c => c == '1');
             }
             return count;
+        }
+
+        public static string GetLocalIpAddress()
+        {
+            try
+            {
+                var addresses = Dns.GetHostAddresses(Dns.GetHostName())
+                    .Where(a => a.AddressFamily == AddressFamily.InterNetwork && !IPAddress.IsLoopback(a))
+                    .Select(a => a.ToString())
+                    .ToList();
+
+                if (addresses.Count > 0)
+                {
+                    return addresses[0];
+                }
+            }
+            catch
+            {
+                // ignore lookup failures and fall back to loopback
+            }
+
+            return IPAddress.Loopback.ToString();
         }
     }
 }

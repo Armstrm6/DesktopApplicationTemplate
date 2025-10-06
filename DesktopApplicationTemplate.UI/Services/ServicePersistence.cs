@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using DesktopApplicationTemplate.Core.Services;
@@ -45,6 +46,7 @@ namespace DesktopApplicationTemplate.Persistence
                         Port = s.TcpOptions.Port,
                         UseUdp = s.TcpOptions.UseUdp,
                         Mode = s.TcpOptions.Mode,
+                        ConnectionRole = s.TcpOptions.ConnectionRole,
                         InputMessage = s.TcpOptions.InputMessage,
                         Script = s.TcpOptions.Script,
                         OutputMessage = s.TcpOptions.OutputMessage,
@@ -150,7 +152,16 @@ namespace DesktopApplicationTemplate.Persistence
                     HidOptions = hid,
                     ScpOptions = scp,
                     TotalExecutionTimeMs = s.TotalExecutionTimeMs,
-                    ExecutionCount = s.ExecutionCount
+                    ExecutionCount = s.ExecutionCount,
+                    Logs = s.Logs
+                        .Take(ServiceListModel.MaxLogEntries)
+                        .Select(l => new LogEntry
+                        {
+                            Level = l.Level,
+                            Message = l.Message,
+                            Color = l.Color
+                        })
+                        .ToList()
                 });
             }
 
@@ -208,6 +219,20 @@ namespace DesktopApplicationTemplate.Persistence
             }
             try
             {
+                try
+                {
+                    var current = JsonSerializer.Deserialize<List<ServiceInfo>>(json);
+                    if (current is { Count: > 0 })
+                    {
+                        logger?.Log($"Loaded {current.Count} services", LogLevel.Debug);
+                        return current;
+                    }
+                }
+                catch (JsonException)
+                {
+                    // fall back to legacy parsing below
+                }
+
                 var legacy = JsonSerializer.Deserialize<List<LegacyServiceInfo>>(json) ?? new List<LegacyServiceInfo>();
                 var result = new List<ServiceInfo>();
                 foreach (var info in legacy)
@@ -231,7 +256,8 @@ namespace DesktopApplicationTemplate.Persistence
                             HidOptions = info.HidOptions,
                             ScpOptions = info.ScpOptions,
                             TotalExecutionTimeMs = info.TotalExecutionTimeMs,
-                            ExecutionCount = info.ExecutionCount
+                            ExecutionCount = info.ExecutionCount,
+                            Logs = info.Logs ?? new List<LogEntry>()
                         });
                     }
                     else
@@ -252,6 +278,7 @@ namespace DesktopApplicationTemplate.Persistence
                             value.Port = info.TcpOptions.Port;
                             value.UseUdp = info.TcpOptions.UseUdp;
                             value.Mode = info.TcpOptions.Mode;
+                            value.ConnectionRole = info.TcpOptions.ConnectionRole;
                             value.InputMessage = info.TcpOptions.InputMessage;
                             value.Script = info.TcpOptions.Script;
                             value.OutputMessage = info.TcpOptions.OutputMessage;
@@ -365,6 +392,7 @@ namespace DesktopApplicationTemplate.Persistence
         public ScpServiceOptions? ScpOptions { get; set; }
         public double TotalExecutionTimeMs { get; set; }
         public int ExecutionCount { get; set; }
+        public List<LogEntry> Logs { get; set; } = new();
     }
 
     internal class LegacyServiceInfo
@@ -385,5 +413,6 @@ namespace DesktopApplicationTemplate.Persistence
         public ScpServiceOptions? ScpOptions { get; set; }
         public double TotalExecutionTimeMs { get; set; }
         public int ExecutionCount { get; set; }
+        public List<LogEntry> Logs { get; set; } = new();
     }
 }
