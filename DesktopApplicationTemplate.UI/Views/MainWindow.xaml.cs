@@ -62,13 +62,16 @@ namespace DesktopApplicationTemplate.UI.Views
             PreloadServicePages();
         }
 
-        private async void MainView_Closing(object? sender, CancelEventArgs e)
+        private void MainView_Closing(object? sender, CancelEventArgs e)
         {
             _logger?.LogInformation("MainView closing");
 
             try
             {
-                await _viewModel.ShutdownServicesAsync();
+                App.UiThreadTaskFactory.Run(async () =>
+                {
+                    await _viewModel.ShutdownServicesAsync().ConfigureAwait(true);
+                });
             }
             catch (Exception ex)
             {
@@ -196,7 +199,11 @@ namespace DesktopApplicationTemplate.UI.Views
                 }
                 else
                 {
-                    _ = Dispatcher.InvokeAsync(ApplyLog, DispatcherPriority.Background);
+                    App.UiThreadTaskFactory.Run(async () =>
+                    {
+                        await App.UiThreadTaskFactory.SwitchToMainThreadAsync();
+                        ApplyLog();
+                    });
                 }
             };
 
