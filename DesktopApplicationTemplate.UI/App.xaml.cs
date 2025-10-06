@@ -388,10 +388,9 @@ namespace DesktopApplicationTemplate.UI
                     var vm = provider.GetRequiredService<MqttCreateServiceViewModel>();
                     vm.ServiceName = defaultName;
                     var mainView = provider.GetRequiredService<MainView>();
-                    vm.ServiceSaved += async (name, options) =>
+                    vm.ServiceSaved += (name, options) =>
                     {
-                        await mainView.TryAddServiceAsync(ServiceType.Mqtt,
-                            new ServiceFactoryOptions<MqttServiceOptions>(name, (MqttServiceOptions)options));
+                        QueueServiceAddition(mainView, ServiceType.Mqtt, name, (MqttServiceOptions)options);
                     };
                     vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
                     var view = ActivatorUtilities.CreateInstance<MqttCreateServiceView>(provider, vm);
@@ -442,10 +441,9 @@ namespace DesktopApplicationTemplate.UI
                     var vm = provider.GetRequiredService<FtpServerCreateViewModel>();
                     vm.ServiceName = defaultName;
                     var mainView = provider.GetRequiredService<MainView>();
-                    vm.ServiceSaved += async (name, options) =>
+                    vm.ServiceSaved += (name, options) =>
                     {
-                        await mainView.TryAddServiceAsync(ServiceType.Ftp,
-                            new ServiceFactoryOptions<CoreFtpServerOptions>(name, (CoreFtpServerOptions)options));
+                        QueueServiceAddition(mainView, ServiceType.Ftp, name, (CoreFtpServerOptions)options);
                     };
                     vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
                     var view = ActivatorUtilities.CreateInstance<FtpServerCreateView>(provider, vm);
@@ -488,10 +486,9 @@ namespace DesktopApplicationTemplate.UI
                     var vm = provider.GetRequiredService<HttpCreateServiceViewModel>();
                     vm.ServiceName = defaultName;
                     var mainView = provider.GetRequiredService<MainView>();
-                    vm.ServiceSaved += async (name, options) =>
+                    vm.ServiceSaved += (name, options) =>
                     {
-                        await mainView.TryAddServiceAsync(ServiceType.Http,
-                            new ServiceFactoryOptions<HttpServiceOptions>(name, (HttpServiceOptions)options));
+                        QueueServiceAddition(mainView, ServiceType.Http, name, (HttpServiceOptions)options);
                     };
                     vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
                     var view = ActivatorUtilities.CreateInstance<HttpCreateServiceView>(provider, vm);
@@ -534,10 +531,9 @@ namespace DesktopApplicationTemplate.UI
                     var vm = provider.GetRequiredService<TcpCreateServiceViewModel>();
                     vm.ServiceName = defaultName;
                     var mainView = provider.GetRequiredService<MainView>();
-                    vm.ServiceSaved += async (name, options) =>
+                    vm.ServiceSaved += (name, options) =>
                     {
-                        await mainView.TryAddServiceAsync(ServiceType.Tcp,
-                            new ServiceFactoryOptions<TcpServiceOptions>(name, (TcpServiceOptions)options));
+                        QueueServiceAddition(mainView, ServiceType.Tcp, name, (TcpServiceOptions)options);
                     };
                     vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
                     return ActivatorUtilities.CreateInstance<TcpCreateServiceView>(provider, vm);
@@ -570,10 +566,9 @@ namespace DesktopApplicationTemplate.UI
                     var vm = provider.GetRequiredService<HidCreateServiceViewModel>();
                     vm.ServiceName = defaultName;
                     var mainView = provider.GetRequiredService<MainView>();
-                    vm.ServiceSaved += async (name, options) =>
+                    vm.ServiceSaved += (name, options) =>
                     {
-                        await mainView.TryAddServiceAsync(ServiceType.Hid,
-                            new ServiceFactoryOptions<HidServiceOptions>(name, (HidServiceOptions)options));
+                        QueueServiceAddition(mainView, ServiceType.Hid, name, (HidServiceOptions)options);
                     };
                     vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
                     var view = ActivatorUtilities.CreateInstance<HidCreateServiceView>(provider, vm);
@@ -616,10 +611,9 @@ namespace DesktopApplicationTemplate.UI
                     var vm = provider.GetRequiredService<ScpCreateServiceViewModel>();
                     vm.ServiceName = defaultName;
                     var mainView = provider.GetRequiredService<MainView>();
-                    vm.ServiceSaved += async (name, options) =>
+                    vm.ServiceSaved += (name, options) =>
                     {
-                        await mainView.TryAddServiceAsync(ServiceType.Scp,
-                            new ServiceFactoryOptions<ScpServiceOptions>(name, (ScpServiceOptions)options));
+                        QueueServiceAddition(mainView, ServiceType.Scp, name, (ScpServiceOptions)options);
                     };
                     vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
                     var view = ActivatorUtilities.CreateInstance<ScpCreateServiceView>(provider, vm);
@@ -662,10 +656,9 @@ namespace DesktopApplicationTemplate.UI
                     var vm = provider.GetRequiredService<FileObserverCreateServiceViewModel>();
                     vm.ServiceName = defaultName;
                     var mainView = provider.GetRequiredService<MainView>();
-                    vm.ServiceSaved += async (name, options) =>
+                    vm.ServiceSaved += (name, options) =>
                     {
-                        await mainView.TryAddServiceAsync(ServiceType.FileObserver,
-                            new ServiceFactoryOptions<FileObserverServiceOptions>(name, (FileObserverServiceOptions)options));
+                        QueueServiceAddition(mainView, ServiceType.FileObserver, name, (FileObserverServiceOptions)options);
                     };
                     vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
                     var view = ActivatorUtilities.CreateInstance<FileObserverCreateServiceView>(provider, vm);
@@ -708,10 +701,9 @@ namespace DesktopApplicationTemplate.UI
                     var vm = provider.GetRequiredService<CsvServiceEditorViewModel>();
                     vm.ServiceName = defaultName;
                     var mainView = provider.GetRequiredService<MainView>();
-                    vm.ServiceSaved += async (name, options) =>
+                    vm.ServiceSaved += (name, options) =>
                     {
-                        await mainView.TryAddServiceAsync(ServiceType.Csv,
-                            new ServiceFactoryOptions<CsvServiceOptions>(name, (CsvServiceOptions)options));
+                        QueueServiceAddition(mainView, ServiceType.Csv, name, (CsvServiceOptions)options);
                     };
                     vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
                     var view = provider.GetRequiredService<CsvServiceEditorView>();
@@ -746,10 +738,9 @@ namespace DesktopApplicationTemplate.UI
                     var vm = provider.GetRequiredService<HeartbeatCreateServiceViewModel>();
                     vm.ServiceName = defaultName;
                     var mainView = provider.GetRequiredService<MainView>();
-                    vm.ServiceSaved += async (name, options) =>
+                    vm.ServiceSaved += (name, options) =>
                     {
-                        await mainView.TryAddServiceAsync(ServiceType.Heartbeat,
-                            new ServiceFactoryOptions<HeartbeatServiceOptions>(name, (HeartbeatServiceOptions)options));
+                        QueueServiceAddition(mainView, ServiceType.Heartbeat, name, (HeartbeatServiceOptions)options);
                     };
                     vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
                     var view = ActivatorUtilities.CreateInstance<HeartbeatCreateServiceView>(provider, vm);
@@ -765,6 +756,40 @@ namespace DesktopApplicationTemplate.UI
                     return view;
                 },
                 LegacyServiceType: ServiceType.Heartbeat);
+        }
+
+        private static void QueueServiceAddition<TOptions>(MainView mainView, ServiceType serviceType, string serviceName, TOptions options)
+        {
+            async Task ExecuteAsync()
+            {
+                await mainView.TryAddServiceAsync(serviceType, new ServiceFactoryOptions<TOptions>(serviceName, options));
+            }
+
+            if (UiThreadTaskFactory is null)
+            {
+                ObserveTaskFailure(ExecuteAsync(), serviceType, serviceName);
+                return;
+            }
+
+            var joinableTask = UiThreadTaskFactory.RunAsync(async () =>
+            {
+                await UiThreadTaskFactory.SwitchToMainThreadAsync();
+                await ExecuteAsync();
+            });
+
+            ObserveTaskFailure(joinableTask.Task, serviceType, serviceName);
+        }
+
+        private static void ObserveTaskFailure(Task task, ServiceType serviceType, string serviceName)
+        {
+            _ = task.ContinueWith(t =>
+            {
+                if (t.IsFaulted && t.Exception is { } exception)
+                {
+                    var logger = AppHost.Services.GetService<ILogger<App>>();
+                    logger?.LogError(exception, "Failed to add {ServiceType} service {ServiceName}", serviceType, serviceName);
+                }
+            }, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
         }
 
         internal void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
