@@ -1,29 +1,23 @@
 using System;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.IO;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Models;
+using DesktopApplicationTemplate.UI.Services;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
     public class SettingsViewModel : ViewModelBase
     {
-        internal static string FilePath { get; set; } =
-            Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "userSettings.json");
+        internal static string FilePath => UserSettingsStorage.FilePath;
         private readonly ILoggingService? _logger;
         private bool _darkTheme;
         private bool _autoCheckUpdates;
         private bool _runUIOnStartup;
         private bool _runServicesOnStartup;
-        private bool _logTcpMessages = true;
         private bool _firstRun = true;
-        private ServiceType _preferredServiceType = ServiceType.Tcp;
         private static bool _suppressSaveConfirmation;
         private static bool _suppressCloseConfirmation;
         private bool _dirty;
 
-        public static bool TcpLoggingEnabled { get; private set; } = true;
         public static bool SaveConfirmationSuppressed
         {
             get => _suppressSaveConfirmation;
@@ -40,10 +34,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public bool AutoCheckUpdates { get => _autoCheckUpdates; set { _autoCheckUpdates = value; _dirty = true; OnPropertyChanged(); } }
         public bool RunUIOnStartup { get => _runUIOnStartup; set { _runUIOnStartup = value; _dirty = true; OnPropertyChanged(); } }
         public bool RunServicesOnStartup { get => _runServicesOnStartup; set { _runServicesOnStartup = value; _dirty = true; OnPropertyChanged(); } }
-        public bool LogTcpMessages { get => _logTcpMessages; set { _logTcpMessages = value; _dirty = true; OnPropertyChanged(); } }
         public bool FirstRun { get => _firstRun; set { _firstRun = value; _dirty = true; OnPropertyChanged(); } }
-        public ServiceType PreferredServiceType { get => _preferredServiceType; set { _preferredServiceType = value; _dirty = true; OnPropertyChanged(); } }
-        public ServiceType[] ServiceTypes { get; } = Enum.GetValues<ServiceType>();
         public bool HasUnsavedChanges => _dirty;
 
         public SettingsViewModel()
@@ -58,37 +49,13 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public void Load()
         {
-            if (!File.Exists(FilePath))
-            {
-                return;
-            }
-
-            UserSettings? userSettings = null;
-
-            try
-            {
-                var json = File.ReadAllText(FilePath);
-                userSettings = JsonSerializer.Deserialize<UserSettings>(json);
-            }
-            catch (IOException ex)
-            {
-                _logger?.Log($"Failed to load settings from '{FilePath}'. Using default settings. Error: {ex}", LogLevel.Error);
-                return;
-            }
-
-            if (userSettings == null)
-            {
-                return;
-            }
+            var userSettings = UserSettingsStorage.Load(_logger);
 
             _darkTheme = userSettings.DarkTheme;
             _autoCheckUpdates = userSettings.AutoCheckUpdates;
             _runUIOnStartup = userSettings.RunUIOnStartup;
             _runServicesOnStartup = userSettings.RunServicesOnStartup;
-            _logTcpMessages = userSettings.LogTcpMessages;
             _firstRun = userSettings.FirstRun;
-            _preferredServiceType = userSettings.PreferredServiceType;
-            TcpLoggingEnabled = userSettings.LogTcpMessages;
             SaveConfirmationSuppressed = userSettings.SuppressSaveConfirmation;
             CloseConfirmationSuppressed = userSettings.SuppressCloseConfirmation;
         }
@@ -101,37 +68,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 AutoCheckUpdates = _autoCheckUpdates,
                 RunUIOnStartup = _runUIOnStartup,
                 RunServicesOnStartup = _runServicesOnStartup,
-                LogTcpMessages = _logTcpMessages,
                 FirstRun = _firstRun,
-                PreferredServiceType = _preferredServiceType,
                 SuppressSaveConfirmation = SaveConfirmationSuppressed,
                 SuppressCloseConfirmation = CloseConfirmationSuppressed
             };
-            var options = new JsonSerializerOptions
-            {
-                WriteIndented = true,
-                ReferenceHandler = ReferenceHandler.IgnoreCycles,
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-            };
-
-            try
-            {
-                File.WriteAllText(FilePath, JsonSerializer.Serialize(data, options));
-                TcpLoggingEnabled = _logTcpMessages;
-                _dirty = false;
-            }
-            catch (StackOverflowException)
-            {
-                var dumpOptions = new JsonSerializerOptions
-                {
-                    WriteIndented = true,
-                    ReferenceHandler = ReferenceHandler.Preserve
-                };
-                var dump = JsonSerializer.Serialize(data, dumpOptions);
-                var temp = Path.Combine(Path.GetTempPath(), "settings_dump.json");
-                File.WriteAllText(temp, dump);
-                Environment.FailFast($"Stack overflow while saving settings. Dump written to {temp}");
-            }
+            UserSettingsStorage.Save(data, _logger);
+            _dirty = false;
         }
 
         // OnPropertyChanged provided by ViewModelBase

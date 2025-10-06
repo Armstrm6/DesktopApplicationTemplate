@@ -54,6 +54,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private int _executionCount;
         private TimeSpan _lastExecutionDuration;
         private string _lastInputMessage = string.Empty;
+        private int _incomingMessageCount;
+        private int _outgoingMessageCount;
 
         /// <summary>
         /// Gets the average execution time in milliseconds for operations performed by this service.
@@ -80,6 +82,36 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public string ExecutionTimeText => _executionCount == 0
             ? string.Empty
             : $"Last: {LastExecutionDuration.TotalMilliseconds:F0} ms (Avg: {AverageExecutionTimeMs:F0} ms)";
+
+        public int IncomingMessageCount
+        {
+            get => _incomingMessageCount;
+            private set
+            {
+                if (_incomingMessageCount == value)
+                {
+                    return;
+                }
+
+                _incomingMessageCount = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public int OutgoingMessageCount
+        {
+            get => _outgoingMessageCount;
+            private set
+            {
+                if (_outgoingMessageCount == value)
+                {
+                    return;
+                }
+
+                _outgoingMessageCount = value;
+                OnPropertyChanged();
+            }
+        }
 
         /// <summary>
         /// Gets the last input message received by this service.
@@ -224,6 +256,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             LogAdded?.Invoke(this, entry);
             if (checkReference)
             {
+                UpdateMessageCounters(message);
+            }
+            if (checkReference)
+            {
                 HandleReference(message, color ?? WpfBrushes.Black, level);
             }
         }
@@ -265,6 +301,37 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     }
                 }
             }
+        }
+
+        private void UpdateMessageCounters(string message)
+        {
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                return;
+            }
+
+            if (ContainsKeyword(message, "incoming", "received"))
+            {
+                IncomingMessageCount++;
+            }
+
+            if (ContainsKeyword(message, "outgoing", "sent", "sending"))
+            {
+                OutgoingMessageCount++;
+            }
+        }
+
+        private static bool ContainsKeyword(string message, params string[] keywords)
+        {
+            foreach (var keyword in keywords)
+            {
+                if (message.Contains(keyword, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public void SetColorsByType()

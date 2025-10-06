@@ -31,4 +31,10 @@ public interface ICsvOutput
     /// </summary>
     /// <param name="filePath">The destination file path.</param>
     void EnsureDirectoryForFile(string filePath);
+
+    /// <summary>
+    /// Deletes the specified file if it exists.
+    /// </summary>
+    /// <param name="filePath">The file path to delete.</param>
+    void DeleteFile(string filePath);
 }
