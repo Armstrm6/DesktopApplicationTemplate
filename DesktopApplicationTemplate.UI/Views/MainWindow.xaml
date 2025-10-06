@@ -190,7 +190,7 @@
                                             <StackPanel Grid.Column="1">
                                                 <TextBlock FontWeight="Bold" Text="{Binding DisplayName}" />
                                                 <TextBlock Text="{Binding ExecutionTimeText}" />
-                                                <TextBlock Text="{Binding LastInputMessage}" TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Text="{Binding LastInputMessage}" TextTrimming="CharacterEllipsis" Foreground="{Binding LastInputBrush}" />
                                                 <TextBlock>
                                                     <Run Text="{Binding IncomingMessageCount, Mode=OneWay}"/>
                                                     <Run Text=" - incoming"/>

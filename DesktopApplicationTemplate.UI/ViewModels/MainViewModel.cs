@@ -519,14 +519,25 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
             LogViewModel.RefreshLogs();
 
-            if (_activatingServices.Contains(svc) && entry.Level >= LogLevel.Error)
+            if (entry.Level >= LogLevel.Error)
             {
-                _activatingServices.Remove(svc);
-                svc.SetRuntimeState(ServiceRuntimeState.Error);
-                svc.IsActive = false;
-                if (!Services.Any(s => s.IsActive) && _activatingServices.Count == 0)
+                var wasActivating = _activatingServices.Remove(svc);
+                if (svc.RuntimeState != ServiceRuntimeState.Error)
                 {
-                    ServicesRunning = false;
+                    svc.SetRuntimeState(ServiceRuntimeState.Error);
+                }
+
+                if (wasActivating)
+                {
+                    if (svc.IsActive)
+                    {
+                        svc.IsActive = false;
+                    }
+
+                    if (!Services.Any(s => s.IsActive) && _activatingServices.Count == 0)
+                    {
+                        ServicesRunning = false;
+                    }
                 }
             }
         }

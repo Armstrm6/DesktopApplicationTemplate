@@ -140,7 +140,7 @@ namespace DesktopApplicationTemplate.UI
                 .Build();
         }
 
-        private void ConfigureServices(IConfiguration configuration, IServiceCollection services)
+        private static void ConfigureServices(IConfiguration configuration, IServiceCollection services)
         {
             services.AddServiceModules();
             services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Mqtt, (sp, _) => new MqttEditServiceHandler(() => sp.GetRequiredService<MainView>(), () => sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<MqttEditServiceHandler>>()));
@@ -163,6 +163,7 @@ namespace DesktopApplicationTemplate.UI
                         handlers[type] = handler;
                     }
                 }
+
                 return handlers;
             });
             services.AddSingleton<MainView>();
@@ -212,8 +213,7 @@ namespace DesktopApplicationTemplate.UI
                 var catalog = sp.GetRequiredService<IServiceCatalog>();
                 return new ServiceUiRegistry<ServiceListModel, Page>(
                     catalog,
-                    new[]
-                    {
+                    [
                         BuildCsvRegistration(),
                         BuildFileObserverRegistration(),
                         BuildHeartbeatRegistration(),
@@ -223,7 +223,7 @@ namespace DesktopApplicationTemplate.UI
                         BuildScpRegistration(),
                         BuildTcpRegistration(),
                         BuildFtpRegistration(),
-                    });
+                    ]);
             });
             services.AddTransient<SplashWindow>();
             services.AddTransient<CreateServicePage>();
@@ -807,8 +807,7 @@ namespace DesktopApplicationTemplate.UI
             _ = OnAppDomainUnhandledExceptionAsync(sender, e);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD001:Use SwitchToMainThreadAsync to switch to the UI thread", Justification = "Dispatcher is sufficient for shutdown")]
-        internal async Task OnAppDomainUnhandledExceptionAsync(object? sender, UnhandledExceptionEventArgs e)
+        internal static async Task OnAppDomainUnhandledExceptionAsync(object? sender, UnhandledExceptionEventArgs e)
         {
             var logger = AppHost.Services.GetService<ILogger<App>>();
             if (e.ExceptionObject is Exception ex)
@@ -821,13 +820,20 @@ namespace DesktopApplicationTemplate.UI
             }
 
             KeyboardSimulator.Reset();
-            if (Current is not null)
+            if (UiThreadTaskFactory is not null)
             {
-                await Current.Dispatcher.InvokeAsync(() => Current.Shutdown());
+                await UiThreadTaskFactory.SwitchToMainThreadAsync();
+                Current?.Shutdown();
+                return;
+            }
+
+            var app = Current;
+            if (app is not null)
+            {
+                await app.Dispatcher.InvokeAsync(static application => application.Shutdown(), app);
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Startup event")]
         protected override async void OnStartup(StartupEventArgs e)
         {
             ShutdownMode = ShutdownMode.OnExplicitShutdown;
@@ -867,7 +873,6 @@ namespace DesktopApplicationTemplate.UI
             base.OnStartup(e);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Application shutdown")]
         protected override async void OnExit(ExitEventArgs e)
         {
             var logger = AppHost.Services.GetService<Microsoft.Extensions.Logging.ILogger<App>>();
