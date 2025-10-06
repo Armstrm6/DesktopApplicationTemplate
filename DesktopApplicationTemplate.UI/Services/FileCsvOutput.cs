@@ -42,4 +42,27 @@ public class FileCsvOutput : ICsvOutput
             Directory.CreateDirectory(directory);
         }
     }
+
+    /// <inheritdoc />
+    public void DeleteFile(string filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath))
+        {
+            return;
+        }
+
+        if (!FileExists(filePath))
+        {
+            return;
+        }
+
+        try
+        {
+            File.Delete(filePath);
+        }
+        catch (IOException)
+        {
+            // Ignore deletion errors; callers log failures if needed.
+        }
+    }
 }

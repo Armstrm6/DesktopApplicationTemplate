@@ -90,18 +90,27 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private readonly ILoggingService? _logger;
         private readonly INetworkConfigurationService _networkService;
         private readonly IDictionary<ServiceType, IEditServiceHandler> _editHandlers;
+        private readonly IStartupPreferencesService _startupPreferencesService;
         private readonly HashSet<ServiceListModel> _activatingServices = new();
         private static readonly TimeSpan ActivationConfirmationDelay = TimeSpan.FromMilliseconds(500);
 
         public NetworkConfigurationViewModel NetworkConfig { get; }
 
-        public MainViewModel(CsvServiceAdapter csvService, NetworkConfigurationViewModel networkConfig, INetworkConfigurationService networkService, IDictionary<ServiceType, IEditServiceHandler> editHandlers, ILoggingService? logger = null, string? servicesFilePath = null)
+        public MainViewModel(
+            CsvServiceAdapter csvService,
+            NetworkConfigurationViewModel networkConfig,
+            INetworkConfigurationService networkService,
+            IDictionary<ServiceType, IEditServiceHandler> editHandlers,
+            IStartupPreferencesService startupPreferencesService,
+            ILoggingService? logger = null,
+            string? servicesFilePath = null)
         {
             _csvService = csvService;
             _networkService = networkService;
             _logger = logger;
             NetworkConfig = networkConfig;
             _editHandlers = editHandlers;
+            _startupPreferencesService = startupPreferencesService ?? throw new ArgumentNullException(nameof(startupPreferencesService));
             _ = NetworkConfig.LoadAsync();
             _networkService.ConfigurationChanged += (_, cfg) => ApplyNetworkConfiguration(cfg);
             ServiceListModel.ResolveService = (type, name) =>
@@ -387,6 +396,22 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     {
                         _logger?.Log("No services configured to start.", LogLevel.Warning);
                         return;
+                    }
+
+                    var currentSettings = UserSettingsStorage.Load(_logger);
+                    var preferenceResult = _startupPreferencesService.ShowDialog(currentSettings.RunServicesOnStartup, currentSettings.RunUIOnStartup);
+                    if (!preferenceResult.Accepted)
+                    {
+                        _logger?.Log("Start services cancelled from startup preferences dialog", LogLevel.Information);
+                        return;
+                    }
+
+                    if (preferenceResult.RunServicesOnStartup != currentSettings.RunServicesOnStartup ||
+                        preferenceResult.RunUIOnStartup != currentSettings.RunUIOnStartup)
+                    {
+                        currentSettings.RunServicesOnStartup = preferenceResult.RunServicesOnStartup;
+                        currentSettings.RunUIOnStartup = preferenceResult.RunUIOnStartup;
+                        UserSettingsStorage.Save(currentSettings, _logger);
                     }
 
                     ServicesRunning = true;

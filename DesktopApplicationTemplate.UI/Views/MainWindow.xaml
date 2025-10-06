@@ -190,6 +190,14 @@
                                                 <TextBlock FontWeight="Bold" Text="{Binding DisplayName}" />
                                                 <TextBlock Text="{Binding ExecutionTimeText}" />
                                                 <TextBlock Text="{Binding LastInputMessage}" TextTrimming="CharacterEllipsis" />
+                                                <TextBlock>
+                                                    <Run Text="{Binding IncomingMessageCount, Mode=OneWay}"/>
+                                                    <Run Text=" - incoming"/>
+                                                </TextBlock>
+                                                <TextBlock>
+                                                    <Run Text="{Binding OutgoingMessageCount, Mode=OneWay}"/>
+                                                    <Run Text=" - outgoing"/>
+                                                </TextBlock>
                                             </StackPanel>
                                         </Grid>
                                     </Border>

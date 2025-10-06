@@ -175,6 +175,7 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<IFileDialogService, FileDialogService>();
             services.AddSingleton<IScpClientFactory, ScpClientFactory>();
             services.AddSingleton<IScpUploadService, ScpService>();
+            services.AddSingleton<IStartupPreferencesService, StartupPreferencesDialogService>();
             // Register shared services and protocol facades from the Services layer.
             services.AddCommonServices();
             services.AddSingleton<SaveConfirmationHelper>();

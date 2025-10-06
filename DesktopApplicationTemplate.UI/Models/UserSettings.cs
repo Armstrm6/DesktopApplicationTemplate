@@ -6,14 +6,8 @@ namespace DesktopApplicationTemplate.Models
         public bool AutoCheckUpdates { get; set; }
         public bool RunUIOnStartup { get; set; }
         public bool RunServicesOnStartup { get; set; }
-        public bool LogTcpMessages { get; set; } = true;
         public bool FirstRun { get; set; } = true;
         public bool SuppressSaveConfirmation { get; set; }
         public bool SuppressCloseConfirmation { get; set; }
-
-        /// <summary>
-        /// Preferred service category for new operations.
-        /// </summary>
-        public ServiceType PreferredServiceType { get; set; } = ServiceType.Tcp;
     }
 }
