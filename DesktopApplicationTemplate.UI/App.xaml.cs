@@ -820,18 +820,15 @@ namespace DesktopApplicationTemplate.UI
             }
 
             KeyboardSimulator.Reset();
-            if (UiThreadTaskFactory is not null)
+            if (UiThreadTaskFactory is null)
             {
-                await UiThreadTaskFactory.SwitchToMainThreadAsync();
-                Current?.Shutdown();
+                logger?.LogWarning("Joinable task factory unavailable during domain exception; scheduling shutdown on dispatcher");
+                _ = Current?.Dispatcher?.BeginInvoke(new Action(() => Current?.Shutdown()));
                 return;
             }
 
-            var app = Current;
-            if (app is not null)
-            {
-                await app.Dispatcher.InvokeAsync(app.Shutdown);
-            }
+            await UiThreadTaskFactory.SwitchToMainThreadAsync();
+            Current?.Shutdown();
         }
 
         protected override void OnStartup(StartupEventArgs e)
