@@ -431,6 +431,30 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
         }
 
+        public async Task ShutdownServicesAsync()
+        {
+            if (!Services.Any(s => s.IsActive) && _activatingServices.Count == 0)
+            {
+                return;
+            }
+
+            while (IsServiceProcessBusy)
+            {
+                await Task.Delay(50);
+            }
+
+            IsServiceProcessBusy = true;
+            try
+            {
+                await StopServicesAsync();
+                ServicesRunning = false;
+            }
+            finally
+            {
+                IsServiceProcessBusy = false;
+            }
+        }
+
         private async Task StartServicesAsync()
         {
             foreach (var svc in Services)

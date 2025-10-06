@@ -168,11 +168,12 @@
                                 <Border CornerRadius="8" BorderBrush="{Binding BorderColor}" Background="{Binding BackgroundColor}" BorderThickness="2" Padding="5" Margin="2"
                                         PreviewMouseLeftButtonDown="ServiceItem_PreviewMouseLeftButtonDown" PreviewMouseMove="ServiceItem_PreviewMouseMove"
                                         AllowDrop="True" Drop="ServiceItem_Drop" MouseLeftButtonDown="ServiceItem_MouseLeftButtonDown">
-                                    <Border CornerRadius="8" BorderBrush="Gray" BorderThickness="1" Padding="5" Margin="2">
+                                        <Border CornerRadius="8" BorderBrush="Gray" BorderThickness="1" Padding="5" Margin="2"
+                                                Tag="{Binding DataContext.EditServiceCommand, RelativeSource={RelativeSource AncestorType=ListBox}}">
                                         <Border.ContextMenu>
-                                            <ContextMenu>
+                                            <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
                                                 <MenuItem Header="Edit Service"
-                                                          Command="{Binding DataContext.EditServiceCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                          Command="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                           CommandParameter="{Binding}" />
                                                 <MenuItem Header="Rename Service" Click="RenameServiceMenu_Click" />
                                                 <MenuItem Header="Delete Service" Click="DeleteServiceMenu_Click" />

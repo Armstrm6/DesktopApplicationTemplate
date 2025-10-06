@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.ComponentModel;
 using DesktopApplicationTemplate.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.ViewModels.Tcp;
@@ -17,6 +18,7 @@ using System.Windows.Input;
 using System.Windows.Controls.Primitives;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
+using System.Windows.Threading;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
@@ -54,10 +56,24 @@ namespace DesktopApplicationTemplate.UI.Views
             MouseDown += MainView_MouseDown;
             CommandBindings.Add(new CommandBinding(SystemCommands.CloseWindowCommand, CloseCommand_Executed));
             CommandBindings.Add(new CommandBinding(SystemCommands.MinimizeWindowCommand, MinimizeCommand_Executed));
-            Closing += (_, _) => _logger?.LogInformation("MainView closing");
+            Closing += MainView_Closing;
             Closed += (_, _) => _viewModel.ConfigurationChangeBlocked -= OnConfigurationChangeBlocked;
             ShowHome();
             PreloadServicePages();
+        }
+
+        private async void MainView_Closing(object? sender, CancelEventArgs e)
+        {
+            _logger?.LogInformation("MainView closing");
+
+            try
+            {
+                await _viewModel.ShutdownServicesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Failed to stop services during shutdown");
+            }
         }
 
         public void ShowHome()
@@ -151,16 +167,16 @@ namespace DesktopApplicationTemplate.UI.Views
                 return;
             }
 
-            Action<LogEntry> handler;
-
-            if (svc.Type == ServiceType.Mqtt)
+            Action<LogEntry> handler = entry =>
             {
-                handler = entry => _viewModel.OnServiceLogAdded(svc, entry);
-            }
-            else
-            {
-                handler = entry =>
+                void ApplyLog()
                 {
+                    if (svc.Type == ServiceType.Mqtt)
+                    {
+                        _viewModel.OnServiceLogAdded(svc, entry);
+                        return;
+                    }
+
                     Brush? brush = null;
                     try
                     {
@@ -172,8 +188,17 @@ namespace DesktopApplicationTemplate.UI.Views
                     }
 
                     svc.AddLog(entry.Message, brush ?? Brushes.Black, entry.Level);
-                };
-            }
+                }
+
+                if (Dispatcher.CheckAccess())
+                {
+                    ApplyLog();
+                }
+                else
+                {
+                    _ = Dispatcher.InvokeAsync(ApplyLog, DispatcherPriority.Background);
+                }
+            };
 
             vm.Logger.LogAdded += handler;
             _serviceLogHandlers[svc] = handler;

@@ -301,9 +301,13 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             }
 
             var pingSucceeded = await PingRemoteAsync().ConfigureAwait(false);
-            if (_options.ConnectionRole == TcpConnectionRole.Client && !pingSucceeded)
+            if (!pingSucceeded)
             {
-                Logger?.Log($"Skipping TCP client start because {_options.Host} did not respond to ping.", LogLevel.Warning);
+                if (!string.IsNullOrWhiteSpace(_options.Host))
+                {
+                    var role = _options.ConnectionRole == TcpConnectionRole.Server ? "listener" : "client";
+                    Logger?.Log($"Cannot start TCP {role} because {_options.Host} did not respond to ping.", LogLevel.Error);
+                }
                 return;
             }
 
@@ -544,12 +548,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                     Logger?.Log($"Ping to {_options.Host} succeeded in {reply.RoundtripTime} ms", LogLevel.Information);
                     return true;
                 }
-                else
-                {
-                    Logger?.Log($"Ping to {_options.Host} failed with status {reply.Status}", LogLevel.Warning);
-                    LogConnectionIssues("TCP ping", null, LogLevel.Warning);
-                    return false;
-                }
+                Logger?.Log($"Ping to {_options.Host} failed with status {reply.Status}", LogLevel.Error);
+                LogConnectionIssues("TCP ping", null, LogLevel.Error);
+                return false;
             }
             catch (Exception ex)
             {
