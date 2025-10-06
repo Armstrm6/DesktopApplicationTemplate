@@ -339,7 +339,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             if (task != null)
             {
                 _networkLoopTask = null;
-                task.ContinueWith(t =>
+                _ = task.ContinueWith(t =>
                 {
                     if (t.IsFaulted && Logger is not null)
                     {
