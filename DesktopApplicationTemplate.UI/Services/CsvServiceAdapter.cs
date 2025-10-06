@@ -5,6 +5,8 @@ using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Csv;
 using DesktopApplicationTemplate.UI.ViewModels.Csv;
 
+using ProtocolCsvService = DesktopApplicationTemplate.Core.Services.Protocols.Csv.ICsvService;
+
 namespace DesktopApplicationTemplate.UI.Services;
 
 /// <summary>
@@ -13,12 +15,12 @@ namespace DesktopApplicationTemplate.UI.Services;
 public class CsvServiceAdapter
 {
     private readonly CsvViewerViewModel _viewModel;
-    private readonly ICsvService _csvService;
+    private readonly ProtocolCsvService _csvService;
     private readonly ICsvOutput _output;
     private readonly CsvServiceState _state = new();
     private readonly ILoggingService? _logger;
 
-    public CsvServiceAdapter(CsvViewerViewModel viewModel, ICsvService csvService, ICsvOutput output, ILoggingService? logger = null)
+    public CsvServiceAdapter(CsvViewerViewModel viewModel, ProtocolCsvService csvService, ICsvOutput output, ILoggingService? logger = null)
     {
         _viewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
         _csvService = csvService ?? throw new ArgumentNullException(nameof(csvService));
