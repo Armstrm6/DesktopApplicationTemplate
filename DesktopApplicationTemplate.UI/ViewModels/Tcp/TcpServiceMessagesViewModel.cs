@@ -10,6 +10,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Tcp;
@@ -103,6 +104,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
         private static readonly TimeSpan PingTimeout = TimeSpan.FromSeconds(2);
         private readonly List<Task> _activeClientTasks = new();
         private readonly object _clientTasksLock = new();
+        private bool _isApplicationExitHooked;
 
         /// <summary>Type of the service associated with these messages.</summary>
         public ServiceType ServiceType { get; private set; } = ServiceType.Tcp;
@@ -199,6 +201,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             RefreshLogCommand = new RelayCommand(() => OnPropertyChanged(nameof(DisplayLogs)));
             OpenAdvancedSettingsCommand = new RelayCommand(() => AdvancedSettingsRequested?.Invoke(this, EventArgs.Empty));
             OpenScriptEditorCommand = new AsyncRelayCommand(OpenScriptEditorAsync);
+
+            EnsureApplicationExitHooked();
         }
 
         /// <summary>Associates the view model with a service and its TCP options.</summary>
@@ -207,6 +211,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
         {
             if (service == null) throw new ArgumentNullException(nameof(service));
             StopNetwork();
+            EnsureApplicationExitHooked();
             if (_service is not null)
             {
                 _service.ActiveChanged -= OnServiceActiveChanged;
@@ -295,6 +300,13 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                 return;
             }
 
+            var pingSucceeded = await PingRemoteAsync().ConfigureAwait(false);
+            if (_options.ConnectionRole == TcpConnectionRole.Client && !pingSucceeded)
+            {
+                Logger?.Log($"Skipping TCP client start because {_options.Host} did not respond to ping.", LogLevel.Warning);
+                return;
+            }
+
             _networkLoopCancellation = new CancellationTokenSource();
             var token = _networkLoopCancellation.Token;
             var protocol = _options.UseUdp ? "UDP" : "TCP";
@@ -303,11 +315,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             _networkLoopTask = _options.ConnectionRole == TcpConnectionRole.Server
                 ? RunServerLoopAsync(token)
                 : RunClientLoopAsync(token);
-
-            if (_options.ConnectionRole == TcpConnectionRole.Server && !string.IsNullOrWhiteSpace(_options.Host))
-            {
-                await PingRemoteAsync().ConfigureAwait(false);
-            }
         }
 
         private void StopNetwork()
@@ -348,6 +355,23 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                 }, TaskScheduler.Default);
             }
 
+            List<Task> clientTasks;
+            lock (_clientTasksLock)
+            {
+                clientTasks = _activeClientTasks.ToList();
+            }
+
+            if (clientTasks.Count > 0)
+            {
+                _ = Task.WhenAll(clientTasks).ContinueWith(t =>
+                {
+                    if (t.IsFaulted && Logger is not null)
+                    {
+                        Logger.Log($"One or more TCP client handlers faulted during shutdown: {t.Exception?.GetBaseException().Message}", LogLevel.Error);
+                    }
+                }, TaskScheduler.Default);
+            }
+
             Logger?.Log("TCP network loop stopped", LogLevel.Debug);
         }
 
@@ -356,12 +380,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             TcpListener? listener = null;
             try
             {
-                var listenAddress = ResolveListenAddress(_options.Host);
-                if (!string.IsNullOrWhiteSpace(_options.Host) &&
-                    !IPAddress.TryParse(_options.Host, out _) &&
-                    !string.Equals(_options.Host, "0.0.0.0", StringComparison.Ordinal) &&
-                    listenAddress.Equals(IPAddress.Any))
+                var listenAddress = ResolveListenAddress(_options.Host, out var fallbackToAny);
+                if (fallbackToAny && !string.IsNullOrWhiteSpace(_options.Host))
                 {
+                    Logger?.Log($"Requested listen address '{_options.Host}' is not assigned to this machine; listening on all interfaces instead.", LogLevel.Warning);
                     LogConnectionIssues("TCP listener address resolution", null, LogLevel.Warning);
                 }
 
@@ -499,29 +521,40 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             }
         }
 
-        private async Task PingRemoteAsync()
+        private async Task<bool> PingRemoteAsync()
         {
-            if (string.IsNullOrWhiteSpace(_options.Host))
+            if (string.IsNullOrWhiteSpace(_options.Host) || string.Equals(_options.Host, "0.0.0.0", StringComparison.Ordinal))
             {
-                return;
+                Logger?.Log("Ping skipped because no remote host is configured.", LogLevel.Debug);
+                return true;
+            }
+
+            if (IsLocalHost(_options.Host))
+            {
+                Logger?.Log($"Ping skipped for local host {_options.Host}.", LogLevel.Debug);
+                return true;
             }
 
             try
             {
                 using var ping = new Ping();
-                var reply = await ping.SendPingAsync(_options.Host, (int)PingTimeout.TotalMilliseconds);
+                var reply = await ping.SendPingAsync(_options.Host, (int)PingTimeout.TotalMilliseconds).ConfigureAwait(false);
                 if (reply.Status == IPStatus.Success)
                 {
                     Logger?.Log($"Ping to {_options.Host} succeeded in {reply.RoundtripTime} ms", LogLevel.Information);
+                    return true;
                 }
                 else
                 {
                     Logger?.Log($"Ping to {_options.Host} failed with status {reply.Status}", LogLevel.Warning);
+                    LogConnectionIssues("TCP ping", null, LogLevel.Warning);
+                    return false;
                 }
             }
             catch (Exception ex)
             {
                 LogConnectionIssues("TCP ping", ex);
+                return false;
             }
         }
 
@@ -596,9 +629,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                 return "Host: not configured";
             }
 
-            if (IPAddress.TryParse(_options.Host, out _))
+            if (IPAddress.TryParse(_options.Host, out var parsedAddress))
             {
-                return $"Host: {_options.Host}";
+                var locality = IsLocalAddress(parsedAddress) ? "local" : "remote";
+                return $"Host: {_options.Host} ({locality})";
             }
 
             try
@@ -712,8 +746,26 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             }, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
         }
 
-        private static IPAddress ResolveListenAddress(string host)
+        private void EnsureApplicationExitHooked()
         {
+            if (_isApplicationExitHooked || Application.Current is null)
+            {
+                return;
+            }
+
+            Application.Current.Exit += OnApplicationExit;
+            _isApplicationExitHooked = true;
+        }
+
+        private void OnApplicationExit(object? sender, ExitEventArgs e)
+        {
+            StopNetwork();
+        }
+
+        private static IPAddress ResolveListenAddress(string host, out bool fallbackToAny)
+        {
+            fallbackToAny = false;
+
             if (string.IsNullOrWhiteSpace(host) || string.Equals(host, "0.0.0.0", StringComparison.Ordinal))
             {
                 return IPAddress.Any;
@@ -721,16 +773,98 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
 
             if (IPAddress.TryParse(host, out var address))
             {
-                return address;
+                if (IsLocalAddress(address))
+                {
+                    return address;
+                }
+
+                fallbackToAny = true;
+                return IPAddress.Any;
             }
 
             try
             {
-                return Dns.GetHostAddresses(host).FirstOrDefault(a => a.AddressFamily == AddressFamily.InterNetwork) ?? IPAddress.Any;
+                var resolved = Dns.GetHostAddresses(host)
+                    .Where(a => a.AddressFamily == AddressFamily.InterNetwork)
+                    .FirstOrDefault(IsLocalAddress);
+
+                if (resolved is not null)
+                {
+                    return resolved;
+                }
             }
             catch
             {
-                return IPAddress.Any;
+                // ignore resolution failures and fall back to any address
+            }
+
+            fallbackToAny = true;
+            return IPAddress.Any;
+        }
+
+        private static bool IsLocalAddress(IPAddress address)
+        {
+            if (address.Equals(IPAddress.Any) || IPAddress.IsLoopback(address))
+            {
+                return true;
+            }
+
+            try
+            {
+                foreach (var networkInterface in NetworkInterface.GetAllNetworkInterfaces())
+                {
+                    if (networkInterface.OperationalStatus != OperationalStatus.Up)
+                    {
+                        continue;
+                    }
+
+                    foreach (var unicast in networkInterface.GetIPProperties().UnicastAddresses)
+                    {
+                        if (unicast.Address.AddressFamily != AddressFamily.InterNetwork)
+                        {
+                            continue;
+                        }
+
+                        if (address.Equals(unicast.Address))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // ignore adapter enumeration failures
+            }
+
+            return false;
+        }
+
+        private static bool IsLocalHost(string host)
+        {
+            if (string.IsNullOrWhiteSpace(host))
+            {
+                return false;
+            }
+
+            if (string.Equals(host, "localhost", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            if (IPAddress.TryParse(host, out var address))
+            {
+                return IsLocalAddress(address);
+            }
+
+            try
+            {
+                return Dns.GetHostAddresses(host)
+                    .Any(a => a.AddressFamily == AddressFamily.InterNetwork && IsLocalAddress(a));
+            }
+            catch
+            {
+                return false;
             }
         }
 

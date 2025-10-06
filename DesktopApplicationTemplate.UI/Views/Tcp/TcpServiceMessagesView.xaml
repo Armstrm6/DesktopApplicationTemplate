@@ -65,7 +65,7 @@
                 </StackPanel>
                 <Button Grid.Row="1" Content="Advanced Settings" Command="{Binding OpenAdvancedSettingsCommand}" Width="150" HorizontalAlignment="Right" Margin="0,0,0,5"/>
                 <shared:ServiceMessageTableView Grid.Row="2" DataContext="{Binding MessageTable}" Margin="0,0,0,10" />
-                <shared:ServiceLogView Grid.Row="3" x:Name="LogView" />
+                <shared:ServiceLogView Grid.Row="3" x:Name="LogView" Height="250" />
             </Grid>
         </Grid>
     </ScrollViewer>
