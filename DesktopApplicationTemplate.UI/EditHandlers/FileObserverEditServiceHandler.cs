@@ -38,7 +38,8 @@ public class FileObserverEditServiceHandler : IEditServiceHandler
         editView.Initialize(vm);
         vm.ServiceSaved += (name, opts) =>
         {
-            service.DisplayName = $"File Observer - {name}";
+            var finalName = mainViewModel.EnsureUniqueServiceName(service, name);
+            service.DisplayName = $"File Observer - {finalName}";
             service.FileObserverOptions = opts;
             if (foPage != null)
                 mainView.ShowPage(foPage);

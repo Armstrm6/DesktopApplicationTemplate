@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using DesktopApplicationTemplate.UI.ViewModels;
@@ -35,6 +37,14 @@ namespace DesktopApplicationTemplate.UI.Views
         }
 
         public string GenerateDefaultName(ServiceType type) => _viewModel.GenerateDefaultName(type);
+
+        public void SetExistingServiceNames(IEnumerable<ServiceListModel> services)
+        {
+            var names = services
+                .Select(s => s.DisplayName.Split(" - ").Last())
+                .ToList();
+            _viewModel.SetExistingNames(names);
+        }
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {

@@ -195,12 +195,23 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
         {
             if (service == null) throw new ArgumentNullException(nameof(service));
             _options = service.TcpOptions ?? new TcpServiceOptions();
+            if (service.TcpOptions is null)
+            {
+                service.TcpOptions = _options;
+            }
             ServiceType = service.Type;
             ServiceName = service.DisplayName.Split(" - ").Last();
             Script = string.IsNullOrWhiteSpace(_options.Script)
                 ? ScriptEditorViewModel.DefaultScript
                 : _options.Script;
             OutputMessage = _options.OutputMessage;
+            UpdateNetworkSettings(
+                _options.ComputerIp,
+                _options.ListeningPort,
+                _options.ServerIp,
+                _options.ServerGateway,
+                _options.ServerPort,
+                _options.UseUdp);
             _runtimeContext = new TcpRuntimeContext(ServiceType, ServiceName, _options, ScriptEditorViewModel.DefaultScript);
             _ = InitializeRuntimeAsync();
         }
@@ -237,6 +248,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             ServerGateway = serverGateway ?? string.Empty;
             ServerPort = serverPort ?? string.Empty;
             IsUdp = isUdp;
+            _options.ComputerIp = ComputerIp;
+            _options.ListeningPort = ListeningPort;
+            _options.ServerIp = ServerIp;
+            _options.ServerGateway = ServerGateway;
+            _options.ServerPort = ServerPort;
+            _options.UseUdp = isUdp;
             OnPropertyChanged(nameof(ComputerIp));
             OnPropertyChanged(nameof(ListeningPort));
             OnPropertyChanged(nameof(ServerIp));

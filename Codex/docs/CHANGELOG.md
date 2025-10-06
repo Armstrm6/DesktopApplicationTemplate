@@ -31,10 +31,12 @@
 - Replaced verbose `ServiceName` strings with `ServiceType` enum properties for log view models.
 - Service persistence now stores `ServiceType` as short codes and reads legacy string names.
 - Service creation and navigation now resolve services via `ServiceType` enum lookups instead of string-based switches.
+- CSV service now derives filenames from `{date}` and `{time}` tokens and appends to existing files instead of incrementing index-based names for each row.
 - `ServiceManager` loads default services from configuration using `ServiceType` short codes and accepts legacy names.
 - `ServiceListModel` now exposes a `Type` enum property, removing string-based service comparisons.
 
 #### Fixed
+- TCP service messages view hooks the Advanced Settings button to a dedicated configuration page so network metadata updates persist.
 - Event raising helpers in `ServiceEditorViewModelBase` invoked themselves recursively; now invoke events directly.
 - Removed unsupported `DisplayName` assignment from Windows service options to restore service build.
 - Service factories populate the `Type` property when creating service models.
@@ -72,6 +74,7 @@
 - MQTT create, edit, and subscription views follow design spacing with shared form styles and accessibility names.
 - Service creation flows now display within the main view, removing the separate Create Service window and placeholder navigation text.
 - Create service page limits options to TCP, MQTT, HTTP, FTP, SCP, and CSV services.
+- Service creation now assigns sequential base names (e.g., `TCP1`) and edit workflows ensure duplicate names fall back to the next available index.
 - Main window height constrained to the work area to prevent overlapping the taskbar.
 - MQTT create and edit views include tooltips on text fields to clarify expected input.
 - Create and edit service view models inject `IServiceRule` to validate required fields with XAML error tooltips.
@@ -109,6 +112,7 @@
 - Service views and view models reorganized into per-service subfolders with updated namespaces.
 
 #### Fixed
+- TCP create and edit views wire their Advanced buttons to open the advanced configuration screen.
 - TCP and SCP edit workflows now load existing options via `Load` methods, enabling DI-friendly construction.
 - Service list averages use one-way bindings to avoid runtime parse exceptions.
 - Main window declares behaviors namespace to prevent XAML parse errors.

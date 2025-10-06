@@ -117,7 +117,7 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
     /// <inheritdoc />
     protected override void OnAdvancedConfig()
     {
-        // Advanced configuration removed.
+        RaiseAdvancedConfigRequested(_options);
     }
 }
 

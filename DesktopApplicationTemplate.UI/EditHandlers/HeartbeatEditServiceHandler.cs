@@ -38,7 +38,8 @@ public class HeartbeatEditServiceHandler : IEditServiceHandler
         editView.Initialize(vm);
         vm.ServiceSaved += (name, opts) =>
         {
-            service.DisplayName = $"Heartbeat - {name}";
+            var finalName = mainViewModel.EnsureUniqueServiceName(service, name);
+            service.DisplayName = $"Heartbeat - {finalName}";
             service.HeartbeatOptions = opts;
             if (hbPage != null)
                 mainView.ShowPage(hbPage);

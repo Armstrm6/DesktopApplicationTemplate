@@ -38,7 +38,8 @@ public class FtpEditServiceHandler : IEditServiceHandler
         var editView = ActivatorUtilities.CreateInstance<FtpServerEditView>(_services, vm);
         vm.ServiceSaved += (name, opts) =>
         {
-            service.DisplayName = $"FTP Server - {name}";
+            var finalName = mainViewModel.EnsureUniqueServiceName(service, name);
+            service.DisplayName = $"FTP Server - {finalName}";
             service.FtpOptions = opts;
             var opt = _services.GetRequiredService<IOptions<FtpServerOptions>>().Value;
             opt.Port = opts.Port;

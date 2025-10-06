@@ -6,6 +6,8 @@ using System.Collections.Specialized;
 using System.Linq;
 using DesktopApplicationTemplate.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI.ViewModels.Tcp;
+using DesktopApplicationTemplate.UI.ViewModels.Tcp.Advanced;
 using DesktopApplicationTemplate.Models;
 using LogLevel = DesktopApplicationTemplate.Core.Services.LogLevel;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,6 +17,8 @@ using System.Windows.Input;
 using System.Windows.Controls.Primitives;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
+using DesktopApplicationTemplate.UI.Views.Tcp.Advanced;
+using DesktopApplicationTemplate.Core.Services.Protocols.Tcp;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
@@ -29,6 +33,7 @@ namespace DesktopApplicationTemplate.UI.Views
         private readonly IServiceUiRegistry<ServiceListModel, Page> _serviceRegistry;
         private readonly IServiceProvider _serviceProvider;
         private readonly Dictionary<ServiceListModel, Action<LogEntry>> _serviceLogHandlers = new();
+        private readonly Dictionary<ServiceListModel, EventHandler> _tcpAdvancedHandlers = new();
         private readonly BrushConverter _brushConverter = new();
 
         public MainView(
@@ -127,6 +132,11 @@ namespace DesktopApplicationTemplate.UI.Views
                     navm.UpdateNetworkConfiguration(_viewModel.NetworkConfig.CurrentConfiguration);
                 }
 
+                if (svc.ServicePage.DataContext is TcpServiceMessagesViewModel tcpVm)
+                {
+                    AttachTcpAdvancedHandler(svc, tcpVm);
+                }
+
                 if (svc.ServicePage is IServiceLogHost logHost)
                 {
                     logHost.SetServiceContext(svc);
@@ -191,6 +201,65 @@ namespace DesktopApplicationTemplate.UI.Views
             _serviceLogHandlers.Remove(svc);
         }
 
+        private void AttachTcpAdvancedHandler(ServiceListModel svc, TcpServiceMessagesViewModel vm)
+        {
+            if (_tcpAdvancedHandlers.ContainsKey(svc))
+            {
+                return;
+            }
+
+            EventHandler handler = (_, _) =>
+            {
+                var options = svc.TcpOptions ?? new TcpServiceOptions();
+                svc.TcpOptions = options;
+                var advVm = ActivatorUtilities.CreateInstance<TcpAdvancedConfigViewModel>(_serviceProvider, options);
+                var advView = _serviceProvider.GetRequiredService<TcpAdvancedConfigView>();
+                advView.Initialize(advVm);
+                advVm.Saved += updatedOptions =>
+                {
+                    svc.TcpOptions = updatedOptions;
+                    vm.UpdateNetworkSettings(
+                        updatedOptions.ComputerIp,
+                        updatedOptions.ListeningPort,
+                        updatedOptions.ServerIp,
+                        updatedOptions.ServerGateway,
+                        updatedOptions.ServerPort,
+                        updatedOptions.UseUdp);
+                    if (svc.ServicePage is not null)
+                    {
+                        ShowPage(svc.ServicePage);
+                    }
+                    _ = _viewModel.SaveServicesAsync();
+                };
+                advVm.BackRequested += () =>
+                {
+                    if (svc.ServicePage is not null)
+                    {
+                        ShowPage(svc.ServicePage);
+                    }
+                };
+                ShowPage(advView);
+            };
+
+            vm.AdvancedSettingsRequested += handler;
+            _tcpAdvancedHandlers[svc] = handler;
+        }
+
+        private void DetachTcpAdvancedHandler(ServiceListModel svc)
+        {
+            if (!_tcpAdvancedHandlers.TryGetValue(svc, out var handler))
+            {
+                return;
+            }
+
+            if (svc.ServicePage?.DataContext is TcpServiceMessagesViewModel vm)
+            {
+                vm.AdvancedSettingsRequested -= handler;
+            }
+
+            _tcpAdvancedHandlers.Remove(svc);
+        }
+
         private void Services_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.Action is NotifyCollectionChangedAction.Remove or NotifyCollectionChangedAction.Replace)
@@ -198,6 +267,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 foreach (ServiceListModel svc in e.OldItems?.OfType<ServiceListModel>() ?? Enumerable.Empty<ServiceListModel>())
                 {
                     DetachServiceLogger(svc);
+                    DetachTcpAdvancedHandler(svc);
                 }
             }
 
@@ -214,6 +284,10 @@ namespace DesktopApplicationTemplate.UI.Views
                 foreach (var svc in _serviceLogHandlers.Keys.ToList())
                 {
                     DetachServiceLogger(svc);
+                }
+                foreach (var svc in _tcpAdvancedHandlers.Keys.ToList())
+                {
+                    DetachTcpAdvancedHandler(svc);
                 }
             }
         }
@@ -244,11 +318,13 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             var page = _serviceProvider.GetRequiredService<CreateServicePage>();
             _createServicePage = page;
+            page.SetExistingServiceNames(_viewModel.Services);
             page.ServiceCreated += (name, type) =>
             {
+                var finalName = _viewModel.GenerateServiceName(type);
                 var svc = new ServiceListModel
                 {
-                    DisplayName = $"{type.ToLegacyString()} - {name}",
+                    DisplayName = $"{type.ToLegacyString()} - {finalName}",
                     Type = type,
                     IsActive = false
                 };

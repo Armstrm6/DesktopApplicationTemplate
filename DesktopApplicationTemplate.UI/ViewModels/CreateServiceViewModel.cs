@@ -1,3 +1,4 @@
+using System;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using DesktopApplicationTemplate.Models;
@@ -29,11 +30,27 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         {
             var typeName = serviceType.ToLegacyString();
             int index = 1;
-            while (_existingNames.Contains($"{typeName}{index}"))
+            foreach (var existing in _existingNames)
             {
-                index++;
+                if (existing.StartsWith(typeName, StringComparison.OrdinalIgnoreCase) &&
+                    int.TryParse(existing[typeName.Length..], out int value) && value >= index)
+                {
+                    index = value + 1;
+                }
             }
             return $"{typeName}{index}";
+        }
+
+        public void SetExistingNames(IEnumerable<string> names)
+        {
+            _existingNames.Clear();
+            foreach (var name in names)
+            {
+                if (!string.IsNullOrWhiteSpace(name))
+                {
+                    _existingNames.Add(name);
+                }
+            }
         }
         // OnPropertyChanged provided by ViewModelBase
     }

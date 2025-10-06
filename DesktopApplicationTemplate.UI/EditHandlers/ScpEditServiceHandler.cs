@@ -38,7 +38,8 @@ public class ScpEditServiceHandler : IEditServiceHandler
         editView.Initialize(vm);
         vm.ServiceSaved += (name, opts) =>
         {
-            service.DisplayName = $"SCP - {name}";
+            var finalName = mainViewModel.EnsureUniqueServiceName(service, name);
+            service.DisplayName = $"SCP - {finalName}";
             service.ScpOptions = opts;
             if (scpPage != null)
                 mainView.ShowPage(scpPage);

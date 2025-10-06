@@ -210,6 +210,25 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             return $"{typeName}{index}";
         }
 
+        internal string EnsureUniqueServiceName(ServiceListModel currentService, string desiredName)
+        {
+            if (currentService is null)
+            {
+                throw new ArgumentNullException(nameof(currentService));
+            }
+
+            var candidate = (desiredName ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(candidate))
+            {
+                return GenerateServiceName(currentService.Type);
+            }
+
+            var duplicate = Services.Any(s => !ReferenceEquals(s, currentService) &&
+                s.DisplayName.Split(" - ").Last().Equals(candidate, StringComparison.OrdinalIgnoreCase));
+
+            return duplicate ? GenerateServiceName(currentService.Type) : candidate;
+        }
+
         private async Task RemoveSelectedServiceAsync()
         {
             if (SelectedService == null)

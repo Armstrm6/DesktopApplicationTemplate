@@ -39,7 +39,8 @@ public class MqttEditServiceHandler : IEditServiceHandler
         editView.Initialize(vm);
         vm.ServiceSaved += (name, opts) =>
         {
-            service.DisplayName = $"MQTT - {name}";
+            var finalName = mainViewModel.EnsureUniqueServiceName(service, name);
+            service.DisplayName = $"MQTT - {finalName}";
             if (tagPage != null)
                 mainView.ShowPage(tagPage);
             _ = mainViewModel.SaveServicesAsync();

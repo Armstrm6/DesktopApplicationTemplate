@@ -37,7 +37,8 @@ public class CsvEditServiceHandler : IEditServiceHandler
         editView.Initialize(vm);
         vm.ServiceSaved += (name, opts) =>
         {
-            service.DisplayName = $"CSV Creator - {name}";
+            var finalName = mainViewModel.EnsureUniqueServiceName(service, name);
+            service.DisplayName = $"CSV Creator - {finalName}";
             service.CsvOptions = opts;
             if (csvPage != null)
                 mainView.ShowPage(csvPage);

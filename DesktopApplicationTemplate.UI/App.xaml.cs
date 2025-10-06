@@ -18,6 +18,7 @@ using DesktopApplicationTemplate.UI.ViewModels.Http.Advanced;
 using DesktopApplicationTemplate.UI.ViewModels.Tcp;
 using DesktopApplicationTemplate.UI.ViewModels.Tcp.Create;
 using DesktopApplicationTemplate.UI.ViewModels.Tcp.Edit;
+using DesktopApplicationTemplate.UI.ViewModels.Tcp.Advanced;
 using DesktopApplicationTemplate.UI.ViewModels.Hid;
 using DesktopApplicationTemplate.UI.ViewModels.Hid.Create;
 using DesktopApplicationTemplate.UI.ViewModels.Hid.Edit;
@@ -52,6 +53,7 @@ using DesktopApplicationTemplate.UI.Views.Http.Advanced;
 using DesktopApplicationTemplate.UI.Views.Tcp;
 using DesktopApplicationTemplate.UI.Views.Tcp.Create;
 using DesktopApplicationTemplate.UI.Views.Tcp.Edit;
+using DesktopApplicationTemplate.UI.Views.Tcp.Advanced;
 using DesktopApplicationTemplate.UI.Views.Hid;
 using DesktopApplicationTemplate.UI.Views.Hid.Create;
 using DesktopApplicationTemplate.UI.Views.Hid.Edit;
@@ -183,6 +185,8 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<ServiceMessageTableViewModel>();
             services.AddSingleton<TcpServiceMessagesView>();
             services.AddTransient<TcpServiceMessagesViewModel>();
+            services.AddTransient<TcpAdvancedConfigView>();
+            services.AddTransient<TcpAdvancedConfigViewModel>();
             services.AddSingleton<HttpServiceView>();
             services.AddSingleton<HttpServiceViewModel>();
             services.AddSingleton<FileObserverView>();
@@ -388,9 +392,13 @@ namespace DesktopApplicationTemplate.UI
                     var vm = provider.GetRequiredService<MqttCreateServiceViewModel>();
                     vm.ServiceName = defaultName;
                     var mainView = provider.GetRequiredService<MainView>();
+                    var mainViewModel = provider.GetRequiredService<MainViewModel>();
                     vm.ServiceSaved += (name, options) =>
+                    {
+                        var finalName = mainViewModel.GenerateServiceName(ServiceType.Mqtt);
                         _ = mainView.AddServiceAsync(ServiceType.Mqtt,
-                            new ServiceFactoryOptions<MqttServiceOptions>(name, (MqttServiceOptions)options));
+                            new ServiceFactoryOptions<MqttServiceOptions>(finalName, (MqttServiceOptions)options));
+                    };
                     vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
                     var view = ActivatorUtilities.CreateInstance<MqttCreateServiceView>(provider, vm);
                     vm.AdvancedConfigRequested += opts =>
@@ -440,9 +448,13 @@ namespace DesktopApplicationTemplate.UI
                     var vm = provider.GetRequiredService<FtpServerCreateViewModel>();
                     vm.ServiceName = defaultName;
                     var mainView = provider.GetRequiredService<MainView>();
+                    var mainViewModel = provider.GetRequiredService<MainViewModel>();
                     vm.ServiceSaved += (name, options) =>
+                    {
+                        var finalName = mainViewModel.GenerateServiceName(ServiceType.Ftp);
                         _ = mainView.AddServiceAsync(ServiceType.Ftp,
-                            new ServiceFactoryOptions<CoreFtpServerOptions>(name, (CoreFtpServerOptions)options));
+                            new ServiceFactoryOptions<CoreFtpServerOptions>(finalName, (CoreFtpServerOptions)options));
+                    };
                     vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
                     var view = ActivatorUtilities.CreateInstance<FtpServerCreateView>(provider, vm);
                     vm.AdvancedConfigRequested += opts =>
@@ -484,9 +496,13 @@ namespace DesktopApplicationTemplate.UI
                     var vm = provider.GetRequiredService<HttpCreateServiceViewModel>();
                     vm.ServiceName = defaultName;
                     var mainView = provider.GetRequiredService<MainView>();
+                    var mainViewModel = provider.GetRequiredService<MainViewModel>();
                     vm.ServiceSaved += (name, options) =>
+                    {
+                        var finalName = mainViewModel.GenerateServiceName(ServiceType.Http);
                         _ = mainView.AddServiceAsync(ServiceType.Http,
-                            new ServiceFactoryOptions<HttpServiceOptions>(name, (HttpServiceOptions)options));
+                            new ServiceFactoryOptions<HttpServiceOptions>(finalName, (HttpServiceOptions)options));
+                    };
                     vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
                     var view = ActivatorUtilities.CreateInstance<HttpCreateServiceView>(provider, vm);
                     vm.AdvancedConfigRequested += opts =>
@@ -528,11 +544,25 @@ namespace DesktopApplicationTemplate.UI
                     var vm = provider.GetRequiredService<TcpCreateServiceViewModel>();
                     vm.ServiceName = defaultName;
                     var mainView = provider.GetRequiredService<MainView>();
+                    var mainViewModel = provider.GetRequiredService<MainViewModel>();
                     vm.ServiceSaved += (name, options) =>
+                    {
+                        var finalName = mainViewModel.GenerateServiceName(ServiceType.Tcp);
                         _ = mainView.AddServiceAsync(ServiceType.Tcp,
-                            new ServiceFactoryOptions<TcpServiceOptions>(name, (TcpServiceOptions)options));
+                            new ServiceFactoryOptions<TcpServiceOptions>(finalName, (TcpServiceOptions)options));
+                    };
                     vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
-                    return ActivatorUtilities.CreateInstance<TcpCreateServiceView>(provider, vm);
+                    var view = ActivatorUtilities.CreateInstance<TcpCreateServiceView>(provider, vm);
+                    vm.AdvancedConfigRequested += opts =>
+                    {
+                        var advVm = ActivatorUtilities.CreateInstance<TcpAdvancedConfigViewModel>(provider, opts);
+                        var advView = provider.GetRequiredService<TcpAdvancedConfigView>();
+                        advView.Initialize(advVm);
+                        advVm.Saved += _ => mainView.ShowPage(view);
+                        advVm.BackRequested += () => mainView.ShowPage(view);
+                        mainView.ShowPage(advView);
+                    };
+                    return view;
                 },
                 LegacyServiceType: ServiceType.Tcp);
         }
@@ -562,9 +592,13 @@ namespace DesktopApplicationTemplate.UI
                     var vm = provider.GetRequiredService<HidCreateServiceViewModel>();
                     vm.ServiceName = defaultName;
                     var mainView = provider.GetRequiredService<MainView>();
+                    var mainViewModel = provider.GetRequiredService<MainViewModel>();
                     vm.ServiceSaved += (name, options) =>
+                    {
+                        var finalName = mainViewModel.GenerateServiceName(ServiceType.Hid);
                         _ = mainView.AddServiceAsync(ServiceType.Hid,
-                            new ServiceFactoryOptions<HidServiceOptions>(name, (HidServiceOptions)options));
+                            new ServiceFactoryOptions<HidServiceOptions>(finalName, (HidServiceOptions)options));
+                    };
                     vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
                     var view = ActivatorUtilities.CreateInstance<HidCreateServiceView>(provider, vm);
                     vm.AdvancedConfigRequested += opts =>
@@ -606,9 +640,13 @@ namespace DesktopApplicationTemplate.UI
                     var vm = provider.GetRequiredService<ScpCreateServiceViewModel>();
                     vm.ServiceName = defaultName;
                     var mainView = provider.GetRequiredService<MainView>();
+                    var mainViewModel = provider.GetRequiredService<MainViewModel>();
                     vm.ServiceSaved += (name, options) =>
+                    {
+                        var finalName = mainViewModel.GenerateServiceName(ServiceType.Scp);
                         _ = mainView.AddServiceAsync(ServiceType.Scp,
-                            new ServiceFactoryOptions<ScpServiceOptions>(name, (ScpServiceOptions)options));
+                            new ServiceFactoryOptions<ScpServiceOptions>(finalName, (ScpServiceOptions)options));
+                    };
                     vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
                     var view = ActivatorUtilities.CreateInstance<ScpCreateServiceView>(provider, vm);
                     vm.AdvancedConfigRequested += opts =>
@@ -650,9 +688,13 @@ namespace DesktopApplicationTemplate.UI
                     var vm = provider.GetRequiredService<FileObserverCreateServiceViewModel>();
                     vm.ServiceName = defaultName;
                     var mainView = provider.GetRequiredService<MainView>();
+                    var mainViewModel = provider.GetRequiredService<MainViewModel>();
                     vm.ServiceSaved += (name, options) =>
+                    {
+                        var finalName = mainViewModel.GenerateServiceName(ServiceType.FileObserver);
                         _ = mainView.AddServiceAsync(ServiceType.FileObserver,
-                            new ServiceFactoryOptions<FileObserverServiceOptions>(name, (FileObserverServiceOptions)options));
+                            new ServiceFactoryOptions<FileObserverServiceOptions>(finalName, (FileObserverServiceOptions)options));
+                    };
                     vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
                     var view = ActivatorUtilities.CreateInstance<FileObserverCreateServiceView>(provider, vm);
                     vm.AdvancedConfigRequested += opts =>
@@ -694,9 +736,13 @@ namespace DesktopApplicationTemplate.UI
                     var vm = provider.GetRequiredService<CsvServiceEditorViewModel>();
                     vm.ServiceName = defaultName;
                     var mainView = provider.GetRequiredService<MainView>();
+                    var mainViewModel = provider.GetRequiredService<MainViewModel>();
                     vm.ServiceSaved += (name, options) =>
+                    {
+                        var finalName = mainViewModel.GenerateServiceName(ServiceType.Csv);
                         _ = mainView.AddServiceAsync(ServiceType.Csv,
-                            new ServiceFactoryOptions<CsvServiceOptions>(name, (CsvServiceOptions)options));
+                            new ServiceFactoryOptions<CsvServiceOptions>(finalName, (CsvServiceOptions)options));
+                    };
                     vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
                     var view = provider.GetRequiredService<CsvServiceEditorView>();
                     view.Initialize(vm);
@@ -730,9 +776,13 @@ namespace DesktopApplicationTemplate.UI
                     var vm = provider.GetRequiredService<HeartbeatCreateServiceViewModel>();
                     vm.ServiceName = defaultName;
                     var mainView = provider.GetRequiredService<MainView>();
+                    var mainViewModel = provider.GetRequiredService<MainViewModel>();
                     vm.ServiceSaved += (name, options) =>
+                    {
+                        var finalName = mainViewModel.GenerateServiceName(ServiceType.Heartbeat);
                         _ = mainView.AddServiceAsync(ServiceType.Heartbeat,
-                            new ServiceFactoryOptions<HeartbeatServiceOptions>(name, (HeartbeatServiceOptions)options));
+                            new ServiceFactoryOptions<HeartbeatServiceOptions>(finalName, (HeartbeatServiceOptions)options));
+                    };
                     vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
                     var view = ActivatorUtilities.CreateInstance<HeartbeatCreateServiceView>(provider, vm);
                     vm.AdvancedConfigRequested += opts =>

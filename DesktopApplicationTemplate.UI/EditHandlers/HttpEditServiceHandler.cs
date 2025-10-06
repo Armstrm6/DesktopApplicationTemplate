@@ -38,7 +38,8 @@ public class HttpEditServiceHandler : IEditServiceHandler
         editView.Initialize(vm);
         vm.ServiceSaved += (name, opts) =>
         {
-            service.DisplayName = $"HTTP - {name}";
+            var finalName = mainViewModel.EnsureUniqueServiceName(service, name);
+            service.DisplayName = $"HTTP - {finalName}";
             service.HttpOptions = opts;
             if (httpPage != null)
                 mainView.ShowPage(httpPage);

@@ -1,0 +1,44 @@
+<Page x:Class="DesktopApplicationTemplate.UI.Views.Tcp.Advanced.TcpAdvancedConfigView"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:views="clr-namespace:DesktopApplicationTemplate.UI.Views"
+      mc:Ignorable="d">
+    <Grid Margin="20">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="Computer IP" Style="{StaticResource FormLabel}"/>
+        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ComputerIp, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormField}"/>
+
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="Listening Port" Style="{StaticResource FormLabel}"/>
+        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding ListeningPort, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormField}"/>
+
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="Server IP" Style="{StaticResource FormLabel}"/>
+        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding ServerIp, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormField}"/>
+
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="Server Gateway" Style="{StaticResource FormLabel}"/>
+        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding ServerGateway, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormField}"/>
+
+        <TextBlock Grid.Row="4" Grid.Column="0" Text="Server Port" Style="{StaticResource FormLabel}"/>
+        <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding ServerPort, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormField}"/>
+
+        <views:AdvancedConfigButtonBar Grid.Row="5" Grid.ColumnSpan="2"
+                                       SaveCommand="{Binding SaveCommand}"
+                                       BackCommand="{Binding BackCommand}"
+                                       SaveButtonText="Save Configuration"
+                                       SaveAutomationName="Save TCP Advanced Configuration"
+                                       BackAutomationName="Back from TCP Advanced Configuration" />
+    </Grid>
+</Page>

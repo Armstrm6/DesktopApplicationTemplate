@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Globalization;
 using System.Linq;
 
 namespace DesktopApplicationTemplate.Core.Services.Protocols.Csv;
@@ -144,16 +145,50 @@ public class CsvService : ICsvService
 
     private static string BuildFileName(CsvConfiguration configuration, CsvServiceState state, ICsvOutput output)
     {
-        string pattern = configuration.FileNamePattern ?? string.Empty;
-        string fileName = pattern.Replace("{index}", state.FileIndex.ToString());
-        if (pattern.Contains("{index}", StringComparison.Ordinal))
+        ArgumentNullException.ThrowIfNull(configuration);
+        ArgumentNullException.ThrowIfNull(state);
+        ArgumentNullException.ThrowIfNull(output);
+
+        if (!string.IsNullOrWhiteSpace(state.CurrentFilePath))
         {
-            state.FileIndex++;
+            output.EnsureDirectoryForFile(state.CurrentFilePath);
+            return state.CurrentFilePath!;
+        }
+
+        var pattern = configuration.FileNamePattern ?? string.Empty;
+        var timestamp = state.FileTimestamp ?? DateTime.Now;
+        state.FileTimestamp = timestamp;
+
+        string fileName = pattern;
+        if (fileName.Contains("{datetime}", StringComparison.Ordinal))
+        {
+            fileName = fileName.Replace("{datetime}", timestamp.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture));
+        }
+
+        if (fileName.Contains("{date}", StringComparison.Ordinal))
+        {
+            fileName = fileName.Replace("{date}", timestamp.ToString("yyyyMMdd", CultureInfo.InvariantCulture));
+        }
+
+        if (fileName.Contains("{time}", StringComparison.Ordinal))
+        {
+            fileName = fileName.Replace("{time}", timestamp.ToString("HHmmss", CultureInfo.InvariantCulture));
+        }
+
+        if (fileName.Contains("{index}", StringComparison.Ordinal))
+        {
+            fileName = fileName.Replace("{index}", state.FileIndex.ToString(CultureInfo.InvariantCulture));
+        }
+
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            fileName = $"output_{timestamp:yyyyMMdd_HHmmss}.csv";
         }
 
         string directory = configuration.OutputDirectory ?? string.Empty;
         string path = Path.Combine(directory, fileName);
         output.EnsureDirectoryForFile(path);
+        state.CurrentFilePath = path;
         return path;
     }
 

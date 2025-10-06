@@ -79,8 +79,10 @@
             <ComboBox Grid.Row="4" Grid.Column="1" ItemsSource="{Binding Modes}" SelectedItem="{Binding Mode}" Style="{StaticResource FormField}"/>
 
             <views:EditorButtonBar Grid.Row="5" Grid.ColumnSpan="2"
+                                   AdvancedConfigCommand="{Binding AdvancedConfigCommand}"
                                    SaveCommand="{Binding SaveCommand}"
                                    CancelCommand="{Binding CancelCommand}"
+                                   AdvancedAutomationName="Open TCP Advanced Configuration"
                                    SaveAutomationName="Save TCP Service"
                                    CancelAutomationName="Cancel TCP Edit" />
         </Grid>

@@ -37,7 +37,8 @@ public class HidEditServiceHandler : IEditServiceHandler
         editView.Initialize(vm);
         vm.ServiceSaved += (name, opts) =>
         {
-            service.DisplayName = $"HID - {name}";
+            var finalName = mainViewModel.EnsureUniqueServiceName(service, name);
+            service.DisplayName = $"HID - {finalName}";
             service.HidOptions = opts;
             if (hidPage != null)
                 mainView.ShowPage(hidPage);
