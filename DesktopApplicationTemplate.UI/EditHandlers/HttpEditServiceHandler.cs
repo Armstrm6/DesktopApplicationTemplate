@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using DesktopApplicationTemplate.Core.Services.Protocols.Http;
 using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI.ViewModels;
@@ -33,12 +34,20 @@ public class HttpEditServiceHandler : IEditServiceHandler
         var mainViewModel = _getMainViewModel();
         var httpPage = mainView.GetOrCreateServicePage(service);
         var options = service.HttpOptions ?? new HttpServiceOptions();
-        var vm = ActivatorUtilities.CreateInstance<HttpEditServiceViewModel>(_services, service.DisplayName.Split(" - ").Last(), options);
+        var vm = ActivatorUtilities.CreateInstance<HttpEditServiceViewModel>(_services, service.DisplayName, options);
         var editView = _services.GetRequiredService<HttpEditServiceView>();
         editView.Initialize(vm);
         vm.ServiceSaved += (name, opts) =>
         {
-            service.DisplayName = $"HTTP - {name}";
+            var trimmed = string.IsNullOrWhiteSpace(name)
+                ? mainViewModel.GenerateServiceName(service.Type)
+                : name.Trim();
+            if (mainViewModel.Services.Any(s => s != service && s.DisplayName.Equals(trimmed, StringComparison.OrdinalIgnoreCase)))
+            {
+                trimmed = mainViewModel.GenerateServiceName(service.Type);
+            }
+
+            service.DisplayName = trimmed;
             service.HttpOptions = opts;
             if (httpPage != null)
                 mainView.ShowPage(httpPage);
