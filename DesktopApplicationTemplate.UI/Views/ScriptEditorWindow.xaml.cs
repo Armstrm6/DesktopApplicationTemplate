@@ -49,7 +49,7 @@ public partial class ScriptEditorWindow : Window
     {
         ClearErrorHighlights();
 
-        foreach (var diag in diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error && !diag.Location.IsInMetadata))
+        foreach (var diag in diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error && !d.Location.IsInMetadata))
         {
             var span = diag.Location.GetLineSpan();
             try
