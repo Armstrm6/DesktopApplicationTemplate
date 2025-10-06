@@ -45,6 +45,9 @@ namespace DesktopApplicationTemplate.Persistence
                         Host = s.TcpOptions.Host,
                         Port = s.TcpOptions.Port,
                         UseUdp = s.TcpOptions.UseUdp,
+                        SubnetMask = s.TcpOptions.SubnetMask,
+                        PrimaryDns = s.TcpOptions.PrimaryDns,
+                        AlternateDns = s.TcpOptions.AlternateDns,
                         Mode = s.TcpOptions.Mode,
                         ConnectionRole = s.TcpOptions.ConnectionRole,
                         InputMessage = s.TcpOptions.InputMessage,
@@ -277,6 +280,9 @@ namespace DesktopApplicationTemplate.Persistence
                             value.Host = info.TcpOptions.Host;
                             value.Port = info.TcpOptions.Port;
                             value.UseUdp = info.TcpOptions.UseUdp;
+                            value.SubnetMask = info.TcpOptions.SubnetMask;
+                            value.PrimaryDns = info.TcpOptions.PrimaryDns;
+                            value.AlternateDns = info.TcpOptions.AlternateDns;
                             value.Mode = info.TcpOptions.Mode;
                             value.ConnectionRole = info.TcpOptions.ConnectionRole;
                             value.InputMessage = info.TcpOptions.InputMessage;

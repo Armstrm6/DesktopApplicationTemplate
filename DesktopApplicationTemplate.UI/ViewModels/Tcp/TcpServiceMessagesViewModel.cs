@@ -357,6 +357,14 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             try
             {
                 var listenAddress = ResolveListenAddress(_options.Host);
+                if (!string.IsNullOrWhiteSpace(_options.Host) &&
+                    !IPAddress.TryParse(_options.Host, out _) &&
+                    !string.Equals(_options.Host, "0.0.0.0", StringComparison.Ordinal) &&
+                    listenAddress.Equals(IPAddress.Any))
+                {
+                    LogConnectionIssues("TCP listener address resolution", null, LogLevel.Warning);
+                }
+
                 listener = new TcpListener(listenAddress, _options.Port);
                 listener.Start();
                 Logger?.Log($"Listening on {listenAddress}:{_options.Port}", LogLevel.Information);
@@ -379,7 +387,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             }
             catch (Exception ex)
             {
-                Logger?.Log($"TCP listener failed: {ex.Message}", LogLevel.Error);
+                LogConnectionIssues("TCP listener", ex);
             }
             finally
             {
@@ -400,6 +408,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             if (string.IsNullOrWhiteSpace(_options.Host))
             {
                 Logger?.Log("TCP client host is not configured.", LogLevel.Warning);
+                LogConnectionIssues("TCP client configuration", null, LogLevel.Warning);
                 return;
             }
 
@@ -439,7 +448,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             }
             catch (Exception ex)
             {
-                Logger?.Log($"TCP client error: {ex.Message}", LogLevel.Error);
+                LogConnectionIssues("TCP client connection", ex);
             }
         }
 
@@ -512,7 +521,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             }
             catch (Exception ex)
             {
-                Logger?.Log($"Ping to {_options.Host} failed: {ex.Message}", LogLevel.Error);
+                LogConnectionIssues("TCP ping", ex);
             }
         }
 
@@ -543,6 +552,114 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                 OnPropertyChanged(nameof(IncomingData));
                 OnPropertyChanged(nameof(OutgoingResults));
             });
+        }
+
+        private void LogConnectionIssues(string stage, Exception? exception, LogLevel? summaryLevel = null)
+        {
+            if (Logger is null)
+            {
+                return;
+            }
+
+            if (exception is not null)
+            {
+                Logger.Log($"{stage} failed: {exception.Message}", LogLevel.Error);
+                if (exception is SocketException socketException)
+                {
+                    Logger.Log($"Socket error: {socketException.SocketErrorCode}", LogLevel.Error);
+                }
+            }
+            else if (summaryLevel is LogLevel level)
+            {
+                Logger.Log($"{stage} has configuration issues.", level);
+            }
+
+            foreach (var detail in BuildConnectionDiagnostics())
+            {
+                Logger.Log(detail, LogLevel.Warning);
+            }
+        }
+
+        private IEnumerable<string> BuildConnectionDiagnostics()
+        {
+            yield return BuildHostDiagnostic();
+            yield return BuildPortDiagnostic();
+            yield return BuildSubnetDiagnostic();
+            yield return BuildDnsDiagnostic(_options.PrimaryDns, "Primary DNS");
+            yield return BuildDnsDiagnostic(_options.AlternateDns, "Alternate DNS");
+        }
+
+        private string BuildHostDiagnostic()
+        {
+            if (string.IsNullOrWhiteSpace(_options.Host))
+            {
+                return "Host: not configured";
+            }
+
+            if (IPAddress.TryParse(_options.Host, out _))
+            {
+                return $"Host: {_options.Host}";
+            }
+
+            try
+            {
+                var addresses = Dns.GetHostAddresses(_options.Host)
+                    .Where(a => a.AddressFamily == AddressFamily.InterNetwork)
+                    .Select(a => a.ToString())
+                    .ToArray();
+
+                if (addresses.Length == 0)
+                {
+                    return $"Host: DNS lookup returned no IPv4 addresses for '{_options.Host}'";
+                }
+
+                var preview = string.Join(", ", addresses.Take(2));
+                if (addresses.Length > 2)
+                {
+                    preview += ", ...";
+                }
+
+                return $"Host: resolved to {preview}";
+            }
+            catch (SocketException ex)
+            {
+                return $"Host: DNS resolution failed ({ex.SocketErrorCode})";
+            }
+            catch (Exception ex)
+            {
+                return $"Host: resolution failed ({ex.Message})";
+            }
+        }
+
+        private string BuildPortDiagnostic()
+        {
+            return _options.Port is >= 1 and <= 65535
+                ? $"Port: {_options.Port}"
+                : $"Port: invalid ({_options.Port})";
+        }
+
+        private string BuildSubnetDiagnostic()
+        {
+            if (string.IsNullOrWhiteSpace(_options.SubnetMask))
+            {
+                return "Subnet: not configured";
+            }
+
+            return IPAddress.TryParse(_options.SubnetMask, out _)
+                ? $"Subnet: {_options.SubnetMask}"
+                : $"Subnet: invalid ({_options.SubnetMask})";
+        }
+
+        private static string BuildDnsDiagnostic(string value, string label)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return $"{label}: not configured";
+            }
+
+            return IPAddress.TryParse(value, out _)
+                ? $"{label}: {value}"
+                : $"{label}: invalid ({value})";
         }
 
         private static Task RunOnUiThreadAsync(Action action)

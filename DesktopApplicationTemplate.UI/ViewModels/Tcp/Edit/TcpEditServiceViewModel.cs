@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Tcp;
 
@@ -18,6 +19,9 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
     private string _serverHost = NetworkUtilities.GetLocalIpAddress();
     private string _clientHost = string.Empty;
     private bool _suppressRoleHostUpdate;
+    private string _subnetMask = string.Empty;
+    private string _primaryDns = string.Empty;
+    private string _alternateDns = string.Empty;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TcpEditServiceViewModel"/> class.
@@ -40,6 +44,9 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
         Port = _options.Port;
         UseUdp = _options.UseUdp;
         Mode = _options.Mode;
+        SubnetMask = _options.SubnetMask;
+        PrimaryDns = _options.PrimaryDns;
+        AlternateDns = _options.AlternateDns;
         if (ConnectionRole == TcpConnectionRole.Server)
         {
             _serverHost = _options.Host;
@@ -115,6 +122,48 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
     }
 
     /// <summary>
+    /// Subnet mask associated with the connection.
+    /// </summary>
+    public string SubnetMask
+    {
+        get => _subnetMask;
+        set
+        {
+            _subnetMask = value ?? string.Empty;
+            ValidateOptionalIpAddress(_subnetMask, nameof(SubnetMask), "Subnet");
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>
+    /// Primary DNS server used for resolving host names.
+    /// </summary>
+    public string PrimaryDns
+    {
+        get => _primaryDns;
+        set
+        {
+            _primaryDns = value ?? string.Empty;
+            ValidateOptionalIpAddress(_primaryDns, nameof(PrimaryDns), "Primary DNS");
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>
+    /// Alternate DNS server used for resolving host names.
+    /// </summary>
+    public string AlternateDns
+    {
+        get => _alternateDns;
+        set
+        {
+            _alternateDns = value ?? string.Empty;
+            ValidateOptionalIpAddress(_alternateDns, nameof(AlternateDns), "Alternate DNS");
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>
     /// Available service modes.
     /// </summary>
     public TcpServiceMode[] Modes { get; } = (TcpServiceMode[])Enum.GetValues(typeof(TcpServiceMode));
@@ -173,6 +222,9 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
         _options.Host = Host;
         _options.Port = Port;
         _options.UseUdp = UseUdp;
+        _options.SubnetMask = SubnetMask;
+        _options.PrimaryDns = PrimaryDns;
+        _options.AlternateDns = AlternateDns;
         _options.Mode = Mode;
         _options.ConnectionRole = ConnectionRole;
         RaiseServiceSaved(_options);
@@ -185,6 +237,24 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
     protected override void OnAdvancedConfig()
     {
         // Advanced configuration removed.
+    }
+
+    private void ValidateOptionalIpAddress(string value, string propertyName, string? displayName = null)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            ClearErrors(propertyName);
+            return;
+        }
+
+        if (IPAddress.TryParse(value, out _))
+        {
+            ClearErrors(propertyName);
+            return;
+        }
+
+        var label = displayName ?? propertyName;
+        AddError(propertyName, $"{label} must be a valid IPv4 address");
     }
 }
 

@@ -42,6 +42,21 @@ public class TcpServiceOptions
     public bool UseUdp { get; set; }
 
     /// <summary>
+    /// Subnet mask associated with the connection.
+    /// </summary>
+    public string SubnetMask { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Primary DNS server used for resolving host names.
+    /// </summary>
+    public string PrimaryDns { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Alternate DNS server used for resolving host names.
+    /// </summary>
+    public string AlternateDns { get; set; } = string.Empty;
+
+    /// <summary>
     /// Operating mode for the service.
     /// </summary>
     public TcpServiceMode Mode { get; set; } = TcpServiceMode.Listening;
