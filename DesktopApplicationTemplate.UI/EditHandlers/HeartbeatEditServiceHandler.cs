@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using DesktopApplicationTemplate.Core.Services.Protocols.Heartbeat;
 using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI.ViewModels;
@@ -33,12 +34,20 @@ public class HeartbeatEditServiceHandler : IEditServiceHandler
         var mainViewModel = _getMainViewModel();
         var hbPage = mainView.GetOrCreateServicePage(service);
         var options = service.HeartbeatOptions ?? new HeartbeatServiceOptions();
-        var vm = ActivatorUtilities.CreateInstance<HeartbeatEditServiceViewModel>(_services, service.DisplayName.Split(" - ").Last(), options);
+        var vm = ActivatorUtilities.CreateInstance<HeartbeatEditServiceViewModel>(_services, service.DisplayName, options);
         var editView = _services.GetRequiredService<HeartbeatEditServiceView>();
         editView.Initialize(vm);
         vm.ServiceSaved += (name, opts) =>
         {
-            service.DisplayName = $"Heartbeat - {name}";
+            var trimmed = string.IsNullOrWhiteSpace(name)
+                ? mainViewModel.GenerateServiceName(service.Type)
+                : name.Trim();
+            if (mainViewModel.Services.Any(s => s != service && s.DisplayName.Equals(trimmed, StringComparison.OrdinalIgnoreCase)))
+            {
+                trimmed = mainViewModel.GenerateServiceName(service.Type);
+            }
+
+            service.DisplayName = trimmed;
             service.HeartbeatOptions = opts;
             if (hbPage != null)
                 mainView.ShowPage(hbPage);

@@ -10,7 +10,7 @@ public class CsvConfiguration
     /// <summary>
     /// Gets or sets the file name pattern used when creating output files.
     /// </summary>
-    public string FileNamePattern { get; set; } = "output_{index}.csv";
+    public string FileNamePattern { get; set; } = "output_{timestamp}.csv";
 
     /// <summary>
     /// Gets or sets the directory where CSV files are written.

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using DesktopApplicationTemplate.UI.ViewModels;
@@ -19,6 +20,8 @@ namespace DesktopApplicationTemplate.UI.Views
             _viewModel = viewModel;
             DataContext = _viewModel;
         }
+
+        public void SetExistingNames(IEnumerable<string> names) => _viewModel.SetExistingNames(names);
 
         private void ServiceType_Click(object sender, RoutedEventArgs e)
         {

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using DesktopApplicationTemplate.Core.Services.Protocols.Ftp;
 using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI.ViewModels;
@@ -34,11 +35,19 @@ public class FtpEditServiceHandler : IEditServiceHandler
         var mainViewModel = _getMainViewModel();
         var ftpPage = mainView.GetOrCreateServicePage(service);
         var options = service.FtpOptions ?? new FtpServerOptions();
-        var vm = ActivatorUtilities.CreateInstance<FtpServerEditViewModel>(_services, service.DisplayName.Split(" - ").Last(), options);
+        var vm = ActivatorUtilities.CreateInstance<FtpServerEditViewModel>(_services, service.DisplayName, options);
         var editView = ActivatorUtilities.CreateInstance<FtpServerEditView>(_services, vm);
         vm.ServiceSaved += (name, opts) =>
         {
-            service.DisplayName = $"FTP Server - {name}";
+            var trimmed = string.IsNullOrWhiteSpace(name)
+                ? mainViewModel.GenerateServiceName(service.Type)
+                : name.Trim();
+            if (mainViewModel.Services.Any(s => s != service && s.DisplayName.Equals(trimmed, StringComparison.OrdinalIgnoreCase)))
+            {
+                trimmed = mainViewModel.GenerateServiceName(service.Type);
+            }
+
+            service.DisplayName = trimmed;
             service.FtpOptions = opts;
             var opt = _services.GetRequiredService<IOptions<FtpServerOptions>>().Value;
             opt.Port = opts.Port;

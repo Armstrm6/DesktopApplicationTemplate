@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using DesktopApplicationTemplate.Core.Services.Protocols.Tcp;
 using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI.ViewModels;
@@ -34,12 +35,20 @@ public class TcpEditServiceHandler : IEditServiceHandler
         var options = service.TcpOptions ?? new TcpServiceOptions();
         var vm = _services.GetRequiredService<TcpEditServiceViewModel>();
         vm.ServiceType = service.Type;
-        vm.Load(service.DisplayName.Split(" - ").Last(), options);
+        vm.Load(service.DisplayName, options);
         var editView = _services.GetRequiredService<TcpEditServiceView>();
         editView.Initialize(vm);
         vm.ServiceSaved += (name, opts) =>
         {
-            service.DisplayName = $"{vm.ServiceType.ToLegacyString()} - {name}";
+            var trimmed = string.IsNullOrWhiteSpace(name)
+                ? mainViewModel.GenerateServiceName(service.Type)
+                : name.Trim();
+            if (mainViewModel.Services.Any(s => s != service && s.DisplayName.Equals(trimmed, StringComparison.OrdinalIgnoreCase)))
+            {
+                trimmed = mainViewModel.GenerateServiceName(service.Type);
+            }
+
+            service.DisplayName = trimmed;
             service.Type = vm.ServiceType;
             service.TcpOptions = opts;
             if (tcpPage != null)

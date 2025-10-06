@@ -6,6 +6,8 @@ using System.Collections.Specialized;
 using System.Linq;
 using DesktopApplicationTemplate.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI.ViewModels.Tcp;
+using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.Models;
 using LogLevel = DesktopApplicationTemplate.Core.Services.LogLevel;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,6 +31,7 @@ namespace DesktopApplicationTemplate.UI.Views
         private readonly IServiceUiRegistry<ServiceListModel, Page> _serviceRegistry;
         private readonly IServiceProvider _serviceProvider;
         private readonly Dictionary<ServiceListModel, Action<LogEntry>> _serviceLogHandlers = new();
+        private readonly Dictionary<ServiceListModel, EventHandler> _tcpAdvancedHandlers = new();
         private readonly BrushConverter _brushConverter = new();
 
         public MainView(
@@ -122,6 +125,11 @@ namespace DesktopApplicationTemplate.UI.Views
                     AttachServiceLogger(svc, vm);
                 }
 
+                if (svc.ServicePage.DataContext is TcpServiceMessagesViewModel tcpVm)
+                {
+                    AttachTcpAdvancedHandler(svc, tcpVm);
+                }
+
                 if (svc.ServicePage.DataContext is INetworkAwareViewModel navm)
                 {
                     navm.UpdateNetworkConfiguration(_viewModel.NetworkConfig.CurrentConfiguration);
@@ -176,6 +184,18 @@ namespace DesktopApplicationTemplate.UI.Views
             }
         }
 
+        private void AttachTcpAdvancedHandler(ServiceListModel svc, TcpServiceMessagesViewModel vm)
+        {
+            if (_tcpAdvancedHandlers.TryGetValue(svc, out var existing))
+            {
+                vm.AdvancedSettingsRequested -= existing;
+            }
+
+            EventHandler handler = (_, _) => OpenTcpAdvancedSettings(svc);
+            vm.AdvancedSettingsRequested += handler;
+            _tcpAdvancedHandlers[svc] = handler;
+        }
+
         private void DetachServiceLogger(ServiceListModel svc)
         {
             if (!_serviceLogHandlers.TryGetValue(svc, out var handler))
@@ -189,6 +209,28 @@ namespace DesktopApplicationTemplate.UI.Views
             }
 
             _serviceLogHandlers.Remove(svc);
+            DetachTcpAdvancedHandler(svc);
+        }
+
+        private void DetachTcpAdvancedHandler(ServiceListModel svc)
+        {
+            if (!_tcpAdvancedHandlers.TryGetValue(svc, out var handler))
+            {
+                return;
+            }
+
+            if (svc.ServicePage?.DataContext is TcpServiceMessagesViewModel vm)
+            {
+                vm.AdvancedSettingsRequested -= handler;
+            }
+
+            _tcpAdvancedHandlers.Remove(svc);
+        }
+
+        private void OpenTcpAdvancedSettings(ServiceListModel svc)
+        {
+            var handler = _serviceProvider.GetKeyedService<IEditServiceHandler>(ServiceType.Tcp);
+            handler?.Edit(svc);
         }
 
         private void Services_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -214,6 +256,10 @@ namespace DesktopApplicationTemplate.UI.Views
                 foreach (var svc in _serviceLogHandlers.Keys.ToList())
                 {
                     DetachServiceLogger(svc);
+                }
+                foreach (var svc in _tcpAdvancedHandlers.Keys.ToList())
+                {
+                    DetachTcpAdvancedHandler(svc);
                 }
             }
         }
@@ -244,11 +290,20 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             var page = _serviceProvider.GetRequiredService<CreateServicePage>();
             _createServicePage = page;
+            page.SetExistingNames(_viewModel.Services.Select(s => s.DisplayName));
             page.ServiceCreated += (name, type) =>
             {
+                var trimmed = string.IsNullOrWhiteSpace(name)
+                    ? _viewModel.GenerateServiceName(type)
+                    : name.Trim();
+                if (_viewModel.Services.Any(s => s.DisplayName.Equals(trimmed, StringComparison.OrdinalIgnoreCase)))
+                {
+                    trimmed = _viewModel.GenerateServiceName(type);
+                }
+
                 var svc = new ServiceListModel
                 {
-                    DisplayName = $"{type.ToLegacyString()} - {name}",
+                    DisplayName = trimmed,
                     Type = type,
                     IsActive = false
                 };
@@ -263,6 +318,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 if (svc.ServicePage != null)
                     ShowPage(svc.ServicePage);
                 _ = _viewModel.SaveServicesAsync();
+                page.SetExistingNames(_viewModel.Services.Select(s => s.DisplayName));
             };
             page.ServiceTypeSelected += NavigateTo;
             page.Cancelled += ShowHome;
@@ -273,7 +329,7 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private void NavigateTo(ServiceType serviceType)
         {
-            var defaultName = _createServicePage?.GenerateDefaultName(serviceType) ?? serviceType.ToLegacyString();
+            var defaultName = _createServicePage?.GenerateDefaultName(serviceType) ?? serviceType.ToBaseName();
             if (_serviceRegistry.TryCreateNavigationPage(serviceType, _serviceProvider, defaultName, out var view) &&
                 view is not null)
             {
@@ -289,12 +345,29 @@ namespace DesktopApplicationTemplate.UI.Views
 
 
 
-        internal async Task AddServiceAsync(ServiceType type, object options)
+        internal async Task<bool> TryAddServiceAsync<TOptions>(ServiceType type, ServiceFactoryOptions<TOptions> context)
         {
-            if (!_serviceRegistry.TryCreateService(type, _serviceProvider, options, out var svc) || svc is null)
+            var sanitizedName = string.IsNullOrWhiteSpace(context.Name)
+                ? _viewModel.GenerateServiceName(type)
+                : context.Name.Trim();
+
+            if (_viewModel.Services.Any(s => s.DisplayName.Equals(sanitizedName, StringComparison.OrdinalIgnoreCase)))
             {
-                return;
+                MessageBox.Show(this,
+                    $"A service named '{sanitizedName}' already exists.",
+                    "Duplicate Service Name",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return false;
             }
+
+            var normalizedContext = context with { Name = sanitizedName };
+
+            if (!_serviceRegistry.TryCreateService(type, _serviceProvider, normalizedContext, out var svc) || svc is null)
+            {
+                return false;
+            }
+
             svc.SetColorsByType();
             svc.LogAdded += _viewModel.OnServiceLogAdded;
             svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
@@ -306,9 +379,14 @@ namespace DesktopApplicationTemplate.UI.Views
             _viewModel.SelectedService = svc;
             ServiceList.ScrollIntoView(svc);
             if (svc.ServicePage != null)
+            {
                 ShowPage(svc.ServicePage);
+            }
+
             await _viewModel.SaveServicesAsync();
+            _createServicePage?.SetExistingNames(_viewModel.Services.Select(s => s.DisplayName));
             _logger?.LogDebug("AddService workflow completed");
+            return true;
         }
 
 
@@ -371,6 +449,7 @@ namespace DesktopApplicationTemplate.UI.Views
                     _viewModel.SelectedService = null;
                 }
                 await _viewModel.SaveServicesAsync();
+                _createServicePage?.SetExistingNames(_viewModel.Services.Select(s => s.DisplayName));
             }
         }
 
@@ -388,13 +467,14 @@ namespace DesktopApplicationTemplate.UI.Views
                 string input = Microsoft.VisualBasic.Interaction.InputBox("Enter new service name:", "Rename Service", svc.DisplayName);
                 if (!string.IsNullOrWhiteSpace(input))
                 {
-                    var namePart = input.Contains(" - ") ? input.Split(" - ").Last() : input;
-                    if (_viewModel.Services.Any(s => s != svc && s.DisplayName.Split(" - ").Last().Equals(namePart, StringComparison.OrdinalIgnoreCase)))
+                    var trimmed = input.Trim();
+                    if (_viewModel.Services.Any(s => s != svc && s.DisplayName.Equals(trimmed, StringComparison.OrdinalIgnoreCase)))
                     {
-                        namePart = _viewModel.GenerateServiceName(svc.Type);
+                        trimmed = _viewModel.GenerateServiceName(svc.Type);
                     }
-                    svc.DisplayName = $"{svc.Type.ToLegacyString()} - {namePart}";
+                    svc.DisplayName = trimmed;
                     await _viewModel.SaveServicesAsync();
+                    _createServicePage?.SetExistingNames(_viewModel.Services.Select(s => s.DisplayName));
                 }
             }
         }

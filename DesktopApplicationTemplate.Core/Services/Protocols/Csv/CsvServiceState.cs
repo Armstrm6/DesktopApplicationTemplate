@@ -16,11 +16,16 @@ public class CsvServiceState
     public bool HeaderWritten { get; set; } = false;
 
     /// <summary>
+    /// Gets or sets the current file name used for CSV output.
+    /// </summary>
+    public string? CurrentFileName { get; set; }
+
+    /// <summary>
     /// Resets the state so the next write will create a fresh file and header.
     /// </summary>
     public void Reset()
     {
         HeaderWritten = false;
-        FileIndex++;
+        CurrentFileName = null;
     }
 }

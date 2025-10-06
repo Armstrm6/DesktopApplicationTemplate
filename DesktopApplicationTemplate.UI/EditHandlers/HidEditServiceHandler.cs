@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.ViewModels.Hid.Edit;
@@ -32,12 +33,20 @@ public class HidEditServiceHandler : IEditServiceHandler
         var mainViewModel = _getMainViewModel();
         var hidPage = mainView.GetOrCreateServicePage(service);
         var options = service.HidOptions ?? new HidServiceOptions();
-        var vm = ActivatorUtilities.CreateInstance<HidEditServiceViewModel>(_services, service.DisplayName.Split(" - ").Last(), options);
+        var vm = ActivatorUtilities.CreateInstance<HidEditServiceViewModel>(_services, service.DisplayName, options);
         var editView = _services.GetRequiredService<HidEditServiceView>();
         editView.Initialize(vm);
         vm.ServiceSaved += (name, opts) =>
         {
-            service.DisplayName = $"HID - {name}";
+            var trimmed = string.IsNullOrWhiteSpace(name)
+                ? mainViewModel.GenerateServiceName(service.Type)
+                : name.Trim();
+            if (mainViewModel.Services.Any(s => s != service && s.DisplayName.Equals(trimmed, StringComparison.OrdinalIgnoreCase)))
+            {
+                trimmed = mainViewModel.GenerateServiceName(service.Type);
+            }
+
+            service.DisplayName = trimmed;
             service.HidOptions = opts;
             if (hidPage != null)
                 mainView.ShowPage(hidPage);

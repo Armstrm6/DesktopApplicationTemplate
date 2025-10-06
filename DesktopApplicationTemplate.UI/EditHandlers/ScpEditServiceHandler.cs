@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.ViewModels.Scp.Edit;
@@ -33,12 +34,20 @@ public class ScpEditServiceHandler : IEditServiceHandler
         var scpPage = mainView.GetOrCreateServicePage(service);
         var options = service.ScpOptions ?? new ScpServiceOptions();
         var vm = _services.GetRequiredService<ScpEditServiceViewModel>();
-        vm.Load(service.DisplayName.Split(" - ").Last(), options);
+        vm.Load(service.DisplayName, options);
         var editView = _services.GetRequiredService<ScpEditServiceView>();
         editView.Initialize(vm);
         vm.ServiceSaved += (name, opts) =>
         {
-            service.DisplayName = $"SCP - {name}";
+            var trimmed = string.IsNullOrWhiteSpace(name)
+                ? mainViewModel.GenerateServiceName(service.Type)
+                : name.Trim();
+            if (mainViewModel.Services.Any(s => s != service && s.DisplayName.Equals(trimmed, StringComparison.OrdinalIgnoreCase)))
+            {
+                trimmed = mainViewModel.GenerateServiceName(service.Type);
+            }
+
+            service.DisplayName = trimmed;
             service.ScpOptions = opts;
             if (scpPage != null)
                 mainView.ShowPage(scpPage);

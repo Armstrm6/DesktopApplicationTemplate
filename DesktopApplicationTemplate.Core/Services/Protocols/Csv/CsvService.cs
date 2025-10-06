@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 
@@ -144,17 +145,56 @@ public class CsvService : ICsvService
 
     private static string BuildFileName(CsvConfiguration configuration, CsvServiceState state, ICsvOutput output)
     {
-        string pattern = configuration.FileNamePattern ?? string.Empty;
-        string fileName = pattern.Replace("{index}", state.FileIndex.ToString());
-        if (pattern.Contains("{index}", StringComparison.Ordinal))
+        if (state is null)
         {
-            state.FileIndex++;
+            throw new ArgumentNullException(nameof(state));
         }
 
-        string directory = configuration.OutputDirectory ?? string.Empty;
-        string path = Path.Combine(directory, fileName);
+        if (output is null)
+        {
+            throw new ArgumentNullException(nameof(output));
+        }
+
+        var directory = configuration.OutputDirectory ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(state.CurrentFileName))
+        {
+            var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture);
+            state.CurrentFileName = ResolveFileName(configuration.FileNamePattern, timestamp);
+            state.HeaderWritten = false;
+        }
+
+        var path = Path.Combine(directory, state.CurrentFileName);
         output.EnsureDirectoryForFile(path);
         return path;
+    }
+
+    private static string ResolveFileName(string? pattern, string timestamp)
+    {
+        if (string.IsNullOrWhiteSpace(pattern))
+        {
+            return $"output_{timestamp}.csv";
+        }
+
+        const string token = "{timestamp}";
+        var index = pattern.IndexOf(token, StringComparison.OrdinalIgnoreCase);
+        if (index >= 0)
+        {
+            return string.Concat(pattern.AsSpan(0, index), timestamp, pattern.AsSpan(index + token.Length));
+        }
+
+        var fileName = Path.GetFileNameWithoutExtension(pattern);
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            fileName = "output";
+        }
+
+        var extension = Path.GetExtension(pattern);
+        if (string.IsNullOrWhiteSpace(extension))
+        {
+            extension = ".csv";
+        }
+
+        return $"{fileName}_{timestamp}{extension}";
     }
 
     private static bool IsCsvService(string serviceName)

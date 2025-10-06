@@ -83,5 +83,23 @@ public static class ServiceTypeExtensions
             ServiceType.Heartbeat => "Heartbeat",
             _ => type.ToCode()
         };
+
+    /// <summary>
+    /// Provides the default prefix used when generating service names.
+    /// </summary>
+    public static string ToBaseName(this ServiceType type) =>
+        type switch
+        {
+            ServiceType.Ftp => "FTP",
+            ServiceType.Mqtt => "MQTT",
+            ServiceType.Http => "HTTP",
+            ServiceType.Tcp => "TCP",
+            ServiceType.Hid => "HID",
+            ServiceType.Csv => "CSV",
+            ServiceType.FileObserver => "FileObserver",
+            ServiceType.Scp => "SCP",
+            ServiceType.Heartbeat => "Heartbeat",
+            _ => type.ToCode()
+        };
 }
 
