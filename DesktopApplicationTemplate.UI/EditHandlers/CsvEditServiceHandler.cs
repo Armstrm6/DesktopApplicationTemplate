@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using DesktopApplicationTemplate.Core.Services.Protocols.Csv;
 using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI.ViewModels;
@@ -32,12 +33,20 @@ public class CsvEditServiceHandler : IEditServiceHandler
         var csvPage = mainView.GetOrCreateServicePage(service);
         var options = service.CsvOptions ?? new CsvServiceOptions();
         var vm = _services.GetRequiredService<CsvServiceEditorViewModel>();
-        vm.Load(service.DisplayName.Split(" - ").Last(), options);
+        vm.Load(service.DisplayName, options);
         var editView = _services.GetRequiredService<CsvServiceEditorView>();
         editView.Initialize(vm);
         vm.ServiceSaved += (name, opts) =>
         {
-            service.DisplayName = $"CSV Creator - {name}";
+            var trimmed = string.IsNullOrWhiteSpace(name)
+                ? mainViewModel.GenerateServiceName(service.Type)
+                : name.Trim();
+            if (mainViewModel.Services.Any(s => s != service && s.DisplayName.Equals(trimmed, StringComparison.OrdinalIgnoreCase)))
+            {
+                trimmed = mainViewModel.GenerateServiceName(service.Type);
+            }
+
+            service.DisplayName = trimmed;
             service.CsvOptions = opts;
             if (csvPage != null)
                 mainView.ShowPage(csvPage);

@@ -196,7 +196,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             if (service == null) throw new ArgumentNullException(nameof(service));
             _options = service.TcpOptions ?? new TcpServiceOptions();
             ServiceType = service.Type;
-            ServiceName = service.DisplayName.Split(" - ").Last();
+            ServiceName = service.DisplayName;
             Script = string.IsNullOrWhiteSpace(_options.Script)
                 ? ScriptEditorViewModel.DefaultScript
                 : _options.Script;

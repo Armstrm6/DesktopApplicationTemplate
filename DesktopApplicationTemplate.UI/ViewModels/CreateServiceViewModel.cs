@@ -22,18 +22,32 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public CreateServiceViewModel(IEnumerable<string>? existingNames = null)
         {
-            _existingNames = existingNames != null ? new HashSet<string>(existingNames) : new HashSet<string>();
+            _existingNames = existingNames != null
+                ? new HashSet<string>(existingNames, StringComparer.OrdinalIgnoreCase)
+                : new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         }
 
         public string GenerateDefaultName(ServiceType serviceType)
         {
-            var typeName = serviceType.ToLegacyString();
+            var typeName = serviceType.ToBaseName();
             int index = 1;
             while (_existingNames.Contains($"{typeName}{index}"))
             {
                 index++;
             }
             return $"{typeName}{index}";
+        }
+
+        public void SetExistingNames(IEnumerable<string> names)
+        {
+            _existingNames.Clear();
+            foreach (var name in names)
+            {
+                if (!string.IsNullOrWhiteSpace(name))
+                {
+                    _existingNames.Add(name);
+                }
+            }
         }
         // OnPropertyChanged provided by ViewModelBase
     }

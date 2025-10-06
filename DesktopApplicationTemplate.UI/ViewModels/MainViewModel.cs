@@ -107,7 +107,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             ServiceListModel.ResolveService = (type, name) =>
                 Services.FirstOrDefault(s =>
                     s.Type == type &&
-                    s.DisplayName.Split(" - ").Last().Equals(name, StringComparison.OrdinalIgnoreCase));
+                    s.DisplayName.Equals(name, StringComparison.OrdinalIgnoreCase));
             if (!string.IsNullOrWhiteSpace(servicesFilePath))
             {
                 ServicePersistence.FilePath = servicesFilePath!;
@@ -196,12 +196,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         internal string GenerateServiceName(ServiceType serviceType)
         {
-            var typeName = serviceType.ToLegacyString();
+            var typeName = serviceType.ToBaseName();
             int index = 1;
             foreach (var svc in Services.Where(s => s.Type == serviceType))
             {
-                var namePart = svc.DisplayName.Split(" - ").Last();
-                if (namePart.StartsWith(typeName) &&
+                var namePart = svc.DisplayName;
+                if (namePart.StartsWith(typeName, StringComparison.OrdinalIgnoreCase) &&
                     int.TryParse(namePart.Substring(typeName.Length), out int n) && n >= index)
                 {
                     index = n + 1;
@@ -288,6 +288,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 };
                 foreach (var a in info.AssociatedServices ?? new List<string>())
                     svc.AssociatedServices.Add(a);
+                var normalizedName = NormalizeDisplayName(svc.Type, svc.DisplayName);
+                if (Services.Any(existing => existing.DisplayName.Equals(normalizedName, StringComparison.OrdinalIgnoreCase)))
+                {
+                    normalizedName = GenerateServiceName(svc.Type);
+                }
+                svc.DisplayName = normalizedName;
                 svc.SetColorsByType();
                 svc.SetRuntimeState(svc.IsActive ? ServiceRuntimeState.Active : ServiceRuntimeState.Inactive);
                 svc.LogAdded += OnServiceLogAdded;
@@ -299,6 +305,38 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
             OnPropertyChanged(nameof(ServicesCreated));
             OnPropertyChanged(nameof(CurrentActiveServices));
+        }
+
+        private static string NormalizeDisplayName(ServiceType type, string displayName)
+        {
+            if (string.IsNullOrWhiteSpace(displayName))
+            {
+                return type.ToBaseName();
+            }
+
+            var trimmed = displayName.Trim();
+            var separatorIndex = trimmed.LastIndexOf(" - ", StringComparison.Ordinal);
+            if (separatorIndex >= 0)
+            {
+                trimmed = trimmed[(separatorIndex + 3)..];
+            }
+
+            var legacyPrefix = type.ToLegacyString();
+            var baseName = type.ToBaseName();
+            if (!string.Equals(legacyPrefix, baseName, StringComparison.OrdinalIgnoreCase) &&
+                trimmed.StartsWith(legacyPrefix, StringComparison.OrdinalIgnoreCase))
+            {
+                trimmed = baseName + trimmed[legacyPrefix.Length..];
+            }
+
+            var codePrefix = type.ToCode();
+            if (!string.Equals(codePrefix, baseName, StringComparison.OrdinalIgnoreCase) &&
+                trimmed.StartsWith(codePrefix, StringComparison.OrdinalIgnoreCase))
+            {
+                trimmed = baseName + trimmed[codePrefix.Length..];
+            }
+
+            return trimmed;
         }
 
         private void ApplyFilters()

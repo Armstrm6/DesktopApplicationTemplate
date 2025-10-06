@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using DesktopApplicationTemplate.Core.Services.Protocols.FileObserver;
 using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI.ViewModels;
@@ -33,12 +34,20 @@ public class FileObserverEditServiceHandler : IEditServiceHandler
         var mainViewModel = _getMainViewModel();
         var foPage = mainView.GetOrCreateServicePage(service);
         var options = service.FileObserverOptions ?? new FileObserverServiceOptions();
-        var vm = ActivatorUtilities.CreateInstance<FileObserverEditServiceViewModel>(_services, service.DisplayName.Split(" - ").Last(), options);
+        var vm = ActivatorUtilities.CreateInstance<FileObserverEditServiceViewModel>(_services, service.DisplayName, options);
         var editView = _services.GetRequiredService<FileObserverEditServiceView>();
         editView.Initialize(vm);
         vm.ServiceSaved += (name, opts) =>
         {
-            service.DisplayName = $"File Observer - {name}";
+            var trimmed = string.IsNullOrWhiteSpace(name)
+                ? mainViewModel.GenerateServiceName(service.Type)
+                : name.Trim();
+            if (mainViewModel.Services.Any(s => s != service && s.DisplayName.Equals(trimmed, StringComparison.OrdinalIgnoreCase)))
+            {
+                trimmed = mainViewModel.GenerateServiceName(service.Type);
+            }
+
+            service.DisplayName = trimmed;
             service.FileObserverOptions = opts;
             if (foPage != null)
                 mainView.ShowPage(foPage);
