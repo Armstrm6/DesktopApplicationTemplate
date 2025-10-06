@@ -830,13 +830,20 @@ namespace DesktopApplicationTemplate.UI
             var app = Current;
             if (app is not null)
             {
-                await app.Dispatcher.InvokeAsync(static application => application.Shutdown(), app);
+                await app.Dispatcher.InvokeAsync(app.Shutdown);
             }
         }
 
-        protected override async void OnStartup(StartupEventArgs e)
+        protected override void OnStartup(StartupEventArgs e)
         {
-            ShutdownMode = ShutdownMode.OnExplicitShutdown;
+            UiThreadTaskFactory.Run(() => OnStartupAsync());
+            base.OnStartup(e);
+        }
+
+        private static async Task OnStartupAsync()
+        {
+            var application = Current ?? throw new InvalidOperationException("Application.Current is unavailable.");
+            application.ShutdownMode = ShutdownMode.OnExplicitShutdown;
             await AppHost.StartAsync();
 
             var settings = AppHost.Services.GetRequiredService<SettingsViewModel>();
@@ -862,18 +869,21 @@ namespace DesktopApplicationTemplate.UI
             {
                 var logger = AppHost.Services.GetService<ILogger<App>>();
                 logger?.LogWarning("MainView service missing; skipping window creation.");
-            }
-            else
-            {
-                MainWindow = mainWindow;
-                mainWindow.Show();
-                ShutdownMode = ShutdownMode.OnMainWindowClose;
+                return;
             }
 
-            base.OnStartup(e);
+            application.MainWindow = mainWindow;
+            mainWindow.Show();
+            application.ShutdownMode = ShutdownMode.OnMainWindowClose;
         }
 
-        protected override async void OnExit(ExitEventArgs e)
+        protected override void OnExit(ExitEventArgs e)
+        {
+            UiThreadTaskFactory.Run(OnExitAsync);
+            base.OnExit(e);
+        }
+
+        private static async Task OnExitAsync()
         {
             var logger = AppHost.Services.GetService<Microsoft.Extensions.Logging.ILogger<App>>();
             var vm = AppHost.Services.GetService<MainViewModel>();
@@ -889,9 +899,8 @@ namespace DesktopApplicationTemplate.UI
             var hid = AppHost.Services.GetService<HidViewModel>();
             hid?.Dispose();
 
-            await AppHost.StopAsync();
+            await AppHost.StopAsync().ConfigureAwait(false);
             AppHost.Dispose();
-            base.OnExit(e);
         }
     }
 }
