@@ -14,6 +14,7 @@ using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Tcp;
 using DesktopApplicationTemplate.Models;
+using DesktopApplicationTemplate.UI;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.Views;
@@ -99,8 +100,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
         private ServiceListModel? _service;
         private CancellationTokenSource? _networkLoopCancellation;
         private Task? _networkLoopTask;
-        private readonly SynchronizationContext? _uiContext;
         private static readonly TimeSpan PingTimeout = TimeSpan.FromSeconds(2);
+        private readonly List<Task> _activeClientTasks = new();
+        private readonly object _clientTasksLock = new();
 
         /// <summary>Type of the service associated with these messages.</summary>
         public ServiceType ServiceType { get; private set; } = ServiceType.Tcp;
@@ -186,8 +188,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             MessageTable = messageTable ?? throw new ArgumentNullException(nameof(messageTable));
             _routing = routing ?? throw new ArgumentNullException(nameof(routing));
             _tcpRuntime = tcpRuntime ?? throw new ArgumentNullException(nameof(tcpRuntime));
-            _uiContext = SynchronizationContext.Current;
-
             Messages.CollectionChanged += (_, _) =>
             {
                 OnPropertyChanged(nameof(IncomingData));
@@ -373,7 +373,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                         break;
                     }
 
-                    _ = HandleClientAsync(client, cancellationToken);
+                    var clientTask = HandleClientAsync(client, cancellationToken);
+                    TrackClientTask(clientTask);
                 }
             }
             catch (Exception ex)
@@ -424,11 +425,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                 {
                     var response = Encoding.UTF8.GetString(buffer, 0, bytesRead);
                     Logger?.Log($"Received response from {endpoint}: {response}", LogLevel.Information);
-                    AppendMessage(message, response, endpoint);
+                    await AppendMessageAsync(message, response, endpoint).ConfigureAwait(false);
                 }
                 else
                 {
-                    AppendMessage(message, string.Empty, endpoint);
+                    await AppendMessageAsync(message, string.Empty, endpoint).ConfigureAwait(false);
                     Logger?.Log($"No response received from {endpoint}", LogLevel.Warning);
                 }
             }
@@ -464,7 +465,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
 
                         var incoming = Encoding.UTF8.GetString(buffer, 0, bytesRead);
                         Logger?.Log($"Received message from {endpoint}: {incoming}", LogLevel.Information);
-                        AppendMessage(incoming, _options.OutputMessage, endpoint);
+                        await AppendMessageAsync(incoming, _options.OutputMessage, endpoint).ConfigureAwait(false);
 
                         if (!string.IsNullOrWhiteSpace(_options.OutputMessage))
                         {
@@ -515,17 +516,21 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             }
         }
 
-        private void AppendMessage(string incoming, string outgoing, string endpoint)
+        private Task AppendMessageAsync(string? incoming, string? outgoing, string? endpoint)
         {
-            RunOnUiThread(() =>
+            var incomingMessage = incoming ?? string.Empty;
+            var outgoingMessage = outgoing ?? string.Empty;
+            var destination = endpoint ?? string.Empty;
+
+            return RunOnUiThreadAsync(() =>
             {
                 Messages.Insert(0, new TcpMessageRow
                 {
-                    IncomingMessage = incoming ?? string.Empty,
-                    IncomingIp = endpoint ?? string.Empty,
-                    OutgoingMessage = outgoing ?? string.Empty,
-                    ConnectedService = endpoint ?? string.Empty,
-                    Result = string.IsNullOrWhiteSpace(outgoing) ? string.Empty : outgoing
+                    IncomingMessage = incomingMessage,
+                    IncomingIp = destination,
+                    OutgoingMessage = outgoingMessage,
+                    ConnectedService = destination,
+                    Result = string.IsNullOrWhiteSpace(outgoingMessage) ? string.Empty : outgoingMessage
                 });
 
                 while (Messages.Count > MaxTcpMessageRows)
@@ -533,23 +538,61 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                     Messages.RemoveAt(Messages.Count - 1);
                 }
 
-                MessageTable.AddMessage(incoming, outgoing, endpoint);
+                MessageTable.AddMessage(incomingMessage, outgoingMessage, destination);
 
                 OnPropertyChanged(nameof(IncomingData));
                 OnPropertyChanged(nameof(OutgoingResults));
             });
         }
 
-        private void RunOnUiThread(Action action)
+        private static Task RunOnUiThreadAsync(Action action)
         {
-            if (_uiContext is null || SynchronizationContext.Current == _uiContext)
+            if (action is null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
+
+            if (App.UiThreadTaskFactory is null)
             {
                 action();
+                return Task.CompletedTask;
             }
-            else
+
+            return App.UiThreadTaskFactory.RunAsync(async () =>
             {
-                _uiContext.Post(_ => action(), null);
+                await App.UiThreadTaskFactory.SwitchToMainThreadAsync();
+                action();
+            }).Task;
+        }
+
+        private void TrackClientTask(Task clientTask)
+        {
+            if (clientTask is null)
+            {
+                throw new ArgumentNullException(nameof(clientTask));
             }
+
+            lock (_clientTasksLock)
+            {
+                _activeClientTasks.Add(clientTask);
+            }
+
+            _ = clientTask.ContinueWith(t =>
+            {
+                lock (_clientTasksLock)
+                {
+                    _activeClientTasks.Remove(t);
+                }
+
+                if (t.IsFaulted && Logger is not null)
+                {
+                    var baseException = t.Exception?.GetBaseException();
+                    if (baseException is not null)
+                    {
+                        Logger.Log($"TCP client handler faulted: {baseException.Message}", LogLevel.Error);
+                    }
+                }
+            }, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
         }
 
         private static IPAddress ResolveListenAddress(string host)
