@@ -1,4 +1,4 @@
-namespace DesktopApplicationTemplate.UI.Services
+namespace DesktopApplicationTemplate.Core.Services.Protocols.Scp
 {
     /// <summary>
     /// Configuration options for SCP services.
