@@ -71,7 +71,8 @@ public sealed class TcpRuntime : ITcpRuntime
         options.LastTestMessage = testMessage;
         options.OutputMessage = output;
 
-        _routingService.UpdateMessage(context.ServiceType, context.ServiceName, testMessage);
+        _routingService.UpdateMessage(context.ServiceType, context.ServiceName, testMessage, MessageRoutingDirection.Input);
+        _routingService.UpdateMessage(context.ServiceType, context.ServiceName, output, MessageRoutingDirection.Output);
 
         return new TcpRuntimeState(script, testMessage, output);
     }
@@ -95,7 +96,8 @@ public sealed class TcpRuntime : ITcpRuntime
         context.Options.LastTestMessage = request.TestMessage;
         context.Options.OutputMessage = output;
 
-        _routingService.UpdateMessage(context.ServiceType, context.ServiceName, request.TestMessage);
+        _routingService.UpdateMessage(context.ServiceType, context.ServiceName, request.TestMessage, MessageRoutingDirection.Input);
+        _routingService.UpdateMessage(context.ServiceType, context.ServiceName, output, MessageRoutingDirection.Output);
 
         return new TcpRuntimeState(request.Script, request.TestMessage, output);
     }
@@ -106,7 +108,7 @@ public sealed class TcpRuntime : ITcpRuntime
         var serviceName = context.ServiceName;
 
         if (string.IsNullOrWhiteSpace(options.LastTestMessage) &&
-            _routingService.TryGetMessage(context.ServiceType, serviceName, out var routed))
+            _routingService.TryGetMessage(context.ServiceType, serviceName, MessageRoutingDirection.Input, out var routed))
         {
             return routed ?? string.Empty;
         }
@@ -118,8 +120,9 @@ public sealed class TcpRuntime : ITcpRuntime
 
     private async Task<string> ExecuteScriptInternalAsync(string script, string message, CancellationToken cancellationToken)
     {
+        var rewrittenScript = MessageRoutingScriptTransformer.InjectRoutingLiterals(script, _routingService);
         var globals = new TcpScriptGlobals { Message = message ?? string.Empty };
-        var code = (script ?? string.Empty) + "\nreturn Process(Message);";
+        var code = rewrittenScript + "\nreturn Process(Message);";
         var compiled = CSharpScript.Create<string>(code, ScriptOptions.Default, typeof(TcpScriptGlobals));
         var diagnostics = compiled.Compile();
 

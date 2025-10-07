@@ -37,6 +37,21 @@ public class TcpServiceOptions
     public int Port { get; set; }
 
     /// <summary>
+    /// Remote host name or address used when the service is configured to send messages.
+    /// </summary>
+    public string DestinationHost { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Remote port used when the service is configured to send messages.
+    /// </summary>
+    public int DestinationPort { get; set; }
+
+    /// <summary>
+    /// Gateway associated with the remote destination.
+    /// </summary>
+    public string DestinationGateway { get; set; } = string.Empty;
+
+    /// <summary>
     /// Indicates whether UDP should be used instead of TCP.
     /// </summary>
     public bool UseUdp { get; set; }

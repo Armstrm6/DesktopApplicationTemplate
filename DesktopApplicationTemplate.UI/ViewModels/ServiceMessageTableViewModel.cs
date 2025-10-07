@@ -1,5 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
+using DesktopApplicationTemplate.Models;
+using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Models;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
@@ -18,12 +20,16 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         /// Adds a new message row and inserts it at the top to maintain
         /// descending timestamp order.
         /// </summary>
-        public void AddMessage(string incoming, string outgoing, string destination)
+        public void AddMessage(ServiceType serviceType, string serviceName, string incoming, string outgoing, string destination)
         {
+            var resolvedServiceName = serviceName ?? string.Empty;
+            var incomingDisplay = MessageDisplayFormatter.FormatForService(incoming, true, serviceType, resolvedServiceName);
+            var outgoingDisplay = MessageDisplayFormatter.FormatForService(outgoing, false, serviceType, resolvedServiceName);
+
             Messages.Insert(0, new ServiceMessageRow
             {
-                IncomingMessage = incoming ?? string.Empty,
-                OutgoingMessage = outgoing ?? string.Empty,
+                IncomingMessage = incomingDisplay,
+                OutgoingMessage = outgoingDisplay,
                 Destination = destination ?? string.Empty,
                 Timestamp = DateTime.Now
             });

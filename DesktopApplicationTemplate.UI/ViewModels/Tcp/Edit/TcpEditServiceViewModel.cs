@@ -22,6 +22,9 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
     private string _subnetMask = string.Empty;
     private string _primaryDns = string.Empty;
     private string _alternateDns = string.Empty;
+    private string _destinationHost = string.Empty;
+    private int _destinationPort;
+    private string _destinationGateway = string.Empty;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TcpEditServiceViewModel"/> class.
@@ -47,6 +50,9 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
         SubnetMask = _options.SubnetMask;
         PrimaryDns = _options.PrimaryDns;
         AlternateDns = _options.AlternateDns;
+        DestinationHost = _options.DestinationHost;
+        DestinationPort = _options.DestinationPort;
+        DestinationGateway = _options.DestinationGateway;
         if (ConnectionRole == TcpConnectionRole.Server)
         {
             _serverHost = _options.Host;
@@ -118,7 +124,22 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
     public TcpServiceMode Mode
     {
         get => _mode;
-        set { _mode = value; OnPropertyChanged(); }
+        set
+        {
+            if (_mode == value)
+            {
+                return;
+            }
+
+            _mode = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(IsSendingEnabled));
+            if (!IsSendingEnabled)
+            {
+                ClearErrors(nameof(DestinationHost));
+                ClearErrors(nameof(DestinationPort));
+            }
+        }
     }
 
     /// <summary>
@@ -169,9 +190,88 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
     public TcpServiceMode[] Modes { get; } = (TcpServiceMode[])Enum.GetValues(typeof(TcpServiceMode));
 
     /// <summary>
+    /// Indicates whether the service should expose sending configuration fields.
+    /// </summary>
+    public bool IsSendingEnabled => Mode != TcpServiceMode.Listening;
+
+    /// <summary>
     /// Available TCP connection roles.
     /// </summary>
     public TcpConnectionRole[] ConnectionRoles { get; } = (TcpConnectionRole[])Enum.GetValues(typeof(TcpConnectionRole));
+
+    /// <summary>
+    /// Remote host used when sending messages.
+    /// </summary>
+    public string DestinationHost
+    {
+        get => _destinationHost;
+        set
+        {
+            _destinationHost = value ?? string.Empty;
+            if (IsSendingEnabled)
+            {
+                var error = Rule.ValidateRequired(_destinationHost, "Destination Host");
+                if (error is not null)
+                {
+                    AddError(nameof(DestinationHost), error);
+                }
+                else
+                {
+                    ClearErrors(nameof(DestinationHost));
+                }
+            }
+            else
+            {
+                ClearErrors(nameof(DestinationHost));
+            }
+
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>
+    /// Remote port used when sending messages.
+    /// </summary>
+    public int DestinationPort
+    {
+        get => _destinationPort;
+        set
+        {
+            _destinationPort = value;
+            if (IsSendingEnabled)
+            {
+                var error = Rule.ValidatePort(value);
+                if (error is not null)
+                {
+                    AddError(nameof(DestinationPort), error);
+                }
+                else
+                {
+                    ClearErrors(nameof(DestinationPort));
+                }
+            }
+            else
+            {
+                ClearErrors(nameof(DestinationPort));
+            }
+
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>
+    /// Gateway associated with the remote destination.
+    /// </summary>
+    public string DestinationGateway
+    {
+        get => _destinationGateway;
+        set
+        {
+            _destinationGateway = value ?? string.Empty;
+            ValidateOptionalIpAddress(_destinationGateway, nameof(DestinationGateway), "Destination Gateway");
+            OnPropertyChanged();
+        }
+    }
 
     /// <summary>
     /// Selected TCP connection role.
@@ -227,6 +327,9 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
         _options.AlternateDns = AlternateDns;
         _options.Mode = Mode;
         _options.ConnectionRole = ConnectionRole;
+        _options.DestinationHost = DestinationHost;
+        _options.DestinationPort = DestinationPort;
+        _options.DestinationGateway = DestinationGateway;
         RaiseServiceSaved(_options);
     }
 

@@ -17,6 +17,7 @@ using DesktopApplicationTemplate.Core.Services.Protocols.Mqtt;
 using DesktopApplicationTemplate.Core.Services.Protocols.Scp;
 using DesktopApplicationTemplate.Core.Services.Protocols.Tcp;
 using DesktopApplicationTemplate.Models;
+using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Services;
 using WpfBrush = System.Windows.Media.Brush;
 using WpfBrushes = System.Windows.Media.Brushes;
@@ -393,7 +394,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         private static string NormalizeLatestMessage(string? message)
         {
-            return string.IsNullOrWhiteSpace(message) ? string.Empty : message.Trim();
+            return string.IsNullOrWhiteSpace(message)
+                ? string.Empty
+                : MessageDisplayFormatter.FormatControlCharacters(message.Trim());
         }
 
         private static string NormalizePersistedMessage(string message)
@@ -403,16 +406,19 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 return string.Empty;
             }
 
-            if (message.Length > TimestampLength && message[TimestampLength] == ' ')
+            var trimmed = message.Trim();
+
+            if (trimmed.Length > TimestampLength && trimmed[TimestampLength] == ' ')
             {
-                var timestampCandidate = message.Substring(0, TimestampLength);
+                var timestampCandidate = trimmed.Substring(0, TimestampLength);
                 if (DateTime.TryParseExact(timestampCandidate, TimestampFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out _))
                 {
-                    return message[(TimestampLength + 1)..].Trim();
+                    var withoutTimestamp = trimmed[(TimestampLength + 1)..].Trim();
+                    return MessageDisplayFormatter.FormatControlCharacters(withoutTimestamp);
                 }
             }
 
-            return message.Trim();
+            return MessageDisplayFormatter.FormatControlCharacters(trimmed);
         }
 
         private static WpfBrush ParseBrush(string? color, WpfBrush fallback)
