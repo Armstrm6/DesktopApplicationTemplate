@@ -314,7 +314,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public void AddLog(string message, WpfBrush? color = null, LogLevel level = LogLevel.Debug, bool checkReference = true)
         {
             var brush = color ?? WpfBrushes.Black;
-            var normalizedMessage = UpdateLastInputMessage(message, brush);
+            var normalizedMessage = NormalizeLatestMessage(message);
             var entryMessage = string.IsNullOrEmpty(normalizedMessage)
                 ? $"[{level}]"
                 : $"[{level}] {normalizedMessage}";

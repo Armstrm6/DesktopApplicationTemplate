@@ -39,10 +39,14 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
         public ObservableCollection<TcpMessageRow> Messages { get; } = new();
 
         /// <summary>Incoming data extracted from <see cref="Messages"/>.</summary>
-        public IEnumerable<string> IncomingData => Messages.Select(m => $"{m.IncomingIp}: {m.IncomingMessage}");
+        public IEnumerable<string> IncomingData => Messages
+            .Select(m => m.IncomingMessage)
+            .Where(message => !string.IsNullOrWhiteSpace(message));
 
         /// <summary>Outgoing results extracted from <see cref="Messages"/>.</summary>
-        public IEnumerable<string> OutgoingResults => Messages.Select(m => $"{m.ConnectedService}: {m.Result}");
+        public IEnumerable<string> OutgoingResults => Messages
+            .Select(m => m.Result)
+            .Where(result => !string.IsNullOrWhiteSpace(result));
 
         /// <summary>Collection of log entries.</summary>
         public ObservableCollection<LogEntry> Logs { get; } = new();
@@ -703,7 +707,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
 
                         var incoming = Encoding.UTF8.GetString(buffer, 0, bytesRead);
                         var formattedIncoming = MessageDisplayFormatter.FormatControlCharacters(incoming);
-                        Logger?.Log($"{ServiceName}.LastInputMessage from {endpoint}: {formattedIncoming}", LogLevel.Information);
+                        Logger?.Log($"Incoming message from {endpoint}: {formattedIncoming}", LogLevel.Information);
                         _routing.UpdateMessage(ServiceType, ServiceName, incoming, MessageRoutingDirection.Input);
                         await AppendMessageAsync(incoming, _options.OutputMessage, endpoint).ConfigureAwait(false);
 
@@ -712,7 +716,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                             var response = Encoding.UTF8.GetBytes(_options.OutputMessage);
                             await stream.WriteAsync(response.AsMemory(0, response.Length), cancellationToken).ConfigureAwait(false);
                             var formattedOutgoing = MessageDisplayFormatter.FormatControlCharacters(_options.OutputMessage);
-                            Logger?.Log($"{ServiceName}.LastOutputMessage to {endpoint}: {formattedOutgoing}", LogLevel.Debug);
+                            Logger?.Log($"Outgoing message to {endpoint}: {formattedOutgoing}", LogLevel.Debug);
                             _routing.UpdateMessage(ServiceType, ServiceName, _options.OutputMessage, MessageRoutingDirection.Output);
                         }
                     }
