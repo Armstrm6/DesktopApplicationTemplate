@@ -492,6 +492,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
         private bool TryGetClientSendEndpoint(out TcpEndpoint? endpoint)
         {
             endpoint = null;
+            if (_options.ConnectionRole != TcpConnectionRole.Client)
+            {
+                return false;
+            }
+
             if (_options.Mode is not (TcpServiceMode.Sending or TcpServiceMode.ReceiveAndSend))
             {
                 return false;
@@ -883,7 +888,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
 
         private IEnumerable<string> BuildDestinationDiagnostics()
         {
-            if (_options.Mode is TcpServiceMode.Sending or TcpServiceMode.ReceiveAndSend)
+            if (_options.ConnectionRole == TcpConnectionRole.Client &&
+                _options.Mode is TcpServiceMode.Sending or TcpServiceMode.ReceiveAndSend)
             {
                 var destinationHost = ResolveDestinationHost();
                 var destinationPort = ResolveDestinationPort();
