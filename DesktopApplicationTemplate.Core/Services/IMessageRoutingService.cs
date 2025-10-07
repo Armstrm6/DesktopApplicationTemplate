@@ -25,6 +25,15 @@ public interface IMessageRoutingService
     bool TryGetMessage(ServiceType serviceType, string serviceName, MessageRoutingDirection direction, out string? message);
 
     /// <summary>
+    /// Attempts to retrieve the latest message by service name without requiring the service type.
+    /// </summary>
+    /// <param name="serviceName">The unique name of the service.</param>
+    /// <param name="direction">Specifies whether to return the last input or output message.</param>
+    /// <param name="message">The resolved message, if available.</param>
+    /// <returns><c>true</c> when a message is available; otherwise, <c>false</c>.</returns>
+    bool TryGetMessage(string serviceName, MessageRoutingDirection direction, out string? message);
+
+    /// <summary>
     /// Resolves <c>{ServiceName.LastInputMessage}</c> and <c>{ServiceName.LastOutputMessage}</c> tokens within the provided template.
     /// </summary>
     /// <param name="template">The template containing message tokens.</param>

@@ -4,11 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Media;
+using DesktopApplicationTemplate.UI.Helpers;
+using DesktopApplicationTemplate.Core.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.VisualStudio.Threading;
-using DesktopApplicationTemplate.UI.Helpers;
 
 namespace DesktopApplicationTemplate.UI.ViewModels;
 
@@ -23,6 +24,7 @@ public class ScriptEditorViewModel : ViewModelBase
     private string _outputMessage = string.Empty;
     private Brush _outputBrush = Brushes.Black;
     private string _lastTestMessage = string.Empty;
+    private IMessageRoutingService? _routingService;
 
     public string ScriptText
     {
@@ -83,6 +85,21 @@ public class ScriptEditorViewModel : ViewModelBase
     public event Action<IEnumerable<Diagnostic>>? ErrorsChanged;
     public event Action<string>? OutputGenerated;
 
+    public IMessageRoutingService? RoutingService
+    {
+        get => _routingService;
+        set
+        {
+            if (_routingService == value)
+            {
+                return;
+            }
+
+            _routingService = value;
+            OnPropertyChanged();
+        }
+    }
+
     public ScriptEditorViewModel()
     {
         RunCommand = new AsyncRelayCommand(RunAsync);
@@ -92,7 +109,10 @@ public class ScriptEditorViewModel : ViewModelBase
     private async Task RunAsync()
     {
         var globals = new Globals { Message = TestMessage };
-        var code = ScriptText + "\nreturn Process(Message);";
+        var scriptBody = _routingService is null
+            ? ScriptText
+            : MessageRoutingScriptTransformer.InjectRoutingLiterals(ScriptText, _routingService);
+        var code = scriptBody + "\nreturn Process(Message);";
         var script = CSharpScript.Create<string>(code, ScriptOptions.Default, typeof(Globals));
         var diagnostics = script.Compile();
         await _jtf.SwitchToMainThreadAsync();

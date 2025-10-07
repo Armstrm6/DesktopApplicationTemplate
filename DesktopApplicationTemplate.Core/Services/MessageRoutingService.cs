@@ -74,6 +74,25 @@ public class MessageRoutingService : IMessageRoutingService
     }
 
     /// <inheritdoc />
+    public bool TryGetMessage(string serviceName, MessageRoutingDirection direction, out string? message)
+    {
+        if (string.IsNullOrWhiteSpace(serviceName))
+        {
+            message = null;
+            return false;
+        }
+
+        if (_messagesByName.TryGetValue(serviceName.Trim(), out var entry))
+        {
+            message = entry.Get(direction);
+            return true;
+        }
+
+        message = null;
+        return false;
+    }
+
+    /// <inheritdoc />
     public string ResolveTokens(string template)
     {
         if (template is null)

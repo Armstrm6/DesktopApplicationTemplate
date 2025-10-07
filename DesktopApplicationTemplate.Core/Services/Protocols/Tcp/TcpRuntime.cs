@@ -120,8 +120,9 @@ public sealed class TcpRuntime : ITcpRuntime
 
     private async Task<string> ExecuteScriptInternalAsync(string script, string message, CancellationToken cancellationToken)
     {
+        var rewrittenScript = MessageRoutingScriptTransformer.InjectRoutingLiterals(script, _routingService);
         var globals = new TcpScriptGlobals { Message = message ?? string.Empty };
-        var code = (script ?? string.Empty) + "\nreturn Process(Message);";
+        var code = rewrittenScript + "\nreturn Process(Message);";
         var compiled = CSharpScript.Create<string>(code, ScriptOptions.Default, typeof(TcpScriptGlobals));
         var diagnostics = compiled.Compile();
 

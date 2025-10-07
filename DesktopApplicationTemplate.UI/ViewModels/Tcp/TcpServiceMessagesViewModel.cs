@@ -305,10 +305,13 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             var pingSucceeded = await PingRemoteAsync().ConfigureAwait(false);
             if (!pingSucceeded)
             {
-                if (!string.IsNullOrWhiteSpace(_options.Host))
+                var targetHost = _options.Mode == TcpServiceMode.Listening
+                    ? _options.Host
+                    : ResolveDestinationHost();
+                if (!string.IsNullOrWhiteSpace(targetHost))
                 {
                     var role = _options.ConnectionRole == TcpConnectionRole.Server ? "listener" : "client";
-                    Logger?.Log($"Cannot start TCP {role} because {_options.Host} did not respond to ping.", LogLevel.Error);
+                    Logger?.Log($"Cannot start TCP {role} because {targetHost} did not respond to ping.", LogLevel.Error);
                 }
                 return;
             }
@@ -316,11 +319,36 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             _networkLoopCancellation = new CancellationTokenSource();
             var token = _networkLoopCancellation.Token;
             var protocol = _options.UseUdp ? "UDP" : "TCP";
-            Logger?.Log($"Starting TCP {_options.ConnectionRole} on {_options.Host}:{_options.Port} ({protocol})", LogLevel.Information);
 
-            _networkLoopTask = _options.ConnectionRole == TcpConnectionRole.Server
-                ? RunServerLoopAsync(token)
-                : RunClientLoopAsync(token);
+            var tasks = new List<Task>();
+            if (_options.Mode is TcpServiceMode.Listening or TcpServiceMode.ReceiveAndSend)
+            {
+                Logger?.Log($"Starting TCP listener on {_options.Host}:{_options.Port} ({protocol})", LogLevel.Information);
+                tasks.Add(RunServerLoopAsync(token));
+            }
+
+            if (_options.Mode is TcpServiceMode.Sending or TcpServiceMode.ReceiveAndSend)
+            {
+                var targetHost = ResolveDestinationHost();
+                var targetPort = ResolveDestinationPort();
+                if (string.IsNullOrWhiteSpace(targetHost) || targetPort <= 0)
+                {
+                    Logger?.Log("TCP client configuration incomplete; skipping client startup.", LogLevel.Warning);
+                }
+                else
+                {
+                    Logger?.Log($"Starting TCP client to {targetHost}:{targetPort} ({protocol})", LogLevel.Information);
+                    tasks.Add(RunClientLoopAsync(token));
+                }
+            }
+
+            if (tasks.Count == 0)
+            {
+                Logger?.Log("TCP service is not configured to listen or send; network startup skipped.", LogLevel.Warning);
+                return;
+            }
+
+            _networkLoopTask = Task.WhenAll(tasks);
         }
 
         private void StopNetwork()
@@ -433,9 +461,17 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
 
         private async Task RunClientLoopAsync(CancellationToken cancellationToken)
         {
-            if (string.IsNullOrWhiteSpace(_options.Host))
+            if (_options.Mode == TcpServiceMode.Listening)
             {
-                Logger?.Log("TCP client host is not configured.", LogLevel.Warning);
+                Logger?.Log("TCP client loop skipped because the service is configured for listening only.", LogLevel.Debug);
+                return;
+            }
+
+            var targetHost = ResolveDestinationHost();
+            var targetPort = ResolveDestinationPort();
+            if (string.IsNullOrWhiteSpace(targetHost) || targetPort <= 0)
+            {
+                Logger?.Log("TCP client destination is not configured.", LogLevel.Warning);
                 LogConnectionIssues("TCP client configuration", null, LogLevel.Warning);
                 return;
             }
@@ -443,8 +479,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             try
             {
                 using var client = new TcpClient();
-                await client.ConnectAsync(_options.Host, _options.Port, cancellationToken).ConfigureAwait(false);
-                Logger?.Log($"Connected to {_options.Host}:{_options.Port}", LogLevel.Information);
+                await client.ConnectAsync(targetHost, targetPort, cancellationToken).ConfigureAwait(false);
+                Logger?.Log($"Connected to {targetHost}:{targetPort}", LogLevel.Information);
 
                 using var stream = client.GetStream();
                 var message = _options.InputMessage ?? string.Empty;
@@ -452,12 +488,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                 {
                     var payload = Encoding.UTF8.GetBytes(message);
                     await stream.WriteAsync(payload.AsMemory(0, payload.Length), cancellationToken).ConfigureAwait(false);
-                    Logger?.Log($"Sent message to {_options.Host}:{_options.Port}: {message}", LogLevel.Information);
+                    Logger?.Log($"Sent message to {targetHost}:{targetPort}: {message}", LogLevel.Information);
                 }
 
                 var buffer = new byte[4096];
                 var bytesRead = await stream.ReadAsync(buffer.AsMemory(0, buffer.Length), cancellationToken).ConfigureAwait(false);
-                var endpoint = $"{_options.Host}:{_options.Port}";
+                var endpoint = $"{targetHost}:{targetPort}";
                 if (bytesRead > 0)
                 {
                     var response = Encoding.UTF8.GetString(buffer, 0, bytesRead);
@@ -533,28 +569,35 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
 
         private async Task<bool> PingRemoteAsync()
         {
-            if (string.IsNullOrWhiteSpace(_options.Host) || string.Equals(_options.Host, "0.0.0.0", StringComparison.Ordinal))
+            if (_options.Mode == TcpServiceMode.Listening)
+            {
+                Logger?.Log("Ping skipped because service is not configured to send.", LogLevel.Debug);
+                return true;
+            }
+
+            var targetHost = ResolveDestinationHost();
+            if (string.IsNullOrWhiteSpace(targetHost) || string.Equals(targetHost, "0.0.0.0", StringComparison.Ordinal))
             {
                 Logger?.Log("Ping skipped because no remote host is configured.", LogLevel.Debug);
                 return true;
             }
 
-            if (IsLocalHost(_options.Host))
+            if (IsLocalHost(targetHost))
             {
-                Logger?.Log($"Ping skipped for local host {_options.Host}.", LogLevel.Debug);
+                Logger?.Log($"Ping skipped for local host {targetHost}.", LogLevel.Debug);
                 return true;
             }
 
             try
             {
                 using var ping = new Ping();
-                var reply = await ping.SendPingAsync(_options.Host, (int)PingTimeout.TotalMilliseconds).ConfigureAwait(false);
+                var reply = await ping.SendPingAsync(targetHost, (int)PingTimeout.TotalMilliseconds).ConfigureAwait(false);
                 if (reply.Status == IPStatus.Success)
                 {
-                    Logger?.Log($"Ping to {_options.Host} succeeded in {reply.RoundtripTime} ms", LogLevel.Information);
+                    Logger?.Log($"Ping to {targetHost} succeeded in {reply.RoundtripTime} ms", LogLevel.Information);
                     return true;
                 }
-                Logger?.Log($"Ping to {_options.Host} failed with status {reply.Status}", LogLevel.Error);
+                Logger?.Log($"Ping to {targetHost} failed with status {reply.Status}", LogLevel.Error);
                 LogConnectionIssues("TCP ping", null, LogLevel.Error);
                 return false;
             }
@@ -569,7 +612,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
         {
             var incomingMessage = incoming ?? string.Empty;
             var outgoingMessage = outgoing ?? string.Empty;
-            var destination = endpoint ?? string.Empty;
+            var destination = string.IsNullOrWhiteSpace(outgoingMessage)
+                ? string.Empty
+                : endpoint ?? string.Empty;
             var incomingDisplay = MessageDisplayFormatter.FormatForService(incomingMessage, true, ServiceType, ServiceName);
             var outgoingDisplay = MessageDisplayFormatter.FormatForService(outgoingMessage, false, ServiceType, ServiceName);
 
@@ -877,6 +922,18 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             }
         }
 
+        private string ResolveDestinationHost()
+        {
+            return string.IsNullOrWhiteSpace(_options.DestinationHost)
+                ? _options.Host
+                : _options.DestinationHost;
+        }
+
+        private int ResolveDestinationPort()
+        {
+            return _options.DestinationPort > 0 ? _options.DestinationPort : _options.Port;
+        }
+
         private void ClearLogs()
         {
             Logs.Clear();
@@ -939,6 +996,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             if (!string.IsNullOrWhiteSpace(Script))
                 svm.ScriptText = Script;
             svm.TestMessage = TestMessage;
+            svm.RoutingService = _routing;
 
             void OnOutputGenerated(string output)
             {

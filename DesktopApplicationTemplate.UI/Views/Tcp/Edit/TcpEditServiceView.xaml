@@ -9,6 +9,7 @@
       mc:Ignorable="d">
     <Page.Resources>
         <helpers:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter" />
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     </Page.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <Grid Margin="20">
@@ -26,6 +27,9 @@
                 <RowDefinition Height="Auto" /> <!-- Alternate DNS -->
                 <RowDefinition Height="Auto" /> <!-- Use UDP -->
                 <RowDefinition Height="Auto" /> <!-- Mode -->
+                <RowDefinition Height="Auto" /> <!-- Destination Host -->
+                <RowDefinition Height="Auto" /> <!-- Destination Port -->
+                <RowDefinition Height="Auto" /> <!-- Destination Gateway -->
                 <RowDefinition Height="Auto" /> <!-- Buttons -->
             </Grid.RowDefinitions>
 
@@ -133,7 +137,61 @@
             <TextBlock Grid.Row="8" Grid.Column="0" Text="Mode" Style="{StaticResource FormLabel}"/>
             <ComboBox Grid.Row="8" Grid.Column="1" ItemsSource="{Binding Modes}" SelectedItem="{Binding Mode}" Style="{StaticResource FormField}"/>
 
-            <views:EditorButtonBar Grid.Row="9" Grid.ColumnSpan="2"
+            <TextBlock Grid.Row="9" Grid.Column="0" Text="Destination Host" Style="{StaticResource FormLabel}"
+                       Visibility="{Binding IsSendingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            <Grid Grid.Row="9" Grid.Column="1" Visibility="{Binding IsSendingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBox x:Name="DestinationHostBox" Text="{Binding DestinationHost, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
+                    <TextBox.Style>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource FormField}">
+                            <Style.Triggers>
+                                <Trigger Property="Validation.HasError" Value="True">
+                                    <Setter Property="ToolTip" Value="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Self}}"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
+                <TextBlock Text="10.0.0.50" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0" VerticalAlignment="Center"
+                           Visibility="{Binding Text, ElementName=DestinationHostBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+            </Grid>
+
+            <TextBlock Grid.Row="10" Grid.Column="0" Text="Destination Port" Style="{StaticResource FormLabel}"
+                       Visibility="{Binding IsSendingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            <Grid Grid.Row="10" Grid.Column="1" Visibility="{Binding IsSendingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBox x:Name="DestinationPortBox" Text="{Binding DestinationPort, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
+                    <TextBox.Style>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource FormField}">
+                            <Style.Triggers>
+                                <Trigger Property="Validation.HasError" Value="True">
+                                    <Setter Property="ToolTip" Value="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Self}}"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
+                <TextBlock Text="5021" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0" VerticalAlignment="Center"
+                           Visibility="{Binding Text, ElementName=DestinationPortBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+            </Grid>
+
+            <TextBlock Grid.Row="11" Grid.Column="0" Text="Destination Gateway" Style="{StaticResource FormLabel}"
+                       Visibility="{Binding IsSendingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            <Grid Grid.Row="11" Grid.Column="1" Visibility="{Binding IsSendingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBox x:Name="DestinationGatewayBox" Text="{Binding DestinationGateway, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
+                    <TextBox.Style>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource FormField}">
+                            <Style.Triggers>
+                                <Trigger Property="Validation.HasError" Value="True">
+                                    <Setter Property="ToolTip" Value="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Self}}"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
+                <TextBlock Text="192.168.1.1" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0" VerticalAlignment="Center"
+                           Visibility="{Binding Text, ElementName=DestinationGatewayBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+            </Grid>
+
+            <views:EditorButtonBar Grid.Row="12" Grid.ColumnSpan="2"
                                    SaveCommand="{Binding SaveCommand}"
                                    CancelCommand="{Binding CancelCommand}"
                                    SaveAutomationName="Save TCP Service"
