@@ -13,6 +13,15 @@ public enum TcpServiceMode
 }
 
 /// <summary>
+/// Indicates whether the TCP service should behave as a client or server.
+/// </summary>
+public enum TcpConnectionRole
+{
+    Server,
+    Client
+}
+
+/// <summary>
 /// Configuration options for creating a TCP service.
 /// </summary>
 public class TcpServiceOptions
@@ -33,9 +42,29 @@ public class TcpServiceOptions
     public bool UseUdp { get; set; }
 
     /// <summary>
+    /// Subnet mask associated with the connection.
+    /// </summary>
+    public string SubnetMask { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Primary DNS server used for resolving host names.
+    /// </summary>
+    public string PrimaryDns { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Alternate DNS server used for resolving host names.
+    /// </summary>
+    public string AlternateDns { get; set; } = string.Empty;
+
+    /// <summary>
     /// Operating mode for the service.
     /// </summary>
     public TcpServiceMode Mode { get; set; } = TcpServiceMode.Listening;
+
+    /// <summary>
+    /// Role of the TCP connection (client or server).
+    /// </summary>
+    public TcpConnectionRole ConnectionRole { get; set; } = TcpConnectionRole.Server;
 
     /// <summary>
     /// Sample message used for testing script transformations.

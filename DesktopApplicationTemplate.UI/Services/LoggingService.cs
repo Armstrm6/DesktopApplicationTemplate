@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.Core.Services;
@@ -13,6 +14,7 @@ namespace DesktopApplicationTemplate.UI.Services
         private readonly IRichTextLogger _richTextLogger;
         private readonly string _logFilePath;
         private readonly List<LogEntry> _logEntries = new();
+        private readonly SemaphoreSlim _fileWriteLock = new(1, 1);
 
         private LogLevel _minimumLevel = LogLevel.Debug;
         public LogLevel MinimumLevel
@@ -76,7 +78,7 @@ namespace DesktopApplicationTemplate.UI.Services
 
             LogAdded?.Invoke(entry);
 
-            _ = WriteToFileAsync(entry.Message + Environment.NewLine);
+            _ = AppendToLogFileAsync(entry.Message + Environment.NewLine);
         }
 
         private static string LevelToColor(LogLevel level) => level switch
@@ -149,19 +151,21 @@ namespace DesktopApplicationTemplate.UI.Services
             _ = _richTextLogger.SetEntriesAsync(_logEntries.Where(e => e.Level >= MinimumLevel));
         }
 
-        private Task WriteToFileAsync(string text)
+        private async Task AppendToLogFileAsync(string text)
         {
-            return Task.Run(async () =>
+            try
             {
-                try
-                {
-                    await File.AppendAllTextAsync(_logFilePath, text).ConfigureAwait(false);
-                }
-                catch
-                {
-                    // ignore logging errors
-                }
-            });
+                await _fileWriteLock.WaitAsync().ConfigureAwait(false);
+                await File.AppendAllTextAsync(_logFilePath, text).ConfigureAwait(false);
+            }
+            catch
+            {
+                // ignore logging errors
+            }
+            finally
+            {
+                _fileWriteLock.Release();
+            }
         }
     }
 }

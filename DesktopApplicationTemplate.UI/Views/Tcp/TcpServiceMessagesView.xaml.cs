@@ -1,5 +1,5 @@
+using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
-using System;
 using System.Windows.Controls;
 using DesktopApplicationTemplate.UI.ViewModels.Tcp;
 using DesktopApplicationTemplate.Models;
@@ -11,10 +11,11 @@ namespace DesktopApplicationTemplate.UI.Views.Tcp
     /// </summary>
     public partial class TcpServiceMessagesView : Page, IServiceLogHost
     {
-        public TcpServiceMessagesView(TcpServiceMessagesViewModel viewModel)
+        public TcpServiceMessagesView(TcpServiceMessagesViewModel viewModel, ILoggingService logger)
         {
             InitializeComponent();
             DataContext = viewModel;
+            viewModel.Logger = logger;
         }
 
         public void SetServiceContext(ServiceListModel service)

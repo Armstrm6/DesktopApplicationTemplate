@@ -140,7 +140,7 @@ namespace DesktopApplicationTemplate.UI
                 .Build();
         }
 
-        private void ConfigureServices(IConfiguration configuration, IServiceCollection services)
+        private static void ConfigureServices(IConfiguration configuration, IServiceCollection services)
         {
             services.AddServiceModules();
             services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Mqtt, (sp, _) => new MqttEditServiceHandler(() => sp.GetRequiredService<MainView>(), () => sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<MqttEditServiceHandler>>()));
@@ -163,6 +163,7 @@ namespace DesktopApplicationTemplate.UI
                         handlers[type] = handler;
                     }
                 }
+
                 return handlers;
             });
             services.AddSingleton<MainView>();
@@ -212,8 +213,7 @@ namespace DesktopApplicationTemplate.UI
                 var catalog = sp.GetRequiredService<IServiceCatalog>();
                 return new ServiceUiRegistry<ServiceListModel, Page>(
                     catalog,
-                    new[]
-                    {
+                    [
                         BuildCsvRegistration(),
                         BuildFileObserverRegistration(),
                         BuildHeartbeatRegistration(),
@@ -223,7 +223,7 @@ namespace DesktopApplicationTemplate.UI
                         BuildScpRegistration(),
                         BuildTcpRegistration(),
                         BuildFtpRegistration(),
-                    });
+                    ]);
             });
             services.AddTransient<SplashWindow>();
             services.AddTransient<CreateServicePage>();
@@ -807,8 +807,7 @@ namespace DesktopApplicationTemplate.UI
             _ = OnAppDomainUnhandledExceptionAsync(sender, e);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD001:Use SwitchToMainThreadAsync to switch to the UI thread", Justification = "Dispatcher is sufficient for shutdown")]
-        internal async Task OnAppDomainUnhandledExceptionAsync(object? sender, UnhandledExceptionEventArgs e)
+        internal static async Task OnAppDomainUnhandledExceptionAsync(object? sender, UnhandledExceptionEventArgs e)
         {
             var logger = AppHost.Services.GetService<ILogger<App>>();
             if (e.ExceptionObject is Exception ex)
@@ -821,16 +820,36 @@ namespace DesktopApplicationTemplate.UI
             }
 
             KeyboardSimulator.Reset();
-            if (Current is not null)
+            if (UiThreadTaskFactory is null)
             {
-                await Current.Dispatcher.InvokeAsync(() => Current.Shutdown());
+                logger?.LogWarning("Joinable task factory unavailable during domain exception; scheduling shutdown on dispatcher context");
+                if (Current?.Dispatcher is { } dispatcher)
+                {
+                    var dispatcherContext = new DispatcherSynchronizationContext(dispatcher);
+                    dispatcherContext.Post(_ => Current?.Shutdown(), null);
+                }
+                else
+                {
+                    Current?.Shutdown();
+                }
+
+                return;
             }
+
+            await UiThreadTaskFactory.SwitchToMainThreadAsync();
+            Current?.Shutdown();
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Startup event")]
-        protected override async void OnStartup(StartupEventArgs e)
+        protected override void OnStartup(StartupEventArgs e)
         {
-            ShutdownMode = ShutdownMode.OnExplicitShutdown;
+            UiThreadTaskFactory.Run(() => OnStartupAsync());
+            base.OnStartup(e);
+        }
+
+        private static async Task OnStartupAsync()
+        {
+            var application = Current ?? throw new InvalidOperationException("Application.Current is unavailable.");
+            application.ShutdownMode = ShutdownMode.OnExplicitShutdown;
             await AppHost.StartAsync();
 
             var settings = AppHost.Services.GetRequiredService<SettingsViewModel>();
@@ -856,19 +875,21 @@ namespace DesktopApplicationTemplate.UI
             {
                 var logger = AppHost.Services.GetService<ILogger<App>>();
                 logger?.LogWarning("MainView service missing; skipping window creation.");
-            }
-            else
-            {
-                MainWindow = mainWindow;
-                mainWindow.Show();
-                ShutdownMode = ShutdownMode.OnMainWindowClose;
+                return;
             }
 
-            base.OnStartup(e);
+            application.MainWindow = mainWindow;
+            mainWindow.Show();
+            application.ShutdownMode = ShutdownMode.OnMainWindowClose;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Application shutdown")]
-        protected override async void OnExit(ExitEventArgs e)
+        protected override void OnExit(ExitEventArgs e)
+        {
+            UiThreadTaskFactory.Run(OnExitAsync);
+            base.OnExit(e);
+        }
+
+        private static async Task OnExitAsync()
         {
             var logger = AppHost.Services.GetService<Microsoft.Extensions.Logging.ILogger<App>>();
             var vm = AppHost.Services.GetService<MainViewModel>();
@@ -884,9 +905,8 @@ namespace DesktopApplicationTemplate.UI
             var hid = AppHost.Services.GetService<HidViewModel>();
             hid?.Dispose();
 
-            await AppHost.StopAsync();
+            await AppHost.StopAsync().ConfigureAwait(false);
             AppHost.Dispose();
-            base.OnExit(e);
         }
     }
 }

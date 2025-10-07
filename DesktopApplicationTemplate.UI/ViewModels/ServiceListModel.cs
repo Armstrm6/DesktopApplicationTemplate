@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
+using System.Linq;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Windows.Controls;
@@ -15,6 +18,7 @@ using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Services;
 using WpfBrush = System.Windows.Media.Brush;
 using WpfBrushes = System.Windows.Media.Brushes;
+using WpfBrushConverter = System.Windows.Media.BrushConverter;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -28,6 +32,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
     public class ServiceListModel : ViewModelBase
     {
+        internal const int MaxLogEntries = 200;
+
         public string DisplayName { get; set; } = string.Empty;
         public ServiceType Type { get; set; }
         [JsonIgnore] public Page? Page { get; set; }
@@ -54,8 +60,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private int _executionCount;
         private TimeSpan _lastExecutionDuration;
         private string _lastInputMessage = string.Empty;
+        private WpfBrush _lastInputBrush = WpfBrushes.Black;
         private int _incomingMessageCount;
         private int _outgoingMessageCount;
+        private static readonly WpfBrushConverter BrushConverter = new();
+        private const string TimestampFormat = "MM.dd.yyyy - HH:mm:ss.fffffff";
+        private const int TimestampLength = 29;
 
         /// <summary>
         /// Gets the average execution time in milliseconds for operations performed by this service.
@@ -123,6 +133,19 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             {
                 _lastInputMessage = value;
                 OnPropertyChanged();
+            }
+        }
+
+        public WpfBrush LastInputBrush
+        {
+            get => _lastInputBrush;
+            private set
+            {
+                if (!Equals(_lastInputBrush, value))
+                {
+                    _lastInputBrush = value;
+                    OnPropertyChanged();
+                }
             }
         }
 
@@ -249,10 +272,16 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public void AddLog(string message, WpfBrush? color = null, LogLevel level = LogLevel.Debug, bool checkReference = true)
         {
-            LastInputMessage = message;
-            var ts = DateTime.Now.ToString("MM.dd.yyyy - HH:mm:ss.fffffff");
+            var normalizedMessage = NormalizeLatestMessage(message);
+            LastInputMessage = normalizedMessage;
+            LastInputBrush = color ?? WpfBrushes.Black;
+            var ts = DateTime.Now.ToString(TimestampFormat, CultureInfo.InvariantCulture);
             var entry = new LogEntry { Message = $"{ts} {message}", Color = (color ?? WpfBrushes.Black).ToString(), Level = level };
             Logs.Insert(0, entry);
+            if (Logs.Count > MaxLogEntries)
+            {
+                Logs.RemoveAt(Logs.Count - 1);
+            }
             LogAdded?.Invoke(this, entry);
             if (checkReference)
             {
@@ -261,6 +290,18 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             if (checkReference)
             {
                 HandleReference(message, color ?? WpfBrushes.Black, level);
+            }
+        }
+
+        public void LoadPersistedLogs(IEnumerable<LogEntry> entries)
+        {
+            var materialized = entries?.Where(e => !string.IsNullOrWhiteSpace(e.Message)).Take(MaxLogEntries).ToList() ?? new List<LogEntry>();
+            Logs = new ObservableCollection<LogEntry>(materialized);
+            OnPropertyChanged(nameof(Logs));
+            if (Logs.FirstOrDefault() is { } latest)
+            {
+                LastInputMessage = NormalizePersistedMessage(latest.Message);
+                LastInputBrush = ParseBrush(latest.Color);
             }
         }
 
@@ -332,6 +373,54 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
 
             return false;
+        }
+
+        private static string NormalizeLatestMessage(string? message)
+        {
+            return string.IsNullOrWhiteSpace(message) ? string.Empty : message.Trim();
+        }
+
+        private static string NormalizePersistedMessage(string message)
+        {
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                return string.Empty;
+            }
+
+            if (message.Length > TimestampLength && message[TimestampLength] == ' ')
+            {
+                var timestampCandidate = message.Substring(0, TimestampLength);
+                if (DateTime.TryParseExact(timestampCandidate, TimestampFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out _))
+                {
+                    return message[(TimestampLength + 1)..].Trim();
+                }
+            }
+
+            return message.Trim();
+        }
+
+        private static WpfBrush ParseBrush(string? color)
+        {
+            if (string.IsNullOrWhiteSpace(color))
+            {
+                return WpfBrushes.Black;
+            }
+
+            try
+            {
+                if (BrushConverter.ConvertFromString(color) is WpfBrush parsed)
+                {
+                    return parsed;
+                }
+            }
+            catch (FormatException)
+            {
+            }
+            catch (NotSupportedException)
+            {
+            }
+
+            return WpfBrushes.Black;
         }
 
         public void SetColorsByType()
