@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -18,14 +19,16 @@ using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Models;
+using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Views;
+using DesktopApplicationTemplate.Core.Models;
 
 namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
 {
     /// <summary>
     /// View model for displaying TCP service messages and associated logs.
     /// </summary>
-    public class TcpServiceMessagesViewModel : ViewModelBase, ILoggingViewModel
+    public class TcpServiceMessagesViewModel : ViewModelBase, ILoggingViewModel, INetworkAwareViewModel
     {
         private LogLevel _logLevelFilter = LogLevel.Debug;
 
@@ -105,6 +108,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
         private readonly List<Task> _activeClientTasks = new();
         private readonly object _clientTasksLock = new();
         private bool _isApplicationExitHooked;
+        private NetworkConfiguration _networkConfiguration = new();
 
         /// <summary>Type of the service associated with these messages.</summary>
         public ServiceType ServiceType { get; private set; } = ServiceType.Tcp;
@@ -227,12 +231,62 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                 : _options.Script;
             OutputMessage = _options.OutputMessage;
             _runtimeContext = new TcpRuntimeContext(ServiceType, ServiceName, _options, ScriptEditorViewModel.DefaultScript);
+            ApplyNetworkConfiguration(restartIfActive: false);
             Messages.Clear();
             MessageTable.Messages.Clear();
             OnPropertyChanged(nameof(IncomingData));
             OnPropertyChanged(nameof(OutgoingResults));
             _ = InitializeRuntimeAsync();
             if (_service.IsActive)
+            {
+                _ = StartNetworkAsync();
+            }
+        }
+
+        /// <inheritdoc />
+        public void UpdateNetworkConfiguration(NetworkConfiguration configuration)
+        {
+            if (configuration is null)
+            {
+                throw new ArgumentNullException(nameof(configuration));
+            }
+
+            _networkConfiguration = configuration;
+            ApplyNetworkConfiguration(restartIfActive: true);
+        }
+
+        private void ApplyNetworkConfiguration(bool restartIfActive)
+        {
+            if (_options is null)
+            {
+                return;
+            }
+
+            var config = _networkConfiguration ?? new NetworkConfiguration();
+
+            if (!string.IsNullOrWhiteSpace(config.IpAddress))
+            {
+                _options.Host = config.IpAddress;
+            }
+
+            _options.SubnetMask = config.SubnetMask ?? string.Empty;
+            _options.PrimaryDns = config.DnsPrimary ?? string.Empty;
+            _options.AlternateDns = config.DnsSecondary ?? string.Empty;
+
+            if (string.IsNullOrWhiteSpace(_options.DestinationGateway))
+            {
+                _options.DestinationGateway = config.Gateway ?? string.Empty;
+            }
+
+            UpdateNetworkSettings(
+                _options.Host,
+                _options.Port > 0 ? _options.Port.ToString(CultureInfo.InvariantCulture) : string.Empty,
+                _options.DestinationHost,
+                _options.DestinationGateway,
+                _options.DestinationPort > 0 ? _options.DestinationPort.ToString(CultureInfo.InvariantCulture) : string.Empty,
+                _options.UseUdp);
+
+            if (restartIfActive && _service?.IsActive == true)
             {
                 _ = StartNetworkAsync();
             }
