@@ -31,7 +31,6 @@ public class TcpEditServiceHandler : IEditServiceHandler
     {
         var mainView = _getMainView();
         var mainViewModel = _getMainViewModel();
-        var tcpPage = mainView.GetOrCreateServicePage(service);
         var options = service.TcpOptions ?? new TcpServiceOptions();
         var vm = _services.GetRequiredService<TcpEditServiceViewModel>();
         vm.ServiceType = service.Type;
@@ -51,14 +50,22 @@ public class TcpEditServiceHandler : IEditServiceHandler
             service.DisplayName = trimmed;
             service.Type = vm.ServiceType;
             service.TcpOptions = opts;
-            if (tcpPage != null)
-                mainView.ShowPage(tcpPage);
+            var page = mainView.GetOrCreateServicePage(service);
+            if (page != null)
+            {
+                mainView.ShowPage(page);
+            }
+            mainViewModel.SelectedService = service;
             _ = mainViewModel.SaveServicesAsync();
         };
         vm.EditCancelled += () =>
         {
-            if (tcpPage != null)
-                mainView.ShowPage(tcpPage);
+            var page = mainView.GetOrCreateServicePage(service);
+            if (page != null)
+            {
+                mainView.ShowPage(page);
+            }
+            mainViewModel.SelectedService = service;
         };
         mainView.ShowPage(editView);
         _logger?.LogDebug("Edit workflow completed for {Name}", service.DisplayName);

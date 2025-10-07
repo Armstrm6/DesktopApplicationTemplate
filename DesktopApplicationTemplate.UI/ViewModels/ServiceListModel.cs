@@ -450,9 +450,15 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         private static string NormalizeLatestMessage(string? message)
         {
-            return string.IsNullOrWhiteSpace(message)
-                ? string.Empty
-                : MessageDisplayFormatter.FormatControlCharacters(message.Trim());
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                return string.Empty;
+            }
+
+            var trimmed = StripBracketedTimestamp(message.Trim());
+            trimmed = StripLogLevel(trimmed);
+
+            return MessageDisplayFormatter.FormatControlCharacters(trimmed);
         }
 
         private static string NormalizePersistedMessage(string message)
@@ -462,31 +468,69 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 return string.Empty;
             }
 
-            var trimmed = message.Trim();
-
-            if (trimmed.Length > TimestampLength && trimmed[TimestampLength] == ' ')
-            {
-                var timestampCandidate = trimmed.Substring(0, TimestampLength);
-                if (DateTime.TryParseExact(timestampCandidate, TimestampFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out _))
-                {
-                    trimmed = trimmed[(TimestampLength + 1)..].Trim();
-                }
-            }
-
-            if (trimmed.StartsWith("[", StringComparison.Ordinal))
-            {
-                var levelEnd = trimmed.IndexOf(']');
-                if (levelEnd > 0)
-                {
-                    var candidate = trimmed.Substring(1, levelEnd - 1);
-                    if (Enum.TryParse(candidate, out LogLevel _))
-                    {
-                        trimmed = trimmed[(levelEnd + 1)..].TrimStart();
-                    }
-                }
-            }
+            var trimmed = StripPersistedTimestamp(message.Trim());
+            trimmed = StripBracketedTimestamp(trimmed);
+            trimmed = StripLogLevel(trimmed);
 
             return MessageDisplayFormatter.FormatControlCharacters(trimmed);
+        }
+
+        private static string StripPersistedTimestamp(string message)
+        {
+            if (message.Length > TimestampLength && message[TimestampLength] == ' ')
+            {
+                var timestampCandidate = message.Substring(0, TimestampLength);
+                if (DateTime.TryParseExact(timestampCandidate, TimestampFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out _))
+                {
+                    return message[(TimestampLength + 1)..].TrimStart();
+                }
+            }
+
+            return message;
+        }
+
+        private static string StripBracketedTimestamp(string message)
+        {
+            if (message.Length == 0 || message[0] != '[')
+            {
+                return message;
+            }
+
+            var endIndex = message.IndexOf(']');
+            if (endIndex <= 1)
+            {
+                return message;
+            }
+
+            var candidate = message.Substring(1, endIndex - 1);
+            if (TimeSpan.TryParseExact(candidate, "hh\\:mm\\:ss", CultureInfo.InvariantCulture, out _))
+            {
+                return message[(endIndex + 1)..].TrimStart();
+            }
+
+            return message;
+        }
+
+        private static string StripLogLevel(string message)
+        {
+            if (!message.StartsWith("[", StringComparison.Ordinal))
+            {
+                return message;
+            }
+
+            var levelEnd = message.IndexOf(']');
+            if (levelEnd <= 0)
+            {
+                return message;
+            }
+
+            var candidate = message.Substring(1, levelEnd - 1);
+            if (Enum.TryParse(candidate, out LogLevel _))
+            {
+                return message[(levelEnd + 1)..].TrimStart();
+            }
+
+            return message;
         }
 
         private static WpfBrush ParseBrush(string? color, WpfBrush fallback)

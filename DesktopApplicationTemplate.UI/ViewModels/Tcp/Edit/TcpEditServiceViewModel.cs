@@ -25,6 +25,7 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
     private string _destinationHost = string.Empty;
     private int _destinationPort;
     private string _destinationGateway = string.Empty;
+    private TcpConnectionRole _previousListeningRole = TcpConnectionRole.Server;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TcpEditServiceViewModel"/> class.
@@ -62,6 +63,7 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
             _clientHost = _options.Host;
         }
         _suppressRoleHostUpdate = false;
+        _previousListeningRole = ConnectionRole == TcpConnectionRole.Client ? TcpConnectionRole.Server : ConnectionRole;
     }
 
 
@@ -134,6 +136,9 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
             _mode = value;
             OnPropertyChanged();
             OnPropertyChanged(nameof(IsSendingEnabled));
+            OnPropertyChanged(nameof(ShowsListeningConfiguration));
+            OnPropertyChanged(nameof(ShowsNetworkProfileConfiguration));
+            EnsureConnectionRoleForMode();
             UpdateDestinationValidationState();
         }
     }
@@ -196,6 +201,16 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
     public bool IsSendingEnabled => RequiresDestinationConfiguration;
 
     /// <summary>
+    /// Indicates whether listening-related configuration should be visible.
+    /// </summary>
+    public bool ShowsListeningConfiguration => Mode != TcpServiceMode.Sending;
+
+    /// <summary>
+    /// Indicates whether network profile fields should be visible for sending scenarios.
+    /// </summary>
+    public bool ShowsNetworkProfileConfiguration => Mode == TcpServiceMode.Sending;
+
+    /// <summary>
     /// Available TCP connection roles.
     /// </summary>
     public TcpConnectionRole[] ConnectionRoles { get; } = (TcpConnectionRole[])Enum.GetValues(typeof(TcpConnectionRole));
@@ -255,7 +270,17 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
                 return;
             }
 
+            if (Mode == TcpServiceMode.Sending && value != TcpConnectionRole.Client)
+            {
+                return;
+            }
+
             _connectionRole = value;
+            if (Mode != TcpServiceMode.Sending)
+            {
+                _previousListeningRole = value;
+            }
+
             OnPropertyChanged();
             OnPropertyChanged(nameof(IsSendingEnabled));
             UpdateDestinationValidationState();
@@ -279,6 +304,31 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
                 Host = _clientHost;
             }
             Logger?.Log($"TCP connection role set to {_connectionRole}", LogLevel.Debug);
+        }
+    }
+
+    private void EnsureConnectionRoleForMode()
+    {
+        if (Mode == TcpServiceMode.Sending)
+        {
+            if (_connectionRole != TcpConnectionRole.Client)
+            {
+                var previous = _connectionRole;
+                _previousListeningRole = previous == TcpConnectionRole.Client ? TcpConnectionRole.Server : previous;
+                _connectionRole = TcpConnectionRole.Client;
+                OnPropertyChanged(nameof(ConnectionRole));
+                OnPropertyChanged(nameof(IsSendingEnabled));
+                UpdateDestinationValidationState();
+                Host = _clientHost;
+            }
+        }
+        else if (_connectionRole == TcpConnectionRole.Client && _previousListeningRole != TcpConnectionRole.Client)
+        {
+            _connectionRole = _previousListeningRole;
+            OnPropertyChanged(nameof(ConnectionRole));
+            OnPropertyChanged(nameof(IsSendingEnabled));
+            UpdateDestinationValidationState();
+            Host = _connectionRole == TcpConnectionRole.Server ? _serverHost : _clientHost;
         }
     }
 

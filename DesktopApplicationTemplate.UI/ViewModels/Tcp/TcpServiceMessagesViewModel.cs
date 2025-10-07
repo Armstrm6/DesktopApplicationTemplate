@@ -237,7 +237,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             _runtimeContext = new TcpRuntimeContext(ServiceType, ServiceName, _options, ScriptEditorViewModel.DefaultScript);
             ApplyNetworkConfiguration(restartIfActive: false);
             Messages.Clear();
-            MessageTable.Messages.Clear();
+            MessageTable.SetActiveService(ServiceType, ServiceName);
             OnPropertyChanged(nameof(IncomingData));
             OnPropertyChanged(nameof(OutgoingResults));
             _ = InitializeRuntimeAsync();
