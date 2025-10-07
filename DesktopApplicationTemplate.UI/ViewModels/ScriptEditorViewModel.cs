@@ -25,6 +25,7 @@ public class ScriptEditorViewModel : ViewModelBase
     private Brush _outputBrush = Brushes.Black;
     private string _lastTestMessage = string.Empty;
     private IMessageRoutingService? _routingService;
+    private string? _routingServiceName;
 
     public string ScriptText
     {
@@ -100,6 +101,21 @@ public class ScriptEditorViewModel : ViewModelBase
         }
     }
 
+    public string? RoutingServiceName
+    {
+        get => _routingServiceName;
+        set
+        {
+            if (_routingServiceName == value)
+            {
+                return;
+            }
+
+            _routingServiceName = value;
+            OnPropertyChanged();
+        }
+    }
+
     public ScriptEditorViewModel()
     {
         RunCommand = new AsyncRelayCommand(RunAsync);
@@ -111,7 +127,7 @@ public class ScriptEditorViewModel : ViewModelBase
         var globals = new Globals { Message = TestMessage };
         var scriptBody = _routingService is null
             ? ScriptText
-            : MessageRoutingScriptTransformer.InjectRoutingLiterals(ScriptText, _routingService);
+            : MessageRoutingScriptTransformer.InjectRoutingLiterals(ScriptText, _routingService, RoutingServiceName);
         var code = scriptBody + "\nreturn Process(Message);";
         var script = CSharpScript.Create<string>(code, ScriptOptions.Default, typeof(Globals));
         var diagnostics = script.Compile();

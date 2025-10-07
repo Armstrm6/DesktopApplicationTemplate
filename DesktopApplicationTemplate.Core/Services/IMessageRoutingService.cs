@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using DesktopApplicationTemplate.Models;
 
 namespace DesktopApplicationTemplate.Core.Services;
@@ -34,9 +35,34 @@ public interface IMessageRoutingService
     bool TryGetMessage(string serviceName, MessageRoutingDirection direction, out string? message);
 
     /// <summary>
-    /// Resolves <c>{ServiceName.LastInputMessage}</c> and <c>{ServiceName.LastOutputMessage}</c> tokens within the provided template.
+    /// Replaces <c>{ServiceName.LastInputMessage}</c> and <c>{ServiceName.LastOutputMessage}</c> tokens within the provided template.
     /// </summary>
     /// <param name="template">The template containing message tokens.</param>
+    /// <param name="referencingServiceName">
+    /// Optional service name that owns the template. When provided, routing dependencies are refreshed to
+    /// reflect the referenced services discovered in <paramref name="template"/>.
+    /// </param>
     /// <returns>The template with tokens replaced by their corresponding messages.</returns>
-    string ResolveTokens(string template);
+    string ResolveTokens(string template, string? referencingServiceName = null);
+
+    /// <summary>
+    /// Updates the routing dependencies for the specified service.
+    /// </summary>
+    /// <param name="referencingServiceName">The service that references other routed messages.</param>
+    /// <param name="references">The set of services and message directions referenced by the service.</param>
+    void SetReferences(string referencingServiceName, IEnumerable<MessageRoutingReference> references);
+
+    /// <summary>
+    /// Gets the services that currently reference the specified service's routed messages.
+    /// </summary>
+    /// <param name="serviceName">The name of the service being referenced.</param>
+    /// <returns>A read-only collection of service references formatted as <c>ServiceName.Property</c>.</returns>
+    IReadOnlyCollection<string> GetReferencingServices(string serviceName);
 }
+
+/// <summary>
+/// Describes a routed message dependency from one service to another.
+/// </summary>
+/// <param name="ServiceName">The referenced service name.</param>
+/// <param name="Direction">The message direction requested from the referenced service.</param>
+public readonly record struct MessageRoutingReference(string ServiceName, MessageRoutingDirection Direction);

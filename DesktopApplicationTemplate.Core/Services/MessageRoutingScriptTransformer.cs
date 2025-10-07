@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -19,7 +20,7 @@ public static class MessageRoutingScriptTransformer
     /// <param name="script">The user provided script.</param>
     /// <param name="routingService">Routing service supplying the latest message snapshots.</param>
     /// <returns>The rewritten script text.</returns>
-    public static string InjectRoutingLiterals(string? script, IMessageRoutingService routingService)
+    public static string InjectRoutingLiterals(string? script, IMessageRoutingService routingService, string? referencingServiceName = null)
     {
         if (string.IsNullOrWhiteSpace(script))
         {
@@ -34,17 +35,24 @@ public static class MessageRoutingScriptTransformer
         var syntaxTree = CSharpSyntaxTree.ParseText(script, ScriptParseOptions);
         var rewriter = new RoutingTokenRewriter(routingService);
         var rewritten = rewriter.Visit(syntaxTree.GetRoot());
+        if (!string.IsNullOrWhiteSpace(referencingServiceName))
+        {
+            routingService.SetReferences(referencingServiceName, rewriter.References);
+        }
         return rewritten.ToFullString();
     }
 
     private sealed class RoutingTokenRewriter : CSharpSyntaxRewriter
     {
         private readonly IMessageRoutingService _routingService;
+        private readonly List<MessageRoutingReference> _references = new();
 
         public RoutingTokenRewriter(IMessageRoutingService routingService)
         {
             _routingService = routingService;
         }
+
+        public IReadOnlyList<MessageRoutingReference> References => _references;
 
         public override SyntaxNode? VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
         {
@@ -64,6 +72,7 @@ public static class MessageRoutingScriptTransformer
                 return visited;
             }
 
+            _references.Add(new MessageRoutingReference(identifier.Identifier.ValueText, direction));
             if (!_routingService.TryGetMessage(identifier.Identifier.ValueText, direction, out var message) || message is null)
             {
                 message = string.Empty;

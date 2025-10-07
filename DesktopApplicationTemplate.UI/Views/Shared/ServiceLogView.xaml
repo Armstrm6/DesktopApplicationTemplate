@@ -9,6 +9,11 @@
              d:DesignWidth="400"
              d:DataContext="{d:DesignInstance Type=viewModels:ServiceLogViewModel}"
              mc:Ignorable="d">
+    <UserControl.CommandBindings>
+        <CommandBinding Command="ApplicationCommands.Copy"
+                        CanExecute="CopyCommand_CanExecute"
+                        Executed="CopyCommand_Executed" />
+    </UserControl.CommandBindings>
     <Border Background="#E6E6E6" CornerRadius="5" Padding="10">
         <Grid>
             <Grid.RowDefinitions>
@@ -27,7 +32,16 @@
                 <Button Content="Export Log" Width="100" Margin="10,0,0,0" Command="{Binding ExportLogCommand}" Background="#CCCCFF"/>
                 <Button Content="Clear Log" Width="100" Margin="10,0,0,0" Command="{Binding ClearLogCommand}" Background="#FFCCCC"/>
             </StackPanel>
-            <ListBox Grid.Row="1" ItemsSource="{Binding DisplayLogs}" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" MinHeight="150">
+            <ListBox x:Name="LogListBox"
+                     Grid.Row="1"
+                     ItemsSource="{Binding DisplayLogs}"
+                     ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto"
+                     MinHeight="150"
+                     SelectionMode="Extended">
+                <ListBox.InputBindings>
+                    <KeyBinding Key="C" Modifiers="Control" Command="ApplicationCommands.Copy" />
+                </ListBox.InputBindings>
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding Message}" Foreground="{Binding Color}" TextWrapping="Wrap" Margin="0,0,0,5" />

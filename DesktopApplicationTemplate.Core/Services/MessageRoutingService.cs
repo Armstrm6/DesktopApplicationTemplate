@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using DesktopApplicationTemplate.Models;
 
@@ -12,6 +14,9 @@ public class MessageRoutingService : IMessageRoutingService
 {
     private readonly ConcurrentDictionary<(ServiceType, string), RoutingMessageEntry> _messages = new();
     private readonly ConcurrentDictionary<string, RoutingMessageEntry> _messagesByName = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, Dictionary<string, HashSet<MessageRoutingDirection>>> _referencesByService = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, Dictionary<string, HashSet<MessageRoutingDirection>>> _referencedByService = new(StringComparer.OrdinalIgnoreCase);
+    private readonly object _referencesLock = new();
     private readonly ILoggingService? _logger;
     private static readonly Regex NewTokenRegex = new(@"\{([A-Za-z0-9_]+)\.(LastInputMessage|LastOutputMessage)\}", RegexOptions.Compiled);
     private static readonly Regex LegacyTokenRegex = new(@"\{([A-Za-z0-9_]+)\.([A-Za-z0-9_]+)\.Message\}", RegexOptions.Compiled);
@@ -93,18 +98,25 @@ public class MessageRoutingService : IMessageRoutingService
     }
 
     /// <inheritdoc />
-    public string ResolveTokens(string template)
+    public string ResolveTokens(string template, string? referencingServiceName = null)
     {
         if (template is null)
             throw new ArgumentNullException(nameof(template));
 
         _logger?.Log($"Resolving tokens in '{template}'", LogLevel.Debug);
+        var normalizedReferencing = NormalizeServiceName(referencingServiceName);
+        List<MessageRoutingReference>? references = normalizedReferencing is null ? null : new List<MessageRoutingReference>();
         var result = NewTokenRegex.Replace(template, m =>
         {
             var name = m.Groups[1].Value;
             var direction = string.Equals(m.Groups[2].Value, nameof(RoutingMessageEntry.LastInputMessage), StringComparison.Ordinal)
                 ? MessageRoutingDirection.Input
                 : MessageRoutingDirection.Output;
+
+            if (references is not null)
+            {
+                references.Add(new MessageRoutingReference(name, direction));
+            }
 
             return TryGetMessageByName(name, direction, out var replacement)
                 ? replacement
@@ -123,8 +135,181 @@ public class MessageRoutingService : IMessageRoutingService
 
             return string.Empty;
         });
+
+        if (normalizedReferencing is not null)
+        {
+            SetReferences(normalizedReferencing, references!);
+        }
+
         _logger?.Log($"Resolved template to '{result}'", LogLevel.Debug);
         return result;
+    }
+
+    /// <inheritdoc />
+    public void SetReferences(string referencingServiceName, IEnumerable<MessageRoutingReference> references)
+    {
+        var normalizedReferencing = NormalizeServiceName(referencingServiceName);
+        if (normalizedReferencing is null)
+        {
+            throw new ArgumentException("Referencing service name cannot be null or whitespace.", nameof(referencingServiceName));
+        }
+
+        var referenceMap = (references ?? Array.Empty<MessageRoutingReference>())
+            .Where(r => !string.IsNullOrWhiteSpace(r.ServiceName))
+            .GroupBy(r => NormalizeServiceName(r.ServiceName)!, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(
+                g => g.Key,
+                g => new HashSet<MessageRoutingDirection>(g.Select(r => r.Direction)),
+                StringComparer.OrdinalIgnoreCase);
+
+        lock (_referencesLock)
+        {
+            if (referenceMap.Count == 0)
+            {
+                if (_referencesByService.Remove(normalizedReferencing, out var previous))
+                {
+                    foreach (var referenced in previous.Keys)
+                    {
+                        RemoveReferencedByEntry(referenced, normalizedReferencing);
+                    }
+                }
+                else
+                {
+                    // Ensure we are removed from any referenced-by entries even if no previous entry was present.
+                    foreach (var referenced in _referencedByService.Keys.ToArray())
+                    {
+                        RemoveReferencedByEntry(referenced, normalizedReferencing);
+                    }
+                }
+
+                return;
+            }
+
+            if (!_referencesByService.TryGetValue(normalizedReferencing, out var currentReferences))
+            {
+                currentReferences = new Dictionary<string, HashSet<MessageRoutingDirection>>(StringComparer.OrdinalIgnoreCase);
+                _referencesByService[normalizedReferencing] = currentReferences;
+            }
+
+            var toRemove = currentReferences.Keys
+                .Where(key => !referenceMap.ContainsKey(key))
+                .ToList();
+            foreach (var removed in toRemove)
+            {
+                currentReferences.Remove(removed);
+                RemoveReferencedByEntry(removed, normalizedReferencing);
+            }
+
+            foreach (var pair in referenceMap)
+            {
+                if (!currentReferences.TryGetValue(pair.Key, out var directions))
+                {
+                    directions = new HashSet<MessageRoutingDirection>();
+                    currentReferences[pair.Key] = directions;
+                }
+                else
+                {
+                    directions.Clear();
+                }
+
+                foreach (var direction in pair.Value)
+                {
+                    directions.Add(direction);
+                }
+
+                if (!_referencedByService.TryGetValue(pair.Key, out var referencingMap))
+                {
+                    referencingMap = new Dictionary<string, HashSet<MessageRoutingDirection>>(StringComparer.OrdinalIgnoreCase);
+                    _referencedByService[pair.Key] = referencingMap;
+                }
+
+                if (!referencingMap.TryGetValue(normalizedReferencing, out var referencingDirections))
+                {
+                    referencingDirections = new HashSet<MessageRoutingDirection>();
+                    referencingMap[normalizedReferencing] = referencingDirections;
+                }
+                else
+                {
+                    referencingDirections.Clear();
+                }
+
+                foreach (var direction in pair.Value)
+                {
+                    referencingDirections.Add(direction);
+                }
+            }
+        }
+    }
+
+    /// <inheritdoc />
+    public IReadOnlyCollection<string> GetReferencingServices(string serviceName)
+    {
+        var normalized = NormalizeServiceName(serviceName);
+        if (normalized is null)
+        {
+            return Array.Empty<string>();
+        }
+
+        lock (_referencesLock)
+        {
+            if (!_referencedByService.TryGetValue(normalized, out var references) || references.Count == 0)
+            {
+                return Array.Empty<string>();
+            }
+
+            var results = new List<string>(references.Count);
+            foreach (var pair in references)
+            {
+                var formattedDirections = pair.Value
+                    .Select(ToPropertyName)
+                    .OrderBy(s => s, StringComparer.OrdinalIgnoreCase)
+                    .ToArray();
+
+                if (formattedDirections.Length == 0)
+                {
+                    results.Add(pair.Key);
+                }
+                else if (formattedDirections.Length == 1)
+                {
+                    results.Add($"{pair.Key}.{formattedDirections[0]}");
+                }
+                else
+                {
+                    results.Add($"{pair.Key}.{string.Join("/", formattedDirections)}");
+                }
+            }
+
+            results.Sort(StringComparer.OrdinalIgnoreCase);
+            return results.ToArray();
+        }
+    }
+
+    private void RemoveReferencedByEntry(string referencedService, string referencingService)
+    {
+        if (!_referencedByService.TryGetValue(referencedService, out var referencingMap))
+        {
+            return;
+        }
+
+        referencingMap.Remove(referencingService);
+        if (referencingMap.Count == 0)
+        {
+            _referencedByService.Remove(referencedService);
+        }
+    }
+
+    private static string? NormalizeServiceName(string? serviceName)
+    {
+        return string.IsNullOrWhiteSpace(serviceName)
+            ? null
+            : serviceName.Trim();
+    }
+
+    private static string ToPropertyName(MessageRoutingDirection direction)
+    {
+        return direction == MessageRoutingDirection.Input
+            ? nameof(RoutingMessageEntry.LastInputMessage)
+            : nameof(RoutingMessageEntry.LastOutputMessage);
     }
 
     private static RoutingMessageEntry CreateEntry(MessageRoutingDirection direction, string payload)

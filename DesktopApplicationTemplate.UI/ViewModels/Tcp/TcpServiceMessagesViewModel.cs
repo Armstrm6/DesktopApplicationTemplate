@@ -492,6 +492,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
         private bool TryGetClientSendEndpoint(out TcpEndpoint? endpoint)
         {
             endpoint = null;
+            if (_options.ConnectionRole != TcpConnectionRole.Client)
+            {
+                return false;
+            }
+
             if (_options.Mode is not (TcpServiceMode.Sending or TcpServiceMode.ReceiveAndSend))
             {
                 return false;
@@ -732,9 +737,16 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             var incomingMessage = incoming ?? string.Empty;
             var outgoingMessage = outgoing ?? string.Empty;
             var incomingEndpoint = endpoint ?? string.Empty;
-            var destination = string.IsNullOrWhiteSpace(outgoingMessage)
-                ? string.Empty
-                : incomingEndpoint;
+            var referencingServices = _routing.GetReferencingServices(ServiceName);
+            var destination = string.Empty;
+            if (!string.IsNullOrWhiteSpace(outgoingMessage))
+            {
+                destination = incomingEndpoint;
+            }
+            else if (referencingServices.Count > 0)
+            {
+                destination = string.Join(", ", referencingServices);
+            }
             var incomingDisplay = MessageDisplayFormatter.FormatForService(incomingMessage, true, ServiceType, ServiceName);
             var outgoingDisplay = MessageDisplayFormatter.FormatForService(outgoingMessage, false, ServiceType, ServiceName);
 
@@ -794,6 +806,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             yield return BuildSubnetDiagnostic();
             yield return BuildDnsDiagnostic(_options.PrimaryDns, "Primary DNS");
             yield return BuildDnsDiagnostic(_options.AlternateDns, "Alternate DNS");
+            foreach (var destinationDetail in BuildDestinationDiagnostics())
+            {
+                yield return destinationDetail;
+            }
         }
 
         private string BuildHostDiagnostic()
@@ -868,6 +884,30 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             return IPAddress.TryParse(value, out _)
                 ? $"{label}: {value}"
                 : $"{label}: invalid ({value})";
+        }
+
+        private IEnumerable<string> BuildDestinationDiagnostics()
+        {
+            if (_options.ConnectionRole == TcpConnectionRole.Client &&
+                _options.Mode is TcpServiceMode.Sending or TcpServiceMode.ReceiveAndSend)
+            {
+                var destinationHost = ResolveDestinationHost();
+                var destinationPort = ResolveDestinationPort();
+                if (string.IsNullOrWhiteSpace(destinationHost) || destinationPort is null)
+                {
+                    yield return "Destination: not configured";
+                }
+                else
+                {
+                    yield return $"Destination: {destinationHost}:{destinationPort}";
+                }
+                yield break;
+            }
+
+            var referencing = _routing.GetReferencingServices(ServiceName);
+            yield return referencing.Count > 0
+                ? $"Destination references: {string.Join(", ", referencing)}"
+                : "Destination references: none";
         }
 
         private static Task RunOnUiThreadAsync(Action action)
@@ -1117,6 +1157,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                 svm.ScriptText = Script;
             svm.TestMessage = TestMessage;
             svm.RoutingService = _routing;
+            svm.RoutingServiceName = ServiceName;
 
             void OnOutputGenerated(string output)
             {
