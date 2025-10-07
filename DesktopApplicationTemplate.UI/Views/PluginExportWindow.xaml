@@ -74,7 +74,7 @@
                           d:DataContext="{d:DesignInstance viewModels:PluginExportViewModel}"
                           BorderThickness="0">
                     <ListView.ItemTemplate>
-                        <DataTemplate DataType="{x:Type viewModels:PluginExportViewModel.PluginDescriptorSelectionViewModel}">
+                        <DataTemplate DataType="{x:Type viewModels:PluginDescriptorSelectionViewModel}">
                             <DockPanel>
                                 <CheckBox Content="{Binding DisplayName}"
                                           IsChecked="{Binding IsSelected, Mode=TwoWay}"
