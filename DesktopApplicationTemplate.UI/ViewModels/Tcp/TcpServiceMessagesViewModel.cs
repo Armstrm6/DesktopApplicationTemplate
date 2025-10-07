@@ -113,6 +113,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
         private readonly object _clientTasksLock = new();
         private bool _isApplicationExitHooked;
         private NetworkConfiguration _networkConfiguration = new();
+        private static readonly TimeSpan ClientReconnectDelay = TimeSpan.FromSeconds(2);
 
         /// <summary>Type of the service associated with these messages.</summary>
         public ServiceType ServiceType { get; private set; } = ServiceType.Tcp;
@@ -643,45 +644,93 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
         private async Task RunClientLoopAsync(TcpEndpoint endpoint, TcpClientOperation operation, CancellationToken cancellationToken)
         {
             var operationLabel = operation == TcpClientOperation.Receive ? "listening endpoint" : "destination";
+            var endpointDisplay = $"{endpoint.Host}:{endpoint.Port}";
 
-            try
+            while (!cancellationToken.IsCancellationRequested)
             {
-                using var client = new TcpClient();
-                await client.ConnectAsync(endpoint.Host, endpoint.Port, cancellationToken).ConfigureAwait(false);
-                Logger?.Log($"Connected to {operationLabel} {endpoint.Host}:{endpoint.Port}", LogLevel.Information);
-
-                using var stream = client.GetStream();
-                var message = _options.InputMessage ?? string.Empty;
-                var shouldSendMessage = operation == TcpClientOperation.Send && !string.IsNullOrWhiteSpace(message);
-                if (shouldSendMessage)
+                try
                 {
-                    var payload = Encoding.UTF8.GetBytes(message);
-                    await stream.WriteAsync(payload.AsMemory(0, payload.Length), cancellationToken).ConfigureAwait(false);
-                    Logger?.Log($"Sent message to {operationLabel} {endpoint.Host}:{endpoint.Port}: {message}", LogLevel.Information);
+                    using var client = new TcpClient();
+                    await client.ConnectAsync(endpoint.Host, endpoint.Port, cancellationToken).ConfigureAwait(false);
+                    Logger?.Log($"Connected to {operationLabel} {endpointDisplay}", LogLevel.Information);
+
+                    using var stream = client.GetStream();
+                    var message = _options.InputMessage ?? string.Empty;
+                    var shouldSendMessage = operation == TcpClientOperation.Send && !string.IsNullOrWhiteSpace(message);
+                    var pendingOutgoing = string.Empty;
+
+                    if (shouldSendMessage)
+                    {
+                        var payload = Encoding.UTF8.GetBytes(message);
+                        await stream.WriteAsync(payload.AsMemory(0, payload.Length), cancellationToken).ConfigureAwait(false);
+                        Logger?.Log($"Sent message to {operationLabel} {endpointDisplay}: {message}", LogLevel.Information);
+                        _routing.UpdateMessage(ServiceType, ServiceName, message, MessageRoutingDirection.Output);
+                        pendingOutgoing = message;
+                    }
+
+                    var buffer = new byte[4096];
+
+                    while (!cancellationToken.IsCancellationRequested)
+                    {
+                        int bytesRead;
+                        try
+                        {
+                            bytesRead = await stream.ReadAsync(buffer.AsMemory(0, buffer.Length), cancellationToken).ConfigureAwait(false);
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            break;
+                        }
+
+                        if (bytesRead == 0)
+                        {
+                            Logger?.Log($"Connection closed by {endpointDisplay}", LogLevel.Information);
+                            break;
+                        }
+
+                        var payload = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+
+                        if (operation == TcpClientOperation.Receive)
+                        {
+                            Logger?.Log($"Received message from {endpointDisplay}: {payload}", LogLevel.Information);
+                            _routing.UpdateMessage(ServiceType, ServiceName, payload, MessageRoutingDirection.Input);
+                            await AppendMessageAsync(payload, string.Empty, endpointDisplay).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            Logger?.Log($"Received response from {endpointDisplay}: {payload}", LogLevel.Information);
+                            _routing.UpdateMessage(ServiceType, ServiceName, payload, MessageRoutingDirection.Input);
+                            await AppendMessageAsync(payload, pendingOutgoing, endpointDisplay).ConfigureAwait(false);
+                            pendingOutgoing = string.Empty;
+                        }
+                    }
+
+                    if (!string.IsNullOrEmpty(pendingOutgoing))
+                    {
+                        await AppendMessageAsync(string.Empty, pendingOutgoing, endpointDisplay).ConfigureAwait(false);
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    // graceful cancellation
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    LogConnectionIssues($"TCP client connection to {endpoint.Host}:{endpoint.Port}", ex);
                 }
 
-                var buffer = new byte[4096];
-                var bytesRead = await stream.ReadAsync(buffer.AsMemory(0, buffer.Length), cancellationToken).ConfigureAwait(false);
-                var endpointDisplay = $"{endpoint.Host}:{endpoint.Port}";
-                if (bytesRead > 0)
+                if (!cancellationToken.IsCancellationRequested)
                 {
-                    var response = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                    Logger?.Log($"Received response from {endpointDisplay}: {response}", LogLevel.Information);
-                    await AppendMessageAsync(message, response, endpointDisplay).ConfigureAwait(false);
+                    try
+                    {
+                        await Task.Delay(ClientReconnectDelay, cancellationToken).ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
                 }
-                else
-                {
-                    await AppendMessageAsync(message, string.Empty, endpointDisplay).ConfigureAwait(false);
-                    Logger?.Log($"No response received from {endpointDisplay}", LogLevel.Warning);
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                // graceful cancellation
-            }
-            catch (Exception ex)
-            {
-                LogConnectionIssues($"TCP client connection to {endpoint.Host}:{endpoint.Port}", ex);
             }
         }
 
