@@ -208,7 +208,7 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
     /// <summary>
     /// Indicates whether network profile fields should be visible for sending scenarios.
     /// </summary>
-    public bool ShowsNetworkProfileConfiguration => Mode == TcpServiceMode.Sending;
+    public bool ShowsNetworkProfileConfiguration => Mode != TcpServiceMode.Listening;
 
     /// <summary>
     /// Available TCP connection roles.

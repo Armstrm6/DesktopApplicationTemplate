@@ -12,7 +12,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
     /// </summary>
     public class ServiceMessageTableViewModel : ViewModelBase
     {
-        public const int MaxRows = 5;
+        public const int MaxRows = 100;
         private readonly Dictionary<string, LinkedList<ServiceMessageRow>> _messagesByService = new(StringComparer.OrdinalIgnoreCase);
         private string _activeServiceKey = string.Empty;
 

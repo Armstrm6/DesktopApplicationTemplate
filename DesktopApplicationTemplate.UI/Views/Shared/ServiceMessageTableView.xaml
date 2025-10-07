@@ -14,8 +14,8 @@
               IsReadOnly="True"
               HeadersVisibility="Column"
               RowHeaderWidth="0"
-              Height="200"
-              ColumnWidth="Auto"
+              MaxHeight="250"
+              ColumnWidth="*"
               MinColumnWidth="100"
               ScrollViewer.HorizontalScrollBarVisibility="Auto"
               ScrollViewer.VerticalScrollBarVisibility="Auto"
@@ -37,15 +37,15 @@
                                  MinWidth="110" />
             <DataGridTextColumn Header="Incoming Message"
                                  Binding="{Binding IncomingMessage}"
-                                 Width="Auto"
-                                 MinWidth="180" />
+                                 Width="2*"
+                                 MinWidth="200" />
             <DataGridTextColumn Header="Outgoing Message"
                                  Binding="{Binding OutgoingMessage}"
-                                 Width="Auto"
-                                 MinWidth="180" />
+                                 Width="2*"
+                                 MinWidth="200" />
             <DataGridTextColumn Header="Destination"
                                  Binding="{Binding Destination}"
-                                 Width="Auto"
+                                 Width="*"
                                  MinWidth="140" />
         </DataGrid.Columns>
     </DataGrid>

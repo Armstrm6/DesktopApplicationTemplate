@@ -693,20 +693,18 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                     Logger?.Log($"Connected to {operationLabel} {endpointDisplay}", LogLevel.Information);
 
                     using var stream = client.GetStream();
-                    var message = _options.InputMessage ?? string.Empty;
+                    var message = _options.OutputMessage ?? string.Empty;
                     var shouldSendMessage = operation == TcpClientOperation.Send && !string.IsNullOrWhiteSpace(message);
-                    var pendingOutgoing = string.Empty;
-
                     if (shouldSendMessage)
                     {
                         var payload = Encoding.UTF8.GetBytes(message);
                         await stream.WriteAsync(payload.AsMemory(0, payload.Length), cancellationToken).ConfigureAwait(false);
                         Logger?.Log($"Sent message to {operationLabel} {endpointDisplay}: {message}", LogLevel.Information);
                         _routing.UpdateMessage(ServiceType, ServiceName, message, MessageRoutingDirection.Output);
-                        pendingOutgoing = message;
                     }
 
                     var buffer = new byte[4096];
+                    var receivedAny = false;
 
                     while (!cancellationToken.IsCancellationRequested)
                     {
@@ -722,35 +720,34 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
 
                         if (bytesRead == 0)
                         {
-                            Logger?.Log($"Connection closed by {endpointDisplay}", LogLevel.Information);
                             break;
                         }
 
-                        var payload = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                        var response = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                        receivedAny = true;
 
                         if (operation == TcpClientOperation.Receive)
                         {
-                            Logger?.Log($"Received message from {endpointDisplay}: {payload}", LogLevel.Information);
-                            _routing.UpdateMessage(ServiceType, ServiceName, payload, MessageRoutingDirection.Input);
-                            await AppendMessageAsync(payload, string.Empty, endpointDisplay).ConfigureAwait(false);
+                            Logger?.Log($"Received message from {endpointDisplay}: {response}", LogLevel.Information);
+                            _routing.UpdateMessage(ServiceType, ServiceName, response, MessageRoutingDirection.Input);
+                            await AppendMessageAsync(response, string.Empty, endpointDisplay).ConfigureAwait(false);
                         }
                         else
                         {
-                            Logger?.Log($"Received response from {endpointDisplay}: {payload}", LogLevel.Information);
-                            _routing.UpdateMessage(ServiceType, ServiceName, payload, MessageRoutingDirection.Input);
-                            await AppendMessageAsync(payload, pendingOutgoing, endpointDisplay).ConfigureAwait(false);
-                            pendingOutgoing = string.Empty;
+                            Logger?.Log($"Received response from {endpointDisplay}: {response}", LogLevel.Information);
+                            _routing.UpdateMessage(ServiceType, ServiceName, response, MessageRoutingDirection.Input);
+                            await AppendMessageAsync(message, response, endpointDisplay).ConfigureAwait(false);
                         }
                     }
 
-                    if (!string.IsNullOrEmpty(pendingOutgoing))
+                    if (!receivedAny && shouldSendMessage)
                     {
-                        await AppendMessageAsync(string.Empty, pendingOutgoing, endpointDisplay).ConfigureAwait(false);
+                        await AppendMessageAsync(message, string.Empty, endpointDisplay).ConfigureAwait(false);
+                        Logger?.Log($"No response received from {endpointDisplay}", LogLevel.Warning);
                     }
                 }
                 catch (OperationCanceledException)
                 {
-                    // graceful cancellation
                     break;
                 }
                 catch (Exception ex)

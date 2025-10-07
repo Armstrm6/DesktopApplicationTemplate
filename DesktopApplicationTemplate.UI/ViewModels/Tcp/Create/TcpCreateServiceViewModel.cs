@@ -182,7 +182,7 @@ public class TcpCreateServiceViewModel : ServiceCreateViewModelBase<TcpServiceOp
     /// <summary>
     /// Indicates whether subnet and DNS inputs should be shown for sending scenarios.
     /// </summary>
-    public bool ShowsNetworkProfileConfiguration => Mode == TcpServiceMode.Sending;
+    public bool ShowsNetworkProfileConfiguration => Mode != TcpServiceMode.Listening;
 
     /// <summary>
     /// Available TCP connection roles.
