@@ -386,16 +386,16 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                 tasks.Add(RunServerLoopAsync(token));
             }
 
-            if (hasClientReceiver)
+            if (hasClientReceiver && clientReceiveEndpoint is TcpEndpoint receiveEndpoint)
             {
-                Logger?.Log($"Starting TCP client to {clientReceiveEndpoint.Value.Host}:{clientReceiveEndpoint.Value.Port} ({protocol}) for receiving", LogLevel.Information);
-                tasks.Add(RunClientLoopAsync(clientReceiveEndpoint.Value, TcpClientOperation.Receive, token));
+                Logger?.Log($"Starting TCP client to {receiveEndpoint.Host}:{receiveEndpoint.Port} ({protocol}) for receiving", LogLevel.Information);
+                tasks.Add(RunClientLoopAsync(receiveEndpoint, TcpClientOperation.Receive, token));
             }
 
-            if (hasClientSender)
+            if (hasClientSender && clientSendEndpoint is TcpEndpoint sendEndpoint)
             {
-                Logger?.Log($"Starting TCP client to {clientSendEndpoint.Value.Host}:{clientSendEndpoint.Value.Port} ({protocol}) for sending", LogLevel.Information);
-                tasks.Add(RunClientLoopAsync(clientSendEndpoint.Value, TcpClientOperation.Send, token));
+                Logger?.Log($"Starting TCP client to {sendEndpoint.Host}:{sendEndpoint.Port} ({protocol}) for sending", LogLevel.Information);
+                tasks.Add(RunClientLoopAsync(sendEndpoint, TcpClientOperation.Send, token));
             }
 
             _networkLoopTask = Task.WhenAll(tasks);
