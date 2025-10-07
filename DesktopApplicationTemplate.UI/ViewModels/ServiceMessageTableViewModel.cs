@@ -12,7 +12,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
     /// </summary>
     public class ServiceMessageTableViewModel : ViewModelBase
     {
-        private const int MaxRows = 5;
+        public const int MaxRows = 5;
         private readonly Dictionary<string, LinkedList<ServiceMessageRow>> _messagesByService = new(StringComparer.OrdinalIgnoreCase);
         private string _activeServiceKey = string.Empty;
 
@@ -47,6 +47,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             var resolvedServiceName = serviceName?.Trim() ?? string.Empty;
             var incomingDisplay = MessageDisplayFormatter.FormatForService(incoming, true, serviceType, resolvedServiceName);
             var outgoingDisplay = MessageDisplayFormatter.FormatForService(outgoing, false, serviceType, resolvedServiceName);
+            var timestamp = DateTime.Now;
 
             var key = BuildKey(serviceType, resolvedServiceName);
             if (!_messagesByService.TryGetValue(key, out var rows))
@@ -60,7 +61,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 IncomingMessage = incomingDisplay,
                 OutgoingMessage = outgoingDisplay,
                 Destination = destination ?? string.Empty,
-                Timestamp = DateTime.Now
+                Timestamp = timestamp
             };
 
             rows.AddFirst(row);
@@ -69,12 +70,65 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 rows.RemoveLast();
             }
 
+            if (ServiceListModel.ResolveService?.Invoke(serviceType, resolvedServiceName) is { } service)
+            {
+                service.RecordMessageHistory(incoming, outgoing, destination, timestamp);
+            }
+
             if (string.Equals(key, _activeServiceKey, StringComparison.OrdinalIgnoreCase))
             {
                 Messages.Insert(0, row);
                 if (Messages.Count > MaxRows)
                 {
                     Messages.RemoveAt(Messages.Count - 1);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Loads persisted messages for a service so previously recorded exchanges reappear in the UI.
+        /// </summary>
+        public void LoadMessages(ServiceType serviceType, string serviceName, IEnumerable<ServiceMessageHistoryEntry> entries)
+        {
+            var resolvedServiceName = serviceName?.Trim() ?? string.Empty;
+            var key = BuildKey(serviceType, resolvedServiceName);
+            if (!_messagesByService.TryGetValue(key, out var rows))
+            {
+                rows = new LinkedList<ServiceMessageRow>();
+                _messagesByService[key] = rows;
+            }
+            else
+            {
+                rows.Clear();
+            }
+
+            if (entries is not null)
+            {
+                foreach (var entry in entries)
+                {
+                    if (entry is null)
+                    {
+                        continue;
+                    }
+
+                    var row = new ServiceMessageRow
+                    {
+                        IncomingMessage = MessageDisplayFormatter.FormatForService(entry.IncomingMessage, true, serviceType, resolvedServiceName),
+                        OutgoingMessage = MessageDisplayFormatter.FormatForService(entry.OutgoingMessage, false, serviceType, resolvedServiceName),
+                        Destination = entry.Destination ?? string.Empty,
+                        Timestamp = entry.Timestamp
+                    };
+
+                    rows.AddLast(row);
+                }
+            }
+
+            if (string.Equals(key, _activeServiceKey, StringComparison.OrdinalIgnoreCase))
+            {
+                Messages.Clear();
+                foreach (var row in rows)
+                {
+                    Messages.Add(row);
                 }
             }
         }

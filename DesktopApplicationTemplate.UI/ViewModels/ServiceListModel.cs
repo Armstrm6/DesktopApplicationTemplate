@@ -18,6 +18,7 @@ using DesktopApplicationTemplate.Core.Services.Protocols.Scp;
 using DesktopApplicationTemplate.Core.Services.Protocols.Tcp;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Helpers;
+using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.Services;
 using WpfBrush = System.Windows.Media.Brush;
 using WpfBrushes = System.Windows.Media.Brushes;
@@ -73,6 +74,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public ObservableCollection<string> AssociatedServices { get; } = new();
 
+        private readonly LinkedList<ServiceMessageHistoryEntry> _messageHistory = new();
         private double _totalExecutionTimeMs;
         private int _executionCount;
         private TimeSpan _lastExecutionDuration;
@@ -353,6 +355,54 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         }
 
         /// <summary>
+        /// Rehydrates persisted message history so the service restores its last known exchanges.
+        /// </summary>
+        /// <param name="entries">The persisted message entries.</param>
+        public void LoadMessageHistory(IEnumerable<ServiceMessageHistoryEntry> entries)
+        {
+            _messageHistory.Clear();
+            LastInputMessage = string.Empty;
+            LastOutputMessage = string.Empty;
+            LastInputBrush = WpfBrushes.Black;
+            if (entries is null)
+            {
+                return;
+            }
+
+            foreach (var entry in entries
+                         .Where(e => e is not null)
+                         .OrderByDescending(e => e.Timestamp)
+                         .Take(ServiceMessageTableViewModel.MaxRows))
+            {
+                _messageHistory.AddLast(new ServiceMessageHistoryEntry
+                {
+                    IncomingMessage = entry.IncomingMessage ?? string.Empty,
+                    OutgoingMessage = entry.OutgoingMessage ?? string.Empty,
+                    Destination = entry.Destination ?? string.Empty,
+                    Timestamp = entry.Timestamp
+                });
+            }
+
+            foreach (var historyEntry in _messageHistory)
+            {
+                if (!string.IsNullOrEmpty(historyEntry.IncomingMessage))
+                {
+                    UpdateLastInputMessage(historyEntry.IncomingMessage);
+                    break;
+                }
+            }
+
+            foreach (var historyEntry in _messageHistory)
+            {
+                if (!string.IsNullOrEmpty(historyEntry.OutgoingMessage))
+                {
+                    UpdateLastOutputMessage(historyEntry.OutgoingMessage);
+                    break;
+                }
+            }
+        }
+
+        /// <summary>
         /// Updates the last input message tracked for this service.
         /// </summary>
         /// <param name="message">The raw message text.</param>
@@ -376,6 +426,52 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             var normalizedMessage = NormalizeLatestMessage(message);
             LastOutputMessage = normalizedMessage;
             return normalizedMessage;
+        }
+
+        /// <summary>
+        /// Records a message exchange for persistence and downstream bindings.
+        /// </summary>
+        public void RecordMessageHistory(string? incomingMessage, string? outgoingMessage, string? destination, DateTime timestamp)
+        {
+            var entry = new ServiceMessageHistoryEntry
+            {
+                IncomingMessage = incomingMessage ?? string.Empty,
+                OutgoingMessage = outgoingMessage ?? string.Empty,
+                Destination = destination ?? string.Empty,
+                Timestamp = timestamp
+            };
+
+            _messageHistory.AddFirst(entry);
+            while (_messageHistory.Count > ServiceMessageTableViewModel.MaxRows)
+            {
+                _messageHistory.RemoveLast();
+            }
+
+            if (!string.IsNullOrEmpty(incomingMessage))
+            {
+                UpdateLastInputMessage(incomingMessage);
+            }
+
+            if (!string.IsNullOrEmpty(outgoingMessage))
+            {
+                UpdateLastOutputMessage(outgoingMessage);
+            }
+        }
+
+        /// <summary>
+        /// Creates a snapshot of the current message history for persistence.
+        /// </summary>
+        public IReadOnlyList<ServiceMessageHistoryEntry> GetMessageHistorySnapshot()
+        {
+            return _messageHistory
+                .Select(entry => new ServiceMessageHistoryEntry
+                {
+                    IncomingMessage = entry.IncomingMessage,
+                    OutgoingMessage = entry.OutgoingMessage,
+                    Destination = entry.Destination,
+                    Timestamp = entry.Timestamp
+                })
+                .ToList();
         }
 
         /// <summary>

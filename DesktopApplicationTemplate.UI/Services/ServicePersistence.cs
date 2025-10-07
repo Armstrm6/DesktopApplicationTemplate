@@ -14,6 +14,7 @@ using DesktopApplicationTemplate.Core.Services.Protocols.Heartbeat;
 using DesktopApplicationTemplate.Core.Services.Protocols.Hid;
 using DesktopApplicationTemplate.Core.Services.Protocols.Scp;
 using DesktopApplicationTemplate.Models;
+using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.ViewModels;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
@@ -169,7 +170,8 @@ namespace DesktopApplicationTemplate.Persistence
                             Message = l.Message,
                             Color = l.Color
                         })
-                        .ToList()
+                        .ToList(),
+                    MessageHistory = s.GetMessageHistorySnapshot().ToList()
                 });
             }
 
@@ -407,6 +409,7 @@ namespace DesktopApplicationTemplate.Persistence
         public double TotalExecutionTimeMs { get; set; }
         public int ExecutionCount { get; set; }
         public List<LogEntry> Logs { get; set; } = new();
+        public List<ServiceMessageHistoryEntry> MessageHistory { get; set; } = new();
     }
 
     internal class LegacyServiceInfo

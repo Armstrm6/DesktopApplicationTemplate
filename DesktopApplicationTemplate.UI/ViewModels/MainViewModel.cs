@@ -11,6 +11,7 @@ using WpfBrushes = System.Windows.Media.Brushes;
 using DesktopApplicationTemplate.Core.Models;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Persistence;
+using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels.Tcp;
 using DesktopApplicationTemplate.Models;
@@ -309,6 +310,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 foreach (var a in info.AssociatedServices ?? new List<string>())
                     svc.AssociatedServices.Add(a);
                 svc.LoadPersistedLogs(info.Logs ?? new List<LogEntry>());
+                svc.LoadMessageHistory(info.MessageHistory ?? new List<ServiceMessageHistoryEntry>());
                 var normalizedName = NormalizeDisplayName(svc.Type, svc.DisplayName);
                 if (Services.Any(existing => existing.DisplayName.Equals(normalizedName, StringComparison.OrdinalIgnoreCase)))
                 {

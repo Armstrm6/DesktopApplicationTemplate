@@ -237,7 +237,22 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             OutputMessage = _options.OutputMessage;
             _runtimeContext = new TcpRuntimeContext(ServiceType, ServiceName, _options, ScriptEditorViewModel.DefaultScript);
             ApplyNetworkConfiguration(restartIfActive: false);
+            var history = service.GetMessageHistorySnapshot();
+            MessageTable.LoadMessages(ServiceType, ServiceName, history);
             Messages.Clear();
+            foreach (var entry in history.AsEnumerable().Reverse())
+            {
+                var incomingDisplay = MessageDisplayFormatter.FormatForService(entry.IncomingMessage, true, ServiceType, ServiceName);
+                var outgoingDisplay = MessageDisplayFormatter.FormatForService(entry.OutgoingMessage, false, ServiceType, ServiceName);
+                Messages.Insert(0, new TcpMessageRow
+                {
+                    IncomingMessage = incomingDisplay,
+                    IncomingIp = string.Empty,
+                    OutgoingMessage = outgoingDisplay,
+                    ConnectedService = entry.Destination ?? string.Empty,
+                    Result = string.IsNullOrEmpty(outgoingDisplay) ? string.Empty : outgoingDisplay
+                });
+            }
             MessageTable.SetActiveService(ServiceType, ServiceName);
             OnPropertyChanged(nameof(IncomingData));
             OnPropertyChanged(nameof(OutgoingResults));
@@ -820,19 +835,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                 }
 
                 MessageTable.AddMessage(ServiceType, ServiceName, incomingMessage, outgoingMessage, destination);
-
-                if (_service is not null)
-                {
-                    if (!string.IsNullOrEmpty(incomingMessage))
-                    {
-                        _service.UpdateLastInputMessage(incomingMessage);
-                    }
-
-                    if (!string.IsNullOrEmpty(outgoingMessage))
-                    {
-                        _service.UpdateLastOutputMessage(outgoingMessage);
-                    }
-                }
 
                 OnPropertyChanged(nameof(IncomingData));
                 OnPropertyChanged(nameof(OutgoingResults));
