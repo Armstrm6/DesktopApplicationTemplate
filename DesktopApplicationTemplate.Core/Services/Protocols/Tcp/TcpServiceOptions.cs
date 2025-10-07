@@ -52,6 +52,21 @@ public class TcpServiceOptions
     public string DestinationGateway { get; set; } = string.Empty;
 
     /// <summary>
+    /// Subnet mask associated with the remote destination.
+    /// </summary>
+    public string DestinationSubnetMask { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Primary DNS server used for resolving the remote destination.
+    /// </summary>
+    public string DestinationPrimaryDns { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Alternate DNS server used for resolving the remote destination.
+    /// </summary>
+    public string DestinationAlternateDns { get; set; } = string.Empty;
+
+    /// <summary>
     /// Indicates whether UDP should be used instead of TCP.
     /// </summary>
     public bool UseUdp { get; set; }

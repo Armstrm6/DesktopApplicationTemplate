@@ -23,6 +23,9 @@ public class TcpCreateServiceViewModel : ServiceCreateViewModelBase<TcpServiceOp
     private string _destinationHost = string.Empty;
     private int _destinationPort;
     private string _destinationGateway = string.Empty;
+    private string _destinationSubnetMask = string.Empty;
+    private string _destinationPrimaryDns = string.Empty;
+    private string _destinationAlternateDns = string.Empty;
     private TcpConnectionRole _previousListeningRole = TcpConnectionRole.Server;
 
     /// <summary>
@@ -153,8 +156,8 @@ public class TcpCreateServiceViewModel : ServiceCreateViewModelBase<TcpServiceOp
             _mode = value;
             OnPropertyChanged();
             OnPropertyChanged(nameof(IsSendingEnabled));
-            OnPropertyChanged(nameof(ShowsListeningConfiguration));
-            OnPropertyChanged(nameof(ShowsNetworkProfileConfiguration));
+            OnPropertyChanged(nameof(CanEditListeningConfiguration));
+            OnPropertyChanged(nameof(CanEditDestinationConfiguration));
             EnsureConnectionRoleForMode();
             UpdateDestinationValidationState();
         }
@@ -167,7 +170,7 @@ public class TcpCreateServiceViewModel : ServiceCreateViewModelBase<TcpServiceOp
 
     private bool RequiresDestinationConfiguration =>
         Mode == TcpServiceMode.Sending ||
-        (Mode == TcpServiceMode.ReceiveAndSend && ConnectionRole == TcpConnectionRole.Client);
+        Mode == TcpServiceMode.ReceiveAndSend;
 
     /// <summary>
     /// Indicates whether the service should expose sending configuration fields.
@@ -175,14 +178,14 @@ public class TcpCreateServiceViewModel : ServiceCreateViewModelBase<TcpServiceOp
     public bool IsSendingEnabled => RequiresDestinationConfiguration;
 
     /// <summary>
-    /// Indicates whether listening configuration should be visible.
+    /// Indicates whether the listening configuration can be modified.
     /// </summary>
-    public bool ShowsListeningConfiguration => Mode != TcpServiceMode.Sending;
+    public bool CanEditListeningConfiguration => Mode != TcpServiceMode.Sending;
 
     /// <summary>
-    /// Indicates whether subnet and DNS inputs should be shown for sending scenarios.
+    /// Indicates whether destination configuration can be modified.
     /// </summary>
-    public bool ShowsNetworkProfileConfiguration => Mode != TcpServiceMode.Listening;
+    public bool CanEditDestinationConfiguration => IsSendingEnabled;
 
     /// <summary>
     /// Available TCP connection roles.
@@ -227,6 +230,48 @@ public class TcpCreateServiceViewModel : ServiceCreateViewModelBase<TcpServiceOp
         {
             _destinationGateway = value ?? string.Empty;
             ValidateOptionalIpAddress(_destinationGateway, nameof(DestinationGateway), "Destination Gateway");
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>
+    /// Subnet mask for the configured destination.
+    /// </summary>
+    public string DestinationSubnetMask
+    {
+        get => _destinationSubnetMask;
+        set
+        {
+            _destinationSubnetMask = value ?? string.Empty;
+            ValidateOptionalIpAddress(_destinationSubnetMask, nameof(DestinationSubnetMask), "Destination Subnet");
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>
+    /// Primary DNS server for the configured destination.
+    /// </summary>
+    public string DestinationPrimaryDns
+    {
+        get => _destinationPrimaryDns;
+        set
+        {
+            _destinationPrimaryDns = value ?? string.Empty;
+            ValidateOptionalIpAddress(_destinationPrimaryDns, nameof(DestinationPrimaryDns), "Destination Primary DNS");
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>
+    /// Alternate DNS server for the configured destination.
+    /// </summary>
+    public string DestinationAlternateDns
+    {
+        get => _destinationAlternateDns;
+        set
+        {
+            _destinationAlternateDns = value ?? string.Empty;
+            ValidateOptionalIpAddress(_destinationAlternateDns, nameof(DestinationAlternateDns), "Destination Alternate DNS");
             OnPropertyChanged();
         }
     }
@@ -315,6 +360,9 @@ public class TcpCreateServiceViewModel : ServiceCreateViewModelBase<TcpServiceOp
         options.DestinationHost = DestinationHost;
         options.DestinationPort = DestinationPort;
         options.DestinationGateway = DestinationGateway;
+        options.DestinationSubnetMask = DestinationSubnetMask;
+        options.DestinationPrimaryDns = DestinationPrimaryDns;
+        options.DestinationAlternateDns = DestinationAlternateDns;
     }
 
     private void ValidateOptionalIpAddress(string value, string propertyName, string? displayName = null)

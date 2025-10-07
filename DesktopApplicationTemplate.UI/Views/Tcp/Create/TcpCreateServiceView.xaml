@@ -29,6 +29,9 @@
                 <RowDefinition Height="Auto" /> <!-- Mode -->
                 <RowDefinition Height="Auto" /> <!-- Destination Host -->
                 <RowDefinition Height="Auto" /> <!-- Destination Port -->
+                <RowDefinition Height="Auto" /> <!-- Destination Subnet -->
+                <RowDefinition Height="Auto" /> <!-- Destination Primary DNS -->
+                <RowDefinition Height="Auto" /> <!-- Destination Alternate DNS -->
                 <RowDefinition Height="Auto" /> <!-- Destination Gateway -->
                 <RowDefinition Height="Auto" /> <!-- Buttons -->
             </Grid.RowDefinitions>
@@ -49,15 +52,13 @@
                 <TextBlock Text="My TCP Service" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0" VerticalAlignment="Center" Visibility="{Binding Text, ElementName=ServiceNameBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
             </Grid>
 
-            <TextBlock Grid.Row="1" Grid.Column="0" Text="Connection Role" Style="{StaticResource FormLabel}"
-                       Visibility="{Binding ShowsListeningConfiguration, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="Connection Role" Style="{StaticResource FormLabel}"/>
             <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding ConnectionRoles}" SelectedItem="{Binding ConnectionRole}"
                       Style="{StaticResource FormField}"
-                      Visibility="{Binding ShowsListeningConfiguration, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                      IsEnabled="{Binding CanEditListeningConfiguration}"/>
 
-            <TextBlock Grid.Row="2" Grid.Column="0" Text="Host" Style="{StaticResource FormLabel}"
-                       Visibility="{Binding ShowsListeningConfiguration, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-            <Grid Grid.Row="2" Grid.Column="1" Visibility="{Binding ShowsListeningConfiguration, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="Host" Style="{StaticResource FormLabel}"/>
+            <Grid Grid.Row="2" Grid.Column="1" IsEnabled="{Binding CanEditListeningConfiguration}">
                 <TextBox x:Name="HostBox" Text="{Binding Host, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
                     <TextBox.Style>
                         <Style TargetType="TextBox" BasedOn="{StaticResource FormField}">
@@ -72,9 +73,8 @@
                 <TextBlock Text="192.168.1.10" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0" VerticalAlignment="Center" Visibility="{Binding Text, ElementName=HostBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
             </Grid>
 
-            <TextBlock Grid.Row="3" Grid.Column="0" Text="Port" Style="{StaticResource FormLabel}"
-                       Visibility="{Binding ShowsListeningConfiguration, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-            <Grid Grid.Row="3" Grid.Column="1" Visibility="{Binding ShowsListeningConfiguration, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <TextBlock Grid.Row="3" Grid.Column="0" Text="Port" Style="{StaticResource FormLabel}"/>
+            <Grid Grid.Row="3" Grid.Column="1" IsEnabled="{Binding CanEditListeningConfiguration}">
                 <TextBox x:Name="PortBox" Text="{Binding Port, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
                     <TextBox.Style>
                         <Style TargetType="TextBox" BasedOn="{StaticResource FormField}">
@@ -89,9 +89,8 @@
                 <TextBlock Text="5020" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0" VerticalAlignment="Center" Visibility="{Binding Text, ElementName=PortBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
             </Grid>
 
-            <TextBlock Grid.Row="4" Grid.Column="0" Text="Subnet" Style="{StaticResource FormLabel}"
-                       Visibility="{Binding ShowsNetworkProfileConfiguration, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-            <Grid Grid.Row="4" Grid.Column="1" Visibility="{Binding ShowsNetworkProfileConfiguration, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="Subnet" Style="{StaticResource FormLabel}"/>
+            <Grid Grid.Row="4" Grid.Column="1">
                 <TextBox x:Name="SubnetBox" Text="{Binding SubnetMask, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
                     <TextBox.Style>
                         <Style TargetType="TextBox" BasedOn="{StaticResource FormField}">
@@ -106,9 +105,8 @@
                 <TextBlock Text="255.255.255.0" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0" VerticalAlignment="Center" Visibility="{Binding Text, ElementName=SubnetBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
             </Grid>
 
-            <TextBlock Grid.Row="5" Grid.Column="0" Text="Primary DNS" Style="{StaticResource FormLabel}"
-                       Visibility="{Binding ShowsNetworkProfileConfiguration, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-            <Grid Grid.Row="5" Grid.Column="1" Visibility="{Binding ShowsNetworkProfileConfiguration, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <TextBlock Grid.Row="5" Grid.Column="0" Text="Primary DNS" Style="{StaticResource FormLabel}"/>
+            <Grid Grid.Row="5" Grid.Column="1">
                 <TextBox x:Name="PrimaryDnsBox" Text="{Binding PrimaryDns, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
                     <TextBox.Style>
                         <Style TargetType="TextBox" BasedOn="{StaticResource FormField}">
@@ -123,9 +121,8 @@
                 <TextBlock Text="8.8.8.8" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0" VerticalAlignment="Center" Visibility="{Binding Text, ElementName=PrimaryDnsBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
             </Grid>
 
-            <TextBlock Grid.Row="6" Grid.Column="0" Text="Alternate DNS" Style="{StaticResource FormLabel}"
-                       Visibility="{Binding ShowsNetworkProfileConfiguration, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-            <Grid Grid.Row="6" Grid.Column="1" Visibility="{Binding ShowsNetworkProfileConfiguration, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <TextBlock Grid.Row="6" Grid.Column="0" Text="Alternate DNS" Style="{StaticResource FormLabel}"/>
+            <Grid Grid.Row="6" Grid.Column="1">
                 <TextBox x:Name="AlternateDnsBox" Text="{Binding AlternateDns, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
                     <TextBox.Style>
                         <Style TargetType="TextBox" BasedOn="{StaticResource FormField}">
@@ -141,14 +138,15 @@
             </Grid>
 
             <CheckBox Grid.Row="7" Grid.ColumnSpan="2" Content="Use UDP" IsChecked="{Binding UseUdp}" Style="{StaticResource FormField}"
-                      Visibility="{Binding ShowsListeningConfiguration, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                      IsEnabled="{Binding CanEditListeningConfiguration}"/>
 
             <TextBlock Grid.Row="8" Grid.Column="0" Text="Mode" Style="{StaticResource FormLabel}"/>
             <ComboBox Grid.Row="8" Grid.Column="1" ItemsSource="{Binding Modes}" SelectedItem="{Binding Mode}" Style="{StaticResource FormField}"/>
 
             <TextBlock Grid.Row="9" Grid.Column="0" Text="Destination Host" Style="{StaticResource FormLabel}"
                        Visibility="{Binding IsSendingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-            <Grid Grid.Row="9" Grid.Column="1" Visibility="{Binding IsSendingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid Grid.Row="9" Grid.Column="1" Visibility="{Binding IsSendingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"
+                  IsEnabled="{Binding CanEditDestinationConfiguration}">
                 <TextBox x:Name="DestinationHostBox" Text="{Binding DestinationHost, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
                     <TextBox.Style>
                         <Style TargetType="TextBox" BasedOn="{StaticResource FormField}">
@@ -166,7 +164,8 @@
 
             <TextBlock Grid.Row="10" Grid.Column="0" Text="Destination Port" Style="{StaticResource FormLabel}"
                        Visibility="{Binding IsSendingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-            <Grid Grid.Row="10" Grid.Column="1" Visibility="{Binding IsSendingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid Grid.Row="10" Grid.Column="1" Visibility="{Binding IsSendingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"
+                  IsEnabled="{Binding CanEditDestinationConfiguration}">
                 <TextBox x:Name="DestinationPortBox" Text="{Binding DestinationPort, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
                     <TextBox.Style>
                         <Style TargetType="TextBox" BasedOn="{StaticResource FormField}">
@@ -182,9 +181,67 @@
                            Visibility="{Binding Text, ElementName=DestinationPortBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
             </Grid>
 
-            <TextBlock Grid.Row="11" Grid.Column="0" Text="Destination Gateway" Style="{StaticResource FormLabel}"
+            <TextBlock Grid.Row="11" Grid.Column="0" Text="Destination Subnet" Style="{StaticResource FormLabel}"
                        Visibility="{Binding IsSendingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-            <Grid Grid.Row="11" Grid.Column="1" Visibility="{Binding IsSendingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid Grid.Row="11" Grid.Column="1" Visibility="{Binding IsSendingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"
+                  IsEnabled="{Binding CanEditDestinationConfiguration}">
+                <TextBox x:Name="DestinationSubnetBox" Text="{Binding DestinationSubnetMask, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
+                    <TextBox.Style>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource FormField}">
+                            <Style.Triggers>
+                                <Trigger Property="Validation.HasError" Value="True">
+                                    <Setter Property="ToolTip" Value="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Self}}"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
+                <TextBlock Text="255.255.255.0" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0" VerticalAlignment="Center"
+                           Visibility="{Binding Text, ElementName=DestinationSubnetBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+            </Grid>
+
+            <TextBlock Grid.Row="12" Grid.Column="0" Text="Destination Primary DNS" Style="{StaticResource FormLabel}"
+                       Visibility="{Binding IsSendingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            <Grid Grid.Row="12" Grid.Column="1" Visibility="{Binding IsSendingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"
+                  IsEnabled="{Binding CanEditDestinationConfiguration}">
+                <TextBox x:Name="DestinationPrimaryDnsBox" Text="{Binding DestinationPrimaryDns, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
+                    <TextBox.Style>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource FormField}">
+                            <Style.Triggers>
+                                <Trigger Property="Validation.HasError" Value="True">
+                                    <Setter Property="ToolTip" Value="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Self}}"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
+                <TextBlock Text="8.8.8.8" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0" VerticalAlignment="Center"
+                           Visibility="{Binding Text, ElementName=DestinationPrimaryDnsBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+            </Grid>
+
+            <TextBlock Grid.Row="13" Grid.Column="0" Text="Destination Alternate DNS" Style="{StaticResource FormLabel}"
+                       Visibility="{Binding IsSendingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            <Grid Grid.Row="13" Grid.Column="1" Visibility="{Binding IsSendingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"
+                  IsEnabled="{Binding CanEditDestinationConfiguration}">
+                <TextBox x:Name="DestinationAlternateDnsBox" Text="{Binding DestinationAlternateDns, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
+                    <TextBox.Style>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource FormField}">
+                            <Style.Triggers>
+                                <Trigger Property="Validation.HasError" Value="True">
+                                    <Setter Property="ToolTip" Value="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Self}}"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
+                <TextBlock Text="1.1.1.1" IsHitTestVisible="False" Foreground="Gray" Margin="5,0,0,0" VerticalAlignment="Center"
+                           Visibility="{Binding Text, ElementName=DestinationAlternateDnsBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+            </Grid>
+
+            <TextBlock Grid.Row="14" Grid.Column="0" Text="Destination Gateway" Style="{StaticResource FormLabel}"
+                       Visibility="{Binding IsSendingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            <Grid Grid.Row="14" Grid.Column="1" Visibility="{Binding IsSendingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"
+                  IsEnabled="{Binding CanEditDestinationConfiguration}">
                 <TextBox x:Name="DestinationGatewayBox" Text="{Binding DestinationGateway, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
                     <TextBox.Style>
                         <Style TargetType="TextBox" BasedOn="{StaticResource FormField}">
@@ -200,7 +257,7 @@
                            Visibility="{Binding Text, ElementName=DestinationGatewayBox, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
             </Grid>
 
-            <views:EditorButtonBar Grid.Row="12" Grid.ColumnSpan="2"
+            <views:EditorButtonBar Grid.Row="15" Grid.ColumnSpan="2"
                                    SaveCommand="{Binding CreateCommand}"
                                    CancelCommand="{Binding CancelCommand}"
                                    SaveButtonText="Create"

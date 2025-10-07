@@ -56,6 +56,9 @@ namespace DesktopApplicationTemplate.Persistence
                         DestinationHost = s.TcpOptions.DestinationHost,
                         DestinationPort = s.TcpOptions.DestinationPort,
                         DestinationGateway = s.TcpOptions.DestinationGateway,
+                        DestinationSubnetMask = s.TcpOptions.DestinationSubnetMask,
+                        DestinationPrimaryDns = s.TcpOptions.DestinationPrimaryDns,
+                        DestinationAlternateDns = s.TcpOptions.DestinationAlternateDns,
                         InputMessage = s.TcpOptions.InputMessage,
                         Script = s.TcpOptions.Script,
                         OutputMessage = s.TcpOptions.OutputMessage,
@@ -295,6 +298,9 @@ namespace DesktopApplicationTemplate.Persistence
                             value.DestinationHost = info.TcpOptions.DestinationHost;
                             value.DestinationPort = info.TcpOptions.DestinationPort;
                             value.DestinationGateway = info.TcpOptions.DestinationGateway;
+                            value.DestinationSubnetMask = info.TcpOptions.DestinationSubnetMask;
+                            value.DestinationPrimaryDns = info.TcpOptions.DestinationPrimaryDns;
+                            value.DestinationAlternateDns = info.TcpOptions.DestinationAlternateDns;
                             value.InputMessage = info.TcpOptions.InputMessage;
                             value.Script = info.TcpOptions.Script;
                             value.OutputMessage = info.TcpOptions.OutputMessage;
