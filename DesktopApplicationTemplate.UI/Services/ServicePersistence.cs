@@ -52,6 +52,9 @@ namespace DesktopApplicationTemplate.Persistence
                         AlternateDns = s.TcpOptions.AlternateDns,
                         Mode = s.TcpOptions.Mode,
                         ConnectionRole = s.TcpOptions.ConnectionRole,
+                        DestinationHost = s.TcpOptions.DestinationHost,
+                        DestinationPort = s.TcpOptions.DestinationPort,
+                        DestinationGateway = s.TcpOptions.DestinationGateway,
                         InputMessage = s.TcpOptions.InputMessage,
                         Script = s.TcpOptions.Script,
                         OutputMessage = s.TcpOptions.OutputMessage,
@@ -287,6 +290,9 @@ namespace DesktopApplicationTemplate.Persistence
                             value.AlternateDns = info.TcpOptions.AlternateDns;
                             value.Mode = info.TcpOptions.Mode;
                             value.ConnectionRole = info.TcpOptions.ConnectionRole;
+                            value.DestinationHost = info.TcpOptions.DestinationHost;
+                            value.DestinationPort = info.TcpOptions.DestinationPort;
+                            value.DestinationGateway = info.TcpOptions.DestinationGateway;
                             value.InputMessage = info.TcpOptions.InputMessage;
                             value.Script = info.TcpOptions.Script;
                             value.OutputMessage = info.TcpOptions.OutputMessage;
