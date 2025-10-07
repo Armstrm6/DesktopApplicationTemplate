@@ -172,6 +172,11 @@
                              ScrollViewer.VerticalScrollBarVisibility="Auto"
                              SelectionChanged="ServiceList_SelectionChanged"
                              MouseDoubleClick="ServiceList_MouseDoubleClick">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <EventSetter Event="MouseDoubleClick" Handler="ServiceListItem_MouseDoubleClick" />
+                            </Style>
+                        </ListBox.ItemContainerStyle>
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Border CornerRadius="8" BorderBrush="{Binding BorderColor}" Background="{Binding BackgroundColor}" BorderThickness="2" Padding="5" Margin="2"

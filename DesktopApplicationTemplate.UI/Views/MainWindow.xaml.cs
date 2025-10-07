@@ -491,6 +491,11 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private void ServiceList_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
+            if (e.Handled)
+            {
+                return;
+            }
+
             if (e.OriginalSource is not DependencyObject source)
             {
                 return;
@@ -503,6 +508,21 @@ namespace DesktopApplicationTemplate.UI.Views
             }
 
             _logger?.LogDebug("Service {Name} double-clicked", svc.DisplayName);
+            if (_viewModel.EditServiceCommand.CanExecute(svc))
+            {
+                _viewModel.EditServiceCommand.Execute(svc);
+                e.Handled = true;
+            }
+        }
+
+        private void ServiceListItem_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (sender is not ListBoxItem { DataContext: ServiceListModel svc })
+            {
+                return;
+            }
+
+            _logger?.LogDebug("Service {Name} double-clicked via item container", svc.DisplayName);
             if (_viewModel.EditServiceCommand.CanExecute(svc))
             {
                 _viewModel.EditServiceCommand.Execute(svc);
