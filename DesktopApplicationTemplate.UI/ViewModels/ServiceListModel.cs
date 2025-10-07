@@ -473,7 +473,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 }
             }
 
-            if (trimmed.StartsWith('[', StringComparison.Ordinal))
+            if (trimmed.StartsWith("[", StringComparison.Ordinal))
             {
                 var levelEnd = trimmed.IndexOf(']');
                 if (levelEnd > 0)
