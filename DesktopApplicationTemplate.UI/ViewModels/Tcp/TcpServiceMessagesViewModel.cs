@@ -252,6 +252,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                 TestMessage = state.TestMessage;
                 OutputMessage = state.OutputMessage;
                 _options.OutputMessage = state.OutputMessage;
+                _routing.UpdateMessage(ServiceType, ServiceName, state.TestMessage, MessageRoutingDirection.Input);
+                _routing.UpdateMessage(ServiceType, ServiceName, state.OutputMessage, MessageRoutingDirection.Output);
                 Logger?.Log($"Script executed successfully: {OutputMessage}", LogLevel.Information);
             }
             catch (Exception ex)
@@ -499,14 +501,18 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                         }
 
                         var incoming = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                        Logger?.Log($"Received message from {endpoint}: {incoming}", LogLevel.Information);
+                        var formattedIncoming = MessageDisplayFormatter.FormatControlCharacters(incoming);
+                        Logger?.Log($"{ServiceName}.LastInputMessage from {endpoint}: {formattedIncoming}", LogLevel.Information);
+                        _routing.UpdateMessage(ServiceType, ServiceName, incoming, MessageRoutingDirection.Input);
                         await AppendMessageAsync(incoming, _options.OutputMessage, endpoint).ConfigureAwait(false);
 
                         if (!string.IsNullOrWhiteSpace(_options.OutputMessage))
                         {
                             var response = Encoding.UTF8.GetBytes(_options.OutputMessage);
                             await stream.WriteAsync(response.AsMemory(0, response.Length), cancellationToken).ConfigureAwait(false);
-                            Logger?.Log($"Sent response to {endpoint}: {_options.OutputMessage}", LogLevel.Debug);
+                            var formattedOutgoing = MessageDisplayFormatter.FormatControlCharacters(_options.OutputMessage);
+                            Logger?.Log($"{ServiceName}.LastOutputMessage to {endpoint}: {formattedOutgoing}", LogLevel.Debug);
+                            _routing.UpdateMessage(ServiceType, ServiceName, _options.OutputMessage, MessageRoutingDirection.Output);
                         }
                     }
                 }
@@ -564,16 +570,18 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             var incomingMessage = incoming ?? string.Empty;
             var outgoingMessage = outgoing ?? string.Empty;
             var destination = endpoint ?? string.Empty;
+            var incomingDisplay = MessageDisplayFormatter.FormatForService(incomingMessage, true, ServiceType, ServiceName);
+            var outgoingDisplay = MessageDisplayFormatter.FormatForService(outgoingMessage, false, ServiceType, ServiceName);
 
             return RunOnUiThreadAsync(() =>
             {
                 Messages.Insert(0, new TcpMessageRow
                 {
-                    IncomingMessage = incomingMessage,
+                    IncomingMessage = incomingDisplay,
                     IncomingIp = destination,
-                    OutgoingMessage = outgoingMessage,
+                    OutgoingMessage = outgoingDisplay,
                     ConnectedService = destination,
-                    Result = string.IsNullOrWhiteSpace(outgoingMessage) ? string.Empty : outgoingMessage
+                    Result = string.IsNullOrEmpty(outgoingDisplay) ? string.Empty : outgoingDisplay
                 });
 
                 while (Messages.Count > MaxTcpMessageRows)
@@ -581,7 +589,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                     Messages.RemoveAt(Messages.Count - 1);
                 }
 
-                MessageTable.AddMessage(incomingMessage, outgoingMessage, destination);
+                MessageTable.AddMessage(ServiceType, ServiceName, incomingMessage, outgoingMessage, destination);
 
                 OnPropertyChanged(nameof(IncomingData));
                 OnPropertyChanged(nameof(OutgoingResults));
@@ -900,6 +908,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                 TestMessage = result.TestMessage;
                 OutputMessage = result.OutputMessage;
                 _options.OutputMessage = result.OutputMessage;
+                _routing.UpdateMessage(ServiceType, ServiceName, result.TestMessage, MessageRoutingDirection.Input);
+                _routing.UpdateMessage(ServiceType, ServiceName, result.OutputMessage, MessageRoutingDirection.Output);
                 Logger?.Log($"Script executed successfully: {OutputMessage}", LogLevel.Information);
             }
             catch (Exception ex)
@@ -935,7 +945,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                 OutputMessage = _options.OutputMessage = output;
                 TestMessage = svm.TestMessage;
                 _options.LastTestMessage = svm.TestMessage;
-                _routing.UpdateMessage(ServiceType, ServiceName, svm.TestMessage);
+                _routing.UpdateMessage(ServiceType, ServiceName, svm.TestMessage, MessageRoutingDirection.Input);
+                _routing.UpdateMessage(ServiceType, ServiceName, output, MessageRoutingDirection.Output);
             }
 
             void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
