@@ -56,12 +56,13 @@ namespace DesktopApplicationTemplate.UI.Views
             DataContext = _viewModel;
             _viewModel.ConfigurationChangeBlocked += OnConfigurationChangeBlocked;
             _viewModel.AddServiceRequested += OnAddServiceRequested;
+            _viewModel.ExportPluginsRequested += OnExportPluginsRequested;
             _viewModel.Services.CollectionChanged += Services_CollectionChanged;
             MouseDown += MainView_MouseDown;
             CommandBindings.Add(new CommandBinding(SystemCommands.CloseWindowCommand, CloseCommand_Executed));
             CommandBindings.Add(new CommandBinding(SystemCommands.MinimizeWindowCommand, MinimizeCommand_Executed));
             Closing += MainView_Closing;
-            Closed += (_, _) => _viewModel.ConfigurationChangeBlocked -= OnConfigurationChangeBlocked;
+            Closed += MainView_Closed;
             ShowHome();
             PreloadServicePages();
         }
@@ -81,6 +82,12 @@ namespace DesktopApplicationTemplate.UI.Views
             {
                 _logger?.LogError(ex, "Failed to stop services during shutdown");
             }
+        }
+
+        private void MainView_Closed(object? sender, EventArgs e)
+        {
+            _viewModel.ConfigurationChangeBlocked -= OnConfigurationChangeBlocked;
+            _viewModel.ExportPluginsRequested -= OnExportPluginsRequested;
         }
 
         public void ShowHome()
@@ -116,6 +123,18 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             _logger?.LogInformation("Minimize command invoked");
             SystemCommands.MinimizeWindow(this);
+        }
+
+        private void OnExportPluginsRequested(object? sender, EventArgs e)
+        {
+            if (_serviceProvider.GetService(typeof(PluginExportWindow)) is not PluginExportWindow exportWindow)
+            {
+                _logger?.LogWarning("Plugin export window could not be resolved from the service provider.");
+                return;
+            }
+
+            exportWindow.Owner = this;
+            exportWindow.ShowDialog();
         }
 
         private void HomeButton_Click(object sender, RoutedEventArgs e) => NavigateHome("Home button");

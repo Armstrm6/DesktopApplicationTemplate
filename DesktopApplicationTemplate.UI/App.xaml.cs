@@ -154,6 +154,13 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<ServiceCatalog>(_ => new ServiceCatalog(descriptorSnapshot));
             services.AddSingleton<IServiceCatalog>(sp => sp.GetRequiredService<ServiceCatalog>());
 
+            var pluginOptions = PluginLoaderOptions.FromConfiguration(configuration);
+            services.AddSingleton(pluginOptions);
+            services.AddSingleton<IPluginImportService, PluginImportService>();
+            services.AddSingleton<IPluginExportService, PluginExportService>();
+            services.AddTransient<PluginExportViewModel>();
+            services.AddTransient<PluginExportWindow>();
+
             services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Mqtt, (sp, _) => new MqttEditServiceHandler(() => sp.GetRequiredService<MainView>(), () => sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<MqttEditServiceHandler>>()));
             services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Heartbeat, (sp, _) => new HeartbeatEditServiceHandler(() => sp.GetRequiredService<MainView>(), () => sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<HeartbeatEditServiceHandler>>()));
             services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Hid, (sp, _) => new HidEditServiceHandler(() => sp.GetRequiredService<MainView>(), () => sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<HidEditServiceHandler>>()));
