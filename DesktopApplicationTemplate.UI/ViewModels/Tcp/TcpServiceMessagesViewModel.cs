@@ -51,6 +51,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
         /// <summary>Collection of log entries.</summary>
         public ObservableCollection<LogEntry> Logs { get; } = new();
 
+        /// <summary>Latest incoming message text for the associated service.</summary>
+        public string LastInputMessage => _service?.LastInputMessage ?? string.Empty;
+
+        /// <summary>Latest outgoing message text for the associated service.</summary>
+        public string LastOutputMessage => _service?.LastOutputMessage ?? string.Empty;
+
         /// <inheritdoc />
         private ILoggingService? _logger;
         public ILoggingService? Logger
@@ -224,10 +230,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             if (_service is not null)
             {
                 _service.ActiveChanged -= OnServiceActiveChanged;
+                _service.PropertyChanged -= OnServicePropertyChanged;
             }
 
             _service = service;
             _service.ActiveChanged += OnServiceActiveChanged;
+            _service.PropertyChanged += OnServicePropertyChanged;
             _options = service.TcpOptions ?? new TcpServiceOptions();
             ServiceType = service.Type;
             ServiceName = service.DisplayName;
@@ -256,10 +264,25 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             MessageTable.SetActiveService(ServiceType, ServiceName);
             OnPropertyChanged(nameof(IncomingData));
             OnPropertyChanged(nameof(OutgoingResults));
+            OnPropertyChanged(nameof(LastInputMessage));
+            OnPropertyChanged(nameof(LastOutputMessage));
             _ = InitializeRuntimeAsync();
             if (_service.IsActive)
             {
                 _ = StartNetworkAsync();
+            }
+        }
+
+        private void OnServicePropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ServiceListModel.LastInputMessage) || string.IsNullOrEmpty(e.PropertyName))
+            {
+                OnPropertyChanged(nameof(LastInputMessage));
+            }
+
+            if (e.PropertyName == nameof(ServiceListModel.LastOutputMessage) || string.IsNullOrEmpty(e.PropertyName))
+            {
+                OnPropertyChanged(nameof(LastOutputMessage));
             }
         }
 
