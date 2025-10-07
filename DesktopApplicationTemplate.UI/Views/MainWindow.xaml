@@ -170,12 +170,13 @@
                              BorderThickness="0" HorizontalContentAlignment="Stretch"
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                              ScrollViewer.VerticalScrollBarVisibility="Auto"
-                             SelectionChanged="ServiceList_SelectionChanged">
+                             SelectionChanged="ServiceList_SelectionChanged"
+                             MouseDoubleClick="ServiceList_MouseDoubleClick">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Border CornerRadius="8" BorderBrush="{Binding BorderColor}" Background="{Binding BackgroundColor}" BorderThickness="2" Padding="5" Margin="2"
                                         PreviewMouseLeftButtonDown="ServiceItem_PreviewMouseLeftButtonDown" PreviewMouseMove="ServiceItem_PreviewMouseMove"
-                                        AllowDrop="True" Drop="ServiceItem_Drop" MouseLeftButtonDown="ServiceItem_MouseLeftButtonDown">
+                                        AllowDrop="True" Drop="ServiceItem_Drop">
                                         <Border CornerRadius="8" BorderBrush="Gray" BorderThickness="1" Padding="5" Margin="2"
                                                 Tag="{Binding DataContext.EditServiceCommand, RelativeSource={RelativeSource AncestorType=ListBox}}">
                                         <Border.ContextMenu>

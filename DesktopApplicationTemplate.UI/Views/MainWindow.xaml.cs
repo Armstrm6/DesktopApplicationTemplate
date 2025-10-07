@@ -489,6 +489,27 @@ namespace DesktopApplicationTemplate.UI.Views
             }
         }
 
+        private void ServiceList_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (e.OriginalSource is not DependencyObject source)
+            {
+                return;
+            }
+
+            var item = Helpers.VisualTreeHelperExtensions.FindParent<ListBoxItem>(source);
+            if (item?.DataContext is not ServiceListModel svc)
+            {
+                return;
+            }
+
+            _logger?.LogDebug("Service {Name} double-clicked", svc.DisplayName);
+            if (_viewModel.EditServiceCommand.CanExecute(svc))
+            {
+                _viewModel.EditServiceCommand.Execute(svc);
+                e.Handled = true;
+            }
+        }
+
         private void FilterButton_Click(object sender, RoutedEventArgs e)
         {
             if (FilterPopup != null)
@@ -636,21 +657,6 @@ namespace DesktopApplicationTemplate.UI.Views
                 }
             }
 
-        }
-
-        private void ServiceItem_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            if (e.ClickCount < 2)
-                return;
-
-            if (sender is Border { DataContext: ServiceListModel svc })
-            {
-                _logger?.LogDebug("Service {Name} double-clicked", svc.DisplayName);
-                if (_viewModel.EditServiceCommand.CanExecute(svc))
-                {
-                    _viewModel.EditServiceCommand.Execute(svc);
-                }
-            }
         }
 
         private void OpenSettings_Click(object sender, RoutedEventArgs e)

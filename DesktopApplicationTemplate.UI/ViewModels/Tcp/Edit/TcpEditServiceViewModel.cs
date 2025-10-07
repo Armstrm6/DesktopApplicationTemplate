@@ -134,11 +134,7 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
             _mode = value;
             OnPropertyChanged();
             OnPropertyChanged(nameof(IsSendingEnabled));
-            if (!IsSendingEnabled)
-            {
-                ClearErrors(nameof(DestinationHost));
-                ClearErrors(nameof(DestinationPort));
-            }
+            UpdateDestinationValidationState();
         }
     }
 
@@ -190,9 +186,14 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
     public TcpServiceMode[] Modes { get; } = (TcpServiceMode[])Enum.GetValues(typeof(TcpServiceMode));
 
     /// <summary>
+    private bool RequiresDestinationConfiguration =>
+        Mode == TcpServiceMode.Sending ||
+        (Mode == TcpServiceMode.ReceiveAndSend && ConnectionRole == TcpConnectionRole.Client);
+
+    /// <summary>
     /// Indicates whether the service should expose sending configuration fields.
     /// </summary>
-    public bool IsSendingEnabled => Mode != TcpServiceMode.Listening;
+    public bool IsSendingEnabled => RequiresDestinationConfiguration;
 
     /// <summary>
     /// Available TCP connection roles.
@@ -208,23 +209,7 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
         set
         {
             _destinationHost = value ?? string.Empty;
-            if (IsSendingEnabled)
-            {
-                var error = Rule.ValidateRequired(_destinationHost, "Destination Host");
-                if (error is not null)
-                {
-                    AddError(nameof(DestinationHost), error);
-                }
-                else
-                {
-                    ClearErrors(nameof(DestinationHost));
-                }
-            }
-            else
-            {
-                ClearErrors(nameof(DestinationHost));
-            }
-
+            ValidateDestinationHost();
             OnPropertyChanged();
         }
     }
@@ -238,23 +223,7 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
         set
         {
             _destinationPort = value;
-            if (IsSendingEnabled)
-            {
-                var error = Rule.ValidatePort(value);
-                if (error is not null)
-                {
-                    AddError(nameof(DestinationPort), error);
-                }
-                else
-                {
-                    ClearErrors(nameof(DestinationPort));
-                }
-            }
-            else
-            {
-                ClearErrors(nameof(DestinationPort));
-            }
-
+            ValidateDestinationPort();
             OnPropertyChanged();
         }
     }
@@ -288,6 +257,8 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
 
             _connectionRole = value;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(IsSendingEnabled));
+            UpdateDestinationValidationState();
             if (_suppressRoleHostUpdate)
             {
                 return;
@@ -358,6 +329,52 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
 
         var label = displayName ?? propertyName;
         AddError(propertyName, $"{label} must be a valid IPv4 address");
+    }
+
+    private void ValidateDestinationHost()
+    {
+        if (RequiresDestinationConfiguration)
+        {
+            var error = Rule.ValidateRequired(_destinationHost, "Destination Host");
+            if (error is not null)
+            {
+                AddError(nameof(DestinationHost), error);
+            }
+            else
+            {
+                ClearErrors(nameof(DestinationHost));
+            }
+        }
+        else
+        {
+            ClearErrors(nameof(DestinationHost));
+        }
+    }
+
+    private void ValidateDestinationPort()
+    {
+        if (RequiresDestinationConfiguration)
+        {
+            var error = Rule.ValidatePort(_destinationPort);
+            if (error is not null)
+            {
+                AddError(nameof(DestinationPort), error);
+            }
+            else
+            {
+                ClearErrors(nameof(DestinationPort));
+            }
+        }
+        else
+        {
+            ClearErrors(nameof(DestinationPort));
+        }
+    }
+
+    private void UpdateDestinationValidationState()
+    {
+        ValidateDestinationHost();
+        ValidateDestinationPort();
     }
 }
 
