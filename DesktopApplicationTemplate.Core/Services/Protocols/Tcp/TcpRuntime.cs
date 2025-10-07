@@ -68,11 +68,8 @@ public sealed class TcpRuntime : ITcpRuntime
         var output = await ExecuteScriptInternalAsync(script, testMessage, cancellationToken).ConfigureAwait(false);
 
         options.Script = script;
-        if (isInputMessage)
-        {
-            options.InputMessage = testMessage;
-        }
-        else
+        options.InputMessage = testMessage;
+        if (!isInputMessage)
         {
             options.LastTestMessage = testMessage;
         }
@@ -97,16 +94,22 @@ public sealed class TcpRuntime : ITcpRuntime
         _name = $"{context.ServiceType}.{context.ServiceName}";
 
         _logger?.LogInformation(this, "Executing TCP script");
-        var output = await ExecuteScriptInternalAsync(request.Script, request.TestMessage, cancellationToken).ConfigureAwait(false);
+        var script = request.Script ?? string.Empty;
+        var message = request.TestMessage ?? string.Empty;
+        var output = await ExecuteScriptInternalAsync(script, message, cancellationToken).ConfigureAwait(false);
 
-        context.Options.Script = request.Script;
-        context.Options.LastTestMessage = request.TestMessage;
+        context.Options.Script = script;
+        context.Options.InputMessage = message;
+        if (!request.IsLiveInput)
+        {
+            context.Options.LastTestMessage = message;
+        }
         context.Options.OutputMessage = output;
 
-        _routingService.UpdateMessage(context.ServiceType, context.ServiceName, request.TestMessage, MessageRoutingDirection.Input);
+        _routingService.UpdateMessage(context.ServiceType, context.ServiceName, message, MessageRoutingDirection.Input);
         _routingService.UpdateMessage(context.ServiceType, context.ServiceName, output, MessageRoutingDirection.Output);
 
-        return new TcpRuntimeState(request.Script, request.TestMessage, output);
+        return new TcpRuntimeState(script, message, output);
     }
 
     private string ResolveInitialMessage(TcpRuntimeContext context, out bool isInputMessage)

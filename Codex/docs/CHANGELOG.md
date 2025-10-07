@@ -41,6 +41,7 @@
 - Removed unsupported `DisplayName` assignment from Windows service options to restore service build.
 - Service factories populate the `Type` property when creating service models.
 - Removed duplicate `ServiceType` enum to resolve namespace conflicts.
+- TCP runtime now feeds live input through the script pipeline so routed output reflects processed messages, and stopping a service restores the configured test message.
 
 ### Navigation & UI
 #### Added
