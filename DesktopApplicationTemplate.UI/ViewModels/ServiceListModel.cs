@@ -317,7 +317,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             if (Logs.FirstOrDefault() is { } latest)
             {
                 LastInputMessage = NormalizePersistedMessage(latest.Message);
-                LastInputBrush = ParseBrush(latest.Color);
+                LastInputBrush = ParseBrush(latest.Color, WpfBrushes.Black);
             }
         }
 
