@@ -15,7 +15,7 @@
               HeadersVisibility="Column"
               RowHeaderWidth="0"
               MaxHeight="200"
-              ColumnWidth="*"
+              ColumnWidth="Auto"
               MinColumnWidth="100"
               ScrollViewer.HorizontalScrollBarVisibility="Auto"
               ScrollViewer.VerticalScrollBarVisibility="Auto">
@@ -26,18 +26,26 @@
             </Style>
         </DataGrid.ColumnHeaderStyle>
         <DataGrid.Columns>
-            <DataGridTextColumn Header="Incoming"
+            <DataGridTextColumn Header="Date"
+                                 Binding="{Binding Timestamp, StringFormat={}{0:d}}"
+                                 Width="Auto"
+                                 MinWidth="110" />
+            <DataGridTextColumn Header="Time"
+                                 Binding="{Binding Timestamp, StringFormat={}{0:T}}"
+                                 Width="Auto"
+                                 MinWidth="110" />
+            <DataGridTextColumn Header="Incoming Message"
                                  Binding="{Binding IncomingMessage}"
-                                 Width="2*"
-                                 MinWidth="150" />
-            <DataGridTextColumn Header="Outgoing"
+                                 Width="Auto"
+                                 MinWidth="180" />
+            <DataGridTextColumn Header="Outgoing Message"
                                  Binding="{Binding OutgoingMessage}"
-                                 Width="2*"
-                                 MinWidth="150" />
+                                 Width="Auto"
+                                 MinWidth="180" />
             <DataGridTextColumn Header="Destination"
                                  Binding="{Binding Destination}"
-                                 Width="*"
-                                 MinWidth="120" />
+                                 Width="Auto"
+                                 MinWidth="140" />
         </DataGrid.Columns>
     </DataGrid>
 </UserControl>

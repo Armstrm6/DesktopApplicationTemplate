@@ -171,7 +171,8 @@
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                              ScrollViewer.VerticalScrollBarVisibility="Auto"
                              SelectionChanged="ServiceList_SelectionChanged"
-                             MouseDoubleClick="ServiceList_MouseDoubleClick">
+                             MouseDoubleClick="ServiceList_MouseDoubleClick"
+                             PreviewMouseLeftButtonUp="ServiceList_PreviewMouseLeftButtonUp">
                         <ListBox.ItemContainerStyle>
                             <Style TargetType="ListBoxItem">
                                 <EventSetter Event="MouseDoubleClick" Handler="ServiceListItem_MouseDoubleClick" />

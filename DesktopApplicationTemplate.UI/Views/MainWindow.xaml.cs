@@ -489,6 +489,36 @@ namespace DesktopApplicationTemplate.UI.Views
             }
         }
 
+        private void ServiceList_PreviewMouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (e.Handled || e.ClickCount != 1)
+            {
+                return;
+            }
+
+            if (e.OriginalSource is not DependencyObject source)
+            {
+                return;
+            }
+
+            var item = Helpers.VisualTreeHelperExtensions.FindParent<ListBoxItem>(source);
+            if (item?.DataContext is not ServiceListModel svc)
+            {
+                return;
+            }
+
+            if (!ReferenceEquals(svc, _viewModel.SelectedService))
+            {
+                return;
+            }
+
+            var page = GetOrCreateServicePage(svc);
+            if (page != null)
+            {
+                ShowPage(page);
+            }
+        }
+
         private void ServiceList_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             if (e.Handled)

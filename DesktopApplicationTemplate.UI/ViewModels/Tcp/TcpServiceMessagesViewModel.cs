@@ -768,6 +768,19 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
 
                 MessageTable.AddMessage(ServiceType, ServiceName, incomingMessage, outgoingMessage, destination);
 
+                if (_service is not null)
+                {
+                    if (!string.IsNullOrEmpty(incomingMessage))
+                    {
+                        _service.UpdateLastInputMessage(incomingMessage);
+                    }
+
+                    if (!string.IsNullOrEmpty(outgoingMessage))
+                    {
+                        _service.UpdateLastOutputMessage(outgoingMessage);
+                    }
+                }
+
                 OnPropertyChanged(nameof(IncomingData));
                 OnPropertyChanged(nameof(OutgoingResults));
             });

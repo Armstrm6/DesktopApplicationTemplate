@@ -77,52 +77,21 @@ namespace DesktopApplicationTemplate.UI.Helpers
         }
 
         /// <summary>
-        /// Formats a message for display using the standardized service reference conventions.
+        /// Formats a message for display using readable control character tokens while keeping the
+        /// original payload intact. Service reference prefixes are intentionally omitted so the
+        /// displayed text mirrors the exact message that was transmitted or received.
         /// </summary>
         /// <param name="message">The message text to format.</param>
-        /// <param name="isIncoming">Indicates whether the message represents incoming data.</param>
-        /// <param name="serviceType">The type of service producing the message.</param>
-        /// <param name="serviceName">The name of the service producing the message.</param>
+        /// <param name="isIncoming">Unused. Present for backward compatibility with previous callers.</param>
+        /// <param name="serviceType">Unused. Present for backward compatibility with previous callers.</param>
+        /// <param name="serviceName">Unused. Present for backward compatibility with previous callers.</param>
         /// <returns>A formatted string suitable for UI presentation.</returns>
         public static string FormatForService(string? message, bool isIncoming, ServiceType serviceType, string serviceName)
         {
-            var formatted = FormatControlCharacters(message);
-            if (string.IsNullOrEmpty(formatted))
-            {
-                return string.Empty;
-            }
-
-            if (!ShouldUseServiceReference(serviceType) || string.IsNullOrWhiteSpace(serviceName))
-            {
-                return formatted;
-            }
-
-            var propertyName = isIncoming ? "LastInputMessage" : "LastOutputMessage";
-            const int separatorLength = 3; // '.', ':' and the following space
-            var requiredLength = serviceName.Length + propertyName.Length + formatted.Length + separatorLength;
-
-            return string.Create(requiredLength, (serviceName, propertyName, formatted),
-                (span, state) =>
-                {
-                    var (svcName, prop, content) = state;
-                    var index = 0;
-                    svcName.AsSpan().CopyTo(span);
-                    index += svcName.Length;
-                    span[index++] = '.';
-                    prop.AsSpan().CopyTo(span[index..]);
-                    index += prop.Length;
-                    span[index++] = ':';
-                    span[index++] = ' ';
-                    content.AsSpan().CopyTo(span[index..]);
-                });
-        }
-
-        private static bool ShouldUseServiceReference(ServiceType serviceType)
-        {
-            return serviceType is not ServiceType.Csv
-                and not ServiceType.Ftp
-                and not ServiceType.FileObserver
-                and not ServiceType.Scp;
+            _ = isIncoming;
+            _ = serviceType;
+            _ = serviceName;
+            return FormatControlCharacters(message);
         }
     }
 }

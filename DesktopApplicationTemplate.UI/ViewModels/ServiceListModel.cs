@@ -77,6 +77,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private int _executionCount;
         private TimeSpan _lastExecutionDuration;
         private string _lastInputMessage = string.Empty;
+        private string _lastOutputMessage = string.Empty;
         private WpfBrush _lastInputBrush = WpfBrushes.Black;
         private int _incomingMessageCount;
         private int _outgoingMessageCount;
@@ -148,7 +149,30 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             get => _lastInputMessage;
             private set
             {
+                if (_lastInputMessage == value)
+                {
+                    return;
+                }
+
                 _lastInputMessage = value;
+                OnPropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Gets the last outgoing message produced by this service.
+        /// </summary>
+        public string LastOutputMessage
+        {
+            get => _lastOutputMessage;
+            private set
+            {
+                if (_lastOutputMessage == value)
+                {
+                    return;
+                }
+
+                _lastOutputMessage = value;
                 OnPropertyChanged();
             }
         }
@@ -289,11 +313,17 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public void AddLog(string message, WpfBrush? color = null, LogLevel level = LogLevel.Debug, bool checkReference = true)
         {
-            var normalizedMessage = NormalizeLatestMessage(message);
-            LastInputMessage = normalizedMessage;
-            LastInputBrush = color ?? WpfBrushes.Black;
-            var ts = DateTime.Now.ToString(TimestampFormat, CultureInfo.InvariantCulture);
-            var entry = new LogEntry { Message = $"{ts} {message}", Color = (color ?? WpfBrushes.Black).ToString(), Level = level };
+            var brush = color ?? WpfBrushes.Black;
+            var normalizedMessage = UpdateLastInputMessage(message, brush);
+            var entryMessage = string.IsNullOrEmpty(normalizedMessage)
+                ? $"[{level}]"
+                : $"[{level}] {normalizedMessage}";
+            var entry = new LogEntry
+            {
+                Message = entryMessage,
+                Color = brush.ToString(),
+                Level = level
+            };
             Logs.Insert(0, entry);
             if (Logs.Count > MaxLogEntries)
             {
@@ -320,6 +350,32 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 LastInputMessage = NormalizePersistedMessage(latest.Message);
                 LastInputBrush = ParseBrush(latest.Color, WpfBrushes.Black);
             }
+        }
+
+        /// <summary>
+        /// Updates the last input message tracked for this service.
+        /// </summary>
+        /// <param name="message">The raw message text.</param>
+        /// <param name="brush">The brush used to display the message in the UI.</param>
+        /// <returns>The normalized message stored on the model.</returns>
+        public string UpdateLastInputMessage(string? message, WpfBrush? brush = null)
+        {
+            var normalizedMessage = NormalizeLatestMessage(message);
+            LastInputMessage = normalizedMessage;
+            LastInputBrush = brush ?? WpfBrushes.Black;
+            return normalizedMessage;
+        }
+
+        /// <summary>
+        /// Updates the last output message tracked for this service.
+        /// </summary>
+        /// <param name="message">The raw message text.</param>
+        /// <returns>The normalized message stored on the model.</returns>
+        public string UpdateLastOutputMessage(string? message)
+        {
+            var normalizedMessage = NormalizeLatestMessage(message);
+            LastOutputMessage = normalizedMessage;
+            return normalizedMessage;
         }
 
         /// <summary>
@@ -413,8 +469,20 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 var timestampCandidate = trimmed.Substring(0, TimestampLength);
                 if (DateTime.TryParseExact(timestampCandidate, TimestampFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out _))
                 {
-                    var withoutTimestamp = trimmed[(TimestampLength + 1)..].Trim();
-                    return MessageDisplayFormatter.FormatControlCharacters(withoutTimestamp);
+                    trimmed = trimmed[(TimestampLength + 1)..].Trim();
+                }
+            }
+
+            if (trimmed.StartsWith('[', StringComparison.Ordinal))
+            {
+                var levelEnd = trimmed.IndexOf(']');
+                if (levelEnd > 0)
+                {
+                    var candidate = trimmed.Substring(1, levelEnd - 1);
+                    if (Enum.TryParse(candidate, out LogLevel _))
+                    {
+                        trimmed = trimmed[(levelEnd + 1)..].TrimStart();
+                    }
                 }
             }
 
