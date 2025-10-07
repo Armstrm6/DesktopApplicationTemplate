@@ -25,6 +25,10 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
     private string _destinationHost = string.Empty;
     private int _destinationPort;
     private string _destinationGateway = string.Empty;
+    private string _destinationSubnetMask = string.Empty;
+    private string _destinationPrimaryDns = string.Empty;
+    private string _destinationAlternateDns = string.Empty;
+    private TcpConnectionRole _previousListeningRole = TcpConnectionRole.Server;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TcpEditServiceViewModel"/> class.
@@ -53,6 +57,9 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
         DestinationHost = _options.DestinationHost;
         DestinationPort = _options.DestinationPort;
         DestinationGateway = _options.DestinationGateway;
+        DestinationSubnetMask = _options.DestinationSubnetMask;
+        DestinationPrimaryDns = _options.DestinationPrimaryDns;
+        DestinationAlternateDns = _options.DestinationAlternateDns;
         if (ConnectionRole == TcpConnectionRole.Server)
         {
             _serverHost = _options.Host;
@@ -62,6 +69,7 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
             _clientHost = _options.Host;
         }
         _suppressRoleHostUpdate = false;
+        _previousListeningRole = ConnectionRole == TcpConnectionRole.Client ? TcpConnectionRole.Server : ConnectionRole;
     }
 
 
@@ -134,6 +142,9 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
             _mode = value;
             OnPropertyChanged();
             OnPropertyChanged(nameof(IsSendingEnabled));
+            OnPropertyChanged(nameof(CanEditListeningConfiguration));
+            OnPropertyChanged(nameof(CanEditDestinationConfiguration));
+            EnsureConnectionRoleForMode();
             UpdateDestinationValidationState();
         }
     }
@@ -188,12 +199,22 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
     /// <summary>
     private bool RequiresDestinationConfiguration =>
         Mode == TcpServiceMode.Sending ||
-        (Mode == TcpServiceMode.ReceiveAndSend && ConnectionRole == TcpConnectionRole.Client);
+        Mode == TcpServiceMode.ReceiveAndSend;
 
     /// <summary>
     /// Indicates whether the service should expose sending configuration fields.
     /// </summary>
     public bool IsSendingEnabled => RequiresDestinationConfiguration;
+
+    /// <summary>
+    /// Indicates whether listening-related configuration can be modified.
+    /// </summary>
+    public bool CanEditListeningConfiguration => Mode != TcpServiceMode.Sending;
+
+    /// <summary>
+    /// Indicates whether destination configuration can be modified.
+    /// </summary>
+    public bool CanEditDestinationConfiguration => IsSendingEnabled;
 
     /// <summary>
     /// Available TCP connection roles.
@@ -243,6 +264,48 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
     }
 
     /// <summary>
+    /// Subnet mask applied to the destination configuration.
+    /// </summary>
+    public string DestinationSubnetMask
+    {
+        get => _destinationSubnetMask;
+        set
+        {
+            _destinationSubnetMask = value ?? string.Empty;
+            ValidateOptionalIpAddress(_destinationSubnetMask, nameof(DestinationSubnetMask), "Destination Subnet");
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>
+    /// Primary DNS server applied to the destination configuration.
+    /// </summary>
+    public string DestinationPrimaryDns
+    {
+        get => _destinationPrimaryDns;
+        set
+        {
+            _destinationPrimaryDns = value ?? string.Empty;
+            ValidateOptionalIpAddress(_destinationPrimaryDns, nameof(DestinationPrimaryDns), "Destination Primary DNS");
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>
+    /// Alternate DNS server applied to the destination configuration.
+    /// </summary>
+    public string DestinationAlternateDns
+    {
+        get => _destinationAlternateDns;
+        set
+        {
+            _destinationAlternateDns = value ?? string.Empty;
+            ValidateOptionalIpAddress(_destinationAlternateDns, nameof(DestinationAlternateDns), "Destination Alternate DNS");
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>
     /// Selected TCP connection role.
     /// </summary>
     public TcpConnectionRole ConnectionRole
@@ -255,7 +318,17 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
                 return;
             }
 
+            if (Mode == TcpServiceMode.Sending && value != TcpConnectionRole.Client)
+            {
+                return;
+            }
+
             _connectionRole = value;
+            if (Mode != TcpServiceMode.Sending)
+            {
+                _previousListeningRole = value;
+            }
+
             OnPropertyChanged();
             OnPropertyChanged(nameof(IsSendingEnabled));
             UpdateDestinationValidationState();
@@ -282,6 +355,31 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
         }
     }
 
+    private void EnsureConnectionRoleForMode()
+    {
+        if (Mode == TcpServiceMode.Sending)
+        {
+            if (_connectionRole != TcpConnectionRole.Client)
+            {
+                var previous = _connectionRole;
+                _previousListeningRole = previous == TcpConnectionRole.Client ? TcpConnectionRole.Server : previous;
+                _connectionRole = TcpConnectionRole.Client;
+                OnPropertyChanged(nameof(ConnectionRole));
+                OnPropertyChanged(nameof(IsSendingEnabled));
+                UpdateDestinationValidationState();
+                Host = _clientHost;
+            }
+        }
+        else if (_connectionRole == TcpConnectionRole.Client && _previousListeningRole != TcpConnectionRole.Client)
+        {
+            _connectionRole = _previousListeningRole;
+            OnPropertyChanged(nameof(ConnectionRole));
+            OnPropertyChanged(nameof(IsSendingEnabled));
+            UpdateDestinationValidationState();
+            Host = _connectionRole == TcpConnectionRole.Server ? _serverHost : _clientHost;
+        }
+    }
+
     /// <inheritdoc />
     protected override void OnSave()
     {
@@ -301,6 +399,9 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
         _options.DestinationHost = DestinationHost;
         _options.DestinationPort = DestinationPort;
         _options.DestinationGateway = DestinationGateway;
+        _options.DestinationSubnetMask = DestinationSubnetMask;
+        _options.DestinationPrimaryDns = DestinationPrimaryDns;
+        _options.DestinationAlternateDns = DestinationAlternateDns;
         RaiseServiceSaved(_options);
     }
 

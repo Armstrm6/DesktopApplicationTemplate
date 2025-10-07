@@ -14,6 +14,7 @@ using DesktopApplicationTemplate.Core.Services.Protocols.Heartbeat;
 using DesktopApplicationTemplate.Core.Services.Protocols.Hid;
 using DesktopApplicationTemplate.Core.Services.Protocols.Scp;
 using DesktopApplicationTemplate.Models;
+using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.ViewModels;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
@@ -55,6 +56,9 @@ namespace DesktopApplicationTemplate.Persistence
                         DestinationHost = s.TcpOptions.DestinationHost,
                         DestinationPort = s.TcpOptions.DestinationPort,
                         DestinationGateway = s.TcpOptions.DestinationGateway,
+                        DestinationSubnetMask = s.TcpOptions.DestinationSubnetMask,
+                        DestinationPrimaryDns = s.TcpOptions.DestinationPrimaryDns,
+                        DestinationAlternateDns = s.TcpOptions.DestinationAlternateDns,
                         InputMessage = s.TcpOptions.InputMessage,
                         Script = s.TcpOptions.Script,
                         OutputMessage = s.TcpOptions.OutputMessage,
@@ -169,7 +173,8 @@ namespace DesktopApplicationTemplate.Persistence
                             Message = l.Message,
                             Color = l.Color
                         })
-                        .ToList()
+                        .ToList(),
+                    MessageHistory = s.GetMessageHistorySnapshot().ToList()
                 });
             }
 
@@ -293,6 +298,9 @@ namespace DesktopApplicationTemplate.Persistence
                             value.DestinationHost = info.TcpOptions.DestinationHost;
                             value.DestinationPort = info.TcpOptions.DestinationPort;
                             value.DestinationGateway = info.TcpOptions.DestinationGateway;
+                            value.DestinationSubnetMask = info.TcpOptions.DestinationSubnetMask;
+                            value.DestinationPrimaryDns = info.TcpOptions.DestinationPrimaryDns;
+                            value.DestinationAlternateDns = info.TcpOptions.DestinationAlternateDns;
                             value.InputMessage = info.TcpOptions.InputMessage;
                             value.Script = info.TcpOptions.Script;
                             value.OutputMessage = info.TcpOptions.OutputMessage;
@@ -407,6 +415,7 @@ namespace DesktopApplicationTemplate.Persistence
         public double TotalExecutionTimeMs { get; set; }
         public int ExecutionCount { get; set; }
         public List<LogEntry> Logs { get; set; } = new();
+        public List<ServiceMessageHistoryEntry> MessageHistory { get; set; } = new();
     }
 
     internal class LegacyServiceInfo

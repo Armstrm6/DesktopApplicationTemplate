@@ -39,13 +39,23 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
         public ObservableCollection<TcpMessageRow> Messages { get; } = new();
 
         /// <summary>Incoming data extracted from <see cref="Messages"/>.</summary>
-        public IEnumerable<string> IncomingData => Messages.Select(m => $"{m.IncomingIp}: {m.IncomingMessage}");
+        public IEnumerable<string> IncomingData => Messages
+            .Select(m => m.IncomingMessage)
+            .Where(message => !string.IsNullOrWhiteSpace(message));
 
         /// <summary>Outgoing results extracted from <see cref="Messages"/>.</summary>
-        public IEnumerable<string> OutgoingResults => Messages.Select(m => $"{m.ConnectedService}: {m.Result}");
+        public IEnumerable<string> OutgoingResults => Messages
+            .Select(m => m.Result)
+            .Where(result => !string.IsNullOrWhiteSpace(result));
 
         /// <summary>Collection of log entries.</summary>
         public ObservableCollection<LogEntry> Logs { get; } = new();
+
+        /// <summary>Latest incoming message text for the associated service.</summary>
+        public string LastInputMessage => _service?.LastInputMessage ?? string.Empty;
+
+        /// <summary>Latest outgoing message text for the associated service.</summary>
+        public string LastOutputMessage => _service?.LastOutputMessage ?? string.Empty;
 
         /// <inheritdoc />
         private ILoggingService? _logger;
@@ -109,6 +119,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
         private readonly object _clientTasksLock = new();
         private bool _isApplicationExitHooked;
         private NetworkConfiguration _networkConfiguration = new();
+        private static readonly TimeSpan ClientReconnectDelay = TimeSpan.FromSeconds(2);
 
         /// <summary>Type of the service associated with these messages.</summary>
         public ServiceType ServiceType { get; private set; } = ServiceType.Tcp;
@@ -219,10 +230,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             if (_service is not null)
             {
                 _service.ActiveChanged -= OnServiceActiveChanged;
+                _service.PropertyChanged -= OnServicePropertyChanged;
             }
 
             _service = service;
             _service.ActiveChanged += OnServiceActiveChanged;
+            _service.PropertyChanged += OnServicePropertyChanged;
             _options = service.TcpOptions ?? new TcpServiceOptions();
             ServiceType = service.Type;
             ServiceName = service.DisplayName;
@@ -232,14 +245,44 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             OutputMessage = _options.OutputMessage;
             _runtimeContext = new TcpRuntimeContext(ServiceType, ServiceName, _options, ScriptEditorViewModel.DefaultScript);
             ApplyNetworkConfiguration(restartIfActive: false);
+            var history = service.GetMessageHistorySnapshot();
+            MessageTable.LoadMessages(ServiceType, ServiceName, history);
             Messages.Clear();
-            MessageTable.Messages.Clear();
+            foreach (var entry in history.AsEnumerable().Reverse())
+            {
+                var incomingDisplay = MessageDisplayFormatter.FormatForService(entry.IncomingMessage, true, ServiceType, ServiceName);
+                var outgoingDisplay = MessageDisplayFormatter.FormatForService(entry.OutgoingMessage, false, ServiceType, ServiceName);
+                Messages.Insert(0, new TcpMessageRow
+                {
+                    IncomingMessage = incomingDisplay,
+                    IncomingIp = string.Empty,
+                    OutgoingMessage = outgoingDisplay,
+                    ConnectedService = entry.Destination ?? string.Empty,
+                    Result = string.IsNullOrEmpty(outgoingDisplay) ? string.Empty : outgoingDisplay
+                });
+            }
+            MessageTable.SetActiveService(ServiceType, ServiceName);
             OnPropertyChanged(nameof(IncomingData));
             OnPropertyChanged(nameof(OutgoingResults));
+            OnPropertyChanged(nameof(LastInputMessage));
+            OnPropertyChanged(nameof(LastOutputMessage));
             _ = InitializeRuntimeAsync();
             if (_service.IsActive)
             {
                 _ = StartNetworkAsync();
+            }
+        }
+
+        private void OnServicePropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ServiceListModel.LastInputMessage) || string.IsNullOrEmpty(e.PropertyName))
+            {
+                OnPropertyChanged(nameof(LastInputMessage));
+            }
+
+            if (e.PropertyName == nameof(ServiceListModel.LastOutputMessage) || string.IsNullOrEmpty(e.PropertyName))
+            {
+                OnPropertyChanged(nameof(LastOutputMessage));
             }
         }
 
@@ -639,45 +682,90 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
         private async Task RunClientLoopAsync(TcpEndpoint endpoint, TcpClientOperation operation, CancellationToken cancellationToken)
         {
             var operationLabel = operation == TcpClientOperation.Receive ? "listening endpoint" : "destination";
+            var endpointDisplay = $"{endpoint.Host}:{endpoint.Port}";
 
-            try
+            while (!cancellationToken.IsCancellationRequested)
             {
-                using var client = new TcpClient();
-                await client.ConnectAsync(endpoint.Host, endpoint.Port, cancellationToken).ConfigureAwait(false);
-                Logger?.Log($"Connected to {operationLabel} {endpoint.Host}:{endpoint.Port}", LogLevel.Information);
-
-                using var stream = client.GetStream();
-                var message = _options.InputMessage ?? string.Empty;
-                var shouldSendMessage = operation == TcpClientOperation.Send && !string.IsNullOrWhiteSpace(message);
-                if (shouldSendMessage)
+                try
                 {
-                    var payload = Encoding.UTF8.GetBytes(message);
-                    await stream.WriteAsync(payload.AsMemory(0, payload.Length), cancellationToken).ConfigureAwait(false);
-                    Logger?.Log($"Sent message to {operationLabel} {endpoint.Host}:{endpoint.Port}: {message}", LogLevel.Information);
+                    using var client = new TcpClient();
+                    await client.ConnectAsync(endpoint.Host, endpoint.Port, cancellationToken).ConfigureAwait(false);
+                    Logger?.Log($"Connected to {operationLabel} {endpointDisplay}", LogLevel.Information);
+
+                    using var stream = client.GetStream();
+                    var message = _options.OutputMessage ?? string.Empty;
+                    var shouldSendMessage = operation == TcpClientOperation.Send && !string.IsNullOrWhiteSpace(message);
+                    if (shouldSendMessage)
+                    {
+                        var payload = Encoding.UTF8.GetBytes(message);
+                        await stream.WriteAsync(payload.AsMemory(0, payload.Length), cancellationToken).ConfigureAwait(false);
+                        Logger?.Log($"Sent message to {operationLabel} {endpointDisplay}: {message}", LogLevel.Information);
+                        _routing.UpdateMessage(ServiceType, ServiceName, message, MessageRoutingDirection.Output);
+                    }
+
+                    var buffer = new byte[4096];
+                    var receivedAny = false;
+
+                    while (!cancellationToken.IsCancellationRequested)
+                    {
+                        int bytesRead;
+                        try
+                        {
+                            bytesRead = await stream.ReadAsync(buffer.AsMemory(0, buffer.Length), cancellationToken).ConfigureAwait(false);
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            break;
+                        }
+
+                        if (bytesRead == 0)
+                        {
+                            break;
+                        }
+
+                        var response = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                        receivedAny = true;
+
+                        if (operation == TcpClientOperation.Receive)
+                        {
+                            Logger?.Log($"Received message from {endpointDisplay}: {response}", LogLevel.Information);
+                            _routing.UpdateMessage(ServiceType, ServiceName, response, MessageRoutingDirection.Input);
+                            await AppendMessageAsync(response, string.Empty, endpointDisplay).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            Logger?.Log($"Received response from {endpointDisplay}: {response}", LogLevel.Information);
+                            _routing.UpdateMessage(ServiceType, ServiceName, response, MessageRoutingDirection.Input);
+                            await AppendMessageAsync(message, response, endpointDisplay).ConfigureAwait(false);
+                        }
+                    }
+
+                    if (!receivedAny && shouldSendMessage)
+                    {
+                        await AppendMessageAsync(message, string.Empty, endpointDisplay).ConfigureAwait(false);
+                        Logger?.Log($"No response received from {endpointDisplay}", LogLevel.Warning);
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    LogConnectionIssues($"TCP client connection to {endpoint.Host}:{endpoint.Port}", ex);
                 }
 
-                var buffer = new byte[4096];
-                var bytesRead = await stream.ReadAsync(buffer.AsMemory(0, buffer.Length), cancellationToken).ConfigureAwait(false);
-                var endpointDisplay = $"{endpoint.Host}:{endpoint.Port}";
-                if (bytesRead > 0)
+                if (!cancellationToken.IsCancellationRequested)
                 {
-                    var response = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                    Logger?.Log($"Received response from {endpointDisplay}: {response}", LogLevel.Information);
-                    await AppendMessageAsync(message, response, endpointDisplay).ConfigureAwait(false);
+                    try
+                    {
+                        await Task.Delay(ClientReconnectDelay, cancellationToken).ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
                 }
-                else
-                {
-                    await AppendMessageAsync(message, string.Empty, endpointDisplay).ConfigureAwait(false);
-                    Logger?.Log($"No response received from {endpointDisplay}", LogLevel.Warning);
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                // graceful cancellation
-            }
-            catch (Exception ex)
-            {
-                LogConnectionIssues($"TCP client connection to {endpoint.Host}:{endpoint.Port}", ex);
             }
         }
 
@@ -703,7 +791,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
 
                         var incoming = Encoding.UTF8.GetString(buffer, 0, bytesRead);
                         var formattedIncoming = MessageDisplayFormatter.FormatControlCharacters(incoming);
-                        Logger?.Log($"{ServiceName}.LastInputMessage from {endpoint}: {formattedIncoming}", LogLevel.Information);
+                        Logger?.Log($"Incoming message from {endpoint}: {formattedIncoming}", LogLevel.Information);
                         _routing.UpdateMessage(ServiceType, ServiceName, incoming, MessageRoutingDirection.Input);
                         await AppendMessageAsync(incoming, _options.OutputMessage, endpoint).ConfigureAwait(false);
 
@@ -712,7 +800,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                             var response = Encoding.UTF8.GetBytes(_options.OutputMessage);
                             await stream.WriteAsync(response.AsMemory(0, response.Length), cancellationToken).ConfigureAwait(false);
                             var formattedOutgoing = MessageDisplayFormatter.FormatControlCharacters(_options.OutputMessage);
-                            Logger?.Log($"{ServiceName}.LastOutputMessage to {endpoint}: {formattedOutgoing}", LogLevel.Debug);
+                            Logger?.Log($"Outgoing message to {endpoint}: {formattedOutgoing}", LogLevel.Debug);
                             _routing.UpdateMessage(ServiceType, ServiceName, _options.OutputMessage, MessageRoutingDirection.Output);
                         }
                     }

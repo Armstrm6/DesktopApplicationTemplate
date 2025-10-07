@@ -18,6 +18,7 @@ using DesktopApplicationTemplate.Core.Services.Protocols.Scp;
 using DesktopApplicationTemplate.Core.Services.Protocols.Tcp;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Helpers;
+using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.Services;
 using WpfBrush = System.Windows.Media.Brush;
 using WpfBrushes = System.Windows.Media.Brushes;
@@ -73,10 +74,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public ObservableCollection<string> AssociatedServices { get; } = new();
 
+        private readonly LinkedList<ServiceMessageHistoryEntry> _messageHistory = new();
         private double _totalExecutionTimeMs;
         private int _executionCount;
         private TimeSpan _lastExecutionDuration;
         private string _lastInputMessage = string.Empty;
+        private string _lastOutputMessage = string.Empty;
         private WpfBrush _lastInputBrush = WpfBrushes.Black;
         private int _incomingMessageCount;
         private int _outgoingMessageCount;
@@ -148,7 +151,30 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             get => _lastInputMessage;
             private set
             {
+                if (_lastInputMessage == value)
+                {
+                    return;
+                }
+
                 _lastInputMessage = value;
+                OnPropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Gets the last outgoing message produced by this service.
+        /// </summary>
+        public string LastOutputMessage
+        {
+            get => _lastOutputMessage;
+            private set
+            {
+                if (_lastOutputMessage == value)
+                {
+                    return;
+                }
+
+                _lastOutputMessage = value;
                 OnPropertyChanged();
             }
         }
@@ -289,11 +315,17 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public void AddLog(string message, WpfBrush? color = null, LogLevel level = LogLevel.Debug, bool checkReference = true)
         {
+            var brush = color ?? WpfBrushes.Black;
             var normalizedMessage = NormalizeLatestMessage(message);
-            LastInputMessage = normalizedMessage;
-            LastInputBrush = color ?? WpfBrushes.Black;
-            var ts = DateTime.Now.ToString(TimestampFormat, CultureInfo.InvariantCulture);
-            var entry = new LogEntry { Message = $"{ts} {message}", Color = (color ?? WpfBrushes.Black).ToString(), Level = level };
+            var entryMessage = string.IsNullOrEmpty(normalizedMessage)
+                ? $"[{level}]"
+                : $"[{level}] {normalizedMessage}";
+            var entry = new LogEntry
+            {
+                Message = entryMessage,
+                Color = brush.ToString(),
+                Level = level
+            };
             Logs.Insert(0, entry);
             if (Logs.Count > MaxLogEntries)
             {
@@ -320,6 +352,126 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 LastInputMessage = NormalizePersistedMessage(latest.Message);
                 LastInputBrush = ParseBrush(latest.Color, WpfBrushes.Black);
             }
+        }
+
+        /// <summary>
+        /// Rehydrates persisted message history so the service restores its last known exchanges.
+        /// </summary>
+        /// <param name="entries">The persisted message entries.</param>
+        public void LoadMessageHistory(IEnumerable<ServiceMessageHistoryEntry> entries)
+        {
+            _messageHistory.Clear();
+            LastInputMessage = string.Empty;
+            LastOutputMessage = string.Empty;
+            LastInputBrush = WpfBrushes.Black;
+            if (entries is null)
+            {
+                return;
+            }
+
+            foreach (var entry in entries
+                         .Where(e => e is not null)
+                         .OrderByDescending(e => e.Timestamp)
+                         .Take(ServiceMessageTableViewModel.MaxRows))
+            {
+                _messageHistory.AddLast(new ServiceMessageHistoryEntry
+                {
+                    IncomingMessage = entry.IncomingMessage ?? string.Empty,
+                    OutgoingMessage = entry.OutgoingMessage ?? string.Empty,
+                    Destination = entry.Destination ?? string.Empty,
+                    Timestamp = entry.Timestamp
+                });
+            }
+
+            foreach (var historyEntry in _messageHistory)
+            {
+                if (!string.IsNullOrEmpty(historyEntry.IncomingMessage))
+                {
+                    UpdateLastInputMessage(historyEntry.IncomingMessage);
+                    break;
+                }
+            }
+
+            foreach (var historyEntry in _messageHistory)
+            {
+                if (!string.IsNullOrEmpty(historyEntry.OutgoingMessage))
+                {
+                    UpdateLastOutputMessage(historyEntry.OutgoingMessage);
+                    break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Updates the last input message tracked for this service.
+        /// </summary>
+        /// <param name="message">The raw message text.</param>
+        /// <param name="brush">The brush used to display the message in the UI.</param>
+        /// <returns>The normalized message stored on the model.</returns>
+        public string UpdateLastInputMessage(string? message, WpfBrush? brush = null)
+        {
+            var normalizedMessage = NormalizeLatestMessage(message);
+            LastInputMessage = normalizedMessage;
+            LastInputBrush = brush ?? WpfBrushes.Black;
+            return normalizedMessage;
+        }
+
+        /// <summary>
+        /// Updates the last output message tracked for this service.
+        /// </summary>
+        /// <param name="message">The raw message text.</param>
+        /// <returns>The normalized message stored on the model.</returns>
+        public string UpdateLastOutputMessage(string? message)
+        {
+            var normalizedMessage = NormalizeLatestMessage(message);
+            LastOutputMessage = normalizedMessage;
+            return normalizedMessage;
+        }
+
+        /// <summary>
+        /// Records a message exchange for persistence and downstream bindings.
+        /// </summary>
+        public void RecordMessageHistory(string? incomingMessage, string? outgoingMessage, string? destination, DateTime timestamp)
+        {
+            var entry = new ServiceMessageHistoryEntry
+            {
+                IncomingMessage = incomingMessage ?? string.Empty,
+                OutgoingMessage = outgoingMessage ?? string.Empty,
+                Destination = destination ?? string.Empty,
+                Timestamp = timestamp
+            };
+
+            _messageHistory.AddFirst(entry);
+            while (_messageHistory.Count > ServiceMessageTableViewModel.MaxRows)
+            {
+                _messageHistory.RemoveLast();
+            }
+
+            if (!string.IsNullOrEmpty(incomingMessage))
+            {
+                UpdateLastInputMessage(incomingMessage);
+            }
+
+            if (!string.IsNullOrEmpty(outgoingMessage))
+            {
+                UpdateLastOutputMessage(outgoingMessage);
+            }
+        }
+
+        /// <summary>
+        /// Creates a snapshot of the current message history for persistence.
+        /// </summary>
+        public IReadOnlyList<ServiceMessageHistoryEntry> GetMessageHistorySnapshot()
+        {
+            return _messageHistory
+                .Select(entry => new ServiceMessageHistoryEntry
+                {
+                    IncomingMessage = entry.IncomingMessage,
+                    OutgoingMessage = entry.OutgoingMessage,
+                    Destination = entry.Destination,
+                    Timestamp = entry.Timestamp
+                })
+                .ToList();
         }
 
         /// <summary>
@@ -394,9 +546,15 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         private static string NormalizeLatestMessage(string? message)
         {
-            return string.IsNullOrWhiteSpace(message)
-                ? string.Empty
-                : MessageDisplayFormatter.FormatControlCharacters(message.Trim());
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                return string.Empty;
+            }
+
+            var trimmed = StripBracketedTimestamp(message.Trim());
+            trimmed = StripLogLevel(trimmed);
+
+            return MessageDisplayFormatter.FormatControlCharacters(trimmed);
         }
 
         private static string NormalizePersistedMessage(string message)
@@ -406,19 +564,69 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 return string.Empty;
             }
 
-            var trimmed = message.Trim();
+            var trimmed = StripPersistedTimestamp(message.Trim());
+            trimmed = StripBracketedTimestamp(trimmed);
+            trimmed = StripLogLevel(trimmed);
 
-            if (trimmed.Length > TimestampLength && trimmed[TimestampLength] == ' ')
+            return MessageDisplayFormatter.FormatControlCharacters(trimmed);
+        }
+
+        private static string StripPersistedTimestamp(string message)
+        {
+            if (message.Length > TimestampLength && message[TimestampLength] == ' ')
             {
-                var timestampCandidate = trimmed.Substring(0, TimestampLength);
+                var timestampCandidate = message.Substring(0, TimestampLength);
                 if (DateTime.TryParseExact(timestampCandidate, TimestampFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out _))
                 {
-                    var withoutTimestamp = trimmed[(TimestampLength + 1)..].Trim();
-                    return MessageDisplayFormatter.FormatControlCharacters(withoutTimestamp);
+                    return message[(TimestampLength + 1)..].TrimStart();
                 }
             }
 
-            return MessageDisplayFormatter.FormatControlCharacters(trimmed);
+            return message;
+        }
+
+        private static string StripBracketedTimestamp(string message)
+        {
+            if (message.Length == 0 || message[0] != '[')
+            {
+                return message;
+            }
+
+            var endIndex = message.IndexOf(']');
+            if (endIndex <= 1)
+            {
+                return message;
+            }
+
+            var candidate = message.Substring(1, endIndex - 1);
+            if (TimeSpan.TryParseExact(candidate, "hh\\:mm\\:ss", CultureInfo.InvariantCulture, out _))
+            {
+                return message[(endIndex + 1)..].TrimStart();
+            }
+
+            return message;
+        }
+
+        private static string StripLogLevel(string message)
+        {
+            if (!message.StartsWith("[", StringComparison.Ordinal))
+            {
+                return message;
+            }
+
+            var levelEnd = message.IndexOf(']');
+            if (levelEnd <= 0)
+            {
+                return message;
+            }
+
+            var candidate = message.Substring(1, levelEnd - 1);
+            if (Enum.TryParse(candidate, out LogLevel _))
+            {
+                return message[(levelEnd + 1)..].TrimStart();
+            }
+
+            return message;
         }
 
         private static WpfBrush ParseBrush(string? color, WpfBrush fallback)
