@@ -822,8 +822,17 @@ namespace DesktopApplicationTemplate.UI
             KeyboardSimulator.Reset();
             if (UiThreadTaskFactory is null)
             {
-                logger?.LogWarning("Joinable task factory unavailable during domain exception; scheduling shutdown on dispatcher");
-                _ = Current?.Dispatcher?.BeginInvoke(new Action(() => Current?.Shutdown()));
+                logger?.LogWarning("Joinable task factory unavailable during domain exception; scheduling shutdown on dispatcher context");
+                if (Current?.Dispatcher is { } dispatcher)
+                {
+                    var dispatcherContext = new DispatcherSynchronizationContext(dispatcher);
+                    dispatcherContext.Post(_ => Current?.Shutdown(), null);
+                }
+                else
+                {
+                    Current?.Shutdown();
+                }
+
                 return;
             }
 
