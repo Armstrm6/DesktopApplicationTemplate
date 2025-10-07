@@ -6,7 +6,7 @@ using DesktopApplicationTemplate.UI.ViewModels.Hid.Edit;
 using DesktopApplicationTemplate.UI.ViewModels.Hid.Advanced;
 using DesktopApplicationTemplate.UI.Views.Hid.Edit;
 using DesktopApplicationTemplate.UI.Views.Hid.Advanced;
-using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Core.Services.Protocols.Hid;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 

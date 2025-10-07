@@ -3,6 +3,7 @@ using DesktopApplicationTemplate.Core.Services.Protocols.FileObserver;
 using DesktopApplicationTemplate.Core.Services.Protocols.Ftp;
 using DesktopApplicationTemplate.Core.Services.Protocols.Heartbeat;
 using DesktopApplicationTemplate.Core.Services.Protocols.Http;
+using DesktopApplicationTemplate.Core.Services.Protocols.Hid;
 using DesktopApplicationTemplate.Core.Services.Protocols.Mqtt;
 using DesktopApplicationTemplate.Core.Services.Protocols.Scp;
 using DesktopApplicationTemplate.Core.Services.Protocols.Tcp;
@@ -10,6 +11,7 @@ using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.EditHandlers;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Modules;
+using DesktopApplicationTemplate.Core.Modules.BuiltIn;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.ViewModels.Http;
 using DesktopApplicationTemplate.UI.ViewModels.Http.Create;
@@ -83,8 +85,6 @@ using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.Helpers;
 // Qualify service-layer types explicitly to avoid name clashes with UI services
 using CoreFtpServerOptions = DesktopApplicationTemplate.Core.Services.Protocols.Ftp.FtpServerOptions;
-using ProtocolCsvService = DesktopApplicationTemplate.Core.Services.Protocols.Csv.ICsvService;
-using ProtocolCsvServiceImplementation = DesktopApplicationTemplate.Core.Services.Protocols.Csv.CsvService;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -142,7 +142,18 @@ namespace DesktopApplicationTemplate.UI
 
         private static void ConfigureServices(IConfiguration configuration, IServiceCollection services)
         {
-            services.AddServiceModules();
+            var moduleAssemblies = new[]
+            {
+                typeof(MqttServiceModule).Assembly
+            };
+
+            var modules = ServiceModuleDiscovery.InstantiateModules(moduleAssemblies);
+            ServiceModuleDiscovery.RegisterModules(modules, services);
+
+            var descriptorSnapshot = ServiceModuleDiscovery.DescribeServices(modules);
+            services.AddSingleton<ServiceCatalog>(_ => new ServiceCatalog(descriptorSnapshot));
+            services.AddSingleton<IServiceCatalog>(sp => sp.GetRequiredService<ServiceCatalog>());
+
             services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Mqtt, (sp, _) => new MqttEditServiceHandler(() => sp.GetRequiredService<MainView>(), () => sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<MqttEditServiceHandler>>()));
             services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Heartbeat, (sp, _) => new HeartbeatEditServiceHandler(() => sp.GetRequiredService<MainView>(), () => sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<HeartbeatEditServiceHandler>>()));
             services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Hid, (sp, _) => new HidEditServiceHandler(() => sp.GetRequiredService<MainView>(), () => sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<HidEditServiceHandler>>()));
@@ -174,8 +185,6 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<ILoggingService, LoggingService>();
             services.AddSingleton<IMessageRoutingService, MessageRoutingService>();
             services.AddSingleton<IFileDialogService, FileDialogService>();
-            services.AddSingleton<IScpClientFactory, ScpClientFactory>();
-            services.AddSingleton<IScpUploadService, ScpService>();
             services.AddSingleton<IStartupPreferencesService, StartupPreferencesDialogService>();
             // Register shared services and protocol facades from the Services layer.
             services.AddCommonServices();
@@ -195,15 +204,9 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<ScpServiceViewModel>();
             services.AddSingleton<HidViewModel>();
             services.AddSingleton<HidViews>();
-            services.AddMqttClientService();
             services.AddSingleton<FTPServiceView>();
             services.AddSingleton<FtpServiceViewModel>();
-            services.AddFtpServer(builder => builder
-                .UseDotNetFileSystem()
-                .EnableAnonymousAuthentication());
-            services.AddSingleton<IFtpServerService, FtpServerService>();
             services.AddSingleton<CsvViewerViewModel>();
-            services.AddSingleton<ProtocolCsvService, ProtocolCsvServiceImplementation>();
             services.AddSingleton<ICsvOutput, FileCsvOutput>();
             services.AddSingleton<CsvServiceAdapter>();
             services.AddSingleton<CsvServiceView>();
@@ -214,15 +217,15 @@ namespace DesktopApplicationTemplate.UI
                 return new ServiceUiRegistry<ServiceListModel, Page>(
                     catalog,
                     [
-                        BuildCsvRegistration(),
-                        BuildFileObserverRegistration(),
-                        BuildHeartbeatRegistration(),
-                        BuildHidRegistration(),
-                        BuildHttpRegistration(),
-                        BuildMqttRegistration(),
-                        BuildScpRegistration(),
-                        BuildTcpRegistration(),
-                        BuildFtpRegistration(),
+                        BuildCsvRegistration(catalog),
+                        BuildFileObserverRegistration(catalog),
+                        BuildHeartbeatRegistration(catalog),
+                        BuildHidRegistration(catalog),
+                        BuildHttpRegistration(catalog),
+                        BuildMqttRegistration(catalog),
+                        BuildScpRegistration(catalog),
+                        BuildTcpRegistration(catalog),
+                        BuildFtpRegistration(catalog),
                     ]);
             });
             services.AddTransient<SplashWindow>();
@@ -313,10 +316,12 @@ namespace DesktopApplicationTemplate.UI
             services.AddOptions<ScpServiceOptions>();
         }
 
-        private static ServiceUiRegistration<ServiceListModel, Page> BuildMqttRegistration()
+        private static ServiceUiRegistration<ServiceListModel, Page> BuildMqttRegistration(IServiceCatalog catalog)
         {
+            var descriptor = GetDescriptorOrThrow(catalog, ServiceDescriptorIds.Mqtt);
+
             return new ServiceUiRegistration<ServiceListModel, Page>(
-                ServiceDescriptorIds.Mqtt,
+                descriptor.Id,
                 (provider, optionsObj) =>
                 {
                     var ctx = (ServiceFactoryOptions<MqttServiceOptions>)optionsObj;
@@ -406,13 +411,16 @@ namespace DesktopApplicationTemplate.UI
                     };
                     return view;
                 },
-                LegacyServiceType: ServiceType.Mqtt);
+                LegacyServiceType: ServiceType.Mqtt,
+                ApplyPresentation: static (service, metadata) => service.ApplyPresentation(metadata));
         }
 
-        private static ServiceUiRegistration<ServiceListModel, Page> BuildFtpRegistration()
+        private static ServiceUiRegistration<ServiceListModel, Page> BuildFtpRegistration(IServiceCatalog catalog)
         {
+            var descriptor = GetDescriptorOrThrow(catalog, ServiceDescriptorIds.Ftp);
+
             return new ServiceUiRegistration<ServiceListModel, Page>(
-                ServiceDescriptorIds.Ftp,
+                descriptor.Id,
                 (provider, optionsObj) =>
                 {
                     var ctx = (ServiceFactoryOptions<CoreFtpServerOptions>)optionsObj;
@@ -459,13 +467,16 @@ namespace DesktopApplicationTemplate.UI
                     };
                     return view;
                 },
-                LegacyServiceType: ServiceType.Ftp);
+                LegacyServiceType: ServiceType.Ftp,
+                ApplyPresentation: static (service, metadata) => service.ApplyPresentation(metadata));
         }
 
-        private static ServiceUiRegistration<ServiceListModel, Page> BuildHttpRegistration()
+        private static ServiceUiRegistration<ServiceListModel, Page> BuildHttpRegistration(IServiceCatalog catalog)
         {
+            var descriptor = GetDescriptorOrThrow(catalog, ServiceDescriptorIds.Http);
+
             return new ServiceUiRegistration<ServiceListModel, Page>(
-                ServiceDescriptorIds.Http,
+                descriptor.Id,
                 (provider, optionsObj) =>
                 {
                     var ctx = (ServiceFactoryOptions<HttpServiceOptions>)optionsObj;
@@ -504,13 +515,16 @@ namespace DesktopApplicationTemplate.UI
                     };
                     return view;
                 },
-                LegacyServiceType: ServiceType.Http);
+                LegacyServiceType: ServiceType.Http,
+                ApplyPresentation: static (service, metadata) => service.ApplyPresentation(metadata));
         }
 
-        private static ServiceUiRegistration<ServiceListModel, Page> BuildTcpRegistration()
+        private static ServiceUiRegistration<ServiceListModel, Page> BuildTcpRegistration(IServiceCatalog catalog)
         {
+            var descriptor = GetDescriptorOrThrow(catalog, ServiceDescriptorIds.Tcp);
+
             return new ServiceUiRegistration<ServiceListModel, Page>(
-                ServiceDescriptorIds.Tcp,
+                descriptor.Id,
                 (provider, optionsObj) =>
                 {
                     var ctx = (ServiceFactoryOptions<TcpServiceOptions>)optionsObj;
@@ -539,13 +553,16 @@ namespace DesktopApplicationTemplate.UI
                     vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
                     return ActivatorUtilities.CreateInstance<TcpCreateServiceView>(provider, vm);
                 },
-                LegacyServiceType: ServiceType.Tcp);
+                LegacyServiceType: ServiceType.Tcp,
+                ApplyPresentation: static (service, metadata) => service.ApplyPresentation(metadata));
         }
 
-        private static ServiceUiRegistration<ServiceListModel, Page> BuildHidRegistration()
+        private static ServiceUiRegistration<ServiceListModel, Page> BuildHidRegistration(IServiceCatalog catalog)
         {
+            var descriptor = GetDescriptorOrThrow(catalog, ServiceDescriptorIds.Hid);
+
             return new ServiceUiRegistration<ServiceListModel, Page>(
-                ServiceDescriptorIds.Hid,
+                descriptor.Id,
                 (provider, optionsObj) =>
                 {
                     var ctx = (ServiceFactoryOptions<HidServiceOptions>)optionsObj;
@@ -584,13 +601,16 @@ namespace DesktopApplicationTemplate.UI
                     };
                     return view;
                 },
-                LegacyServiceType: ServiceType.Hid);
+                LegacyServiceType: ServiceType.Hid,
+                ApplyPresentation: static (service, metadata) => service.ApplyPresentation(metadata));
         }
 
-        private static ServiceUiRegistration<ServiceListModel, Page> BuildScpRegistration()
+        private static ServiceUiRegistration<ServiceListModel, Page> BuildScpRegistration(IServiceCatalog catalog)
         {
+            var descriptor = GetDescriptorOrThrow(catalog, ServiceDescriptorIds.Scp);
+
             return new ServiceUiRegistration<ServiceListModel, Page>(
-                ServiceDescriptorIds.Scp,
+                descriptor.Id,
                 (provider, optionsObj) =>
                 {
                     var ctx = (ServiceFactoryOptions<ScpServiceOptions>)optionsObj;
@@ -629,13 +649,16 @@ namespace DesktopApplicationTemplate.UI
                     };
                     return view;
                 },
-                LegacyServiceType: ServiceType.Scp);
+                LegacyServiceType: ServiceType.Scp,
+                ApplyPresentation: static (service, metadata) => service.ApplyPresentation(metadata));
         }
 
-        private static ServiceUiRegistration<ServiceListModel, Page> BuildFileObserverRegistration()
+        private static ServiceUiRegistration<ServiceListModel, Page> BuildFileObserverRegistration(IServiceCatalog catalog)
         {
+            var descriptor = GetDescriptorOrThrow(catalog, ServiceDescriptorIds.FileObserver);
+
             return new ServiceUiRegistration<ServiceListModel, Page>(
-                ServiceDescriptorIds.FileObserver,
+                descriptor.Id,
                 (provider, optionsObj) =>
                 {
                     var ctx = (ServiceFactoryOptions<FileObserverServiceOptions>)optionsObj;
@@ -674,13 +697,16 @@ namespace DesktopApplicationTemplate.UI
                     };
                     return view;
                 },
-                LegacyServiceType: ServiceType.FileObserver);
+                LegacyServiceType: ServiceType.FileObserver,
+                ApplyPresentation: static (service, metadata) => service.ApplyPresentation(metadata));
         }
 
-        private static ServiceUiRegistration<ServiceListModel, Page> BuildCsvRegistration()
+        private static ServiceUiRegistration<ServiceListModel, Page> BuildCsvRegistration(IServiceCatalog catalog)
         {
+            var descriptor = GetDescriptorOrThrow(catalog, ServiceDescriptorIds.Csv);
+
             return new ServiceUiRegistration<ServiceListModel, Page>(
-                ServiceDescriptorIds.Csv,
+                descriptor.Id,
                 (provider, optionsObj) =>
                 {
                     var ctx = (ServiceFactoryOptions<CsvServiceOptions>)optionsObj;
@@ -711,13 +737,16 @@ namespace DesktopApplicationTemplate.UI
                     view.Initialize(vm);
                     return view;
                 },
-                LegacyServiceType: ServiceType.Csv);
+                LegacyServiceType: ServiceType.Csv,
+                ApplyPresentation: static (service, metadata) => service.ApplyPresentation(metadata));
         }
 
-        private static ServiceUiRegistration<ServiceListModel, Page> BuildHeartbeatRegistration()
+        private static ServiceUiRegistration<ServiceListModel, Page> BuildHeartbeatRegistration(IServiceCatalog catalog)
         {
+            var descriptor = GetDescriptorOrThrow(catalog, ServiceDescriptorIds.Heartbeat);
+
             return new ServiceUiRegistration<ServiceListModel, Page>(
-                ServiceDescriptorIds.Heartbeat,
+                descriptor.Id,
                 (provider, optionsObj) =>
                 {
                     var ctx = (ServiceFactoryOptions<HeartbeatServiceOptions>)optionsObj;
@@ -756,7 +785,28 @@ namespace DesktopApplicationTemplate.UI
                     };
                     return view;
                 },
-                LegacyServiceType: ServiceType.Heartbeat);
+                LegacyServiceType: ServiceType.Heartbeat,
+                ApplyPresentation: static (service, metadata) => service.ApplyPresentation(metadata));
+        }
+
+        private static IServiceDescriptor GetDescriptorOrThrow(IServiceCatalog catalog, string descriptorId)
+        {
+            if (catalog is null)
+            {
+                throw new ArgumentNullException(nameof(catalog));
+            }
+
+            if (descriptorId is null)
+            {
+                throw new ArgumentNullException(nameof(descriptorId));
+            }
+
+            if (catalog.TryGetById(descriptorId, out var descriptor))
+            {
+                return descriptor;
+            }
+
+            throw new InvalidOperationException($"Descriptor '{descriptorId}' is not registered.");
         }
 
         private static void QueueServiceAddition<TOptions>(MainView mainView, ServiceType serviceType, string serviceName, TOptions options)

@@ -89,6 +89,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private readonly CsvServiceAdapter _csvService;
         private readonly ILoggingService? _logger;
         private readonly INetworkConfigurationService _networkService;
+        private readonly IServiceCatalog _serviceCatalog;
         private readonly IDictionary<ServiceType, IEditServiceHandler> _editHandlers;
         private readonly IStartupPreferencesService _startupPreferencesService;
         private readonly HashSet<ServiceListModel> _activatingServices = new();
@@ -100,6 +101,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             CsvServiceAdapter csvService,
             NetworkConfigurationViewModel networkConfig,
             INetworkConfigurationService networkService,
+            IServiceCatalog serviceCatalog,
             IDictionary<ServiceType, IEditServiceHandler> editHandlers,
             IStartupPreferencesService startupPreferencesService,
             ILoggingService? logger = null,
@@ -107,6 +109,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         {
             _csvService = csvService;
             _networkService = networkService;
+            _serviceCatalog = serviceCatalog ?? throw new ArgumentNullException(nameof(serviceCatalog));
             _logger = logger;
             NetworkConfig = networkConfig;
             _editHandlers = editHandlers;
@@ -304,7 +307,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     normalizedName = GenerateServiceName(svc.Type);
                 }
                 svc.DisplayName = normalizedName;
-                svc.SetColorsByType();
+                ApplyPresentationMetadata(svc);
                 svc.SetRuntimeState(svc.IsActive ? ServiceRuntimeState.Active : ServiceRuntimeState.Inactive);
                 svc.LogAdded += OnServiceLogAdded;
                 svc.ActiveChanged += OnServiceActiveChanged;
@@ -319,6 +322,23 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
             OnPropertyChanged(nameof(ServicesCreated));
             OnPropertyChanged(nameof(CurrentActiveServices));
+        }
+
+        private void ApplyPresentationMetadata(ServiceListModel service)
+        {
+            if (service is null)
+            {
+                return;
+            }
+
+            if (_serviceCatalog.TryGetByLegacyType(service.Type, out var descriptor))
+            {
+                service.ApplyPresentation(descriptor.Presentation);
+            }
+            else
+            {
+                service.ApplyPresentation(ServicePresentationMetadata.Empty);
+            }
         }
 
         private static string NormalizeDisplayName(ServiceType type, string displayName)

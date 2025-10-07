@@ -1,4 +1,4 @@
-namespace DesktopApplicationTemplate.UI.Services
+namespace DesktopApplicationTemplate.Core.Services.Protocols.Hid
 {
     /// <summary>
     /// Configuration options for HID services.

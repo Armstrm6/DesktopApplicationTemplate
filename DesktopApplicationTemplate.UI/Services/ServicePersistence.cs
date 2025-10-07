@@ -11,6 +11,8 @@ using DesktopApplicationTemplate.Core.Services.Protocols.Http;
 using DesktopApplicationTemplate.Core.Services.Protocols.Tcp;
 using DesktopApplicationTemplate.Core.Services.Protocols.FileObserver;
 using DesktopApplicationTemplate.Core.Services.Protocols.Heartbeat;
+using DesktopApplicationTemplate.Core.Services.Protocols.Hid;
+using DesktopApplicationTemplate.Core.Services.Protocols.Scp;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.ViewModels;
 using Microsoft.Extensions.Options;

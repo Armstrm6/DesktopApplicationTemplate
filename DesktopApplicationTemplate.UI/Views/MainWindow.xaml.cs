@@ -6,6 +6,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.ComponentModel;
 using DesktopApplicationTemplate.Services;
+using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.ViewModels.Tcp;
 using DesktopApplicationTemplate.UI.Services;
@@ -31,6 +32,7 @@ namespace DesktopApplicationTemplate.UI.Views
         private readonly MainViewModel _viewModel;
         private readonly ILogger<MainView>? _logger;
         private readonly IServiceUiRegistry<ServiceListModel, Page> _serviceRegistry;
+        private readonly IServiceCatalog _serviceCatalog;
         private readonly IServiceProvider _serviceProvider;
         private readonly Dictionary<ServiceListModel, Action<LogEntry>> _serviceLogHandlers = new();
         private readonly Dictionary<ServiceListModel, EventHandler> _tcpAdvancedHandlers = new();
@@ -39,12 +41,14 @@ namespace DesktopApplicationTemplate.UI.Views
         public MainView(
             MainViewModel viewModel,
             IServiceUiRegistry<ServiceListModel, Page> serviceRegistry,
-            IServiceProvider serviceProvider)
+            IServiceProvider serviceProvider,
+            IServiceCatalog serviceCatalog)
         {
             InitializeComponent();
             _viewModel = viewModel;
             _serviceRegistry = serviceRegistry;
             _serviceProvider = serviceProvider;
+            _serviceCatalog = serviceCatalog ?? throw new ArgumentNullException(nameof(serviceCatalog));
             if (_serviceProvider.GetService(typeof(ILoggerFactory)) is ILoggerFactory factory)
             {
                 _logger = factory.CreateLogger<MainView>();
@@ -339,7 +343,7 @@ namespace DesktopApplicationTemplate.UI.Views
                     Type = type,
                     IsActive = false
                 };
-                svc.SetColorsByType();
+                ApplyPresentation(svc);
                 svc.LogAdded += _viewModel.OnServiceLogAdded;
                 svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
                 GetOrCreateServicePage(svc);
@@ -358,6 +362,23 @@ namespace DesktopApplicationTemplate.UI.Views
         }
 
         private CreateServicePage? _createServicePage;
+
+        private void ApplyPresentation(ServiceListModel service)
+        {
+            if (service is null)
+            {
+                return;
+            }
+
+            if (_serviceCatalog.TryGetByLegacyType(service.Type, out var descriptor))
+            {
+                service.ApplyPresentation(descriptor.Presentation);
+            }
+            else
+            {
+                service.ApplyPresentation(ServicePresentationMetadata.Empty);
+            }
+        }
 
         private void NavigateTo(ServiceType serviceType)
         {
@@ -400,7 +421,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 return false;
             }
 
-            svc.SetColorsByType();
+            ApplyPresentation(svc);
             svc.LogAdded += _viewModel.OnServiceLogAdded;
             svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
 

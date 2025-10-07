@@ -1,6 +1,6 @@
 using System;
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Core.Services.Protocols.Scp;
 
 namespace DesktopApplicationTemplate.UI.ViewModels.Scp.Edit;
 

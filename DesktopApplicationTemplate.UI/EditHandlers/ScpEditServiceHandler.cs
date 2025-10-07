@@ -6,7 +6,7 @@ using DesktopApplicationTemplate.UI.ViewModels.Scp.Edit;
 using DesktopApplicationTemplate.UI.ViewModels.Scp.Advanced;
 using DesktopApplicationTemplate.UI.Views.Scp.Edit;
 using DesktopApplicationTemplate.UI.Views.Scp.Advanced;
-using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.Core.Services.Protocols.Scp;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 

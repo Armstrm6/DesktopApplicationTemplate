@@ -12,7 +12,9 @@ using DesktopApplicationTemplate.Core.Services.Protocols.FileObserver;
 using DesktopApplicationTemplate.Core.Services.Protocols.Ftp;
 using DesktopApplicationTemplate.Core.Services.Protocols.Heartbeat;
 using DesktopApplicationTemplate.Core.Services.Protocols.Http;
+using DesktopApplicationTemplate.Core.Services.Protocols.Hid;
 using DesktopApplicationTemplate.Core.Services.Protocols.Mqtt;
+using DesktopApplicationTemplate.Core.Services.Protocols.Scp;
 using DesktopApplicationTemplate.Core.Services.Protocols.Tcp;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Services;
@@ -51,6 +53,20 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         {
             get => _borderColor;
             set { _borderColor = value; OnPropertyChanged(); }
+        }
+
+        private string? _iconGlyph;
+        public string? IconGlyph
+        {
+            get => _iconGlyph;
+            private set { _iconGlyph = value; OnPropertyChanged(); }
+        }
+
+        private string? _descriptorLabel;
+        public string? DescriptorLabel
+        {
+            get => _descriptorLabel;
+            private set { _descriptorLabel = value; OnPropertyChanged(); }
         }
         [JsonIgnore] public Page? ServicePage { get; set; }
 
@@ -301,7 +317,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             if (Logs.FirstOrDefault() is { } latest)
             {
                 LastInputMessage = NormalizePersistedMessage(latest.Message);
-                LastInputBrush = ParseBrush(latest.Color);
+                LastInputBrush = ParseBrush(latest.Color, WpfBrushes.Black);
             }
         }
 
@@ -399,11 +415,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             return message.Trim();
         }
 
-        private static WpfBrush ParseBrush(string? color)
+        private static WpfBrush ParseBrush(string? color, WpfBrush fallback)
         {
             if (string.IsNullOrWhiteSpace(color))
             {
-                return WpfBrushes.Black;
+                return fallback;
             }
 
             try
@@ -420,24 +436,16 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             {
             }
 
-            return WpfBrushes.Black;
+            return fallback;
         }
 
-        public void SetColorsByType()
+        public void ApplyPresentation(ServicePresentationMetadata metadata)
         {
-            (BackgroundColor, BorderColor) = Type switch
-            {
-                ServiceType.Tcp => (WpfBrushes.LightBlue, WpfBrushes.DarkBlue),
-                ServiceType.Http => (WpfBrushes.LightGreen, WpfBrushes.DarkGreen),
-                ServiceType.FileObserver => (WpfBrushes.LightSalmon, WpfBrushes.DarkSalmon),
-                ServiceType.Hid => (WpfBrushes.LightYellow, WpfBrushes.Goldenrod),
-                ServiceType.Heartbeat => (WpfBrushes.LightPink, WpfBrushes.DeepPink),
-                ServiceType.Scp => (WpfBrushes.LightCyan, WpfBrushes.CadetBlue),
-                ServiceType.Mqtt => (WpfBrushes.LightGoldenrodYellow, WpfBrushes.Goldenrod),
-                ServiceType.Ftp => (WpfBrushes.LightSteelBlue, WpfBrushes.SteelBlue),
-                ServiceType.Csv => (WpfBrushes.LightGray, WpfBrushes.Gray),
-                _ => (WpfBrushes.LightGray, WpfBrushes.Gray)
-            };
+            var normalized = ServicePresentationMetadata.Normalize(metadata);
+            BackgroundColor = ParseBrush(normalized.PrimaryAccentColor, WpfBrushes.LightGray);
+            BorderColor = ParseBrush(normalized.SecondaryAccentColor, WpfBrushes.Gray);
+            IconGlyph = normalized.IconGlyph;
+            DescriptorLabel = normalized.DisplayLabel;
             OnPropertyChanged(nameof(BackgroundColor));
             OnPropertyChanged(nameof(BorderColor));
         }
