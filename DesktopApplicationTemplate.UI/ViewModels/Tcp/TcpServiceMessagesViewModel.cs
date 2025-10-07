@@ -499,14 +499,14 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
 
             var host = ResolveDestinationHost();
             var port = ResolveDestinationPort();
-            if (string.IsNullOrWhiteSpace(host) || port <= 0)
+            if (string.IsNullOrWhiteSpace(host) || port is null)
             {
                 Logger?.Log("TCP client destination is not configured; skipping client startup.", LogLevel.Warning);
                 LogConnectionIssues("TCP client configuration", null, LogLevel.Warning);
                 return false;
             }
 
-            endpoint = new TcpEndpoint(host, port);
+            endpoint = new TcpEndpoint(host, port.Value);
             return true;
         }
 
@@ -731,9 +731,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
         {
             var incomingMessage = incoming ?? string.Empty;
             var outgoingMessage = outgoing ?? string.Empty;
+            var incomingEndpoint = endpoint ?? string.Empty;
             var destination = string.IsNullOrWhiteSpace(outgoingMessage)
                 ? string.Empty
-                : endpoint ?? string.Empty;
+                : incomingEndpoint;
             var incomingDisplay = MessageDisplayFormatter.FormatForService(incomingMessage, true, ServiceType, ServiceName);
             var outgoingDisplay = MessageDisplayFormatter.FormatForService(outgoingMessage, false, ServiceType, ServiceName);
 
@@ -742,7 +743,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                 Messages.Insert(0, new TcpMessageRow
                 {
                     IncomingMessage = incomingDisplay,
-                    IncomingIp = destination,
+                    IncomingIp = incomingEndpoint,
                     OutgoingMessage = outgoingDisplay,
                     ConnectedService = destination,
                     Result = string.IsNullOrEmpty(outgoingDisplay) ? string.Empty : outgoingDisplay
@@ -1044,13 +1045,13 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
         private string ResolveDestinationHost()
         {
             return string.IsNullOrWhiteSpace(_options.DestinationHost)
-                ? _options.Host
+                ? string.Empty
                 : _options.DestinationHost;
         }
 
-        private int ResolveDestinationPort()
+        private int? ResolveDestinationPort()
         {
-            return _options.DestinationPort > 0 ? _options.DestinationPort : _options.Port;
+            return _options.DestinationPort > 0 ? _options.DestinationPort : null;
         }
 
         private void ClearLogs()
