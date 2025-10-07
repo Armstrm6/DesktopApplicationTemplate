@@ -34,6 +34,7 @@
 - Service creation and navigation now resolve services via `ServiceType` enum lookups instead of string-based switches.
 - `ServiceManager` loads default services from configuration using `ServiceType` short codes and accepts legacy names.
 - `ServiceListModel` now exposes a `Type` enum property, removing string-based service comparisons.
+- Standardized routed message naming to `{Service}.InputMessage` and `{Service}.OutputMessage` in the editor and UI, while keeping legacy `Last*` tokens working for compatibility.
 
 #### Fixed
 - Event raising helpers in `ServiceEditorViewModelBase` invoked themselves recursively; now invoke events directly.
@@ -100,7 +101,7 @@
 - Script editor raises an `OutputGenerated` event and TCP service messages view updates its output message when scripts run.
 - TcpServiceMessagesViewModel executes scripts asynchronously and awaits results when saving.
 - TcpServiceMessagesViewModel logs script execution results and exceptions.
-- Restricted `TcpServiceMessagesViewModel.OutputMessage` setter to internal to prevent external modification.
+- Restricted `TcpServiceMessagesViewModel.ScriptOutputMessage` setter to internal to prevent external modification.
 - TcpServiceMessagesViewModel runs the initial script asynchronously to avoid blocking.
 - App domain unhandled exception handler is asynchronous and awaits dispatcher shutdown.
 - Main window resolves edit workflows through a DI-injected handler dictionary instead of a large if/else chain.
@@ -330,4 +331,5 @@
 - Guarded WPF test thread apartment configuration with an OS check to avoid CA1416 build errors on non-Windows hosts.
 - Added `StubFileDialogService` to test project to support file dialog operations.
 - Console test logger writes plain text messages to avoid Visual Studio RPC errors when expanding test results.
+- TCP runtime initialization now prefers routed input messages over saved test messages so connected services respond with the incoming payload instead of the last test value.
 

@@ -52,10 +52,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
         public ObservableCollection<LogEntry> Logs { get; } = new();
 
         /// <summary>Latest incoming message text for the associated service.</summary>
-        public string LastInputMessage => _service?.LastInputMessage ?? string.Empty;
+        public string InputMessage => _service?.InputMessage ?? string.Empty;
 
         /// <summary>Latest outgoing message text for the associated service.</summary>
-        public string LastOutputMessage => _service?.LastOutputMessage ?? string.Empty;
+        public string OutputMessage => _service?.OutputMessage ?? string.Empty;
 
         /// <inheritdoc />
         private ILoggingService? _logger;
@@ -143,7 +143,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
 
         private string _script = string.Empty;
 
-        private string _outputMessage = string.Empty;
+        private string _scriptOutputMessage = string.Empty;
 
         /// <summary>Message used for testing communication.</summary>
         public string TestMessage
@@ -170,12 +170,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
         }
 
         /// <summary>Result of executing the test message with the current script.</summary>
-        public string OutputMessage
+        public string ScriptOutputMessage
         {
-            get => _outputMessage;
+            get => _scriptOutputMessage;
             internal set
             {
-                _outputMessage = value ?? string.Empty;
+                _scriptOutputMessage = value ?? string.Empty;
                 OnPropertyChanged();
             }
         }
@@ -242,7 +242,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             Script = string.IsNullOrWhiteSpace(_options.Script)
                 ? ScriptEditorViewModel.DefaultScript
                 : _options.Script;
-            OutputMessage = _options.OutputMessage;
+            ScriptOutputMessage = _options.OutputMessage;
             _runtimeContext = new TcpRuntimeContext(ServiceType, ServiceName, _options, ScriptEditorViewModel.DefaultScript);
             ApplyNetworkConfiguration(restartIfActive: false);
             var history = service.GetMessageHistorySnapshot();
@@ -264,8 +264,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             MessageTable.SetActiveService(ServiceType, ServiceName);
             OnPropertyChanged(nameof(IncomingData));
             OnPropertyChanged(nameof(OutgoingResults));
-            OnPropertyChanged(nameof(LastInputMessage));
-            OnPropertyChanged(nameof(LastOutputMessage));
+            OnPropertyChanged(nameof(InputMessage));
+            OnPropertyChanged(nameof(OutputMessage));
             _ = InitializeRuntimeAsync();
             if (_service.IsActive)
             {
@@ -275,14 +275,14 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
 
         private void OnServicePropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(ServiceListModel.LastInputMessage) || string.IsNullOrEmpty(e.PropertyName))
+            if (e.PropertyName == nameof(ServiceListModel.InputMessage) || string.IsNullOrEmpty(e.PropertyName))
             {
-                OnPropertyChanged(nameof(LastInputMessage));
+                OnPropertyChanged(nameof(InputMessage));
             }
 
-            if (e.PropertyName == nameof(ServiceListModel.LastOutputMessage) || string.IsNullOrEmpty(e.PropertyName))
+            if (e.PropertyName == nameof(ServiceListModel.OutputMessage) || string.IsNullOrEmpty(e.PropertyName))
             {
-                OnPropertyChanged(nameof(LastOutputMessage));
+                OnPropertyChanged(nameof(OutputMessage));
             }
         }
 
@@ -347,15 +347,15 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                 var state = await _tcpRuntime.InitializeAsync(_runtimeContext).ConfigureAwait(false);
                 Script = state.Script;
                 TestMessage = state.TestMessage;
-                OutputMessage = state.OutputMessage;
+                ScriptOutputMessage = state.OutputMessage;
                 _options.OutputMessage = state.OutputMessage;
                 _routing.UpdateMessage(ServiceType, ServiceName, state.TestMessage, MessageRoutingDirection.Input);
                 _routing.UpdateMessage(ServiceType, ServiceName, state.OutputMessage, MessageRoutingDirection.Output);
-                Logger?.Log($"Script executed successfully: {OutputMessage}", LogLevel.Information);
+                Logger?.Log($"Script executed successfully: {ScriptOutputMessage}", LogLevel.Information);
             }
             catch (Exception ex)
             {
-                OutputMessage = ex.ToString();
+                ScriptOutputMessage = ex.ToString();
                 Logger?.Log($"Script execution failed: {ex}", LogLevel.Error);
             }
         }
@@ -1211,15 +1211,15 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                 var result = await _tcpRuntime.ExecuteAsync(new TcpRuntimeExecutionRequest(_runtimeContext, Script, TestMessage)).ConfigureAwait(false);
                 Script = result.Script;
                 TestMessage = result.TestMessage;
-                OutputMessage = result.OutputMessage;
+                ScriptOutputMessage = result.OutputMessage;
                 _options.OutputMessage = result.OutputMessage;
                 _routing.UpdateMessage(ServiceType, ServiceName, result.TestMessage, MessageRoutingDirection.Input);
                 _routing.UpdateMessage(ServiceType, ServiceName, result.OutputMessage, MessageRoutingDirection.Output);
-                Logger?.Log($"Script executed successfully: {OutputMessage}", LogLevel.Information);
+                Logger?.Log($"Script executed successfully: {ScriptOutputMessage}", LogLevel.Information);
             }
             catch (Exception ex)
             {
-                OutputMessage = ex.ToString();
+                ScriptOutputMessage = ex.ToString();
                 Logger?.Log($"Script execution failed: {ex}", LogLevel.Error);
             }
         }
@@ -1249,7 +1249,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
 
             void OnOutputGenerated(string output)
             {
-                OutputMessage = _options.OutputMessage = output;
+                ScriptOutputMessage = _options.OutputMessage = output;
                 TestMessage = svm.TestMessage;
                 _options.LastTestMessage = svm.TestMessage;
                 _routing.UpdateMessage(ServiceType, ServiceName, svm.TestMessage, MessageRoutingDirection.Input);

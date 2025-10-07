@@ -35,7 +35,8 @@ public interface IMessageRoutingService
     bool TryGetMessage(string serviceName, MessageRoutingDirection direction, out string? message);
 
     /// <summary>
-    /// Replaces <c>{ServiceName.LastInputMessage}</c> and <c>{ServiceName.LastOutputMessage}</c> tokens within the provided template.
+    /// Replaces <c>{ServiceName.InputMessage}</c> and <c>{ServiceName.OutputMessage}</c> tokens within the provided template.
+    /// Legacy <c>LastInputMessage</c> and <c>LastOutputMessage</c> tokens are still recognized for compatibility.
     /// </summary>
     /// <param name="template">The template containing message tokens.</param>
     /// <param name="referencingServiceName">

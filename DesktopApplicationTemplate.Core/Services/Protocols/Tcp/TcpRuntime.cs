@@ -61,14 +61,21 @@ public sealed class TcpRuntime : ITcpRuntime
 
         var options = context.Options ?? throw new ArgumentNullException(nameof(context.Options));
         var script = string.IsNullOrWhiteSpace(options.Script) ? context.DefaultScript : options.Script;
-        var testMessage = ResolveInitialMessage(context);
+        var testMessage = ResolveInitialMessage(context, out var isInputMessage);
 
         _logger?.LogInformation(this, "Initializing TCP script runtime");
 
         var output = await ExecuteScriptInternalAsync(script, testMessage, cancellationToken).ConfigureAwait(false);
 
         options.Script = script;
-        options.LastTestMessage = testMessage;
+        if (isInputMessage)
+        {
+            options.InputMessage = testMessage;
+        }
+        else
+        {
+            options.LastTestMessage = testMessage;
+        }
         options.OutputMessage = output;
 
         _routingService.UpdateMessage(context.ServiceType, context.ServiceName, testMessage, MessageRoutingDirection.Input);
@@ -102,20 +109,27 @@ public sealed class TcpRuntime : ITcpRuntime
         return new TcpRuntimeState(request.Script, request.TestMessage, output);
     }
 
-    private string ResolveInitialMessage(TcpRuntimeContext context)
+    private string ResolveInitialMessage(TcpRuntimeContext context, out bool isInputMessage)
     {
         var options = context.Options;
         var serviceName = context.ServiceName;
 
-        if (string.IsNullOrWhiteSpace(options.LastTestMessage) &&
-            _routingService.TryGetMessage(context.ServiceType, serviceName, MessageRoutingDirection.Input, out var routed))
+        if (_routingService.TryGetMessage(context.ServiceType, serviceName, MessageRoutingDirection.Input, out var routed))
         {
-            return routed ?? string.Empty;
+            isInputMessage = true;
+            var resolved = routed ?? string.Empty;
+            options.InputMessage = resolved;
+            return resolved;
         }
 
-        return string.IsNullOrWhiteSpace(options.LastTestMessage)
-            ? $"{serviceName}-PEAK-123456789"
-            : options.LastTestMessage;
+        if (!string.IsNullOrWhiteSpace(options.LastTestMessage))
+        {
+            isInputMessage = false;
+            return options.LastTestMessage;
+        }
+
+        isInputMessage = false;
+        return $"{serviceName}-PEAK-123456789";
     }
 
     private async Task<string> ExecuteScriptInternalAsync(string script, string message, CancellationToken cancellationToken)
