@@ -98,7 +98,10 @@ namespace DesktopApplicationTemplate.UI.Helpers
             }
 
             var propertyName = isIncoming ? "LastInputMessage" : "LastOutputMessage";
-            return string.Create(serviceName.Length + propertyName.Length + formatted.Length + 2, (serviceName, propertyName, formatted),
+            const int separatorLength = 3; // '.', ':' and the following space
+            var requiredLength = serviceName.Length + propertyName.Length + formatted.Length + separatorLength;
+
+            return string.Create(requiredLength, (serviceName, propertyName, formatted),
                 (span, state) =>
                 {
                     var (svcName, prop, content) = state;
