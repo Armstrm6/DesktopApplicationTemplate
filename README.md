@@ -113,6 +113,13 @@ Dictionary-based edit handlers are registered for each `ServiceType` and injecte
 
 Dynamic DI modules are enabled by `services.AddServiceModules()`, which scans assemblies for `IServiceModule` implementations and calls their `RegisterServices` methods. Dropping a new module into the application automatically registers its services without manual wiring.
 
+### Plug-in packaging workflow
+
+1. Open the main window and choose **Export Plug-ins** from the navigation bar.
+2. Select the descriptors that should be packaged, then review the manifest metadata (plug-in id, name, and version).
+3. Optionally browse to a custom destination. Leaving the path blank writes the archive to the configured plug-in directory using the sanitized id and version.
+4. Click **Export** to generate a `.peakiot` archive. The package contains the selected assemblies plus a manifest compatible with the existing `PluginImportService`, so the file can be copied back into the plug-in directory or imported without additional steps.
+
 ### Adding a new service example
 
 1. Add a value to the `ServiceType` enum.

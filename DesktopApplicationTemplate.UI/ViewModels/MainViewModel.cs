@@ -41,6 +41,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public ICommand RemoveServiceCommand { get; }
         public ICommand EditServiceCommand { get; }
         public ICommand ToggleServiceProcessCommand { get; }
+        public ICommand ExportPluginsCommand { get; }
         public int ServicesCreated => Services.Count;
         public int CurrentActiveServices => Services.Count(s => s.IsActive);
 
@@ -129,6 +130,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             RemoveServiceCommand = new AsyncRelayCommand(RemoveSelectedServiceAsync, () => SelectedService != null);
             EditServiceCommand = new RelayCommand<ServiceListModel?>(EditService, svc => svc != null);
             ToggleServiceProcessCommand = new AsyncRelayCommand(ToggleServiceProcessAsync, () => !IsServiceProcessBusy);
+            ExportPluginsCommand = new RelayCommand(OnExportPlugins);
             FilteredServices = CollectionViewSource.GetDefaultView(Services);
             Filters.PropertyChanged += (_, __) => ApplyFilters();
             LoadServices();
@@ -159,8 +161,14 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
         }
 
+        private void OnExportPlugins()
+        {
+            ExportPluginsRequested?.Invoke(this, EventArgs.Empty);
+        }
+
         public event Action? AddServiceRequested;
         public event Action? ConfigurationChangeBlocked;
+        public event EventHandler? ExportPluginsRequested;
 
         public bool RequestConfigurationChange()
         {

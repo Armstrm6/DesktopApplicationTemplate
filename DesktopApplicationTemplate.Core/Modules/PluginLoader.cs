@@ -17,18 +17,7 @@ namespace DesktopApplicationTemplate.Core.Modules;
 /// </summary>
 public sealed class PluginLoader
 {
-    private const string ManifestFileName = "plugin.manifest.json";
-    private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web)
-    {
-        AllowTrailingCommas = true,
-        PropertyNameCaseInsensitive = true,
-        ReadCommentHandling = JsonCommentHandling.Skip,
-    };
-
     private static readonly List<PluginLoadContext> ActiveContexts = new();
-    private static readonly StringComparison PathComparison = OperatingSystem.IsWindows()
-        ? StringComparison.OrdinalIgnoreCase
-        : StringComparison.Ordinal;
     private static readonly HashSet<string> SupportedArchiveExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
         ".peakiot",
@@ -123,20 +112,20 @@ public sealed class PluginLoader
     private void LoadFromArchive(string archivePath, ICollection<Assembly> assemblies)
     {
         using var archive = ZipFile.OpenRead(archivePath);
-        var manifestEntry = archive.GetEntry(ManifestFileName);
+        var manifestEntry = archive.GetEntry(PluginPackageUtilities.ManifestFileName);
         if (manifestEntry is null)
         {
-            logger.LogWarning("Plug-in archive {ArchivePath} does not contain {ManifestFileName}.", archivePath, ManifestFileName);
+            logger.LogWarning("Plug-in archive {ArchivePath} does not contain {ManifestFileName}.", archivePath, PluginPackageUtilities.ManifestFileName);
             return;
         }
 
         PluginManifest? manifest;
         using (var manifestStream = manifestEntry.Open())
         {
-            manifest = JsonSerializer.Deserialize<PluginManifest>(manifestStream, SerializerOptions);
+            manifest = JsonSerializer.Deserialize<PluginManifest>(manifestStream, PluginPackageUtilities.SerializerOptions);
         }
 
-        if (!TryValidateBasicManifest(manifest, archivePath, out var basicErrors))
+        if (!PluginPackageUtilities.TryValidateBasicManifest(manifest, archivePath, out var basicErrors))
         {
             foreach (var error in basicErrors)
             {
@@ -146,7 +135,7 @@ public sealed class PluginLoader
             return;
         }
 
-        var extractionPath = GetExtractionPath(manifest!);
+        var extractionPath = options.GetExtractionPath(manifest!);
         if (Directory.Exists(extractionPath))
         {
             Directory.Delete(extractionPath, recursive: true);
@@ -160,10 +149,10 @@ public sealed class PluginLoader
 
     private void LoadFromDirectory(string directoryPath, ICollection<Assembly> assemblies, string? origin = null)
     {
-        var manifestPath = Path.Combine(directoryPath, ManifestFileName);
+        var manifestPath = options.GetManifestPath(directoryPath);
         if (!File.Exists(manifestPath))
         {
-            logger.LogWarning("Plug-in folder {PluginDirectory} does not contain {ManifestFileName}.", directoryPath, ManifestFileName);
+            logger.LogWarning("Plug-in folder {PluginDirectory} does not contain {ManifestFileName}.", directoryPath, PluginPackageUtilities.ManifestFileName);
             return;
         }
 
@@ -171,7 +160,7 @@ public sealed class PluginLoader
         try
         {
             using var stream = File.OpenRead(manifestPath);
-            manifest = JsonSerializer.Deserialize<PluginManifest>(stream, SerializerOptions);
+            manifest = JsonSerializer.Deserialize<PluginManifest>(stream, PluginPackageUtilities.SerializerOptions);
         }
         catch (JsonException ex)
         {
@@ -179,7 +168,7 @@ public sealed class PluginLoader
             return;
         }
 
-        if (!TryValidateManifest(manifest, directoryPath, origin ?? manifestPath, out var errors))
+        if (!PluginPackageUtilities.TryValidateManifest(manifest, directoryPath, origin ?? manifestPath, out var errors))
         {
             foreach (var error in errors)
             {
@@ -189,14 +178,14 @@ public sealed class PluginLoader
             return;
         }
 
-        var manifestKey = CreateManifestKey(manifest!);
+        var manifestKey = PluginPackageUtilities.CreateManifestKey(manifest!);
         if (!loadedPlugins.Add(manifestKey))
         {
             logger.LogInformation("Plug-in {PluginId} version {PluginVersion} was already loaded. Skipping payload at {PluginDirectory}.", manifest!.Id, manifest.Version, directoryPath);
             return;
         }
 
-        var entryAssemblyPath = ResolvePath(directoryPath, manifest!.EntryAssembly);
+        var entryAssemblyPath = PluginPackageUtilities.ResolveRelativePath(directoryPath, manifest!.EntryAssembly);
         if (entryAssemblyPath is null)
         {
             logger.LogWarning("Entry assembly {EntryAssembly} for plug-in {PluginId} resolves outside of the plug-in directory.", manifest.EntryAssembly, manifest.Id);
@@ -212,7 +201,7 @@ public sealed class PluginLoader
 
         foreach (var assemblyReference in assemblyReferences)
         {
-            var assemblyPath = ResolvePath(directoryPath, assemblyReference);
+            var assemblyPath = PluginPackageUtilities.ResolveRelativePath(directoryPath, assemblyReference);
             if (assemblyPath is null || !File.Exists(assemblyPath))
             {
                 logger.LogWarning(
@@ -243,139 +232,6 @@ public sealed class PluginLoader
         }
     }
 
-    private static bool TryValidateBasicManifest(PluginManifest? manifest, string origin, out List<string> errors)
-    {
-        errors = new List<string>();
-        if (manifest is null)
-        {
-            errors.Add(FormattableString.Invariant($"Plug-in manifest in '{origin}' could not be parsed."));
-            return false;
-        }
-
-        if (string.IsNullOrWhiteSpace(manifest.Id))
-        {
-            errors.Add(FormattableString.Invariant($"Plug-in manifest in '{origin}' is missing 'id'."));
-        }
-
-        if (string.IsNullOrWhiteSpace(manifest.Version))
-        {
-            errors.Add(FormattableString.Invariant($"Plug-in manifest in '{origin}' is missing 'version'."));
-        }
-        else if (!Version.TryParse(manifest.Version, out _))
-        {
-            errors.Add(FormattableString.Invariant($"Plug-in manifest in '{origin}' specifies an invalid version '{manifest.Version}'."));
-        }
-
-        if (string.IsNullOrWhiteSpace(manifest.EntryAssembly))
-        {
-            errors.Add(FormattableString.Invariant($"Plug-in manifest in '{origin}' is missing 'entryAssembly'."));
-        }
-
-        return errors.Count == 0;
-    }
-
-    private static bool TryValidateManifest(PluginManifest? manifest, string pluginDirectory, string origin, out List<string> errors)
-    {
-        if (!TryValidateBasicManifest(manifest, origin, out errors))
-        {
-            return false;
-        }
-
-        if (manifest is null)
-        {
-            return false;
-        }
-
-        var entryAssembly = ResolvePath(pluginDirectory, manifest.EntryAssembly);
-        if (entryAssembly is null)
-        {
-            errors.Add(FormattableString.Invariant($"Entry assembly '{manifest.EntryAssembly}' resolves outside '{pluginDirectory}'."));
-        }
-        else if (!File.Exists(entryAssembly))
-        {
-            errors.Add(FormattableString.Invariant($"Entry assembly '{manifest.EntryAssembly}' was not found at '{entryAssembly}'."));
-        }
-
-        foreach (var assemblyReference in manifest.ServiceAssemblies)
-        {
-            var resolved = ResolvePath(pluginDirectory, assemblyReference);
-            if (resolved is null)
-            {
-                errors.Add(FormattableString.Invariant($"Service assembly '{assemblyReference}' resolves outside '{pluginDirectory}'."));
-                continue;
-            }
-
-            if (!File.Exists(resolved))
-            {
-                errors.Add(FormattableString.Invariant($"Service assembly '{assemblyReference}' was not found at '{resolved}'."));
-            }
-        }
-
-        foreach (var probingPath in manifest.ProbingPaths)
-        {
-            if (ResolvePath(pluginDirectory, probingPath) is null)
-            {
-                errors.Add(FormattableString.Invariant($"Probing path '{probingPath}' resolves outside '{pluginDirectory}'."));
-            }
-        }
-
-        return errors.Count == 0;
-    }
-
-    private static string CreateManifestKey(PluginManifest manifest)
-    {
-        return FormattableString.Invariant($"{manifest.Id.Trim()}|{manifest.Version.Trim()}");
-    }
-
-    private string GetExtractionPath(PluginManifest manifest)
-    {
-        var safeId = SanitizeSegment(manifest.Id);
-        var safeVersion = SanitizeSegment(manifest.Version);
-        return Path.Combine(options.ExtractionDirectory, safeId, safeVersion);
-    }
-
-    private static string? ResolvePath(string root, string relativePath)
-    {
-        if (string.IsNullOrWhiteSpace(relativePath))
-        {
-            return null;
-        }
-
-        var combined = Path.GetFullPath(Path.Combine(root, relativePath));
-        var rootPath = EnsureTrailingSeparator(Path.GetFullPath(root));
-        if (!combined.StartsWith(rootPath, PathComparison))
-        {
-            return null;
-        }
-
-        return combined;
-    }
-
-    private static string EnsureTrailingSeparator(string path)
-    {
-        if (!path.EndsWith(Path.DirectorySeparatorChar) && !path.EndsWith(Path.AltDirectorySeparatorChar))
-        {
-            path += Path.DirectorySeparatorChar;
-        }
-
-        return path;
-    }
-
-    private static string SanitizeSegment(string value)
-    {
-        var invalid = Path.GetInvalidFileNameChars();
-        var buffer = value.ToCharArray();
-        for (var i = 0; i < buffer.Length; i++)
-        {
-            if (invalid.Contains(buffer[i]))
-            {
-                buffer[i] = '_';
-            }
-        }
-
-        return new string(buffer);
-    }
-
     private sealed class PluginLoadContext : AssemblyLoadContext
     {
         private readonly AssemblyDependencyResolver resolver;
@@ -390,9 +246,9 @@ public sealed class PluginLoader
             }
 
             resolver = new AssemblyDependencyResolver(entryAssemblyPath);
-            var rootPath = EnsureTrailingSeparator(Path.GetFullPath(pluginDirectory));
+            var rootPath = PluginPackageUtilities.EnsureTrailingSeparator(Path.GetFullPath(pluginDirectory));
             this.probingPaths = probingPaths
-                .Select(path => ResolvePath(rootPath, path))
+                .Select(path => PluginPackageUtilities.ResolveRelativePath(rootPath, path))
                 .Where(path => path is not null)
                 .Cast<string>()
                 .Distinct(StringComparer.OrdinalIgnoreCase)

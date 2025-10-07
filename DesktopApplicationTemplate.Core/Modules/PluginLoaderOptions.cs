@@ -36,6 +36,39 @@ public sealed class PluginLoaderOptions
     public string ExtractionDirectory { get; }
 
     /// <summary>
+    /// Gets the full path for a package residing in the plug-in root directory.
+    /// Ensures the directory exists.
+    /// </summary>
+    /// <param name="fileName">The package file name.</param>
+    /// <returns>The absolute package path.</returns>
+    public string GetPackagePath(string fileName)
+    {
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            throw new ArgumentException("File name must be provided", nameof(fileName));
+        }
+
+        Directory.CreateDirectory(RootDirectory);
+        return Path.Combine(RootDirectory, fileName);
+    }
+
+    /// <summary>
+    /// Calculates the extraction path for the provided manifest.
+    /// </summary>
+    public string GetExtractionPath(PluginManifest manifest)
+    {
+        return PluginPackageUtilities.GetExtractionPath(this, manifest);
+    }
+
+    /// <summary>
+    /// Gets the manifest path for the specified plug-in directory.
+    /// </summary>
+    public string GetManifestPath(string pluginDirectory)
+    {
+        return PluginPackageUtilities.GetManifestPath(pluginDirectory);
+    }
+
+    /// <summary>
     /// Creates options using the provided configuration.
     /// </summary>
     /// <param name="configuration">The application configuration.</param>

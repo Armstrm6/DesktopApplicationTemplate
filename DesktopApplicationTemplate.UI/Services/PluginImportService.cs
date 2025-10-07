@@ -58,11 +58,10 @@ public sealed class PluginImportService : IPluginImportService
 
         try
         {
-            Directory.CreateDirectory(_options.RootDirectory);
             var fileName = Path.GetFileName(sourcePath);
-            var destinationPath = Path.Combine(_options.RootDirectory, fileName);
+            var destinationPath = _options.GetPackagePath(fileName);
 
-            if (!PathsEqual(sourcePath, destinationPath))
+            if (!PluginPackageUtilities.PathsEqual(sourcePath, destinationPath))
             {
                 _logger.LogInformation("Copying plug-in package {Source} to {Destination}.", sourcePath, destinationPath);
                 File.Copy(sourcePath, destinationPath, overwrite: true);
@@ -114,9 +113,4 @@ public sealed class PluginImportService : IPluginImportService
         }
     }
 
-    private static bool PathsEqual(string first, string second)
-    {
-        var comparison = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
-        return string.Equals(Path.GetFullPath(first), Path.GetFullPath(second), comparison);
-    }
 }

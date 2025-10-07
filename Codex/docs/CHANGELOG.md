@@ -17,6 +17,7 @@
 - Migration routine converts legacy service type names to `ServiceType` and logs unmapped values.
 - `IServiceModule` interface enables service-specific DI registration and modules are discovered and registered automatically at startup.
 - Static `ServiceTypeExtensions` maps service types to short codes for reuse in serialization and configuration.
+- Plug-in packaging utilities expose manifest validation helpers so import and export workflows share directory handling.
 
 #### Changed
 - Clarified environment instruction precedence in `AGENTS.md`.
@@ -53,6 +54,7 @@
 - Text inputs now automatically display tooltips derived from bound property names, guiding expected user input.
 - Reusable `AdvancedConfigViewModelBase<TOptions>` and `AdvancedConfigButtonBar` unify Save/Back logic across advanced configuration views.
 - Reusable `ServiceLogView` control and `ServiceLogViewModel` provide consistent log panels for the main window and services.
+- Main window adds an Export Plug-ins command and dialog so operators can bundle descriptors into `.peakiot` archives.
 - Reusable `ServiceMessageTableView` and `ServiceMessageTableViewModel` display recent service messages with default columns, integrated into the TCP service view.
 - Script editor window with Roslyn-based syntax highlighting and run/save commands.
 - TCP service messages view adds an Edit Script button for modifying scripts and test messages.
