@@ -152,9 +152,10 @@ namespace DesktopApplicationTemplate.UI.Views
             ShowHome();
         }
 
-        private void OnHomeRequested(object? sender, string reason)
+        private async void OnHomeRequested(object? sender, string reason)
         {
-            Dispatcher.Invoke(() => NavigateHome(reason));
+            await App.UiThreadTaskFactory.SwitchToMainThreadAsync();
+            NavigateHome(reason);
         }
 
 
@@ -477,7 +478,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 _logger?.LogDebug("RemoveService command executed");
             }
         }
-        private void ServiceList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void ServiceList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             _logger?.LogDebug("Service selection changed");
             if (_viewModel.SelectedService is ServiceListModel selected)
@@ -486,14 +487,11 @@ namespace DesktopApplicationTemplate.UI.Views
                 if (page != null)
                 {
                     ShowPage(page);
-                    _ = App.UiThreadTaskFactory.RunAsync(async () =>
+                    await App.UiThreadTaskFactory.SwitchToMainThreadAsync();
+                    using (_viewModel.PreserveActiveServiceSelection())
                     {
-                        await App.UiThreadTaskFactory.SwitchToMainThreadAsync();
-                        using (_viewModel.PreserveActiveServiceSelection())
-                        {
-                            ServiceList.SelectedItem = null;
-                        }
-                    });
+                        ServiceList.SelectedItem = null;
+                    }
                 }
 
                 return;
