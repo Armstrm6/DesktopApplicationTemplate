@@ -628,6 +628,37 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             _logger?.Log($"Exported {LogViewModel.DisplayLogs.Count()} logs to {filePath}", LogLevel.Debug);
         }
 
+        public bool TryExportAllLogs(string filePath, out string? errorMessage)
+        {
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                errorMessage = "A valid file path was not provided.";
+                _logger?.Log("Export aborted because the destination file path was empty.", LogLevel.Warning);
+                return false;
+            }
+
+            try
+            {
+                var lines = AllLogs.Select(entry => entry.Message).ToList();
+                File.WriteAllLines(filePath, lines);
+                _logger?.Log($"Exported {lines.Count} total logs to {filePath}", LogLevel.Information);
+                errorMessage = null;
+                return true;
+            }
+            catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+            {
+                errorMessage = ex.Message;
+                _logger?.Log($"Failed to export logs to {filePath}: {ex.Message}", LogLevel.Error);
+                return false;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+                _logger?.Log($"Failed to export logs to {filePath}: {ex.Message}", LogLevel.Error);
+                return false;
+            }
+        }
+
         public void RefreshLogs()
         {
             LogViewModel.RefreshLogs();

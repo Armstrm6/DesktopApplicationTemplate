@@ -30,6 +30,10 @@ namespace DesktopApplicationTemplate.UI.Views
     [SupportedOSPlatform("windows")]
     public partial class MainView : Window
     {
+        private const string LogExportDialogFilter = "Log files (*.log)|*.log|Text files (*.txt)|*.txt|All files (*.*)|*.*";
+        private const string LogExportTimestampFormat = "yyyyMMdd_HHmmss";
+        private const string LogExportDefaultPrefix = "AllServices";
+
         private readonly MainViewModel _viewModel;
         private readonly ILogger<MainView>? _logger;
         private readonly IServiceUiRegistry<ServiceListModel, Page> _serviceRegistry;
@@ -830,10 +834,41 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private void ExportLog_Click(object sender, RoutedEventArgs e)
         {
-            _logger?.LogInformation("Export log button clicked");
-            var path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "exported_logs.txt");
-            _viewModel.ExportDisplayedLogs(path);
-            _logger?.LogInformation("Logs exported to {Path}", path);
+            _logger?.LogInformation("Home view export logs button clicked");
+
+            var timestamp = DateTime.Now.ToString(LogExportTimestampFormat);
+            var suggestedName = $"{LogExportDefaultPrefix}_{timestamp}.log";
+            var selectedPath = App.FileDialogService.SaveFile(suggestedName, LogExportDialogFilter);
+
+            if (string.IsNullOrWhiteSpace(selectedPath))
+            {
+                _logger?.LogInformation("Log export canceled by the user.");
+                return;
+            }
+
+            if (_viewModel.TryExportAllLogs(selectedPath, out var errorMessage))
+            {
+                _logger?.LogInformation("All logs exported to {FilePath}", selectedPath);
+                MessageBox.Show(
+                    this,
+                    $"Logs exported to:\n{selectedPath}",
+                    "Export Complete",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
+            else
+            {
+                var failureMessage = string.IsNullOrWhiteSpace(errorMessage)
+                    ? "An unknown error occurred."
+                    : errorMessage;
+                _logger?.LogError("Failed to export logs to {FilePath}: {ErrorMessage}", selectedPath, failureMessage);
+                MessageBox.Show(
+                    this,
+                    $"Failed to export logs to '{selectedPath}': {failureMessage}",
+                    "Export Failed",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
         }
 
         private void RefreshLog_Click(object sender, RoutedEventArgs e)
