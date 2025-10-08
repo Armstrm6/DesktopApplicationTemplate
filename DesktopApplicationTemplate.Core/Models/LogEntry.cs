@@ -23,5 +23,15 @@ namespace DesktopApplicationTemplate.Models
         /// Display color for the entry in a cross-platform format (e.g., "#FF0000").
         /// </summary>
         public string Color { get; set; } = "#000000";
+
+        /// <summary>
+        /// Identifies the originating service type when applicable.
+        /// </summary>
+        public ServiceType? ServiceType { get; set; }
+
+        /// <summary>
+        /// Friendly name of the originating service when available.
+        /// </summary>
+        public string ServiceName { get; set; } = string.Empty;
     }
 }
