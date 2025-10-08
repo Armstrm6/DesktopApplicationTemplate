@@ -41,7 +41,6 @@ using DesktopApplicationTemplate.UI.ViewModels.Heartbeat.Advanced;
 using DesktopApplicationTemplate.UI.ViewModels.Mqtt;
 using DesktopApplicationTemplate.UI.ViewModels.Mqtt.Create;
 using DesktopApplicationTemplate.UI.ViewModels.Mqtt.Edit;
-using DesktopApplicationTemplate.UI.ViewModels.Mqtt.Advanced;
 using DesktopApplicationTemplate.UI.ViewModels.Ftp;
 using DesktopApplicationTemplate.UI.ViewModels.Ftp.Create;
 using DesktopApplicationTemplate.UI.ViewModels.Ftp.Edit;
@@ -75,7 +74,6 @@ using DesktopApplicationTemplate.UI.Views.Heartbeat.Advanced;
 using DesktopApplicationTemplate.UI.Views.Mqtt;
 using DesktopApplicationTemplate.UI.Views.Mqtt.Create;
 using DesktopApplicationTemplate.UI.Views.Mqtt.Edit;
-using DesktopApplicationTemplate.UI.Views.Mqtt.Advanced;
 using DesktopApplicationTemplate.UI.Views.Ftp;
 using DesktopApplicationTemplate.UI.Views.Ftp.Create;
 using DesktopApplicationTemplate.UI.Views.Ftp.Edit;
@@ -245,8 +243,6 @@ namespace DesktopApplicationTemplate.UI
             services.AddTransient<MqttEditServiceView>();
             services.AddTransient<MqttEditServiceViewModel>();
             services.AddTransient<ServiceEditViewModelBase<MqttServiceOptions>, MqttEditServiceViewModel>();
-            services.AddTransient<MqttAdvancedConfigView>();
-            services.AddTransient<MqttAdvancedConfigViewModel>();
             services.AddTransient<TcpCreateServiceView>();
             services.AddTransient<TcpCreateServiceViewModel>();
             services.AddTransient<ServiceCreateViewModelBase<TcpServiceOptions>, TcpCreateServiceViewModel>();
@@ -356,15 +352,6 @@ namespace DesktopApplicationTemplate.UI
                     };
                     vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
                     var view = ActivatorUtilities.CreateInstance<MqttCreateServiceView>(provider, vm);
-                    vm.AdvancedConfigRequested += opts =>
-                    {
-                        var advVm = ActivatorUtilities.CreateInstance<MqttAdvancedConfigViewModel>(provider, opts);
-                        var advView = provider.GetRequiredService<MqttAdvancedConfigView>();
-                        advView.Initialize(advVm);
-                        advVm.Saved += _ => mainView.ShowPage(view);
-                        advVm.BackRequested += () => mainView.ShowPage(view);
-                        mainView.ShowPage(advView);
-                    };
                     return view;
                 },
                 LegacyServiceType: ServiceType.Mqtt,
