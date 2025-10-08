@@ -9,6 +9,15 @@ Purpose: Running log of what worked, what broke, and why.
 - Always record environment limitations (e.g., missing dotnet runtime).
 - When Windows collaborators run builds or tests, capture the commands and summarize their results so Codex can reference them.
 
+[2025-10-07 10:30] Topic: Service template asset consolidation
+Context: Moved the legacy `design/` mockups into the new `Service Templates/` top-level directory.
+Observations: Created MQTT, TCP, and ApplicationShell subfolders with a README that inventories the draw.io sources and SVG exports for each template.
+Codex Limitations noticed: Linux container only; design assets were reorganized without running platform-specific tooling.
+Effective Prompts / Instructions that worked: User request to centralize example assets and update docs.
+Decisions & Rationale: Align documentation with the new structure so contributors know where to add future templates.
+Action Items: 1) Add new protocol folders under `Service Templates/` when introducing additional mockups.
+Related Commits/PRs:
+
 [2025-10-06 09:00] Topic: Self-heal automation removal
 Context: Disabled Codex's automated pipeline repair to avoid self-directed patch generation.
 Observations: Deleted `.github/workflows/self-heal.yml` and the `Codex/tools/selfheal` script, so CI failures now require manual triage.

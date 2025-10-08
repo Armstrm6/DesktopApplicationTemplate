@@ -105,6 +105,10 @@ The UI exposes several built in service types. A brief description of each is sh
 
 Each service has an editor page where the parameters and test messages can be modified.  A **Help** button is available on these pages to display common ASCII commands (ACK, NAK, ENQ, ETX) which can be inserted when building protocol messages.
 
+## Service template resources
+
+Reference layouts for the built-in services now live under `Service Templates/`. The accompanying [README](Service%20Templates/README.md) inventories the available MQTT, TCP, and shell mockups so contributors can quickly locate the draw.io sources and SVG exports when designing new protocols.
+
 ## Extending the application
 
 `ServiceType` is an enum that identifies each supported service category. It is serialized using short codes alongside descriptor identifiers so persisted services always resolve to the correct feature.
