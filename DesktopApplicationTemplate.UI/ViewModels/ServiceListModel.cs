@@ -120,6 +120,17 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public ObservableCollection<string> AssociatedServices { get; } = new();
 
+        private static readonly object ServiceRegistryLock = new();
+        private static readonly HashSet<ServiceListModel> ServiceRegistry = new();
+
+        public ServiceListModel()
+        {
+            lock (ServiceRegistryLock)
+            {
+                ServiceRegistry.Add(this);
+            }
+        }
+
         private readonly LinkedList<ServiceMessageHistoryEntry> _messageHistory = new();
         private double _totalExecutionTimeMs;
         private int _executionCount;
@@ -337,7 +348,24 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         /// Enables forwarding of log entries between services when cross-service references are detected.
         /// Defaults to <c>false</c> so services remain independent unless explicitly linked.
         /// </summary>
-        public static bool EnableCrossServiceLogForwarding { get; set; }
+        private static bool _enableCrossServiceLogForwarding;
+        public static bool EnableCrossServiceLogForwarding
+        {
+            get => _enableCrossServiceLogForwarding;
+            set
+            {
+                if (_enableCrossServiceLogForwarding == value)
+                {
+                    return;
+                }
+
+                _enableCrossServiceLogForwarding = value;
+                if (!value)
+                {
+                    ClearAllCrossServiceAssociations();
+                }
+            }
+        }
 
         private bool _isActive;
         public bool IsActive
@@ -628,6 +656,18 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 return;
             }
 
+            if (!EnableCrossServiceLogForwarding)
+            {
+                RemoveAssociation(target);
+                return;
+            }
+
+            EnsureAssociation(target);
+            target.AddLog(forwardedMessage, color, level, false);
+        }
+
+        private void EnsureAssociation(ServiceListModel target)
+        {
             if (!AssociatedServices.Contains(target.DisplayName))
             {
                 AssociatedServices.Add(target.DisplayName);
@@ -637,10 +677,70 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             {
                 target.AssociatedServices.Add(DisplayName);
             }
+        }
 
-            if (EnableCrossServiceLogForwarding)
+        private void RemoveAssociation(ServiceListModel target)
+        {
+            RemoveStaleAssociation(this, target);
+        }
+
+        private static void RemoveStaleAssociation(ServiceListModel first, ServiceListModel second)
+        {
+            if (first is null || second is null)
             {
-                target.AddLog(forwardedMessage, color, level, false);
+                return;
+            }
+
+            first.AssociatedServices.Remove(second.DisplayName);
+            second.AssociatedServices.Remove(first.DisplayName);
+        }
+
+        private static void ClearAllCrossServiceAssociations()
+        {
+            var snapshot = GetRegisteredServicesSnapshot();
+            for (var i = 0; i < snapshot.Count; i++)
+            {
+                var current = snapshot[i];
+                for (var j = i + 1; j < snapshot.Count; j++)
+                {
+                    RemoveStaleAssociation(current, snapshot[j]);
+                }
+
+                current.AssociatedServices.Clear();
+            }
+        }
+
+        private static IReadOnlyList<ServiceListModel> GetRegisteredServicesSnapshot()
+        {
+            lock (ServiceRegistryLock)
+            {
+                return ServiceRegistry.ToList();
+            }
+        }
+
+        internal static void RemoveServiceAssociations(ServiceListModel service)
+        {
+            if (service is null)
+            {
+                return;
+            }
+
+            var snapshot = GetRegisteredServicesSnapshot();
+            foreach (var other in snapshot)
+            {
+                if (ReferenceEquals(other, service))
+                {
+                    continue;
+                }
+
+                RemoveStaleAssociation(service, other);
+            }
+
+            service.AssociatedServices.Clear();
+
+            lock (ServiceRegistryLock)
+            {
+                ServiceRegistry.Remove(service);
             }
         }
 
