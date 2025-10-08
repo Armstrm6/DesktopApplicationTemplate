@@ -198,8 +198,8 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<CloseConfirmationHelper>();
             services.AddSingleton<IMqttClientSessionManager, MqttClientSessionManager>();
             services.AddSingleton<MainViewModel>();
-            services.AddSingleton<ServiceMessageTableViewModel>();
-            services.AddSingleton<TcpServiceMessagesView>();
+            services.AddTransient<ServiceMessageTableViewModel>();
+            services.AddTransient<TcpServiceMessagesView>();
             services.AddTransient<TcpServiceMessagesViewModel>();
             services.AddSingleton<HttpServiceView>();
             services.AddSingleton<HttpServiceViewModel>();
