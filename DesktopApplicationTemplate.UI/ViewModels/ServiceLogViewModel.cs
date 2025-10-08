@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,6 +7,9 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Models;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using System.Windows;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -14,6 +18,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
     /// </summary>
     public class ServiceLogViewModel : ViewModelBase
     {
+        private readonly ILogger<ServiceLogViewModel> _logger;
         private ObservableCollection<LogEntry> _logs;
         private NotifyCollectionChangedEventHandler? _logsChangedHandler;
 
@@ -22,7 +27,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         /// with default values.
         /// </summary>
         public ServiceLogViewModel()
-            : this(ServiceType.Mqtt, new ObservableCollection<LogEntry>())
+            : this(ServiceType.Mqtt, new ObservableCollection<LogEntry>(), null)
         {
         }
 
@@ -31,10 +36,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         /// </summary>
         /// <param name="type">The category of service associated with these logs.</param>
         /// <param name="logs">The collection of log entries to display.</param>
-        public ServiceLogViewModel(ServiceType type, ObservableCollection<LogEntry> logs)
+        public ServiceLogViewModel(ServiceType type, ObservableCollection<LogEntry> logs, ILogger<ServiceLogViewModel>? logger = null)
         {
             Type = type;
             _logs = logs;
+            _logger = logger ?? NullLogger<ServiceLogViewModel>.Instance;
             AttachLogCollection(_logs);
             RefreshLogCommand = new RelayCommand(RefreshLogs);
             ExportLogCommand = new RelayCommand(() => ExportLogs(Path.Combine(Path.GetTempPath(), "exported_logs.txt")));
@@ -109,8 +115,20 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         /// <param name="filePath">The destination file path.</param>
         public void ExportLogs(string filePath)
         {
-            var lines = DisplayLogs.Select(l => l.Message).ToList();
-            File.WriteAllLines(filePath, lines);
+            try
+            {
+                var lines = DisplayLogs.Select(l => l.Message).ToList();
+                File.WriteAllLines(filePath, lines);
+            }
+            catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+            {
+                _logger.LogError(ex, "Failed to export logs to {FilePath}.", filePath);
+                MessageBox.Show(
+                    $"Failed to export logs to '{filePath}': {ex.Message}",
+                    "Export Failed",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
         }
 
         /// <summary>
