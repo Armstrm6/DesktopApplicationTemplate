@@ -57,8 +57,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 _activeService = value;
                 OnPropertyChanged();
                 LogViewModel.SetLogs(_activeService?.Logs ?? AllLogs, _activeService is null);
-                (RemoveServiceCommand as AsyncRelayCommand)?.RaiseCanExecuteChanged();
-                (EditServiceCommand as RelayCommand<ServiceListModel?>)?.RaiseCanExecuteChanged();
+                RefreshServiceCommandStates();
             }
         }
         public ICommand AddServiceCommand { get; }
@@ -81,6 +80,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     _servicesRunning = value;
                     OnPropertyChanged();
                     OnPropertyChanged(nameof(ServiceProcessButtonText));
+                    RefreshServiceCommandStates();
                 }
             }
         }
@@ -96,6 +96,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     _isServiceProcessBusy = value;
                     OnPropertyChanged();
                     (ToggleServiceProcessCommand as AsyncRelayCommand)?.RaiseCanExecuteChanged();
+                    RefreshServiceCommandStates();
                 }
             }
         }
@@ -111,6 +112,19 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         }
 
         public IEnumerable<LogEntry> DisplayLogs => LogViewModel.DisplayLogs;
+
+        private void RefreshServiceCommandStates()
+        {
+            if (RemoveServiceCommand is AsyncRelayCommand<ServiceListModel?> removeCommand)
+            {
+                removeCommand.RaiseCanExecuteChanged();
+            }
+
+            if (EditServiceCommand is RelayCommand<ServiceListModel?> editCommand)
+            {
+                editCommand.RaiseCanExecuteChanged();
+            }
+        }
 
         private readonly CsvServiceAdapter _csvService;
         private readonly ILoggingService? _logger;
@@ -128,6 +142,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         internal int ActivatingServicesCount => _activatingServices.Count;
 
         public NetworkConfigurationViewModel NetworkConfig { get; }
+
+        private bool CanModifyConfiguration => !IsServiceProcessBusy && !ServicesRunning;
 
         public MainViewModel(
             CsvServiceAdapter csvService,
@@ -170,7 +186,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             };
 
             AddServiceCommand = new RelayCommand(AddService);
-            RemoveServiceCommand = new AsyncRelayCommand(RemoveSelectedServiceAsync, () => ActiveService != null);
+            RemoveServiceCommand = new AsyncRelayCommand<ServiceListModel?>(RemoveServiceAsync, CanRemoveService);
             EditServiceCommand = new RelayCommand<ServiceListModel?>(EditService, svc => svc != null || ActiveService != null);
             ToggleServiceProcessCommand = new AsyncRelayCommand(ToggleServiceProcessAsync, () => !IsServiceProcessBusy);
             ExportPluginsCommand = new RelayCommand(OnExportPlugins);
@@ -245,13 +261,18 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public bool RequestConfigurationChange()
         {
-            if (IsServiceProcessBusy || ServicesRunning)
+            if (!CanModifyConfiguration)
             {
                 ConfigurationChangeBlocked?.Invoke();
                 return false;
             }
 
             return true;
+        }
+
+        private bool CanRemoveService(ServiceListModel? service)
+        {
+            return (service ?? ActiveService) != null && CanModifyConfiguration;
         }
 
         private void EditService(ServiceListModel? service)
@@ -314,9 +335,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             return $"{typeName}{index}";
         }
 
-        private async Task RemoveSelectedServiceAsync()
+        private async Task RemoveServiceAsync(ServiceListModel? service)
         {
-            if (ActiveService == null)
+            var target = service ?? ActiveService;
+            if (target == null)
             {
                 return;
             }
@@ -326,24 +348,38 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 return;
             }
 
-            _logger?.Log($"Removing service {ActiveService.DisplayName}", LogLevel.Debug);
-            var index = Services.IndexOf(ActiveService);
-            ActiveService.AddLog("Service removed", WpfBrushes.Red);
-            if (ActiveService.Type != ServiceType.Csv)
-                _csvService.RemoveColumnsForService(ActiveService.DisplayName);
-            _activatingServices.Remove(ActiveService);
-            ActiveService.LogAdded -= OnServiceLogAdded;
-            ActiveService.ActiveChanged -= OnServiceActiveChanged;
-            Services.Remove(ActiveService);
+            _logger?.Log($"Removing service {target.DisplayName}", LogLevel.Debug);
+            var index = Services.IndexOf(target);
+            target.AddLog("Service removed", WpfBrushes.Red);
+            if (target.Type != ServiceType.Csv)
+            {
+                _csvService.RemoveColumnsForService(target.DisplayName);
+            }
+
+            _activatingServices.Remove(target);
+            target.LogAdded -= OnServiceLogAdded;
+            target.ActiveChanged -= OnServiceActiveChanged;
+            Services.Remove(target);
+
+            if (ReferenceEquals(ActiveService, target))
+            {
+                ActiveService = null;
+            }
+
             if (Services.Count > 0)
             {
-                if (index >= Services.Count) index = Services.Count - 1;
+                if (index >= Services.Count)
+                {
+                    index = Services.Count - 1;
+                }
+
                 SelectedService = Services[index];
             }
             else
             {
                 SelectedService = null;
             }
+
             OnPropertyChanged(nameof(ServicesCreated));
             OnPropertyChanged(nameof(CurrentActiveServices));
             LogViewModel.RefreshLogs();
