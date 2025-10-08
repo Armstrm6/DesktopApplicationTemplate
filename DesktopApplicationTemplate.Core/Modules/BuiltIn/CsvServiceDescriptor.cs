@@ -1,6 +1,7 @@
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Csv;
 using DesktopApplicationTemplate.Models;
+using ModelsServiceType = DesktopApplicationTemplate.Models.ServiceType;
 
 namespace DesktopApplicationTemplate.Core.Modules.BuiltIn;
 
@@ -14,7 +15,7 @@ public sealed class CsvServiceDescriptor : BuiltInServiceDescriptor<CsvServiceOp
             ServiceDescriptorIds.Csv,
             "CSV Creator",
             BuiltInServiceCategories.DataProcessing,
-            ServiceType.Csv,
+            ModelsServiceType.Csv,
             new ServicePresentationMetadata(
                 "📄",
                 "LightGray",

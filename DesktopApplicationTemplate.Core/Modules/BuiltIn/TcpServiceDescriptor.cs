@@ -1,6 +1,7 @@
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Tcp;
 using DesktopApplicationTemplate.Models;
+using ModelsServiceType = DesktopApplicationTemplate.Models.ServiceType;
 
 namespace DesktopApplicationTemplate.Core.Modules.BuiltIn;
 
@@ -14,7 +15,7 @@ public sealed class TcpServiceDescriptor : BuiltInServiceDescriptor<TcpServiceOp
             ServiceDescriptorIds.Tcp,
             "TCP",
             BuiltInServiceCategories.Connectivity,
-            ServiceType.Tcp,
+            ModelsServiceType.Tcp,
             new ServicePresentationMetadata(
                 "🔗",
                 "LightBlue",

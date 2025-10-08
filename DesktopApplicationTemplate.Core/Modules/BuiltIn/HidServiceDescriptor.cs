@@ -1,6 +1,7 @@
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Hid;
 using DesktopApplicationTemplate.Models;
+using ModelsServiceType = DesktopApplicationTemplate.Models.ServiceType;
 
 namespace DesktopApplicationTemplate.Core.Modules.BuiltIn;
 
@@ -14,7 +15,7 @@ public sealed class HidServiceDescriptor : BuiltInServiceDescriptor<HidServiceOp
             ServiceDescriptorIds.Hid,
             "HID",
             BuiltInServiceCategories.Automation,
-            ServiceType.Hid,
+            ModelsServiceType.Hid,
             new ServicePresentationMetadata(
                 "🎛️",
                 "LightYellow",

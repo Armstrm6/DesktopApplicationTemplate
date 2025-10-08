@@ -1,6 +1,7 @@
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.FileObserver;
 using DesktopApplicationTemplate.Models;
+using ModelsServiceType = DesktopApplicationTemplate.Models.ServiceType;
 
 namespace DesktopApplicationTemplate.Core.Modules.BuiltIn;
 
@@ -14,7 +15,7 @@ public sealed class FileObserverServiceDescriptor : BuiltInServiceDescriptor<Fil
             ServiceDescriptorIds.FileObserver,
             "File Observer",
             BuiltInServiceCategories.Monitoring,
-            ServiceType.FileObserver,
+            ModelsServiceType.FileObserver,
             new ServicePresentationMetadata(
                 "👀",
                 "LightSalmon",

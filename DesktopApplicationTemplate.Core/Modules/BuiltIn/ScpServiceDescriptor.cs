@@ -1,6 +1,7 @@
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Scp;
 using DesktopApplicationTemplate.Models;
+using ModelsServiceType = DesktopApplicationTemplate.Models.ServiceType;
 
 namespace DesktopApplicationTemplate.Core.Modules.BuiltIn;
 
@@ -14,7 +15,7 @@ public sealed class ScpServiceDescriptor : BuiltInServiceDescriptor<ScpServiceOp
             ServiceDescriptorIds.Scp,
             "SCP",
             BuiltInServiceCategories.FileTransfer,
-            ServiceType.Scp,
+            ModelsServiceType.Scp,
             new ServicePresentationMetadata(
                 "📦",
                 "LightCyan",

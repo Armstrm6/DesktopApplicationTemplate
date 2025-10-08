@@ -1,6 +1,7 @@
 using DesktopApplicationTemplate.Core.Services.Protocols.Ftp;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Models;
+using ModelsServiceType = DesktopApplicationTemplate.Models.ServiceType;
 
 namespace DesktopApplicationTemplate.Core.Modules.BuiltIn;
 
@@ -14,7 +15,7 @@ public sealed class FtpServiceDescriptor : BuiltInServiceDescriptor<FtpServerOpt
             ServiceDescriptorIds.Ftp,
             "FTP Server",
             BuiltInServiceCategories.FileTransfer,
-            ServiceType.Ftp,
+            ModelsServiceType.Ftp,
             new ServicePresentationMetadata(
                 "🖥️",
                 "LightSteelBlue",
