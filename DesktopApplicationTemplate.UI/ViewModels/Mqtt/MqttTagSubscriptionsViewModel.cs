@@ -13,6 +13,7 @@ using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.Services;
+using MQTTnet.Client;
 using MQTTnet.Protocol;
 
 namespace DesktopApplicationTemplate.UI.ViewModels.Mqtt;
@@ -110,13 +111,7 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
             _sendTestMessageCommand.RaiseCanExecuteChanged();
 
             if (!value)
-            {
-                foreach (var subscription in Subscriptions)
-                {
-                    subscription.IsSubscribed = false;
-                    subscription.StatusMessage = "Disconnected";
-                }
-            }
+                ResetSubscriptionStates("Disconnected");
         }
     }
 
@@ -273,9 +268,9 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
         {
             await _clientService.UnsubscribeAsync(SelectedSubscription.Topic);
         }
-        catch
+        catch (Exception ex)
         {
-            // ignore failures, UI already reflects removal
+            Logger?.Log($"MQTT unsubscribe failed for {SelectedSubscription.Topic}: {ex.Message}", LogLevel.Warning);
         }
 
         var topic = SelectedSubscription.Topic;
@@ -285,7 +280,10 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
     }
 
     private bool CanSendTestMessage(TagSubscription? subscription)
-        => subscription is not null && IsConnected && !string.IsNullOrWhiteSpace(subscription.OutgoingMessage);
+        => subscription is not null
+           && IsConnected
+           && subscription.IsSubscribed
+           && !string.IsNullOrWhiteSpace(subscription.OutgoingMessage);
 
     private async Task SendTestMessageAsync(TagSubscription? subscription)
     {
@@ -348,12 +346,14 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
             IsConnected = false;
             Logger?.Log(ex.Message, LogLevel.Warning);
             EditConnectionRequested?.Invoke(this, EventArgs.Empty);
+            ResetSubscriptionStates($"Connection failed: {ex.Message}");
             return false;
         }
         catch (Exception ex)
         {
             IsConnected = false;
             Logger?.Log($"MQTT connect failed: {ex.Message}", LogLevel.Error);
+            ResetSubscriptionStates($"Connection failed: {ex.Message}");
             return false;
         }
     }
@@ -406,11 +406,28 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
             return;
         }
 
+        subscription.IsSubscribed = false;
         subscription.StatusMessage = "Subscribing...";
 
         try
         {
-            await _clientService.SubscribeAsync(subscription.Topic, subscription.QoS);
+            var result = await _clientService.SubscribeAsync(subscription.Topic, subscription.QoS);
+            var items = result.Items;
+            var success = items is not null && items.All(item =>
+                item.ResultCode == MqttClientSubscribeResultCode.GrantedQoS0 ||
+                item.ResultCode == MqttClientSubscribeResultCode.GrantedQoS1 ||
+                item.ResultCode == MqttClientSubscribeResultCode.GrantedQoS2);
+
+            if (!success)
+            {
+                var codes = items is null
+                    ? "Unknown"
+                    : string.Join(", ", items.Select(item => item.ResultCode));
+                subscription.StatusMessage = $"Subscribe failed: {codes}";
+                Logger?.Log($"MQTT subscribe failed for {subscription.Topic}: {codes}", LogLevel.Error);
+                return;
+            }
+
             subscription.IsSubscribed = true;
             subscription.StatusMessage = "Subscribed";
         }
@@ -419,6 +436,10 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
             subscription.IsSubscribed = false;
             subscription.StatusMessage = $"Subscribe failed: {ex.Message}";
             Logger?.Log($"MQTT subscribe failed for {subscription.Topic}: {ex.Message}", LogLevel.Error);
+        }
+        finally
+        {
+            _sendTestMessageCommand.RaiseCanExecuteChanged();
         }
     }
 
@@ -468,6 +489,7 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
                 subscription.StatusMessage = "Disconnected";
             }
 
+            _sendTestMessageCommand.RaiseCanExecuteChanged();
             return;
         }
 
@@ -478,17 +500,22 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
             try
             {
                 await _clientService.UnsubscribeAsync(subscription.Topic);
+                subscription.StatusMessage = "Disconnected";
             }
             catch (Exception ex)
             {
+                subscription.StatusMessage = $"Unsubscribe failed: {ex.Message}";
                 Logger?.Log($"MQTT unsubscribe failed for {subscription.Topic}: {ex.Message}", LogLevel.Warning);
             }
             finally
             {
                 subscription.IsSubscribed = false;
-                subscription.StatusMessage = "Disconnected";
+                if (string.IsNullOrWhiteSpace(subscription.StatusMessage))
+                    subscription.StatusMessage = "Disconnected";
             }
         }
+
+        _sendTestMessageCommand.RaiseCanExecuteChanged();
     }
 
     private void OnSubscriptionsChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -522,6 +549,9 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
             case nameof(TagSubscription.OutgoingMessage):
                 _sendTestMessageCommand.RaiseCanExecuteChanged();
                 break;
+            case nameof(TagSubscription.IsSubscribed):
+                _sendTestMessageCommand.RaiseCanExecuteChanged();
+                break;
             case nameof(TagSubscription.QoS):
                 if (IsConnected)
                 {
@@ -548,4 +578,15 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
 
     private void OnLogAdded(LogEntry entry)
         => LogEntries.Insert(0, entry);
+
+    private void ResetSubscriptionStates(string statusMessage)
+    {
+        foreach (var subscription in Subscriptions)
+        {
+            subscription.IsSubscribed = false;
+            subscription.StatusMessage = statusMessage;
+        }
+
+        _sendTestMessageCommand.RaiseCanExecuteChanged();
+    }
 }
