@@ -104,6 +104,7 @@
 - TcpServiceMessagesViewModel logs script execution results and exceptions.
 - Restricted `TcpServiceMessagesViewModel.ScriptOutputMessage` setter to internal to prevent external modification.
 - TcpServiceMessagesViewModel runs the initial script asynchronously to avoid blocking.
+- TcpServiceMessagesViewModel reuses host/port settings for client listeners and suppresses destination warnings when a server listener is configured so heartbeat traffic reaches the script pipeline without noisy diagnostics.
 - App domain unhandled exception handler is asynchronous and awaits dispatcher shutdown.
 - Main window resolves edit workflows through a DI-injected handler dictionary instead of a large if/else chain.
 - Edit handlers register with DI keyed by `ServiceType`, and the main window receives a dictionary constructed from those registrations.
