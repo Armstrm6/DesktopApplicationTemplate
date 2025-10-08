@@ -9,6 +9,9 @@
              d:DesignWidth="400"
              d:DataContext="{d:DesignInstance Type=viewModels:ServiceLogViewModel}"
              mc:Ignorable="d">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </UserControl.Resources>
     <UserControl.CommandBindings>
         <CommandBinding Command="ApplicationCommands.Copy"
                         CanExecute="CopyCommand_CanExecute"
@@ -31,6 +34,24 @@
                 <Button Content="Update Log" Width="100" Margin="10,0,0,0" Command="{Binding RefreshLogCommand}" Background="#FFFFCC"/>
                 <Button Content="Export Log" Width="100" Margin="10,0,0,0" Background="#CCCCFF" Click="ExportLog_Click"/>
                 <Button Content="Clear Log" Width="100" Margin="10,0,0,0" Command="{Binding ClearLogCommand}" Background="#FFCCCC"/>
+                <StackPanel Margin="20,0,0,0"
+                            Visibility="{Binding IsAggregated, Converter={StaticResource BooleanToVisibilityConverter}}"
+                            Width="220">
+                    <TextBlock Text="SERVICES" FontWeight="Bold" Margin="0,0,0,5"/>
+                    <ListBox ItemsSource="{Binding ServiceFilters}"
+                             SelectionMode="Multiple"
+                             BorderThickness="1"
+                             MaxHeight="140"
+                             HorizontalContentAlignment="Stretch">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <CheckBox Content="{Binding ServiceName}"
+                                          IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                          Margin="0,0,0,5" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
             </StackPanel>
             <ListBox x:Name="LogListBox"
                      Grid.Row="1"

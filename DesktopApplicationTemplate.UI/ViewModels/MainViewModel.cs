@@ -1,6 +1,7 @@
 using System;
-using System.Collections.ObjectModel;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -53,7 +54,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
                 _activeService = value;
                 OnPropertyChanged();
-                LogViewModel.SetLogs(_activeService?.Logs ?? AllLogs);
+                LogViewModel.SetLogs(_activeService?.Logs ?? AllLogs, _activeService is null);
                 (RemoveServiceCommand as AsyncRelayCommand)?.RaiseCanExecuteChanged();
                 (EditServiceCommand as RelayCommand<ServiceListModel?>)?.RaiseCanExecuteChanged();
             }
@@ -116,6 +117,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private readonly IDictionary<ServiceType, IEditServiceHandler> _editHandlers;
         private readonly IStartupPreferencesService _startupPreferencesService;
         private readonly HashSet<ServiceListModel> _activatingServices = new();
+        private readonly HashSet<ServiceListModel> _trackedServices = new();
         private static readonly TimeSpan ActivationConfirmationDelay = TimeSpan.FromMilliseconds(500);
 
         public NetworkConfigurationViewModel NetworkConfig { get; }
@@ -149,7 +151,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 _logger?.Log($"Using service persistence path {ServicePersistence.FilePath}", LogLevel.Debug);
             }
 
-            LogViewModel = new ServiceLogViewModel(ServiceType.Mqtt, AllLogs);
+            Services.CollectionChanged += OnServicesCollectionChanged;
+
+            LogViewModel = new ServiceLogViewModel(ServiceType.Mqtt, AllLogs, null, isAggregated: true);
             LogViewModel.PropertyChanged += (s, e) =>
             {
                 if (e.PropertyName == nameof(ServiceLogViewModel.DisplayLogs))
@@ -167,6 +171,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             FilteredServices = CollectionViewSource.GetDefaultView(Services);
             Filters.PropertyChanged += (_, __) => ApplyFilters();
             LoadServices();
+            foreach (var service in Services)
+            {
+                TrackService(service);
+            }
+            LogViewModel.UpdateServiceFilters(Services.Select(s => s.DisplayName));
             ServicesRunning = Services.Any(svc => svc.IsActive);
             ApplyFilters();
             if (_logger is LoggingService concreteLogger)
@@ -573,6 +582,18 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public void OnServiceLogAdded(ServiceListModel svc, LogEntry entry)
         {
+            if (svc is null || entry is null)
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(entry.ServiceName))
+            {
+                entry.ServiceName = svc.DisplayName;
+            }
+
+            entry.ServiceType ??= svc.Type;
+
             AllLogs.Insert(0, entry);
             if (svc.Type != ServiceType.Csv && Services.Any(s => s.Type == ServiceType.Csv))
             {
@@ -608,6 +629,83 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     }
                 }
             }
+        }
+
+        private void OnServicesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e is null)
+            {
+                return;
+            }
+
+            if (e.Action == NotifyCollectionChangedAction.Reset)
+            {
+                foreach (var tracked in _trackedServices.ToList())
+                {
+                    UntrackService(tracked);
+                }
+
+                foreach (var service in Services)
+                {
+                    TrackService(service);
+                }
+            }
+            else
+            {
+                if (e.NewItems is not null)
+                {
+                    foreach (ServiceListModel service in e.NewItems)
+                    {
+                        TrackService(service);
+                    }
+                }
+
+                if (e.OldItems is not null && e.Action != NotifyCollectionChangedAction.Move)
+                {
+                    foreach (ServiceListModel service in e.OldItems)
+                    {
+                        UntrackService(service);
+                    }
+                }
+            }
+
+            LogViewModel.UpdateServiceFilters(Services.Select(s => s.DisplayName));
+        }
+
+        private void TrackService(ServiceListModel service)
+        {
+            if (service is null)
+            {
+                return;
+            }
+
+            if (_trackedServices.Add(service))
+            {
+                service.PropertyChanged += OnServicePropertyChanged;
+            }
+        }
+
+        private void UntrackService(ServiceListModel service)
+        {
+            if (service is null)
+            {
+                return;
+            }
+
+            if (_trackedServices.Remove(service))
+            {
+                service.PropertyChanged -= OnServicePropertyChanged;
+            }
+        }
+
+        private void OnServicePropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (!string.Equals(e.PropertyName, nameof(ServiceListModel.DisplayName), StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            LogViewModel.UpdateServiceFilters(Services.Select(s => s.DisplayName));
         }
 
         internal void OnServiceActiveChanged(bool _)

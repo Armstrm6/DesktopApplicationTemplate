@@ -173,7 +173,9 @@ namespace DesktopApplicationTemplate.Persistence
                         {
                             Level = l.Level,
                             Message = l.Message,
-                            Color = l.Color
+                            Color = l.Color,
+                            ServiceType = l.ServiceType ?? s.Type,
+                            ServiceName = string.IsNullOrWhiteSpace(l.ServiceName) ? s.DisplayName : l.ServiceName
                         })
                         .ToList(),
                     MessageHistory = s.GetMessageHistorySnapshot().ToList()

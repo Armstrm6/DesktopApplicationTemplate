@@ -38,8 +38,39 @@ namespace DesktopApplicationTemplate.UI.ViewModels
     {
         internal const int MaxLogEntries = 200;
 
-        public string DisplayName { get; set; } = string.Empty;
-        public ServiceType Type { get; set; }
+        private string _displayName = string.Empty;
+        public string DisplayName
+        {
+            get => _displayName;
+            set
+            {
+                if (string.Equals(_displayName, value, StringComparison.Ordinal))
+                {
+                    return;
+                }
+
+                _displayName = value ?? string.Empty;
+                OnPropertyChanged();
+                RefreshLogMetadata();
+            }
+        }
+
+        private ServiceType _type;
+        public ServiceType Type
+        {
+            get => _type;
+            set
+            {
+                if (_type == value)
+                {
+                    return;
+                }
+
+                _type = value;
+                OnPropertyChanged();
+                RefreshLogMetadata();
+            }
+        }
         [JsonIgnore] public Page? Page { get; set; }
         public int Order { get; set; }
 
@@ -329,6 +360,20 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         }
 
         public ObservableCollection<LogEntry> Logs { get; set; } = new();
+
+        private void RefreshLogMetadata()
+        {
+            if (Logs is null)
+            {
+                return;
+            }
+
+            foreach (var entry in Logs)
+            {
+                entry.ServiceType = Type;
+                entry.ServiceName = DisplayName;
+            }
+        }
         public event Action<bool>? ActiveChanged;
 
         public event Action<ServiceListModel, LogEntry>? LogAdded;
@@ -344,7 +389,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             {
                 Message = entryMessage,
                 Color = brush.ToString(),
-                Level = level
+                Level = level,
+                ServiceType = Type,
+                ServiceName = DisplayName
             };
             Logs.Insert(0, entry);
             if (Logs.Count > MaxLogEntries)
@@ -367,9 +414,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             var materialized = entries?.Where(e => !string.IsNullOrWhiteSpace(e.Message)).Take(MaxLogEntries).ToList() ?? new List<LogEntry>();
             Logs = new ObservableCollection<LogEntry>(materialized);
             OnPropertyChanged(nameof(Logs));
+            RefreshLogMetadata();
             if (Logs.FirstOrDefault() is { } latest)
             {
-            InputMessage = NormalizePersistedMessage(latest.Message);
+                InputMessage = NormalizePersistedMessage(latest.Message);
                 LastInputBrush = ParseBrush(latest.Color, WpfBrushes.Black);
             }
         }
