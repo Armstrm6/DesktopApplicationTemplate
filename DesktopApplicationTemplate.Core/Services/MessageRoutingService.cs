@@ -98,6 +98,36 @@ public class MessageRoutingService : IMessageRoutingService
     }
 
     /// <inheritdoc />
+    public void ClearService(ServiceType serviceType, string serviceName)
+    {
+        var normalized = NormalizeServiceName(serviceName);
+        if (normalized is null)
+        {
+            throw new ArgumentException("Service name cannot be null or whitespace.", nameof(serviceName));
+        }
+
+        _logger?.Log($"Clearing routing cache for {serviceType}.{normalized}", LogLevel.Debug);
+        ClearMessagesForService(normalized, serviceType);
+        ClearReferencesForService(normalized);
+        _logger?.Log($"Routing cache for {serviceType}.{normalized} cleared", LogLevel.Debug);
+    }
+
+    /// <inheritdoc />
+    public void ClearService(string serviceName)
+    {
+        var normalized = NormalizeServiceName(serviceName);
+        if (normalized is null)
+        {
+            throw new ArgumentException("Service name cannot be null or whitespace.", nameof(serviceName));
+        }
+
+        _logger?.Log($"Clearing routing cache for {normalized}", LogLevel.Debug);
+        ClearMessagesForService(normalized, serviceType: null);
+        ClearReferencesForService(normalized);
+        _logger?.Log($"Routing cache for {normalized} cleared", LogLevel.Debug);
+    }
+
+    /// <inheritdoc />
     public string ResolveTokens(string template, string? referencingServiceName = null)
     {
         if (template is null)
@@ -293,6 +323,71 @@ public class MessageRoutingService : IMessageRoutingService
         if (referencingMap.Count == 0)
         {
             _referencedByService.Remove(referencedService);
+        }
+    }
+
+    private void ClearMessagesForService(string normalizedServiceName, ServiceType? serviceType)
+    {
+        if (serviceType.HasValue)
+        {
+            _messages.TryRemove((serviceType.Value, normalizedServiceName), out _);
+        }
+        else
+        {
+            foreach (var key in _messages.Keys
+                .Where(k => string.Equals(k.Item2, normalizedServiceName, StringComparison.OrdinalIgnoreCase))
+                .ToList())
+            {
+                _messages.TryRemove(key, out _);
+            }
+        }
+
+        var replacement = _messages.FirstOrDefault(kvp =>
+            string.Equals(kvp.Key.Item2, normalizedServiceName, StringComparison.OrdinalIgnoreCase)).Value;
+
+        if (replacement is null)
+        {
+            _messagesByName.TryRemove(normalizedServiceName, out _);
+        }
+        else
+        {
+            _messagesByName[normalizedServiceName] = replacement;
+        }
+    }
+
+    private void ClearReferencesForService(string normalizedServiceName)
+    {
+        lock (_referencesLock)
+        {
+            if (_referencesByService.Remove(normalizedServiceName, out var references))
+            {
+                foreach (var referencedService in references.Keys.ToArray())
+                {
+                    RemoveReferencedByEntry(referencedService, normalizedServiceName);
+                }
+            }
+            else
+            {
+                foreach (var referencedService in _referencedByService.Keys.ToArray())
+                {
+                    RemoveReferencedByEntry(referencedService, normalizedServiceName);
+                }
+            }
+
+            if (_referencedByService.Remove(normalizedServiceName, out var referencingServices))
+            {
+                foreach (var referencingService in referencingServices.Keys.ToArray())
+                {
+                    if (_referencesByService.TryGetValue(referencingService, out var dependencies))
+                    {
+                        dependencies.Remove(normalizedServiceName);
+                        if (dependencies.Count == 0)
+                        {
+                            _referencesByService.Remove(referencingService);
+                        }
+                    }
+                }
+            }
         }
     }
 

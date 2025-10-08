@@ -35,6 +35,19 @@ public interface IMessageRoutingService
     bool TryGetMessage(string serviceName, MessageRoutingDirection direction, out string? message);
 
     /// <summary>
+    /// Clears cached messages and dependency metadata for the specified service.
+    /// </summary>
+    /// <param name="serviceType">The category of the service.</param>
+    /// <param name="serviceName">The unique name of the service.</param>
+    void ClearService(ServiceType serviceType, string serviceName);
+
+    /// <summary>
+    /// Clears cached messages and dependency metadata for services matching the supplied name.
+    /// </summary>
+    /// <param name="serviceName">The unique name of the service.</param>
+    void ClearService(string serviceName);
+
+    /// <summary>
     /// Replaces <c>{ServiceName.InputMessage}</c> and <c>{ServiceName.OutputMessage}</c> tokens within the provided template.
     /// Legacy <c>LastInputMessage</c> and <c>LastOutputMessage</c> tokens are still recognized for compatibility.
     /// </summary>

@@ -509,6 +509,7 @@ namespace DesktopApplicationTemplate.UI.Views
                     trimmed = _viewModel.GenerateServiceName(type);
                 }
 
+                _viewModel.ClearRoutingCache(type, trimmed);
                 var svc = new ServiceListModel
                 {
                     DisplayName = trimmed,
@@ -596,6 +597,8 @@ namespace DesktopApplicationTemplate.UI.Views
             }
 
             var normalizedContext = context with { Name = sanitizedName };
+
+            _viewModel.ClearRoutingCache(type, sanitizedName);
 
             if (!_serviceRegistry.TryCreateService(type, _serviceProvider, normalizedContext, out var svc) || svc is null)
             {
@@ -789,7 +792,12 @@ namespace DesktopApplicationTemplate.UI.Views
                     {
                         trimmed = _viewModel.GenerateServiceName(svc.Type);
                     }
-                    svc.DisplayName = trimmed;
+                    if (!string.Equals(svc.DisplayName, trimmed, StringComparison.Ordinal))
+                    {
+                        _viewModel.ClearRoutingCache(svc.Type, svc.DisplayName);
+                        _viewModel.ClearRoutingCache(svc.Type, trimmed);
+                        svc.DisplayName = trimmed;
+                    }
                     await _viewModel.SaveServicesAsync();
                     _createServicePage?.SetExistingNames(_viewModel.Services.Select(s => s.DisplayName));
                 }

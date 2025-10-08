@@ -128,6 +128,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         private readonly CsvServiceAdapter _csvService;
         private readonly ILoggingService? _logger;
+        private readonly IMessageRoutingService _messageRoutingService;
         private readonly INetworkConfigurationService _networkService;
         private readonly IServiceCatalog _serviceCatalog;
         private readonly IDictionary<ServiceType, IEditServiceHandler> _editHandlers;
@@ -152,12 +153,14 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             IServiceCatalog serviceCatalog,
             IDictionary<ServiceType, IEditServiceHandler> editHandlers,
             IStartupPreferencesService startupPreferencesService,
+            IMessageRoutingService messageRoutingService,
             ILoggingService? logger = null,
             string? servicesFilePath = null)
         {
             _csvService = csvService;
             _networkService = networkService;
             _serviceCatalog = serviceCatalog ?? throw new ArgumentNullException(nameof(serviceCatalog));
+            _messageRoutingService = messageRoutingService ?? throw new ArgumentNullException(nameof(messageRoutingService));
             _logger = logger;
             NetworkConfig = networkConfig;
             _editHandlers = editHandlers;
@@ -349,6 +352,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
 
             _logger?.Log($"Removing service {target.DisplayName}", LogLevel.Debug);
+            ClearRoutingCache(target.Type, target.DisplayName);
             var index = Services.IndexOf(target);
             target.AddLog("Service removed", WpfBrushes.Red);
             if (target.Type != ServiceType.Csv)
@@ -386,6 +390,16 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             LogViewModel.RefreshLogs();
             await SaveServicesAsync().ConfigureAwait(false);
             _logger?.Log("Service removed", LogLevel.Debug);
+        }
+
+        internal void ClearRoutingCache(ServiceType serviceType, string serviceName)
+        {
+            if (string.IsNullOrWhiteSpace(serviceName))
+            {
+                return;
+            }
+
+            _messageRoutingService.ClearService(serviceType, serviceName);
         }
 
         public async Task SaveServicesAsync()
@@ -443,6 +457,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 {
                     normalizedName = GenerateServiceName(svc.Type);
                 }
+                ClearRoutingCache(svc.Type, normalizedName);
                 svc.DisplayName = normalizedName;
                 if (string.IsNullOrWhiteSpace(svc.DescriptorId))
                 {
