@@ -20,6 +20,7 @@ using System.Windows.Controls.Primitives;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using System.Windows.Threading;
+using Microsoft.VisualStudio.Threading;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
@@ -37,6 +38,8 @@ namespace DesktopApplicationTemplate.UI.Views
         private readonly Dictionary<ServiceListModel, Action<LogEntry>> _serviceLogHandlers = new();
         private readonly Dictionary<ServiceListModel, EventHandler> _tcpAdvancedHandlers = new();
         private readonly BrushConverter _brushConverter = new();
+        private JoinableTask? _shutdownTask;
+        private bool _shutdownCompleted;
 
         public MainView(
             MainViewModel viewModel,
@@ -68,10 +71,28 @@ namespace DesktopApplicationTemplate.UI.Views
             PreloadServicePages();
         }
 
-        private async void MainView_Closing(object? sender, CancelEventArgs e)
+        private void MainView_Closing(object? sender, CancelEventArgs e)
         {
             _logger?.LogInformation("MainView closing");
 
+            if (_shutdownCompleted)
+            {
+                return;
+            }
+
+            if (_shutdownTask is { IsCompleted: false })
+            {
+                e.Cancel = true;
+                return;
+            }
+
+            e.Cancel = true;
+            _shutdownTask = App.UiThreadTaskFactory.RunAsync(PerformShutdownAsync);
+            ObserveAndLog(_shutdownTask);
+        }
+
+        private async Task PerformShutdownAsync()
+        {
             try
             {
                 await _viewModel.ShutdownServicesAsync().ConfigureAwait(true);
@@ -79,6 +100,13 @@ namespace DesktopApplicationTemplate.UI.Views
             catch (Exception ex)
             {
                 _logger?.LogError(ex, "Failed to stop services during shutdown");
+            }
+            finally
+            {
+                await App.UiThreadTaskFactory.SwitchToMainThreadAsync();
+                _shutdownCompleted = true;
+                _shutdownTask = null;
+                Close();
             }
         }
 
@@ -152,10 +180,21 @@ namespace DesktopApplicationTemplate.UI.Views
             ShowHome();
         }
 
-        private async void OnHomeRequested(object? sender, string reason)
+        private void OnHomeRequested(object? sender, string reason)
         {
-            await App.UiThreadTaskFactory.SwitchToMainThreadAsync();
-            NavigateHome(reason);
+            if (Dispatcher.CheckAccess())
+            {
+                NavigateHome(reason);
+                return;
+            }
+
+            var joinableTask = App.UiThreadTaskFactory.RunAsync(async () =>
+            {
+                await App.UiThreadTaskFactory.SwitchToMainThreadAsync();
+                NavigateHome(reason);
+            });
+
+            ObserveAndLog(joinableTask);
         }
 
 
@@ -478,7 +517,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 _logger?.LogDebug("RemoveService command executed");
             }
         }
-        private async void ServiceList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ServiceList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             _logger?.LogDebug("Service selection changed");
             if (_viewModel.SelectedService is ServiceListModel selected)
@@ -487,7 +526,6 @@ namespace DesktopApplicationTemplate.UI.Views
                 if (page != null)
                 {
                     ShowPage(page);
-                    await App.UiThreadTaskFactory.SwitchToMainThreadAsync();
                     using (_viewModel.PreserveActiveServiceSelection())
                     {
                         ServiceList.SelectedItem = null;
@@ -802,6 +840,13 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             _logger?.LogDebug("Refresh log button clicked");
             _viewModel.RefreshLogs();
+        }
+
+        private void ObserveAndLog(JoinableTask joinableTask)
+        {
+            joinableTask.Task.ContinueWith(
+                t => _logger?.LogError(t.Exception, "Unhandled exception in background operation"),
+                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
         }
 
     }
