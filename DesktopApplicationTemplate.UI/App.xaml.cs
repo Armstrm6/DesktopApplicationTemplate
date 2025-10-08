@@ -331,6 +331,7 @@ namespace DesktopApplicationTemplate.UI
                     var mainView = provider.GetRequiredService<MainView>();
                     var newService = new ServiceListModel
                     {
+                        DescriptorId = descriptor.Id,
                         DisplayName = ctx.Name,
                         Type = ServiceType.Mqtt,
                         IsActive = false
@@ -355,7 +356,6 @@ namespace DesktopApplicationTemplate.UI
                     var view = ActivatorUtilities.CreateInstance<MqttCreateServiceView>(provider, vm);
                     return view;
                 },
-                LegacyServiceType: ServiceType.Mqtt,
                 ApplyPresentation: static (service, metadata) => service.ApplyPresentation(metadata));
         }
 
@@ -371,6 +371,7 @@ namespace DesktopApplicationTemplate.UI
                     var mainView = provider.GetRequiredService<MainView>();
                     var svc = new ServiceListModel
                     {
+                        DescriptorId = descriptor.Id,
                         DisplayName = ctx.Name,
                         Type = ServiceType.Ftp,
                         IsActive = false,
@@ -411,7 +412,6 @@ namespace DesktopApplicationTemplate.UI
                     };
                     return view;
                 },
-                LegacyServiceType: ServiceType.Ftp,
                 ApplyPresentation: static (service, metadata) => service.ApplyPresentation(metadata));
         }
 
@@ -427,6 +427,7 @@ namespace DesktopApplicationTemplate.UI
                     var mainView = provider.GetRequiredService<MainView>();
                     var svc = new ServiceListModel
                     {
+                        DescriptorId = descriptor.Id,
                         DisplayName = ctx.Name,
                         Type = ServiceType.Http,
                         IsActive = false,
@@ -459,7 +460,6 @@ namespace DesktopApplicationTemplate.UI
                     };
                     return view;
                 },
-                LegacyServiceType: ServiceType.Http,
                 ApplyPresentation: static (service, metadata) => service.ApplyPresentation(metadata));
         }
 
@@ -475,6 +475,7 @@ namespace DesktopApplicationTemplate.UI
                     var mainView = provider.GetRequiredService<MainView>();
                     var svc = new ServiceListModel
                     {
+                        DescriptorId = descriptor.Id,
                         DisplayName = ctx.Name,
                         Type = ServiceType.Tcp,
                         IsActive = false,
@@ -497,7 +498,6 @@ namespace DesktopApplicationTemplate.UI
                     vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
                     return ActivatorUtilities.CreateInstance<TcpCreateServiceView>(provider, vm);
                 },
-                LegacyServiceType: ServiceType.Tcp,
                 ApplyPresentation: static (service, metadata) => service.ApplyPresentation(metadata));
         }
 
@@ -513,6 +513,7 @@ namespace DesktopApplicationTemplate.UI
                     var mainView = provider.GetRequiredService<MainView>();
                     var svc = new ServiceListModel
                     {
+                        DescriptorId = descriptor.Id,
                         DisplayName = ctx.Name,
                         Type = ServiceType.Hid,
                         IsActive = false,
@@ -545,7 +546,6 @@ namespace DesktopApplicationTemplate.UI
                     };
                     return view;
                 },
-                LegacyServiceType: ServiceType.Hid,
                 ApplyPresentation: static (service, metadata) => service.ApplyPresentation(metadata));
         }
 
@@ -561,6 +561,7 @@ namespace DesktopApplicationTemplate.UI
                     var mainView = provider.GetRequiredService<MainView>();
                     var svc = new ServiceListModel
                     {
+                        DescriptorId = descriptor.Id,
                         DisplayName = ctx.Name,
                         Type = ServiceType.Scp,
                         IsActive = false,
@@ -593,7 +594,6 @@ namespace DesktopApplicationTemplate.UI
                     };
                     return view;
                 },
-                LegacyServiceType: ServiceType.Scp,
                 ApplyPresentation: static (service, metadata) => service.ApplyPresentation(metadata));
         }
 
@@ -609,6 +609,7 @@ namespace DesktopApplicationTemplate.UI
                     var mainView = provider.GetRequiredService<MainView>();
                     var svc = new ServiceListModel
                     {
+                        DescriptorId = descriptor.Id,
                         DisplayName = ctx.Name,
                         Type = ServiceType.FileObserver,
                         IsActive = false,
@@ -641,7 +642,6 @@ namespace DesktopApplicationTemplate.UI
                     };
                     return view;
                 },
-                LegacyServiceType: ServiceType.FileObserver,
                 ApplyPresentation: static (service, metadata) => service.ApplyPresentation(metadata));
         }
 
@@ -657,6 +657,7 @@ namespace DesktopApplicationTemplate.UI
                     var mainView = provider.GetRequiredService<MainView>();
                     var svc = new ServiceListModel
                     {
+                        DescriptorId = descriptor.Id,
                         DisplayName = ctx.Name,
                         Type = ServiceType.Csv,
                         IsActive = false,
@@ -681,7 +682,6 @@ namespace DesktopApplicationTemplate.UI
                     view.Initialize(vm);
                     return view;
                 },
-                LegacyServiceType: ServiceType.Csv,
                 ApplyPresentation: static (service, metadata) => service.ApplyPresentation(metadata));
         }
 
@@ -697,6 +697,7 @@ namespace DesktopApplicationTemplate.UI
                     var mainView = provider.GetRequiredService<MainView>();
                     var svc = new ServiceListModel
                     {
+                        DescriptorId = descriptor.Id,
                         DisplayName = ctx.Name,
                         Type = ServiceType.Heartbeat,
                         IsActive = false,
@@ -729,7 +730,6 @@ namespace DesktopApplicationTemplate.UI
                     };
                     return view;
                 },
-                LegacyServiceType: ServiceType.Heartbeat,
                 ApplyPresentation: static (service, metadata) => service.ApplyPresentation(metadata));
         }
 

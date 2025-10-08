@@ -71,6 +71,22 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 RefreshLogMetadata();
             }
         }
+
+        private string? _descriptorId;
+        public string? DescriptorId
+        {
+            get => _descriptorId;
+            set
+            {
+                if (string.Equals(_descriptorId, value, StringComparison.Ordinal))
+                {
+                    return;
+                }
+
+                _descriptorId = value;
+                OnPropertyChanged();
+            }
+        }
         [JsonIgnore] public Page? Page { get; set; }
         public int Order { get; set; }
 

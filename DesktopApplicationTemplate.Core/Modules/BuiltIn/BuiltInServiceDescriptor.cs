@@ -22,7 +22,7 @@ public abstract class BuiltInServiceDescriptor<TOptions> : IServiceDescriptor
         string id,
         string displayName,
         string category,
-        ServiceType legacyType,
+        ServiceType serviceType,
         ServicePresentationMetadata presentation,
         string? description = null,
         IServiceOptionsSerializer? serializer = null,
@@ -31,7 +31,7 @@ public abstract class BuiltInServiceDescriptor<TOptions> : IServiceDescriptor
         Id = id ?? throw new ArgumentNullException(nameof(id));
         DisplayName = displayName ?? throw new ArgumentNullException(nameof(displayName));
         Category = category ?? throw new ArgumentNullException(nameof(category));
-        LegacyType = legacyType;
+        ServiceType = serviceType;
         Description = description;
         _presentation = ServicePresentationMetadata.Normalize(presentation);
         _serializer = serializer ?? new JsonServiceOptionsSerializer<TOptions>();
@@ -57,7 +57,7 @@ public abstract class BuiltInServiceDescriptor<TOptions> : IServiceDescriptor
 
     public string? Description { get; }
 
-    public ServiceType? LegacyType { get; }
+    public ServiceType? ServiceType { get; }
 
     public IServiceOptionsSerializer OptionsSerializer => _serializer;
 

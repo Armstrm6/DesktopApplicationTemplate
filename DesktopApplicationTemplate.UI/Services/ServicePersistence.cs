@@ -174,6 +174,7 @@ namespace DesktopApplicationTemplate.Persistence
                 data.Add(new ServiceInfo
                 {
                     DisplayName = s.DisplayName,
+                    DescriptorId = s.DescriptorId,
                     ServiceType = s.Type,
                     IsActive = s.IsActive,
                     Created = DateTime.Now,
@@ -249,6 +250,7 @@ namespace DesktopApplicationTemplate.Persistence
                 logger?.Log("Services file not found", LogLevel.Warning);
                 return new List<ServiceInfo>();
             }
+
             string json;
             try
             {
@@ -259,58 +261,19 @@ namespace DesktopApplicationTemplate.Persistence
                 logger?.Log("Services file not found", LogLevel.Warning);
                 return new List<ServiceInfo>();
             }
+
             try
             {
-                try
+                var services = JsonSerializer.Deserialize<List<ServiceInfo>>(json) ?? new List<ServiceInfo>();
+
+                foreach (var info in services)
                 {
-                    var current = JsonSerializer.Deserialize<List<ServiceInfo>>(json);
-                    if (current is { Count: > 0 })
-                    {
-                        logger?.Log($"Loaded {current.Count} services", LogLevel.Debug);
-                        return current;
-                    }
-                }
-                catch (JsonException)
-                {
-                    // fall back to legacy parsing below
+                    info.AssociatedServices ??= new List<string>();
+                    info.Logs ??= new List<LogEntry>();
+                    info.MessageHistory ??= new List<ServiceMessageHistoryEntry>();
                 }
 
-                var legacy = JsonSerializer.Deserialize<List<LegacyServiceInfo>>(json) ?? new List<LegacyServiceInfo>();
-                var result = new List<ServiceInfo>();
-                foreach (var info in legacy)
-                {
-                    if (ServiceTypeExtensions.TryParse(info.ServiceType, out var type))
-                    {
-                        result.Add(new ServiceInfo
-                        {
-                            DisplayName = info.DisplayName,
-                            ServiceType = type,
-                            IsActive = info.IsActive,
-                            Created = info.Created,
-                            Order = info.Order,
-                            AssociatedServices = info.AssociatedServices ?? new List<string>(),
-                            TcpOptions = info.TcpOptions,
-                            FtpOptions = info.FtpOptions,
-                            HttpOptions = info.HttpOptions,
-                            CsvOptions = info.CsvOptions,
-                            HeartbeatOptions = info.HeartbeatOptions,
-                            FileObserverOptions = info.FileObserverOptions,
-                            HidOptions = info.HidOptions,
-                            ScpOptions = info.ScpOptions,
-                            TotalExecutionTimeMs = info.TotalExecutionTimeMs,
-                            ExecutionCount = info.ExecutionCount,
-                            IncomingMessageCount = info.IncomingMessageCount,
-                            OutgoingMessageCount = info.OutgoingMessageCount,
-                            Logs = info.Logs ?? new List<LogEntry>()
-                        });
-                    }
-                    else
-                    {
-                        logger?.Log($"Unmapped service type '{info.ServiceType}' for '{info.DisplayName}'", LogLevel.Warning);
-                    }
-                }
-
-                foreach (var info in result)
+                foreach (var info in services)
                 {
                     if (info.ServiceType == ServiceType.Mqtt && info.MqttOptions is null)
                     {
@@ -365,6 +328,7 @@ namespace DesktopApplicationTemplate.Persistence
                             value.LastTestMessage = info.TcpOptions.LastTestMessage;
                         }
                     }
+
                     if (info.ServiceType == ServiceType.Ftp && info.FtpOptions != null)
                     {
                         try
@@ -385,6 +349,7 @@ namespace DesktopApplicationTemplate.Persistence
                             // ignore missing options during tests or early startup
                         }
                     }
+
                     if (info.ServiceType == ServiceType.Heartbeat && info.HeartbeatOptions != null)
                     {
                         var opt = App.AppHost?.Services.GetService<IOptions<HeartbeatServiceOptions>>();
@@ -443,8 +408,13 @@ namespace DesktopApplicationTemplate.Persistence
                     }
                 }
 
-                logger?.Log($"Loaded {result.Count} services", LogLevel.Debug);
-                return result;
+                logger?.Log($"Loaded {services.Count} services", LogLevel.Debug);
+                return services;
+            }
+            catch (JsonException)
+            {
+                logger?.Log("Failed to parse services file", LogLevel.Error);
+                return new List<ServiceInfo>();
             }
             catch
             {
@@ -457,6 +427,7 @@ namespace DesktopApplicationTemplate.Persistence
     public class ServiceInfo
     {
         public string DisplayName { get; set; } = string.Empty;
+        public string? DescriptorId { get; set; }
         public ServiceType ServiceType { get; set; }
         public bool IsActive { get; set; }
         public DateTime Created { get; set; }
@@ -479,26 +450,4 @@ namespace DesktopApplicationTemplate.Persistence
         public List<ServiceMessageHistoryEntry> MessageHistory { get; set; } = new();
     }
 
-    internal class LegacyServiceInfo
-    {
-        public string DisplayName { get; set; } = string.Empty;
-        public string ServiceType { get; set; } = string.Empty;
-        public bool IsActive { get; set; }
-        public DateTime Created { get; set; }
-        public int Order { get; set; }
-        public List<string> AssociatedServices { get; set; } = new();
-        public TcpServiceOptions? TcpOptions { get; set; }
-        public FtpServerOptions? FtpOptions { get; set; }
-        public HttpServiceOptions? HttpOptions { get; set; }
-        public CsvServiceOptions? CsvOptions { get; set; }
-        public HeartbeatServiceOptions? HeartbeatOptions { get; set; }
-        public FileObserverServiceOptions? FileObserverOptions { get; set; }
-        public HidServiceOptions? HidOptions { get; set; }
-        public ScpServiceOptions? ScpOptions { get; set; }
-        public double TotalExecutionTimeMs { get; set; }
-        public int ExecutionCount { get; set; }
-        public int IncomingMessageCount { get; set; }
-        public int OutgoingMessageCount { get; set; }
-        public List<LogEntry> Logs { get; set; } = new();
-    }
 }

@@ -542,7 +542,15 @@ namespace DesktopApplicationTemplate.UI.Views
                 return;
             }
 
-            if (_serviceCatalog.TryGetByLegacyType(service.Type, out var descriptor))
+            var descriptorId = service.DescriptorId;
+            if (string.IsNullOrWhiteSpace(descriptorId))
+            {
+                descriptorId = _serviceCatalog.Descriptors.FirstOrDefault(d => d.ServiceType == service.Type)?.Id;
+                service.DescriptorId = descriptorId;
+            }
+
+            if (!string.IsNullOrWhiteSpace(descriptorId) &&
+                _serviceCatalog.TryGetById(descriptorId, out var descriptor))
             {
                 service.ApplyPresentation(descriptor.Presentation);
             }

@@ -107,7 +107,7 @@ Each service has an editor page where the parameters and test messages can be mo
 
 ## Extending the application
 
-`ServiceType` is an enum that identifies each supported service category. It is serialized using short codes and still recognizes legacy names so existing configurations continue to load.
+`ServiceType` is an enum that identifies each supported service category. It is serialized using short codes alongside descriptor identifiers so persisted services always resolve to the correct feature.
 
 Dictionary-based edit handlers are registered for each `ServiceType` and injected into the main view model as a lookup. When a user edits a service, the view model resolves the handler from that dictionary instead of relying on large switch statements, making it easy to plug in new handlers.
 

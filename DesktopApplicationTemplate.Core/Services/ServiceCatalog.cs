@@ -12,8 +12,6 @@ public sealed class ServiceCatalog : IServiceCatalog
 {
     private readonly object _sync = new();
     private IReadOnlyDictionary<string, IServiceDescriptor> _descriptorsById = new Dictionary<string, IServiceDescriptor>(StringComparer.Ordinal);
-    private IReadOnlyDictionary<ServiceType, IServiceDescriptor> _descriptorsByLegacy = new Dictionary<ServiceType, IServiceDescriptor>();
-    private IReadOnlyDictionary<ServiceType, string> _legacyMap = new Dictionary<ServiceType, string>();
     private IReadOnlyCollection<IServiceDescriptor> _descriptors = Array.Empty<IServiceDescriptor>();
 
     public ServiceCatalog(IEnumerable<IServiceDescriptor> descriptors)
@@ -23,15 +21,10 @@ public sealed class ServiceCatalog : IServiceCatalog
 
     public IReadOnlyCollection<IServiceDescriptor> Descriptors => _descriptors;
 
-    public IReadOnlyDictionary<ServiceType, string> LegacyMap => _legacyMap;
-
     public event EventHandler? DescriptorsChanged;
 
     public bool TryGetById(string id, out IServiceDescriptor descriptor) =>
         _descriptorsById.TryGetValue(id, out descriptor!);
-
-    public bool TryGetByLegacyType(ServiceType legacyType, out IServiceDescriptor descriptor) =>
-        _descriptorsByLegacy.TryGetValue(legacyType, out descriptor!);
 
     public void UpdateDescriptors(IEnumerable<IServiceDescriptor> descriptors)
     {
@@ -57,21 +50,8 @@ public sealed class ServiceCatalog : IServiceCatalog
             var snapshots = builders.Values.Select(b => b.Build()).ToList();
 
             var descriptorsById = snapshots.ToDictionary(d => d.Id, d => (IServiceDescriptor)d, StringComparer.Ordinal);
-            var legacyLookup = new Dictionary<ServiceType, IServiceDescriptor>();
-            foreach (var descriptor in snapshots)
-            {
-                if (descriptor.LegacyType is { } legacy)
-                {
-                    if (!legacyLookup.TryAdd(legacy, descriptor))
-                    {
-                        throw new InvalidOperationException($"Legacy service type '{legacy}' is already mapped to descriptor '{legacyLookup[legacy].Id}'.");
-                    }
-                }
-            }
 
             _descriptorsById = descriptorsById;
-            _descriptorsByLegacy = legacyLookup;
-            _legacyMap = legacyLookup.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Id);
             _descriptors = snapshots;
         }
 
@@ -84,7 +64,7 @@ public sealed class ServiceCatalog : IServiceCatalog
         private string? _displayName;
         private string? _category;
         private string? _description;
-        private ServiceType? _legacyType;
+        private ServiceType? _serviceType;
         private IServiceOptionsSerializer? _serializer;
         private readonly Dictionary<(ServiceFactoryKind Kind, Type ContractType, string? Key), ServiceFactoryBinding> _factories = new();
         private ServicePresentationMetadata? _presentation;
@@ -132,15 +112,15 @@ public sealed class ServiceCatalog : IServiceCatalog
                 }
             }
 
-            if (descriptor.LegacyType is { } legacy)
+            if (descriptor.ServiceType is { } serviceType)
             {
-                if (_legacyType is null)
+                if (_serviceType is null)
                 {
-                    _legacyType = legacy;
+                    _serviceType = serviceType;
                 }
-                else if (_legacyType.Value != legacy)
+                else if (_serviceType.Value != serviceType)
                 {
-                    throw new InvalidOperationException($"Conflicting legacy type assignments for descriptor '{_id}'.");
+                    throw new InvalidOperationException($"Conflicting service type assignments for descriptor '{_id}'.");
                 }
             }
 
@@ -182,7 +162,7 @@ public sealed class ServiceCatalog : IServiceCatalog
                 _displayName!,
                 _category!,
                 _description,
-                _legacyType,
+                _serviceType,
                 _serializer,
                 factories,
                 presentation,
@@ -218,7 +198,7 @@ public sealed class ServiceCatalog : IServiceCatalog
             string displayName,
             string category,
             string? description,
-            ServiceType? legacyType,
+            ServiceType? serviceType,
             IServiceOptionsSerializer? serializer,
             IReadOnlyCollection<ServiceFactoryBinding> factories,
             ServicePresentationMetadata presentation,
@@ -229,7 +209,7 @@ public sealed class ServiceCatalog : IServiceCatalog
             DisplayName = displayName;
             Category = category;
             Description = description;
-            LegacyType = legacyType;
+            ServiceType = serviceType;
             OptionsSerializer = serializer;
             Factories = factories;
             Presentation = presentation;
@@ -245,7 +225,7 @@ public sealed class ServiceCatalog : IServiceCatalog
 
         public string? Description { get; }
 
-        public ServiceType? LegacyType { get; }
+        public ServiceType? ServiceType { get; }
 
         public IServiceOptionsSerializer? OptionsSerializer { get; }
 

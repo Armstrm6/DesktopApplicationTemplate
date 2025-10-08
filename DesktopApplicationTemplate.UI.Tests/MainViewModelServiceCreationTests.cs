@@ -250,29 +250,20 @@ namespace DesktopApplicationTemplate.UI.Tests
         private sealed class TestServiceCatalog : IServiceCatalog
         {
             private readonly List<IServiceDescriptor> descriptors = new();
-            private readonly Dictionary<ServiceType, string> legacyMap = new();
 
             public IReadOnlyCollection<IServiceDescriptor> Descriptors => descriptors;
 
             public event EventHandler? DescriptorsChanged;
-
-            public IReadOnlyDictionary<ServiceType, string> LegacyMap => legacyMap;
 
             public IEnumerable<IServiceDescriptor> GetAll() => Descriptors;
 
             public void UpdateDescriptors(IEnumerable<IServiceDescriptor> newDescriptors)
             {
                 descriptors.Clear();
-                legacyMap.Clear();
 
                 foreach (var descriptor in newDescriptors ?? Enumerable.Empty<IServiceDescriptor>())
                 {
                     descriptors.Add(descriptor);
-
-                    if (descriptor.LegacyType is ServiceType legacyType)
-                    {
-                        legacyMap[legacyType] = descriptor.Id;
-                    }
                 }
 
                 DescriptorsChanged?.Invoke(this, EventArgs.Empty);
@@ -287,17 +278,6 @@ namespace DesktopApplicationTemplate.UI.Tests
                 {
                     descriptor = match;
                     return true;
-                }
-
-                descriptor = null!;
-                return false;
-            }
-
-            public bool TryGetByLegacyType(ServiceType type, out IServiceDescriptor descriptor)
-            {
-                if (legacyMap.TryGetValue(type, out var descriptorId))
-                {
-                    return TryGetById(descriptorId, out descriptor);
                 }
 
                 descriptor = null!;

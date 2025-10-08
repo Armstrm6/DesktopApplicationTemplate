@@ -373,8 +373,13 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             var existing = ServicePersistence.Load(_logger);
             foreach (var info in existing.OrderBy(i => i.Order))
             {
+                var descriptorId = string.IsNullOrWhiteSpace(info.DescriptorId)
+                    ? ResolveDescriptorId(info.ServiceType)
+                    : info.DescriptorId;
+
                 var svc = new ServiceListModel
                 {
+                    DescriptorId = descriptorId,
                     DisplayName = info.DisplayName,
                     Type = info.ServiceType,
                     IsActive = info.IsActive,
@@ -402,6 +407,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     normalizedName = GenerateServiceName(svc.Type);
                 }
                 svc.DisplayName = normalizedName;
+                if (string.IsNullOrWhiteSpace(svc.DescriptorId))
+                {
+                    svc.DescriptorId = ResolveDescriptorId(svc.Type);
+                }
+
                 ApplyPresentationMetadata(svc);
                 svc.SetRuntimeState(svc.IsActive ? ServiceRuntimeState.Active : ServiceRuntimeState.Inactive);
                 svc.LogAdded += OnServiceLogAdded;
@@ -419,6 +429,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             OnPropertyChanged(nameof(CurrentActiveServices));
         }
 
+        private string? ResolveDescriptorId(ServiceType serviceType)
+        {
+            return _serviceCatalog.Descriptors.FirstOrDefault(d => d.ServiceType == serviceType)?.Id;
+        }
+
         private void ApplyPresentationMetadata(ServiceListModel service)
         {
             if (service is null)
@@ -426,7 +441,15 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 return;
             }
 
-            if (_serviceCatalog.TryGetByLegacyType(service.Type, out var descriptor))
+            var descriptorId = service.DescriptorId;
+            if (string.IsNullOrWhiteSpace(descriptorId))
+            {
+                descriptorId = ResolveDescriptorId(service.Type);
+                service.DescriptorId = descriptorId;
+            }
+
+            if (!string.IsNullOrWhiteSpace(descriptorId) &&
+                _serviceCatalog.TryGetById(descriptorId, out var descriptor))
             {
                 service.ApplyPresentation(descriptor.Presentation);
             }
@@ -450,13 +473,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 trimmed = trimmed[(separatorIndex + 3)..];
             }
 
-            var legacyPrefix = type.ToLegacyString();
             var baseName = type.ToBaseName();
-            if (!string.Equals(legacyPrefix, baseName, StringComparison.OrdinalIgnoreCase) &&
-                trimmed.StartsWith(legacyPrefix, StringComparison.OrdinalIgnoreCase))
-            {
-                trimmed = baseName + trimmed[legacyPrefix.Length..];
-            }
 
             var codePrefix = type.ToCode();
             if (!string.Equals(codePrefix, baseName, StringComparison.OrdinalIgnoreCase) &&
@@ -464,6 +481,14 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 !trimmed.StartsWith(baseName, StringComparison.OrdinalIgnoreCase))
             {
                 trimmed = baseName + trimmed[codePrefix.Length..];
+            }
+
+            var enumName = type.ToString();
+            if (!string.Equals(enumName, baseName, StringComparison.OrdinalIgnoreCase) &&
+                trimmed.StartsWith(enumName, StringComparison.OrdinalIgnoreCase) &&
+                !trimmed.StartsWith(baseName, StringComparison.OrdinalIgnoreCase))
+            {
+                trimmed = baseName + trimmed[enumName.Length..];
             }
 
             return trimmed;
