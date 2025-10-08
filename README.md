@@ -96,10 +96,6 @@ Run the background service (useful for development):
 dotnet run --project DesktopApplicationTemplate.Service/DesktopApplicationTemplate.Service.csproj
 ```
 
-## Network configuration
-
-Open **Settings → Network Configuration** in the desktop app to review or apply static IP settings. The view now lists all detected network adapters and requires you to pick the adapter that should receive the configuration. The selected adapter name is passed directly to the operating system (for example via `netsh interface ipv4 ... name="LAN 1"` on Windows), ensuring the commands target the intended interface even when names include spaces. Always confirm the correct adapter is selected before saving changes, especially on multi-NIC hosts.
-
 ## Execute unit tests
 
 Use `dotnet test` to run the xUnit tests. The repository includes a

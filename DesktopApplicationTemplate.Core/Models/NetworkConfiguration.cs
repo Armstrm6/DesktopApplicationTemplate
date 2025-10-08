@@ -4,7 +4,6 @@ namespace DesktopApplicationTemplate.Core.Models
 {
     public class NetworkConfiguration
     {
-        public string InterfaceName { get; init; } = string.Empty;
         public string IpAddress { get; init; } = string.Empty;
         public string SubnetMask { get; init; } = string.Empty;
         public string Gateway { get; init; } = string.Empty;
