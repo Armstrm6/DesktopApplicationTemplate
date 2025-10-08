@@ -68,16 +68,13 @@ namespace DesktopApplicationTemplate.UI.Views
             PreloadServicePages();
         }
 
-        private void MainView_Closing(object? sender, CancelEventArgs e)
+        private async void MainView_Closing(object? sender, CancelEventArgs e)
         {
             _logger?.LogInformation("MainView closing");
 
             try
             {
-                App.UiThreadTaskFactory.Run(async () =>
-                {
-                    await _viewModel.ShutdownServicesAsync().ConfigureAwait(true);
-                });
+                await _viewModel.ShutdownServicesAsync().ConfigureAwait(true);
             }
             catch (Exception ex)
             {
@@ -489,13 +486,14 @@ namespace DesktopApplicationTemplate.UI.Views
                 if (page != null)
                 {
                     ShowPage(page);
-                    Dispatcher.BeginInvoke(new Action(() =>
+                    _ = App.UiThreadTaskFactory.RunAsync(async () =>
                     {
+                        await App.UiThreadTaskFactory.SwitchToMainThreadAsync();
                         using (_viewModel.PreserveActiveServiceSelection())
                         {
                             ServiceList.SelectedItem = null;
                         }
-                    }), DispatcherPriority.Background);
+                    });
                 }
 
                 return;
