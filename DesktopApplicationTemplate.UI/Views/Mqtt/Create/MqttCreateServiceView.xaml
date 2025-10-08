@@ -20,6 +20,15 @@
                 <RowDefinition Height="Auto" /> <!-- Username -->
                 <RowDefinition Height="Auto" /> <!-- Password -->
                 <RowDefinition Height="Auto" /> <!-- Connection Type -->
+                <RowDefinition Height="Auto" /> <!-- Use Client Certificate -->
+                <RowDefinition Height="Auto" /> <!-- Client Certificate -->
+                <RowDefinition Height="Auto" /> <!-- Will Topic -->
+                <RowDefinition Height="Auto" /> <!-- Will Payload -->
+                <RowDefinition Height="Auto" /> <!-- Will QoS -->
+                <RowDefinition Height="Auto" /> <!-- Will Retain -->
+                <RowDefinition Height="Auto" /> <!-- Keep Alive -->
+                <RowDefinition Height="Auto" /> <!-- Clean Session -->
+                <RowDefinition Height="Auto" /> <!-- Reconnect Delay -->
                 <RowDefinition Height="Auto" /> <!-- Buttons -->
             </Grid.RowDefinitions>
 
@@ -89,12 +98,98 @@
                 <ComboBoxItem Content="WebSocket TLS" Tag="{x:Static svc:MqttConnectionType.WebSocketTls}"/>
             </ComboBox>
 
-            <views:EditorButtonBar Grid.Row="7" Grid.ColumnSpan="2"
-                                   AdvancedConfigCommand="{Binding AdvancedConfigCommand}"
+            <TextBlock Grid.Row="7" Grid.Column="0" Text="Use Client Certificate" Style="{StaticResource FormLabel}"/>
+            <CheckBox Grid.Row="7" Grid.Column="1"
+                      Content="Enable TLS client certificate"
+                      IsChecked="{Binding UseClientCertificate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+            <TextBlock Grid.Row="8" Grid.Column="0" Text="Client Certificate" Style="{StaticResource FormLabel}"/>
+            <DockPanel Grid.Row="8" Grid.Column="1">
+                <TextBox Text="{Binding ClientCertificateDisplay}"
+                         IsReadOnly="True"
+                         Margin="0,0,5,0"
+                         VerticalAlignment="Center"
+                         ToolTip="Selected client certificate path"
+                         IsEnabled="{Binding UseClientCertificate}">
+                    <TextBox.Style>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource FormField}">
+                            <Style.Triggers>
+                                <Trigger Property="Validation.HasError" Value="True">
+                                    <Setter Property="ToolTip" Value="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Self}}"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                    <TextBox.Tag>
+                        <Binding Path="ClientCertificatePath"
+                                 Mode="OneWay"
+                                 ValidatesOnNotifyDataErrors="True"/>
+                    </TextBox.Tag>
+                </TextBox>
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+                    <Button Content="Browse"
+                            Margin="0,0,5,0"
+                            Width="70"
+                            IsEnabled="{Binding UseClientCertificate}"
+                            Command="{Binding BrowseClientCertificateCommand}"/>
+                    <Button Content="Clear"
+                            Width="60"
+                            IsEnabled="{Binding UseClientCertificate}"
+                            Command="{Binding ClearClientCertificateCommand}"/>
+                </StackPanel>
+            </DockPanel>
+
+            <TextBlock Grid.Row="9" Grid.Column="0" Text="Will Topic" Style="{StaticResource FormLabel}"/>
+            <TextBox Grid.Row="9" Grid.Column="1" Text="{Binding WillTopic}" Style="{StaticResource FormField}" ToolTip="Optional will topic"/>
+
+            <TextBlock Grid.Row="10" Grid.Column="0" Text="Will Payload" Style="{StaticResource FormLabel}"/>
+            <TextBox Grid.Row="10" Grid.Column="1" Text="{Binding WillPayload}" Style="{StaticResource FormField}" ToolTip="Optional will payload"/>
+
+            <TextBlock Grid.Row="11" Grid.Column="0" Text="Will QoS" Style="{StaticResource FormLabel}"/>
+            <ComboBox Grid.Row="11" Grid.Column="1"
+                      ItemsSource="{Binding QoSLevels}"
+                      SelectedItem="{Binding WillQualityOfService}"
+                      Style="{StaticResource FormField}"/>
+
+            <TextBlock Grid.Row="12" Grid.Column="0" Text="Retain Will" Style="{StaticResource FormLabel}"/>
+            <CheckBox Grid.Row="12" Grid.Column="1" Content="Retain last will message" IsChecked="{Binding WillRetain}"/>
+
+            <TextBlock Grid.Row="13" Grid.Column="0" Text="Keep Alive (sec)" Style="{StaticResource FormLabel}"/>
+            <TextBox Grid.Row="13" Grid.Column="1"
+                     Text="{Binding KeepAliveSeconds, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
+                <TextBox.Style>
+                    <Style TargetType="TextBox" BasedOn="{StaticResource FormField}">
+                        <Style.Triggers>
+                            <Trigger Property="Validation.HasError" Value="True">
+                                <Setter Property="ToolTip" Value="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Self}}"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBox.Style>
+            </TextBox>
+
+            <TextBlock Grid.Row="14" Grid.Column="0" Text="Clean Session" Style="{StaticResource FormLabel}"/>
+            <CheckBox Grid.Row="14" Grid.Column="1" Content="Request clean session" IsChecked="{Binding CleanSession}"/>
+
+            <TextBlock Grid.Row="15" Grid.Column="0" Text="Reconnect Delay (sec)" Style="{StaticResource FormLabel}"/>
+            <TextBox Grid.Row="15" Grid.Column="1"
+                     Text="{Binding ReconnectDelaySeconds, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
+                <TextBox.Style>
+                    <Style TargetType="TextBox" BasedOn="{StaticResource FormField}">
+                        <Style.Triggers>
+                            <Trigger Property="Validation.HasError" Value="True">
+                                <Setter Property="ToolTip" Value="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Self}}"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBox.Style>
+            </TextBox>
+
+            <views:EditorButtonBar Grid.Row="16" Grid.ColumnSpan="2"
+                                   IsAdvancedVisible="False"
                                    SaveCommand="{Binding CreateCommand}"
                                    CancelCommand="{Binding CancelCommand}"
                                    SaveButtonText="Create"
-                                   AdvancedAutomationName="Open MQTT Advanced Configuration"
                                    SaveAutomationName="Create MQTT Service"
                                    CancelAutomationName="Cancel MQTT Creation" />
         </Grid>

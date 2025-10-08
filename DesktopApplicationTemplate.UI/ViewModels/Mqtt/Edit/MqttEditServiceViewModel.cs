@@ -124,6 +124,9 @@ public class MqttEditServiceViewModel : ServiceEditViewModelBase<MqttServiceOpti
     protected override void OnCancel() => RaiseEditCancelled();
 
     /// <inheritdoc />
-    protected override void OnAdvancedConfig() => RaiseAdvancedConfigRequested(_options);
+    protected override void OnAdvancedConfig()
+    {
+        // Advanced configuration is now handled directly within the primary editor.
+    }
 }
 

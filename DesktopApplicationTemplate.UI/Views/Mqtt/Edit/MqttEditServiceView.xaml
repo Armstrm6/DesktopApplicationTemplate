@@ -80,10 +80,9 @@
             <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding Password}" Style="{StaticResource FormField}" ToolTip="Password"/>
 
             <views:EditorButtonBar Grid.Row="6" Grid.ColumnSpan="2"
-                                   AdvancedConfigCommand="{Binding AdvancedConfigCommand}"
+                                   IsAdvancedVisible="False"
                                    SaveCommand="{Binding SaveCommand}"
                                    CancelCommand="{Binding CancelCommand}"
-                                   AdvancedAutomationName="Open MQTT Advanced Configuration"
                                    SaveAutomationName="Save MQTT Service"
                                    CancelAutomationName="Cancel MQTT Edit" />
         </Grid>
