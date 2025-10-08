@@ -12,6 +12,7 @@ using DesktopApplicationTemplate.Core.Services.Protocols.Mqtt;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Models;
+using DesktopApplicationTemplate.UI.Services;
 using MQTTnet.Protocol;
 
 namespace DesktopApplicationTemplate.UI.ViewModels.Mqtt;
@@ -40,10 +41,13 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
     /// <summary>
     /// Initializes a new instance of the <see cref="MqttTagSubscriptionsViewModel"/> class.
     /// </summary>
-    public MqttTagSubscriptionsViewModel(IMqttClientService clientService, MqttServiceOptions options)
+    public MqttTagSubscriptionsViewModel(ServiceListModel service, IMqttClientSessionManager sessionManager)
     {
-        _clientService = clientService ?? throw new ArgumentNullException(nameof(clientService));
-        _options = options ?? throw new ArgumentNullException(nameof(options));
+        ArgumentNullException.ThrowIfNull(service);
+        ArgumentNullException.ThrowIfNull(sessionManager);
+
+        _options = service.MqttOptions ??= new MqttServiceOptions();
+        _clientService = sessionManager.GetClient(service);
 
         Subscriptions = new ObservableCollection<TagSubscription>();
         Subscriptions.CollectionChanged += OnSubscriptionsChanged;
@@ -56,7 +60,6 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
         _sendTestMessageCommand = new AsyncRelayCommand<TagSubscription>(SendTestMessageAsync, CanSendTestMessage);
 
         _clientService.ConnectionStateChanged += OnConnectionStateChanged;
-        IsConnected = _clientService.IsConnected;
     }
 
     /// <inheritdoc />

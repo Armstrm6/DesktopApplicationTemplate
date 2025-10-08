@@ -196,6 +196,7 @@ namespace DesktopApplicationTemplate.UI
             services.AddCommonServices();
             services.AddSingleton<SaveConfirmationHelper>();
             services.AddSingleton<CloseConfirmationHelper>();
+            services.AddSingleton<IMqttClientSessionManager, MqttClientSessionManager>();
             services.AddSingleton<MainViewModel>();
             services.AddSingleton<ServiceMessageTableViewModel>();
             services.AddSingleton<TcpServiceMessagesView>();
