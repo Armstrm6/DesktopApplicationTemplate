@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DesktopApplicationTemplate.Core.Models;
 using DesktopApplicationTemplate.Core.Services;
@@ -181,9 +182,25 @@ namespace DesktopApplicationTemplate.UI.Tests
 
         private sealed class TestNetworkConfigurationService : INetworkConfigurationService
         {
-            public Task ApplyConfigurationAsync(NetworkConfiguration configuration) => Task.CompletedTask;
+            private NetworkConfiguration currentConfiguration = new();
 
-            public Task<NetworkConfiguration> GetConfigurationAsync() => Task.FromResult(new NetworkConfiguration());
+            public event EventHandler<NetworkConfiguration>? ConfigurationChanged;
+
+            public Task ApplyConfigurationAsync(
+                NetworkConfiguration configuration,
+                CancellationToken cancellationToken = default)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                currentConfiguration = configuration ?? new NetworkConfiguration();
+                ConfigurationChanged?.Invoke(this, currentConfiguration);
+                return Task.CompletedTask;
+            }
+
+            public Task<NetworkConfiguration> GetConfigurationAsync(CancellationToken cancellationToken = default)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                return Task.FromResult(currentConfiguration);
+            }
         }
 
         private sealed class TestFileDialogService : IFileDialogService
@@ -231,16 +248,57 @@ namespace DesktopApplicationTemplate.UI.Tests
 
         private sealed class TestServiceCatalog : IServiceCatalog
         {
-            public IEnumerable<IServiceDescriptor> GetAll() => Enumerable.Empty<IServiceDescriptor>();
+            private readonly List<IServiceDescriptor> descriptors = new();
+            private readonly Dictionary<ServiceType, string> legacyMap = new();
+
+            public IReadOnlyCollection<IServiceDescriptor> Descriptors => descriptors;
+
+            public event EventHandler? DescriptorsChanged;
+
+            public IReadOnlyDictionary<ServiceType, string> LegacyMap => legacyMap;
+
+            public IEnumerable<IServiceDescriptor> GetAll() => Descriptors;
+
+            public void UpdateDescriptors(IEnumerable<IServiceDescriptor> newDescriptors)
+            {
+                descriptors.Clear();
+                legacyMap.Clear();
+
+                foreach (var descriptor in newDescriptors ?? Enumerable.Empty<IServiceDescriptor>())
+                {
+                    descriptors.Add(descriptor);
+
+                    if (descriptor.LegacyType is ServiceType legacyType)
+                    {
+                        legacyMap[legacyType] = descriptor.Id;
+                    }
+                }
+
+                DescriptorsChanged?.Invoke(this, EventArgs.Empty);
+            }
 
             public bool TryGetById(string descriptorId, out IServiceDescriptor descriptor)
             {
+                var match = descriptors.FirstOrDefault(
+                    d => string.Equals(d.Id, descriptorId, StringComparison.Ordinal));
+
+                if (match is not null)
+                {
+                    descriptor = match;
+                    return true;
+                }
+
                 descriptor = null!;
                 return false;
             }
 
             public bool TryGetByLegacyType(ServiceType type, out IServiceDescriptor descriptor)
             {
+                if (legacyMap.TryGetValue(type, out var descriptorId))
+                {
+                    return TryGetById(descriptorId, out descriptor);
+                }
+
                 descriptor = null!;
                 return false;
             }
