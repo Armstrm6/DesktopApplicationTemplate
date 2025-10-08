@@ -628,11 +628,14 @@ namespace DesktopApplicationTemplate.UI.Views
         private void RemoveService_Click(object sender, RoutedEventArgs e)
         {
             _logger?.LogDebug("RemoveService button clicked");
-            if (DataContext is ViewModels.MainViewModel vm &&
-                vm.RemoveServiceCommand.CanExecute(null))
+            if (DataContext is ViewModels.MainViewModel vm)
             {
-                vm.RemoveServiceCommand.Execute(null);
-                _logger?.LogDebug("RemoveService command executed");
+                var target = vm.SelectedService ?? vm.ActiveService;
+                if (vm.RemoveServiceCommand.CanExecute(target))
+                {
+                    vm.RemoveServiceCommand.Execute(target);
+                    _logger?.LogDebug("RemoveService command executed");
+                }
             }
         }
         private void ServiceList_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -894,6 +897,23 @@ namespace DesktopApplicationTemplate.UI.Views
         internal void ServiceItem_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             _dragStart = e.GetPosition(null);
+        }
+
+        internal void ServiceItem_PreviewMouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (sender is not DependencyObject source)
+            {
+                return;
+            }
+
+            var item = Helpers.VisualTreeHelperExtensions.FindParent<ListBoxItem>(source);
+            if (item != null)
+            {
+                item.Focus();
+                item.IsSelected = true;
+            }
+
+            ServiceList.Focus();
         }
 
         internal void ServiceItem_PreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)

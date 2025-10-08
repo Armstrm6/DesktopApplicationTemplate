@@ -127,6 +127,11 @@
                              SelectionChanged="ServiceList_SelectionChanged"
                              MouseDoubleClick="ServiceList_MouseDoubleClick"
                              PreviewMouseLeftButtonUp="ServiceList_PreviewMouseLeftButtonUp">
+                        <ListBox.InputBindings>
+                            <KeyBinding Key="Delete"
+                                        Command="{Binding RemoveServiceCommand}"
+                                        CommandParameter="{Binding SelectedItem, ElementName=ServiceList}" />
+                        </ListBox.InputBindings>
                         <ListBox.ItemContainerStyle>
                             <Style TargetType="ListBoxItem">
                                 <EventSetter Event="MouseDoubleClick" Handler="ServiceListItem_MouseDoubleClick" />

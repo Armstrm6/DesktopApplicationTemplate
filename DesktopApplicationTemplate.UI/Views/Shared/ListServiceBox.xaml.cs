@@ -20,6 +20,14 @@ public partial class ListServiceBox : UserControl
         }
     }
 
+    private void ServiceItem_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (Window.GetWindow(this) is MainView mainView)
+        {
+            mainView.ServiceItem_PreviewMouseRightButtonDown(sender, e);
+        }
+    }
+
     private void ServiceItem_PreviewMouseMove(object sender, MouseEventArgs e)
     {
         if (Window.GetWindow(this) is MainView mainView)

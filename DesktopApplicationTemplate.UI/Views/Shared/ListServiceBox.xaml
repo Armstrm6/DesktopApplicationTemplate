@@ -62,6 +62,7 @@
             Padding="5"
             Margin="2"
             PreviewMouseLeftButtonDown="ServiceItem_PreviewMouseLeftButtonDown"
+            PreviewMouseRightButtonDown="ServiceItem_PreviewMouseRightButtonDown"
             PreviewMouseMove="ServiceItem_PreviewMouseMove"
             AllowDrop="True"
             Drop="ServiceItem_Drop">
