@@ -34,24 +34,43 @@
                 <Button Content="Update Log" Width="100" Margin="10,0,0,0" Command="{Binding RefreshLogCommand}" Background="#FFFFCC"/>
                 <Button Content="Export Log" Width="100" Margin="10,0,0,0" Background="#CCCCFF" Click="ExportLog_Click"/>
                 <Button Content="Clear Log" Width="100" Margin="10,0,0,0" Command="{Binding ClearLogCommand}" Background="#FFCCCC"/>
-                <StackPanel Margin="20,0,0,0"
-                            Visibility="{Binding IsAggregated, Converter={StaticResource BooleanToVisibilityConverter}}"
-                            Width="220">
-                    <TextBlock Text="SERVICES" FontWeight="Bold" Margin="0,0,0,5"/>
-                    <ListBox ItemsSource="{Binding ServiceFilters}"
-                             SelectionMode="Multiple"
-                             BorderThickness="1"
-                             MaxHeight="140"
-                             HorizontalContentAlignment="Stretch">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <CheckBox Content="{Binding ServiceName}"
-                                          IsChecked="{Binding IsSelected, Mode=TwoWay}"
-                                          Margin="0,0,0,5" />
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </StackPanel>
+                <Grid Margin="20,0,0,0"
+                      Visibility="{Binding IsAggregated, Converter={StaticResource BooleanToVisibilityConverter}}"
+                      Width="220">
+                    <ToggleButton x:Name="ServiceFiltersToggle"
+                                  Content="SERVICES"
+                                  FontWeight="Bold"
+                                  Padding="10,5"
+                                  HorizontalContentAlignment="Left" />
+                    <Popup Placement="Bottom"
+                           PlacementTarget="{Binding ElementName=ServiceFiltersToggle}"
+                           IsOpen="{Binding IsChecked, ElementName=ServiceFiltersToggle, Mode=TwoWay}"
+                           StaysOpen="False"
+                           AllowsTransparency="True"
+                           DataContext="{Binding DataContext, ElementName=ServiceFiltersToggle}">
+                        <Border Background="White"
+                                BorderBrush="Gray"
+                                BorderThickness="1"
+                                Padding="10"
+                                MaxWidth="220">
+                            <ListBox ItemsSource="{Binding ServiceFilters}"
+                                     SelectionMode="Multiple"
+                                     BorderThickness="0"
+                                     MaxHeight="200"
+                                     ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                     HorizontalContentAlignment="Stretch">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <CheckBox Content="{Binding ServiceName}"
+                                                  IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                                  Margin="0,0,0,5" />
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Border>
+                    </Popup>
+                </Grid>
             </StackPanel>
             <ListBox x:Name="LogListBox"
                      Grid.Row="1"
