@@ -7,6 +7,7 @@ using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Mqtt;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.UI.ViewModels;
 using MQTTnet.Protocol;
 
 namespace DesktopApplicationTemplate.UI.ViewModels.Mqtt.Edit;
@@ -43,13 +44,16 @@ public class MqttEditConnectionViewModel : ValidatableViewModelBase, ILoggingVie
     /// Initializes a new instance of the <see cref="MqttEditConnectionViewModel"/> class.
     /// </summary>
     public MqttEditConnectionViewModel(
-        IMqttClientService clientService,
-        MqttServiceOptions options,
+        ServiceListModel service,
+        IMqttClientSessionManager sessionManager,
         IFileDialogService fileDialogService,
         ILoggingService? logger = null)
     {
-        _clientService = clientService ?? throw new ArgumentNullException(nameof(clientService));
-        _options = options ?? throw new ArgumentNullException(nameof(options));
+        ArgumentNullException.ThrowIfNull(service);
+        ArgumentNullException.ThrowIfNull(sessionManager);
+
+        _clientService = sessionManager.GetClient(service);
+        _options = service.MqttOptions ??= new MqttServiceOptions();
         _fileDialogService = fileDialogService ?? throw new ArgumentNullException(nameof(fileDialogService));
         Logger = logger;
 

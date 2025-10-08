@@ -26,16 +26,16 @@ public partial class MqttTagSubscriptionsView : Page, IServiceLogHost
     /// <summary>
     /// Applies the supplied view model to the page.
     /// </summary>
+    /// <param name="service">The service that owns the view model.</param>
     /// <param name="viewModel">The view model to use as the data context.</param>
-    public void Initialize(MqttTagSubscriptionsViewModel viewModel)
+    public void Initialize(ServiceListModel service, MqttTagSubscriptionsViewModel viewModel)
     {
-        if (viewModel is null)
-        {
-            throw new ArgumentNullException(nameof(viewModel));
-        }
+        ArgumentNullException.ThrowIfNull(service);
+        ArgumentNullException.ThrowIfNull(viewModel);
 
         viewModel.Logger = _logger;
         DataContext = viewModel;
+        SetServiceContext(service);
     }
 
     /// <inheritdoc />

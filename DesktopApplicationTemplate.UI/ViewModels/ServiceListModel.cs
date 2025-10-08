@@ -316,12 +316,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         /// </summary>
         public MqttServiceOptions? MqttOptions { get; set; }
 
-        /// <summary>
-        /// Gets or sets the MQTT client instance associated with this service.
-        /// </summary>
-        [JsonIgnore]
-        public IMqttClientService? MqttClientService { get; set; }
-
         public static Func<ServiceType, string, ServiceListModel?>? ResolveService { get; set; }
 
         private bool _isActive;

@@ -307,19 +307,11 @@ namespace DesktopApplicationTemplate.UI.Views
                 return;
             }
 
-            var options = svc.MqttOptions ??= new MqttServiceOptions();
-            if (svc.MqttClientService is null)
-            {
-                var factory = _serviceProvider.GetRequiredService<IMqttClientServiceFactory>();
-                svc.MqttClientService = factory.Create(options);
-            }
-
             if (!_mqttSubscriptionViewModels.TryGetValue(svc, out var viewModel))
             {
                 viewModel = ActivatorUtilities.CreateInstance<MqttTagSubscriptionsViewModel>(
                     _serviceProvider,
-                    svc.MqttClientService!,
-                    options);
+                    svc);
                 _mqttSubscriptionViewModels[svc] = viewModel;
             }
 
@@ -332,7 +324,9 @@ namespace DesktopApplicationTemplate.UI.Views
             viewModel.EditConnectionRequested += handler;
             _mqttEditHandlers[svc] = handler;
 
-            page.Initialize(viewModel);
+            svc.MqttOptions ??= new MqttServiceOptions();
+
+            page.Initialize(svc, viewModel);
         }
 
         private void AttachTcpAdvancedHandler(ServiceListModel svc, TcpServiceMessagesViewModel vm)
@@ -389,11 +383,8 @@ namespace DesktopApplicationTemplate.UI.Views
             _mqttEditHandlers.Remove(svc);
             _mqttSubscriptionViewModels.Remove(svc);
 
-            if (svc.MqttClientService is not null)
-            {
-                _ = svc.MqttClientService.DisconnectAsync();
-                svc.MqttClientService = null;
-            }
+            var sessionManager = _serviceProvider.GetRequiredService<IMqttClientSessionManager>();
+            _ = sessionManager.ReleaseAsync(svc);
         }
 
         private void OpenTcpAdvancedSettings(ServiceListModel svc)
@@ -409,18 +400,12 @@ namespace DesktopApplicationTemplate.UI.Views
                 return;
             }
 
-            var options = service.MqttOptions ??= new MqttServiceOptions();
-            if (service.MqttClientService is null)
-            {
-                var factory = _serviceProvider.GetRequiredService<IMqttClientServiceFactory>();
-                service.MqttClientService = factory.Create(options);
-            }
+            service.MqttOptions ??= new MqttServiceOptions();
 
             var logger = _serviceProvider.GetService<ILoggingService>();
             var viewModel = ActivatorUtilities.CreateInstance<MqttEditConnectionViewModel>(
                 _serviceProvider,
-                service.MqttClientService!,
-                options,
+                service,
                 logger);
 
             if (highlightMissingFields)
