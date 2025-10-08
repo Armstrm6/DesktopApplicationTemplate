@@ -403,10 +403,14 @@ namespace DesktopApplicationTemplate.UI.Views
             service.MqttOptions ??= new MqttServiceOptions();
 
             var logger = _serviceProvider.GetService<ILoggingService>();
-            var viewModel = ActivatorUtilities.CreateInstance<MqttEditConnectionViewModel>(
-                _serviceProvider,
-                service,
-                logger);
+            var viewModel = logger is null
+                ? ActivatorUtilities.CreateInstance<MqttEditConnectionViewModel>(
+                    _serviceProvider,
+                    service)
+                : ActivatorUtilities.CreateInstance<MqttEditConnectionViewModel>(
+                    _serviceProvider,
+                    service,
+                    logger);
 
             if (highlightMissingFields)
             {
