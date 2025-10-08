@@ -52,10 +52,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
         public ObservableCollection<LogEntry> Logs { get; } = new();
 
         /// <summary>Latest incoming message text for the associated service.</summary>
-        public string LastInputMessage => _service?.LastInputMessage ?? string.Empty;
+        public string InputMessage => _service?.InputMessage ?? string.Empty;
 
         /// <summary>Latest outgoing message text for the associated service.</summary>
-        public string LastOutputMessage => _service?.LastOutputMessage ?? string.Empty;
+        public string OutputMessage => _service?.OutputMessage ?? string.Empty;
 
         /// <inheritdoc />
         private ILoggingService? _logger;
@@ -143,7 +143,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
 
         private string _script = string.Empty;
 
-        private string _outputMessage = string.Empty;
+        private string _scriptOutputMessage = string.Empty;
 
         /// <summary>Message used for testing communication.</summary>
         public string TestMessage
@@ -170,12 +170,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
         }
 
         /// <summary>Result of executing the test message with the current script.</summary>
-        public string OutputMessage
+        public string ScriptOutputMessage
         {
-            get => _outputMessage;
+            get => _scriptOutputMessage;
             internal set
             {
-                _outputMessage = value ?? string.Empty;
+                _scriptOutputMessage = value ?? string.Empty;
                 OnPropertyChanged();
             }
         }
@@ -242,7 +242,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             Script = string.IsNullOrWhiteSpace(_options.Script)
                 ? ScriptEditorViewModel.DefaultScript
                 : _options.Script;
-            OutputMessage = _options.OutputMessage;
+            ScriptOutputMessage = _options.OutputMessage;
             _runtimeContext = new TcpRuntimeContext(ServiceType, ServiceName, _options, ScriptEditorViewModel.DefaultScript);
             ApplyNetworkConfiguration(restartIfActive: false);
             var history = service.GetMessageHistorySnapshot();
@@ -264,8 +264,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             MessageTable.SetActiveService(ServiceType, ServiceName);
             OnPropertyChanged(nameof(IncomingData));
             OnPropertyChanged(nameof(OutgoingResults));
-            OnPropertyChanged(nameof(LastInputMessage));
-            OnPropertyChanged(nameof(LastOutputMessage));
+            OnPropertyChanged(nameof(InputMessage));
+            OnPropertyChanged(nameof(OutputMessage));
             _ = InitializeRuntimeAsync();
             if (_service.IsActive)
             {
@@ -275,14 +275,14 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
 
         private void OnServicePropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(ServiceListModel.LastInputMessage) || string.IsNullOrEmpty(e.PropertyName))
+            if (e.PropertyName == nameof(ServiceListModel.InputMessage) || string.IsNullOrEmpty(e.PropertyName))
             {
-                OnPropertyChanged(nameof(LastInputMessage));
+                OnPropertyChanged(nameof(InputMessage));
             }
 
-            if (e.PropertyName == nameof(ServiceListModel.LastOutputMessage) || string.IsNullOrEmpty(e.PropertyName))
+            if (e.PropertyName == nameof(ServiceListModel.OutputMessage) || string.IsNullOrEmpty(e.PropertyName))
             {
-                OnPropertyChanged(nameof(LastOutputMessage));
+                OnPropertyChanged(nameof(OutputMessage));
             }
         }
 
@@ -347,15 +347,15 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                 var state = await _tcpRuntime.InitializeAsync(_runtimeContext).ConfigureAwait(false);
                 Script = state.Script;
                 TestMessage = state.TestMessage;
-                OutputMessage = state.OutputMessage;
+                ScriptOutputMessage = state.OutputMessage;
                 _options.OutputMessage = state.OutputMessage;
                 _routing.UpdateMessage(ServiceType, ServiceName, state.TestMessage, MessageRoutingDirection.Input);
                 _routing.UpdateMessage(ServiceType, ServiceName, state.OutputMessage, MessageRoutingDirection.Output);
-                Logger?.Log($"Script executed successfully: {OutputMessage}", LogLevel.Information);
+                Logger?.Log($"Script executed successfully: {ScriptOutputMessage}", LogLevel.Information);
             }
             catch (Exception ex)
             {
-                OutputMessage = ex.ToString();
+                ScriptOutputMessage = ex.ToString();
                 Logger?.Log($"Script execution failed: {ex}", LogLevel.Error);
             }
         }
@@ -500,6 +500,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             }
 
             Logger?.Log("TCP network loop stopped", LogLevel.Debug);
+            _ = RestoreTestMessageAsync();
         }
 
         private bool ShouldStartServerListener()
@@ -729,20 +730,19 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                         if (operation == TcpClientOperation.Receive)
                         {
                             Logger?.Log($"Received message from {endpointDisplay}: {response}", LogLevel.Information);
-                            _routing.UpdateMessage(ServiceType, ServiceName, response, MessageRoutingDirection.Input);
-                            await AppendMessageAsync(response, string.Empty, endpointDisplay).ConfigureAwait(false);
                         }
                         else
                         {
                             Logger?.Log($"Received response from {endpointDisplay}: {response}", LogLevel.Information);
-                            _routing.UpdateMessage(ServiceType, ServiceName, response, MessageRoutingDirection.Input);
-                            await AppendMessageAsync(message, response, endpointDisplay).ConfigureAwait(false);
                         }
+
+                        var processedOutput = await ExecuteIncomingMessageAsync(response, cancellationToken).ConfigureAwait(false);
+                        await AppendMessageAsync(response, processedOutput, endpointDisplay, sentToEndpoint: false).ConfigureAwait(false);
                     }
 
                     if (!receivedAny && shouldSendMessage)
                     {
-                        await AppendMessageAsync(message, string.Empty, endpointDisplay).ConfigureAwait(false);
+                        await AppendMessageAsync(message, string.Empty, endpointDisplay, sentToEndpoint: true).ConfigureAwait(false);
                         Logger?.Log($"No response received from {endpointDisplay}", LogLevel.Warning);
                     }
                 }
@@ -769,6 +769,32 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             }
         }
 
+        private async Task<string> ExecuteIncomingMessageAsync(string incomingMessage, CancellationToken cancellationToken)
+        {
+            if (_runtimeContext is null)
+            {
+                _routing.UpdateMessage(ServiceType, ServiceName, incomingMessage, MessageRoutingDirection.Input);
+                return _options.OutputMessage ?? string.Empty;
+            }
+
+            try
+            {
+                var state = await _tcpRuntime.ExecuteAsync(
+                    new TcpRuntimeExecutionRequest(_runtimeContext, Script, incomingMessage, isLiveInput: true),
+                    cancellationToken).ConfigureAwait(false);
+
+                _options.OutputMessage = state.OutputMessage;
+                return state.OutputMessage;
+            }
+            catch (Exception ex)
+            {
+                Logger?.Log($"TCP script execution failed: {ex.Message}", LogLevel.Error);
+                Logger?.Log(ex.ToString(), LogLevel.Debug);
+                _routing.UpdateMessage(ServiceType, ServiceName, incomingMessage, MessageRoutingDirection.Input);
+                return _options.OutputMessage ?? string.Empty;
+            }
+        }
+
         private async Task HandleClientAsync(TcpClient client, CancellationToken cancellationToken)
         {
             using (client)
@@ -792,16 +818,17 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                         var incoming = Encoding.UTF8.GetString(buffer, 0, bytesRead);
                         var formattedIncoming = MessageDisplayFormatter.FormatControlCharacters(incoming);
                         Logger?.Log($"Incoming message from {endpoint}: {formattedIncoming}", LogLevel.Information);
-                        _routing.UpdateMessage(ServiceType, ServiceName, incoming, MessageRoutingDirection.Input);
-                        await AppendMessageAsync(incoming, _options.OutputMessage, endpoint).ConfigureAwait(false);
 
-                        if (!string.IsNullOrWhiteSpace(_options.OutputMessage))
+                        var outgoing = await ExecuteIncomingMessageAsync(incoming, cancellationToken).ConfigureAwait(false);
+                        var hasResponse = !string.IsNullOrWhiteSpace(outgoing);
+                        await AppendMessageAsync(incoming, outgoing, endpoint, hasResponse).ConfigureAwait(false);
+
+                        if (hasResponse)
                         {
-                            var response = Encoding.UTF8.GetBytes(_options.OutputMessage);
+                            var response = Encoding.UTF8.GetBytes(outgoing);
                             await stream.WriteAsync(response.AsMemory(0, response.Length), cancellationToken).ConfigureAwait(false);
-                            var formattedOutgoing = MessageDisplayFormatter.FormatControlCharacters(_options.OutputMessage);
+                            var formattedOutgoing = MessageDisplayFormatter.FormatControlCharacters(outgoing);
                             Logger?.Log($"Outgoing message to {endpoint}: {formattedOutgoing}", LogLevel.Debug);
-                            _routing.UpdateMessage(ServiceType, ServiceName, _options.OutputMessage, MessageRoutingDirection.Output);
                         }
                     }
                 }
@@ -820,16 +847,20 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             }
         }
 
-        private Task AppendMessageAsync(string? incoming, string? outgoing, string? endpoint)
+        private Task AppendMessageAsync(string? incoming, string? outgoing, string? endpoint, bool sentToEndpoint)
         {
             var incomingMessage = incoming ?? string.Empty;
             var outgoingMessage = outgoing ?? string.Empty;
             var incomingEndpoint = endpoint ?? string.Empty;
             var referencingServices = _routing.GetReferencingServices(ServiceName);
             var destination = string.Empty;
-            if (!string.IsNullOrWhiteSpace(outgoingMessage))
+            if (sentToEndpoint && !string.IsNullOrWhiteSpace(incomingEndpoint))
             {
                 destination = incomingEndpoint;
+            }
+            else if (!string.IsNullOrWhiteSpace(outgoingMessage) && referencingServices.Count > 0)
+            {
+                destination = string.Join(", ", referencingServices);
             }
             else if (referencingServices.Count > 0)
             {
@@ -1048,6 +1079,40 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             }, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
         }
 
+        private async Task RestoreTestMessageAsync()
+        {
+            if (_runtimeContext is null)
+            {
+                return;
+            }
+
+            var fallback = string.IsNullOrWhiteSpace(TestMessage)
+                ? (_options.LastTestMessage ?? string.Empty)
+                : TestMessage;
+
+            try
+            {
+                var state = await _tcpRuntime.ExecuteAsync(
+                    new TcpRuntimeExecutionRequest(_runtimeContext, Script, fallback, isLiveInput: false)).ConfigureAwait(false);
+
+                _options.OutputMessage = state.OutputMessage;
+
+                await RunOnUiThreadAsync(() =>
+                {
+                    TestMessage = state.TestMessage;
+                    ScriptOutputMessage = state.OutputMessage;
+                    _service?.UpdateInputMessage(state.TestMessage);
+                    _service?.UpdateOutputMessage(state.OutputMessage);
+                }).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                Logger?.Log($"Failed to restore test message after stopping TCP service: {ex.Message}", LogLevel.Error);
+                Logger?.Log(ex.ToString(), LogLevel.Debug);
+                _routing.UpdateMessage(ServiceType, ServiceName, fallback, MessageRoutingDirection.Input);
+            }
+        }
+
         private void EnsureApplicationExitHooked()
         {
             if (_isApplicationExitHooked || Application.Current is null)
@@ -1211,15 +1276,15 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                 var result = await _tcpRuntime.ExecuteAsync(new TcpRuntimeExecutionRequest(_runtimeContext, Script, TestMessage)).ConfigureAwait(false);
                 Script = result.Script;
                 TestMessage = result.TestMessage;
-                OutputMessage = result.OutputMessage;
+                ScriptOutputMessage = result.OutputMessage;
                 _options.OutputMessage = result.OutputMessage;
                 _routing.UpdateMessage(ServiceType, ServiceName, result.TestMessage, MessageRoutingDirection.Input);
                 _routing.UpdateMessage(ServiceType, ServiceName, result.OutputMessage, MessageRoutingDirection.Output);
-                Logger?.Log($"Script executed successfully: {OutputMessage}", LogLevel.Information);
+                Logger?.Log($"Script executed successfully: {ScriptOutputMessage}", LogLevel.Information);
             }
             catch (Exception ex)
             {
-                OutputMessage = ex.ToString();
+                ScriptOutputMessage = ex.ToString();
                 Logger?.Log($"Script execution failed: {ex}", LogLevel.Error);
             }
         }
@@ -1249,7 +1314,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
 
             void OnOutputGenerated(string output)
             {
-                OutputMessage = _options.OutputMessage = output;
+                ScriptOutputMessage = _options.OutputMessage = output;
                 TestMessage = svm.TestMessage;
                 _options.LastTestMessage = svm.TestMessage;
                 _routing.UpdateMessage(ServiceType, ServiceName, svm.TestMessage, MessageRoutingDirection.Input);

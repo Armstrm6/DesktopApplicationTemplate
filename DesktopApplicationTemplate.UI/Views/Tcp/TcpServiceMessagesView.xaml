@@ -20,7 +20,7 @@
 
                 <StackPanel Grid.Column="0">
                     <TextBlock Text="Incoming Data" FontWeight="Bold" Margin="0,0,0,5"/>
-                    <TextBox Text="{Binding LastInputMessage, Mode=OneWay}"
+                    <TextBox Text="{Binding InputMessage, Mode=OneWay}"
                              IsReadOnly="True"
                              TextWrapping="Wrap"
                              AcceptsReturn="True"
@@ -32,7 +32,7 @@
 
                 <StackPanel Grid.Column="1">
                     <TextBlock Text="Outgoing Results" FontWeight="Bold" Margin="0,0,0,5"/>
-                    <TextBox Text="{Binding LastOutputMessage, Mode=OneWay}"
+                    <TextBox Text="{Binding OutputMessage, Mode=OneWay}"
                              IsReadOnly="True"
                              TextWrapping="Wrap"
                              AcceptsReturn="True"
@@ -54,7 +54,7 @@
                     <TextBlock Text="Test Message:" VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <TextBox Text="{Binding TestMessage, UpdateSourceTrigger=PropertyChanged}" Width="300"/>
                     <Button Content="Edit Script" Margin="10,0,0,0" Command="{Binding OpenScriptEditorCommand}" Height="24"/>
-                    <TextBox Text="{Binding OutputMessage, Mode=OneWay}" Width="300"
+                    <TextBox Text="{Binding ScriptOutputMessage, Mode=OneWay}" Width="300"
                              IsReadOnly="True" Margin="10,0,0,0" Background="#EDEDED"/>
                 </StackPanel>
                 <Button Grid.Row="1" Content="Advanced Settings" Command="{Binding OpenAdvancedSettingsCommand}" Width="150" HorizontalAlignment="Right" Margin="0,0,0,5"/>

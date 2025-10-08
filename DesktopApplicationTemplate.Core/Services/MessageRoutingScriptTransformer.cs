@@ -14,8 +14,9 @@ public static class MessageRoutingScriptTransformer
     private static readonly CSharpParseOptions ScriptParseOptions = new(kind: SourceCodeKind.Script);
 
     /// <summary>
-    /// Rewrites <c>{ServiceName}.LastInputMessage</c> and <c>{ServiceName}.LastOutputMessage</c> member access
-    /// expressions into string literals backed by the routing service.
+    /// Rewrites <c>{ServiceName}.InputMessage</c> and <c>{ServiceName}.OutputMessage</c> member access expressions
+    /// into string literals backed by the routing service. Legacy tokens using <c>LastInputMessage</c> and
+    /// <c>LastOutputMessage</c> remain supported for backward compatibility.
     /// </summary>
     /// <param name="script">The user provided script.</param>
     /// <param name="routingService">Routing service supplying the latest message snapshots.</param>
@@ -85,13 +86,15 @@ public static class MessageRoutingScriptTransformer
 
         private static bool TryGetDirection(string identifier, out MessageRoutingDirection direction)
         {
-            if (string.Equals(identifier, "LastInputMessage", StringComparison.Ordinal))
+            if (string.Equals(identifier, "InputMessage", StringComparison.Ordinal) ||
+                string.Equals(identifier, "LastInputMessage", StringComparison.Ordinal))
             {
                 direction = MessageRoutingDirection.Input;
                 return true;
             }
 
-            if (string.Equals(identifier, "LastOutputMessage", StringComparison.Ordinal))
+            if (string.Equals(identifier, "OutputMessage", StringComparison.Ordinal) ||
+                string.Equals(identifier, "LastOutputMessage", StringComparison.Ordinal))
             {
                 direction = MessageRoutingDirection.Output;
                 return true;
