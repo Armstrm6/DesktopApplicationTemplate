@@ -17,7 +17,6 @@ public sealed record ServiceUiRegistration<TService, TPage>(
     Func<IServiceProvider, object, TService> CreateService,
     Func<IServiceProvider, TPage> CreateServicePage,
     Func<IServiceProvider, string, TPage> CreateNavigationPage,
-    ServiceType? LegacyServiceType = null,
     Action<TService, ServicePresentationMetadata>? ApplyPresentation = null);
 
 public interface IServiceUiRegistry<TService, TPage> : IDisposable
@@ -48,7 +47,7 @@ public sealed class ServiceUiRegistry<TService, TPage> : IServiceUiRegistry<TSer
 {
     private readonly IServiceCatalog _serviceCatalog;
     private readonly IReadOnlyDictionary<string, ServiceUiRegistration<TService, TPage>> _registrations;
-    private readonly Dictionary<ServiceType, string> _legacyMap = new();
+    private readonly Dictionary<ServiceType, string> _serviceTypeMap = new();
     private IReadOnlyCollection<ServiceType> _supportedServices = Array.Empty<ServiceType>();
     private readonly IReadOnlyCollection<string> _supportedDescriptorIds;
     private bool _disposed;
@@ -75,15 +74,11 @@ public sealed class ServiceUiRegistry<TService, TPage> : IServiceUiRegistry<TSer
             }
 
             map[registration.DescriptorId] = registration;
-            if (registration.LegacyServiceType is { } legacy)
-            {
-                _legacyMap[legacy] = registration.DescriptorId;
-            }
         }
 
         _registrations = new ReadOnlyDictionary<string, ServiceUiRegistration<TService, TPage>>(map);
         _supportedDescriptorIds = _registrations.Keys.ToArray();
-        UpdateLegacyMappings();
+        RefreshSupportedServices();
         _serviceCatalog.DescriptorsChanged += OnDescriptorsChanged;
     }
 
@@ -93,7 +88,7 @@ public sealed class ServiceUiRegistry<TService, TPage> : IServiceUiRegistry<TSer
 
     public bool TryCreateService(ServiceType serviceType, IServiceProvider provider, object options, out TService? service)
     {
-        if (!_legacyMap.TryGetValue(serviceType, out var descriptorId))
+        if (!_serviceTypeMap.TryGetValue(serviceType, out var descriptorId))
         {
             service = default;
             return false;
@@ -122,7 +117,7 @@ public sealed class ServiceUiRegistry<TService, TPage> : IServiceUiRegistry<TSer
 
     public bool TryCreateServicePage(ServiceType serviceType, IServiceProvider provider, out TPage? page)
     {
-        if (!_legacyMap.TryGetValue(serviceType, out var descriptorId))
+        if (!_serviceTypeMap.TryGetValue(serviceType, out var descriptorId))
         {
             page = default;
             return false;
@@ -150,7 +145,7 @@ public sealed class ServiceUiRegistry<TService, TPage> : IServiceUiRegistry<TSer
 
     public bool TryCreateNavigationPage(ServiceType serviceType, IServiceProvider provider, string defaultName, out TPage? page)
     {
-        if (!_legacyMap.TryGetValue(serviceType, out var descriptorId))
+        if (!_serviceTypeMap.TryGetValue(serviceType, out var descriptorId))
         {
             page = default;
             return false;
@@ -188,35 +183,22 @@ public sealed class ServiceUiRegistry<TService, TPage> : IServiceUiRegistry<TSer
         GC.SuppressFinalize(this);
     }
 
-    private void OnDescriptorsChanged(object? sender, EventArgs e) => UpdateLegacyMappings();
+    private void OnDescriptorsChanged(object? sender, EventArgs e) => RefreshSupportedServices();
 
-    private void UpdateLegacyMappings()
+    private void RefreshSupportedServices()
     {
-        var updated = new Dictionary<ServiceType, string>();
+        _serviceTypeMap.Clear();
 
-        foreach (var registration in _registrations.Values)
+        foreach (var descriptor in _serviceCatalog.Descriptors)
         {
-            if (registration.LegacyServiceType is { } legacy)
+            if (descriptor.ServiceType is { } serviceType &&
+                _registrations.ContainsKey(descriptor.Id))
             {
-                updated[legacy] = registration.DescriptorId;
+                _serviceTypeMap[serviceType] = descriptor.Id;
             }
         }
 
-        foreach (var kvp in _serviceCatalog.LegacyMap)
-        {
-            if (_registrations.ContainsKey(kvp.Value))
-            {
-                updated[kvp.Key] = kvp.Value;
-            }
-        }
-
-        _legacyMap.Clear();
-        foreach (var kvp in updated)
-        {
-            _legacyMap[kvp.Key] = kvp.Value;
-        }
-
-        _supportedServices = _legacyMap.Keys.ToArray();
+        _supportedServices = _serviceTypeMap.Keys.ToArray();
     }
 
     private void ApplyPresentationIfAvailable(TService? service, ServiceUiRegistration<TService, TPage> registration)

@@ -29,9 +29,9 @@ public interface IServiceDescriptor
     string? Description { get; }
 
     /// <summary>
-    /// Gets the legacy <see cref="ServiceType"/> associated with the service, if any.
+    /// Gets the canonical <see cref="ServiceType"/> associated with the service, if any.
     /// </summary>
-    ServiceType? LegacyType { get; }
+    ServiceType? ServiceType { get; }
 
     /// <summary>
     /// Gets the serializer used to persist service options, if available.

@@ -7,7 +7,7 @@ namespace DesktopApplicationTemplate.Core.Converters;
 
 /// <summary>
 /// Converts <see cref="ServiceType"/> values to short codes for persistence
-/// and parses legacy names.
+/// and parses canonical identifiers.
 /// </summary>
 public sealed class ServiceTypeJsonConverter : JsonConverter<ServiceType>
 {

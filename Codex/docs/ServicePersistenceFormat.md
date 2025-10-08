@@ -11,13 +11,14 @@ The file stores an array of service records:
   {
     "DisplayName": "HTTP - My API",
     "DescriptorId": "custom.http",
-    "LegacyType": "http",
-    "LegacyTypeName": "Http",
+    "ServiceType": "HT",
     "IsActive": false,
     "Created": "2025-10-07T18:42:11.3246188Z",
     "Order": 0,
     "AssociatedServices": ["TCP - Listener"],
-    "SerializedPayload": "{\"BaseUrl\":\"https://example.com\"}",
+    "HttpOptions": {
+      "BaseUrl": "https://example.com"
+    },
     "TotalExecutionTimeMs": 0.0,
     "ExecutionCount": 0
   }
@@ -29,25 +30,25 @@ All properties use PascalCase to match the serialized `PersistedServiceRecord` m
 ### Core fields
 
 1. **`DescriptorId`** – Stable identifier exposed by the descriptor. Service persistence always prefers descriptor identifiers to locate factories and serializers.
-2. **`SerializedPayload`** – Descriptor-provided serialization of the options payload. `ServicePersistence` invokes `IServiceOptionsSerializer.Serialize` on save and `Deserialize` on load, so plug-ins can choose any JSON shape that fits their options model.
-3. **`LegacyType` / `LegacyTypeName`** – Compatibility values retained for migrations. `LegacyType` uses the short code written by `ServiceTypeJsonConverter` (for example, `"tcp"`); `LegacyTypeName` records the enum name (for example, `"Tcp"`). During load, the catalog uses `IServiceCatalog.LegacyMap` to translate legacy codes into the correct descriptor.
+2. **`ServiceType`** – Canonical short code emitted by `ServiceTypeJsonConverter` (for example, `"HT"` for `Http`). The value is kept in sync with the descriptor metadata and persisted alongside the identifier for quick filtering.
+3. **Service-specific options** – Built-in services write their strongly-typed options (`HttpOptions`, `TcpOptions`, and so on). Plug-ins should continue to expose serializers that hydrate their view models from the stored JSON payload.
 4. **State metadata** – `DisplayName`, `IsActive`, `Created`, `Order`, `AssociatedServices`, `TotalExecutionTimeMs`, and `ExecutionCount` mirror the values surfaced by `ServiceListModel`.
 
 ### Descriptor payload contract
 
 - Implement `IServiceOptionsSerializer` (or `IServiceOptionsSerializer<TOptions>`) on your descriptor to control persistence.
-- `SerializedPayload` **must** be valid JSON representing your options type. The serializer can emit compact or indented JSON; persistence stores the raw string.
-- When loading, `ServicePersistence` passes the stored string to `Deserialize`. If the serializer is unavailable, the loader falls back to `JsonSerializer.Deserialize<object>`.
+- Built-in descriptors persist their strongly typed option models directly. Plug-ins can emit whatever JSON shape their serializer understands, storing the document under descriptor-specific properties.
+- When loading, `ServicePersistence` passes the stored JSON to `Deserialize`. If the serializer is unavailable, the loader falls back to `JsonSerializer.Deserialize<object>`.
 
 ### Backward compatibility
 
-- Older files may contain a `Payload` object instead of `SerializedPayload`. The loader still supports this legacy shape by deserializing the JSON object via the descriptor serializer.
-- Very old releases used service-type names (`"ServiceType": "FTP"`). Those entries are mapped through `ServiceTypeExtensions.TryParse` and `IServiceCatalog.LegacyMap` so descriptors continue to resolve.
+- Older files may contain a `Payload` object instead of service-specific option properties. The loader still supports this legacy shape by deserializing the JSON object via the descriptor serializer.
+- Persisted records must now provide a `DescriptorId` and canonical `ServiceType` code. The loader no longer translates legacy enum names automatically, so update historical exports before migrating to the trimmed format.
 - Descriptors should preserve their identifiers and keep their serializers backward compatible. If options evolve, support migrating legacy JSON inside your `IServiceOptionsSerializer` implementation.
 
 ## Validation checklist for plug-in authors
 
-1. Provide a unique `DescriptorId` and `LegacyType` (if migrating an enum-based service).
+1. Provide a unique `DescriptorId` and canonical `ServiceType` code (if migrating an enum-based service).
 2. Supply an `IServiceOptionsSerializer` that round-trips your options and tolerates historical payload shapes.
 3. Confirm your descriptor registers factories so `MainViewModel` can request the appropriate UI/service factory during load.
 4. Add automated tests that serialize services using your descriptor and verify that deserialization restores the expected options and metadata.

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DesktopApplicationTemplate.Models;
 
@@ -22,29 +23,8 @@ public static class ServiceTypeExtensions
         { ServiceType.Heartbeat, "HB" }
     };
 
-    private static readonly Dictionary<string, ServiceType> LegacyMap = new(StringComparer.OrdinalIgnoreCase)
-    {
-        { "MQ", ServiceType.Mqtt },
-        { "MQTT", ServiceType.Mqtt },
-        { "HT", ServiceType.Http },
-        { "HTTP", ServiceType.Http },
-        { "FT", ServiceType.Ftp },
-        { "FTP", ServiceType.Ftp },
-        { "FTP Server", ServiceType.Ftp },
-        { "HD", ServiceType.Hid },
-        { "HID", ServiceType.Hid },
-        { "CV", ServiceType.Csv },
-        { "CSV", ServiceType.Csv },
-        { "CSV Creator", ServiceType.Csv },
-        { "FO", ServiceType.FileObserver },
-        { "File Observer", ServiceType.FileObserver },
-        { "SC", ServiceType.Scp },
-        { "SCP", ServiceType.Scp },
-        { "TC", ServiceType.Tcp },
-        { "TCP", ServiceType.Tcp },
-        { "HB", ServiceType.Heartbeat },
-        { "Heartbeat", ServiceType.Heartbeat }
-    };
+    private static readonly Dictionary<string, ServiceType> CodeLookup =
+        CodeMap.ToDictionary(kvp => kvp.Value, kvp => kvp.Key, StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// Converts a <see cref="ServiceType"/> to its short code representation.
@@ -57,32 +37,31 @@ public static class ServiceTypeExtensions
     /// </summary>
     public static bool TryParse(string? value, out ServiceType result)
     {
-        if (value != null && LegacyMap.TryGetValue(value, out result))
+        result = default;
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return false;
+        }
+
+        var trimmed = value.Trim();
+
+        if (CodeLookup.TryGetValue(trimmed, out result))
         {
             return true;
         }
 
-        return Enum.TryParse(value, true, out result);
-    }
+        var normalized = trimmed
+            .Replace(" ", string.Empty, StringComparison.Ordinal)
+            .Replace("-", string.Empty, StringComparison.Ordinal);
 
-    /// <summary>
-    /// Converts a <see cref="ServiceType"/> to one of its legacy display strings,
-    /// defaulting to the short code if no legacy name exists.
-    /// </summary>
-    public static string ToLegacyString(this ServiceType type) =>
-        type switch
+        if (!string.Equals(normalized, trimmed, StringComparison.Ordinal) &&
+            Enum.TryParse(normalized, true, out result))
         {
-            ServiceType.Ftp => "FTP",
-            ServiceType.Mqtt => "MQTT",
-            ServiceType.Http => "HTTP",
-            ServiceType.Tcp => "TCP",
-            ServiceType.Hid => "HID",
-            ServiceType.Csv => "CSV Creator",
-            ServiceType.FileObserver => "File Observer",
-            ServiceType.Scp => "SCP",
-            ServiceType.Heartbeat => "Heartbeat",
-            _ => type.ToCode()
-        };
+            return true;
+        }
+
+        return Enum.TryParse(trimmed, true, out result);
+    }
 
     /// <summary>
     /// Provides the default prefix used when generating service names.
