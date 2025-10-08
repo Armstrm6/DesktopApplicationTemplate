@@ -14,9 +14,10 @@
               IsReadOnly="True"
               HeadersVisibility="Column"
               RowHeaderWidth="0"
-              MaxHeight="250"
               ColumnWidth="*"
               MinColumnWidth="100"
+              VerticalAlignment="Stretch"
+              HorizontalAlignment="Stretch"
               ScrollViewer.HorizontalScrollBarVisibility="Auto"
               ScrollViewer.VerticalScrollBarVisibility="Auto"
               ScrollViewer.CanContentScroll="True">

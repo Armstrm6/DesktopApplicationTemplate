@@ -57,6 +57,7 @@ namespace DesktopApplicationTemplate.UI.Views
             _viewModel.ConfigurationChangeBlocked += OnConfigurationChangeBlocked;
             _viewModel.AddServiceRequested += OnAddServiceRequested;
             _viewModel.ExportPluginsRequested += OnExportPluginsRequested;
+            _viewModel.HomeRequested += OnHomeRequested;
             _viewModel.Services.CollectionChanged += Services_CollectionChanged;
             MouseDown += MainView_MouseDown;
             CommandBindings.Add(new CommandBinding(SystemCommands.CloseWindowCommand, CloseCommand_Executed));
@@ -88,6 +89,7 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             _viewModel.ConfigurationChangeBlocked -= OnConfigurationChangeBlocked;
             _viewModel.ExportPluginsRequested -= OnExportPluginsRequested;
+            _viewModel.HomeRequested -= OnHomeRequested;
         }
 
         public void ShowHome()
@@ -149,7 +151,13 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             _logger?.LogInformation("{Source} clicked", source);
             _viewModel.SelectedService = null;
+            ServiceList.SelectedItem = null;
             ShowHome();
+        }
+
+        private void OnHomeRequested(object? sender, string reason)
+        {
+            Dispatcher.Invoke(() => NavigateHome(reason));
         }
 
 
@@ -475,15 +483,25 @@ namespace DesktopApplicationTemplate.UI.Views
         private void ServiceList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             _logger?.LogDebug("Service selection changed");
-            if (_viewModel.SelectedService != null)
+            if (_viewModel.SelectedService is ServiceListModel selected)
             {
-                var page = GetOrCreateServicePage(_viewModel.SelectedService);
+                var page = GetOrCreateServicePage(selected);
                 if (page != null)
                 {
                     ShowPage(page);
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        using (_viewModel.PreserveActiveServiceSelection())
+                        {
+                            ServiceList.SelectedItem = null;
+                        }
+                    }), DispatcherPriority.Background);
                 }
+
+                return;
             }
-            else
+
+            if (_viewModel.ActiveService is null)
             {
                 ShowHome();
             }
@@ -507,7 +525,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 return;
             }
 
-            if (!ReferenceEquals(svc, _viewModel.SelectedService))
+            if (!ReferenceEquals(svc, _viewModel.SelectedService) && !ReferenceEquals(svc, _viewModel.ActiveService))
             {
                 return;
             }

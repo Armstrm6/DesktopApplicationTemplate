@@ -165,6 +165,8 @@ namespace DesktopApplicationTemplate.Persistence
                     ScpOptions = scp,
                     TotalExecutionTimeMs = s.TotalExecutionTimeMs,
                     ExecutionCount = s.ExecutionCount,
+                    IncomingMessageCount = s.IncomingMessageCount,
+                    OutgoingMessageCount = s.OutgoingMessageCount,
                     Logs = s.Logs
                         .Take(ServiceListModel.MaxLogEntries)
                         .Select(l => new LogEntry
@@ -270,6 +272,8 @@ namespace DesktopApplicationTemplate.Persistence
                             ScpOptions = info.ScpOptions,
                             TotalExecutionTimeMs = info.TotalExecutionTimeMs,
                             ExecutionCount = info.ExecutionCount,
+                            IncomingMessageCount = info.IncomingMessageCount,
+                            OutgoingMessageCount = info.OutgoingMessageCount,
                             Logs = info.Logs ?? new List<LogEntry>()
                         });
                     }
@@ -414,6 +418,8 @@ namespace DesktopApplicationTemplate.Persistence
         public ScpServiceOptions? ScpOptions { get; set; }
         public double TotalExecutionTimeMs { get; set; }
         public int ExecutionCount { get; set; }
+        public int IncomingMessageCount { get; set; }
+        public int OutgoingMessageCount { get; set; }
         public List<LogEntry> Logs { get; set; } = new();
         public List<ServiceMessageHistoryEntry> MessageHistory { get; set; } = new();
     }
@@ -436,6 +442,8 @@ namespace DesktopApplicationTemplate.Persistence
         public ScpServiceOptions? ScpOptions { get; set; }
         public double TotalExecutionTimeMs { get; set; }
         public int ExecutionCount { get; set; }
+        public int IncomingMessageCount { get; set; }
+        public int OutgoingMessageCount { get; set; }
         public List<LogEntry> Logs { get; set; } = new();
     }
 }

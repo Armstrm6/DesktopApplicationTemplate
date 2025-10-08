@@ -5,8 +5,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:shared="clr-namespace:DesktopApplicationTemplate.UI.Views.Shared"
       mc:Ignorable="d">
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-        <Grid Margin="10">
+    <Grid Margin="10">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
@@ -47,7 +46,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,5">
@@ -59,8 +58,7 @@
                 </StackPanel>
                 <Button Grid.Row="1" Content="Advanced Settings" Command="{Binding OpenAdvancedSettingsCommand}" Width="150" HorizontalAlignment="Right" Margin="0,0,0,5"/>
                 <shared:ServiceMessageTableView Grid.Row="2" DataContext="{Binding MessageTable}" Margin="0,0,0,10" />
-                <shared:ServiceLogView Grid.Row="3" x:Name="LogView" Height="250" />
+                <shared:ServiceLogView Grid.Row="3" x:Name="LogView" />
             </Grid>
-        </Grid>
-    </ScrollViewer>
+    </Grid>
 </Page>
