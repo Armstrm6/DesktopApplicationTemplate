@@ -113,6 +113,7 @@ namespace DesktopApplicationTemplate.UI
         public static IHost AppHost { get; private set; } = null!;
         private static JoinableTaskContext UiThreadTaskContext { get; set; } = null!;
         public static JoinableTaskFactory UiThreadTaskFactory { get; private set; } = null!;
+        public static IFileDialogService FileDialogService => AppHost.Services.GetRequiredService<IFileDialogService>();
 
         public App()
         {
