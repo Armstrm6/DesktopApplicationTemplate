@@ -1309,6 +1309,27 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
 
         private void OnLogAdded(LogEntry entry) => Logs.Insert(0, entry);
 
+        /// <summary>
+        /// Copies the current editor state to the owning service without executing the runtime.
+        /// </summary>
+        public Task PersistOptionsAsync()
+        {
+            if (_service is null)
+            {
+                return Task.CompletedTask;
+            }
+
+            var options = _service.TcpOptions ?? new TcpServiceOptions();
+            options.Script = Script ?? string.Empty;
+            options.LastTestMessage = TestMessage ?? string.Empty;
+            options.InputMessage = TestMessage ?? string.Empty;
+            options.OutputMessage = ScriptOutputMessage ?? string.Empty;
+            _service.TcpOptions = options;
+            _options = options;
+
+            return Task.CompletedTask;
+        }
+
         /// <summary>Saves the current test message to options and routing.</summary>
         public async Task SaveAsync()
         {
