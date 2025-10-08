@@ -11,6 +11,7 @@ using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI.ViewModels.Csv;
 using FluentAssertions;
 using Xunit;
 
@@ -32,7 +33,7 @@ namespace DesktopApplicationTemplate.UI.Tests
         }
 
         [Fact]
-        public async Task StartServicesAsync_DoesNotActivateServicesDuringCreation()
+        public async Task StartServicesAsync_DoesNotActivateServicesDuringCreationAsync()
         {
             var viewModel = environment.ViewModel;
             var service = CreateService("CreationGuard");
@@ -50,7 +51,7 @@ namespace DesktopApplicationTemplate.UI.Tests
         }
 
         [Fact]
-        public async Task StopServicesAsync_DoesNotDeactivateServicesDuringCreation()
+        public async Task StopServicesAsync_DoesNotDeactivateServicesDuringCreationAsync()
         {
             var viewModel = environment.ViewModel;
             var service = CreateService("ActiveService");
@@ -68,7 +69,7 @@ namespace DesktopApplicationTemplate.UI.Tests
         }
 
         [Fact]
-        public async Task StartServicesAsync_ActivatesAfterCreationScopeDisposes()
+        public async Task StartServicesAsync_ActivatesAfterCreationScopeDisposesAsync()
         {
             var viewModel = environment.ViewModel;
             var service = CreateService("DeferredStart");

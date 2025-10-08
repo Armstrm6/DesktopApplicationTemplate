@@ -176,6 +176,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             var normalizedNames = (serviceNames ?? Enumerable.Empty<string>())
                 .Select(name => name?.Trim())
                 .Where(name => !string.IsNullOrWhiteSpace(name))
+                .Select(name => name!)
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
