@@ -26,7 +26,7 @@
 - Disabled default `AutoStart` and set environment configuration files to `"AutoStart": false`.
 - Core library targets `net8.0` to avoid Windows targeting pack restore errors.
 - Removed the Windows service host and installer projects in favor of the consolidated `DesktopApplicationTemplate.Services` library.
-- Adjusted solution and project references so cross-platform assemblies depend only on the core while Windows projects also reference `DesktopApplicationTemplate.Windows`.
+- Retired the legacy `DesktopApplicationTemplate.Windows` stub project after migrating its responsibilities into the remaining cross-platform assemblies.
 - Replaced `ServiceCreated`/`ServiceUpdated` with unified `ServiceSaved` events and centralized `ServiceName` validation in `ServiceEditorViewModelBase`.
 - Windows service host sets explicit `ServiceName` and `DisplayName` values with the application name and installer uses the same constant.
 - Replaced verbose `ServiceName` strings with `ServiceType` enum properties for log view models.

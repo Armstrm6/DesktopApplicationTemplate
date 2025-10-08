@@ -274,7 +274,7 @@ Related Commits/PRs:
 
 [2025-09-10 12:30] Topic: WPF logging refactor
 Context: Moved `LogEntry`, `LogLevel`, and `ILoggingService` into a new `DesktopApplicationTemplate.Windows` project and retargeted core to `net8.0`.
-Observations: Core no longer requires WPF; UI and service apps reference the new Windows library.
+Observations: Core no longer requires WPF; UI and service apps reference the new Windows library. Update 2025-10-07: That stub has now been removed and its responsibilities live in the remaining projects.
 Codex Limitations noticed: Linux container lacks the Microsoft.WindowsDesktop runtime, so build and test commands cannot run locally.
 Effective Prompts / Instructions that worked: User request to isolate WPF-specific types from the core library.
 Decisions & Rationale: Introduced a dedicated Windows project while preserving existing namespaces to minimize code changes.
@@ -292,7 +292,7 @@ Related Commits/PRs:
 
 [2025-09-11 09:00] Topic: Project reference alignment
 Context: Added core dependency to `DesktopApplicationTemplate.Windows` and updated changelog to clarify project references.
-Observations: Non-Windows assemblies now depend solely on the cross-platform core; Windows projects reference both core and Windows library.
+Observations: Non-Windows assemblies now depend solely on the cross-platform core; Windows projects referenced both core and Windows library at the time, but the Windows stub was removed on 2025-10-07.
 Codex Limitations noticed: Installed dotnet-sdk-8.0 (8.0.119) but global.json requires 8.0.404; restore/build/test commands fail.
 Effective Prompts / Instructions that worked: Repository guidance on logging limitations and project reference adjustments.
 Decisions & Rationale: Tie Windows library to core to unify shared services.
