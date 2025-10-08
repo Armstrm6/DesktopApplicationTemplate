@@ -46,6 +46,13 @@ public class HidEditServiceHandler : IEditServiceHandler
                 trimmed = mainViewModel.GenerateServiceName(service.Type);
             }
 
+            var previousName = service.DisplayName;
+            if (!string.Equals(previousName, trimmed, StringComparison.Ordinal))
+            {
+                mainViewModel.ClearRoutingCache(service.Type, previousName);
+                mainViewModel.ClearRoutingCache(service.Type, trimmed);
+            }
+
             service.DisplayName = trimmed;
             service.HidOptions = opts;
             if (hidPage != null)

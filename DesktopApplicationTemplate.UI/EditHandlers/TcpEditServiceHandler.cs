@@ -47,8 +47,19 @@ public class TcpEditServiceHandler : IEditServiceHandler
                 trimmed = mainViewModel.GenerateServiceName(service.Type);
             }
 
+            var previousName = service.DisplayName;
+            var previousType = service.Type;
+            var newType = vm.ServiceType;
+            var nameChanged = !string.Equals(previousName, trimmed, StringComparison.Ordinal);
+            var typeChanged = previousType != newType;
+            if (nameChanged || typeChanged)
+            {
+                mainViewModel.ClearRoutingCache(previousType, previousName);
+                mainViewModel.ClearRoutingCache(newType, trimmed);
+            }
+
             service.DisplayName = trimmed;
-            service.Type = vm.ServiceType;
+            service.Type = newType;
             service.TcpOptions = opts;
             var page = mainView.GetOrCreateServicePage(service);
             if (page != null)

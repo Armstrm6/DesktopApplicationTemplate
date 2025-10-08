@@ -47,6 +47,13 @@ public class FtpEditServiceHandler : IEditServiceHandler
                 trimmed = mainViewModel.GenerateServiceName(service.Type);
             }
 
+            var previousName = service.DisplayName;
+            if (!string.Equals(previousName, trimmed, StringComparison.Ordinal))
+            {
+                mainViewModel.ClearRoutingCache(service.Type, previousName);
+                mainViewModel.ClearRoutingCache(service.Type, trimmed);
+            }
+
             service.DisplayName = trimmed;
             service.FtpOptions = opts;
             var opt = _services.GetRequiredService<IOptions<FtpServerOptions>>().Value;
