@@ -11,6 +11,7 @@ using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using CoreLogLevel = DesktopApplicationTemplate.Core.Services.LogLevel;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -79,8 +80,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         /// <summary>
         /// Gets or sets the log level filter.
         /// </summary>
-        private LogLevel _logLevelFilter = LogLevel.Debug;
-        public LogLevel LogLevelFilter
+        private CoreLogLevel _logLevelFilter = CoreLogLevel.Debug;
+        public CoreLogLevel LogLevelFilter
         {
             get => _logLevelFilter;
             set { _logLevelFilter = value; OnPropertyChanged(); OnPropertyChanged(nameof(DisplayLogs)); }
