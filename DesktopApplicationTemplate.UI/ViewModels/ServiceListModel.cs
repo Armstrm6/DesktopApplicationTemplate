@@ -78,8 +78,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private double _totalExecutionTimeMs;
         private int _executionCount;
         private TimeSpan _lastExecutionDuration;
-        private string _lastInputMessage = string.Empty;
-        private string _lastOutputMessage = string.Empty;
+        private string _inputMessage = string.Empty;
+        private string _outputMessage = string.Empty;
         private WpfBrush _lastInputBrush = WpfBrushes.Black;
         private int _incomingMessageCount;
         private int _outgoingMessageCount;
@@ -144,37 +144,37 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         }
 
         /// <summary>
-        /// Gets the last input message received by this service.
+        /// Gets the most recent input message received by this service.
         /// </summary>
-        public string LastInputMessage
+        public string InputMessage
         {
-            get => _lastInputMessage;
+            get => _inputMessage;
             private set
             {
-                if (_lastInputMessage == value)
+                if (_inputMessage == value)
                 {
                     return;
                 }
 
-                _lastInputMessage = value;
+                _inputMessage = value;
                 OnPropertyChanged();
             }
         }
 
         /// <summary>
-        /// Gets the last outgoing message produced by this service.
+        /// Gets the most recent outgoing message produced by this service.
         /// </summary>
-        public string LastOutputMessage
+        public string OutputMessage
         {
-            get => _lastOutputMessage;
+            get => _outputMessage;
             private set
             {
-                if (_lastOutputMessage == value)
+                if (_outputMessage == value)
                 {
                     return;
                 }
 
-                _lastOutputMessage = value;
+                _outputMessage = value;
                 OnPropertyChanged();
             }
         }
@@ -349,7 +349,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             OnPropertyChanged(nameof(Logs));
             if (Logs.FirstOrDefault() is { } latest)
             {
-                LastInputMessage = NormalizePersistedMessage(latest.Message);
+            InputMessage = NormalizePersistedMessage(latest.Message);
                 LastInputBrush = ParseBrush(latest.Color, WpfBrushes.Black);
             }
         }
@@ -361,8 +361,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public void LoadMessageHistory(IEnumerable<ServiceMessageHistoryEntry> entries)
         {
             _messageHistory.Clear();
-            LastInputMessage = string.Empty;
-            LastOutputMessage = string.Empty;
+            InputMessage = string.Empty;
+            OutputMessage = string.Empty;
             LastInputBrush = WpfBrushes.Black;
             if (entries is null)
             {
@@ -387,7 +387,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             {
                 if (!string.IsNullOrEmpty(historyEntry.IncomingMessage))
                 {
-                    UpdateLastInputMessage(historyEntry.IncomingMessage);
+                    UpdateInputMessage(historyEntry.IncomingMessage);
                     break;
                 }
             }
@@ -396,7 +396,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             {
                 if (!string.IsNullOrEmpty(historyEntry.OutgoingMessage))
                 {
-                    UpdateLastOutputMessage(historyEntry.OutgoingMessage);
+                    UpdateOutputMessage(historyEntry.OutgoingMessage);
                     break;
                 }
             }
@@ -408,10 +408,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         /// <param name="message">The raw message text.</param>
         /// <param name="brush">The brush used to display the message in the UI.</param>
         /// <returns>The normalized message stored on the model.</returns>
-        public string UpdateLastInputMessage(string? message, WpfBrush? brush = null)
+        public string UpdateInputMessage(string? message, WpfBrush? brush = null)
         {
             var normalizedMessage = NormalizeLatestMessage(message);
-            LastInputMessage = normalizedMessage;
+            InputMessage = normalizedMessage;
             LastInputBrush = brush ?? WpfBrushes.Black;
             return normalizedMessage;
         }
@@ -421,10 +421,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         /// </summary>
         /// <param name="message">The raw message text.</param>
         /// <returns>The normalized message stored on the model.</returns>
-        public string UpdateLastOutputMessage(string? message)
+        public string UpdateOutputMessage(string? message)
         {
             var normalizedMessage = NormalizeLatestMessage(message);
-            LastOutputMessage = normalizedMessage;
+            OutputMessage = normalizedMessage;
             return normalizedMessage;
         }
 
@@ -449,12 +449,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
             if (!string.IsNullOrEmpty(incomingMessage))
             {
-                UpdateLastInputMessage(incomingMessage);
+                UpdateInputMessage(incomingMessage);
             }
 
             if (!string.IsNullOrEmpty(outgoingMessage))
             {
-                UpdateLastOutputMessage(outgoingMessage);
+                UpdateOutputMessage(outgoingMessage);
             }
         }
 

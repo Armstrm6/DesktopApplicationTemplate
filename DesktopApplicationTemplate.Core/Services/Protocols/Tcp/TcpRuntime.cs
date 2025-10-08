@@ -61,14 +61,18 @@ public sealed class TcpRuntime : ITcpRuntime
 
         var options = context.Options ?? throw new ArgumentNullException(nameof(context.Options));
         var script = string.IsNullOrWhiteSpace(options.Script) ? context.DefaultScript : options.Script;
-        var testMessage = ResolveInitialMessage(context);
+        var testMessage = ResolveInitialMessage(context, out var isInputMessage);
 
         _logger?.LogInformation(this, "Initializing TCP script runtime");
 
         var output = await ExecuteScriptInternalAsync(script, testMessage, cancellationToken).ConfigureAwait(false);
 
         options.Script = script;
-        options.LastTestMessage = testMessage;
+        options.InputMessage = testMessage;
+        if (!isInputMessage)
+        {
+            options.LastTestMessage = testMessage;
+        }
         options.OutputMessage = output;
 
         _routingService.UpdateMessage(context.ServiceType, context.ServiceName, testMessage, MessageRoutingDirection.Input);
@@ -90,32 +94,45 @@ public sealed class TcpRuntime : ITcpRuntime
         _name = $"{context.ServiceType}.{context.ServiceName}";
 
         _logger?.LogInformation(this, "Executing TCP script");
-        var output = await ExecuteScriptInternalAsync(request.Script, request.TestMessage, cancellationToken).ConfigureAwait(false);
+        var script = request.Script ?? string.Empty;
+        var message = request.TestMessage ?? string.Empty;
+        var output = await ExecuteScriptInternalAsync(script, message, cancellationToken).ConfigureAwait(false);
 
-        context.Options.Script = request.Script;
-        context.Options.LastTestMessage = request.TestMessage;
+        context.Options.Script = script;
+        context.Options.InputMessage = message;
+        if (!request.IsLiveInput)
+        {
+            context.Options.LastTestMessage = message;
+        }
         context.Options.OutputMessage = output;
 
-        _routingService.UpdateMessage(context.ServiceType, context.ServiceName, request.TestMessage, MessageRoutingDirection.Input);
+        _routingService.UpdateMessage(context.ServiceType, context.ServiceName, message, MessageRoutingDirection.Input);
         _routingService.UpdateMessage(context.ServiceType, context.ServiceName, output, MessageRoutingDirection.Output);
 
-        return new TcpRuntimeState(request.Script, request.TestMessage, output);
+        return new TcpRuntimeState(script, message, output);
     }
 
-    private string ResolveInitialMessage(TcpRuntimeContext context)
+    private string ResolveInitialMessage(TcpRuntimeContext context, out bool isInputMessage)
     {
         var options = context.Options;
         var serviceName = context.ServiceName;
 
-        if (string.IsNullOrWhiteSpace(options.LastTestMessage) &&
-            _routingService.TryGetMessage(context.ServiceType, serviceName, MessageRoutingDirection.Input, out var routed))
+        if (_routingService.TryGetMessage(context.ServiceType, serviceName, MessageRoutingDirection.Input, out var routed))
         {
-            return routed ?? string.Empty;
+            isInputMessage = true;
+            var resolved = routed ?? string.Empty;
+            options.InputMessage = resolved;
+            return resolved;
         }
 
-        return string.IsNullOrWhiteSpace(options.LastTestMessage)
-            ? $"{serviceName}-PEAK-123456789"
-            : options.LastTestMessage;
+        if (!string.IsNullOrWhiteSpace(options.LastTestMessage))
+        {
+            isInputMessage = false;
+            return options.LastTestMessage;
+        }
+
+        isInputMessage = false;
+        return $"{serviceName}-PEAK-123456789";
     }
 
     private async Task<string> ExecuteScriptInternalAsync(string script, string message, CancellationToken cancellationToken)

@@ -18,7 +18,7 @@ public class MessageRoutingService : IMessageRoutingService
     private readonly Dictionary<string, Dictionary<string, HashSet<MessageRoutingDirection>>> _referencedByService = new(StringComparer.OrdinalIgnoreCase);
     private readonly object _referencesLock = new();
     private readonly ILoggingService? _logger;
-    private static readonly Regex NewTokenRegex = new(@"\{([A-Za-z0-9_]+)\.(LastInputMessage|LastOutputMessage)\}", RegexOptions.Compiled);
+    private static readonly Regex NewTokenRegex = new(@"\{([A-Za-z0-9_]+)\.(InputMessage|OutputMessage|LastInputMessage|LastOutputMessage)\}", RegexOptions.Compiled);
     private static readonly Regex LegacyTokenRegex = new(@"\{([A-Za-z0-9_]+)\.([A-Za-z0-9_]+)\.Message\}", RegexOptions.Compiled);
 
     /// <summary>
@@ -109,9 +109,7 @@ public class MessageRoutingService : IMessageRoutingService
         var result = NewTokenRegex.Replace(template, m =>
         {
             var name = m.Groups[1].Value;
-            var direction = string.Equals(m.Groups[2].Value, nameof(RoutingMessageEntry.LastInputMessage), StringComparison.Ordinal)
-                ? MessageRoutingDirection.Input
-                : MessageRoutingDirection.Output;
+            var direction = ParseDirection(m.Groups[2].Value);
 
             if (references is not null)
             {
@@ -130,7 +128,7 @@ public class MessageRoutingService : IMessageRoutingService
             if (Enum.TryParse<ServiceType>(typeStr, out var type) &&
                 _messages.TryGetValue((type, name), out var entry))
             {
-                return entry.LastInputMessage;
+                return entry.InputMessage;
             }
 
             return string.Empty;
@@ -305,11 +303,22 @@ public class MessageRoutingService : IMessageRoutingService
             : serviceName.Trim();
     }
 
+    private static MessageRoutingDirection ParseDirection(string propertyName)
+    {
+        if (string.Equals(propertyName, nameof(RoutingMessageEntry.InputMessage), StringComparison.Ordinal) ||
+            string.Equals(propertyName, "LastInputMessage", StringComparison.Ordinal))
+        {
+            return MessageRoutingDirection.Input;
+        }
+
+        return MessageRoutingDirection.Output;
+    }
+
     private static string ToPropertyName(MessageRoutingDirection direction)
     {
         return direction == MessageRoutingDirection.Input
-            ? nameof(RoutingMessageEntry.LastInputMessage)
-            : nameof(RoutingMessageEntry.LastOutputMessage);
+            ? nameof(RoutingMessageEntry.InputMessage)
+            : nameof(RoutingMessageEntry.OutputMessage);
     }
 
     private static RoutingMessageEntry CreateEntry(MessageRoutingDirection direction, string payload)
@@ -335,27 +344,27 @@ public class MessageRoutingService : IMessageRoutingService
 
     private sealed class RoutingMessageEntry
     {
-        private string _lastInputMessage = string.Empty;
-        private string _lastOutputMessage = string.Empty;
+        private string _inputMessage = string.Empty;
+        private string _outputMessage = string.Empty;
 
-        public string LastInputMessage => _lastInputMessage;
-        public string LastOutputMessage => _lastOutputMessage;
+        public string InputMessage => _inputMessage;
+        public string OutputMessage => _outputMessage;
 
         public void Update(MessageRoutingDirection direction, string payload)
         {
             if (direction == MessageRoutingDirection.Input)
             {
-                _lastInputMessage = payload ?? string.Empty;
+                _inputMessage = payload ?? string.Empty;
             }
             else
             {
-                _lastOutputMessage = payload ?? string.Empty;
+                _outputMessage = payload ?? string.Empty;
             }
         }
 
         public string Get(MessageRoutingDirection direction)
         {
-            return direction == MessageRoutingDirection.Input ? _lastInputMessage : _lastOutputMessage;
+            return direction == MessageRoutingDirection.Input ? _inputMessage : _outputMessage;
         }
     }
 }
