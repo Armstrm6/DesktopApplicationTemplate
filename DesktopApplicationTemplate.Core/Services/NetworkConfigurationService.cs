@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -25,10 +26,7 @@ namespace DesktopApplicationTemplate.Core.Services
 
         public Task<NetworkConfiguration> GetConfigurationAsync(CancellationToken cancellationToken = default)
         {
-            var iface = NetworkInterface.GetAllNetworkInterfaces()
-                .FirstOrDefault(n => n.Name.Equals("eth0", StringComparison.OrdinalIgnoreCase))
-                ?? NetworkInterface.GetAllNetworkInterfaces()
-                    .FirstOrDefault(n => n.OperationalStatus == OperationalStatus.Up);
+            var iface = ResolveInterface(null);
 
             if (iface == null)
             {
@@ -43,40 +41,106 @@ namespace DesktopApplicationTemplate.Core.Services
                                         .Select(a => a.ToString()).ToList();
             var config = new NetworkConfiguration
             {
+                InterfaceName = iface.Name,
                 IpAddress = unicast?.Address.ToString() ?? string.Empty,
                 SubnetMask = unicast?.IPv4Mask?.ToString() ?? string.Empty,
                 Gateway = gateway,
                 DnsPrimary = dns.ElementAtOrDefault(0) ?? string.Empty,
                 DnsSecondary = dns.ElementAtOrDefault(1) ?? string.Empty
             };
-            _logger?.LogInformation("Retrieved network configuration for eth0: {IP}", config.IpAddress);
+            _logger?.LogInformation("Retrieved network configuration for {InterfaceName}: {IP}", iface.Name, config.IpAddress);
             return Task.FromResult(config);
         }
 
         public async Task ApplyConfigurationAsync(NetworkConfiguration configuration, CancellationToken cancellationToken = default)
         {
-            _logger?.LogInformation("Applying network configuration: {IP}/{Subnet} GW {Gateway}", configuration.IpAddress, configuration.SubnetMask, configuration.Gateway);
+            var interfaceName = GetInterfaceName(configuration.InterfaceName);
+            if (string.IsNullOrWhiteSpace(interfaceName))
+            {
+                _logger?.LogWarning("No network interface available to apply configuration");
+                return;
+            }
+
+            _logger?.LogInformation("Applying network configuration for {InterfaceName}: {IP}/{Subnet} GW {Gateway}", interfaceName, configuration.IpAddress, configuration.SubnetMask, configuration.Gateway);
             if (OperatingSystem.IsWindows())
             {
-                await _processRunner.RunAsync("netsh", $"interface ip set address \"eth0\" static {configuration.IpAddress} {configuration.SubnetMask} {configuration.Gateway}", cancellationToken).ConfigureAwait(false);
-                await _processRunner.RunAsync("netsh", $"interface ip set dns \"eth0\" static {configuration.DnsPrimary}", cancellationToken).ConfigureAwait(false);
+                var escapedName = EscapeInterfaceName(interfaceName);
+                await _processRunner.RunAsync("netsh", $"interface ipv4 set address name=\"{escapedName}\" static {configuration.IpAddress} {configuration.SubnetMask} {configuration.Gateway}", cancellationToken).ConfigureAwait(false);
+                if (!string.IsNullOrWhiteSpace(configuration.DnsPrimary))
+                {
+                    await _processRunner.RunAsync("netsh", $"interface ipv4 set dnsservers name=\"{escapedName}\" source=static address={configuration.DnsPrimary}", cancellationToken).ConfigureAwait(false);
+                }
                 if (!string.IsNullOrWhiteSpace(configuration.DnsSecondary))
                 {
-                    await _processRunner.RunAsync("netsh", $"interface ip add dns \"eth0\" {configuration.DnsSecondary} index=2", cancellationToken).ConfigureAwait(false);
+                    await _processRunner.RunAsync("netsh", $"interface ipv4 add dnsservers name=\"{escapedName}\" address={configuration.DnsSecondary} index=2", cancellationToken).ConfigureAwait(false);
                 }
             }
             else
             {
                 var prefix = NetworkUtilities.SubnetToCidr(configuration.SubnetMask);
-                await _processRunner.RunAsync("ip", $"addr add {configuration.IpAddress}/{prefix} dev eth0", cancellationToken).ConfigureAwait(false);
-                await _processRunner.RunAsync("ip", $"route add default via {configuration.Gateway} dev eth0", cancellationToken).ConfigureAwait(false);
+                await _processRunner.RunAsync("ip", $"addr add {configuration.IpAddress}/{prefix} dev {interfaceName}", cancellationToken).ConfigureAwait(false);
+                await _processRunner.RunAsync("ip", $"route add default via {configuration.Gateway} dev {interfaceName}", cancellationToken).ConfigureAwait(false);
                 await _processRunner.RunAsync("sh", $"-c \"echo nameserver {configuration.DnsPrimary} > /etc/resolv.conf\"", cancellationToken).ConfigureAwait(false);
                 if (!string.IsNullOrWhiteSpace(configuration.DnsSecondary))
                 {
                     await _processRunner.RunAsync("sh", $"-c \"echo nameserver {configuration.DnsSecondary} >> /etc/resolv.conf\"", cancellationToken).ConfigureAwait(false);
                 }
             }
-            ConfigurationChanged?.Invoke(this, configuration);
+            var appliedConfiguration = new NetworkConfiguration
+            {
+                InterfaceName = interfaceName,
+                IpAddress = configuration.IpAddress,
+                SubnetMask = configuration.SubnetMask,
+                Gateway = configuration.Gateway,
+                DnsPrimary = configuration.DnsPrimary,
+                DnsSecondary = configuration.DnsSecondary
+            };
+            ConfigurationChanged?.Invoke(this, appliedConfiguration);
+        }
+
+        public Task<IReadOnlyList<string>> GetAvailableInterfacesAsync(CancellationToken cancellationToken = default)
+        {
+            var names = NetworkInterface.GetAllNetworkInterfaces()
+                .Where(n => n.NetworkInterfaceType != NetworkInterfaceType.Loopback)
+                .Select(n => n.Name)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(n => n, StringComparer.OrdinalIgnoreCase)
+                .ToList()
+                .AsReadOnly();
+            return Task.FromResult((IReadOnlyList<string>)names);
+        }
+
+        private static string EscapeInterfaceName(string interfaceName) => interfaceName.Replace("\"", "\\\"");
+
+        private static NetworkInterface? ResolveInterface(string? requestedInterface)
+        {
+            var interfaces = NetworkInterface.GetAllNetworkInterfaces();
+            if (!string.IsNullOrWhiteSpace(requestedInterface))
+            {
+                var namedInterface = interfaces.FirstOrDefault(n => n.Name.Equals(requestedInterface, StringComparison.OrdinalIgnoreCase));
+                if (namedInterface != null)
+                {
+                    return namedInterface;
+                }
+            }
+
+            var preferred = interfaces.FirstOrDefault(n => n.Name.Equals("eth0", StringComparison.OrdinalIgnoreCase));
+            if (preferred != null)
+            {
+                return preferred;
+            }
+
+            return interfaces.FirstOrDefault(n => n.OperationalStatus == OperationalStatus.Up && n.Supports(NetworkInterfaceComponent.IPv4));
+        }
+
+        private static string? GetInterfaceName(string? requestedInterface)
+        {
+            if (!string.IsNullOrWhiteSpace(requestedInterface))
+            {
+                return ResolveInterface(requestedInterface)?.Name ?? requestedInterface;
+            }
+
+            return ResolveInterface(null)?.Name;
         }
 
     }

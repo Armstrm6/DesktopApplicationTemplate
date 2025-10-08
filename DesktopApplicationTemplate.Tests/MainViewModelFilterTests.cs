@@ -4,8 +4,10 @@ using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.Models;
 using Moq;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Xunit;
 
 namespace DesktopApplicationTemplate.Tests
@@ -18,6 +20,8 @@ namespace DesktopApplicationTemplate.Tests
             var configPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json");
             var csv = new CsvService(new CsvViewerViewModel(new StubFileDialogService(), configPath));
             var network = new Mock<INetworkConfigurationService>();
+            network.Setup(n => n.GetAvailableInterfacesAsync(It.IsAny<CancellationToken>()))
+                .ReturnsAsync((IReadOnlyList<string>)Array.Empty<string>());
             var networkVm = new NetworkConfigurationViewModel(network.Object);
             var vm = new MainViewModel(csv, networkVm, network.Object)
             {

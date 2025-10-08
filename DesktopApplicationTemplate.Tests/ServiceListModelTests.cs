@@ -124,6 +124,8 @@ namespace DesktopApplicationTemplate.Tests
                 => Task.FromResult(new NetworkConfiguration());
             public Task ApplyConfigurationAsync(NetworkConfiguration configuration, CancellationToken ct = default)
                 => Task.CompletedTask;
+            public Task<IReadOnlyList<string>> GetAvailableInterfacesAsync(CancellationToken ct = default)
+                => Task.FromResult((IReadOnlyList<string>)Array.Empty<string>());
         }
     }
 }

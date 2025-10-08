@@ -1,3 +1,6 @@
+using System;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Models;
@@ -20,6 +23,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             RefreshCommand = new AsyncRelayCommand(LoadAsync);
         }
 
+        public ObservableCollection<string> Interfaces { get; } = new();
+
         private string _ipAddress = string.Empty;
         public string IpAddress { get => _ipAddress; set { _ipAddress = value; OnPropertyChanged(); } }
 
@@ -35,6 +40,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private string _dnsSecondary = string.Empty;
         public string DnsSecondary { get => _dnsSecondary; set { _dnsSecondary = value; OnPropertyChanged(); } }
 
+        private string _selectedInterface = string.Empty;
+        public string SelectedInterface { get => _selectedInterface; set { _selectedInterface = value; OnPropertyChanged(); } }
+
         public NetworkConfiguration CurrentConfiguration { get; private set; } = new();
 
         public ICommand ApplyCommand { get; }
@@ -42,12 +50,27 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public async Task LoadAsync()
         {
+            var available = await _service.GetAvailableInterfacesAsync().ConfigureAwait(false);
+            Interfaces.Clear();
+            foreach (var adapter in available)
+            {
+                Interfaces.Add(adapter);
+            }
+
             CurrentConfiguration = await _service.GetConfigurationAsync().ConfigureAwait(false);
             IpAddress = CurrentConfiguration.IpAddress;
             SubnetMask = CurrentConfiguration.SubnetMask;
             Gateway = CurrentConfiguration.Gateway;
             DnsPrimary = CurrentConfiguration.DnsPrimary;
             DnsSecondary = CurrentConfiguration.DnsSecondary;
+            if (!string.IsNullOrWhiteSpace(CurrentConfiguration.InterfaceName) &&
+                !Interfaces.Any(adapter => string.Equals(adapter, CurrentConfiguration.InterfaceName, StringComparison.OrdinalIgnoreCase)))
+            {
+                Interfaces.Add(CurrentConfiguration.InterfaceName);
+            }
+            SelectedInterface = !string.IsNullOrWhiteSpace(CurrentConfiguration.InterfaceName)
+                ? CurrentConfiguration.InterfaceName
+                : Interfaces.FirstOrDefault() ?? string.Empty;
             _logger?.Log("Loaded network configuration", LogLevel.Debug);
         }
 
@@ -55,6 +78,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         {
             var config = new NetworkConfiguration
             {
+                InterfaceName = SelectedInterface,
                 IpAddress = IpAddress,
                 SubnetMask = SubnetMask,
                 Gateway = Gateway,
