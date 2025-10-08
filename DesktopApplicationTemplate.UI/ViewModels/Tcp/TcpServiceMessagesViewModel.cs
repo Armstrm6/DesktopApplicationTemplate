@@ -400,8 +400,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                 hasListener = false;
             }
 
-            var hasClientReceiver = TryGetClientReceiveEndpoint(out var clientReceiveEndpoint);
-            var hasClientSender = TryGetClientSendEndpoint(out var clientSendEndpoint);
+            var hasClientReceiver = TryGetClientReceiveEndpoint(out var clientReceiveEndpoint, logWhenMissing: !hasListener);
+            var hasClientSender = TryGetClientSendEndpoint(out var clientSendEndpoint, logWhenMissing: !hasListener && !hasClientReceiver);
 
             if (!hasListener && !hasClientReceiver && !hasClientSender)
             {
@@ -509,7 +509,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                    _options.Mode is TcpServiceMode.Listening or TcpServiceMode.ReceiveAndSend;
         }
 
-        private bool TryGetClientReceiveEndpoint(out TcpEndpoint? endpoint)
+        private bool TryGetClientReceiveEndpoint(out TcpEndpoint? endpoint, bool logWhenMissing)
         {
             endpoint = null;
             if (_options.ConnectionRole != TcpConnectionRole.Client)
@@ -526,8 +526,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             var port = ResolveDestinationPort();
             if (string.IsNullOrWhiteSpace(host) || port is null)
             {
-                Logger?.Log("TCP client destination is not configured; skipping client startup.", LogLevel.Warning);
-                LogConnectionIssues("TCP client configuration", null, LogLevel.Warning);
+                if (logWhenMissing)
+                {
+                    Logger?.Log("TCP client destination is not configured; skipping client startup.", LogLevel.Warning);
+                    LogConnectionIssues("TCP client configuration", null, LogLevel.Warning);
+                }
                 return false;
             }
 
@@ -535,7 +538,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             return true;
         }
 
-        private bool TryGetClientSendEndpoint(out TcpEndpoint? endpoint)
+        private bool TryGetClientSendEndpoint(out TcpEndpoint? endpoint, bool logWhenMissing)
         {
             endpoint = null;
             if (_options.ConnectionRole != TcpConnectionRole.Client)
@@ -552,8 +555,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             var port = ResolveDestinationPort();
             if (string.IsNullOrWhiteSpace(host) || port is null)
             {
-                Logger?.Log("TCP client destination is not configured; skipping client startup.", LogLevel.Warning);
-                LogConnectionIssues("TCP client configuration", null, LogLevel.Warning);
+                if (logWhenMissing)
+                {
+                    Logger?.Log("TCP client destination is not configured; skipping client startup.", LogLevel.Warning);
+                    LogConnectionIssues("TCP client configuration", null, LogLevel.Warning);
+                }
                 return false;
             }
 
@@ -1239,14 +1245,32 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
 
         private string ResolveDestinationHost()
         {
-            return string.IsNullOrWhiteSpace(_options.DestinationHost)
-                ? string.Empty
-                : _options.DestinationHost;
+            if (!string.IsNullOrWhiteSpace(_options.DestinationHost))
+            {
+                return _options.DestinationHost;
+            }
+
+            if (!string.IsNullOrWhiteSpace(_options.Host))
+            {
+                return _options.Host;
+            }
+
+            return string.Empty;
         }
 
         private int? ResolveDestinationPort()
         {
-            return _options.DestinationPort > 0 ? _options.DestinationPort : null;
+            if (_options.DestinationPort > 0)
+            {
+                return _options.DestinationPort;
+            }
+
+            if (_options.Port > 0)
+            {
+                return _options.Port;
+            }
+
+            return null;
         }
 
         private void ClearLogs()
