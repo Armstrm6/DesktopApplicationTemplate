@@ -356,6 +356,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 _csvService.RemoveColumnsForService(target.DisplayName);
             }
 
+            ServiceListModel.RemoveServiceAssociations(target);
             _activatingServices.Remove(target);
             target.LogAdded -= OnServiceLogAdded;
             target.ActiveChanged -= OnServiceActiveChanged;
