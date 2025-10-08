@@ -20,6 +20,7 @@ using System.Windows.Controls.Primitives;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using System.Windows.Threading;
+using Microsoft.VisualStudio.Threading;
 
 namespace DesktopApplicationTemplate.UI.Views
 {
@@ -37,6 +38,8 @@ namespace DesktopApplicationTemplate.UI.Views
         private readonly Dictionary<ServiceListModel, Action<LogEntry>> _serviceLogHandlers = new();
         private readonly Dictionary<ServiceListModel, EventHandler> _tcpAdvancedHandlers = new();
         private readonly BrushConverter _brushConverter = new();
+        private JoinableTask? _shutdownTask;
+        private bool _shutdownCompleted;
 
         public MainView(
             MainViewModel viewModel,
@@ -57,6 +60,7 @@ namespace DesktopApplicationTemplate.UI.Views
             _viewModel.ConfigurationChangeBlocked += OnConfigurationChangeBlocked;
             _viewModel.AddServiceRequested += OnAddServiceRequested;
             _viewModel.ExportPluginsRequested += OnExportPluginsRequested;
+            _viewModel.HomeRequested += OnHomeRequested;
             _viewModel.Services.CollectionChanged += Services_CollectionChanged;
             MouseDown += MainView_MouseDown;
             CommandBindings.Add(new CommandBinding(SystemCommands.CloseWindowCommand, CloseCommand_Executed));
@@ -71,16 +75,38 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             _logger?.LogInformation("MainView closing");
 
+            if (_shutdownCompleted)
+            {
+                return;
+            }
+
+            if (_shutdownTask is { IsCompleted: false })
+            {
+                e.Cancel = true;
+                return;
+            }
+
+            e.Cancel = true;
+            _shutdownTask = App.UiThreadTaskFactory.RunAsync(PerformShutdownAsync);
+            ObserveAndLog(_shutdownTask);
+        }
+
+        private async Task PerformShutdownAsync()
+        {
             try
             {
-                App.UiThreadTaskFactory.Run(async () =>
-                {
-                    await _viewModel.ShutdownServicesAsync().ConfigureAwait(true);
-                });
+                await _viewModel.ShutdownServicesAsync().ConfigureAwait(true);
             }
             catch (Exception ex)
             {
                 _logger?.LogError(ex, "Failed to stop services during shutdown");
+            }
+            finally
+            {
+                await App.UiThreadTaskFactory.SwitchToMainThreadAsync();
+                _shutdownCompleted = true;
+                _shutdownTask = null;
+                Close();
             }
         }
 
@@ -88,6 +114,7 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             _viewModel.ConfigurationChangeBlocked -= OnConfigurationChangeBlocked;
             _viewModel.ExportPluginsRequested -= OnExportPluginsRequested;
+            _viewModel.HomeRequested -= OnHomeRequested;
         }
 
         public void ShowHome()
@@ -149,7 +176,25 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             _logger?.LogInformation("{Source} clicked", source);
             _viewModel.SelectedService = null;
+            ServiceList.SelectedItem = null;
             ShowHome();
+        }
+
+        private void OnHomeRequested(object? sender, string reason)
+        {
+            if (Dispatcher.CheckAccess())
+            {
+                NavigateHome(reason);
+                return;
+            }
+
+            var joinableTask = App.UiThreadTaskFactory.RunAsync(async () =>
+            {
+                await App.UiThreadTaskFactory.SwitchToMainThreadAsync();
+                NavigateHome(reason);
+            });
+
+            ObserveAndLog(joinableTask);
         }
 
 
@@ -475,15 +520,22 @@ namespace DesktopApplicationTemplate.UI.Views
         private void ServiceList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             _logger?.LogDebug("Service selection changed");
-            if (_viewModel.SelectedService != null)
+            if (_viewModel.SelectedService is ServiceListModel selected)
             {
-                var page = GetOrCreateServicePage(_viewModel.SelectedService);
+                var page = GetOrCreateServicePage(selected);
                 if (page != null)
                 {
                     ShowPage(page);
+                    using (_viewModel.PreserveActiveServiceSelection())
+                    {
+                        ServiceList.SelectedItem = null;
+                    }
                 }
+
+                return;
             }
-            else
+
+            if (_viewModel.ActiveService is null)
             {
                 ShowHome();
             }
@@ -507,7 +559,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 return;
             }
 
-            if (!ReferenceEquals(svc, _viewModel.SelectedService))
+            if (!ReferenceEquals(svc, _viewModel.SelectedService) && !ReferenceEquals(svc, _viewModel.ActiveService))
             {
                 return;
             }
@@ -788,6 +840,28 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             _logger?.LogDebug("Refresh log button clicked");
             _viewModel.RefreshLogs();
+        }
+
+        private void ObserveAndLog(JoinableTask? joinableTask)
+        {
+            if (joinableTask is null)
+            {
+                return;
+            }
+
+            async Task ObserveBackgroundTaskAsync()
+            {
+                try
+                {
+                    await joinableTask.JoinAsync();
+                }
+                catch (Exception ex)
+                {
+                    _logger?.LogError(ex, "Unhandled exception in background operation");
+                }
+            }
+
+            _ = ObserveBackgroundTaskAsync();
         }
 
     }

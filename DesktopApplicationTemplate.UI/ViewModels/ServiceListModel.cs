@@ -144,6 +144,26 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         }
 
         /// <summary>
+        /// Applies persisted message counters to the current instance.
+        /// </summary>
+        /// <param name="incoming">The number of incoming messages previously recorded.</param>
+        /// <param name="outgoing">The number of outgoing messages previously recorded.</param>
+        public void InitializeMessageCounts(int incoming, int outgoing)
+        {
+            IncomingMessageCount = Math.Max(0, incoming);
+            OutgoingMessageCount = Math.Max(0, outgoing);
+        }
+
+        /// <summary>
+        /// Resets the incoming and outgoing message counters.
+        /// </summary>
+        public void ResetMessageCounts()
+        {
+            IncomingMessageCount = 0;
+            OutgoingMessageCount = 0;
+        }
+
+        /// <summary>
         /// Gets the most recent input message received by this service.
         /// </summary>
         public string InputMessage

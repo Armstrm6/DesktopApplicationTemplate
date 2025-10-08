@@ -26,6 +26,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public FilterViewModel Filters { get; } = new();
         public ObservableCollection<LogEntry> AllLogs { get; } = new();
         private ServiceListModel? _selectedService;
+        private ServiceListModel? _activeService;
+        private bool _suppressActiveServiceReset;
         public ServiceListModel? SelectedService
         {
             get => _selectedService;
@@ -33,7 +35,25 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             {
                 _selectedService = value;
                 OnPropertyChanged();
-                LogViewModel.SetLogs(_selectedService?.Logs ?? AllLogs);
+                if (!_suppressActiveServiceReset || value != null)
+                {
+                    ActiveService = value;
+                }
+            }
+        }
+        public ServiceListModel? ActiveService
+        {
+            get => _activeService;
+            private set
+            {
+                if (_activeService == value)
+                {
+                    return;
+                }
+
+                _activeService = value;
+                OnPropertyChanged();
+                LogViewModel.SetLogs(_activeService?.Logs ?? AllLogs);
                 (RemoveServiceCommand as AsyncRelayCommand)?.RaiseCanExecuteChanged();
                 (EditServiceCommand as RelayCommand<ServiceListModel?>)?.RaiseCanExecuteChanged();
             }
@@ -43,6 +63,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public ICommand EditServiceCommand { get; }
         public ICommand ToggleServiceProcessCommand { get; }
         public ICommand ExportPluginsCommand { get; }
+        public ICommand ResetMessageCountsCommand { get; }
         public int ServicesCreated => Services.Count;
         public int CurrentActiveServices => Services.Count(s => s.IsActive);
 
@@ -127,16 +148,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 ServicePersistence.FilePath = servicesFilePath!;
                 _logger?.Log($"Using service persistence path {ServicePersistence.FilePath}", LogLevel.Debug);
             }
-            AddServiceCommand = new RelayCommand(AddService);
-            RemoveServiceCommand = new AsyncRelayCommand(RemoveSelectedServiceAsync, () => SelectedService != null);
-            EditServiceCommand = new RelayCommand<ServiceListModel?>(EditService, svc => svc != null);
-            ToggleServiceProcessCommand = new AsyncRelayCommand(ToggleServiceProcessAsync, () => !IsServiceProcessBusy);
-            ExportPluginsCommand = new RelayCommand(OnExportPlugins);
-            FilteredServices = CollectionViewSource.GetDefaultView(Services);
-            Filters.PropertyChanged += (_, __) => ApplyFilters();
-            LoadServices();
-            ServicesRunning = Services.Any(svc => svc.IsActive);
-            ApplyFilters();
+
             LogViewModel = new ServiceLogViewModel(ServiceType.Mqtt, AllLogs);
             LogViewModel.PropertyChanged += (s, e) =>
             {
@@ -145,6 +157,18 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 if (e.PropertyName == nameof(ServiceLogViewModel.LogLevelFilter))
                     OnPropertyChanged(nameof(LogLevelFilter));
             };
+
+            AddServiceCommand = new RelayCommand(AddService);
+            RemoveServiceCommand = new AsyncRelayCommand(RemoveSelectedServiceAsync, () => ActiveService != null);
+            EditServiceCommand = new RelayCommand<ServiceListModel?>(EditService, svc => svc != null || ActiveService != null);
+            ToggleServiceProcessCommand = new AsyncRelayCommand(ToggleServiceProcessAsync, () => !IsServiceProcessBusy);
+            ExportPluginsCommand = new RelayCommand(OnExportPlugins);
+            ResetMessageCountsCommand = new AsyncRelayCommand(ResetMessageCountsAsync);
+            FilteredServices = CollectionViewSource.GetDefaultView(Services);
+            Filters.PropertyChanged += (_, __) => ApplyFilters();
+            LoadServices();
+            ServicesRunning = Services.Any(svc => svc.IsActive);
+            ApplyFilters();
             if (_logger is LoggingService concreteLogger)
             {
                 concreteLogger.Reload();
@@ -170,6 +194,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public event Action? AddServiceRequested;
         public event Action? ConfigurationChangeBlocked;
         public event EventHandler? ExportPluginsRequested;
+        public event EventHandler<string>? HomeRequested;
 
         public bool RequestConfigurationChange()
         {
@@ -184,7 +209,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         private void EditService(ServiceListModel? service)
         {
-            var target = service ?? SelectedService;
+            var target = service ?? ActiveService;
             if (target == null)
                 return;
 
@@ -215,6 +240,17 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             _logger?.Log("AddService completed", LogLevel.Debug);
         }
 
+        private async Task ResetMessageCountsAsync()
+        {
+            foreach (var service in Services)
+            {
+                service.ResetMessageCounts();
+            }
+
+            await SaveServicesAsync().ConfigureAwait(false);
+            _logger?.Log("Message counters reset", LogLevel.Information);
+        }
+
         internal string GenerateServiceName(ServiceType serviceType)
         {
             var typeName = serviceType.ToBaseName();
@@ -233,7 +269,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         private async Task RemoveSelectedServiceAsync()
         {
-            if (SelectedService == null)
+            if (ActiveService == null)
             {
                 return;
             }
@@ -243,15 +279,15 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 return;
             }
 
-            _logger?.Log($"Removing service {SelectedService.DisplayName}", LogLevel.Debug);
-            var index = Services.IndexOf(SelectedService);
-            SelectedService.AddLog("Service removed", WpfBrushes.Red);
-            if (SelectedService.Type != ServiceType.Csv)
-                _csvService.RemoveColumnsForService(SelectedService.DisplayName);
-            _activatingServices.Remove(SelectedService);
-            SelectedService.LogAdded -= OnServiceLogAdded;
-            SelectedService.ActiveChanged -= OnServiceActiveChanged;
-            Services.Remove(SelectedService);
+            _logger?.Log($"Removing service {ActiveService.DisplayName}", LogLevel.Debug);
+            var index = Services.IndexOf(ActiveService);
+            ActiveService.AddLog("Service removed", WpfBrushes.Red);
+            if (ActiveService.Type != ServiceType.Csv)
+                _csvService.RemoveColumnsForService(ActiveService.DisplayName);
+            _activatingServices.Remove(ActiveService);
+            ActiveService.LogAdded -= OnServiceLogAdded;
+            ActiveService.ActiveChanged -= OnServiceActiveChanged;
+            Services.Remove(ActiveService);
             if (Services.Count > 0)
             {
                 if (index >= Services.Count) index = Services.Count - 1;
@@ -307,6 +343,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     TotalExecutionTimeMs = info.TotalExecutionTimeMs,
                     ExecutionCount = info.ExecutionCount
                 };
+                svc.InitializeMessageCounts(info.IncomingMessageCount, info.OutgoingMessageCount);
                 foreach (var a in info.AssociatedServices ?? new List<string>())
                     svc.AssociatedServices.Add(a);
                 svc.LoadPersistedLogs(info.Logs ?? new List<LogEntry>());
@@ -452,6 +489,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
                     ServicesRunning = true;
                     _logger?.Log("Starting services", LogLevel.Information);
+                    HomeRequested?.Invoke(this, "Start Services");
                     await StartServicesAsync();
                 }
             }
@@ -597,6 +635,34 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         }
 
         // OnPropertyChanged inherited from ViewModelBase
+
+        internal IDisposable PreserveActiveServiceSelection()
+        {
+            return new ActiveServiceSelectionScope(this);
+        }
+
+        private sealed class ActiveServiceSelectionScope : IDisposable
+        {
+            private readonly MainViewModel _owner;
+            private bool _disposed;
+
+            public ActiveServiceSelectionScope(MainViewModel owner)
+            {
+                _owner = owner;
+                _owner._suppressActiveServiceReset = true;
+            }
+
+            public void Dispose()
+            {
+                if (_disposed)
+                {
+                    return;
+                }
+
+                _owner._suppressActiveServiceReset = false;
+                _disposed = true;
+            }
+        }
     }
 
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -704,8 +705,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                     using var stream = client.GetStream();
                     var message = _options.OutputMessage ?? string.Empty;
                     var shouldSendMessage = operation == TcpClientOperation.Send && !string.IsNullOrWhiteSpace(message);
+                    Stopwatch? sendStopwatch = null;
                     if (shouldSendMessage)
                     {
+                        sendStopwatch = Stopwatch.StartNew();
                         var payload = Encoding.UTF8.GetBytes(message);
                         await stream.WriteAsync(payload.AsMemory(0, payload.Length), cancellationToken).ConfigureAwait(false);
                         Logger?.Log($"Sent message to {operationLabel} {endpointDisplay}: {message}", LogLevel.Information);
@@ -735,6 +738,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                         var response = Encoding.UTF8.GetString(buffer, 0, bytesRead);
                         receivedAny = true;
 
+                        if (sendStopwatch is not null)
+                        {
+                            sendStopwatch.Stop();
+                            sendStopwatch = null;
+                        }
+
                         if (operation == TcpClientOperation.Receive)
                         {
                             Logger?.Log($"Received message from {endpointDisplay}: {response}", LogLevel.Information);
@@ -744,13 +753,21 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                             Logger?.Log($"Received response from {endpointDisplay}: {response}", LogLevel.Information);
                         }
 
+                        var responseStopwatch = Stopwatch.StartNew();
                         var processedOutput = await ExecuteIncomingMessageAsync(response, cancellationToken).ConfigureAwait(false);
                         await AppendMessageAsync(response, processedOutput, endpointDisplay, sentToEndpoint: false).ConfigureAwait(false);
+                        responseStopwatch.Stop();
+                        _service?.RecordExecutionTime(responseStopwatch.Elapsed);
                     }
 
                     if (!receivedAny && shouldSendMessage)
                     {
+                        sendStopwatch?.Stop();
                         await AppendMessageAsync(message, string.Empty, endpointDisplay, sentToEndpoint: true).ConfigureAwait(false);
+                        if (sendStopwatch is not null)
+                        {
+                            _service?.RecordExecutionTime(sendStopwatch.Elapsed);
+                        }
                         Logger?.Log($"No response received from {endpointDisplay}", LogLevel.Warning);
                     }
                 }
@@ -827,9 +844,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                         var formattedIncoming = MessageDisplayFormatter.FormatControlCharacters(incoming);
                         Logger?.Log($"Incoming message from {endpoint}: {formattedIncoming}", LogLevel.Information);
 
+                        var cycleStopwatch = Stopwatch.StartNew();
                         var outgoing = await ExecuteIncomingMessageAsync(incoming, cancellationToken).ConfigureAwait(false);
                         var hasResponse = !string.IsNullOrWhiteSpace(outgoing);
                         await AppendMessageAsync(incoming, outgoing, endpoint, hasResponse).ConfigureAwait(false);
+                        cycleStopwatch.Stop();
+                        _service?.RecordExecutionTime(cycleStopwatch.Elapsed);
 
                         if (hasResponse)
                         {
