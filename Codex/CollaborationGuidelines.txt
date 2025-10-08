@@ -33,7 +33,8 @@ Documentation Style
 
 Draw.io Integration
 -------------------
-- Store architecture diagrams as `.drawio` files in the `design` directory.
+- Store architecture diagrams as `.drawio` files under the `Service Templates/` directory (for example, `Service Templates/Architecture`).
+- Group protocol-specific mockups inside `Service Templates/<Protocol>` folders so related assets stay together.
 - Export diagrams to `.png` for quick review while keeping the editable `.drawio` source under version control.
 - Describe diagram updates in commit messages or pull requests so reviewers understand their purpose.
 
