@@ -4,7 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:views="clr-namespace:DesktopApplicationTemplate.UI.Views"
-        xmlns:viewModels="clr-namespace:DesktopApplicationTemplate.UI.ViewModels"
         xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
         xmlns:sys="clr-namespace:System.Windows;assembly=PresentationFramework"
         xmlns:behaviors="clr-namespace:DesktopApplicationTemplate.UI.Behaviors"
@@ -25,55 +24,6 @@
                 <ResourceDictionary Source="../Themes/BubblyWindow.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <helpers:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
-            <Style x:Key="ServiceStatusIndicatorStyle" TargetType="Ellipse">
-                <Setter Property="Width" Value="12" />
-                <Setter Property="Height" Value="12" />
-                <Setter Property="Margin" Value="0,0,8,0" />
-                <Setter Property="VerticalAlignment" Value="Center" />
-                <Setter Property="Stroke" Value="#FF4A4A4A" />
-                <Setter Property="StrokeThickness" Value="1" />
-                <Setter Property="Fill">
-                    <Setter.Value>
-                        <SolidColorBrush Color="#FFD32F2F" />
-                    </Setter.Value>
-                </Setter>
-                <Style.Triggers>
-                    <DataTrigger Binding="{Binding RuntimeState}" Value="{x:Static viewModels:ServiceRuntimeState.Active}">
-                        <Setter Property="Fill">
-                            <Setter.Value>
-                                <SolidColorBrush Color="#FF2E7D32" />
-                            </Setter.Value>
-                        </Setter>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding RuntimeState}" Value="{x:Static viewModels:ServiceRuntimeState.Activating}">
-                        <Setter Property="Fill">
-                            <Setter.Value>
-                                <SolidColorBrush Color="#FFF9A825" />
-                            </Setter.Value>
-                        </Setter>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding RuntimeState}" Value="{x:Static viewModels:ServiceRuntimeState.Error}">
-                        <Setter Property="Fill">
-                            <Setter.Value>
-                                <SolidColorBrush Color="#FFD32F2F" />
-                            </Setter.Value>
-                        </Setter>
-                        <DataTrigger.EnterActions>
-                            <BeginStoryboard x:Name="ErrorFlashStoryboard">
-                                <Storyboard RepeatBehavior="Forever" FillBehavior="Stop">
-                                    <ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)" Duration="0:0:0.8">
-                                        <DiscreteColorKeyFrame KeyTime="0:0:0" Value="#FFD32F2F" />
-                                        <DiscreteColorKeyFrame KeyTime="0:0:0.4" Value="#FF808080" />
-                                    </ColorAnimationUsingKeyFrames>
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </DataTrigger.EnterActions>
-                        <DataTrigger.ExitActions>
-                            <StopStoryboard BeginStoryboardName="ErrorFlashStoryboard" />
-                        </DataTrigger.ExitActions>
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
         </ResourceDictionary>
     </Window.Resources>
 
@@ -180,44 +130,7 @@
                         </ListBox.ItemContainerStyle>
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Border CornerRadius="8" BorderBrush="{Binding BorderColor}" Background="{Binding BackgroundColor}" BorderThickness="2" Padding="5" Margin="2"
-                                        PreviewMouseLeftButtonDown="ServiceItem_PreviewMouseLeftButtonDown" PreviewMouseMove="ServiceItem_PreviewMouseMove"
-                                        AllowDrop="True" Drop="ServiceItem_Drop">
-                                        <Border CornerRadius="8" BorderBrush="Gray" BorderThickness="1" Padding="5" Margin="2"
-                                                Tag="{Binding DataContext.EditServiceCommand, RelativeSource={RelativeSource AncestorType=ListBox}}">
-                                        <Border.ContextMenu>
-                                            <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
-                                                <MenuItem Header="Edit Service"
-                                                          Command="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                                          CommandParameter="{Binding}" />
-                                                <MenuItem Header="Rename Service" Click="RenameServiceMenu_Click" />
-                                                <MenuItem Header="Delete Service" Click="DeleteServiceMenu_Click" />
-                                                <MenuItem Header="Change Color" Click="ChangeColorMenu_Click" />
-                                            </ContextMenu>
-                                        </Border.ContextMenu>
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Ellipse Style="{StaticResource ServiceStatusIndicatorStyle}"
-                                                     ToolTip="{Binding RuntimeState}"/>
-                                            <StackPanel Grid.Column="1">
-                                                <TextBlock FontWeight="Bold" Text="{Binding DisplayName}" />
-                                                <TextBlock Text="{Binding ExecutionTimeText}" />
-                                                <TextBlock Text="{Binding InputMessage}" TextTrimming="CharacterEllipsis" Foreground="{Binding LastInputBrush}" />
-                                                <TextBlock>
-                                                    <Run Text="{Binding IncomingMessageCount, Mode=OneWay}"/>
-                                                    <Run Text=" - incoming"/>
-                                                </TextBlock>
-                                                <TextBlock>
-                                                    <Run Text="{Binding OutgoingMessageCount, Mode=OneWay}"/>
-                                                    <Run Text=" - outgoing"/>
-                                                </TextBlock>
-                                            </StackPanel>
-                                        </Grid>
-                                    </Border>
-                                </Border>
+                                <shared:ListServiceBox />
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
