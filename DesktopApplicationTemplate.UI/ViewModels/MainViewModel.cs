@@ -17,6 +17,7 @@ using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels.Tcp;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Helpers;
+using DesktopApplicationTemplate.Core.Services.Protocols.Mqtt;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -349,6 +350,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     FileObserverOptions = info.FileObserverOptions,
                     HidOptions = info.HidOptions,
                     ScpOptions = info.ScpOptions,
+                    MqttOptions = info.MqttOptions ?? new MqttServiceOptions(),
                     TotalExecutionTimeMs = info.TotalExecutionTimeMs,
                     ExecutionCount = info.ExecutionCount
                 };

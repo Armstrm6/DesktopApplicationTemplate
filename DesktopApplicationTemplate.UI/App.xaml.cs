@@ -270,9 +270,7 @@ namespace DesktopApplicationTemplate.UI
             services.AddTransient<HttpAdvancedConfigView>();
             services.AddTransient<HttpAdvancedConfigViewModel>();
             services.AddTransient<MqttEditConnectionView>();
-            services.AddTransient<MqttEditConnectionViewModel>();
             services.AddTransient<MqttTagSubscriptionsView>();
-            services.AddTransient<MqttTagSubscriptionsViewModel>();
             services.AddTransient<HidCreateServiceView>();
             services.AddTransient<HidCreateServiceViewModel>();
             services.AddTransient<ServiceCreateViewModelBase<HidServiceOptions>, HidCreateServiceViewModel>();
@@ -334,7 +332,6 @@ namespace DesktopApplicationTemplate.UI
                 {
                     var ctx = (ServiceFactoryOptions<MqttServiceOptions>)optionsObj;
                     var mainView = provider.GetRequiredService<MainView>();
-                    var mainViewModel = provider.GetRequiredService<MainViewModel>();
                     var newService = new ServiceListModel
                     {
                         DisplayName = ctx.Name,
@@ -342,57 +339,8 @@ namespace DesktopApplicationTemplate.UI
                         IsActive = false
                     };
 
+                    newService.MqttOptions = ctx.Options ?? new MqttServiceOptions();
                     mainView.GetOrCreateServicePage(newService);
-
-                    var options = ctx.Options;
-                    var resolved = provider.GetRequiredService<IOptions<MqttServiceOptions>>().Value;
-                    resolved.Host = options.Host;
-                    resolved.Port = options.Port;
-                    resolved.ClientId = options.ClientId;
-                    resolved.Username = options.Username;
-                    resolved.Password = options.Password;
-                    resolved.ConnectionType = options.ConnectionType;
-                    resolved.WillTopic = options.WillTopic;
-                    resolved.WillPayload = options.WillPayload;
-                    resolved.WillQualityOfService = options.WillQualityOfService;
-                    resolved.WillRetain = options.WillRetain;
-                    resolved.KeepAliveSeconds = options.KeepAliveSeconds;
-                    resolved.CleanSession = options.CleanSession;
-                    resolved.ReconnectDelay = options.ReconnectDelay;
-
-                    if (newService.ServicePage is MqttTagSubscriptionsView mqttView &&
-                        mqttView.DataContext is MqttTagSubscriptionsViewModel mqttVm)
-                    {
-                        newService.ActiveChanged += active =>
-                        {
-                            if (active)
-                            {
-                                _ = mqttVm.ConnectAsync();
-                            }
-                        };
-
-                        mqttVm.EditConnectionRequested += (_, _) =>
-                        {
-                            var editView = provider.GetRequiredService<MqttEditConnectionView>();
-                            if (editView.DataContext is MqttEditConnectionViewModel vm)
-                            {
-                                var opt = provider.GetRequiredService<IOptions<MqttServiceOptions>>().Value;
-                                vm.Load(opt);
-                                vm.HighlightMissingFields();
-                                vm.RequestClose += (_, _) =>
-                                {
-                                    if (newService.ServicePage != null)
-                                    {
-                                        mainView.ShowPage(newService.ServicePage);
-                                    }
-
-                                    _ = mainViewModel.SaveServicesAsync();
-                                };
-                            }
-
-                            mainView.ShowPage(editView);
-                        };
-                    }
 
                     return newService;
                 },

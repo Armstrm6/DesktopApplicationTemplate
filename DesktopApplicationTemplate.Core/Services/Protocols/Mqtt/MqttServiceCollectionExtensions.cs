@@ -12,7 +12,7 @@ public static class MqttServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddMqttClientService(this IServiceCollection services)
     {
-        services.AddSingleton<IMqttClientService, MqttService>();
+        services.AddSingleton<IMqttClientServiceFactory, MqttClientServiceFactory>();
         return services;
     }
 }

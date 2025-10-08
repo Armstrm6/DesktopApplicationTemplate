@@ -12,6 +12,7 @@ using DesktopApplicationTemplate.Core.Services.Protocols.Tcp;
 using DesktopApplicationTemplate.Core.Services.Protocols.FileObserver;
 using DesktopApplicationTemplate.Core.Services.Protocols.Heartbeat;
 using DesktopApplicationTemplate.Core.Services.Protocols.Hid;
+using DesktopApplicationTemplate.Core.Services.Protocols.Mqtt;
 using DesktopApplicationTemplate.Core.Services.Protocols.Scp;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Models;
@@ -147,6 +148,29 @@ namespace DesktopApplicationTemplate.Persistence
                     };
                 }
 
+                MqttServiceOptions? mqtt = null;
+                if (s.Type == ServiceType.Mqtt && s.MqttOptions != null)
+                {
+                    mqtt = new MqttServiceOptions
+                    {
+                        Host = s.MqttOptions.Host,
+                        Port = s.MqttOptions.Port,
+                        ClientId = s.MqttOptions.ClientId,
+                        Username = s.MqttOptions.Username,
+                        Password = s.MqttOptions.Password,
+                        ConnectionType = s.MqttOptions.ConnectionType,
+                        WebSocketPath = s.MqttOptions.WebSocketPath,
+                        ClientCertificate = s.MqttOptions.ClientCertificate?.ToArray(),
+                        WillTopic = s.MqttOptions.WillTopic,
+                        WillPayload = s.MqttOptions.WillPayload,
+                        WillQualityOfService = s.MqttOptions.WillQualityOfService,
+                        WillRetain = s.MqttOptions.WillRetain,
+                        KeepAliveSeconds = s.MqttOptions.KeepAliveSeconds,
+                        CleanSession = s.MqttOptions.CleanSession,
+                        ReconnectDelay = s.MqttOptions.ReconnectDelay
+                    };
+                }
+
                 data.Add(new ServiceInfo
                 {
                     DisplayName = s.DisplayName,
@@ -163,6 +187,7 @@ namespace DesktopApplicationTemplate.Persistence
                     FileObserverOptions = fileObserver,
                     HidOptions = hid,
                     ScpOptions = scp,
+                    MqttOptions = mqtt,
                     TotalExecutionTimeMs = s.TotalExecutionTimeMs,
                     ExecutionCount = s.ExecutionCount,
                     IncomingMessageCount = s.IncomingMessageCount,
@@ -287,6 +312,33 @@ namespace DesktopApplicationTemplate.Persistence
 
                 foreach (var info in result)
                 {
+                    if (info.ServiceType == ServiceType.Mqtt && info.MqttOptions is null)
+                    {
+                        var opt = App.AppHost?.Services.GetService<IOptions<MqttServiceOptions>>();
+                        if (opt != null)
+                        {
+                            var value = opt.Value;
+                            info.MqttOptions = new MqttServiceOptions
+                            {
+                                Host = value.Host,
+                                Port = value.Port,
+                                ClientId = value.ClientId,
+                                Username = value.Username,
+                                Password = value.Password,
+                                ConnectionType = value.ConnectionType,
+                                WebSocketPath = value.WebSocketPath,
+                                ClientCertificate = value.ClientCertificate?.ToArray(),
+                                WillTopic = value.WillTopic,
+                                WillPayload = value.WillPayload,
+                                WillQualityOfService = value.WillQualityOfService,
+                                WillRetain = value.WillRetain,
+                                KeepAliveSeconds = value.KeepAliveSeconds,
+                                CleanSession = value.CleanSession,
+                                ReconnectDelay = value.ReconnectDelay
+                            };
+                        }
+                    }
+
                     if (info.ServiceType == ServiceType.Tcp && info.TcpOptions != null)
                     {
                         var opt = App.AppHost?.Services.GetService<IOptions<TcpServiceOptions>>();
@@ -418,6 +470,7 @@ namespace DesktopApplicationTemplate.Persistence
         public FileObserverServiceOptions? FileObserverOptions { get; set; }
         public HidServiceOptions? HidOptions { get; set; }
         public ScpServiceOptions? ScpOptions { get; set; }
+        public MqttServiceOptions? MqttOptions { get; set; }
         public double TotalExecutionTimeMs { get; set; }
         public int ExecutionCount { get; set; }
         public int IncomingMessageCount { get; set; }

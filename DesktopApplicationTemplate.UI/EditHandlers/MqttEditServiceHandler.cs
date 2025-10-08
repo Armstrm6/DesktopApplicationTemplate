@@ -10,7 +10,6 @@ using DesktopApplicationTemplate.UI.Views.Mqtt.Advanced;
 using DesktopApplicationTemplate.UI.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace DesktopApplicationTemplate.UI.EditHandlers;
 
@@ -34,7 +33,8 @@ public class MqttEditServiceHandler : IEditServiceHandler
         var mainView = _getMainView();
         var mainViewModel = _getMainViewModel();
         var tagPage = mainView.GetOrCreateServicePage(service);
-        var options = _services.GetRequiredService<IOptions<MqttServiceOptions>>().Value;
+        var options = service.MqttOptions ?? new MqttServiceOptions();
+        service.MqttOptions = options;
         var vm = ActivatorUtilities.CreateInstance<MqttEditServiceViewModel>(_services, service.DisplayName, options);
         var editView = _services.GetRequiredService<MqttEditServiceView>();
         editView.Initialize(vm);

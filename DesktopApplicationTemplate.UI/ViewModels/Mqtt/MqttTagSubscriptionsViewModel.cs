@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -11,7 +12,6 @@ using DesktopApplicationTemplate.Core.Services.Protocols.Mqtt;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Models;
-using Microsoft.Extensions.Options;
 using MQTTnet.Protocol;
 
 namespace DesktopApplicationTemplate.UI.ViewModels.Mqtt;
@@ -27,6 +27,7 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
     private readonly AsyncRelayCommand _addTopicCommand;
     private readonly AsyncRelayCommand _removeTopicCommand;
     private readonly AsyncRelayCommand _connectCommand;
+    private readonly AsyncRelayCommand _testConnectionCommand;
     private readonly AsyncRelayCommand<TagSubscription> _sendTestMessageCommand;
 
     private TagSubscription? _selectedSubscription;
@@ -39,10 +40,10 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
     /// <summary>
     /// Initializes a new instance of the <see cref="MqttTagSubscriptionsViewModel"/> class.
     /// </summary>
-    public MqttTagSubscriptionsViewModel(IMqttClientService clientService, IOptions<MqttServiceOptions> options)
+    public MqttTagSubscriptionsViewModel(IMqttClientService clientService, MqttServiceOptions options)
     {
         _clientService = clientService ?? throw new ArgumentNullException(nameof(clientService));
-        _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
+        _options = options ?? throw new ArgumentNullException(nameof(options));
 
         Subscriptions = new ObservableCollection<TagSubscription>();
         Subscriptions.CollectionChanged += OnSubscriptionsChanged;
@@ -51,6 +52,7 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
         _addTopicCommand = new AsyncRelayCommand(AddTopicAsync, () => CanAddTopic);
         _removeTopicCommand = new AsyncRelayCommand(RemoveTopicAsync, () => SelectedSubscription != null);
         _connectCommand = new AsyncRelayCommand(ConnectAsync, () => !_isBusy);
+        _testConnectionCommand = new AsyncRelayCommand(TestConnectionAsync, () => !_isBusy);
         _sendTestMessageCommand = new AsyncRelayCommand<TagSubscription>(SendTestMessageAsync, CanSendTestMessage);
 
         _clientService.ConnectionStateChanged += OnConnectionStateChanged;
@@ -101,6 +103,7 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
             OnPropertyChanged();
             OnPropertyChanged(nameof(ConnectionActionLabel));
             _connectCommand.RaiseCanExecuteChanged();
+            _testConnectionCommand.RaiseCanExecuteChanged();
             _sendTestMessageCommand.RaiseCanExecuteChanged();
 
             if (!value)
@@ -180,6 +183,11 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
     public ICommand ConnectCommand => _connectCommand;
 
     /// <summary>
+    /// Command to test the MQTT connection using the current settings.
+    /// </summary>
+    public ICommand TestConnectionCommand => _testConnectionCommand;
+
+    /// <summary>
     /// Command to publish a test message for a subscription.
     /// </summary>
     public ICommand SendTestMessageCommand => _sendTestMessageCommand;
@@ -193,6 +201,38 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
     /// Gets a value indicating whether a topic can be added.
     /// </summary>
     public bool CanAddTopic => !string.IsNullOrWhiteSpace(NewTopic);
+
+    private bool TryValidateConnectionOptions(out List<string> errors)
+    {
+        errors = new List<string>();
+
+        if (string.IsNullOrWhiteSpace(_options.Host))
+        {
+            errors.Add("Host is required.");
+        }
+
+        if (_options.Port < 1 || _options.Port > 65535)
+        {
+            errors.Add("Port must be between 1 and 65535.");
+        }
+
+        if (string.IsNullOrWhiteSpace(_options.ClientId))
+        {
+            errors.Add("Client Id is required.");
+        }
+
+        return errors.Count == 0;
+    }
+
+    private void NotifyValidationErrors(IEnumerable<string> errors)
+    {
+        foreach (var error in errors)
+        {
+            Logger?.Log($"MQTT configuration error: {error}", LogLevel.Warning);
+        }
+
+        EditConnectionRequested?.Invoke(this, EventArgs.Empty);
+    }
 
     private async Task AddTopicAsync()
     {
@@ -263,6 +303,7 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
 
         _isBusy = true;
         _connectCommand.RaiseCanExecuteChanged();
+        _testConnectionCommand.RaiseCanExecuteChanged();
 
         try
         {
@@ -272,30 +313,84 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
                 return;
             }
 
-            Logger?.Log("MQTT connect start", LogLevel.Debug);
-            try
+            if (!TryValidateConnectionOptions(out var errors))
             {
-                await _clientService.ConnectAsync(_options);
-                IsConnected = true;
-                await SubscribeAllAsync();
-                Logger?.Log("MQTT connect finished", LogLevel.Debug);
+                NotifyValidationErrors(errors);
+                return;
             }
-            catch (ArgumentException ex)
+
+            await ConnectCoreAsync();
+        }
+        finally
+        {
+            _isBusy = false;
+            _connectCommand.RaiseCanExecuteChanged();
+            _testConnectionCommand.RaiseCanExecuteChanged();
+        }
+    }
+
+    private async Task<bool> ConnectCoreAsync()
+    {
+        Logger?.Log("MQTT connect start", LogLevel.Debug);
+        try
+        {
+            await _clientService.ConnectAsync(_options);
+            IsConnected = true;
+            await SubscribeAllAsync();
+            Logger?.Log("MQTT connect finished", LogLevel.Debug);
+            return true;
+        }
+        catch (ArgumentException ex)
+        {
+            IsConnected = false;
+            Logger?.Log(ex.Message, LogLevel.Warning);
+            EditConnectionRequested?.Invoke(this, EventArgs.Empty);
+            return false;
+        }
+        catch (Exception ex)
+        {
+            IsConnected = false;
+            Logger?.Log($"MQTT connect failed: {ex.Message}", LogLevel.Error);
+            return false;
+        }
+    }
+
+    private async Task TestConnectionAsync()
+    {
+        if (_isBusy)
+        {
+            return;
+        }
+
+        if (!TryValidateConnectionOptions(out var errors))
+        {
+            NotifyValidationErrors(errors);
+            return;
+        }
+
+        _isBusy = true;
+        _connectCommand.RaiseCanExecuteChanged();
+        _testConnectionCommand.RaiseCanExecuteChanged();
+
+        try
+        {
+            if (IsConnected)
             {
-                IsConnected = false;
-                Logger?.Log(ex.Message, LogLevel.Warning);
-                EditConnectionRequested?.Invoke(this, EventArgs.Empty);
+                Logger?.Log("MQTT client is already connected.", LogLevel.Information);
+                return;
             }
-            catch (Exception ex)
+
+            var connected = await ConnectCoreAsync();
+            if (connected)
             {
-                IsConnected = false;
-                Logger?.Log($"MQTT connect failed: {ex.Message}", LogLevel.Error);
+                Logger?.Log("MQTT test connection succeeded.", LogLevel.Information);
             }
         }
         finally
         {
             _isBusy = false;
             _connectCommand.RaiseCanExecuteChanged();
+            _testConnectionCommand.RaiseCanExecuteChanged();
         }
     }
 

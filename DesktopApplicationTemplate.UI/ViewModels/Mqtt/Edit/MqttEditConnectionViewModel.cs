@@ -4,7 +4,6 @@ using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Mqtt;
 using DesktopApplicationTemplate.UI.Helpers;
-using Microsoft.Extensions.Options;
 
 namespace DesktopApplicationTemplate.UI.ViewModels.Mqtt.Edit;
 
@@ -30,11 +29,11 @@ public class MqttEditConnectionViewModel : ValidatableViewModelBase, ILoggingVie
     /// </summary>
     public MqttEditConnectionViewModel(
         IMqttClientService clientService,
-        IOptions<MqttServiceOptions> options,
+        MqttServiceOptions options,
         ILoggingService? logger = null)
     {
         _clientService = clientService ?? throw new ArgumentNullException(nameof(clientService));
-        _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
+        _options = options ?? throw new ArgumentNullException(nameof(options));
         Logger = logger;
 
         Load(_options);
