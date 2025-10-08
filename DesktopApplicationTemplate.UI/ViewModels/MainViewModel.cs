@@ -5,6 +5,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -21,7 +22,7 @@ using DesktopApplicationTemplate.Core.Services.Protocols.Mqtt;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
-    public class MainViewModel : ViewModelBase
+    public partial class MainViewModel : ViewModelBase
     {
         public ObservableCollection<ServiceListModel> Services { get; set; } = new();
         public ICollectionView FilteredServices { get; }
@@ -120,6 +121,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private readonly HashSet<ServiceListModel> _activatingServices = new();
         private readonly HashSet<ServiceListModel> _trackedServices = new();
         private static readonly TimeSpan ActivationConfirmationDelay = TimeSpan.FromMilliseconds(500);
+        private int _serviceCreationScopeDepth;
+
+        internal bool IsServiceCreationInProgress => Volatile.Read(ref _serviceCreationScopeDepth) > 0;
+
+        internal int ActivatingServicesCount => _activatingServices.Count;
 
         public NetworkConfigurationViewModel NetworkConfig { get; }
 
@@ -182,6 +188,37 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             if (_logger is LoggingService concreteLogger)
             {
                 concreteLogger.Reload();
+            }
+        }
+
+        internal IDisposable BeginServiceCreationScope()
+        {
+            Interlocked.Increment(ref _serviceCreationScopeDepth);
+            return new ServiceCreationScope(this);
+        }
+
+        private void EndServiceCreationScope()
+        {
+            var newDepth = Interlocked.Decrement(ref _serviceCreationScopeDepth);
+            if (newDepth < 0)
+            {
+                Interlocked.Exchange(ref _serviceCreationScopeDepth, 0);
+            }
+        }
+
+        private sealed class ServiceCreationScope : IDisposable
+        {
+            private MainViewModel? owner;
+
+            public ServiceCreationScope(MainViewModel owner)
+            {
+                this.owner = owner ?? throw new ArgumentNullException(nameof(owner));
+            }
+
+            public void Dispose()
+            {
+                owner?.EndServiceCreationScope();
+                owner = null;
             }
         }
 
@@ -460,6 +497,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         private async Task ToggleServiceProcessAsync()
         {
+            if (IsServiceCreationInProgress)
+            {
+                _logger?.Log("Service process toggle ignored because a service is being created.", LogLevel.Debug);
+                return;
+            }
+
             if (IsServiceProcessBusy)
             {
                 return;
@@ -512,6 +555,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public async Task ShutdownServicesAsync()
         {
+            if (IsServiceCreationInProgress)
+            {
+                _logger?.Log("Shutdown skipped because a service is being created.", LogLevel.Debug);
+                return;
+            }
+
             if (!Services.Any(s => s.IsActive) && _activatingServices.Count == 0)
             {
                 return;
@@ -536,6 +585,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         private async Task StartServicesAsync()
         {
+            if (IsServiceCreationInProgress)
+            {
+                _logger?.Log("Skipping service activation while creation is in progress.", LogLevel.Debug);
+                return;
+            }
+
             foreach (var svc in Services)
             {
                 if (svc.IsActive)
@@ -558,6 +613,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         private async Task StopServicesAsync()
         {
+            if (IsServiceCreationInProgress)
+            {
+                _logger?.Log("Skipping service deactivation while creation is in progress.", LogLevel.Debug);
+                return;
+            }
+
             foreach (var svc in Services)
             {
                 _activatingServices.Remove(svc);
