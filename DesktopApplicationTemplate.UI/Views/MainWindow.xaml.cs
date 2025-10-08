@@ -568,7 +568,7 @@ namespace DesktopApplicationTemplate.UI.Views
             }
         }
 
-        private void DeleteServiceMenu_Click(object sender, RoutedEventArgs e) => _ = DeleteServiceMenuAsync(sender, e);
+        internal void DeleteServiceMenu_Click(object sender, RoutedEventArgs e) => _ = DeleteServiceMenuAsync(sender, e);
 
         private async Task DeleteServiceMenuAsync(object sender, RoutedEventArgs e)
         {
@@ -596,7 +596,7 @@ namespace DesktopApplicationTemplate.UI.Views
             }
         }
 
-        private void RenameServiceMenu_Click(object sender, RoutedEventArgs e) => _ = RenameServiceMenuAsync(sender, e);
+        internal void RenameServiceMenu_Click(object sender, RoutedEventArgs e) => _ = RenameServiceMenuAsync(sender, e);
 
         private async Task RenameServiceMenuAsync(object sender, RoutedEventArgs e)
         {
@@ -622,7 +622,7 @@ namespace DesktopApplicationTemplate.UI.Views
             }
         }
 
-        private void ChangeColorMenu_Click(object sender, RoutedEventArgs e) => _ = ChangeColorMenuAsync(sender, e);
+        internal void ChangeColorMenu_Click(object sender, RoutedEventArgs e) => _ = ChangeColorMenuAsync(sender, e);
 
         private async Task ChangeColorMenuAsync(object sender, RoutedEventArgs e)
         {
@@ -721,12 +721,12 @@ namespace DesktopApplicationTemplate.UI.Views
         }
 
         private System.Windows.Point _dragStart;
-        private void ServiceItem_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        internal void ServiceItem_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             _dragStart = e.GetPosition(null);
         }
 
-        private void ServiceItem_PreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        internal void ServiceItem_PreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
         {
             if (e.LeftButton != System.Windows.Input.MouseButtonState.Pressed)
                 return;
@@ -742,7 +742,7 @@ namespace DesktopApplicationTemplate.UI.Views
             }
         }
 
-        private void ServiceItem_Drop(object sender, System.Windows.DragEventArgs e) => _ = ServiceItemDropAsync(sender, e);
+        internal void ServiceItem_Drop(object sender, System.Windows.DragEventArgs e) => _ = ServiceItemDropAsync(sender, e);
 
         private async Task ServiceItemDropAsync(object sender, System.Windows.DragEventArgs e)
         {
