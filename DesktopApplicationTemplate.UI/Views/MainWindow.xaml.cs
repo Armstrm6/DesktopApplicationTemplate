@@ -853,7 +853,7 @@ namespace DesktopApplicationTemplate.UI.Views
             {
                 try
                 {
-                    await joinableTask.Task.ConfigureAwait(false);
+                    await joinableTask.JoinAsync();
                 }
                 catch (Exception ex)
                 {
