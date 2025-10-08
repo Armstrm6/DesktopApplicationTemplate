@@ -1,6 +1,7 @@
 using DesktopApplicationTemplate.Core.Services.Protocols.Mqtt;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Models;
+using ModelsServiceType = DesktopApplicationTemplate.Models.ServiceType;
 
 namespace DesktopApplicationTemplate.Core.Modules.BuiltIn;
 
@@ -14,7 +15,7 @@ public sealed class MqttServiceDescriptor : BuiltInServiceDescriptor<MqttService
             ServiceDescriptorIds.Mqtt,
             "MQTT",
             BuiltInServiceCategories.Messaging,
-            ServiceType.Mqtt,
+            ModelsServiceType.Mqtt,
             new ServicePresentationMetadata(
                 "📡",
                 "LightGoldenrodYellow",

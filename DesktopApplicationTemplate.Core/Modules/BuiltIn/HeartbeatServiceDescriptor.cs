@@ -1,6 +1,7 @@
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Heartbeat;
 using DesktopApplicationTemplate.Models;
+using ModelsServiceType = DesktopApplicationTemplate.Models.ServiceType;
 
 namespace DesktopApplicationTemplate.Core.Modules.BuiltIn;
 
@@ -14,7 +15,7 @@ public sealed class HeartbeatServiceDescriptor : BuiltInServiceDescriptor<Heartb
             ServiceDescriptorIds.Heartbeat,
             "Heartbeat",
             BuiltInServiceCategories.Monitoring,
-            ServiceType.Heartbeat,
+            ModelsServiceType.Heartbeat,
             new ServicePresentationMetadata(
                 "❤️",
                 "LightPink",

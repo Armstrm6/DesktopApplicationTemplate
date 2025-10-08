@@ -1,6 +1,7 @@
 using DesktopApplicationTemplate.Core.Services.Protocols.Http;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Models;
+using ModelsServiceType = DesktopApplicationTemplate.Models.ServiceType;
 
 namespace DesktopApplicationTemplate.Core.Modules.BuiltIn;
 
@@ -14,7 +15,7 @@ public sealed class HttpServiceDescriptor : BuiltInServiceDescriptor<HttpService
             ServiceDescriptorIds.Http,
             "HTTP",
             BuiltInServiceCategories.Connectivity,
-            ServiceType.Http,
+            ModelsServiceType.Http,
             new ServicePresentationMetadata(
                 "🌐",
                 "LightGreen",
