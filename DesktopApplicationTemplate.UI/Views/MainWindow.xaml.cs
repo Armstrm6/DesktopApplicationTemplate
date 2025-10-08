@@ -842,11 +842,26 @@ namespace DesktopApplicationTemplate.UI.Views
             _viewModel.RefreshLogs();
         }
 
-        private void ObserveAndLog(JoinableTask joinableTask)
+        private void ObserveAndLog(JoinableTask? joinableTask)
         {
-            joinableTask.Task.ContinueWith(
-                t => _logger?.LogError(t.Exception, "Unhandled exception in background operation"),
-                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
+            if (joinableTask is null)
+            {
+                return;
+            }
+
+            async Task ObserveBackgroundTaskAsync()
+            {
+                try
+                {
+                    await joinableTask.Task.ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    _logger?.LogError(ex, "Unhandled exception in background operation");
+                }
+            }
+
+            _ = ObserveBackgroundTaskAsync();
         }
 
     }
