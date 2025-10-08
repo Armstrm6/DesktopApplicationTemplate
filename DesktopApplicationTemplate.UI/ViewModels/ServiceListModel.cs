@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
 using System.Windows.Controls;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Csv;
@@ -334,6 +333,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public static Func<ServiceType, string, ServiceListModel?>? ResolveService { get; set; }
 
+        /// <summary>
+        /// Enables forwarding of log entries between services when cross-service references are detected.
+        /// Defaults to <c>false</c> so services remain independent unless explicitly linked.
+        /// </summary>
+        public static bool EnableCrossServiceLogForwarding { get; set; }
+
         private bool _isActive;
         public bool IsActive
         {
@@ -602,25 +607,131 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         private void HandleReference(string message, WpfBrush color, LogLevel level)
         {
-            var m = Regex.Match(message, @"^([^.]+)\.([^.]+)\.(.+)$");
-            if (m.Success && ResolveService != null)
+            if (ResolveService == null)
             {
-                var typeStr = m.Groups[1].Value;
-                var name = m.Groups[2].Value;
-                var msg = m.Groups[3].Value;
-                if (ServiceTypeExtensions.TryParse(typeStr, out var type))
+                return;
+            }
+
+            if (!TryExtractCrossServiceReference(message, out var typeStr, out var serviceName, out var forwardedMessage))
+            {
+                return;
+            }
+
+            if (!ServiceTypeExtensions.TryParse(typeStr, out var type))
+            {
+                return;
+            }
+
+            var target = ResolveService(type, serviceName);
+            if (target == null || ReferenceEquals(target, this))
+            {
+                return;
+            }
+
+            if (!AssociatedServices.Contains(target.DisplayName))
+            {
+                AssociatedServices.Add(target.DisplayName);
+            }
+
+            if (!target.AssociatedServices.Contains(DisplayName))
+            {
+                target.AssociatedServices.Add(DisplayName);
+            }
+
+            if (EnableCrossServiceLogForwarding)
+            {
+                target.AddLog(forwardedMessage, color, level, false);
+            }
+        }
+
+        private static bool TryExtractCrossServiceReference(string message, out string typeName, out string serviceName, out string forwardedMessage)
+        {
+            typeName = string.Empty;
+            serviceName = string.Empty;
+            forwardedMessage = string.Empty;
+
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                return false;
+            }
+
+            ReadOnlySpan<char> span = message.AsSpan().TrimStart();
+            span = StripTimestamp(span);
+            span = StripLogLevelPrefix(span);
+            span = TrimLeadingWhitespace(span);
+
+            if (span.IsEmpty)
+            {
+                return false;
+            }
+
+            var normalized = span.ToString();
+            var firstDot = normalized.IndexOf('.');
+            if (firstDot <= 0)
+            {
+                return false;
+            }
+
+            var secondDot = normalized.IndexOf('.', firstDot + 1);
+            if (secondDot <= firstDot + 1)
+            {
+                return false;
+            }
+
+            typeName = normalized[..firstDot];
+            serviceName = normalized[(firstDot + 1)..secondDot];
+            forwardedMessage = normalized[(secondDot + 1)..].TrimStart();
+
+            return forwardedMessage.Length > 0;
+        }
+
+        private static ReadOnlySpan<char> StripTimestamp(ReadOnlySpan<char> message)
+        {
+            if (message.Length >= TimestampLength)
+            {
+                var timestampCandidate = message[..TimestampLength];
+                if (DateTime.TryParseExact(timestampCandidate.ToString(), TimestampFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out _))
                 {
-                    var target = ResolveService(type, name);
-                    if (target != null && target != this)
-                    {
-                        if (!AssociatedServices.Contains(target.DisplayName))
-                            AssociatedServices.Add(target.DisplayName);
-                        if (!target.AssociatedServices.Contains(DisplayName))
-                            target.AssociatedServices.Add(DisplayName);
-                        target.AddLog(msg, color, level, false);
-                    }
+                    return TrimLeadingWhitespace(message[TimestampLength..]);
                 }
             }
+
+            return message;
+        }
+
+        private static ReadOnlySpan<char> StripLogLevelPrefix(ReadOnlySpan<char> message)
+        {
+            var span = message;
+            while (span.Length > 0 && span[0] == '[')
+            {
+                var closingIndex = span[1..].IndexOf(']');
+                if (closingIndex < 0)
+                {
+                    break;
+                }
+
+                var nextIndex = closingIndex + 2; // Include '[' and ']'
+                if (nextIndex > span.Length)
+                {
+                    break;
+                }
+
+                span = span[nextIndex..];
+                span = TrimLeadingWhitespace(span);
+            }
+
+            return span;
+        }
+
+        private static ReadOnlySpan<char> TrimLeadingWhitespace(ReadOnlySpan<char> span)
+        {
+            var index = 0;
+            while (index < span.Length && char.IsWhiteSpace(span[index]))
+            {
+                index++;
+            }
+
+            return index == 0 ? span : span[index..];
         }
 
         private void UpdateMessageCounters(string message)
