@@ -4,7 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:views="clr-namespace:DesktopApplicationTemplate.UI.Views"
-        xmlns:viewModels="clr-namespace:DesktopApplicationTemplate.UI.ViewModels"
         xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
         xmlns:sys="clr-namespace:System.Windows;assembly=PresentationFramework"
         xmlns:behaviors="clr-namespace:DesktopApplicationTemplate.UI.Behaviors"
@@ -25,55 +24,6 @@
                 <ResourceDictionary Source="../Themes/BubblyWindow.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <helpers:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
-            <Style x:Key="ServiceStatusIndicatorStyle" TargetType="Ellipse">
-                <Setter Property="Width" Value="12" />
-                <Setter Property="Height" Value="12" />
-                <Setter Property="Margin" Value="0,0,8,0" />
-                <Setter Property="VerticalAlignment" Value="Center" />
-                <Setter Property="Stroke" Value="#FF4A4A4A" />
-                <Setter Property="StrokeThickness" Value="1" />
-                <Setter Property="Fill">
-                    <Setter.Value>
-                        <SolidColorBrush Color="#FFD32F2F" />
-                    </Setter.Value>
-                </Setter>
-                <Style.Triggers>
-                    <DataTrigger Binding="{Binding RuntimeState}" Value="{x:Static viewModels:ServiceRuntimeState.Active}">
-                        <Setter Property="Fill">
-                            <Setter.Value>
-                                <SolidColorBrush Color="#FF2E7D32" />
-                            </Setter.Value>
-                        </Setter>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding RuntimeState}" Value="{x:Static viewModels:ServiceRuntimeState.Activating}">
-                        <Setter Property="Fill">
-                            <Setter.Value>
-                                <SolidColorBrush Color="#FFF9A825" />
-                            </Setter.Value>
-                        </Setter>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding RuntimeState}" Value="{x:Static viewModels:ServiceRuntimeState.Error}">
-                        <Setter Property="Fill">
-                            <Setter.Value>
-                                <SolidColorBrush Color="#FFD32F2F" />
-                            </Setter.Value>
-                        </Setter>
-                        <DataTrigger.EnterActions>
-                            <BeginStoryboard x:Name="ErrorFlashStoryboard">
-                                <Storyboard RepeatBehavior="Forever" FillBehavior="Stop">
-                                    <ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)" Duration="0:0:0.8">
-                                        <DiscreteColorKeyFrame KeyTime="0:0:0" Value="#FFD32F2F" />
-                                        <DiscreteColorKeyFrame KeyTime="0:0:0.4" Value="#FF808080" />
-                                    </ColorAnimationUsingKeyFrames>
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </DataTrigger.EnterActions>
-                        <DataTrigger.ExitActions>
-                            <StopStoryboard BeginStoryboardName="ErrorFlashStoryboard" />
-                        </DataTrigger.ExitActions>
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
         </ResourceDictionary>
     </Window.Resources>
 
