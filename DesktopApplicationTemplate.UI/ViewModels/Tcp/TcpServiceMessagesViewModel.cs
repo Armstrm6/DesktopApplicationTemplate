@@ -121,6 +121,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
         private bool _isApplicationExitHooked;
         private NetworkConfiguration _networkConfiguration = new();
         private static readonly TimeSpan ClientReconnectDelay = TimeSpan.FromSeconds(2);
+        private bool _suppressRuntimeInitialization;
+        private bool _pendingNavigationInitialization;
+        private bool _navigationInitializationLogged;
 
         /// <summary>Type of the service associated with these messages.</summary>
         public ServiceType ServiceType { get; private set; } = ServiceType.Tcp;
@@ -136,7 +139,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                 if (_serviceName == value) return;
                 _serviceName = value ?? string.Empty;
                 OnPropertyChanged();
-                InitializeTestMessage();
+                if (!_suppressRuntimeInitialization)
+                {
+                    InitializeTestMessage();
+                }
             }
         }
 
@@ -239,12 +245,22 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             _service.PropertyChanged += OnServicePropertyChanged;
             _options = service.TcpOptions ?? new TcpServiceOptions();
             ServiceType = service.Type;
-            ServiceName = service.DisplayName;
+            _suppressRuntimeInitialization = true;
+            try
+            {
+                ServiceName = service.DisplayName;
+            }
+            finally
+            {
+                _suppressRuntimeInitialization = false;
+            }
             Script = string.IsNullOrWhiteSpace(_options.Script)
                 ? ScriptEditorViewModel.DefaultScript
                 : _options.Script;
             ScriptOutputMessage = _options.OutputMessage;
             _runtimeContext = new TcpRuntimeContext(ServiceType, ServiceName, _options, ScriptEditorViewModel.DefaultScript);
+            _pendingNavigationInitialization = true;
+            _navigationInitializationLogged = false;
             ApplyNetworkConfiguration(restartIfActive: false);
             var history = service.GetMessageHistorySnapshot();
             MessageTable.LoadMessages(ServiceType, ServiceName, history);
@@ -340,8 +356,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
         {
             if (_runtimeContext is null)
             {
+                _pendingNavigationInitialization = false;
                 return;
             }
+
+            var isNavigationInitialization = _pendingNavigationInitialization;
+            _pendingNavigationInitialization = false;
 
             try
             {
@@ -352,7 +372,23 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                 _options.OutputMessage = state.OutputMessage;
                 _routing.UpdateMessage(ServiceType, ServiceName, state.TestMessage, MessageRoutingDirection.Input);
                 _routing.UpdateMessage(ServiceType, ServiceName, state.OutputMessage, MessageRoutingDirection.Output);
-                Logger?.Log($"Script executed successfully: {ScriptOutputMessage}", LogLevel.Information);
+                if (isNavigationInitialization)
+                {
+                    if (_navigationInitializationLogged)
+                    {
+                        Logger?.Log($"Duplicate navigation runtime initialization detected; skipping additional success log for {ServiceName}.", LogLevel.Debug);
+                    }
+                    else
+                    {
+                        _navigationInitializationLogged = true;
+                        Logger?.Log($"Script executed successfully: {ScriptOutputMessage}", LogLevel.Information);
+                        Logger?.Log($"Navigation runtime initialization logged exactly once for {ServiceName}.", LogLevel.Debug);
+                    }
+                }
+                else
+                {
+                    Logger?.Log($"Script executed successfully: {ScriptOutputMessage}", LogLevel.Information);
+                }
             }
             catch (Exception ex)
             {
@@ -1364,6 +1400,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             }
 
             _runtimeContext = new TcpRuntimeContext(ServiceType, ServiceName, _options, ScriptEditorViewModel.DefaultScript);
+            _pendingNavigationInitialization = true;
+            _navigationInitializationLogged = false;
             _ = InitializeRuntimeAsync();
         }
 
