@@ -11,6 +11,11 @@ using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.ViewModels.Tcp;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.Models;
+using DesktopApplicationTemplate.UI.ViewModels.Mqtt;
+using DesktopApplicationTemplate.UI.ViewModels.Mqtt.Edit;
+using DesktopApplicationTemplate.UI.Views.Mqtt;
+using DesktopApplicationTemplate.UI.Views.Mqtt.Edit;
+using DesktopApplicationTemplate.Core.Services.Protocols.Mqtt;
 using LogLevel = DesktopApplicationTemplate.Core.Services.LogLevel;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -41,6 +46,8 @@ namespace DesktopApplicationTemplate.UI.Views
         private readonly IServiceProvider _serviceProvider;
         private readonly Dictionary<ServiceListModel, Action<LogEntry>> _serviceLogHandlers = new();
         private readonly Dictionary<ServiceListModel, EventHandler> _tcpAdvancedHandlers = new();
+        private readonly Dictionary<ServiceListModel, EventHandler> _mqttEditHandlers = new();
+        private readonly Dictionary<ServiceListModel, MqttTagSubscriptionsViewModel> _mqttSubscriptionViewModels = new();
         private readonly BrushConverter _brushConverter = new();
         private JoinableTask? _shutdownTask;
         private bool _shutdownCompleted;
@@ -211,6 +218,11 @@ namespace DesktopApplicationTemplate.UI.Views
 
             if (svc.ServicePage != null)
             {
+                if (svc.Type == ServiceType.Mqtt && svc.ServicePage is MqttTagSubscriptionsView mqttPage)
+                {
+                    InitializeMqttSubscriptionsPage(svc, mqttPage);
+                }
+
                 if (svc.ServicePage.DataContext is ILoggingViewModel vm)
                 {
                     AttachServiceLogger(svc, vm);
@@ -288,6 +300,41 @@ namespace DesktopApplicationTemplate.UI.Views
             }
         }
 
+        private void InitializeMqttSubscriptionsPage(ServiceListModel svc, MqttTagSubscriptionsView page)
+        {
+            if (svc is null || page is null)
+            {
+                return;
+            }
+
+            var options = svc.MqttOptions ??= new MqttServiceOptions();
+            if (svc.MqttClientService is null)
+            {
+                var factory = _serviceProvider.GetRequiredService<IMqttClientServiceFactory>();
+                svc.MqttClientService = factory.Create(options);
+            }
+
+            if (!_mqttSubscriptionViewModels.TryGetValue(svc, out var viewModel))
+            {
+                viewModel = ActivatorUtilities.CreateInstance<MqttTagSubscriptionsViewModel>(
+                    _serviceProvider,
+                    svc.MqttClientService!,
+                    options);
+                _mqttSubscriptionViewModels[svc] = viewModel;
+            }
+
+            if (_mqttEditHandlers.TryGetValue(svc, out var existingHandler))
+            {
+                viewModel.EditConnectionRequested -= existingHandler;
+            }
+
+            EventHandler handler = (_, _) => ShowMqttEditConnectionView(svc, highlightMissingFields: true);
+            viewModel.EditConnectionRequested += handler;
+            _mqttEditHandlers[svc] = handler;
+
+            page.Initialize(viewModel);
+        }
+
         private void AttachTcpAdvancedHandler(ServiceListModel svc, TcpServiceMessagesViewModel vm)
         {
             if (_tcpAdvancedHandlers.TryGetValue(svc, out var existing))
@@ -302,18 +349,18 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private void DetachServiceLogger(ServiceListModel svc)
         {
-            if (!_serviceLogHandlers.TryGetValue(svc, out var handler))
+            if (_serviceLogHandlers.TryGetValue(svc, out var handler))
             {
-                return;
+                if (svc.ServicePage?.DataContext is ILoggingViewModel vm && vm.Logger is not null)
+                {
+                    vm.Logger.LogAdded -= handler;
+                }
+
+                _serviceLogHandlers.Remove(svc);
             }
 
-            if (svc.ServicePage?.DataContext is ILoggingViewModel vm && vm.Logger is not null)
-            {
-                vm.Logger.LogAdded -= handler;
-            }
-
-            _serviceLogHandlers.Remove(svc);
             DetachTcpAdvancedHandler(svc);
+            DetachMqttHandlers(svc);
         }
 
         private void DetachTcpAdvancedHandler(ServiceListModel svc)
@@ -331,10 +378,73 @@ namespace DesktopApplicationTemplate.UI.Views
             _tcpAdvancedHandlers.Remove(svc);
         }
 
+        private void DetachMqttHandlers(ServiceListModel svc)
+        {
+            if (_mqttEditHandlers.TryGetValue(svc, out var handler) &&
+                _mqttSubscriptionViewModels.TryGetValue(svc, out var viewModel))
+            {
+                viewModel.EditConnectionRequested -= handler;
+            }
+
+            _mqttEditHandlers.Remove(svc);
+            _mqttSubscriptionViewModels.Remove(svc);
+
+            if (svc.MqttClientService is not null)
+            {
+                _ = svc.MqttClientService.DisconnectAsync();
+                svc.MqttClientService = null;
+            }
+        }
+
         private void OpenTcpAdvancedSettings(ServiceListModel svc)
         {
             var handler = _serviceProvider.GetKeyedService<IEditServiceHandler>(ServiceType.Tcp);
             handler?.Edit(svc);
+        }
+
+        private void ShowMqttEditConnectionView(ServiceListModel service, bool highlightMissingFields = false)
+        {
+            if (service is null)
+            {
+                return;
+            }
+
+            var options = service.MqttOptions ??= new MqttServiceOptions();
+            if (service.MqttClientService is null)
+            {
+                var factory = _serviceProvider.GetRequiredService<IMqttClientServiceFactory>();
+                service.MqttClientService = factory.Create(options);
+            }
+
+            var logger = _serviceProvider.GetService<ILoggingService>();
+            var viewModel = ActivatorUtilities.CreateInstance<MqttEditConnectionViewModel>(
+                _serviceProvider,
+                service.MqttClientService!,
+                options,
+                logger);
+
+            if (highlightMissingFields)
+            {
+                viewModel.HighlightMissingFields();
+            }
+
+            var editView = _serviceProvider.GetRequiredService<MqttEditConnectionView>();
+            editView.Initialize(viewModel);
+
+            EventHandler? closeHandler = null;
+            closeHandler = (_, _) =>
+            {
+                viewModel.RequestClose -= closeHandler;
+                if (service.ServicePage != null)
+                {
+                    ShowPage(service.ServicePage);
+                }
+
+                _ = _viewModel.SaveServicesAsync();
+            };
+            viewModel.RequestClose += closeHandler;
+
+            ShowPage(editView);
         }
 
         private void Services_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -364,6 +474,10 @@ namespace DesktopApplicationTemplate.UI.Views
                 foreach (var svc in _tcpAdvancedHandlers.Keys.ToList())
                 {
                     DetachTcpAdvancedHandler(svc);
+                }
+                foreach (var svc in _mqttEditHandlers.Keys.ToList())
+                {
+                    DetachMqttHandlers(svc);
                 }
             }
         }

@@ -12,14 +12,30 @@ namespace DesktopApplicationTemplate.UI.Views.Mqtt;
 /// </summary>
 public partial class MqttTagSubscriptionsView : Page, IServiceLogHost
 {
+    private readonly ILoggingService _logger;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="MqttTagSubscriptionsView"/> class.
     /// </summary>
-    public MqttTagSubscriptionsView(MqttTagSubscriptionsViewModel vm, ILoggingService logger)
+    public MqttTagSubscriptionsView(ILoggingService logger)
     {
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         InitializeComponent();
-        vm.Logger = logger;
-        DataContext = vm;
+    }
+
+    /// <summary>
+    /// Applies the supplied view model to the page.
+    /// </summary>
+    /// <param name="viewModel">The view model to use as the data context.</param>
+    public void Initialize(MqttTagSubscriptionsViewModel viewModel)
+    {
+        if (viewModel is null)
+        {
+            throw new ArgumentNullException(nameof(viewModel));
+        }
+
+        viewModel.Logger = _logger;
+        DataContext = viewModel;
     }
 
     /// <inheritdoc />

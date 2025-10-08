@@ -30,6 +30,11 @@
                     Command="{Binding ConnectCommand}"
                     Width="80"
                     AutomationProperties.Name="{Binding ConnectionActionLabel, StringFormat={}{0} MQTT}"/>
+            <Button Content="Test Connection"
+                    Command="{Binding TestConnectionCommand}"
+                    Width="120"
+                    Margin="5,0,0,0"
+                    AutomationProperties.Name="Test MQTT Connection"/>
             <Ellipse Width="10" Height="10" Margin="5,0,0,0" Fill="{Binding IsConnected, Converter={StaticResource BoolToBrush}}"/>
             <TextBox Text="{Binding NewTopic, UpdateSourceTrigger=PropertyChanged}" Width="200" Margin="10,0,0,0" x:Name="NewTopicBox" ToolTip="Topic to subscribe"
                      behaviors:TextBoxHintBehavior.AutoToolTip="True"/>
