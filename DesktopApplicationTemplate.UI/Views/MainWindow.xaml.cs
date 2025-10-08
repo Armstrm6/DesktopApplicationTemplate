@@ -496,6 +496,7 @@ namespace DesktopApplicationTemplate.UI.Views
             page.SetExistingNames(_viewModel.Services.Select(s => s.DisplayName));
             page.ServiceCreated += (name, type) =>
             {
+                using var creationScope = _viewModel.BeginServiceCreationScope();
                 var trimmed = string.IsNullOrWhiteSpace(name)
                     ? _viewModel.GenerateServiceName(type)
                     : name.Trim();
@@ -507,9 +508,9 @@ namespace DesktopApplicationTemplate.UI.Views
                 var svc = new ServiceListModel
                 {
                     DisplayName = trimmed,
-                    Type = type,
-                    IsActive = false
+                    Type = type
                 };
+                svc.InitializeActivationState(isActive: false);
                 ApplyPresentation(svc);
                 svc.LogAdded += _viewModel.OnServiceLogAdded;
                 svc.ActiveChanged += _viewModel.OnServiceActiveChanged;
@@ -567,6 +568,7 @@ namespace DesktopApplicationTemplate.UI.Views
 
         internal async Task<bool> TryAddServiceAsync<TOptions>(ServiceType type, ServiceFactoryOptions<TOptions> context)
         {
+            using var creationScope = _viewModel.BeginServiceCreationScope();
             var sanitizedName = string.IsNullOrWhiteSpace(context.Name)
                 ? _viewModel.GenerateServiceName(type)
                 : context.Name.Trim();
@@ -588,6 +590,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 return false;
             }
 
+            svc.InitializeActivationState(isActive: false);
             ApplyPresentation(svc);
             svc.LogAdded += _viewModel.OnServiceLogAdded;
             svc.ActiveChanged += _viewModel.OnServiceActiveChanged;

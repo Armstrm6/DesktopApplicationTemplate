@@ -345,6 +345,27 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
         }
 
+        internal void InitializeActivationState(bool isActive, bool notify = false)
+        {
+            var stateChanged = _isActive != isActive;
+            _isActive = isActive;
+
+            if (isActive)
+            {
+                SetRuntimeState(ServiceRuntimeState.Active);
+            }
+            else if (RuntimeState != ServiceRuntimeState.Error)
+            {
+                SetRuntimeState(ServiceRuntimeState.Inactive);
+            }
+
+            if (stateChanged && notify)
+            {
+                OnPropertyChanged(nameof(IsActive));
+                ActiveChanged?.Invoke(_isActive);
+            }
+        }
+
         public void SetRuntimeState(ServiceRuntimeState state)
         {
             RuntimeState = state;
