@@ -33,8 +33,25 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
     {
         private LogLevel _logLevelFilter = LogLevel.Debug;
 
+        private readonly Func<ServiceMessageTableViewModel> _messageTableFactory;
+        private readonly Dictionary<ServiceListModel, ServiceMessageTableViewModel> _serviceMessageTables = new();
+        private ServiceMessageTableViewModel _messageTable;
+
         /// <summary>Table view model for displaying message history.</summary>
-        public ServiceMessageTableViewModel MessageTable { get; }
+        public ServiceMessageTableViewModel MessageTable
+        {
+            get => _messageTable;
+            private set
+            {
+                if (_messageTable == value)
+                {
+                    return;
+                }
+
+                _messageTable = value ?? throw new ArgumentNullException(nameof(MessageTable));
+                OnPropertyChanged();
+            }
+        }
 
         /// <summary>Collection of TCP message rows.</summary>
         public ObservableCollection<TcpMessageRow> Messages { get; } = new();
@@ -207,11 +224,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
 
         private readonly ITcpRuntime _tcpRuntime;
 
-        public TcpServiceMessagesViewModel(ServiceMessageTableViewModel messageTable, IMessageRoutingService routing, ITcpRuntime tcpRuntime)
+        public TcpServiceMessagesViewModel(Func<ServiceMessageTableViewModel> messageTableFactory, IMessageRoutingService routing, ITcpRuntime tcpRuntime)
         {
-            MessageTable = messageTable ?? throw new ArgumentNullException(nameof(messageTable));
+            _messageTableFactory = messageTableFactory ?? throw new ArgumentNullException(nameof(messageTableFactory));
             _routing = routing ?? throw new ArgumentNullException(nameof(routing));
             _tcpRuntime = tcpRuntime ?? throw new ArgumentNullException(nameof(tcpRuntime));
+            MessageTable = _messageTableFactory();
             Messages.CollectionChanged += (_, _) =>
             {
                 OnPropertyChanged(nameof(IncomingData));
@@ -241,6 +259,13 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             }
 
             _service = service;
+            if (!_serviceMessageTables.TryGetValue(service, out var messageTable))
+            {
+                messageTable = _messageTableFactory();
+                _serviceMessageTables[service] = messageTable;
+            }
+
+            MessageTable = messageTable;
             _service.ActiveChanged += OnServiceActiveChanged;
             _service.PropertyChanged += OnServicePropertyChanged;
             _options = service.TcpOptions ?? new TcpServiceOptions();
