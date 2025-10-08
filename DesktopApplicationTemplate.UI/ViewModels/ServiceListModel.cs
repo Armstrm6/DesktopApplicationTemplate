@@ -477,10 +477,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             if (checkReference)
             {
                 UpdateMessageCounters(message);
-            }
-            if (checkReference)
-            {
-                HandleReference(message, color ?? WpfBrushes.Black, level);
+                if (EnableCrossServiceLogForwarding)
+                {
+                    HandleReference(message, brush, level);
+                }
             }
         }
 
@@ -640,6 +640,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 return;
             }
 
+            if (!EnableCrossServiceLogForwarding)
+            {
+                return;
+            }
+
             if (!TryExtractCrossServiceReference(message, out var typeStr, out var serviceName, out var forwardedMessage))
             {
                 return;
@@ -653,12 +658,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             var target = ResolveService(type, serviceName);
             if (target == null || ReferenceEquals(target, this))
             {
-                return;
-            }
-
-            if (!EnableCrossServiceLogForwarding)
-            {
-                RemoveAssociation(target);
                 return;
             }
 
@@ -679,11 +678,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
         }
 
-        private void RemoveAssociation(ServiceListModel target)
-        {
-            RemoveStaleAssociation(this, target);
-        }
-
         private static void RemoveStaleAssociation(ServiceListModel first, ServiceListModel second)
         {
             if (first is null || second is null)
@@ -698,15 +692,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private static void ClearAllCrossServiceAssociations()
         {
             var snapshot = GetRegisteredServicesSnapshot();
-            for (var i = 0; i < snapshot.Count; i++)
+            foreach (var service in snapshot)
             {
-                var current = snapshot[i];
-                for (var j = i + 1; j < snapshot.Count; j++)
-                {
-                    RemoveStaleAssociation(current, snapshot[j]);
-                }
-
-                current.AssociatedServices.Clear();
+                RemoveAllServiceAssociations(service, snapshot);
             }
         }
 
@@ -726,7 +714,23 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
 
             var snapshot = GetRegisteredServicesSnapshot();
-            foreach (var other in snapshot)
+            RemoveAllServiceAssociations(service, snapshot);
+
+            lock (ServiceRegistryLock)
+            {
+                ServiceRegistry.Remove(service);
+            }
+        }
+
+        private static void RemoveAllServiceAssociations(ServiceListModel service, IReadOnlyList<ServiceListModel>? snapshot = null)
+        {
+            if (service is null)
+            {
+                return;
+            }
+
+            var services = snapshot ?? GetRegisteredServicesSnapshot();
+            foreach (var other in services)
             {
                 if (ReferenceEquals(other, service))
                 {
@@ -737,11 +741,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
 
             service.AssociatedServices.Clear();
-
-            lock (ServiceRegistryLock)
-            {
-                ServiceRegistry.Remove(service);
-            }
         }
 
         private static bool TryExtractCrossServiceReference(string message, out string typeName, out string serviceName, out string forwardedMessage)
