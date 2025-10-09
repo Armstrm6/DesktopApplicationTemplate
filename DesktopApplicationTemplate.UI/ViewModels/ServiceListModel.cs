@@ -239,8 +239,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         /// <param name="outgoing">The number of outgoing messages previously recorded.</param>
         public void InitializeMessageCounts(int incoming, int outgoing)
         {
-            if (_messageHistory.Count > 0)
+            if (_messageHistory.Count == 0)
             {
+                ResetMessageCounts();
                 return;
             }
 
