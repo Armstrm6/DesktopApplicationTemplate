@@ -238,9 +238,9 @@ namespace DesktopApplicationTemplate.UI
             Current?.Shutdown();
         }
 
-        protected override void OnStartup(StartupEventArgs e)
+        protected override async void OnStartup(StartupEventArgs e)
         {
-            UiThreadTaskFactory.Run(() => OnStartupAsync());
+            await OnStartupAsync();
             base.OnStartup(e);
         }
 
@@ -281,9 +281,9 @@ namespace DesktopApplicationTemplate.UI
             application.ShutdownMode = ShutdownMode.OnMainWindowClose;
         }
 
-        protected override void OnExit(ExitEventArgs e)
+        protected override async void OnExit(ExitEventArgs e)
         {
-            UiThreadTaskFactory.Run(OnExitAsync);
+            await OnExitAsync();
             base.OnExit(e);
         }
 
