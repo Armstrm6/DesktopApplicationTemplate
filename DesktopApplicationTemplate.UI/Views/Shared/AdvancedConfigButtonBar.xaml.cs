@@ -2,7 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace DesktopApplicationTemplate.UI.Views;
+namespace DesktopApplicationTemplate.UI.Views.Shared;
 
 public partial class AdvancedConfigButtonBar : UserControl
 {
