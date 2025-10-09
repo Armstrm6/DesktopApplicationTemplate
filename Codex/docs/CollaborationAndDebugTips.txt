@@ -9,6 +9,15 @@ Purpose: Running log of what worked, what broke, and why.
 - Always record environment limitations (e.g., missing dotnet runtime).
 - When Windows collaborators run builds or tests, capture the commands and summarize their results so Codex can reference them.
 
+[2025-10-09 10:10] Topic: EV7 drive mapping automation
+Context: Added a PowerShell helper to remap EV7 installation media and SATA storage to the expected drive letters after automation failures.
+Observations: The script prioritizes SATA disks on bus type SATA, assigns the primary partition to drive D:, moves a second SATA disk to E:, and relocates the USB installer to E: or F: depending on availability. It safely frees conflicting letters before reassignment.
+Codex Limitations noticed: Unable to execute PowerShell or verify drive mappings inside the Linux container; validation must occur on a Windows host.
+Effective Prompts / Instructions that worked: User-provided remediation steps describing SATA1/SATA2 requirements and USB relocation.
+Decisions & Rationale: Capture the drive-letter policy in version control and provide a repeatable script for field technicians to resolve automation errors.
+Action Items: Run the script on the target system and confirm EV7 automation succeeds afterward.
+Related Commits/PRs:
+
 [2025-10-07 10:30] Topic: Service template asset consolidation
 Context: Moved the legacy `design/` mockups into the new `Service Templates/` top-level directory.
 Observations: Created MQTT, TCP, and ApplicationShell subfolders with a README that inventories the draw.io sources and SVG exports for each template.
