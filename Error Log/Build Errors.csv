@@ -44,4 +44,4 @@ XDG0008,DesktopApplicationTemplate.UI/FTPServiceView.xaml,2
 System.ArgumentException,DesktopApplicationTemplate.UI/CsvServiceCollectionExtensions.cs,1
 System.Windows.Markup.XamlParseException,DesktopApplicationTemplate.UI/MainWindow.xaml,1
 System.Windows.Markup.XamlParseException,DesktopApplicationTemplate.UI/TcpServiceMessagesView.xaml,1
-NOCMD,DesktopApplicationTemplate/dotnet,1
+NOCMD,DesktopApplicationTemplate/dotnet,2
