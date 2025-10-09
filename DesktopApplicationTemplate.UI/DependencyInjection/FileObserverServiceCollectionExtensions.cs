@@ -18,7 +18,6 @@ using DesktopApplicationTemplate.UI.Views.FileObserver.Advanced;
 using DesktopApplicationTemplate.UI.Views.FileObserver.Create;
 using DesktopApplicationTemplate.UI.Views.FileObserver.Edit;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace DesktopApplicationTemplate.UI.DependencyInjection
 {
@@ -42,7 +41,7 @@ namespace DesktopApplicationTemplate.UI.DependencyInjection
             services.AddTransient<FileObserverAdvancedConfigView>();
             services.AddTransient<FileObserverAdvancedConfigViewModel>();
 
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<ServiceUiRegistration<ServiceListModel, Page>>(sp => CreateFileObserverRegistration(sp.GetRequiredService<IServiceCatalog>())));
+            services.AddSingleton<ServiceUiRegistration<ServiceListModel, Page>>(sp => CreateFileObserverRegistration(sp.GetRequiredService<IServiceCatalog>()));
 
             return services;
         }

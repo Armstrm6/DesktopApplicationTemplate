@@ -17,7 +17,6 @@ using DesktopApplicationTemplate.UI.Views.Ftp.Advanced;
 using DesktopApplicationTemplate.UI.Views.Ftp.Create;
 using DesktopApplicationTemplate.UI.Views.Ftp.Edit;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using CoreFtpServerOptions = DesktopApplicationTemplate.Core.Services.Protocols.Ftp.FtpServerOptions;
 
 namespace DesktopApplicationTemplate.UI.DependencyInjection
@@ -42,7 +41,7 @@ namespace DesktopApplicationTemplate.UI.DependencyInjection
             services.AddTransient<FtpServerEditViewModel>();
             services.AddTransient<ServiceEditViewModelBase<CoreFtpServerOptions>, FtpServerEditViewModel>();
 
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<ServiceUiRegistration<ServiceListModel, Page>>(sp => CreateFtpRegistration(sp.GetRequiredService<IServiceCatalog>())));
+            services.AddSingleton<ServiceUiRegistration<ServiceListModel, Page>>(sp => CreateFtpRegistration(sp.GetRequiredService<IServiceCatalog>()));
 
             return services;
         }

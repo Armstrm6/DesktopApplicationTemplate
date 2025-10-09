@@ -18,7 +18,6 @@ using DesktopApplicationTemplate.UI.Views.Heartbeat.Advanced;
 using DesktopApplicationTemplate.UI.Views.Heartbeat.Create;
 using DesktopApplicationTemplate.UI.Views.Heartbeat.Edit;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace DesktopApplicationTemplate.UI.DependencyInjection
 {
@@ -42,7 +41,7 @@ namespace DesktopApplicationTemplate.UI.DependencyInjection
             services.AddTransient<HeartbeatAdvancedConfigView>();
             services.AddTransient<HeartbeatAdvancedConfigViewModel>();
 
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<ServiceUiRegistration<ServiceListModel, Page>>(sp => CreateHeartbeatRegistration(sp.GetRequiredService<IServiceCatalog>())));
+            services.AddSingleton<ServiceUiRegistration<ServiceListModel, Page>>(sp => CreateHeartbeatRegistration(sp.GetRequiredService<IServiceCatalog>()));
 
             return services;
         }

@@ -16,7 +16,6 @@ using DesktopApplicationTemplate.UI.Views.Tcp;
 using DesktopApplicationTemplate.UI.Views.Tcp.Create;
 using DesktopApplicationTemplate.UI.Views.Tcp.Edit;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace DesktopApplicationTemplate.UI.DependencyInjection
 {
@@ -40,7 +39,7 @@ namespace DesktopApplicationTemplate.UI.DependencyInjection
             services.AddTransient<TcpEditServiceViewModel>();
             services.AddTransient<ServiceEditViewModelBase<TcpServiceOptions>, TcpEditServiceViewModel>();
 
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<ServiceUiRegistration<ServiceListModel, Page>>(sp => CreateTcpRegistration(sp.GetRequiredService<IServiceCatalog>())));
+            services.AddSingleton<ServiceUiRegistration<ServiceListModel, Page>>(sp => CreateTcpRegistration(sp.GetRequiredService<IServiceCatalog>()));
 
             return services;
         }

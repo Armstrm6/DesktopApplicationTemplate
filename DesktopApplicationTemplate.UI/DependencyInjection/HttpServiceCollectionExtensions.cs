@@ -18,7 +18,6 @@ using DesktopApplicationTemplate.UI.Views.Http.Advanced;
 using DesktopApplicationTemplate.UI.Views.Http.Create;
 using DesktopApplicationTemplate.UI.Views.Http.Edit;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace DesktopApplicationTemplate.UI.DependencyInjection
 {
@@ -42,7 +41,7 @@ namespace DesktopApplicationTemplate.UI.DependencyInjection
             services.AddTransient<HttpAdvancedConfigView>();
             services.AddTransient<HttpAdvancedConfigViewModel>();
 
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<ServiceUiRegistration<ServiceListModel, Page>>(sp => CreateHttpRegistration(sp.GetRequiredService<IServiceCatalog>())));
+            services.AddSingleton<ServiceUiRegistration<ServiceListModel, Page>>(sp => CreateHttpRegistration(sp.GetRequiredService<IServiceCatalog>()));
 
             return services;
         }
