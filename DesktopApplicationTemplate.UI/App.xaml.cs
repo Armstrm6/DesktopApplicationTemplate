@@ -38,6 +38,7 @@ using DesktopApplicationTemplate.Models;
 using System.Threading.Tasks;
 using DesktopApplicationTemplate.Services;
 using System.Runtime.ExceptionServices;
+using DesktopApplicationTemplate.BuildDiagnostics;
 
 
 namespace DesktopApplicationTemplate.UI
@@ -125,6 +126,7 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<NetworkConfigurationViewModel>();
             services.AddSingleton<IRichTextLogger, NullRichTextLogger>();
             services.AddSingleton<ILoggingService, LoggingService>();
+            services.AddSingleton<IErrorTrackingService, ExcelErrorTrackingService>();
             services.AddSingleton<IMessageRoutingService, MessageRoutingService>();
             services.AddSingleton<IFileDialogService, FileDialogService>();
             services.AddSingleton<IStartupPreferencesService, StartupPreferencesDialogService>();
@@ -174,8 +176,10 @@ namespace DesktopApplicationTemplate.UI
         private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
             var logger = AppHost.Services.GetService<ILogger<App>>();
+            var errorTracking = AppHost.Services.GetService<IErrorTrackingService>();
             if (e.Exception is { } exception)
             {
+                errorTracking?.RecordRuntimeException(exception, null);
                 logger?.LogError(exception, "Unhandled dispatcher exception");
             }
             else
@@ -209,8 +213,10 @@ namespace DesktopApplicationTemplate.UI
         internal static async Task OnAppDomainUnhandledExceptionAsync(object? sender, UnhandledExceptionEventArgs e)
         {
             var logger = AppHost.Services.GetService<ILogger<App>>();
+            var errorTracking = AppHost.Services.GetService<IErrorTrackingService>();
             if (e.ExceptionObject is Exception ex)
             {
+                errorTracking?.RecordRuntimeException(ex, null);
                 logger?.LogError(ex, "Unhandled domain exception");
             }
             else

@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DesktopApplicationTemplate.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DesktopApplicationTemplate.UI", "DesktopApplicationTemplate.UI\DesktopApplicationTemplate.UI.csproj", "{ECFDCBB9-CEBD-4236-B96D-8519760318B9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DesktopApplicationTemplate.BuildDiagnostics", "DesktopApplicationTemplate.BuildDiagnostics\DesktopApplicationTemplate.BuildDiagnostics.csproj", "{F64E71F0-C894-47BB-88FC-B4612E5F9664}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
                 {ECFDCBB9-CEBD-4236-B96D-8519760318B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
                 {ECFDCBB9-CEBD-4236-B96D-8519760318B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
                 {ECFDCBB9-CEBD-4236-B96D-8519760318B9}.Release|Any CPU.Build.0 = Release|Any CPU
+                {F64E71F0-C894-47BB-88FC-B4612E5F9664}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                {F64E71F0-C894-47BB-88FC-B4612E5F9664}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                {F64E71F0-C894-47BB-88FC-B4612E5F9664}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                {F64E71F0-C894-47BB-88FC-B4612E5F9664}.Release|Any CPU.Build.0 = Release|Any CPU
         EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
