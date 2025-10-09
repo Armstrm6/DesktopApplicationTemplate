@@ -4,7 +4,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
-      xmlns:shared="clr-namespace:DesktopApplicationTemplate.UI.Views.Shared"
+      xmlns:shared="clr-namespace:DesktopApplicationTemplate.UI.Views.Shared;assembly=DesktopApplicationTemplate.UI"
       mc:Ignorable="d">
     <Page.Resources>
         <helpers:BooleanToBrushConverter x:Key="BooleanToBrushConverter" TrueBrush="Green" FalseBrush="Red"/>

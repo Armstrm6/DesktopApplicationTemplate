@@ -5,7 +5,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:behaviors="clr-namespace:DesktopApplicationTemplate.UI.Behaviors"
       xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
-      xmlns:views="clr-namespace:DesktopApplicationTemplate.UI.Views"
+      xmlns:views="clr-namespace:DesktopApplicationTemplate.UI.Views;assembly=DesktopApplicationTemplate.UI"
       mc:Ignorable="d">
     <Page.Resources>
         <helpers:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter" />
