@@ -32,7 +32,8 @@ public class HidEditServiceHandler : IEditServiceHandler
         var mainView = _getMainView();
         var mainViewModel = _getMainViewModel();
         var hidPage = mainView.GetOrCreateServicePage(service);
-        var options = service.HidOptions ?? new HidServiceOptions();
+        var options = service.GetOptions<HidServiceOptions>() ?? new HidServiceOptions();
+        service.SetOptions(options);
         var vm = ActivatorUtilities.CreateInstance<HidEditServiceViewModel>(_services, service.DisplayName, options);
         var editView = _services.GetRequiredService<HidEditServiceView>();
         editView.Initialize(vm);
@@ -54,7 +55,7 @@ public class HidEditServiceHandler : IEditServiceHandler
             }
 
             service.DisplayName = trimmed;
-            service.HidOptions = opts;
+            service.SetOptions(opts);
             if (hidPage != null)
                 mainView.ShowPage(hidPage);
             _ = mainViewModel.SaveServicesAsync();

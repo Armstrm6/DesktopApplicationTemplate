@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Windows.Controls;
-using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Csv;
 using DesktopApplicationTemplate.Core.Services.Protocols.FileObserver;
 using DesktopApplicationTemplate.Core.Services.Protocols.Ftp;
@@ -15,6 +15,7 @@ using DesktopApplicationTemplate.Core.Services.Protocols.Hid;
 using DesktopApplicationTemplate.Core.Services.Protocols.Mqtt;
 using DesktopApplicationTemplate.Core.Services.Protocols.Scp;
 using DesktopApplicationTemplate.Core.Services.Protocols.Tcp;
+using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Models;
@@ -119,6 +120,21 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         [JsonIgnore] public Page? ServicePage { get; set; }
 
         public ObservableCollection<string> AssociatedServices { get; } = new();
+
+        private Dictionary<string, JsonElement> _serializedOptions = new(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// Gets or sets the serialized representation of protocol options for persistence.
+        /// </summary>
+        [JsonInclude]
+        public Dictionary<string, JsonElement> SerializedOptions
+        {
+            get => _serializedOptions;
+            set => _serializedOptions = value ?? new Dictionary<string, JsonElement>(StringComparer.OrdinalIgnoreCase);
+        }
+
+        [JsonIgnore]
+        private readonly Dictionary<string, object?> _options = new(StringComparer.OrdinalIgnoreCase);
 
         private static readonly object ServiceRegistryLock = new();
         private static readonly HashSet<ServiceListModel> ServiceRegistry = new();
@@ -298,49 +314,247 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         }
 
         /// <summary>
-        /// TCP-specific configuration for this service, if applicable.
+        /// Stores strongly typed options for the service keyed by descriptor or service type.
         /// </summary>
-        public TcpServiceOptions? TcpOptions { get; set; }
+        /// <param name="options">The options instance to persist.</param>
+        /// <param name="key">Optional override for the storage key.</param>
+        /// <typeparam name="TOptions">The options type.</typeparam>
+        public void SetOptions<TOptions>(TOptions? options, string? key = null)
+            where TOptions : class
+        {
+            var keyCandidates = EnumerateOptionKeys(key).ToArray();
+            var resolvedKey = keyCandidates.FirstOrDefault();
+            if (resolvedKey is null)
+            {
+                return;
+            }
+
+            if (options is null)
+            {
+                _options.Remove(resolvedKey);
+                _serializedOptions.Remove(resolvedKey);
+                return;
+            }
+
+            _options[resolvedKey] = options;
+
+            try
+            {
+                _serializedOptions[resolvedKey] = JsonSerializer.SerializeToElement(options);
+            }
+            catch (NotSupportedException)
+            {
+                _serializedOptions.Remove(resolvedKey);
+            }
+            catch (JsonException)
+            {
+                _serializedOptions.Remove(resolvedKey);
+            }
+
+            foreach (var candidate in keyCandidates.Skip(1))
+            {
+                _options.Remove(candidate);
+                _serializedOptions.Remove(candidate);
+            }
+        }
 
         /// <summary>
-        /// FTP server-specific configuration for this service, if applicable.
+        /// Retrieves strongly typed options previously registered for the service.
         /// </summary>
-        public FtpServerOptions? FtpOptions { get; set; }
+        /// <typeparam name="TOptions">The expected options type.</typeparam>
+        /// <param name="key">Optional override for the storage key.</param>
+        /// <returns>The stored options instance, or <c>null</c> when unavailable.</returns>
+        public TOptions? GetOptions<TOptions>(string? key = null)
+            where TOptions : class
+        {
+            var keyCandidates = EnumerateOptionKeys(key).ToArray();
+            var resolvedKey = keyCandidates.FirstOrDefault();
+            if (resolvedKey is null)
+            {
+                return null;
+            }
+
+            foreach (var candidate in keyCandidates)
+            {
+                if (_options.TryGetValue(candidate, out var raw) && raw is TOptions typed)
+                {
+                    PromoteOptionKey(candidate, resolvedKey, typed);
+                    return typed;
+                }
+
+                if (_serializedOptions.TryGetValue(candidate, out var element))
+                {
+                    try
+                    {
+                        var deserialized = element.Deserialize<TOptions>();
+                        if (deserialized is not null)
+                        {
+                            PromoteOptionKey(candidate, resolvedKey, deserialized);
+                            return deserialized;
+                        }
+                    }
+                    catch (JsonException)
+                    {
+                        // Ignore and try next candidate.
+                    }
+                }
+            }
+
+            return null;
+        }
 
         /// <summary>
-        /// HTTP-specific configuration for this service, if applicable.
+        /// Retrieves existing options or creates a new instance via the provided factory.
         /// </summary>
-        public HttpServiceOptions? HttpOptions { get; set; }
+        /// <typeparam name="TOptions">The expected options type.</typeparam>
+        /// <param name="factory">Factory used when no stored options exist.</param>
+        /// <param name="key">Optional override for the storage key.</param>
+        /// <returns>The resolved options instance.</returns>
+        public TOptions GetOrCreateOptions<TOptions>(Func<TOptions> factory, string? key = null)
+            where TOptions : class
+        {
+            if (factory is null)
+            {
+                throw new ArgumentNullException(nameof(factory));
+            }
 
-        /// <summary>
-        /// HID-specific configuration for this service, if applicable.
-        /// </summary>
-        public HidServiceOptions? HidOptions { get; set; }
+            var existing = GetOptions<TOptions>(key);
+            if (existing is not null)
+            {
+                return existing;
+            }
 
-        /// <summary>
-        /// Heartbeat-specific configuration for this service, if applicable.
-        /// </summary>
-        public HeartbeatServiceOptions? HeartbeatOptions { get; set; }
+            var created = factory();
+            SetOptions(created, key);
+            return created;
+        }
 
-        /// <summary>
-        /// File Observer-specific configuration for this service, if applicable.
-        /// </summary>
-        public FileObserverServiceOptions? FileObserverOptions { get; set; }
+        private IEnumerable<string> EnumerateOptionKeys(string? overrideKey)
+        {
+            if (!string.IsNullOrWhiteSpace(overrideKey))
+            {
+                yield return overrideKey;
+            }
 
-        /// <summary>
-        /// SCP-specific configuration for this service, if applicable.
-        /// </summary>
-        public ScpServiceOptions? ScpOptions { get; set; }
+            if (!string.IsNullOrWhiteSpace(DescriptorId))
+            {
+                yield return DescriptorId;
+            }
 
-        /// <summary>
-        /// CSV creator-specific configuration for this service, if applicable.
-        /// </summary>
-        public CsvServiceOptions? CsvOptions { get; set; }
+            if (Type != default)
+            {
+                yield return Type.ToString();
+            }
+        }
 
-        /// <summary>
-        /// MQTT-specific configuration for this service, if applicable.
-        /// </summary>
-        public MqttServiceOptions? MqttOptions { get; set; }
+        private void PromoteOptionKey<TOptions>(string sourceKey, string targetKey, TOptions value)
+            where TOptions : class
+        {
+            if (string.Equals(sourceKey, targetKey, StringComparison.Ordinal))
+            {
+                _options[targetKey] = value;
+                return;
+            }
+
+            _options[targetKey] = value;
+            _options.Remove(sourceKey);
+
+            if (_serializedOptions.TryGetValue(sourceKey, out var element))
+            {
+                _serializedOptions[targetKey] = element;
+                _serializedOptions.Remove(sourceKey);
+                return;
+            }
+
+            try
+            {
+                _serializedOptions[targetKey] = JsonSerializer.SerializeToElement(value);
+            }
+            catch (NotSupportedException)
+            {
+                _serializedOptions.Remove(targetKey);
+            }
+            catch (JsonException)
+            {
+                _serializedOptions.Remove(targetKey);
+            }
+        }
+
+        #region Legacy option bindings
+
+        [JsonPropertyName("TcpOptions")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public TcpServiceOptions? LegacyTcpOptions
+        {
+            get => null;
+            set => SetOptions(value);
+        }
+
+        [JsonPropertyName("FtpOptions")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public FtpServerOptions? LegacyFtpOptions
+        {
+            get => null;
+            set => SetOptions(value);
+        }
+
+        [JsonPropertyName("HttpOptions")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public HttpServiceOptions? LegacyHttpOptions
+        {
+            get => null;
+            set => SetOptions(value);
+        }
+
+        [JsonPropertyName("HidOptions")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public HidServiceOptions? LegacyHidOptions
+        {
+            get => null;
+            set => SetOptions(value);
+        }
+
+        [JsonPropertyName("HeartbeatOptions")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public HeartbeatServiceOptions? LegacyHeartbeatOptions
+        {
+            get => null;
+            set => SetOptions(value);
+        }
+
+        [JsonPropertyName("FileObserverOptions")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public FileObserverServiceOptions? LegacyFileObserverOptions
+        {
+            get => null;
+            set => SetOptions(value);
+        }
+
+        [JsonPropertyName("ScpOptions")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public ScpServiceOptions? LegacyScpOptions
+        {
+            get => null;
+            set => SetOptions(value);
+        }
+
+        [JsonPropertyName("CsvOptions")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public CsvServiceOptions? LegacyCsvOptions
+        {
+            get => null;
+            set => SetOptions(value);
+        }
+
+        [JsonPropertyName("MqttOptions")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public MqttServiceOptions? LegacyMqttOptions
+        {
+            get => null;
+            set => SetOptions(value);
+        }
+
+        #endregion
 
         public static Func<ServiceType, string, ServiceListModel?>? ResolveService { get; set; }
 

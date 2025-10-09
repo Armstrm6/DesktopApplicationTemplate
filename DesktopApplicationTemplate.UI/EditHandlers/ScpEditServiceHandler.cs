@@ -32,7 +32,8 @@ public class ScpEditServiceHandler : IEditServiceHandler
         var mainView = _getMainView();
         var mainViewModel = _getMainViewModel();
         var scpPage = mainView.GetOrCreateServicePage(service);
-        var options = service.ScpOptions ?? new ScpServiceOptions();
+        var options = service.GetOptions<ScpServiceOptions>() ?? new ScpServiceOptions();
+        service.SetOptions(options);
         var vm = _services.GetRequiredService<ScpEditServiceViewModel>();
         vm.Load(service.DisplayName, options);
         var editView = _services.GetRequiredService<ScpEditServiceView>();
@@ -55,7 +56,7 @@ public class ScpEditServiceHandler : IEditServiceHandler
             }
 
             service.DisplayName = trimmed;
-            service.ScpOptions = opts;
+            service.SetOptions(opts);
             if (scpPage != null)
                 mainView.ShowPage(scpPage);
             _ = mainViewModel.SaveServicesAsync();

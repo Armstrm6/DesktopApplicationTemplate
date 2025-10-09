@@ -57,7 +57,7 @@ public sealed class MqttClientSessionManager : IMqttClientSessionManager
         {
             if (!_sessions.TryGetValue(service, out var client))
             {
-                var options = service.MqttOptions ??= new MqttServiceOptions();
+                var options = service.GetOrCreateOptions(() => new MqttServiceOptions());
                 client = _clientFactory.Create(options);
                 _sessions.Add(service, client);
                 _logger.LogDebug("Created MQTT client session for service {ServiceName}.", service.DisplayName);

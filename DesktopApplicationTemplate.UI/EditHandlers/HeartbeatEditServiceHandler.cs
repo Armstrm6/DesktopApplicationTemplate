@@ -33,7 +33,8 @@ public class HeartbeatEditServiceHandler : IEditServiceHandler
         var mainView = _getMainView();
         var mainViewModel = _getMainViewModel();
         var hbPage = mainView.GetOrCreateServicePage(service);
-        var options = service.HeartbeatOptions ?? new HeartbeatServiceOptions();
+        var options = service.GetOptions<HeartbeatServiceOptions>() ?? new HeartbeatServiceOptions();
+        service.SetOptions(options);
         var vm = ActivatorUtilities.CreateInstance<HeartbeatEditServiceViewModel>(_services, service.DisplayName, options);
         var editView = _services.GetRequiredService<HeartbeatEditServiceView>();
         editView.Initialize(vm);
@@ -55,7 +56,7 @@ public class HeartbeatEditServiceHandler : IEditServiceHandler
             }
 
             service.DisplayName = trimmed;
-            service.HeartbeatOptions = opts;
+            service.SetOptions(opts);
             if (hbPage != null)
                 mainView.ShowPage(hbPage);
             _ = mainViewModel.SaveServicesAsync();
