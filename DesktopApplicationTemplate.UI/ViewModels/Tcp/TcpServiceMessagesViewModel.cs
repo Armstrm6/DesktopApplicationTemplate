@@ -35,12 +35,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
 
         private readonly Func<ServiceMessageTableViewModel> _messageTableFactory;
         private readonly Dictionary<ServiceListModel, ServiceMessageTableViewModel> _serviceMessageTables = new();
-        private ServiceMessageTableViewModel _messageTable;
+        private ServiceMessageTableViewModel? _messageTable;
 
         /// <summary>Table view model for displaying message history.</summary>
         public ServiceMessageTableViewModel MessageTable
         {
-            get => _messageTable;
+            get => _messageTable ?? throw new InvalidOperationException("Message table has not been initialized.");
             private set
             {
                 if (_messageTable == value)
