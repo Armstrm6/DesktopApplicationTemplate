@@ -377,3 +377,7 @@ Resources/**/out/
 
 # Web project artifacts
 wwwroot/
+
+# Visual Studio diagnostics exports
+Build Errors/
+Build Errors/*.xlsx
