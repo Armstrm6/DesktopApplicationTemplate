@@ -45,6 +45,7 @@ namespace DesktopApplicationTemplate.UI.Views
         private readonly IServiceCatalog _serviceCatalog;
         private readonly IServiceProvider _serviceProvider;
         private readonly Dictionary<ServiceListModel, Action<LogEntry>> _serviceLogHandlers = new();
+        private readonly Dictionary<ServiceListModel, ServiceLoggingAdapter> _serviceLogAdapters = new();
         private readonly Dictionary<ServiceListModel, EventHandler> _tcpAdvancedHandlers = new();
         private readonly Dictionary<ServiceListModel, EventHandler> _mqttEditHandlers = new();
         private readonly Dictionary<ServiceListModel, MqttTagSubscriptionsViewModel> _mqttSubscriptionViewModels = new();
@@ -249,10 +250,25 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private void AttachServiceLogger(ServiceListModel svc, ILoggingViewModel vm)
         {
-            if (vm.Logger is null || _serviceLogHandlers.ContainsKey(svc))
+            if (_serviceLogHandlers.ContainsKey(svc))
             {
                 return;
             }
+
+            var baseLogger = vm.Logger ?? _serviceProvider.GetRequiredService<ILoggingService>();
+            ServiceLoggingAdapter adapter;
+
+            if (baseLogger is ServiceLoggingAdapter existingAdapter)
+            {
+                adapter = existingAdapter;
+            }
+            else
+            {
+                adapter = new ServiceLoggingAdapter(baseLogger, svc.Type, () => svc.DisplayName);
+            }
+
+            vm.Logger = adapter;
+            _serviceLogAdapters[svc] = adapter;
 
             Action<LogEntry> handler = entry =>
             {
@@ -274,7 +290,18 @@ namespace DesktopApplicationTemplate.UI.Views
                         brush = null;
                     }
 
-                    svc.AddLog(entry.Message, brush ?? Brushes.Black, entry.Level);
+                    var message = entry.Message;
+                    if (entry.ServiceType == svc.Type && !string.IsNullOrWhiteSpace(entry.ServiceName))
+                    {
+                        var contextToken = $"[{entry.ServiceType}.{entry.ServiceName}] ";
+                        var tokenIndex = message.IndexOf(contextToken, StringComparison.OrdinalIgnoreCase);
+                        if (tokenIndex >= 0)
+                        {
+                            message = message.Remove(tokenIndex, contextToken.Length);
+                        }
+                    }
+
+                    svc.AddLog(message, brush ?? Brushes.Black, entry.Level);
                 }
 
                 if (Dispatcher.CheckAccess())
@@ -351,6 +378,16 @@ namespace DesktopApplicationTemplate.UI.Views
                 }
 
                 _serviceLogHandlers.Remove(svc);
+            }
+
+            if (_serviceLogAdapters.Remove(svc, out var adapter))
+            {
+                if (svc.ServicePage?.DataContext is ILoggingViewModel vm)
+                {
+                    vm.Logger = adapter.InnerLogger;
+                }
+
+                adapter.Dispose();
             }
 
             DetachTcpAdvancedHandler(svc);

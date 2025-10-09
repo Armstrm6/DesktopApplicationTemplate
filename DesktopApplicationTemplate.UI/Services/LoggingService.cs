@@ -62,11 +62,30 @@ namespace DesktopApplicationTemplate.UI.Services
 
         public void Log(string message, LogLevel level)
         {
+            var now = DateTime.Now;
+            var normalizedMessage = message ?? string.Empty;
+            var hasServiceContext = TryExtractServiceContext(
+                normalizedMessage,
+                out var contextType,
+                out var contextName,
+                out var contextMessage);
+
+            if (hasServiceContext)
+            {
+                normalizedMessage = contextMessage;
+            }
+
+            var contextPrefix = hasServiceContext
+                ? $"[{contextType}.{contextName}] "
+                : string.Empty;
+
             var entry = new LogEntry
             {
-                Message = $"[{DateTime.Now:HH:mm:ss}] [{level}] {message}",
+                Message = $"[{now:HH:mm:ss}] [{level}] {contextPrefix}{normalizedMessage}",
                 Color = LevelToColor(level),
-                Level = level
+                Level = level,
+                ServiceType = hasServiceContext ? contextType : null,
+                ServiceName = hasServiceContext ? contextName : string.Empty
             };
 
             _logEntries.Add(entry);
@@ -79,6 +98,50 @@ namespace DesktopApplicationTemplate.UI.Services
             LogAdded?.Invoke(entry);
 
             _ = AppendToLogFileAsync(entry.Message + Environment.NewLine);
+        }
+
+        private static bool TryExtractServiceContext(
+            string message,
+            out ServiceType serviceType,
+            out string serviceName,
+            out string content)
+        {
+            serviceType = default;
+            serviceName = string.Empty;
+            content = message ?? string.Empty;
+
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                return false;
+            }
+
+            var firstDot = message.IndexOf('.');
+            if (firstDot <= 0)
+            {
+                return false;
+            }
+
+            var secondDot = message.IndexOf('.', firstDot + 1);
+            if (secondDot <= firstDot + 1)
+            {
+                return false;
+            }
+
+            var typeSegment = message[..firstDot];
+            if (!Enum.TryParse(typeSegment, ignoreCase: true, out serviceType))
+            {
+                return false;
+            }
+
+            var nameSegment = message[(firstDot + 1)..secondDot].Trim();
+            if (string.IsNullOrWhiteSpace(nameSegment))
+            {
+                return false;
+            }
+
+            serviceName = nameSegment;
+            content = message[(secondDot + 1)..].TrimStart();
+            return true;
         }
 
         private static string LevelToColor(LogLevel level) => level switch
