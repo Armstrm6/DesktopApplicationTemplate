@@ -37,6 +37,7 @@ using System.Threading;
 using DesktopApplicationTemplate.Models;
 using System.Threading.Tasks;
 using DesktopApplicationTemplate.Services;
+using System.Runtime.ExceptionServices;
 
 
 namespace DesktopApplicationTemplate.UI
@@ -238,10 +239,22 @@ namespace DesktopApplicationTemplate.UI
             Current?.Shutdown();
         }
 
-        protected override async void OnStartup(StartupEventArgs e)
+        protected override void OnStartup(StartupEventArgs e)
         {
-            await OnStartupAsync();
+            ExceptionDispatchInfo? capturedException = null;
+
+            try
+            {
+                UiThreadTaskFactory.Run(OnStartupAsync);
+            }
+            catch (Exception ex)
+            {
+                capturedException = ExceptionDispatchInfo.Capture(ex);
+            }
+
             base.OnStartup(e);
+
+            capturedException?.Throw();
         }
 
         private static async Task OnStartupAsync()
@@ -281,10 +294,22 @@ namespace DesktopApplicationTemplate.UI
             application.ShutdownMode = ShutdownMode.OnMainWindowClose;
         }
 
-        protected override async void OnExit(ExitEventArgs e)
+        protected override void OnExit(ExitEventArgs e)
         {
-            await OnExitAsync();
+            ExceptionDispatchInfo? capturedException = null;
+
+            try
+            {
+                UiThreadTaskFactory.Run(OnExitAsync);
+            }
+            catch (Exception ex)
+            {
+                capturedException = ExceptionDispatchInfo.Capture(ex);
+            }
+
             base.OnExit(e);
+
+            capturedException?.Throw();
         }
 
         private static async Task OnExitAsync()
