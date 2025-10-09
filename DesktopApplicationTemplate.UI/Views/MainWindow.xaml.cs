@@ -351,7 +351,7 @@ namespace DesktopApplicationTemplate.UI.Views
             viewModel.EditConnectionRequested += handler;
             _mqttEditHandlers[svc] = handler;
 
-            svc.MqttOptions ??= new MqttServiceOptions();
+            _ = svc.GetOrCreateOptions(() => new MqttServiceOptions());
 
             page.Initialize(svc, viewModel);
         }
@@ -437,7 +437,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 return;
             }
 
-            service.MqttOptions ??= new MqttServiceOptions();
+            _ = service.GetOrCreateOptions(() => new MqttServiceOptions());
 
             var logger = _serviceProvider.GetService<ILoggingService>();
             var viewModel = logger is null

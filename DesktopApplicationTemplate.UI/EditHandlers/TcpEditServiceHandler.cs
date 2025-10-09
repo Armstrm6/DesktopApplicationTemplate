@@ -31,7 +31,7 @@ public class TcpEditServiceHandler : IEditServiceHandler
     {
         var mainView = _getMainView();
         var mainViewModel = _getMainViewModel();
-        var options = service.TcpOptions ?? new TcpServiceOptions();
+        var options = service.GetOrCreateOptions(() => new TcpServiceOptions());
         var vm = _services.GetRequiredService<TcpEditServiceViewModel>();
         vm.ServiceType = service.Type;
         vm.Load(service.DisplayName, options);
@@ -60,7 +60,7 @@ public class TcpEditServiceHandler : IEditServiceHandler
 
             service.DisplayName = trimmed;
             service.Type = newType;
-            service.TcpOptions = opts;
+            service.SetOptions((TcpServiceOptions)opts);
             var page = mainView.GetOrCreateServicePage(service);
             if (page != null)
             {

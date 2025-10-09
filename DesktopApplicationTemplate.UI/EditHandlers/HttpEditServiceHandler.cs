@@ -33,7 +33,7 @@ public class HttpEditServiceHandler : IEditServiceHandler
         var mainView = _getMainView();
         var mainViewModel = _getMainViewModel();
         var httpPage = mainView.GetOrCreateServicePage(service);
-        var options = service.HttpOptions ?? new HttpServiceOptions();
+        var options = service.GetOrCreateOptions(() => new HttpServiceOptions());
         var vm = ActivatorUtilities.CreateInstance<HttpEditServiceViewModel>(_services, service.DisplayName, options);
         var editView = _services.GetRequiredService<HttpEditServiceView>();
         editView.Initialize(vm);
@@ -55,7 +55,7 @@ public class HttpEditServiceHandler : IEditServiceHandler
             }
 
             service.DisplayName = trimmed;
-            service.HttpOptions = opts;
+            service.SetOptions((HttpServiceOptions)opts);
             if (httpPage != null)
                 mainView.ShowPage(httpPage);
             _ = mainViewModel.SaveServicesAsync();
