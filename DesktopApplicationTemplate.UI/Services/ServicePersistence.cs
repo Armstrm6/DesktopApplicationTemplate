@@ -34,6 +34,16 @@ namespace DesktopApplicationTemplate.Persistence
             var index = 0;
             foreach (var s in services)
             {
+                var tcpOptions = s.GetOptions<TcpServiceOptions>();
+                var ftpOptions = s.GetOptions<FtpServerOptions>();
+                var httpOptions = s.GetOptions<HttpServiceOptions>();
+                var csvOptions = s.GetOptions<CsvServiceOptions>();
+                var heartbeatOptions = s.GetOptions<HeartbeatServiceOptions>();
+                var fileObserverOptions = s.GetOptions<FileObserverServiceOptions>();
+                var hidOptions = s.GetOptions<HidServiceOptions>();
+                var scpOptions = s.GetOptions<ScpServiceOptions>();
+                var mqttOptions = s.GetOptions<MqttServiceOptions>();
+
                 TcpServiceOptions? tcp = null;
                 CsvServiceOptions? csv = null;
                 FtpServerOptions? ftp = null;
@@ -42,132 +52,132 @@ namespace DesktopApplicationTemplate.Persistence
                 FileObserverServiceOptions? fileObserver = null;
                 HidServiceOptions? hid = null;
                 ScpServiceOptions? scp = null;
-                if (s.Type == ServiceType.Tcp && s.TcpOptions != null)
+                if (s.Type == ServiceType.Tcp && tcpOptions != null)
                 {
                     tcp = new TcpServiceOptions
                     {
-                        Host = s.TcpOptions.Host,
-                        Port = s.TcpOptions.Port,
-                        UseUdp = s.TcpOptions.UseUdp,
-                        SubnetMask = s.TcpOptions.SubnetMask,
-                        PrimaryDns = s.TcpOptions.PrimaryDns,
-                        AlternateDns = s.TcpOptions.AlternateDns,
-                        Mode = s.TcpOptions.Mode,
-                        ConnectionRole = s.TcpOptions.ConnectionRole,
-                        DestinationHost = s.TcpOptions.DestinationHost,
-                        DestinationPort = s.TcpOptions.DestinationPort,
-                        DestinationGateway = s.TcpOptions.DestinationGateway,
-                        DestinationSubnetMask = s.TcpOptions.DestinationSubnetMask,
-                        DestinationPrimaryDns = s.TcpOptions.DestinationPrimaryDns,
-                        DestinationAlternateDns = s.TcpOptions.DestinationAlternateDns,
-                        InputMessage = s.TcpOptions.InputMessage,
-                        Script = s.TcpOptions.Script,
-                        OutputMessage = s.TcpOptions.OutputMessage,
-                        LastTestMessage = s.TcpOptions.LastTestMessage
+                        Host = tcpOptions.Host,
+                        Port = tcpOptions.Port,
+                        UseUdp = tcpOptions.UseUdp,
+                        SubnetMask = tcpOptions.SubnetMask,
+                        PrimaryDns = tcpOptions.PrimaryDns,
+                        AlternateDns = tcpOptions.AlternateDns,
+                        Mode = tcpOptions.Mode,
+                        ConnectionRole = tcpOptions.ConnectionRole,
+                        DestinationHost = tcpOptions.DestinationHost,
+                        DestinationPort = tcpOptions.DestinationPort,
+                        DestinationGateway = tcpOptions.DestinationGateway,
+                        DestinationSubnetMask = tcpOptions.DestinationSubnetMask,
+                        DestinationPrimaryDns = tcpOptions.DestinationPrimaryDns,
+                        DestinationAlternateDns = tcpOptions.DestinationAlternateDns,
+                        InputMessage = tcpOptions.InputMessage,
+                        Script = tcpOptions.Script,
+                        OutputMessage = tcpOptions.OutputMessage,
+                        LastTestMessage = tcpOptions.LastTestMessage
                     };
                 }
 
-                if (s.Type == ServiceType.Ftp && s.FtpOptions != null)
+                if (s.Type == ServiceType.Ftp && ftpOptions != null)
                 {
                     ftp = new FtpServerOptions
                     {
-                        Port = s.FtpOptions.Port,
-                        RootPath = s.FtpOptions.RootPath,
-                        AllowAnonymous = s.FtpOptions.AllowAnonymous,
-                        Username = s.FtpOptions.Username,
-                        Password = s.FtpOptions.Password
+                        Port = ftpOptions.Port,
+                        RootPath = ftpOptions.RootPath,
+                        AllowAnonymous = ftpOptions.AllowAnonymous,
+                        Username = ftpOptions.Username,
+                        Password = ftpOptions.Password
                     };
                 }
 
-                if (s.Type == ServiceType.Http && s.HttpOptions != null)
+                if (s.Type == ServiceType.Http && httpOptions != null)
                 {
                     http = new HttpServiceOptions
                     {
-                        BaseUrl = s.HttpOptions.BaseUrl,
-                        Username = s.HttpOptions.Username,
-                        Password = s.HttpOptions.Password,
-                        ClientCertificatePath = s.HttpOptions.ClientCertificatePath
+                        BaseUrl = httpOptions.BaseUrl,
+                        Username = httpOptions.Username,
+                        Password = httpOptions.Password,
+                        ClientCertificatePath = httpOptions.ClientCertificatePath
                     };
                 }
-                if (s.Type == ServiceType.Csv && s.CsvOptions != null)
+                if (s.Type == ServiceType.Csv && csvOptions != null)
                 {
                     csv = new CsvServiceOptions
                     {
-                        OutputPath = s.CsvOptions?.OutputPath ?? string.Empty,
-                        Delimiter = s.CsvOptions?.Delimiter ?? ",",
-                        IncludeHeaders = s.CsvOptions?.IncludeHeaders ?? true
+                        OutputPath = csvOptions.OutputPath ?? string.Empty,
+                        Delimiter = csvOptions.Delimiter ?? ",",
+                        IncludeHeaders = csvOptions.IncludeHeaders ?? true
                     };
                 }
 
-                if (s.Type == ServiceType.Heartbeat && s.HeartbeatOptions != null)
+                if (s.Type == ServiceType.Heartbeat && heartbeatOptions != null)
                 {
                     heartbeat = new HeartbeatServiceOptions
                     {
-                        BaseMessage = s.HeartbeatOptions.BaseMessage,
-                        IncludePing = s.HeartbeatOptions.IncludePing,
-                        IncludeStatus = s.HeartbeatOptions.IncludeStatus
+                        BaseMessage = heartbeatOptions.BaseMessage,
+                        IncludePing = heartbeatOptions.IncludePing,
+                        IncludeStatus = heartbeatOptions.IncludeStatus
                     };
                 }
 
-                if (s.Type == ServiceType.FileObserver && s.FileObserverOptions != null)
+                if (s.Type == ServiceType.FileObserver && fileObserverOptions != null)
                 {
                     fileObserver = new FileObserverServiceOptions
                     {
-                        FilePath = s.FileObserverOptions.FilePath,
-                        ImageNames = s.FileObserverOptions.ImageNames,
-                        SendAllImages = s.FileObserverOptions.SendAllImages,
-                        SendFirstX = s.FileObserverOptions.SendFirstX,
-                        XCount = s.FileObserverOptions.XCount,
-                        SendTcpCommand = s.FileObserverOptions.SendTcpCommand,
-                        TcpCommand = s.FileObserverOptions.TcpCommand
+                        FilePath = fileObserverOptions.FilePath,
+                        ImageNames = fileObserverOptions.ImageNames,
+                        SendAllImages = fileObserverOptions.SendAllImages,
+                        SendFirstX = fileObserverOptions.SendFirstX,
+                        XCount = fileObserverOptions.XCount,
+                        SendTcpCommand = fileObserverOptions.SendTcpCommand,
+                        TcpCommand = fileObserverOptions.TcpCommand
                     };
                 }
 
-                if (s.Type == ServiceType.Hid && s.HidOptions != null)
+                if (s.Type == ServiceType.Hid && hidOptions != null)
                 {
                     hid = new HidServiceOptions
                     {
-                        MessageTemplate = s.HidOptions.MessageTemplate,
-                        UsbProtocol = s.HidOptions.UsbProtocol,
-                        AttachedService = s.HidOptions.AttachedService,
-                        DebounceTimeMs = s.HidOptions.DebounceTimeMs,
-                        KeyDownTimeMs = s.HidOptions.KeyDownTimeMs
+                        MessageTemplate = hidOptions.MessageTemplate,
+                        UsbProtocol = hidOptions.UsbProtocol,
+                        AttachedService = hidOptions.AttachedService,
+                        DebounceTimeMs = hidOptions.DebounceTimeMs,
+                        KeyDownTimeMs = hidOptions.KeyDownTimeMs
                     };
                 }
 
-                if (s.Type == ServiceType.Scp && s.ScpOptions != null)
+                if (s.Type == ServiceType.Scp && scpOptions != null)
                 {
                     scp = new ScpServiceOptions
                     {
-                        Host = s.ScpOptions.Host,
-                        Port = s.ScpOptions.Port,
-                        Username = s.ScpOptions.Username,
-                        Password = s.ScpOptions.Password,
-                        LocalPath = s.ScpOptions.LocalPath,
-                        RemotePath = s.ScpOptions.RemotePath
+                        Host = scpOptions.Host,
+                        Port = scpOptions.Port,
+                        Username = scpOptions.Username,
+                        Password = scpOptions.Password,
+                        LocalPath = scpOptions.LocalPath,
+                        RemotePath = scpOptions.RemotePath
                     };
                 }
 
                 MqttServiceOptions? mqtt = null;
-                if (s.Type == ServiceType.Mqtt && s.MqttOptions != null)
+                if (s.Type == ServiceType.Mqtt && mqttOptions != null)
                 {
                     mqtt = new MqttServiceOptions
                     {
-                        Host = s.MqttOptions.Host,
-                        Port = s.MqttOptions.Port,
-                        ClientId = s.MqttOptions.ClientId,
-                        Username = s.MqttOptions.Username,
-                        Password = s.MqttOptions.Password,
-                        ConnectionType = s.MqttOptions.ConnectionType,
-                        WebSocketPath = s.MqttOptions.WebSocketPath,
-                        ClientCertificate = s.MqttOptions.ClientCertificate?.ToArray(),
-                        WillTopic = s.MqttOptions.WillTopic,
-                        WillPayload = s.MqttOptions.WillPayload,
-                        WillQualityOfService = s.MqttOptions.WillQualityOfService,
-                        WillRetain = s.MqttOptions.WillRetain,
-                        KeepAliveSeconds = s.MqttOptions.KeepAliveSeconds,
-                        CleanSession = s.MqttOptions.CleanSession,
-                        ReconnectDelay = s.MqttOptions.ReconnectDelay
+                        Host = mqttOptions.Host,
+                        Port = mqttOptions.Port,
+                        ClientId = mqttOptions.ClientId,
+                        Username = mqttOptions.Username,
+                        Password = mqttOptions.Password,
+                        ConnectionType = mqttOptions.ConnectionType,
+                        WebSocketPath = mqttOptions.WebSocketPath,
+                        ClientCertificate = mqttOptions.ClientCertificate?.ToArray(),
+                        WillTopic = mqttOptions.WillTopic,
+                        WillPayload = mqttOptions.WillPayload,
+                        WillQualityOfService = mqttOptions.WillQualityOfService,
+                        WillRetain = mqttOptions.WillRetain,
+                        KeepAliveSeconds = mqttOptions.KeepAliveSeconds,
+                        CleanSession = mqttOptions.CleanSession,
+                        ReconnectDelay = mqttOptions.ReconnectDelay
                     };
                 }
 

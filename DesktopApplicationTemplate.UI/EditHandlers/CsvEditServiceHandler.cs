@@ -31,7 +31,7 @@ public class CsvEditServiceHandler : IEditServiceHandler
         var mainView = _getMainView();
         var mainViewModel = _getMainViewModel();
         var csvPage = mainView.GetOrCreateServicePage(service);
-        var options = service.CsvOptions ?? new CsvServiceOptions();
+        var options = service.GetOrCreateOptions(() => new CsvServiceOptions());
         var vm = _services.GetRequiredService<CsvServiceEditorViewModel>();
         vm.Load(service.DisplayName, options);
         var editView = _services.GetRequiredService<CsvServiceEditorView>();
@@ -54,7 +54,7 @@ public class CsvEditServiceHandler : IEditServiceHandler
             }
 
             service.DisplayName = trimmed;
-            service.CsvOptions = opts;
+            service.SetOptions((CsvServiceOptions)opts);
             if (csvPage != null)
                 mainView.ShowPage(csvPage);
             _ = mainViewModel.SaveServicesAsync();

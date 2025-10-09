@@ -268,7 +268,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             MessageTable = messageTable;
             _service.ActiveChanged += OnServiceActiveChanged;
             _service.PropertyChanged += OnServicePropertyChanged;
-            _options = service.TcpOptions ?? new TcpServiceOptions();
+            _options = service.GetOrCreateOptions(() => new TcpServiceOptions());
             ServiceType = service.Type;
             _suppressRuntimeInitialization = true;
             try
@@ -1380,12 +1380,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                 return Task.CompletedTask;
             }
 
-            var options = _service.TcpOptions ?? new TcpServiceOptions();
+            var options = _service.GetOrCreateOptions(() => new TcpServiceOptions());
             options.Script = Script ?? string.Empty;
             options.LastTestMessage = TestMessage ?? string.Empty;
             options.InputMessage = TestMessage ?? string.Empty;
             options.OutputMessage = ScriptOutputMessage ?? string.Empty;
-            _service.TcpOptions = options;
+            _service.SetOptions(options);
             _options = options;
 
             return Task.CompletedTask;

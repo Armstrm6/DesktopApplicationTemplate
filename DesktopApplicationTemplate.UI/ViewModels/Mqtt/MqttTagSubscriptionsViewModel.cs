@@ -47,7 +47,7 @@ public class MqttTagSubscriptionsViewModel : ValidatableViewModelBase, ILoggingV
         ArgumentNullException.ThrowIfNull(service);
         ArgumentNullException.ThrowIfNull(sessionManager);
 
-        _options = service.MqttOptions ??= new MqttServiceOptions();
+        _options = service.GetOrCreateOptions(() => new MqttServiceOptions());
         _clientService = sessionManager.GetClient(service);
 
         Subscriptions = new ObservableCollection<TagSubscription>();

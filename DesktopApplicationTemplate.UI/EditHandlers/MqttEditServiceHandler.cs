@@ -31,8 +31,7 @@ public class MqttEditServiceHandler : IEditServiceHandler
         var mainView = _getMainView();
         var mainViewModel = _getMainViewModel();
         var tagPage = mainView.GetOrCreateServicePage(service);
-        var options = service.MqttOptions ?? new MqttServiceOptions();
-        service.MqttOptions = options;
+        var options = service.GetOrCreateOptions(() => new MqttServiceOptions());
         var vm = ActivatorUtilities.CreateInstance<MqttEditServiceViewModel>(_services, service.DisplayName, options);
         var editView = _services.GetRequiredService<MqttEditServiceView>();
         editView.Initialize(vm);
@@ -53,6 +52,7 @@ public class MqttEditServiceHandler : IEditServiceHandler
                 mainViewModel.ClearRoutingCache(service.Type, trimmed);
             }
 
+            service.SetOptions((MqttServiceOptions)opts);
             service.DisplayName = trimmed;
             if (tagPage != null)
                 mainView.ShowPage(tagPage);
