@@ -53,7 +53,8 @@ public class MqttEditConnectionViewModel : ValidatableViewModelBase, ILoggingVie
         ArgumentNullException.ThrowIfNull(sessionManager);
 
         _clientService = sessionManager.GetClient(service);
-        _options = service.MqttOptions ??= new MqttServiceOptions();
+        _options = service.GetOptions<MqttServiceOptions>() ?? new MqttServiceOptions();
+        service.SetOptions(_options);
         _fileDialogService = fileDialogService ?? throw new ArgumentNullException(nameof(fileDialogService));
         Logger = logger;
 

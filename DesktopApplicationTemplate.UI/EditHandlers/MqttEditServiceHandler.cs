@@ -31,8 +31,8 @@ public class MqttEditServiceHandler : IEditServiceHandler
         var mainView = _getMainView();
         var mainViewModel = _getMainViewModel();
         var tagPage = mainView.GetOrCreateServicePage(service);
-        var options = service.MqttOptions ?? new MqttServiceOptions();
-        service.MqttOptions = options;
+        var options = service.GetOptions<MqttServiceOptions>() ?? new MqttServiceOptions();
+        service.SetOptions(options);
         var vm = ActivatorUtilities.CreateInstance<MqttEditServiceViewModel>(_services, service.DisplayName, options);
         var editView = _services.GetRequiredService<MqttEditServiceView>();
         editView.Initialize(vm);

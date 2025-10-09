@@ -42,132 +42,141 @@ namespace DesktopApplicationTemplate.Persistence
                 FileObserverServiceOptions? fileObserver = null;
                 HidServiceOptions? hid = null;
                 ScpServiceOptions? scp = null;
-                if (s.Type == ServiceType.Tcp && s.TcpOptions != null)
+                var tcpSource = s.GetOptions<TcpServiceOptions>();
+                if (s.Type == ServiceType.Tcp && tcpSource != null)
                 {
                     tcp = new TcpServiceOptions
                     {
-                        Host = s.TcpOptions.Host,
-                        Port = s.TcpOptions.Port,
-                        UseUdp = s.TcpOptions.UseUdp,
-                        SubnetMask = s.TcpOptions.SubnetMask,
-                        PrimaryDns = s.TcpOptions.PrimaryDns,
-                        AlternateDns = s.TcpOptions.AlternateDns,
-                        Mode = s.TcpOptions.Mode,
-                        ConnectionRole = s.TcpOptions.ConnectionRole,
-                        DestinationHost = s.TcpOptions.DestinationHost,
-                        DestinationPort = s.TcpOptions.DestinationPort,
-                        DestinationGateway = s.TcpOptions.DestinationGateway,
-                        DestinationSubnetMask = s.TcpOptions.DestinationSubnetMask,
-                        DestinationPrimaryDns = s.TcpOptions.DestinationPrimaryDns,
-                        DestinationAlternateDns = s.TcpOptions.DestinationAlternateDns,
-                        InputMessage = s.TcpOptions.InputMessage,
-                        Script = s.TcpOptions.Script,
-                        OutputMessage = s.TcpOptions.OutputMessage,
-                        LastTestMessage = s.TcpOptions.LastTestMessage
+                        Host = tcpSource.Host,
+                        Port = tcpSource.Port,
+                        UseUdp = tcpSource.UseUdp,
+                        SubnetMask = tcpSource.SubnetMask,
+                        PrimaryDns = tcpSource.PrimaryDns,
+                        AlternateDns = tcpSource.AlternateDns,
+                        Mode = tcpSource.Mode,
+                        ConnectionRole = tcpSource.ConnectionRole,
+                        DestinationHost = tcpSource.DestinationHost,
+                        DestinationPort = tcpSource.DestinationPort,
+                        DestinationGateway = tcpSource.DestinationGateway,
+                        DestinationSubnetMask = tcpSource.DestinationSubnetMask,
+                        DestinationPrimaryDns = tcpSource.DestinationPrimaryDns,
+                        DestinationAlternateDns = tcpSource.DestinationAlternateDns,
+                        InputMessage = tcpSource.InputMessage,
+                        Script = tcpSource.Script,
+                        OutputMessage = tcpSource.OutputMessage,
+                        LastTestMessage = tcpSource.LastTestMessage
                     };
                 }
 
-                if (s.Type == ServiceType.Ftp && s.FtpOptions != null)
+                var ftpSource = s.GetOptions<FtpServerOptions>();
+                if (s.Type == ServiceType.Ftp && ftpSource != null)
                 {
                     ftp = new FtpServerOptions
                     {
-                        Port = s.FtpOptions.Port,
-                        RootPath = s.FtpOptions.RootPath,
-                        AllowAnonymous = s.FtpOptions.AllowAnonymous,
-                        Username = s.FtpOptions.Username,
-                        Password = s.FtpOptions.Password
+                        Port = ftpSource.Port,
+                        RootPath = ftpSource.RootPath,
+                        AllowAnonymous = ftpSource.AllowAnonymous,
+                        Username = ftpSource.Username,
+                        Password = ftpSource.Password
                     };
                 }
 
-                if (s.Type == ServiceType.Http && s.HttpOptions != null)
+                var httpSource = s.GetOptions<HttpServiceOptions>();
+                if (s.Type == ServiceType.Http && httpSource != null)
                 {
                     http = new HttpServiceOptions
                     {
-                        BaseUrl = s.HttpOptions.BaseUrl,
-                        Username = s.HttpOptions.Username,
-                        Password = s.HttpOptions.Password,
-                        ClientCertificatePath = s.HttpOptions.ClientCertificatePath
+                        BaseUrl = httpSource.BaseUrl,
+                        Username = httpSource.Username,
+                        Password = httpSource.Password,
+                        ClientCertificatePath = httpSource.ClientCertificatePath
                     };
                 }
-                if (s.Type == ServiceType.Csv && s.CsvOptions != null)
+                var csvSource = s.GetOptions<CsvServiceOptions>();
+                if (s.Type == ServiceType.Csv && csvSource != null)
                 {
                     csv = new CsvServiceOptions
                     {
-                        OutputPath = s.CsvOptions?.OutputPath ?? string.Empty,
-                        Delimiter = s.CsvOptions?.Delimiter ?? ",",
-                        IncludeHeaders = s.CsvOptions?.IncludeHeaders ?? true
+                        OutputPath = csvSource.OutputPath ?? string.Empty,
+                        Delimiter = csvSource.Delimiter ?? ",",
+                        IncludeHeaders = csvSource.IncludeHeaders ?? true
                     };
                 }
 
-                if (s.Type == ServiceType.Heartbeat && s.HeartbeatOptions != null)
+                var heartbeatSource = s.GetOptions<HeartbeatServiceOptions>();
+                if (s.Type == ServiceType.Heartbeat && heartbeatSource != null)
                 {
                     heartbeat = new HeartbeatServiceOptions
                     {
-                        BaseMessage = s.HeartbeatOptions.BaseMessage,
-                        IncludePing = s.HeartbeatOptions.IncludePing,
-                        IncludeStatus = s.HeartbeatOptions.IncludeStatus
+                        BaseMessage = heartbeatSource.BaseMessage,
+                        IncludePing = heartbeatSource.IncludePing,
+                        IncludeStatus = heartbeatSource.IncludeStatus
                     };
                 }
 
-                if (s.Type == ServiceType.FileObserver && s.FileObserverOptions != null)
+                var fileObserverSource = s.GetOptions<FileObserverServiceOptions>();
+                if (s.Type == ServiceType.FileObserver && fileObserverSource != null)
                 {
                     fileObserver = new FileObserverServiceOptions
                     {
-                        FilePath = s.FileObserverOptions.FilePath,
-                        ImageNames = s.FileObserverOptions.ImageNames,
-                        SendAllImages = s.FileObserverOptions.SendAllImages,
-                        SendFirstX = s.FileObserverOptions.SendFirstX,
-                        XCount = s.FileObserverOptions.XCount,
-                        SendTcpCommand = s.FileObserverOptions.SendTcpCommand,
-                        TcpCommand = s.FileObserverOptions.TcpCommand
+                        FilePath = fileObserverSource.FilePath,
+                        ImageNames = fileObserverSource.ImageNames,
+                        SendAllImages = fileObserverSource.SendAllImages,
+                        SendFirstX = fileObserverSource.SendFirstX,
+                        XCount = fileObserverSource.XCount,
+                        SendTcpCommand = fileObserverSource.SendTcpCommand,
+                        TcpCommand = fileObserverSource.TcpCommand
                     };
                 }
 
-                if (s.Type == ServiceType.Hid && s.HidOptions != null)
+                var hidSource = s.GetOptions<HidServiceOptions>();
+                if (s.Type == ServiceType.Hid && hidSource != null)
                 {
                     hid = new HidServiceOptions
                     {
-                        MessageTemplate = s.HidOptions.MessageTemplate,
-                        UsbProtocol = s.HidOptions.UsbProtocol,
-                        AttachedService = s.HidOptions.AttachedService,
-                        DebounceTimeMs = s.HidOptions.DebounceTimeMs,
-                        KeyDownTimeMs = s.HidOptions.KeyDownTimeMs
+                        MessageTemplate = hidSource.MessageTemplate,
+                        UsbProtocol = hidSource.UsbProtocol,
+                        AttachedService = hidSource.AttachedService,
+                        DebounceTimeMs = hidSource.DebounceTimeMs,
+                        KeyDownTimeMs = hidSource.KeyDownTimeMs
                     };
                 }
 
-                if (s.Type == ServiceType.Scp && s.ScpOptions != null)
+                var scpSource = s.GetOptions<ScpServiceOptions>();
+                if (s.Type == ServiceType.Scp && scpSource != null)
                 {
                     scp = new ScpServiceOptions
                     {
-                        Host = s.ScpOptions.Host,
-                        Port = s.ScpOptions.Port,
-                        Username = s.ScpOptions.Username,
-                        Password = s.ScpOptions.Password,
-                        LocalPath = s.ScpOptions.LocalPath,
-                        RemotePath = s.ScpOptions.RemotePath
+                        Host = scpSource.Host,
+                        Port = scpSource.Port,
+                        Username = scpSource.Username,
+                        Password = scpSource.Password,
+                        LocalPath = scpSource.LocalPath,
+                        RemotePath = scpSource.RemotePath
                     };
                 }
 
                 MqttServiceOptions? mqtt = null;
-                if (s.Type == ServiceType.Mqtt && s.MqttOptions != null)
+                var mqttSource = s.GetOptions<MqttServiceOptions>();
+                if (s.Type == ServiceType.Mqtt && mqttSource != null)
                 {
                     mqtt = new MqttServiceOptions
                     {
-                        Host = s.MqttOptions.Host,
-                        Port = s.MqttOptions.Port,
-                        ClientId = s.MqttOptions.ClientId,
-                        Username = s.MqttOptions.Username,
-                        Password = s.MqttOptions.Password,
-                        ConnectionType = s.MqttOptions.ConnectionType,
-                        WebSocketPath = s.MqttOptions.WebSocketPath,
-                        ClientCertificate = s.MqttOptions.ClientCertificate?.ToArray(),
-                        WillTopic = s.MqttOptions.WillTopic,
-                        WillPayload = s.MqttOptions.WillPayload,
-                        WillQualityOfService = s.MqttOptions.WillQualityOfService,
-                        WillRetain = s.MqttOptions.WillRetain,
-                        KeepAliveSeconds = s.MqttOptions.KeepAliveSeconds,
-                        CleanSession = s.MqttOptions.CleanSession,
-                        ReconnectDelay = s.MqttOptions.ReconnectDelay
+                        Host = mqttSource.Host,
+                        Port = mqttSource.Port,
+                        ClientId = mqttSource.ClientId,
+                        Username = mqttSource.Username,
+                        Password = mqttSource.Password,
+                        ConnectionType = mqttSource.ConnectionType,
+                        WebSocketPath = mqttSource.WebSocketPath,
+                        ClientCertificate = mqttSource.ClientCertificate?.ToArray(),
+                        WillTopic = mqttSource.WillTopic,
+                        WillPayload = mqttSource.WillPayload,
+                        WillQualityOfService = mqttSource.WillQualityOfService,
+                        WillRetain = mqttSource.WillRetain,
+                        KeepAliveSeconds = mqttSource.KeepAliveSeconds,
+                        CleanSession = mqttSource.CleanSession,
+                        ReconnectDelay = mqttSource.ReconnectDelay
                     };
                 }
 

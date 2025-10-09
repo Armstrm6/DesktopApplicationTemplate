@@ -337,7 +337,7 @@ namespace DesktopApplicationTemplate.UI
                         IsActive = false
                     };
 
-                    newService.MqttOptions = ctx.Options ?? new MqttServiceOptions();
+                    newService.SetOptions(ctx.Options ?? new MqttServiceOptions(), descriptor.Id);
                     mainView.GetOrCreateServicePage(newService);
 
                     return newService;
@@ -375,9 +375,10 @@ namespace DesktopApplicationTemplate.UI
                         DescriptorId = descriptor.Id,
                         DisplayName = ctx.Name,
                         Type = ServiceType.Ftp,
-                        IsActive = false,
-                        FtpOptions = ftpOptions
+                        IsActive = false
                     };
+
+                    svc.SetOptions(ftpOptions, descriptor.Id);
 
                     mainView.GetOrCreateServicePage(svc);
 
@@ -424,9 +425,10 @@ namespace DesktopApplicationTemplate.UI
                         DescriptorId = descriptor.Id,
                         DisplayName = ctx.Name,
                         Type = ServiceType.Http,
-                        IsActive = false,
-                        HttpOptions = ctx.Options
+                        IsActive = false
                     };
+
+                    svc.SetOptions(ctx.Options ?? new HttpServiceOptions(), descriptor.Id);
 
                     mainView.GetOrCreateServicePage(svc);
                     return svc;
@@ -472,9 +474,10 @@ namespace DesktopApplicationTemplate.UI
                         DescriptorId = descriptor.Id,
                         DisplayName = ctx.Name,
                         Type = ServiceType.Tcp,
-                        IsActive = false,
-                        TcpOptions = ctx.Options
+                        IsActive = false
                     };
+
+                    svc.SetOptions(ctx.Options ?? new TcpServiceOptions(), descriptor.Id);
 
                     mainView.GetOrCreateServicePage(svc);
                     return svc;
@@ -510,9 +513,10 @@ namespace DesktopApplicationTemplate.UI
                         DescriptorId = descriptor.Id,
                         DisplayName = ctx.Name,
                         Type = ServiceType.Hid,
-                        IsActive = false,
-                        HidOptions = ctx.Options
+                        IsActive = false
                     };
+
+                    svc.SetOptions(ctx.Options ?? new HidServiceOptions(), descriptor.Id);
 
                     mainView.GetOrCreateServicePage(svc);
                     return svc;
@@ -558,9 +562,10 @@ namespace DesktopApplicationTemplate.UI
                         DescriptorId = descriptor.Id,
                         DisplayName = ctx.Name,
                         Type = ServiceType.Scp,
-                        IsActive = false,
-                        ScpOptions = ctx.Options
+                        IsActive = false
                     };
+
+                    svc.SetOptions(ctx.Options ?? new ScpServiceOptions(), descriptor.Id);
 
                     mainView.GetOrCreateServicePage(svc);
                     return svc;
@@ -606,9 +611,10 @@ namespace DesktopApplicationTemplate.UI
                         DescriptorId = descriptor.Id,
                         DisplayName = ctx.Name,
                         Type = ServiceType.FileObserver,
-                        IsActive = false,
-                        FileObserverOptions = ctx.Options
+                        IsActive = false
                     };
+
+                    svc.SetOptions(ctx.Options ?? new FileObserverServiceOptions(), descriptor.Id);
 
                     mainView.GetOrCreateServicePage(svc);
                     return svc;
@@ -654,9 +660,10 @@ namespace DesktopApplicationTemplate.UI
                         DescriptorId = descriptor.Id,
                         DisplayName = ctx.Name,
                         Type = ServiceType.Csv,
-                        IsActive = false,
-                        CsvOptions = ctx.Options
+                        IsActive = false
                     };
+
+                    svc.SetOptions(ctx.Options ?? new CsvServiceOptions(), descriptor.Id);
 
                     mainView.GetOrCreateServicePage(svc);
                     return svc;
@@ -694,9 +701,10 @@ namespace DesktopApplicationTemplate.UI
                         DescriptorId = descriptor.Id,
                         DisplayName = ctx.Name,
                         Type = ServiceType.Heartbeat,
-                        IsActive = false,
-                        HeartbeatOptions = ctx.Options
+                        IsActive = false
                     };
+
+                    svc.SetOptions(ctx.Options ?? new HeartbeatServiceOptions(), descriptor.Id);
 
                     mainView.GetOrCreateServicePage(svc);
                     return svc;

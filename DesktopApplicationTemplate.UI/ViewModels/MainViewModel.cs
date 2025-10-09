@@ -435,18 +435,39 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     Type = info.ServiceType,
                     IsActive = info.IsActive,
                     Order = info.Order,
-                    TcpOptions = info.TcpOptions,
-                    FtpOptions = info.FtpOptions,
-                    HttpOptions = info.HttpOptions,
-                    CsvOptions = info.CsvOptions,
-                    HeartbeatOptions = info.HeartbeatOptions,
-                    FileObserverOptions = info.FileObserverOptions,
-                    HidOptions = info.HidOptions,
-                    ScpOptions = info.ScpOptions,
-                    MqttOptions = info.MqttOptions ?? new MqttServiceOptions(),
                     TotalExecutionTimeMs = info.TotalExecutionTimeMs,
                     ExecutionCount = info.ExecutionCount
                 };
+                switch (info.ServiceType)
+                {
+                    case ServiceType.Tcp when info.TcpOptions is not null:
+                        svc.SetOptions(info.TcpOptions, descriptorId);
+                        break;
+                    case ServiceType.Ftp when info.FtpOptions is not null:
+                        svc.SetOptions(info.FtpOptions, descriptorId);
+                        break;
+                    case ServiceType.Http when info.HttpOptions is not null:
+                        svc.SetOptions(info.HttpOptions, descriptorId);
+                        break;
+                    case ServiceType.Csv when info.CsvOptions is not null:
+                        svc.SetOptions(info.CsvOptions, descriptorId);
+                        break;
+                    case ServiceType.Heartbeat when info.HeartbeatOptions is not null:
+                        svc.SetOptions(info.HeartbeatOptions, descriptorId);
+                        break;
+                    case ServiceType.FileObserver when info.FileObserverOptions is not null:
+                        svc.SetOptions(info.FileObserverOptions, descriptorId);
+                        break;
+                    case ServiceType.Hid when info.HidOptions is not null:
+                        svc.SetOptions(info.HidOptions, descriptorId);
+                        break;
+                    case ServiceType.Scp when info.ScpOptions is not null:
+                        svc.SetOptions(info.ScpOptions, descriptorId);
+                        break;
+                    case ServiceType.Mqtt:
+                        svc.SetOptions(info.MqttOptions ?? new MqttServiceOptions(), descriptorId);
+                        break;
+                }
                 svc.InitializeMessageCounts(info.IncomingMessageCount, info.OutgoingMessageCount);
                 foreach (var a in info.AssociatedServices ?? new List<string>())
                     svc.AssociatedServices.Add(a);
