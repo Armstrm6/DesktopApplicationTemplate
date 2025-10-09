@@ -3,26 +3,26 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Reflection;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Csv;
-using DesktopApplicationTemplate.Core.Services.Protocols.Ftp;
-using DesktopApplicationTemplate.Core.Services.Protocols.Http;
-using DesktopApplicationTemplate.Core.Services.Protocols.Tcp;
 using DesktopApplicationTemplate.Core.Services.Protocols.FileObserver;
+using DesktopApplicationTemplate.Core.Services.Protocols.Ftp;
 using DesktopApplicationTemplate.Core.Services.Protocols.Heartbeat;
 using DesktopApplicationTemplate.Core.Services.Protocols.Hid;
+using DesktopApplicationTemplate.Core.Services.Protocols.Http;
 using DesktopApplicationTemplate.Core.Services.Protocols.Mqtt;
 using DesktopApplicationTemplate.Core.Services.Protocols.Scp;
+using DesktopApplicationTemplate.Core.Services.Protocols.Tcp;
 using DesktopApplicationTemplate.Models;
+using DesktopApplicationTemplate.UI;
 using DesktopApplicationTemplate.UI.Models;
+using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using DesktopApplicationTemplate.UI;
-using DesktopApplicationTemplate.UI.Services;
 
 namespace DesktopApplicationTemplate.Persistence
 {
@@ -47,6 +47,9 @@ namespace DesktopApplicationTemplate.Persistence
 
             foreach (var service in services)
             {
+                var descriptor = ResolveDescriptor(serviceCatalog, service.DescriptorId, service.Type);
+                EnsureSerializedOptions(service, descriptor);
+
                 var info = new ServiceInfo
                 {
                     DisplayName = service.DisplayName,
@@ -73,20 +76,9 @@ namespace DesktopApplicationTemplate.Persistence
                         })
                         .ToList(),
                     MessageHistory = service.GetMessageHistorySnapshot().ToList(),
-                    TcpOptions = null,
-                    FtpOptions = null,
-                    HttpOptions = null,
-                    CsvOptions = null,
-                    HeartbeatOptions = null,
-                    FileObserverOptions = null,
-                    HidOptions = null,
-                    ScpOptions = null,
-                    MqttOptions = null
                 };
 
-                if (!string.IsNullOrWhiteSpace(service.DescriptorId) &&
-                    serviceCatalog.TryGetById(service.DescriptorId, out var descriptor) &&
-                    descriptor.OptionsSerializer is { } serializer)
+                if (descriptor?.OptionsSerializer is { } serializer)
                 {
                     var options = GetOptionsForSerializer(service, serializer, descriptor.Id);
                     if (options is null)
@@ -180,6 +172,7 @@ namespace DesktopApplicationTemplate.Persistence
                     info.Logs ??= new List<LogEntry>();
                     info.MessageHistory ??= new List<ServiceMessageHistoryEntry>();
                     info.SerializedOptions ??= new Dictionary<string, JsonElement>(StringComparer.OrdinalIgnoreCase);
+                    info.LegacySerializedOptions ??= new Dictionary<string, JsonElement>(StringComparer.OrdinalIgnoreCase);
 
                     var service = CreateServiceModel(info, serviceCatalog);
                     services.Add(service);
@@ -268,7 +261,7 @@ namespace DesktopApplicationTemplate.Persistence
 
             if (!applied)
             {
-                applied = TryApplyLegacyOptions(info, service);
+                applied = TryApplyLegacyOptions(info, service, descriptor);
             }
 
             if (!applied && serializer is not null)
@@ -287,11 +280,6 @@ namespace DesktopApplicationTemplate.Persistence
                     // Ignore failures and fall through to type-based defaults.
                 }
             }
-
-            if (!applied)
-            {
-                ApplyDefaultOptions(info.ServiceType, service);
-            }
         }
 
         private static IServiceDescriptor? ResolveDescriptor(IServiceCatalog catalog, string? descriptorId, ServiceType serviceType)
@@ -302,6 +290,48 @@ namespace DesktopApplicationTemplate.Persistence
             }
 
             return catalog.Descriptors.FirstOrDefault(d => d.ServiceType == serviceType);
+        }
+
+        private static void EnsureSerializedOptions(ServiceListModel service, IServiceDescriptor? descriptor)
+        {
+            if (descriptor?.OptionsSerializer is not { } serializer)
+            {
+                return;
+            }
+
+            var options = GetOptionsForSerializer(service, serializer, descriptor.Id);
+            if (options is null)
+            {
+                try
+                {
+                    options = serializer.CreateDefaultOptions();
+                }
+                catch (Exception)
+                {
+                    options = null;
+                }
+            }
+
+            if (options is null)
+            {
+                return;
+            }
+
+            var key = !string.IsNullOrWhiteSpace(descriptor.Id)
+                ? descriptor.Id
+                : (!string.IsNullOrWhiteSpace(service.DescriptorId)
+                    ? service.DescriptorId
+                    : service.Type.ToString());
+
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                return;
+            }
+
+            if (TrySerializeOptions(serializer, options, out var element))
+            {
+                service.SerializedOptions[key] = element;
+            }
         }
 
         private static Dictionary<string, JsonElement> CloneSerializedOptions(IReadOnlyDictionary<string, JsonElement>? source)
@@ -320,78 +350,54 @@ namespace DesktopApplicationTemplate.Persistence
             return result;
         }
 
-        private static bool TryApplyLegacyOptions(ServiceInfo info, ServiceListModel service)
+        private static bool TryApplyLegacyOptions(ServiceInfo info, ServiceListModel service, IServiceDescriptor? descriptor)
         {
-            switch (info.ServiceType)
+            if (info.LegacySerializedOptions is null || info.LegacySerializedOptions.Count == 0)
             {
-                case ServiceType.Tcp when info.TcpOptions is not null:
-                    service.SetOptions(info.TcpOptions, service.DescriptorId);
-                    return true;
-                case ServiceType.Ftp when info.FtpOptions is not null:
-                    service.SetOptions(info.FtpOptions, service.DescriptorId);
-                    return true;
-                case ServiceType.Http when info.HttpOptions is not null:
-                    service.SetOptions(info.HttpOptions, service.DescriptorId);
-                    return true;
-                case ServiceType.Csv when info.CsvOptions is not null:
-                    service.SetOptions(info.CsvOptions, service.DescriptorId);
-                    return true;
-                case ServiceType.Heartbeat when info.HeartbeatOptions is not null:
-                    service.SetOptions(info.HeartbeatOptions, service.DescriptorId);
-                    return true;
-                case ServiceType.FileObserver when info.FileObserverOptions is not null:
-                    service.SetOptions(info.FileObserverOptions, service.DescriptorId);
-                    return true;
-                case ServiceType.Hid when info.HidOptions is not null:
-                    service.SetOptions(info.HidOptions, service.DescriptorId);
-                    return true;
-                case ServiceType.Scp when info.ScpOptions is not null:
-                    service.SetOptions(info.ScpOptions, service.DescriptorId);
-                    return true;
-                case ServiceType.Mqtt:
-                    var mqtt = info.MqttOptions ?? ResolveDefaultMqttOptions() ?? new MqttServiceOptions();
-                    service.SetOptions(mqtt, service.DescriptorId);
-                    return true;
-                default:
-                    return false;
+                return false;
             }
-        }
 
-        private static void ApplyDefaultOptions(ServiceType serviceType, ServiceListModel service)
-        {
-            switch (serviceType)
+            if (descriptor?.OptionsSerializer is { } serializer)
             {
-                case ServiceType.Tcp:
-                    service.SetOptions(new TcpServiceOptions(), service.DescriptorId);
-                    break;
-                case ServiceType.Ftp:
-                    service.SetOptions(new FtpServerOptions(), service.DescriptorId);
-                    break;
-                case ServiceType.Http:
-                    service.SetOptions(new HttpServiceOptions(), service.DescriptorId);
-                    break;
-                case ServiceType.Csv:
-                    service.SetOptions(new CsvServiceOptions(), service.DescriptorId);
-                    break;
-                case ServiceType.Heartbeat:
-                    service.SetOptions(new HeartbeatServiceOptions(), service.DescriptorId);
-                    break;
-                case ServiceType.FileObserver:
-                    service.SetOptions(new FileObserverServiceOptions(), service.DescriptorId);
-                    break;
-                case ServiceType.Hid:
-                    service.SetOptions(new HidServiceOptions(), service.DescriptorId);
-                    break;
-                case ServiceType.Scp:
-                    service.SetOptions(new ScpServiceOptions(), service.DescriptorId);
-                    break;
-                case ServiceType.Mqtt:
-                    var mqttDefaults = ResolveDefaultMqttOptions() ?? new MqttServiceOptions();
-                    service.SetOptions(mqttDefaults, service.DescriptorId);
-                    break;
-                default:
-                    break;
+                foreach (var key in LegacyOptionKeys)
+                {
+                    if (!info.LegacySerializedOptions.TryGetValue(key.Key, out var payload) ||
+                        payload.ValueKind is JsonValueKind.Null or JsonValueKind.Undefined)
+                    {
+                        continue;
+                    }
+
+                    if (service.TryApplySerializedOptions(serializer, payload, descriptor.Id ?? key.Key))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
             }
+
+            foreach (var key in LegacyOptionKeys)
+            {
+                if (!info.LegacySerializedOptions.TryGetValue(key.Key, out var payload) ||
+                    payload.ValueKind is JsonValueKind.Null or JsonValueKind.Undefined)
+                {
+                    continue;
+                }
+
+                if (TryDeserializeLegacyOptions(service, key.Value, payload))
+                {
+                    return true;
+                }
+            }
+
+            if (info.ServiceType == ServiceType.Mqtt)
+            {
+                var fallback = ResolveDefaultMqttOptions() ?? new MqttServiceOptions();
+                service.SetOptions(fallback, service.DescriptorId);
+                return true;
+            }
+
+            return false;
         }
 
         private static MqttServiceOptions? ResolveDefaultMqttOptions()
@@ -422,6 +428,94 @@ namespace DesktopApplicationTemplate.Persistence
                 CleanSession = value.CleanSession,
                 ReconnectDelay = value.ReconnectDelay
             };
+        }
+
+        private static bool TryDeserializeLegacyOptions(ServiceListModel service, ServiceType serviceType, JsonElement payload)
+        {
+            try
+            {
+                switch (serviceType)
+                {
+                    case ServiceType.Tcp:
+                        var tcp = payload.Deserialize<TcpServiceOptions>();
+                        if (tcp is not null)
+                        {
+                            service.SetOptions(tcp, service.DescriptorId);
+                            return true;
+                        }
+                        break;
+                    case ServiceType.Ftp:
+                        var ftp = payload.Deserialize<FtpServerOptions>();
+                        if (ftp is not null)
+                        {
+                            service.SetOptions(ftp, service.DescriptorId);
+                            return true;
+                        }
+                        break;
+                    case ServiceType.Http:
+                        var http = payload.Deserialize<HttpServiceOptions>();
+                        if (http is not null)
+                        {
+                            service.SetOptions(http, service.DescriptorId);
+                            return true;
+                        }
+                        break;
+                    case ServiceType.Csv:
+                        var csv = payload.Deserialize<CsvServiceOptions>();
+                        if (csv is not null)
+                        {
+                            service.SetOptions(csv, service.DescriptorId);
+                            return true;
+                        }
+                        break;
+                    case ServiceType.Heartbeat:
+                        var heartbeat = payload.Deserialize<HeartbeatServiceOptions>();
+                        if (heartbeat is not null)
+                        {
+                            service.SetOptions(heartbeat, service.DescriptorId);
+                            return true;
+                        }
+                        break;
+                    case ServiceType.FileObserver:
+                        var observer = payload.Deserialize<FileObserverServiceOptions>();
+                        if (observer is not null)
+                        {
+                            service.SetOptions(observer, service.DescriptorId);
+                            return true;
+                        }
+                        break;
+                    case ServiceType.Hid:
+                        var hid = payload.Deserialize<HidServiceOptions>();
+                        if (hid is not null)
+                        {
+                            service.SetOptions(hid, service.DescriptorId);
+                            return true;
+                        }
+                        break;
+                    case ServiceType.Scp:
+                        var scp = payload.Deserialize<ScpServiceOptions>();
+                        if (scp is not null)
+                        {
+                            service.SetOptions(scp, service.DescriptorId);
+                            return true;
+                        }
+                        break;
+                    case ServiceType.Mqtt:
+                        var mqtt = payload.Deserialize<MqttServiceOptions>();
+                        if (mqtt is not null)
+                        {
+                            service.SetOptions(mqtt, service.DescriptorId);
+                            return true;
+                        }
+                        break;
+                }
+            }
+            catch (JsonException)
+            {
+                return false;
+            }
+
+            return false;
         }
 
         private static object? GetOptionsForSerializer(ServiceListModel service, IServiceOptionsSerializer serializer, string? key)
@@ -475,6 +569,20 @@ namespace DesktopApplicationTemplate.Persistence
                 return false;
             }
         }
+
+        private static readonly IReadOnlyDictionary<string, ServiceType> LegacyOptionKeys =
+            new Dictionary<string, ServiceType>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["TcpOptions"] = ServiceType.Tcp,
+                ["FtpOptions"] = ServiceType.Ftp,
+                ["HttpOptions"] = ServiceType.Http,
+                ["CsvOptions"] = ServiceType.Csv,
+                ["HeartbeatOptions"] = ServiceType.Heartbeat,
+                ["FileObserverOptions"] = ServiceType.FileObserver,
+                ["HidOptions"] = ServiceType.Hid,
+                ["ScpOptions"] = ServiceType.Scp,
+                ["MqttOptions"] = ServiceType.Mqtt
+            };
     }
 
     public class ServiceInfo
@@ -488,21 +596,14 @@ namespace DesktopApplicationTemplate.Persistence
         public List<string> AssociatedServices { get; set; } = new();
         [JsonInclude]
         public Dictionary<string, JsonElement> SerializedOptions { get; set; } = new(StringComparer.OrdinalIgnoreCase);
-        public TcpServiceOptions? TcpOptions { get; set; }
-        public FtpServerOptions? FtpOptions { get; set; }
-        public HttpServiceOptions? HttpOptions { get; set; }
-        public CsvServiceOptions? CsvOptions { get; set; }
-        public HeartbeatServiceOptions? HeartbeatOptions { get; set; }
-        public FileObserverServiceOptions? FileObserverOptions { get; set; }
-        public HidServiceOptions? HidOptions { get; set; }
-        public ScpServiceOptions? ScpOptions { get; set; }
-        public MqttServiceOptions? MqttOptions { get; set; }
         public double TotalExecutionTimeMs { get; set; }
         public int ExecutionCount { get; set; }
         public int IncomingMessageCount { get; set; }
         public int OutgoingMessageCount { get; set; }
         public List<LogEntry> Logs { get; set; } = new();
         public List<ServiceMessageHistoryEntry> MessageHistory { get; set; } = new();
+        [JsonExtensionData]
+        public Dictionary<string, JsonElement> LegacySerializedOptions { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     }
 
 }
