@@ -7,7 +7,7 @@ namespace DesktopApplicationTemplate.UI.Views.Shared
     /// <summary>
     /// Interaction logic for ServiceMessageTableView.xaml
     /// </summary>
-    public partial class ServiceMessageTableView : UserControl
+    public partial class ServiceMessageTableView : Page
     {
         public ServiceMessageTableView()
         {
