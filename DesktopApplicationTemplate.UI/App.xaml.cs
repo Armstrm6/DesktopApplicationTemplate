@@ -170,6 +170,36 @@ namespace DesktopApplicationTemplate.UI
             services.AddOptions<ScpServiceOptions>();
         }
 
+        private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+        {
+            var logger = AppHost.Services.GetService<ILogger<App>>();
+            if (e.Exception is { } exception)
+            {
+                logger?.LogError(exception, "Unhandled dispatcher exception");
+            }
+            else
+            {
+                logger?.LogError("Unhandled dispatcher exception without an Exception instance");
+            }
+
+            e.Handled = true;
+
+            if (UiThreadTaskFactory is null)
+            {
+                logger?.LogWarning("Joinable task factory unavailable during dispatcher exception; shutting down synchronously.");
+                KeyboardSimulator.Reset();
+                Current?.Shutdown();
+                return;
+            }
+
+            UiThreadTaskFactory.Run(async () =>
+            {
+                KeyboardSimulator.Reset();
+                await Task.Yield();
+                Current?.Shutdown();
+            });
+        }
+
         private void HandleAppDomainUnhandledException(object? sender, UnhandledExceptionEventArgs e)
         {
             _ = OnAppDomainUnhandledExceptionAsync(sender, e);
