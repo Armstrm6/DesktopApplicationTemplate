@@ -35,11 +35,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Page Include="Views/**/*.xaml">
+    <Page Update="Views/**/*.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Themes/**/*.xaml">
+    <Page Update="Themes/**/*.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
