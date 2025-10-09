@@ -87,7 +87,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.Threading;
 using MQTTnet;
 using FubarDev.FtpServer;
@@ -370,23 +369,17 @@ namespace DesktopApplicationTemplate.UI
                 {
                     var ctx = (ServiceFactoryOptions<CoreFtpServerOptions>)optionsObj;
                     var mainView = provider.GetRequiredService<MainView>();
+                    var ftpOptions = ctx.Options ?? new CoreFtpServerOptions();
                     var svc = new ServiceListModel
                     {
                         DescriptorId = descriptor.Id,
                         DisplayName = ctx.Name,
                         Type = ServiceType.Ftp,
                         IsActive = false,
-                        FtpOptions = ctx.Options
+                        FtpOptions = ftpOptions
                     };
 
                     mainView.GetOrCreateServicePage(svc);
-
-                    var resolved = provider.GetRequiredService<IOptions<CoreFtpServerOptions>>().Value;
-                    resolved.Port = ctx.Options.Port;
-                    resolved.RootPath = ctx.Options.RootPath;
-                    resolved.AllowAnonymous = ctx.Options.AllowAnonymous;
-                    resolved.Username = ctx.Options.Username;
-                    resolved.Password = ctx.Options.Password;
 
                     return svc;
                 },
