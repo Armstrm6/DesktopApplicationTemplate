@@ -199,6 +199,7 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<IMqttClientSessionManager, MqttClientSessionManager>();
             services.AddSingleton<MainViewModel>();
             services.AddTransient<ServiceMessageTableViewModel>();
+            services.AddTransient<Func<ServiceMessageTableViewModel>>(sp => () => sp.GetRequiredService<ServiceMessageTableViewModel>());
             services.AddTransient<TcpServiceMessagesView>();
             services.AddTransient<TcpServiceMessagesViewModel>();
             services.AddSingleton<HttpServiceView>();
