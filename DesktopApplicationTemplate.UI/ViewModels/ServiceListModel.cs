@@ -239,6 +239,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         /// <param name="outgoing">The number of outgoing messages previously recorded.</param>
         public void InitializeMessageCounts(int incoming, int outgoing)
         {
+            if (_messageHistory.Count > 0)
+            {
+                return;
+            }
+
             IncomingMessageCount = Math.Max(0, incoming);
             OutgoingMessageCount = Math.Max(0, outgoing);
         }
@@ -847,7 +852,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             LogAdded?.Invoke(this, entry);
             if (checkReference)
             {
-                UpdateMessageCounters(message);
                 if (EnableCrossServiceLogForwarding)
                 {
                     HandleReference(message, brush, level);
@@ -878,24 +882,43 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             InputMessage = string.Empty;
             OutputMessage = string.Empty;
             LastInputBrush = WpfBrushes.Black;
+            IncomingMessageCount = 0;
+            OutgoingMessageCount = 0;
             if (entries is null)
             {
                 return;
             }
 
+            var incomingCount = 0;
+            var outgoingCount = 0;
             foreach (var entry in entries
                          .Where(e => e is not null)
                          .OrderByDescending(e => e.Timestamp)
                          .Take(ServiceMessageTableViewModel.MaxRows))
             {
+                var incoming = entry.IncomingMessage ?? string.Empty;
+                var outgoing = entry.OutgoingMessage ?? string.Empty;
+                if (!string.IsNullOrEmpty(incoming))
+                {
+                    incomingCount++;
+                }
+
+                if (!string.IsNullOrEmpty(outgoing))
+                {
+                    outgoingCount++;
+                }
+
                 _messageHistory.AddLast(new ServiceMessageHistoryEntry
                 {
-                    IncomingMessage = entry.IncomingMessage ?? string.Empty,
-                    OutgoingMessage = entry.OutgoingMessage ?? string.Empty,
+                    IncomingMessage = incoming,
+                    OutgoingMessage = outgoing,
                     Destination = entry.Destination ?? string.Empty,
                     Timestamp = entry.Timestamp
                 });
             }
+
+            IncomingMessageCount = incomingCount;
+            OutgoingMessageCount = outgoingCount;
 
             foreach (var historyEntry in _messageHistory)
             {
@@ -963,11 +986,13 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
             if (!string.IsNullOrEmpty(incomingMessage))
             {
+                IncomingMessageCount++;
                 UpdateInputMessage(incomingMessage);
             }
 
             if (!string.IsNullOrEmpty(outgoingMessage))
             {
+                OutgoingMessageCount++;
                 UpdateOutputMessage(outgoingMessage);
             }
         }
@@ -1202,37 +1227,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
 
             return index == 0 ? span : span[index..];
-        }
-
-        private void UpdateMessageCounters(string message)
-        {
-            if (string.IsNullOrWhiteSpace(message))
-            {
-                return;
-            }
-
-            if (ContainsKeyword(message, "incoming", "received"))
-            {
-                IncomingMessageCount++;
-            }
-
-            if (ContainsKeyword(message, "outgoing", "sent", "sending"))
-            {
-                OutgoingMessageCount++;
-            }
-        }
-
-        private static bool ContainsKeyword(string message, params string[] keywords)
-        {
-            foreach (var keyword in keywords)
-            {
-                if (message.Contains(keyword, StringComparison.OrdinalIgnoreCase))
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         private static string NormalizeLatestMessage(string? message)
