@@ -557,7 +557,7 @@ namespace DesktopApplicationTemplate.Persistence
                     serializer.Serialize(writer, options);
                 }
 
-                element = JsonDocument.Parse(buffer.WrittenSpan).RootElement.Clone();
+                element = JsonDocument.Parse(buffer.WrittenMemory).RootElement.Clone();
                 return true;
             }
             catch (JsonException)
