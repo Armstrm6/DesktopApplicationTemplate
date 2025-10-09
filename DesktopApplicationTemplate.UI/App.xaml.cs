@@ -202,22 +202,22 @@ namespace DesktopApplicationTemplate.UI
             services.AddTransient<Func<ServiceMessageTableViewModel>>(sp => () => sp.GetRequiredService<ServiceMessageTableViewModel>());
             services.AddTransient<TcpServiceMessagesView>();
             services.AddTransient<TcpServiceMessagesViewModel>();
-            services.AddSingleton<HttpServiceView>();
-            services.AddSingleton<HttpServiceViewModel>();
-            services.AddSingleton<FileObserverView>();
-            services.AddSingleton<FileObserverViewModel>();
-            services.AddSingleton<HeartbeatView>();
-            services.AddSingleton<HeartbeatViewModel>();
-            services.AddSingleton<SCPServiceView>();
-            services.AddSingleton<ScpServiceViewModel>();
-            services.AddSingleton<HidViewModel>();
-            services.AddSingleton<HidViews>();
-            services.AddSingleton<FTPServiceView>();
-            services.AddSingleton<FtpServiceViewModel>();
-            services.AddSingleton<CsvViewerViewModel>();
+            services.AddTransient<HttpServiceView>();
+            services.AddTransient<HttpServiceViewModel>();
+            services.AddTransient<FileObserverView>();
+            services.AddTransient<FileObserverViewModel>();
+            services.AddTransient<HeartbeatView>();
+            services.AddTransient<HeartbeatViewModel>();
+            services.AddTransient<SCPServiceView>();
+            services.AddTransient<ScpServiceViewModel>();
+            services.AddTransient<HidViewModel>();
+            services.AddTransient<HidViews>();
+            services.AddTransient<FTPServiceView>();
+            services.AddTransient<FtpServiceViewModel>();
+            services.AddTransient<CsvViewerViewModel>();
             services.AddSingleton<ICsvOutput, FileCsvOutput>();
-            services.AddSingleton<CsvServiceAdapter>();
-            services.AddSingleton<CsvServiceView>();
+            services.AddTransient<CsvServiceAdapter>();
+            services.AddTransient<CsvServiceView>();
             services.AddSingleton<SettingsViewModel>();
             services.AddSingleton<IServiceUiRegistry<ServiceListModel, Page>>(sp =>
             {
