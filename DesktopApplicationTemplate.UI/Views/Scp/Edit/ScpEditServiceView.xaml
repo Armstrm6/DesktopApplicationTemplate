@@ -4,7 +4,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
-      xmlns:views="clr-namespace:DesktopApplicationTemplate.UI.Views;assembly=DesktopApplicationTemplate.UI"
+      xmlns:shared="clr-namespace:DesktopApplicationTemplate.UI.Views.Shared;assembly=DesktopApplicationTemplate.UI"
       mc:Ignorable="d">
     <Grid Margin="20">
         <Grid.ColumnDefinitions>
@@ -35,7 +35,7 @@
         <TextBlock Grid.Row="4" Grid.Column="0" Text="Password" Style="{StaticResource FormLabel}"/>
         <PasswordBox Grid.Row="4" Grid.Column="1" helpers:PasswordBoxAssistant.BindPassword="True" helpers:PasswordBoxAssistant.BoundPassword="{Binding Password}" Style="{StaticResource FormField}"/>
 
-        <views:EditorButtonBar Grid.Row="5" Grid.ColumnSpan="2"
+        <shared:EditorButtonBar Grid.Row="5" Grid.ColumnSpan="2"
                                AdvancedConfigCommand="{Binding AdvancedConfigCommand}"
                                SaveCommand="{Binding SaveCommand}"
                                CancelCommand="{Binding CancelCommand}"

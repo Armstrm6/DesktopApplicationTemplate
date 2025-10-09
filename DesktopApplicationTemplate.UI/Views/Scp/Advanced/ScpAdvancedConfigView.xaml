@@ -3,7 +3,7 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-      xmlns:views="clr-namespace:DesktopApplicationTemplate.UI.Views;assembly=DesktopApplicationTemplate.UI"
+      xmlns:shared="clr-namespace:DesktopApplicationTemplate.UI.Views.Shared;assembly=DesktopApplicationTemplate.UI"
       mc:Ignorable="d">
     <Grid Margin="20">
         <Grid.ColumnDefinitions>
@@ -22,7 +22,7 @@
         <TextBlock Grid.Row="1" Grid.Column="0" Text="Remote Path" Style="{StaticResource FormLabel}"/>
         <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding RemotePath}" Style="{StaticResource FormField}"/>
 
-        <views:AdvancedConfigButtonBar Grid.Row="2" Grid.ColumnSpan="2"
+        <shared:AdvancedConfigButtonBar Grid.Row="2" Grid.ColumnSpan="2"
                                        SaveCommand="{Binding SaveCommand}"
                                        BackCommand="{Binding BackCommand}"
                                        SaveAutomationName="Save SCP Advanced Configuration"

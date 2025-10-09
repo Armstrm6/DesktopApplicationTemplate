@@ -4,7 +4,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:svc="clr-namespace:DesktopApplicationTemplate.Core.Services.Protocols.Mqtt;assembly=DesktopApplicationTemplate.Core"
-      xmlns:views="clr-namespace:DesktopApplicationTemplate.UI.Views;assembly=DesktopApplicationTemplate.UI"
+      xmlns:shared="clr-namespace:DesktopApplicationTemplate.UI.Views.Shared;assembly=DesktopApplicationTemplate.UI"
       mc:Ignorable="d">
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <Grid Margin="20">
@@ -185,7 +185,7 @@
                 </TextBox.Style>
             </TextBox>
 
-            <views:EditorButtonBar Grid.Row="16" Grid.ColumnSpan="2"
+            <shared:EditorButtonBar Grid.Row="16" Grid.ColumnSpan="2"
                                    IsAdvancedVisible="False"
                                    SaveCommand="{Binding CreateCommand}"
                                    CancelCommand="{Binding CancelCommand}"
