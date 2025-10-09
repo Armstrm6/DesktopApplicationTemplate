@@ -165,6 +165,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             NetworkConfig = networkConfig;
             _editHandlers = editHandlers;
             _startupPreferencesService = startupPreferencesService ?? throw new ArgumentNullException(nameof(startupPreferencesService));
+            ServiceListModel.OptionsSerializerResolver = ResolveOptionsSerializer;
             _ = NetworkConfig.LoadAsync();
             _networkService.ConfigurationChanged += (_, cfg) => ApplyNetworkConfiguration(cfg);
             ServiceListModel.ResolveService = (type, name) =>
@@ -416,90 +417,60 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     await tcpVm.PersistOptionsAsync().ConfigureAwait(false);
                 }
             }
-            ServicePersistence.Save(Services);
+            ServicePersistence.Save(Services, _serviceCatalog, _logger);
         }
 
         private void LoadServices()
         {
-            var existing = ServicePersistence.Load(_logger);
-            foreach (var info in existing.OrderBy(i => i.Order))
+            var existing = ServicePersistence.Load(_serviceCatalog, _logger);
+            foreach (var service in existing.OrderBy(s => s.Order))
             {
-                var descriptorId = string.IsNullOrWhiteSpace(info.DescriptorId)
-                    ? ResolveDescriptorId(info.ServiceType)
-                    : info.DescriptorId;
-
-                var svc = new ServiceListModel
+                if (string.IsNullOrWhiteSpace(service.DescriptorId))
                 {
-                    DescriptorId = descriptorId,
-                    DisplayName = info.DisplayName,
-                    Type = info.ServiceType,
-                    IsActive = info.IsActive,
-                    Order = info.Order,
-                    TotalExecutionTimeMs = info.TotalExecutionTimeMs,
-                    ExecutionCount = info.ExecutionCount
-                };
-                switch (info.ServiceType)
-                {
-                    case ServiceType.Tcp when info.TcpOptions is not null:
-                        svc.SetOptions(info.TcpOptions, descriptorId);
-                        break;
-                    case ServiceType.Ftp when info.FtpOptions is not null:
-                        svc.SetOptions(info.FtpOptions, descriptorId);
-                        break;
-                    case ServiceType.Http when info.HttpOptions is not null:
-                        svc.SetOptions(info.HttpOptions, descriptorId);
-                        break;
-                    case ServiceType.Csv when info.CsvOptions is not null:
-                        svc.SetOptions(info.CsvOptions, descriptorId);
-                        break;
-                    case ServiceType.Heartbeat when info.HeartbeatOptions is not null:
-                        svc.SetOptions(info.HeartbeatOptions, descriptorId);
-                        break;
-                    case ServiceType.FileObserver when info.FileObserverOptions is not null:
-                        svc.SetOptions(info.FileObserverOptions, descriptorId);
-                        break;
-                    case ServiceType.Hid when info.HidOptions is not null:
-                        svc.SetOptions(info.HidOptions, descriptorId);
-                        break;
-                    case ServiceType.Scp when info.ScpOptions is not null:
-                        svc.SetOptions(info.ScpOptions, descriptorId);
-                        break;
-                    case ServiceType.Mqtt:
-                        svc.SetOptions(info.MqttOptions ?? new MqttServiceOptions(), descriptorId);
-                        break;
-                }
-                svc.InitializeMessageCounts(info.IncomingMessageCount, info.OutgoingMessageCount);
-                foreach (var a in info.AssociatedServices ?? new List<string>())
-                    svc.AssociatedServices.Add(a);
-                svc.LoadPersistedLogs(info.Logs ?? new List<LogEntry>());
-                svc.LoadMessageHistory(info.MessageHistory ?? new List<ServiceMessageHistoryEntry>());
-                var normalizedName = NormalizeDisplayName(svc.Type, svc.DisplayName);
-                if (Services.Any(existing => existing.DisplayName.Equals(normalizedName, StringComparison.OrdinalIgnoreCase)))
-                {
-                    normalizedName = GenerateServiceName(svc.Type);
-                }
-                ClearRoutingCache(svc.Type, normalizedName);
-                svc.DisplayName = normalizedName;
-                if (string.IsNullOrWhiteSpace(svc.DescriptorId))
-                {
-                    svc.DescriptorId = ResolveDescriptorId(svc.Type);
+                    service.DescriptorId = ResolveDescriptorId(service.Type);
                 }
 
-                ApplyPresentationMetadata(svc);
-                svc.SetRuntimeState(svc.IsActive ? ServiceRuntimeState.Active : ServiceRuntimeState.Inactive);
-                svc.LogAdded += OnServiceLogAdded;
-                svc.ActiveChanged += OnServiceActiveChanged;
-                if (svc.Type != ServiceType.Csv)
-                    _csvService.EnsureColumnsForService(svc.DisplayName);
-                Services.Add(svc);
-                foreach (var log in svc.Logs.Reverse())
+                var normalizedName = NormalizeDisplayName(service.Type, service.DisplayName);
+                if (Services.Any(existingService => existingService.DisplayName.Equals(normalizedName, StringComparison.OrdinalIgnoreCase)))
+                {
+                    normalizedName = GenerateServiceName(service.Type);
+                }
+
+                ClearRoutingCache(service.Type, normalizedName);
+                service.DisplayName = normalizedName;
+
+                ApplyPresentationMetadata(service);
+                service.LogAdded += OnServiceLogAdded;
+                service.ActiveChanged += OnServiceActiveChanged;
+
+                if (service.Type != ServiceType.Csv)
+                {
+                    _csvService.EnsureColumnsForService(service.DisplayName);
+                }
+
+                Services.Add(service);
+
+                foreach (var log in service.Logs.Reverse())
                 {
                     AllLogs.Insert(0, log);
                 }
-                _logger?.Log($"Loaded service {svc.DisplayName}", LogLevel.Debug);
+
+                _logger?.Log($"Loaded service {service.DisplayName}", LogLevel.Debug);
             }
             OnPropertyChanged(nameof(ServicesCreated));
             OnPropertyChanged(nameof(CurrentActiveServices));
+        }
+
+        private IServiceOptionsSerializer? ResolveOptionsSerializer(string? descriptorId)
+        {
+            if (string.IsNullOrWhiteSpace(descriptorId))
+            {
+                return null;
+            }
+
+            return _serviceCatalog.TryGetById(descriptorId, out var descriptor)
+                ? descriptor.OptionsSerializer
+                : null;
         }
 
         private string? ResolveDescriptorId(ServiceType serviceType)

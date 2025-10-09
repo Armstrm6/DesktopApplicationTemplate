@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Buffers;
 using System.Globalization;
 using System.Linq;
 using System.Text.Json;
@@ -123,6 +124,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         private Dictionary<string, JsonElement> _serializedOptions = new(StringComparer.OrdinalIgnoreCase);
 
+        internal static Func<string?, IServiceOptionsSerializer?>? OptionsSerializerResolver { get; set; }
+
         /// <summary>
         /// Gets or sets the serialized representation of protocol options for persistence.
         /// </summary>
@@ -130,7 +133,20 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public Dictionary<string, JsonElement> SerializedOptions
         {
             get => _serializedOptions;
-            set => _serializedOptions = value ?? new Dictionary<string, JsonElement>(StringComparer.OrdinalIgnoreCase);
+            set
+            {
+                if (value is null)
+                {
+                    _serializedOptions = new Dictionary<string, JsonElement>(StringComparer.OrdinalIgnoreCase);
+                    return;
+                }
+
+                _serializedOptions = new Dictionary<string, JsonElement>(StringComparer.OrdinalIgnoreCase);
+                foreach (var pair in value)
+                {
+                    _serializedOptions[pair.Key] = pair.Value.Clone();
+                }
+            }
         }
 
         [JsonIgnore]
@@ -331,31 +347,18 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
             if (options is null)
             {
-                _options.Remove(resolvedKey);
-                _serializedOptions.Remove(resolvedKey);
+                RemoveOptionKeys(keyCandidates);
                 return;
             }
 
-            _options[resolvedKey] = options;
-
-            try
+            var serializer = ResolveSerializer(keyCandidates);
+            if (serializer is not null && serializer.OptionsType.IsAssignableFrom(typeof(TOptions)))
             {
-                _serializedOptions[resolvedKey] = JsonSerializer.SerializeToElement(options);
-            }
-            catch (NotSupportedException)
-            {
-                _serializedOptions.Remove(resolvedKey);
-            }
-            catch (JsonException)
-            {
-                _serializedOptions.Remove(resolvedKey);
+                SetOptionsWithSerializer(serializer, options, resolvedKey, keyCandidates);
+                return;
             }
 
-            foreach (var candidate in keyCandidates.Skip(1))
-            {
-                _options.Remove(candidate);
-                _serializedOptions.Remove(candidate);
-            }
+            SetOptionsWithDefault(options, resolvedKey, keyCandidates);
         }
 
         /// <summary>
@@ -374,33 +377,220 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 return null;
             }
 
+            var serializer = ResolveSerializer(keyCandidates);
+
             foreach (var candidate in keyCandidates)
             {
                 if (_options.TryGetValue(candidate, out var raw) && raw is TOptions typed)
                 {
-                    PromoteOptionKey(candidate, resolvedKey, typed);
+                    if (!string.Equals(candidate, resolvedKey, StringComparison.Ordinal))
+                    {
+                        SetOptions(typed, resolvedKey);
+                    }
+
                     return typed;
                 }
 
-                if (_serializedOptions.TryGetValue(candidate, out var element))
+                if (!_serializedOptions.TryGetValue(candidate, out var element))
+                {
+                    continue;
+                }
+
+                TOptions? deserialized = null;
+                if (serializer is not null && serializer.OptionsType.IsAssignableFrom(typeof(TOptions)))
                 {
                     try
                     {
-                        var deserialized = element.Deserialize<TOptions>();
-                        if (deserialized is not null)
-                        {
-                            PromoteOptionKey(candidate, resolvedKey, deserialized);
-                            return deserialized;
-                        }
+                        deserialized = serializer.Deserialize(element) as TOptions;
                     }
                     catch (JsonException)
                     {
-                        // Ignore and try next candidate.
+                        deserialized = null;
                     }
+                    catch (InvalidCastException)
+                    {
+                        deserialized = null;
+                    }
+                }
+
+                if (deserialized is null)
+                {
+                    try
+                    {
+                        deserialized = element.Deserialize<TOptions>();
+                    }
+                    catch (JsonException)
+                    {
+                        deserialized = null;
+                    }
+                }
+
+                if (deserialized is not null)
+                {
+                    SetOptions(deserialized, resolvedKey);
+                    return deserialized;
                 }
             }
 
             return null;
+        }
+
+        internal bool TryApplySerializedOptions(IServiceOptionsSerializer serializer, JsonElement payload, string? key = null)
+        {
+            var keyCandidates = EnumerateOptionKeys(key).ToArray();
+            var resolvedKey = keyCandidates.FirstOrDefault();
+            if (resolvedKey is null)
+            {
+                return false;
+            }
+
+            try
+            {
+                var options = serializer.Deserialize(payload);
+                if (!serializer.OptionsType.IsInstanceOfType(options))
+                {
+                    return false;
+                }
+
+                SetOptionsWithSerializer(serializer, options, resolvedKey, keyCandidates, payload);
+                return true;
+            }
+            catch (JsonException)
+            {
+                return false;
+            }
+            catch (NotSupportedException)
+            {
+                return false;
+            }
+        }
+
+        private IServiceOptionsSerializer? ResolveSerializer(string[] keyCandidates)
+        {
+            var resolver = OptionsSerializerResolver;
+            if (resolver is null)
+            {
+                return null;
+            }
+
+            foreach (var candidate in keyCandidates)
+            {
+                if (string.IsNullOrWhiteSpace(candidate))
+                {
+                    continue;
+                }
+
+                var serializer = resolver(candidate);
+                if (serializer is not null)
+                {
+                    return serializer;
+                }
+            }
+
+            return null;
+        }
+
+        private void SetOptionsWithSerializer(IServiceOptionsSerializer serializer, object options, string resolvedKey, string[] keyCandidates, JsonElement? payloadOverride = null)
+        {
+            if (!serializer.OptionsType.IsInstanceOfType(options))
+            {
+                throw new ArgumentException($"Options must be assignable to {serializer.OptionsType}.", nameof(options));
+            }
+
+            _options[resolvedKey] = options;
+
+            if (payloadOverride is JsonElement payload)
+            {
+                _serializedOptions[resolvedKey] = payload.Clone();
+            }
+            else if (TrySerializeOptions(serializer, options, out var element))
+            {
+                _serializedOptions[resolvedKey] = element;
+            }
+            else
+            {
+                _serializedOptions.Remove(resolvedKey);
+            }
+
+            RemoveCandidateKeys(keyCandidates, resolvedKey);
+        }
+
+        private void SetOptionsWithDefault<TOptions>(TOptions options, string resolvedKey, string[] keyCandidates)
+            where TOptions : class
+        {
+            _options[resolvedKey] = options;
+
+            try
+            {
+                _serializedOptions[resolvedKey] = JsonSerializer.SerializeToElement(options);
+            }
+            catch (NotSupportedException)
+            {
+                _serializedOptions.Remove(resolvedKey);
+            }
+            catch (JsonException)
+            {
+                _serializedOptions.Remove(resolvedKey);
+            }
+
+            RemoveCandidateKeys(keyCandidates, resolvedKey);
+        }
+
+        private void RemoveOptionKeys(string[] keyCandidates)
+        {
+            foreach (var candidate in keyCandidates)
+            {
+                if (string.IsNullOrWhiteSpace(candidate))
+                {
+                    continue;
+                }
+
+                _options.Remove(candidate);
+                _serializedOptions.Remove(candidate);
+            }
+        }
+
+        private void RemoveCandidateKeys(string[] keyCandidates, string keepKey)
+        {
+            foreach (var candidate in keyCandidates)
+            {
+                if (string.IsNullOrWhiteSpace(candidate) || string.Equals(candidate, keepKey, StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                _options.Remove(candidate);
+                _serializedOptions.Remove(candidate);
+            }
+        }
+
+        private static bool TrySerializeOptions(IServiceOptionsSerializer serializer, object options, out JsonElement element)
+        {
+            element = default;
+            try
+            {
+                if (!serializer.OptionsType.IsInstanceOfType(options))
+                {
+                    return false;
+                }
+
+                var buffer = new ArrayBufferWriter<byte>();
+                using (var writer = new Utf8JsonWriter(buffer))
+                {
+                    serializer.Serialize(writer, options);
+                }
+
+                element = JsonDocument.Parse(buffer.WrittenSpan).RootElement.Clone();
+                return true;
+            }
+            catch (JsonException)
+            {
+                return false;
+            }
+            catch (NotSupportedException)
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -444,39 +634,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             if (Type != default)
             {
                 yield return Type.ToString();
-            }
-        }
-
-        private void PromoteOptionKey<TOptions>(string sourceKey, string targetKey, TOptions value)
-            where TOptions : class
-        {
-            if (string.Equals(sourceKey, targetKey, StringComparison.Ordinal))
-            {
-                _options[targetKey] = value;
-                return;
-            }
-
-            _options[targetKey] = value;
-            _options.Remove(sourceKey);
-
-            if (_serializedOptions.TryGetValue(sourceKey, out var element))
-            {
-                _serializedOptions[targetKey] = element;
-                _serializedOptions.Remove(sourceKey);
-                return;
-            }
-
-            try
-            {
-                _serializedOptions[targetKey] = JsonSerializer.SerializeToElement(value);
-            }
-            catch (NotSupportedException)
-            {
-                _serializedOptions.Remove(targetKey);
-            }
-            catch (JsonException)
-            {
-                _serializedOptions.Remove(targetKey);
             }
         }
 
