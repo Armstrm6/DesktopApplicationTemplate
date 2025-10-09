@@ -2,9 +2,9 @@ using System;
 using System.Windows.Controls;
 using DesktopApplicationTemplate.Core.Models;
 using DesktopApplicationTemplate.Core.Services;
-using DesktopApplicationTemplate.Core.Services.Protocols.Ftp;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.Services;
+using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.ViewModels.Ftp;
@@ -18,6 +18,7 @@ using DesktopApplicationTemplate.UI.Views.Ftp.Create;
 using DesktopApplicationTemplate.UI.Views.Ftp.Edit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using CoreFtpServerOptions = DesktopApplicationTemplate.Core.Services.Protocols.Ftp.FtpServerOptions;
 
 namespace DesktopApplicationTemplate.UI.DependencyInjection
 {
