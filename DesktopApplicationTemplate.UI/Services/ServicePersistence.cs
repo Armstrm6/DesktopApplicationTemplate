@@ -300,111 +300,45 @@ namespace DesktopApplicationTemplate.Persistence
                                 ReconnectDelay = value.ReconnectDelay
                             };
                         }
-                    }
-
-                    if (info.ServiceType == ServiceType.Tcp && info.TcpOptions != null)
-                    {
-                        var opt = App.AppHost?.Services.GetService<IOptions<TcpServiceOptions>>();
-                        if (opt != null)
+                        else
                         {
-                            var value = opt.Value;
-                            value.Host = info.TcpOptions.Host;
-                            value.Port = info.TcpOptions.Port;
-                            value.UseUdp = info.TcpOptions.UseUdp;
-                            value.SubnetMask = info.TcpOptions.SubnetMask;
-                            value.PrimaryDns = info.TcpOptions.PrimaryDns;
-                            value.AlternateDns = info.TcpOptions.AlternateDns;
-                            value.Mode = info.TcpOptions.Mode;
-                            value.ConnectionRole = info.TcpOptions.ConnectionRole;
-                            value.DestinationHost = info.TcpOptions.DestinationHost;
-                            value.DestinationPort = info.TcpOptions.DestinationPort;
-                            value.DestinationGateway = info.TcpOptions.DestinationGateway;
-                            value.DestinationSubnetMask = info.TcpOptions.DestinationSubnetMask;
-                            value.DestinationPrimaryDns = info.TcpOptions.DestinationPrimaryDns;
-                            value.DestinationAlternateDns = info.TcpOptions.DestinationAlternateDns;
-                            value.InputMessage = info.TcpOptions.InputMessage;
-                            value.Script = info.TcpOptions.Script;
-                            value.OutputMessage = info.TcpOptions.OutputMessage;
-                            value.LastTestMessage = info.TcpOptions.LastTestMessage;
+                            info.MqttOptions = new MqttServiceOptions();
                         }
                     }
 
-                    if (info.ServiceType == ServiceType.Ftp && info.FtpOptions != null)
+                    if (info.ServiceType == ServiceType.Tcp && info.TcpOptions is null)
                     {
-                        try
-                        {
-                            var opt = App.AppHost?.Services.GetService<IOptions<FtpServerOptions>>();
-                            if (opt != null)
-                            {
-                                var value = opt.Value;
-                                value.Port = info.FtpOptions.Port;
-                                value.RootPath = info.FtpOptions.RootPath;
-                                value.AllowAnonymous = info.FtpOptions.AllowAnonymous;
-                                value.Username = info.FtpOptions.Username;
-                                value.Password = info.FtpOptions.Password;
-                            }
-                        }
-                        catch
-                        {
-                            // ignore missing options during tests or early startup
-                        }
+                        info.TcpOptions = new TcpServiceOptions();
                     }
 
-                    if (info.ServiceType == ServiceType.Heartbeat && info.HeartbeatOptions != null)
+                    if (info.ServiceType == ServiceType.Ftp && info.FtpOptions is null)
                     {
-                        var opt = App.AppHost?.Services.GetService<IOptions<HeartbeatServiceOptions>>();
-                        if (opt != null)
-                        {
-                            var value = opt.Value;
-                            value.BaseMessage = info.HeartbeatOptions.BaseMessage;
-                            value.IncludePing = info.HeartbeatOptions.IncludePing;
-                            value.IncludeStatus = info.HeartbeatOptions.IncludeStatus;
-                        }
+                        info.FtpOptions = new FtpServerOptions();
                     }
 
-                    if (info.ServiceType == ServiceType.FileObserver && info.FileObserverOptions != null)
+                    if (info.ServiceType == ServiceType.Http && info.HttpOptions is null)
                     {
-                        var opt = App.AppHost?.Services.GetService<IOptions<FileObserverServiceOptions>>();
-                        if (opt != null)
-                        {
-                            var value = opt.Value;
-                            value.FilePath = info.FileObserverOptions.FilePath;
-                            value.ImageNames = info.FileObserverOptions.ImageNames;
-                            value.SendAllImages = info.FileObserverOptions.SendAllImages;
-                            value.SendFirstX = info.FileObserverOptions.SendFirstX;
-                            value.XCount = info.FileObserverOptions.XCount;
-                            value.SendTcpCommand = info.FileObserverOptions.SendTcpCommand;
-                            value.TcpCommand = info.FileObserverOptions.TcpCommand;
-                        }
+                        info.HttpOptions = new HttpServiceOptions();
                     }
 
-                    if (info.ServiceType == ServiceType.Hid && info.HidOptions != null)
+                    if (info.ServiceType == ServiceType.Heartbeat && info.HeartbeatOptions is null)
                     {
-                        var opt = App.AppHost?.Services.GetService<IOptions<HidServiceOptions>>();
-                        if (opt != null)
-                        {
-                            var value = opt.Value;
-                            value.MessageTemplate = info.HidOptions.MessageTemplate;
-                            value.UsbProtocol = info.HidOptions.UsbProtocol;
-                            value.AttachedService = info.HidOptions.AttachedService;
-                            value.DebounceTimeMs = info.HidOptions.DebounceTimeMs;
-                            value.KeyDownTimeMs = info.HidOptions.KeyDownTimeMs;
-                        }
+                        info.HeartbeatOptions = new HeartbeatServiceOptions();
                     }
 
-                    if (info.ServiceType == ServiceType.Scp && info.ScpOptions != null)
+                    if (info.ServiceType == ServiceType.FileObserver && info.FileObserverOptions is null)
                     {
-                        var opt = App.AppHost?.Services.GetService<IOptions<ScpServiceOptions>>();
-                        if (opt != null)
-                        {
-                            var value = opt.Value;
-                            value.Host = info.ScpOptions.Host;
-                            value.Port = info.ScpOptions.Port;
-                            value.Username = info.ScpOptions.Username;
-                            value.Password = info.ScpOptions.Password;
-                            value.LocalPath = info.ScpOptions.LocalPath;
-                            value.RemotePath = info.ScpOptions.RemotePath;
-                        }
+                        info.FileObserverOptions = new FileObserverServiceOptions();
+                    }
+
+                    if (info.ServiceType == ServiceType.Hid && info.HidOptions is null)
+                    {
+                        info.HidOptions = new HidServiceOptions();
+                    }
+
+                    if (info.ServiceType == ServiceType.Scp && info.ScpOptions is null)
+                    {
+                        info.ScpOptions = new ScpServiceOptions();
                     }
                 }
 

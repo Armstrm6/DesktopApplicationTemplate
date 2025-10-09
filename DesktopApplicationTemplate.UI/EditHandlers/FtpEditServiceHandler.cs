@@ -10,7 +10,6 @@ using DesktopApplicationTemplate.UI.Views.Ftp.Advanced;
 using DesktopApplicationTemplate.UI.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace DesktopApplicationTemplate.UI.EditHandlers;
 
@@ -56,12 +55,6 @@ public class FtpEditServiceHandler : IEditServiceHandler
 
             service.DisplayName = trimmed;
             service.FtpOptions = opts;
-            var opt = _services.GetRequiredService<IOptions<FtpServerOptions>>().Value;
-            opt.Port = opts.Port;
-            opt.RootPath = opts.RootPath;
-            opt.AllowAnonymous = opts.AllowAnonymous;
-            opt.Username = opts.Username;
-            opt.Password = opts.Password;
             if (ftpPage != null)
                 mainView.ShowPage(ftpPage);
             _ = mainViewModel.SaveServicesAsync();
