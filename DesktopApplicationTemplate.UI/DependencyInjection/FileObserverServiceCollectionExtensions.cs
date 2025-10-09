@@ -6,6 +6,7 @@ using DesktopApplicationTemplate.Core.Services.Protocols.FileObserver;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.Services;
 using DesktopApplicationTemplate.UI.Models;
+using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.ViewModels.FileObserver;
 using DesktopApplicationTemplate.UI.ViewModels.FileObserver.Advanced;
