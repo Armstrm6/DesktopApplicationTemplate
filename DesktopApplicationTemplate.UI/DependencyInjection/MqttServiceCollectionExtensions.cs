@@ -16,7 +16,6 @@ using DesktopApplicationTemplate.UI.Views.Mqtt;
 using DesktopApplicationTemplate.UI.Views.Mqtt.Create;
 using DesktopApplicationTemplate.UI.Views.Mqtt.Edit;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace DesktopApplicationTemplate.UI.DependencyInjection
 {
@@ -38,7 +37,7 @@ namespace DesktopApplicationTemplate.UI.DependencyInjection
             services.AddTransient<MqttEditConnectionView>();
             services.AddTransient<MqttTagSubscriptionsView>();
 
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<ServiceUiRegistration<ServiceListModel, Page>>(sp => CreateMqttRegistration(sp.GetRequiredService<IServiceCatalog>())));
+            services.AddSingleton<ServiceUiRegistration<ServiceListModel, Page>>(sp => CreateMqttRegistration(sp.GetRequiredService<IServiceCatalog>()));
 
             return services;
         }

@@ -18,7 +18,6 @@ using DesktopApplicationTemplate.UI.Views.Hid.Advanced;
 using DesktopApplicationTemplate.UI.Views.Hid.Create;
 using DesktopApplicationTemplate.UI.Views.Hid.Edit;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace DesktopApplicationTemplate.UI.DependencyInjection
 {
@@ -42,7 +41,7 @@ namespace DesktopApplicationTemplate.UI.DependencyInjection
             services.AddTransient<HidAdvancedConfigView>();
             services.AddTransient<HidAdvancedConfigViewModel>();
 
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<ServiceUiRegistration<ServiceListModel, Page>>(sp => CreateHidRegistration(sp.GetRequiredService<IServiceCatalog>())));
+            services.AddSingleton<ServiceUiRegistration<ServiceListModel, Page>>(sp => CreateHidRegistration(sp.GetRequiredService<IServiceCatalog>()));
 
             return services;
         }

@@ -14,7 +14,6 @@ using DesktopApplicationTemplate.UI.Views;
 using DesktopApplicationTemplate.UI.Views.Csv;
 using DesktopApplicationTemplate.UI.Views.Csv.Edit;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace DesktopApplicationTemplate.UI.DependencyInjection
 {
@@ -35,7 +34,7 @@ namespace DesktopApplicationTemplate.UI.DependencyInjection
             services.AddTransient<CsvServiceEditorViewModel>();
             services.AddTransient<ServiceEditorViewModelBase<CsvServiceOptions>, CsvServiceEditorViewModel>();
 
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<ServiceUiRegistration<ServiceListModel, Page>>(sp => CreateCsvRegistration(sp.GetRequiredService<IServiceCatalog>())));
+            services.AddSingleton<ServiceUiRegistration<ServiceListModel, Page>>(sp => CreateCsvRegistration(sp.GetRequiredService<IServiceCatalog>()));
 
             return services;
         }
