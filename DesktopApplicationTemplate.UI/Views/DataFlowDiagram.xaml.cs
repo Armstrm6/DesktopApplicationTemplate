@@ -1,18 +1,17 @@
 using System.Windows.Controls;
 
-namespace DesktopApplicationTemplate.UI.Views
+namespace DesktopApplicationTemplate.UI.Views;
+
+/// <summary>
+/// Visualizes data flow through incoming, processing, and outgoing stages.
+/// </summary>
+public partial class DataFlowDiagram : UserControl
 {
     /// <summary>
-    /// Visualizes data flow through incoming, processing, and outgoing stages.
+    /// Initializes a new instance of the <see cref="DataFlowDiagram"/> class.
     /// </summary>
-    public partial class DataFlowDiagram : UserControl
+    public DataFlowDiagram()
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DataFlowDiagram"/> class.
-        /// </summary>
-        public DataFlowDiagram()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }
