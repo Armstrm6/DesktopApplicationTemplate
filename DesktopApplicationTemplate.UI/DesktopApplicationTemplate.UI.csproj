@@ -35,6 +35,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Page Include="Views/Shared/AdvancedConfigButtonBar.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views/Shared/EditorButtonBar.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Views/**/*.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
