@@ -173,7 +173,7 @@ namespace DesktopApplicationTemplate.UI
 
         private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
-            var logger = AppHost.Services.GetService<ILogger<App>>();
+            var logger = AppHost?.Services?.GetService<ILogger<App>>();
             if (e.Exception is { } exception)
             {
                 logger?.LogError(exception, "Unhandled dispatcher exception");
@@ -208,7 +208,7 @@ namespace DesktopApplicationTemplate.UI
 
         internal static async Task OnAppDomainUnhandledExceptionAsync(object? sender, UnhandledExceptionEventArgs e)
         {
-            var logger = AppHost.Services.GetService<ILogger<App>>();
+            var logger = AppHost?.Services?.GetService<ILogger<App>>();
             if (e.ExceptionObject is Exception ex)
             {
                 logger?.LogError(ex, "Unhandled domain exception");

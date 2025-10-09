@@ -50,3 +50,4 @@ XDG0008,DesktopApplicationTemplate.UI/FileObserverCreateServiceView.xaml,'FormFi
 XDG0008,DesktopApplicationTemplate.UI/TcpServiceMessagesView.xaml,'FormField' resource not found.,1,2025-10-09T18:06:21
 XDG0008,DesktopApplicationTemplate.UI/FTPServiceView.xaml,"The resource ""StringNullOrEmptyToVisibilityConverter"" has an incompatible type.",1,2025-10-09T18:06:21
 XDG0008,DesktopApplicationTemplate.UI/FTPServiceView.xaml,'FormField' resource not found.,1,2025-10-09T18:06:21
+System.NullReferenceException,DesktopApplicationTemplate.UI/App.xaml.cs,Object reference not set to an instance of an object.,1,2025-10-09T18:15:23
