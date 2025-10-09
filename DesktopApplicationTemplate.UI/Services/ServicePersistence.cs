@@ -80,20 +80,20 @@ namespace DesktopApplicationTemplate.Persistence
 
                 if (descriptor?.OptionsSerializer is { } serializer)
                 {
-                    var options = GetOptionsForSerializer(service, serializer, descriptor.Id);
-                    if (options is null)
+                    var descriptorOptions = GetOptionsForSerializer(service, serializer, descriptor.Id);
+                    if (descriptorOptions is null)
                     {
                         try
                         {
-                            options = serializer.CreateDefaultOptions();
+                            descriptorOptions = serializer.CreateDefaultOptions();
                         }
                         catch (Exception)
                         {
-                            options = null;
+                            descriptorOptions = null;
                         }
                     }
 
-                    if (options is not null && TrySerializeOptions(serializer, options, out var element))
+                    if (descriptorOptions is not null && TrySerializeOptions(serializer, descriptorOptions, out var element))
                     {
                         info.SerializedOptions[descriptor.Id] = element;
                     }
