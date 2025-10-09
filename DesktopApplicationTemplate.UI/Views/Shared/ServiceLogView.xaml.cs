@@ -12,7 +12,7 @@ namespace DesktopApplicationTemplate.UI.Views.Shared
     /// <summary>
     /// Interaction logic for ServiceLogView.xaml
     /// </summary>
-    public partial class ServiceLogView : UserControl
+    public partial class ServiceLogView : Page
     {
         private const string ExportDialogFilter = "Log files (*.log)|*.log|Text files (*.txt)|*.txt|All files (*.*)|*.*";
         private const string ExportTimestampFormat = "yyyyMMdd_HHmmss";
