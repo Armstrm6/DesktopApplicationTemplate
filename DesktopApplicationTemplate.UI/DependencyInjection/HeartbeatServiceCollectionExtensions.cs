@@ -6,6 +6,7 @@ using DesktopApplicationTemplate.Core.Services.Protocols.Heartbeat;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.Services;
 using DesktopApplicationTemplate.UI.Models;
+using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.ViewModels.Heartbeat;
 using DesktopApplicationTemplate.UI.ViewModels.Heartbeat.Advanced;
