@@ -17,7 +17,8 @@ public sealed record ServiceUiRegistration<TService, TPage>(
     Func<IServiceProvider, object, TService> CreateService,
     Func<IServiceProvider, TPage> CreateServicePage,
     Func<IServiceProvider, string, TPage> CreateNavigationPage,
-    Action<TService, ServicePresentationMetadata>? ApplyPresentation = null);
+    Action<TService, ServicePresentationMetadata>? ApplyPresentation = null,
+    Func<IServiceProvider, object?>? CreateEditHandler = null);
 
 public interface IServiceUiRegistry<TService, TPage> : IDisposable
 {
@@ -36,6 +37,10 @@ public interface IServiceUiRegistry<TService, TPage> : IDisposable
     bool TryCreateNavigationPage(ServiceType serviceType, IServiceProvider provider, string defaultName, out TPage? page);
 
     bool TryCreateNavigationPage(string descriptorId, IServiceProvider provider, string defaultName, out TPage? page);
+
+    bool TryGetRegistration(ServiceType serviceType, out ServiceUiRegistration<TService, TPage>? registration);
+
+    bool TryGetRegistration(string descriptorId, out ServiceUiRegistration<TService, TPage>? registration);
 }
 
 /// <summary>
@@ -169,6 +174,31 @@ public sealed class ServiceUiRegistry<TService, TPage> : IServiceUiRegistry<TSer
 
         page = registration.CreateNavigationPage(provider, defaultName);
         return true;
+    }
+
+    public bool TryGetRegistration(ServiceType serviceType, out ServiceUiRegistration<TService, TPage>? registration)
+    {
+        if (_serviceTypeMap.TryGetValue(serviceType, out var descriptorId) &&
+            _registrations.TryGetValue(descriptorId, out var resolved))
+        {
+            registration = resolved;
+            return true;
+        }
+
+        registration = default;
+        return false;
+    }
+
+    public bool TryGetRegistration(string descriptorId, out ServiceUiRegistration<TService, TPage>? registration)
+    {
+        if (_registrations.TryGetValue(descriptorId, out var resolved))
+        {
+            registration = resolved;
+            return true;
+        }
+
+        registration = default;
+        return false;
     }
 
     public void Dispose()

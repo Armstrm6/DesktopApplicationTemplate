@@ -1,7 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Services;
+using DesktopApplicationTemplate.UI.ViewModels;
+using System.Windows.Controls;
 
 namespace DesktopApplicationTemplate.UI.Services;
 
@@ -30,4 +34,8 @@ public sealed record PluginImportResult(
     bool Success,
     string Message,
     string? DestinationPath,
-    IReadOnlyCollection<IServiceDescriptor> ImportedDescriptors);
+    IReadOnlyCollection<IServiceDescriptor> ImportedDescriptors)
+{
+    public IReadOnlyCollection<ServiceUiRegistration<ServiceListModel, Page>> ImportedUiRegistrations { get; init; }
+        = Array.Empty<ServiceUiRegistration<ServiceListModel, Page>>();
+}

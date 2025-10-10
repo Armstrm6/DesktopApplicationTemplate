@@ -5,6 +5,7 @@ using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Mqtt;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.Services;
+using DesktopApplicationTemplate.UI.EditHandlers;
 using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
@@ -16,6 +17,7 @@ using DesktopApplicationTemplate.UI.Views.Mqtt;
 using DesktopApplicationTemplate.UI.Views.Mqtt.Create;
 using DesktopApplicationTemplate.UI.Views.Mqtt.Edit;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace DesktopApplicationTemplate.UI.DependencyInjection
 {
@@ -80,7 +82,12 @@ namespace DesktopApplicationTemplate.UI.DependencyInjection
                     var view = ActivatorUtilities.CreateInstance<MqttCreateServiceView>(provider, vm);
                     return view;
                 },
-                ApplyPresentation: static (service, metadata) => service.ApplyPresentation(metadata));
+                ApplyPresentation: static (service, metadata) => service.ApplyPresentation(metadata),
+                CreateEditHandler: provider => new MqttEditServiceHandler(
+                    () => provider.GetRequiredService<MainView>(),
+                    () => provider.GetRequiredService<MainViewModel>(),
+                    provider,
+                    provider.GetService<ILogger<MqttEditServiceHandler>>()));
         }
     }
 }
