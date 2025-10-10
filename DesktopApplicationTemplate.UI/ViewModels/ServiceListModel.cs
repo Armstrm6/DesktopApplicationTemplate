@@ -176,6 +176,32 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             get => _descriptorLabel;
             private set { _descriptorLabel = value; OnPropertyChanged(); }
         }
+
+        private bool _needsAttention;
+        public bool NeedsAttention => _needsAttention;
+
+        private string? _attentionReason;
+        public string? AttentionReason => _attentionReason;
+
+        internal void SetAttentionState(bool needsAttention, string? reason)
+        {
+            if (!needsAttention)
+            {
+                reason = null;
+            }
+
+            if (_needsAttention != needsAttention)
+            {
+                _needsAttention = needsAttention;
+                OnPropertyChanged(nameof(NeedsAttention));
+            }
+
+            if (!string.Equals(_attentionReason, reason, StringComparison.Ordinal))
+            {
+                _attentionReason = reason;
+                OnPropertyChanged(nameof(AttentionReason));
+            }
+        }
         [JsonIgnore] public Page? ServicePage { get; set; }
 
         [JsonIgnore]
