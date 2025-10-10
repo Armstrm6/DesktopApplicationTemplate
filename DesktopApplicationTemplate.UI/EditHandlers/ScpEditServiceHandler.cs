@@ -38,7 +38,7 @@ public class ScpEditServiceHandler : IEditServiceHandler
         vm.Load(service.DisplayName, options);
         var editView = _services.GetRequiredService<ScpEditServiceView>();
         editView.Initialize(vm);
-        vm.ServiceSaved += (name, opts) =>
+        vm.ServiceSaved += async (name, opts) =>
         {
             var trimmed = string.IsNullOrWhiteSpace(name)
                 ? mainViewModel.GenerateServiceName(service.Type)
@@ -59,7 +59,7 @@ public class ScpEditServiceHandler : IEditServiceHandler
             service.SetOptions(opts);
             if (scpPage != null)
                 mainView.ShowPage(scpPage);
-            _ = mainViewModel.SaveServicesAsync();
+            await mainViewModel.SaveServicesAsync().ConfigureAwait(false);
         };
         vm.EditCancelled += () =>
         {

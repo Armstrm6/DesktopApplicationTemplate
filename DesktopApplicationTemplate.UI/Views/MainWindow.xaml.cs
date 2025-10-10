@@ -463,7 +463,7 @@ namespace DesktopApplicationTemplate.UI.Views
             editView.Initialize(viewModel);
 
             EventHandler? closeHandler = null;
-            closeHandler = (_, _) =>
+            closeHandler = async (_, _) =>
             {
                 viewModel.RequestClose -= closeHandler;
                 if (service.ServicePage != null)
@@ -471,7 +471,7 @@ namespace DesktopApplicationTemplate.UI.Views
                     ShowPage(service.ServicePage);
                 }
 
-                _ = _viewModel.SaveServicesAsync();
+                await _viewModel.SaveServicesAsync().ConfigureAwait(false);
             };
             viewModel.RequestClose += closeHandler;
 
@@ -540,7 +540,7 @@ namespace DesktopApplicationTemplate.UI.Views
             var page = _serviceProvider.GetRequiredService<CreateServicePage>();
             _createServicePage = page;
             page.SetExistingNames(_viewModel.Services.Select(s => s.DisplayName));
-            page.ServiceCreated += (name, type) =>
+            page.ServiceCreated += async (name, type) =>
             {
                 using var creationScope = _viewModel.BeginServiceCreationScope();
                 var trimmed = string.IsNullOrWhiteSpace(name)
@@ -569,7 +569,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 ServiceList.ScrollIntoView(svc);
                 if (svc.ServicePage != null)
                     ShowPage(svc.ServicePage);
-                _ = _viewModel.SaveServicesAsync();
+                await _viewModel.SaveServicesAsync().ConfigureAwait(false);
                 page.SetExistingNames(_viewModel.Services.Select(s => s.DisplayName));
             };
             page.ServiceTypeSelected += NavigateTo;

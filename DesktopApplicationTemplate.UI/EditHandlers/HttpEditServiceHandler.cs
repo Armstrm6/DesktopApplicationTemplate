@@ -38,7 +38,7 @@ public class HttpEditServiceHandler : IEditServiceHandler
         var vm = ActivatorUtilities.CreateInstance<HttpEditServiceViewModel>(_services, service.DisplayName, options);
         var editView = _services.GetRequiredService<HttpEditServiceView>();
         editView.Initialize(vm);
-        vm.ServiceSaved += (name, opts) =>
+        vm.ServiceSaved += async (name, opts) =>
         {
             var trimmed = string.IsNullOrWhiteSpace(name)
                 ? mainViewModel.GenerateServiceName(service.Type)
@@ -59,7 +59,7 @@ public class HttpEditServiceHandler : IEditServiceHandler
             service.SetOptions(opts);
             if (httpPage != null)
                 mainView.ShowPage(httpPage);
-            _ = mainViewModel.SaveServicesAsync();
+            await mainViewModel.SaveServicesAsync().ConfigureAwait(false);
         };
         vm.EditCancelled += () =>
         {
