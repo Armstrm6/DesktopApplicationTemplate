@@ -48,8 +48,9 @@ namespace DesktopApplicationTemplate.Persistence
 
             foreach (var service in services)
             {
-                var descriptor = ResolveDescriptor(serviceCatalog, service.DescriptorId, service.Type);
-                EnsureSerializedOptions(service, descriptor);
+                var resolution = ResolveDescriptor(serviceCatalog, service.DescriptorId, service.Type);
+                EnsureSerializedOptions(service, resolution);
+                var descriptor = resolution.Descriptor;
 
                 var info = new ServiceInfo
                 {
@@ -80,7 +81,7 @@ namespace DesktopApplicationTemplate.Persistence
                     RoutingAttributes = CloneRoutingAttributes(service.GetRoutingAttributesSnapshot()),
                 };
 
-                if (descriptor?.OptionsSerializer is { } serializer)
+                if (resolution.IsSuccessful && descriptor?.OptionsSerializer is { } serializer)
                 {
                     var descriptorOptions = GetOptionsForSerializer(service, serializer, descriptor.Id);
                     if (descriptorOptions is null)
@@ -220,7 +221,8 @@ namespace DesktopApplicationTemplate.Persistence
 
         private static ServiceListModel CreateServiceModel(ServiceInfo info, IServiceCatalog serviceCatalog, IMessageRoutingService routingService)
         {
-            var descriptor = ResolveDescriptor(serviceCatalog, info.DescriptorId, info.ServiceType);
+            var resolution = ResolveDescriptor(serviceCatalog, info.DescriptorId, info.ServiceType);
+            var descriptor = resolution.Descriptor;
             var descriptorId = descriptor?.Id ?? info.DescriptorId;
 
             var service = new ServiceListModel(routingService)
@@ -247,17 +249,25 @@ namespace DesktopApplicationTemplate.Persistence
             service.InitializeMessageCounts(info.IncomingMessageCount, info.OutgoingMessageCount);
             service.InitializeActivationState(info.IsActive);
 
-            ApplyOptions(info, service, descriptor);
+            ApplyOptions(info, service, resolution);
 
             service.RepublishRoutingAttributes();
 
             return service;
         }
 
-        private static void ApplyOptions(ServiceInfo info, ServiceListModel service, IServiceDescriptor? descriptor)
+        private static void ApplyOptions(ServiceInfo info, ServiceListModel service, DescriptorResolution resolution)
         {
+            var descriptor = resolution.IsSuccessful ? resolution.Descriptor : null;
             var serializer = descriptor?.OptionsSerializer;
             var applied = false;
+            var attentionReasons = new List<string>();
+
+            var resolutionReason = BuildResolutionAttentionReason(resolution, info);
+            if (!string.IsNullOrWhiteSpace(resolutionReason))
+            {
+                attentionReasons.Add(resolutionReason);
+            }
 
             if (serializer is not null)
             {
@@ -293,36 +303,104 @@ namespace DesktopApplicationTemplate.Persistence
                 applied = TryApplyLegacyOptions(info, service, descriptor);
             }
 
-            if (!applied && serializer is not null)
+            var hasPayload = HasPersistedPayload(info);
+
+            if (!applied)
             {
-                try
+                if (serializer is not null && !hasPayload)
                 {
-                    var defaults = serializer.CreateDefaultOptions();
-                    if (defaults is not null && TrySerializeOptions(serializer, defaults, out var element))
+                    try
                     {
-                        service.TryApplySerializedOptions(serializer, element, descriptor?.Id ?? service.DescriptorId);
-                        applied = true;
+                        var defaults = serializer.CreateDefaultOptions();
+                        if (defaults is not null && TrySerializeOptions(serializer, defaults, out var element))
+                        {
+                            service.TryApplySerializedOptions(serializer, element, descriptor?.Id ?? service.DescriptorId);
+                            applied = true;
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        // Ignore failures and fall through to attention state handling.
                     }
                 }
-                catch (Exception)
+                else if (hasPayload)
                 {
-                    // Ignore failures and fall through to type-based defaults.
+                    var key = descriptor?.Id
+                        ?? info.DescriptorId
+                        ?? service.DescriptorId
+                        ?? info.ServiceType.ToString();
+
+                    if (serializer is null)
+                    {
+                        attentionReasons.Add($"Stored configuration for '{key}' could not be applied because no compatible serializer is available.");
+                    }
+                    else if (resolution.IsSuccessful)
+                    {
+                        attentionReasons.Add($"Stored configuration for '{key}' could not be parsed by the registered serializer.");
+                    }
+                    else if (attentionReasons.Count == 0)
+                    {
+                        attentionReasons.Add($"Stored configuration for '{key}' was preserved for future recovery.");
+                    }
                 }
+            }
+
+            if (applied && attentionReasons.Count == 0)
+            {
+                service.SetAttentionState(false, null);
+            }
+            else
+            {
+                service.SetAttentionState(attentionReasons.Count > 0, attentionReasons.Count > 0 ? string.Join(" ", attentionReasons) : null);
             }
         }
 
-        private static IServiceDescriptor? ResolveDescriptor(IServiceCatalog catalog, string? descriptorId, ServiceType serviceType)
+        private static DescriptorResolution ResolveDescriptor(IServiceCatalog catalog, string? descriptorId, ServiceType serviceType)
         {
             if (!string.IsNullOrWhiteSpace(descriptorId) && catalog.TryGetById(descriptorId, out var descriptor))
             {
-                return descriptor;
+                return DescriptorResolution.Resolved(descriptor, descriptorId, serviceType);
             }
 
-            return catalog.Descriptors.FirstOrDefault(d => d.ServiceType == serviceType);
+            if (!string.IsNullOrWhiteSpace(descriptorId))
+            {
+                var candidates = catalog.Descriptors
+                    .Where(d => d.ServiceType == serviceType)
+                    .ToList();
+
+                return candidates.Count > 0
+                    ? DescriptorResolution.Ambiguous(descriptorId, serviceType, candidates)
+                    : DescriptorResolution.Missing(descriptorId, serviceType);
+            }
+
+            if (serviceType == default)
+            {
+                return DescriptorResolution.Missing(null, serviceType);
+            }
+
+            var matches = catalog.Descriptors
+                .Where(d => d.ServiceType == serviceType)
+                .ToList();
+
+            if (matches.Count == 1)
+            {
+                var resolved = matches[0];
+                return DescriptorResolution.Resolved(resolved, resolved.Id, serviceType);
+            }
+
+            return matches.Count > 1
+                ? DescriptorResolution.Ambiguous(null, serviceType, matches)
+                : DescriptorResolution.Missing(null, serviceType);
         }
 
-        private static void EnsureSerializedOptions(ServiceListModel service, IServiceDescriptor? descriptor)
+        private static void EnsureSerializedOptions(ServiceListModel service, DescriptorResolution resolution)
         {
+            if (!resolution.IsSuccessful)
+            {
+                return;
+            }
+
+            var descriptor = resolution.Descriptor;
             if (descriptor?.OptionsSerializer is not { } serializer)
             {
                 return;
@@ -628,6 +706,105 @@ namespace DesktopApplicationTemplate.Persistence
                 ["ScpOptions"] = ServiceType.Scp,
                 ["MqttOptions"] = ServiceType.Mqtt
             };
+
+        private static bool HasPersistedPayload(ServiceInfo info)
+        {
+            if (info.SerializedOptions is not null)
+            {
+                foreach (var payload in info.SerializedOptions.Values)
+                {
+                    if (payload.ValueKind is not JsonValueKind.Null and not JsonValueKind.Undefined)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            if (info.LegacySerializedOptions is not null)
+            {
+                foreach (var payload in info.LegacySerializedOptions.Values)
+                {
+                    if (payload.ValueKind is not JsonValueKind.Null and not JsonValueKind.Undefined)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private static string? BuildResolutionAttentionReason(DescriptorResolution resolution, ServiceInfo info)
+        {
+            if (!resolution.NeedsAttention)
+            {
+                return null;
+            }
+
+            if (!string.IsNullOrWhiteSpace(resolution.RequestedId))
+            {
+                return resolution.Status switch
+                {
+                    DescriptorResolutionStatus.Missing => $"Descriptor '{resolution.RequestedId}' is not registered. Stored configuration was preserved.",
+                    DescriptorResolutionStatus.Ambiguous => $"Descriptor '{resolution.RequestedId}' is not registered. Found {resolution.Candidates.Count} potential replacement(s) for {info.ServiceType}. Stored configuration was preserved.",
+                    _ => null
+                };
+            }
+
+            return resolution.Status switch
+            {
+                DescriptorResolutionStatus.Missing => $"No descriptor is registered for {info.ServiceType}. Stored configuration was preserved.",
+                DescriptorResolutionStatus.Ambiguous => $"Multiple descriptors are registered for {info.ServiceType}. Stored configuration was preserved.",
+                _ => null
+            };
+        }
+
+        private enum DescriptorResolutionStatus
+        {
+            Resolved,
+            Missing,
+            Ambiguous
+        }
+
+        private readonly struct DescriptorResolution
+        {
+            private DescriptorResolution(
+                DescriptorResolutionStatus status,
+                IServiceDescriptor? descriptor,
+                string? requestedId,
+                ServiceType serviceType,
+                IReadOnlyList<IServiceDescriptor> candidates)
+            {
+                Status = status;
+                Descriptor = descriptor;
+                RequestedId = requestedId;
+                ServiceType = serviceType;
+                Candidates = candidates;
+            }
+
+            public DescriptorResolutionStatus Status { get; }
+
+            public IServiceDescriptor? Descriptor { get; }
+
+            public string? RequestedId { get; }
+
+            public ServiceType ServiceType { get; }
+
+            public IReadOnlyList<IServiceDescriptor> Candidates { get; }
+
+            public bool IsSuccessful => Status == DescriptorResolutionStatus.Resolved;
+
+            public bool NeedsAttention => !IsSuccessful;
+
+            public static DescriptorResolution Resolved(IServiceDescriptor descriptor, string? requestedId, ServiceType serviceType)
+                => new(DescriptorResolutionStatus.Resolved, descriptor, requestedId, serviceType, Array.Empty<IServiceDescriptor>());
+
+            public static DescriptorResolution Missing(string? requestedId, ServiceType serviceType)
+                => new(DescriptorResolutionStatus.Missing, null, requestedId, serviceType, Array.Empty<IServiceDescriptor>());
+
+            public static DescriptorResolution Ambiguous(string? requestedId, ServiceType serviceType, IReadOnlyList<IServiceDescriptor> candidates)
+                => new(DescriptorResolutionStatus.Ambiguous, null, requestedId, serviceType, candidates);
+        }
     }
 
     public class ServiceInfo
