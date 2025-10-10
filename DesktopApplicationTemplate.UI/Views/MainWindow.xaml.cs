@@ -795,7 +795,7 @@ namespace DesktopApplicationTemplate.UI.Views
 
                 var index = _viewModel.Services.IndexOf(svc);
                 svc.LogAdded -= _viewModel.OnServiceLogAdded;
-                ServiceListModel.RemoveServiceAssociations(svc);
+                _viewModel.RemoveServiceAssociations(svc);
                 _viewModel.Services.Remove(svc);
                 if (_viewModel.Services.Count > 0)
                 {

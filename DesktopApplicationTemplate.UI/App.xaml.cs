@@ -134,6 +134,7 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<CloseConfirmationHelper>();
             services.AddSingleton<IMqttClientSessionManager, MqttClientSessionManager>();
             services.AddSingleton<MainViewModel>();
+            services.AddSingleton<IServiceLookup>(sp => sp.GetRequiredService<MainViewModel>());
             services.AddSingleton<SettingsViewModel>();
 
             services.AddCsvUi();

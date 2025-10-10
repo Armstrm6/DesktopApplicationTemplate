@@ -23,7 +23,14 @@ using Microsoft.Extensions.Options;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
-    public partial class MainViewModel : ViewModelBase
+    internal interface IServiceLookup
+    {
+        bool TryGetService(ServiceType type, string name, out ServiceListModel? service);
+
+        IEnumerable<ServiceListModel> FindByDisplayName(string name);
+    }
+
+    public partial class MainViewModel : ViewModelBase, IServiceLookup
     {
         private const int DefaultAggregatedLogCapacity = 1000;
 
@@ -141,8 +148,13 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private readonly IStartupPreferencesService _startupPreferencesService;
         private readonly HashSet<ServiceListModel> _activatingServices = new();
         private readonly HashSet<ServiceListModel> _trackedServices = new();
+        private readonly Dictionary<(ServiceType Type, string Name), ServiceListModel> _serviceIndex = new();
+        private readonly Dictionary<string, HashSet<ServiceListModel>> _servicesByName = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<ServiceListModel, ServiceIndexEntry> _serviceKeys = new();
         private static readonly TimeSpan ActivationConfirmationDelay = TimeSpan.FromMilliseconds(500);
         private int _serviceCreationScopeDepth;
+
+        private readonly record struct ServiceIndexEntry(ServiceType Type, string NormalizedName, string DisplayName);
 
         internal bool IsServiceCreationInProgress => Volatile.Read(ref _serviceCreationScopeDepth) > 0;
 
@@ -175,12 +187,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             var aggregatedLogCapacity = Math.Max(1, appOptions?.Value?.AggregatedLogRetention ?? DefaultAggregatedLogCapacity);
             AllLogs = new LimitedObservableCollection<LogEntry>(aggregatedLogCapacity);
             ServiceListModel.OptionsSerializerResolver = ResolveOptionsSerializer;
+            ServiceListModel.CrossServiceAssociationsClearing += OnCrossServiceAssociationsClearing;
             _ = NetworkConfig.LoadAsync();
             _networkService.ConfigurationChanged += (_, cfg) => ApplyNetworkConfiguration(cfg);
-            ServiceListModel.ResolveService = (type, name) =>
-                Services.FirstOrDefault(s =>
-                    s.Type == type &&
-                    s.DisplayName.Equals(name, StringComparison.OrdinalIgnoreCase));
             if (!string.IsNullOrWhiteSpace(servicesFilePath))
             {
                 ServicePersistence.FilePath = servicesFilePath!;
@@ -371,7 +380,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 _csvService.RemoveColumnsForService(target.DisplayName);
             }
 
-            ServiceListModel.RemoveServiceAssociations(target);
+            RemoveServiceAssociations(target);
             _activatingServices.Remove(target);
             target.LogAdded -= OnServiceLogAdded;
             target.ActiveChanged -= OnServiceActiveChanged;
@@ -827,6 +836,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
             if (_trackedServices.Add(service))
             {
+                AddServiceToIndex(service);
                 service.PropertyChanged += OnServicePropertyChanged;
             }
         }
@@ -841,17 +851,233 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             if (_trackedServices.Remove(service))
             {
                 service.PropertyChanged -= OnServicePropertyChanged;
+                RemoveServiceFromIndex(service);
+            }
+        }
+
+        private void AddServiceToIndex(ServiceListModel service)
+        {
+            var entry = CreateIndexEntry(service);
+            _serviceIndex[(entry.Type, entry.NormalizedName)] = service;
+            AddToNameIndex(service, entry.NormalizedName);
+            _serviceKeys[service] = entry;
+            service.ServiceLookup = this;
+        }
+
+        private void RemoveServiceFromIndex(ServiceListModel service)
+        {
+            if (_serviceKeys.Remove(service, out var entry))
+            {
+                _serviceIndex.Remove((entry.Type, entry.NormalizedName));
+                RemoveFromNameIndex(service, entry.NormalizedName);
+            }
+
+            service.ServiceLookup = null;
+        }
+
+        private void UpdateServiceIndex(ServiceListModel service, bool updateAssociations)
+        {
+            if (!_serviceKeys.TryGetValue(service, out var previousEntry))
+            {
+                AddServiceToIndex(service);
+                return;
+            }
+
+            var newEntry = CreateIndexEntry(service);
+            var keyChanged = previousEntry.Type != newEntry.Type || previousEntry.NormalizedName != newEntry.NormalizedName;
+            var nameChanged = !string.Equals(previousEntry.DisplayName, newEntry.DisplayName, StringComparison.Ordinal);
+
+            if (!keyChanged)
+            {
+                if (nameChanged)
+                {
+                    _serviceKeys[service] = newEntry;
+                    if (updateAssociations)
+                    {
+                        UpdateNeighborAssociations(service, previousEntry.DisplayName);
+                    }
+                }
+
+                return;
+            }
+
+            _serviceIndex.Remove((previousEntry.Type, previousEntry.NormalizedName));
+            RemoveFromNameIndex(service, previousEntry.NormalizedName);
+
+            _serviceIndex[(newEntry.Type, newEntry.NormalizedName)] = service;
+            AddToNameIndex(service, newEntry.NormalizedName);
+            _serviceKeys[service] = newEntry;
+
+            if (updateAssociations || nameChanged)
+            {
+                UpdateNeighborAssociations(service, previousEntry.DisplayName);
+            }
+        }
+
+        private void AddToNameIndex(ServiceListModel service, string normalizedName)
+        {
+            if (!_servicesByName.TryGetValue(normalizedName, out var bucket))
+            {
+                bucket = new HashSet<ServiceListModel>();
+                _servicesByName[normalizedName] = bucket;
+            }
+
+            bucket.Add(service);
+        }
+
+        private void RemoveFromNameIndex(ServiceListModel service, string normalizedName)
+        {
+            if (!_servicesByName.TryGetValue(normalizedName, out var bucket))
+            {
+                return;
+            }
+
+            bucket.Remove(service);
+            if (bucket.Count == 0)
+            {
+                _servicesByName.Remove(normalizedName);
+            }
+        }
+
+        private ServiceIndexEntry CreateIndexEntry(ServiceListModel service)
+        {
+            var displayName = service.DisplayName ?? string.Empty;
+            return new ServiceIndexEntry(service.Type, NormalizeServiceName(displayName), displayName);
+        }
+
+        private static string NormalizeServiceName(string? name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return string.Empty;
+            }
+
+            return name.Trim().ToUpperInvariant();
+        }
+
+        public bool TryGetService(ServiceType type, string name, out ServiceListModel? service)
+        {
+            return _serviceIndex.TryGetValue((type, NormalizeServiceName(name)), out service);
+        }
+
+        public IEnumerable<ServiceListModel> FindByDisplayName(string name)
+        {
+            var normalized = NormalizeServiceName(name);
+            if (_servicesByName.TryGetValue(normalized, out var bucket) && bucket.Count > 0)
+            {
+                return bucket.ToArray();
+            }
+
+            return Array.Empty<ServiceListModel>();
+        }
+
+        private IReadOnlyList<ServiceListModel> GetAssociatedServiceNeighbors(ServiceListModel service)
+        {
+            if (service.AssociatedServices.Count == 0)
+            {
+                return Array.Empty<ServiceListModel>();
+            }
+
+            var neighbors = new HashSet<ServiceListModel>();
+            var snapshot = service.AssociatedServices.ToList();
+            foreach (var neighborName in snapshot)
+            {
+                foreach (var neighbor in FindByDisplayName(neighborName))
+                {
+                    if (!ReferenceEquals(neighbor, service))
+                    {
+                        neighbors.Add(neighbor);
+                    }
+                }
+            }
+
+            return neighbors.Count == 0 ? Array.Empty<ServiceListModel>() : neighbors.ToList();
+        }
+
+        private void UpdateNeighborAssociations(ServiceListModel service, string previousDisplayName)
+        {
+            if (service is null || string.IsNullOrWhiteSpace(previousDisplayName))
+            {
+                return;
+            }
+
+            foreach (var neighbor in GetAssociatedServiceNeighbors(service))
+            {
+                if (neighbor.AssociatedServices.Remove(previousDisplayName))
+                {
+                    var newName = service.DisplayName;
+                    if (!string.IsNullOrWhiteSpace(newName) && !neighbor.AssociatedServices.Contains(newName))
+                    {
+                        neighbor.AssociatedServices.Add(newName);
+                    }
+                }
+            }
+        }
+
+        private void ClearAssociationsFor(ServiceListModel service)
+        {
+            if (service is null)
+            {
+                return;
+            }
+
+            var namesToRemove = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            if (!string.IsNullOrWhiteSpace(service.DisplayName))
+            {
+                namesToRemove.Add(service.DisplayName);
+            }
+
+            if (service.AssociatedServices.Count == 0 && namesToRemove.Count == 0)
+            {
+                return;
+            }
+
+            foreach (var neighbor in GetAssociatedServiceNeighbors(service))
+            {
+                foreach (var name in namesToRemove)
+                {
+                    neighbor.AssociatedServices.Remove(name);
+                }
+            }
+
+            service.AssociatedServices.Clear();
+        }
+
+        internal void RemoveServiceAssociations(ServiceListModel service)
+        {
+            ClearAssociationsFor(service);
+        }
+
+        private void OnCrossServiceAssociationsClearing()
+        {
+            foreach (var service in Services.ToList())
+            {
+                ClearAssociationsFor(service);
             }
         }
 
         private void OnServicePropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (!string.Equals(e.PropertyName, nameof(ServiceListModel.DisplayName), StringComparison.Ordinal))
+            if (sender is not ServiceListModel service)
             {
                 return;
             }
 
-            LogViewModel.UpdateServiceFilters(Services.Select(s => s.DisplayName));
+            var propertyName = e.PropertyName;
+            var affectsDisplayName = string.IsNullOrEmpty(propertyName) ||
+                string.Equals(propertyName, nameof(ServiceListModel.DisplayName), StringComparison.Ordinal);
+            var affectsIndex = affectsDisplayName ||
+                string.Equals(propertyName, nameof(ServiceListModel.Type), StringComparison.Ordinal);
+
+            if (affectsIndex)
+            {
+                UpdateServiceIndex(service, affectsDisplayName);
+            }
+
+            if (affectsDisplayName)
+            {
+                LogViewModel.UpdateServiceFilters(Services.Select(s => s.DisplayName));
+            }
         }
 
         internal void OnServiceActiveChanged(bool _)
