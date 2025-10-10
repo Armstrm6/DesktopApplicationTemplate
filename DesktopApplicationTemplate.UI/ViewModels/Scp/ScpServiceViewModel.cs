@@ -55,6 +55,8 @@ public class ScpServiceViewModel : ViewModelBase, ILoggingViewModel, INetworkAwa
         public ICommand BrowseCommand { get; }
         public ICommand TransferCommand { get; }
         public ICommand SaveCommand { get; }
+        private bool _isExportingLogs;
+        private readonly AsyncRelayCommand _exportLogCommand;
 
         private ILoggingService? _logger;
         public ILoggingService? Logger
@@ -103,7 +105,8 @@ public class ScpServiceViewModel : ViewModelBase, ILoggingViewModel, INetworkAwa
             TransferCommand = new AsyncRelayCommand(TransferAsync);
             SaveCommand = new AsyncRelayCommand(SaveAsync);
             RefreshLogCommand = new RelayCommand(() => OnPropertyChanged(nameof(DisplayLogs)));
-            ExportLogCommand = new RelayCommand(ExportLogs);
+            _exportLogCommand = new AsyncRelayCommand(ExportLogsAsync, () => !_isExportingLogs);
+            ExportLogCommand = _exportLogCommand;
             ClearLogCommand = new RelayCommand(ClearLogs);
         }
 
@@ -138,11 +141,33 @@ public class ScpServiceViewModel : ViewModelBase, ILoggingViewModel, INetworkAwa
             Logger?.Log("SCP logs cleared", LogLevel.Debug);
         }
 
-        private void ExportLogs()
+        private async Task ExportLogsAsync()
         {
+            if (_isExportingLogs)
+            {
+                return;
+            }
+
+            _isExportingLogs = true;
+            _exportLogCommand.RaiseCanExecuteChanged();
+
             var path = Path.Combine(Path.GetTempPath(), "scp_logs.txt");
-            File.WriteAllLines(path, DisplayLogs.Select(l => l.Message));
-            Logger?.Log($"SCP logs exported to {path}", LogLevel.Debug);
+
+            try
+            {
+                var lines = DisplayLogs.Select(l => l.Message).ToList();
+                await File.WriteAllLinesAsync(path, lines);
+                Logger?.Log($"SCP logs exported to {path}", LogLevel.Debug);
+            }
+            catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+            {
+                Logger?.Log($"Failed to export SCP logs to {path}: {ex.Message}", LogLevel.Error);
+            }
+            finally
+            {
+                _isExportingLogs = false;
+                _exportLogCommand.RaiseCanExecuteChanged();
+            }
         }
 
         private void OnLogAdded(LogEntry entry) => Logs.Insert(0, entry);

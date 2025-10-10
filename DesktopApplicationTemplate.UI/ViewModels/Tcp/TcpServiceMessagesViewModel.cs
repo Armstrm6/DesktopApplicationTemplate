@@ -141,6 +141,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
         private bool _suppressRuntimeInitialization;
         private bool _pendingNavigationInitialization;
         private bool _navigationInitializationLogged;
+        private bool _isExportingLogs;
+        private readonly AsyncRelayCommand _exportLogCommand;
 
         /// <summary>Type of the service associated with these messages.</summary>
         public ServiceType ServiceType { get; private set; } = ServiceType.Tcp;
@@ -310,7 +312,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                 context: context);
 
             ClearLogCommand = new RelayCommand(ClearLogs);
-            ExportLogCommand = new RelayCommand(ExportLogs);
+            _exportLogCommand = new AsyncRelayCommand(ExportLogsAsync, () => !_isExportingLogs);
+            ExportLogCommand = _exportLogCommand;
             RefreshLogCommand = new RelayCommand(() => OnPropertyChanged(nameof(DisplayLogs)));
             OpenAdvancedSettingsCommand = new RelayCommand(() => AdvancedSettingsRequested?.Invoke(this, EventArgs.Empty));
             OpenScriptEditorCommand = new AsyncRelayCommand(OpenScriptEditorAsync);
@@ -1477,11 +1480,33 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             Logger?.Log("TCP logs cleared", LogLevel.Debug);
         }
 
-        private void ExportLogs()
+        private async Task ExportLogsAsync()
         {
+            if (_isExportingLogs)
+            {
+                return;
+            }
+
+            _isExportingLogs = true;
+            _exportLogCommand.RaiseCanExecuteChanged();
+
             var path = Path.Combine(Path.GetTempPath(), "tcp_logs.txt");
-            File.WriteAllLines(path, DisplayLogs.Select(l => l.Message));
-            Logger?.Log($"TCP logs exported to {path}", LogLevel.Debug);
+
+            try
+            {
+                var lines = DisplayLogs.Select(l => l.Message).ToList();
+                await File.WriteAllLinesAsync(path, lines);
+                Logger?.Log($"TCP logs exported to {path}", LogLevel.Debug);
+            }
+            catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+            {
+                Logger?.Log($"Failed to export TCP logs to {path}: {ex.Message}", LogLevel.Error);
+            }
+            finally
+            {
+                _isExportingLogs = false;
+                _exportLogCommand.RaiseCanExecuteChanged();
+            }
         }
 
         private void OnLogAdded(LogEntry entry) => Logs.Insert(0, entry);

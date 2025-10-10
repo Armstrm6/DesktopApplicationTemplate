@@ -1018,9 +1018,15 @@ namespace DesktopApplicationTemplate.UI.Views
             _viewModel.ClearLogs();
         }
 
-        private void ExportLog_Click(object sender, RoutedEventArgs e)
+        private async void ExportLog_Click(object sender, RoutedEventArgs e)
         {
             _logger?.LogInformation("Home view export logs button clicked");
+
+            var button = sender as Button;
+            if (button is not null)
+            {
+                button.IsEnabled = false;
+            }
 
             var timestamp = DateTime.Now.ToString(LogExportTimestampFormat);
             var suggestedName = $"{LogExportDefaultPrefix}_{timestamp}.log";
@@ -1029,31 +1035,46 @@ namespace DesktopApplicationTemplate.UI.Views
             if (string.IsNullOrWhiteSpace(selectedPath))
             {
                 _logger?.LogInformation("Log export canceled by the user.");
+                if (button is not null)
+                {
+                    button.IsEnabled = true;
+                }
                 return;
             }
 
-            if (_viewModel.TryExportAllLogs(selectedPath, out var errorMessage))
+            try
             {
-                _logger?.LogInformation("All logs exported to {FilePath}", selectedPath);
-                MessageBox.Show(
-                    this,
-                    $"Logs exported to:\n{selectedPath}",
-                    "Export Complete",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
+                var (success, errorMessage) = await _viewModel.TryExportAllLogsAsync(selectedPath);
+                if (success)
+                {
+                    _logger?.LogInformation("All logs exported to {FilePath}", selectedPath);
+                    MessageBox.Show(
+                        this,
+                        $"Logs exported to:\n{selectedPath}",
+                        "Export Complete",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
+                else
+                {
+                    var failureMessage = string.IsNullOrWhiteSpace(errorMessage)
+                        ? "An unknown error occurred."
+                        : errorMessage;
+                    _logger?.LogError("Failed to export logs to {FilePath}: {ErrorMessage}", selectedPath, failureMessage);
+                    MessageBox.Show(
+                        this,
+                        $"Failed to export logs to '{selectedPath}': {failureMessage}",
+                        "Export Failed",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                }
             }
-            else
+            finally
             {
-                var failureMessage = string.IsNullOrWhiteSpace(errorMessage)
-                    ? "An unknown error occurred."
-                    : errorMessage;
-                _logger?.LogError("Failed to export logs to {FilePath}: {ErrorMessage}", selectedPath, failureMessage);
-                MessageBox.Show(
-                    this,
-                    $"Failed to export logs to '{selectedPath}': {failureMessage}",
-                    "Export Failed",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                if (button is not null)
+                {
+                    button.IsEnabled = true;
+                }
             }
         }
 

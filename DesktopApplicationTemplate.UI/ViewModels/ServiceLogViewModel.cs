@@ -5,10 +5,12 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Models;
+using DesktopApplicationTemplate.UI.Helpers;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using CoreLogLevel = DesktopApplicationTemplate.Core.Services.LogLevel;
@@ -24,6 +26,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private ObservableCollection<LogEntry> _logs;
         private NotifyCollectionChangedEventHandler? _logsChangedHandler;
         private bool _newestFirstInSource = true;
+        private bool _isExportingLogs;
+        private readonly AsyncRelayCommand _exportLogCommand;
 
         /// <summary>
         /// Gets the collection of service filters applied in aggregated mode.
@@ -70,7 +74,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             _newestFirstInSource = newestFirstInSource;
             AttachLogCollection(_logs);
             RefreshLogCommand = new RelayCommand(RefreshLogs);
-            ExportLogCommand = new RelayCommand(() => ExportLogs(Path.Combine(Path.GetTempPath(), "exported_logs.txt")));
+            _exportLogCommand = new AsyncRelayCommand(
+                () => ExportLogsAsync(Path.Combine(Path.GetTempPath(), "exported_logs.txt")),
+                () => !_isExportingLogs);
+            ExportLogCommand = _exportLogCommand;
             ClearLogCommand = new RelayCommand(ClearLogs);
         }
 
@@ -217,12 +224,20 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         /// Exports the displayed logs to the specified file path.
         /// </summary>
         /// <param name="filePath">The destination file path.</param>
-        public void ExportLogs(string filePath)
+        public async Task ExportLogsAsync(string filePath)
         {
+            if (_isExportingLogs)
+            {
+                return;
+            }
+
+            _isExportingLogs = true;
+            _exportLogCommand.RaiseCanExecuteChanged();
+
             try
             {
                 var lines = DisplayLogs.Select(l => l.Message).ToList();
-                File.WriteAllLines(filePath, lines);
+                await File.WriteAllLinesAsync(filePath, lines);
             }
             catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
             {
@@ -232,6 +247,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     "Export Failed",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
+            }
+            finally
+            {
+                _isExportingLogs = false;
+                _exportLogCommand.RaiseCanExecuteChanged();
             }
         }
 
