@@ -377,7 +377,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             target.AddLog("Service removed", WpfBrushes.Red);
             if (target.Type != ServiceType.Csv)
             {
-                _csvService.RemoveColumnsForService(target.DisplayName);
+                await _csvService.RemoveColumnsForServiceAsync(target.DisplayName).ConfigureAwait(false);
             }
 
             RemoveServiceAssociations(target);
