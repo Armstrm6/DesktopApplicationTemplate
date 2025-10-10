@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 
@@ -23,7 +24,7 @@ public abstract class ServiceCreateViewModelBase<TOptions> : ServiceEditorViewMo
         SaveButtonText = "Create";
         if (_screen is not null)
         {
-            _screen.ServiceSaved += (_, o) => RaiseServiceSaved(o);
+            _screen.ServiceSaved += (_, o) => RaiseServiceSavedAsync(o);
             _screen.EditCancelled += () => RaiseEditCancelled();
             _screen.AdvancedConfigRequested += o => RaiseAdvancedConfigRequested(o);
         }
@@ -40,15 +41,15 @@ public abstract class ServiceCreateViewModelBase<TOptions> : ServiceEditorViewMo
     public ICommand CreateCommand => SaveCommand;
 
     /// <inheritdoc />
-    protected override void OnSave()
+    protected override async Task OnSaveAsync()
     {
         if (HasErrors)
             return;
         ApplyOptions(Options);
         if (_screen is not null)
-            _screen.Save(ServiceName, Options);
+            await _screen.SaveAsync(ServiceName, Options);
         else
-            RaiseServiceSaved(Options);
+            await RaiseServiceSavedAsync(Options);
     }
 
     /// <inheritdoc />

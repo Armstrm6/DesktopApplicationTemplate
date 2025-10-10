@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using System.Windows.Controls;
 using DesktopApplicationTemplate.Core.Models;
 using DesktopApplicationTemplate.Core.Services;
@@ -74,6 +75,7 @@ namespace DesktopApplicationTemplate.UI.DependencyInjection
                     vm.ServiceSaved += (name, options) =>
                     {
                         ServiceRegistrationHelper.QueueServiceAddition(mainView, ServiceType.Csv, name, (CsvServiceOptions)options);
+                        return Task.CompletedTask;
                     };
                     vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
                     var view = provider.GetRequiredService<CsvServiceEditorView>();

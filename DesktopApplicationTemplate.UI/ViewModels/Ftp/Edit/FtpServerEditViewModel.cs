@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Ftp;
 
@@ -61,15 +62,15 @@ public class FtpServerEditViewModel : ServiceEditViewModelBase<FtpServerOptions>
     }
 
     /// <inheritdoc />
-    protected override void OnSave()
+    protected override Task OnSaveAsync()
     {
         if (HasErrors)
-            return;
+            return Task.CompletedTask;
         Logger?.Log("FTP server edit options start", LogLevel.Debug);
         _options.Port = Port;
         _options.RootPath = RootPath;
         Logger?.Log("FTP server edit options finished", LogLevel.Debug);
-        RaiseServiceSaved(_options);
+        return RaiseServiceSavedAsync(_options);
     }
 
     /// <inheritdoc />

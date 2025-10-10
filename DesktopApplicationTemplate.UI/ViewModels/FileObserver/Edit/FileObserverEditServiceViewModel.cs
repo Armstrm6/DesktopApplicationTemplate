@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.FileObserver;
 
@@ -48,15 +49,15 @@ public class FileObserverEditServiceViewModel : ServiceEditViewModelBase<FileObs
     public FileObserverServiceOptions Options => _options;
 
     /// <inheritdoc />
-    protected override void OnSave()
+    protected override Task OnSaveAsync()
     {
         if (HasErrors)
         {
             Logger?.Log("FileObserver edit validation failed", LogLevel.Warning);
-            return;
+            return Task.CompletedTask;
         }
         _options.FilePath = FilePath;
-        RaiseServiceSaved(_options);
+        return RaiseServiceSavedAsync(_options);
     }
 
     /// <inheritdoc />
