@@ -156,6 +156,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                 if (_serviceName == value) return;
                 _serviceName = value ?? string.Empty;
                 OnPropertyChanged();
+                _testMessageBinder.ReferencingServiceName = _serviceName;
+                _scriptBinder.ReferencingServiceName = _serviceName;
                 if (!_suppressRuntimeInitialization)
                 {
                     InitializeTestMessage();
@@ -163,32 +165,91 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             }
         }
 
-        private string _testMessage = string.Empty;
+        private readonly ServiceAttributeExpressionBinder _testMessageBinder;
+        private readonly ServiceAttributeExpressionBinder _scriptBinder;
 
-        private string _script = string.Empty;
+        private string _testMessageExpression = string.Empty;
+        private string _resolvedTestMessage = string.Empty;
+        private string? _testMessageError;
+
+        private string _scriptExpression = string.Empty;
+        private string _resolvedScript = string.Empty;
+        private string? _scriptError;
 
         private string _scriptOutputMessage = string.Empty;
 
         /// <summary>Message used for testing communication.</summary>
-        public string TestMessage
+        public string TestMessage => _resolvedTestMessage;
+
+        /// <summary>Expression used to generate the test message.</summary>
+        public string TestMessageExpression
         {
-            get => _testMessage;
+            get => _testMessageExpression;
             set
             {
-                if (_testMessage == value) return;
-                _testMessage = value ?? string.Empty;
+                var normalized = value ?? string.Empty;
+                if (string.Equals(_testMessageExpression, normalized, StringComparison.Ordinal))
+                {
+                    return;
+                }
+
+                _testMessageExpression = normalized;
+                _options.InputMessageExpression = normalized;
+                OnPropertyChanged();
+                _testMessageBinder.Expression = normalized;
+            }
+        }
+
+        /// <summary>Validation message for the test message expression.</summary>
+        public string? TestMessageError
+        {
+            get => _testMessageError;
+            private set
+            {
+                if (Equals(_testMessageError, value))
+                {
+                    return;
+                }
+
+                _testMessageError = value;
                 OnPropertyChanged();
             }
         }
 
         /// <summary>Script applied to incoming messages before routing.</summary>
-        public string Script
+        public string Script => _resolvedScript;
+
+        /// <summary>Expression that generates the script.</summary>
+        public string ScriptExpression
         {
-            get => _script;
+            get => _scriptExpression;
             set
             {
-                if (_script == value) return;
-                _script = value ?? string.Empty;
+                var normalized = value ?? string.Empty;
+                if (string.Equals(_scriptExpression, normalized, StringComparison.Ordinal))
+                {
+                    return;
+                }
+
+                _scriptExpression = normalized;
+                _options.ScriptExpression = normalized;
+                OnPropertyChanged();
+                _scriptBinder.Expression = normalized;
+            }
+        }
+
+        /// <summary>Validation message for the script expression.</summary>
+        public string? ScriptError
+        {
+            get => _scriptError;
+            private set
+            {
+                if (Equals(_scriptError, value))
+                {
+                    return;
+                }
+
+                _scriptError = value;
                 OnPropertyChanged();
             }
         }
@@ -236,6 +297,18 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                 OnPropertyChanged(nameof(OutgoingResults));
             };
 
+            var context = SynchronizationContext.Current;
+            _testMessageBinder = new ServiceAttributeExpressionBinder(
+                _routing,
+                resolved => UpdateResolvedTestMessage(resolved),
+                error => TestMessageError = error,
+                context: context);
+            _scriptBinder = new ServiceAttributeExpressionBinder(
+                _routing,
+                resolved => UpdateResolvedScript(resolved),
+                error => ScriptError = error,
+                context: context);
+
             ClearLogCommand = new RelayCommand(ClearLogs);
             ExportLogCommand = new RelayCommand(ExportLogs);
             RefreshLogCommand = new RelayCommand(() => OnPropertyChanged(nameof(DisplayLogs)));
@@ -243,6 +316,39 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             OpenScriptEditorCommand = new AsyncRelayCommand(OpenScriptEditorAsync);
 
             EnsureApplicationExitHooked();
+        }
+
+        private void UpdateResolvedTestMessage(string resolved)
+        {
+            var normalized = resolved ?? string.Empty;
+            if (string.Equals(_resolvedTestMessage, normalized, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            _resolvedTestMessage = normalized;
+            _options.InputMessage = normalized;
+            _options.LastTestMessage = normalized;
+            OnPropertyChanged(nameof(TestMessage));
+            _service?.UpdateInputMessage(normalized);
+
+            if (!string.IsNullOrWhiteSpace(ServiceName))
+            {
+                _routing.UpdateMessage(ServiceType, ServiceName, normalized, MessageRoutingDirection.Input);
+            }
+        }
+
+        private void UpdateResolvedScript(string resolved)
+        {
+            var normalized = resolved ?? string.Empty;
+            if (string.Equals(_resolvedScript, normalized, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            _resolvedScript = normalized;
+            _options.Script = normalized;
+            OnPropertyChanged(nameof(Script));
         }
 
         /// <summary>Associates the view model with a service and its TCP options.</summary>
@@ -280,9 +386,18 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             {
                 _suppressRuntimeInitialization = false;
             }
-            Script = string.IsNullOrWhiteSpace(_options.Script)
+            var scriptExpression = string.IsNullOrWhiteSpace(_options.ScriptExpression)
+                ? (string.IsNullOrWhiteSpace(_options.Script)
+                    ? ScriptEditorViewModel.DefaultScript
+                    : _options.Script)
+                : _options.ScriptExpression;
+            ScriptExpression = string.IsNullOrWhiteSpace(scriptExpression)
                 ? ScriptEditorViewModel.DefaultScript
-                : _options.Script;
+                : scriptExpression;
+            var testExpression = string.IsNullOrWhiteSpace(_options.InputMessageExpression)
+                ? (_options.LastTestMessage ?? _options.InputMessage ?? string.Empty)
+                : _options.InputMessageExpression;
+            TestMessageExpression = testExpression ?? string.Empty;
             ScriptOutputMessage = _options.OutputMessage;
             _runtimeContext = new TcpRuntimeContext(ServiceType, ServiceName, _options, ScriptEditorViewModel.DefaultScript);
             _pendingNavigationInitialization = true;
@@ -392,11 +507,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             try
             {
                 var state = await _tcpRuntime.InitializeAsync(_runtimeContext).ConfigureAwait(false);
-                Script = state.Script;
-                TestMessage = state.TestMessage;
+                ScriptExpression = state.Script ?? string.Empty;
+                TestMessageExpression = state.TestMessage ?? string.Empty;
                 ScriptOutputMessage = state.OutputMessage;
                 _options.OutputMessage = state.OutputMessage;
-                _routing.UpdateMessage(ServiceType, ServiceName, state.TestMessage, MessageRoutingDirection.Input);
+                _routing.UpdateMessage(ServiceType, ServiceName, TestMessage, MessageRoutingDirection.Input);
                 _routing.UpdateMessage(ServiceType, ServiceName, state.OutputMessage, MessageRoutingDirection.Output);
                 if (isNavigationInitialization)
                 {
@@ -1189,9 +1304,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
 
                 await RunOnUiThreadAsync(() =>
                 {
-                    TestMessage = state.TestMessage;
+                    TestMessageExpression = state.TestMessage ?? string.Empty;
                     ScriptOutputMessage = state.OutputMessage;
-                    _service?.UpdateInputMessage(state.TestMessage);
+                    _service?.UpdateInputMessage(TestMessage);
                     _service?.UpdateOutputMessage(state.OutputMessage);
                 }).ConfigureAwait(false);
             }
@@ -1382,7 +1497,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             }
 
             var options = _service.GetOrCreateOptions(() => new TcpServiceOptions());
+            options.ScriptExpression = ScriptExpression ?? string.Empty;
             options.Script = Script ?? string.Empty;
+            options.InputMessageExpression = TestMessageExpression ?? string.Empty;
             options.LastTestMessage = TestMessage ?? string.Empty;
             options.InputMessage = TestMessage ?? string.Empty;
             options.OutputMessage = ScriptOutputMessage ?? string.Empty;
@@ -1403,11 +1520,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             try
             {
                 var result = await _tcpRuntime.ExecuteAsync(new TcpRuntimeExecutionRequest(_runtimeContext, Script, TestMessage)).ConfigureAwait(false);
-                Script = result.Script;
-                TestMessage = result.TestMessage;
+                ScriptExpression = result.Script ?? string.Empty;
+                TestMessageExpression = result.TestMessage ?? string.Empty;
                 ScriptOutputMessage = result.OutputMessage;
                 _options.OutputMessage = result.OutputMessage;
-                _routing.UpdateMessage(ServiceType, ServiceName, result.TestMessage, MessageRoutingDirection.Input);
+                _routing.UpdateMessage(ServiceType, ServiceName, TestMessage, MessageRoutingDirection.Input);
                 _routing.UpdateMessage(ServiceType, ServiceName, result.OutputMessage, MessageRoutingDirection.Output);
                 Logger?.Log($"Script executed successfully: {ScriptOutputMessage}", LogLevel.Information);
             }
@@ -1446,16 +1563,15 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             void OnOutputGenerated(string output)
             {
                 ScriptOutputMessage = _options.OutputMessage = output;
-                TestMessage = svm.TestMessage;
-                _options.LastTestMessage = svm.TestMessage;
-                _routing.UpdateMessage(ServiceType, ServiceName, svm.TestMessage, MessageRoutingDirection.Input);
+                TestMessageExpression = svm.TestMessage ?? string.Empty;
+                _routing.UpdateMessage(ServiceType, ServiceName, TestMessage, MessageRoutingDirection.Input);
                 _routing.UpdateMessage(ServiceType, ServiceName, output, MessageRoutingDirection.Output);
             }
 
             void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
             {
                 if (e.PropertyName == nameof(ScriptEditorViewModel.TestMessage))
-                    TestMessage = svm.TestMessage;
+                    TestMessageExpression = svm.TestMessage ?? string.Empty;
             }
 
             svm.OutputGenerated += OnOutputGenerated;
@@ -1468,8 +1584,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
 
             if (result)
             {
-                Script = editor.ScriptText;
-                TestMessage = editor.LastTestMessage;
+                ScriptExpression = editor.ScriptText ?? string.Empty;
+                TestMessageExpression = editor.LastTestMessage ?? string.Empty;
                 await SaveAsync().ConfigureAwait(false);
             }
         }
