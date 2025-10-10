@@ -23,6 +23,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private readonly ILogger<ServiceLogViewModel> _logger;
         private ObservableCollection<LogEntry> _logs;
         private NotifyCollectionChangedEventHandler? _logsChangedHandler;
+        private bool _newestFirstInSource = true;
 
         /// <summary>
         /// Gets the collection of service filters applied in aggregated mode.
@@ -60,12 +61,13 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         /// </summary>
         /// <param name="type">The category of service associated with these logs.</param>
         /// <param name="logs">The collection of log entries to display.</param>
-        public ServiceLogViewModel(ServiceType type, ObservableCollection<LogEntry> logs, ILogger<ServiceLogViewModel>? logger = null, bool isAggregated = false)
+        public ServiceLogViewModel(ServiceType type, ObservableCollection<LogEntry> logs, ILogger<ServiceLogViewModel>? logger = null, bool isAggregated = false, bool newestFirstInSource = true)
         {
             Type = type;
             _logs = logs;
             _logger = logger ?? NullLogger<ServiceLogViewModel>.Instance;
             IsAggregated = isAggregated;
+            _newestFirstInSource = newestFirstInSource;
             AttachLogCollection(_logs);
             RefreshLogCommand = new RelayCommand(RefreshLogs);
             ExportLogCommand = new RelayCommand(() => ExportLogs(Path.Combine(Path.GetTempPath(), "exported_logs.txt")));
@@ -95,25 +97,26 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             get
             {
                 var filteredByLevel = _logs.Where(l => l.Level >= LogLevelFilter);
+                IEnumerable<LogEntry> result = filteredByLevel;
 
-                if (!IsAggregated)
+                if (IsAggregated)
                 {
-                    return filteredByLevel;
+                    var selectedServices = ServiceFilters
+                        .Where(filter => filter.IsSelected)
+                        .Select(filter => filter.ServiceName)
+                        .ToList();
+
+                    if (selectedServices.Count == 0)
+                    {
+                        return Array.Empty<LogEntry>();
+                    }
+
+                    var selectedSet = new HashSet<string>(selectedServices, StringComparer.OrdinalIgnoreCase);
+                    result = result.Where(entry =>
+                        string.IsNullOrWhiteSpace(entry.ServiceName) || selectedSet.Contains(entry.ServiceName));
                 }
 
-                var selectedServices = ServiceFilters
-                    .Where(filter => filter.IsSelected)
-                    .Select(filter => filter.ServiceName)
-                    .ToList();
-
-                if (selectedServices.Count == 0)
-                {
-                    return Array.Empty<LogEntry>();
-                }
-
-                var selectedSet = new HashSet<string>(selectedServices, StringComparer.OrdinalIgnoreCase);
-                return filteredByLevel.Where(entry =>
-                    string.IsNullOrWhiteSpace(entry.ServiceName) || selectedSet.Contains(entry.ServiceName));
+                return _newestFirstInSource ? result : result.Reverse();
             }
         }
 
@@ -137,7 +140,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         /// </summary>
         /// <param name="logs">The new log collection.</param>
         /// <param name="isAggregated">Indicates whether the view is displaying aggregated logs.</param>
-        public void SetLogs(ObservableCollection<LogEntry> logs, bool isAggregated = false)
+        public void SetLogs(ObservableCollection<LogEntry> logs, bool isAggregated = false, bool newestFirstInSource = true)
         {
             if (logs is null)
             {
@@ -147,6 +150,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             if (_logs == logs)
             {
                 IsAggregated = isAggregated;
+                _newestFirstInSource = newestFirstInSource;
                 RefreshLogs();
                 return;
             }
@@ -155,6 +159,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             _logs = logs;
             AttachLogCollection(_logs);
             IsAggregated = isAggregated;
+            _newestFirstInSource = newestFirstInSource;
             OnPropertyChanged(nameof(DisplayLogs));
         }
 
