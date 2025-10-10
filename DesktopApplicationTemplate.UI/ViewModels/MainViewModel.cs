@@ -488,7 +488,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             ApplyFilters();
             if (_logger is LoggingService concreteLogger)
             {
-                concreteLogger.Reload();
+                await concreteLogger.ReloadAsync().ConfigureAwait(true);
             }
         }
 
@@ -1148,7 +1148,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
             _ = task.ContinueWith(
                 t => _ = t.Exception,
-                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
+                CancellationToken.None,
+                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
         }
 
         // OnPropertyChanged inherited from ViewModelBase
