@@ -161,14 +161,9 @@ This launches the hosted service which periodically emits a heartbeat message us
 
 ## CSV editor example
 
-Use the menu option **CSV Viewer** to open the CSV configuration window. Columns can be added and associated with a service and an optional script. When another service produces a value, call `CsvService.RecordLog` or `CsvService.AppendRow` with the values and a CSV file will be written using the filename pattern from the editor. For example:
+Use the menu option **CSV Viewer** to open the CSV configuration window. Each column now stores an attribute expression such as `{TcpService.InputMessage}` or `{HttpService.StatusCode}`. The viewer evaluates these expressions through the routing service so the latest attribute values are captured automatically. Optional format templates (for example, `"{0:yyyy-MM-dd HH:mm:ss}"`) apply via `string.Format` before the row is written.
 
-```csharp
-// gather data from services
-csvService.AppendRow(new [] { tcpValue, httpStatus });
-```
-
-This appends a new row to `output_{index}.csv` with the TCP and HTTP values.
+When a referenced attribute changes, the CSV adapter records a new row using the configured expressions. You can still call `CsvService.AppendRow` manually for ad-hoc data, but most scenarios rely on routed attributes so column definitions stay declarative.
 
 ## Referencing other service messages
 

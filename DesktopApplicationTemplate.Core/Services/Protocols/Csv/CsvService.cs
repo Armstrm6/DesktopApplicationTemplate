@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using DesktopApplicationTemplate.Core.Services;
 
 namespace DesktopApplicationTemplate.Core.Services.Protocols.Csv;
 
@@ -11,40 +12,19 @@ namespace DesktopApplicationTemplate.Core.Services.Protocols.Csv;
 /// </summary>
 public class CsvService : ICsvService
 {
+    private readonly IMessageRoutingService _routingService;
+
+    public CsvService(IMessageRoutingService routingService)
+    {
+        _routingService = routingService ?? throw new ArgumentNullException(nameof(routingService));
+    }
+
     /// <inheritdoc />
     public bool EnsureColumnsForService(CsvConfiguration configuration, string serviceName)
     {
         ArgumentNullException.ThrowIfNull(configuration);
         ArgumentException.ThrowIfNullOrWhiteSpace(serviceName);
-
-        if (IsCsvService(serviceName))
-        {
-            return false;
-        }
-
-        bool modified = false;
-        if (!configuration.Columns.Any(c => string.Equals(c.Name, serviceName, StringComparison.Ordinal)))
-        {
-            configuration.Columns.Add(new CsvColumnDefinition
-            {
-                Name = serviceName,
-                Service = serviceName
-            });
-            modified = true;
-        }
-
-        string sentColumn = $"{serviceName} Sent";
-        if (!configuration.Columns.Any(c => string.Equals(c.Name, sentColumn, StringComparison.Ordinal)))
-        {
-            configuration.Columns.Add(new CsvColumnDefinition
-            {
-                Name = sentColumn,
-                Service = serviceName
-            });
-            modified = true;
-        }
-
-        return modified;
+        return false;
     }
 
     /// <inheritdoc />
@@ -53,29 +33,6 @@ public class CsvService : ICsvService
         ArgumentNullException.ThrowIfNull(configuration);
         ArgumentNullException.ThrowIfNull(state);
         ArgumentException.ThrowIfNullOrWhiteSpace(serviceName);
-
-        if (IsCsvService(serviceName))
-        {
-            return false;
-        }
-
-        string sentColumn = $"{serviceName} Sent";
-        List<CsvColumnDefinition> removed = configuration.Columns
-            .Where(c => string.Equals(c.Name, serviceName, StringComparison.Ordinal) ||
-                        string.Equals(c.Name, sentColumn, StringComparison.Ordinal))
-            .ToList();
-
-        foreach (var column in removed)
-        {
-            configuration.Columns.Remove(column);
-        }
-
-        if (removed.Count > 0)
-        {
-            state.Reset();
-            return true;
-        }
-
         return false;
     }
 
@@ -86,28 +43,36 @@ public class CsvService : ICsvService
         ArgumentNullException.ThrowIfNull(state);
         ArgumentNullException.ThrowIfNull(output);
         ArgumentException.ThrowIfNullOrWhiteSpace(serviceName);
-        message ??= string.Empty;
 
-        if (IsCsvService(serviceName))
+        var columns = configuration.Columns ?? Array.Empty<CsvColumnDefinition>();
+        if (columns.Count == 0)
         {
             return;
         }
 
-        EnsureColumnsForService(configuration, serviceName);
         EnsureHeader(configuration, state, output);
 
-        string[] values = configuration.Columns.Select(_ => string.Empty).ToArray();
-        bool sent = message.Contains("Sending", StringComparison.OrdinalIgnoreCase) ||
-                    message.Contains("Sent", StringComparison.OrdinalIgnoreCase);
-        string columnName = sent ? $"{serviceName} Sent" : serviceName;
-
-        int columnIndex = configuration.Columns
-            .Select((column, index) => new { column, index })
-            .FirstOrDefault(item => string.Equals(item.column.Name, columnName, StringComparison.Ordinal))?.index ?? -1;
-
-        if (columnIndex >= 0)
+        var values = new string[columns.Count];
+        for (int i = 0; i < columns.Count; i++)
         {
-            values[columnIndex] = message.Replace(',', ' ');
+            var column = columns[i];
+            string resolved;
+            try
+            {
+                resolved = CsvExpressionEvaluator.Evaluate(column.Expression, _routingService, serviceName);
+            }
+            catch
+            {
+                resolved = string.Empty;
+            }
+
+            if (string.IsNullOrWhiteSpace(resolved) && string.IsNullOrWhiteSpace(column.Expression))
+            {
+                resolved = message ?? string.Empty;
+            }
+
+            resolved = CsvExpressionEvaluator.ApplyFormat(resolved, column.Format);
+            values[i] = (resolved ?? string.Empty).Replace(',', ' ');
         }
 
         AppendRow(configuration, state, output, values);
@@ -121,6 +86,8 @@ public class CsvService : ICsvService
         ArgumentNullException.ThrowIfNull(output);
         ArgumentNullException.ThrowIfNull(values);
 
+        EnsureHeader(configuration, state, output);
+
         string filePath = BuildFileName(configuration, state, output);
         string line = string.Join(',', values.Select(value => value ?? string.Empty));
         output.AppendLine(filePath, line + Environment.NewLine);
@@ -129,6 +96,11 @@ public class CsvService : ICsvService
     private static void EnsureHeader(CsvConfiguration configuration, CsvServiceState state, ICsvOutput output)
     {
         if (state.HeaderWritten)
+        {
+            return;
+        }
+
+        if (configuration.Columns is null || configuration.Columns.Count == 0)
         {
             return;
         }
@@ -197,6 +169,4 @@ public class CsvService : ICsvService
         return $"{fileName}_{timestamp}{extension}";
     }
 
-    private static bool IsCsvService(string serviceName)
-        => serviceName.Contains("CSV", StringComparison.OrdinalIgnoreCase);
 }
