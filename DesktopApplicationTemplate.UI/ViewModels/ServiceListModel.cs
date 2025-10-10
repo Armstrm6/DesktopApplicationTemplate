@@ -39,6 +39,17 @@ namespace DesktopApplicationTemplate.UI.ViewModels
     {
         internal const int MaxLogEntries = 200;
 
+        public const string InputMessageAttributeName = "InputMessage";
+        public const string OutputMessageAttributeName = "OutputMessage";
+        public const string IncomingMessageCountAttributeName = "IncomingMessageCount";
+        public const string OutgoingMessageCountAttributeName = "OutgoingMessageCount";
+        public const string RuntimeStateAttributeName = "RuntimeState";
+
+        private readonly IMessageRoutingService _routingService;
+        private readonly Dictionary<string, RoutingAttributeValue> _routingAttributes = new(StringComparer.OrdinalIgnoreCase);
+
+        private readonly record struct RoutingAttributeValue(string Value, MessageRoutingDirection? Direction);
+
         private string _displayName = string.Empty;
         public string DisplayName
         {
@@ -50,9 +61,35 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     return;
                 }
 
+                var previousName = _displayName;
                 _displayName = value ?? string.Empty;
                 OnPropertyChanged();
                 RefreshLogMetadata();
+                OnDisplayNameChanged(previousName);
+            }
+        }
+
+        private void OnDisplayNameChanged(string previousName)
+        {
+            if (string.Equals(previousName, _displayName, StringComparison.OrdinalIgnoreCase))
+            {
+                if (!string.IsNullOrWhiteSpace(_displayName))
+                {
+                    RepublishRoutingAttributes();
+                }
+
+                return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(previousName))
+            {
+                _routingService.ClearService(Type, previousName);
+                _routingService.ClearService(previousName);
+            }
+
+            if (!string.IsNullOrWhiteSpace(_displayName))
+            {
+                RepublishRoutingAttributes();
             }
         }
 
@@ -67,10 +104,29 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     return;
                 }
 
+                var previousType = _type;
                 _type = value;
                 OnPropertyChanged();
                 RefreshLogMetadata();
+                OnServiceTypeChanged(previousType);
             }
+        }
+
+        private void OnServiceTypeChanged(ServiceType previousType)
+        {
+            if (previousType == _type)
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(_displayName))
+            {
+                return;
+            }
+
+            _routingService.ClearService(previousType, _displayName);
+            _routingService.ClearService(_displayName);
+            RepublishRoutingAttributes();
         }
 
         private string? _descriptorId;
@@ -155,12 +211,19 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private static readonly object ServiceRegistryLock = new();
         private static readonly HashSet<ServiceListModel> ServiceRegistry = new();
 
-        public ServiceListModel()
+        public ServiceListModel(IMessageRoutingService routingService)
         {
+            _routingService = routingService ?? throw new ArgumentNullException(nameof(routingService));
+
             lock (ServiceRegistryLock)
             {
                 ServiceRegistry.Add(this);
             }
+
+            ResetMessageCounts();
+            SetRoutingAttribute(InputMessageAttributeName, _inputMessage, MessageRoutingDirection.Input, publish: false);
+            SetRoutingAttribute(OutputMessageAttributeName, _outputMessage, MessageRoutingDirection.Output, publish: false);
+            SetRoutingAttribute(RuntimeStateAttributeName, _runtimeState.ToString(), publish: false);
         }
 
         private readonly LinkedList<ServiceMessageHistoryEntry> _messageHistory = new();
@@ -212,13 +275,14 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             get => _incomingMessageCount;
             private set
             {
-                if (_incomingMessageCount == value)
+                var changed = _incomingMessageCount != value;
+                _incomingMessageCount = value;
+                if (changed)
                 {
-                    return;
+                    OnPropertyChanged();
                 }
 
-                _incomingMessageCount = value;
-                OnPropertyChanged();
+                SetRoutingAttribute(IncomingMessageCountAttributeName, value.ToString(CultureInfo.InvariantCulture));
             }
         }
 
@@ -227,13 +291,14 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             get => _outgoingMessageCount;
             private set
             {
-                if (_outgoingMessageCount == value)
+                var changed = _outgoingMessageCount != value;
+                _outgoingMessageCount = value;
+                if (changed)
                 {
-                    return;
+                    OnPropertyChanged();
                 }
 
-                _outgoingMessageCount = value;
-                OnPropertyChanged();
+                SetRoutingAttribute(OutgoingMessageCountAttributeName, value.ToString(CultureInfo.InvariantCulture));
             }
         }
 
@@ -271,13 +336,15 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             get => _inputMessage;
             private set
             {
-                if (_inputMessage == value)
+                var resolved = value ?? string.Empty;
+                var changed = _inputMessage != resolved;
+                _inputMessage = resolved;
+                if (changed)
                 {
-                    return;
+                    OnPropertyChanged();
                 }
 
-                _inputMessage = value;
-                OnPropertyChanged();
+                SetRoutingAttribute(InputMessageAttributeName, resolved, MessageRoutingDirection.Input);
             }
         }
 
@@ -289,13 +356,15 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             get => _outputMessage;
             private set
             {
-                if (_outputMessage == value)
+                var resolved = value ?? string.Empty;
+                var changed = _outputMessage != resolved;
+                _outputMessage = resolved;
+                if (changed)
                 {
-                    return;
+                    OnPropertyChanged();
                 }
 
-                _outputMessage = value;
-                OnPropertyChanged();
+                SetRoutingAttribute(OutputMessageAttributeName, resolved, MessageRoutingDirection.Output);
             }
         }
 
@@ -840,11 +909,14 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             get => _runtimeState;
             private set
             {
-                if (_runtimeState != value)
+                var changed = _runtimeState != value;
+                _runtimeState = value;
+                if (changed)
                 {
-                    _runtimeState = value;
                     OnPropertyChanged();
                 }
+
+                SetRoutingAttribute(RuntimeStateAttributeName, _runtimeState.ToString());
             }
         }
 
@@ -1381,6 +1453,146 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
 
             return fallback;
+        }
+
+        public void PublishRoutingAttribute(string attributeName, string? value, MessageRoutingDirection? direction = null)
+        {
+            SetRoutingAttribute(attributeName, value, direction, publish: true);
+        }
+
+        public void ClearRoutingAttribute(string attributeName)
+        {
+            SetRoutingAttribute(attributeName, null, direction: null, publish: true);
+        }
+
+        internal void RestoreRoutingAttributes(IDictionary<string, string>? attributes)
+        {
+            _routingAttributes.Clear();
+
+            if (attributes is null)
+            {
+                return;
+            }
+
+            foreach (var pair in attributes)
+            {
+                if (string.IsNullOrWhiteSpace(pair.Key))
+                {
+                    continue;
+                }
+
+                SetRoutingAttribute(pair.Key, pair.Value ?? string.Empty, direction: null, publish: false);
+            }
+        }
+
+        internal Dictionary<string, string> GetRoutingAttributesSnapshot()
+        {
+            return _routingAttributes.ToDictionary(
+                pair => pair.Key,
+                pair => pair.Value.Value,
+                StringComparer.OrdinalIgnoreCase);
+        }
+
+        internal void RepublishRoutingAttributes()
+        {
+            if (string.IsNullOrWhiteSpace(_displayName))
+            {
+                return;
+            }
+
+            foreach (var pair in _routingAttributes)
+            {
+                PublishNormalizedAttribute(pair.Key, pair.Value.Value, pair.Value.Direction);
+            }
+        }
+
+        internal void ClearRoutingAttributes()
+        {
+            if (!string.IsNullOrWhiteSpace(_displayName))
+            {
+                _routingService.ClearService(Type, _displayName);
+                _routingService.ClearService(_displayName);
+            }
+
+            _routingAttributes.Clear();
+        }
+
+        private void SetRoutingAttribute(string attributeName, string? value, MessageRoutingDirection? direction = null, bool publish = true)
+        {
+            if (string.IsNullOrWhiteSpace(attributeName))
+            {
+                throw new ArgumentException("Attribute name cannot be null or whitespace.", nameof(attributeName));
+            }
+
+            var normalized = attributeName.Trim();
+
+            if (value is null)
+            {
+                if (_routingAttributes.Remove(normalized, out var existing) && publish)
+                {
+                    ClearNormalizedAttribute(normalized, existing.Direction);
+                }
+
+                return;
+            }
+
+            var resolvedDirection = direction ?? InferDirection(normalized);
+            if (!resolvedDirection.HasValue &&
+                _routingAttributes.TryGetValue(normalized, out var current) &&
+                current.Direction.HasValue)
+            {
+                resolvedDirection = current.Direction;
+            }
+
+            var resolvedValue = value;
+            _routingAttributes[normalized] = new RoutingAttributeValue(resolvedValue, resolvedDirection);
+
+            if (publish)
+            {
+                PublishNormalizedAttribute(normalized, resolvedValue, resolvedDirection);
+            }
+        }
+
+        private void PublishNormalizedAttribute(string attributeName, string value, MessageRoutingDirection? direction)
+        {
+            if (string.IsNullOrWhiteSpace(_displayName))
+            {
+                return;
+            }
+
+            if (direction.HasValue)
+            {
+                _routingService.UpdateMessage(Type, _displayName, value, direction.Value);
+            }
+            else
+            {
+                _routingService.PublishAttribute(Type, _displayName, attributeName, value);
+            }
+        }
+
+        private void ClearNormalizedAttribute(string attributeName, MessageRoutingDirection? direction)
+        {
+            if (string.IsNullOrWhiteSpace(_displayName))
+            {
+                return;
+            }
+
+            _routingService.ClearAttribute(Type, _displayName, attributeName);
+        }
+
+        private static MessageRoutingDirection? InferDirection(string attributeName)
+        {
+            if (string.Equals(attributeName, InputMessageAttributeName, StringComparison.OrdinalIgnoreCase))
+            {
+                return MessageRoutingDirection.Input;
+            }
+
+            if (string.Equals(attributeName, OutputMessageAttributeName, StringComparison.OrdinalIgnoreCase))
+            {
+                return MessageRoutingDirection.Output;
+            }
+
+            return null;
         }
 
         public void ApplyPresentation(ServicePresentationMetadata metadata)

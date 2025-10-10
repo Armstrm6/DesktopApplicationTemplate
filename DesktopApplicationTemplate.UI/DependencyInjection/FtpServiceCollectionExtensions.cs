@@ -57,7 +57,8 @@ namespace DesktopApplicationTemplate.UI.DependencyInjection
                     var ctx = (ServiceFactoryOptions<CoreFtpServerOptions>)optionsObj;
                     var mainView = provider.GetRequiredService<MainView>();
                     var ftpOptions = ctx.Options ?? new CoreFtpServerOptions();
-                    var svc = new ServiceListModel
+                    var routing = provider.GetRequiredService<IMessageRoutingService>();
+                    var svc = new ServiceListModel(routing)
                     {
                         DescriptorId = descriptor.Id,
                         DisplayName = ctx.Name,

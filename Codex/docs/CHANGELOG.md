@@ -31,6 +31,7 @@
 - Windows service host sets explicit `ServiceName` and `DisplayName` values with the application name and installer uses the same constant.
 - Replaced verbose `ServiceName` strings with `ServiceType` enum properties for log view models.
 - Service persistence now stores `ServiceType` as short codes and reads legacy string names.
+- Service routing attributes (input/output text, message counters, runtime state, and protocol-specific metadata) persist with each service and are republished through `IMessageRoutingService` after load or rename operations.
 - Service creation and navigation now resolve services via `ServiceType` enum lookups instead of string-based switches.
 - `ServiceManager` loads default services from configuration using `ServiceType` short codes and accepts legacy names.
 - `ServiceListModel` now exposes a `Type` enum property, removing string-based service comparisons.
