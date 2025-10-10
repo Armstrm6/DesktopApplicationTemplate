@@ -38,4 +38,6 @@ public sealed record PluginImportResult(
 {
     public IReadOnlyCollection<ServiceUiRegistration<ServiceListModel, Page>> ImportedUiRegistrations { get; init; }
         = Array.Empty<ServiceUiRegistration<ServiceListModel, Page>>();
+
+    public IReadOnlyCollection<string> Diagnostics { get; init; } = Array.Empty<string>();
 }

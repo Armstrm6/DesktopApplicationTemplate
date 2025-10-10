@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Reflection;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -33,7 +34,7 @@ public sealed class PluginExportService : IPluginExportService
 
     public IReadOnlyCollection<PluginDescriptorExportInfo> GetExportableDescriptors()
     {
-        var index = BuildModuleIndex();
+        var (index, _) = BuildModuleIndex();
         return index.Values
             .Select(context => new PluginDescriptorExportInfo(
                 context.Descriptor.Id,
@@ -91,7 +92,7 @@ public sealed class PluginExportService : IPluginExportService
             return new PluginExportResult(false, "Select at least one descriptor to export.", null, descriptorIds);
         }
 
-        var moduleIndex = BuildModuleIndex();
+        var (moduleIndex, moduleDiagnostics) = BuildModuleIndex();
         var selectedContexts = new List<ModuleExportContext>();
         foreach (var descriptorId in descriptorIds)
         {
@@ -99,7 +100,10 @@ public sealed class PluginExportService : IPluginExportService
 
             if (!moduleIndex.TryGetValue(descriptorId, out var context))
             {
-                return new PluginExportResult(false, $"Descriptor '{descriptorId}' is not available for export.", null, descriptorIds);
+                return new PluginExportResult(false, $"Descriptor '{descriptorId}' is not available for export.", null, descriptorIds)
+                {
+                    Diagnostics = moduleDiagnostics,
+                };
             }
 
             selectedContexts.Add(context);
@@ -107,7 +111,10 @@ public sealed class PluginExportService : IPluginExportService
 
         if (selectedContexts.Count == 0)
         {
-            return new PluginExportResult(false, "No descriptors matched the selection.", null, descriptorIds);
+            return new PluginExportResult(false, "No descriptors matched the selection.", null, descriptorIds)
+            {
+                Diagnostics = moduleDiagnostics,
+            };
         }
 
         var filesToCopy = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -136,14 +143,20 @@ public sealed class PluginExportService : IPluginExportService
 
         if (filesToCopy.Count == 0)
         {
-            return new PluginExportResult(false, "No assemblies were discovered for the selected descriptors.", null, descriptorIds);
+            return new PluginExportResult(false, "No assemblies were discovered for the selected descriptors.", null, descriptorIds)
+            {
+                Diagnostics = moduleDiagnostics,
+            };
         }
 
         entryAssembly ??= serviceAssemblies.First();
         var manifest = BuildManifest(request, entryAssembly, serviceAssemblies, probingPaths);
         if (!PluginPackageUtilities.TryValidateBasicManifest(manifest, "export", out var manifestErrors))
         {
-            return new PluginExportResult(false, string.Join(Environment.NewLine, manifestErrors), null, descriptorIds);
+            return new PluginExportResult(false, string.Join(Environment.NewLine, manifestErrors), null, descriptorIds)
+            {
+                Diagnostics = moduleDiagnostics,
+            };
         }
 
         var destination = ResolveDestinationPath(request);
@@ -194,8 +207,16 @@ public sealed class PluginExportService : IPluginExportService
             ? $"Exported descriptor '{selectedContexts[0].Descriptor.DisplayName}'."
             : $"Exported {selectedContexts.Count} descriptors.";
 
+        if (moduleDiagnostics.Count > 0)
+        {
+            successMessage += " Some modules were skipped due to load errors.";
+        }
+
         _logger.LogInformation("{Message} Package: {PackagePath}.", successMessage, destination);
-        return new PluginExportResult(true, successMessage, destination, descriptorIds);
+        return new PluginExportResult(true, successMessage, destination, descriptorIds)
+        {
+            Diagnostics = moduleDiagnostics,
+        };
     }
 
     private void IncludeFromManifest(
@@ -363,10 +384,41 @@ public sealed class PluginExportService : IPluginExportService
         }
     }
 
-    private IReadOnlyDictionary<string, ModuleExportContext> BuildModuleIndex()
+    private (Dictionary<string, ModuleExportContext> Index, IReadOnlyCollection<string> Diagnostics) BuildModuleIndex()
     {
         var assemblies = PluginLoader.CombineWithDefaultAssemblies(AppDomain.CurrentDomain.GetAssemblies());
-        var modules = ServiceModuleDiscovery.InstantiateModules(assemblies);
+        var diagnostics = new List<string>();
+        var modules = ServiceModuleDiscovery.InstantiateModules(
+            assemblies,
+            (assembly, errors) =>
+            {
+                var errorArray = errors?.Where(static error => error is not null).Cast<Exception>().ToArray()
+                    ?? Array.Empty<Exception>();
+                if (errorArray.Length == 0)
+                {
+                    return;
+                }
+
+                var diagnostic = FormatTypeLoadDiagnostic(assembly, errorArray);
+                diagnostics.Add(diagnostic);
+
+                var assemblyName = assembly?.GetName().Name ?? assembly?.FullName ?? "(unknown)";
+                var summary = string.Join("; ", errorArray.Select(error => error.Message));
+                _logger.LogWarning(
+                    errorArray[0],
+                    "Failed to load module types from assembly {AssemblyName}. Errors: {ErrorSummary}.",
+                    assemblyName,
+                    summary);
+
+                for (var i = 1; i < errorArray.Length; i++)
+                {
+                    _logger.LogDebug(
+                        errorArray[i],
+                        "Additional loader error for assembly {AssemblyName}.",
+                        assemblyName);
+                }
+            });
+
         var result = new Dictionary<string, ModuleExportContext>(StringComparer.Ordinal);
         var availableIds = new HashSet<string>(_serviceCatalog.Descriptors.Select(d => d.Id), StringComparer.Ordinal);
 
@@ -421,7 +473,7 @@ public sealed class PluginExportService : IPluginExportService
             }
         }
 
-        return result;
+        return (result, diagnostics.ToArray());
     }
 
     private bool IsWithinManagedRoots(string path)
@@ -478,6 +530,13 @@ public sealed class PluginExportService : IPluginExportService
     private static string NormalizeForManifest(string relativePath)
     {
         return relativePath.Replace(Path.DirectorySeparatorChar, '/');
+    }
+
+    private static string FormatTypeLoadDiagnostic(Assembly? assembly, IReadOnlyCollection<Exception> errors)
+    {
+        var assemblyName = assembly?.GetName().Name ?? assembly?.FullName ?? "(unknown)";
+        var summary = string.Join("; ", errors.Select(error => error.Message));
+        return FormattableString.Invariant($"Assembly '{assemblyName}' skipped: {summary}");
     }
 
     private sealed record ModuleExportContext(
