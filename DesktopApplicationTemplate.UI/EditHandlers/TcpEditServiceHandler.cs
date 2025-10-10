@@ -61,6 +61,7 @@ public class TcpEditServiceHandler : IEditServiceHandler
 
             service.DisplayName = trimmed;
             service.Type = newType;
+            mainViewModel.RefreshRoutingAttributes(service);
             service.SetOptions(opts);
             var page = mainView.GetOrCreateServicePage(service);
             if (page != null)

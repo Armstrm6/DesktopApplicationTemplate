@@ -55,6 +55,7 @@ public class CsvEditServiceHandler : IEditServiceHandler
             }
 
             service.DisplayName = trimmed;
+            mainViewModel.RefreshRoutingAttributes(service);
             service.SetOptions(opts);
             if (csvPage != null)
                 mainView.ShowPage(csvPage);

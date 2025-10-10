@@ -642,6 +642,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 return false;
             }
 
+            _viewModel.AttachRouting(svc);
             svc.InitializeActivationState(isActive: false);
             ApplyPresentation(svc);
             svc.LogAdded += _viewModel.OnServiceLogAdded;

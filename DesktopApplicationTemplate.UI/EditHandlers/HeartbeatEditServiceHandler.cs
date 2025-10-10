@@ -56,6 +56,7 @@ public class HeartbeatEditServiceHandler : IEditServiceHandler
             }
 
             service.DisplayName = trimmed;
+            mainViewModel.RefreshRoutingAttributes(service);
             service.SetOptions(opts);
             if (hbPage != null)
                 mainView.ShowPage(hbPage);

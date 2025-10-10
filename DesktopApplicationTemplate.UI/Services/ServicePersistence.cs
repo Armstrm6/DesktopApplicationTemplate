@@ -76,6 +76,7 @@ namespace DesktopApplicationTemplate.Persistence
                         })
                         .ToList(),
                     MessageHistory = service.GetMessageHistorySnapshot().ToList(),
+                    RoutingAttributes = new Dictionary<string, string>(service.GetRoutingAttributesSnapshot(), StringComparer.OrdinalIgnoreCase),
                 };
 
                 if (descriptor?.OptionsSerializer is { } serializer)
@@ -171,6 +172,7 @@ namespace DesktopApplicationTemplate.Persistence
                     info.AssociatedServices ??= new List<string>();
                     info.Logs ??= new List<LogEntry>();
                     info.MessageHistory ??= new List<ServiceMessageHistoryEntry>();
+                    info.RoutingAttributes ??= new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                     info.SerializedOptions ??= new Dictionary<string, JsonElement>(StringComparer.OrdinalIgnoreCase);
                     info.LegacySerializedOptions ??= new Dictionary<string, JsonElement>(StringComparer.OrdinalIgnoreCase);
 
@@ -217,6 +219,7 @@ namespace DesktopApplicationTemplate.Persistence
 
             service.LoadPersistedLogs(info.Logs);
             service.LoadMessageHistory(info.MessageHistory);
+            service.LoadRoutingAttributes(info.RoutingAttributes);
             service.InitializeMessageCounts(info.IncomingMessageCount, info.OutgoingMessageCount);
             service.InitializeActivationState(info.IsActive);
 
@@ -602,6 +605,7 @@ namespace DesktopApplicationTemplate.Persistence
         public int OutgoingMessageCount { get; set; }
         public List<LogEntry> Logs { get; set; } = new();
         public List<ServiceMessageHistoryEntry> MessageHistory { get; set; } = new();
+        public Dictionary<string, string> RoutingAttributes { get; set; } = new(StringComparer.OrdinalIgnoreCase);
         [JsonExtensionData]
         public Dictionary<string, JsonElement> LegacySerializedOptions { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     }
