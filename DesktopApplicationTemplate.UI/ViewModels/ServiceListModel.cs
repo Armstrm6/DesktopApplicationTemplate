@@ -176,6 +176,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         }
         [JsonIgnore] public Page? ServicePage { get; set; }
 
+        [JsonIgnore]
+        internal IServiceLookup? ServiceLookup { get; set; }
+
         public ObservableCollection<string> AssociatedServices { get; } = new();
 
         private Dictionary<string, JsonElement> _serializedOptions = new(StringComparer.OrdinalIgnoreCase);
@@ -208,17 +211,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         [JsonIgnore]
         private readonly Dictionary<string, object?> _options = new(StringComparer.OrdinalIgnoreCase);
 
-        private static readonly object ServiceRegistryLock = new();
-        private static readonly HashSet<ServiceListModel> ServiceRegistry = new();
+        internal static event Action? CrossServiceAssociationsClearing;
 
         public ServiceListModel(IMessageRoutingService routingService)
         {
             _routingService = routingService ?? throw new ArgumentNullException(nameof(routingService));
-
-            lock (ServiceRegistryLock)
-            {
-                ServiceRegistry.Add(this);
-            }
 
             ResetMessageCounts();
             SetRoutingAttribute(InputMessageAttributeName, _inputMessage, MessageRoutingDirection.Input, publish: false);
@@ -825,8 +822,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         #endregion
 
-        public static Func<ServiceType, string, ServiceListModel?>? ResolveService { get; set; }
-
         /// <summary>
         /// Enables forwarding of log entries between services when cross-service references are detected.
         /// Defaults to <c>false</c> so services remain independent unless explicitly linked.
@@ -845,7 +840,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 _enableCrossServiceLogForwarding = value;
                 if (!value)
                 {
-                    ClearAllCrossServiceAssociations();
+                    CrossServiceAssociationsClearing?.Invoke();
                 }
             }
         }
@@ -1148,12 +1143,13 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         private void HandleReference(string message, WpfBrush color, LogLevel level)
         {
-            if (ResolveService == null)
+            if (!EnableCrossServiceLogForwarding)
             {
                 return;
             }
 
-            if (!EnableCrossServiceLogForwarding)
+            var lookup = ServiceLookup;
+            if (lookup is null)
             {
                 return;
             }
@@ -1168,8 +1164,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 return;
             }
 
-            var target = ResolveService(type, serviceName);
-            if (target == null || ReferenceEquals(target, this))
+            if (!lookup.TryGetService(type, serviceName, out var target) || target == null || ReferenceEquals(target, this))
             {
                 return;
             }
@@ -1191,70 +1186,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
         }
 
-        private static void RemoveStaleAssociation(ServiceListModel first, ServiceListModel second)
-        {
-            if (first is null || second is null)
-            {
-                return;
-            }
-
-            first.AssociatedServices.Remove(second.DisplayName);
-            second.AssociatedServices.Remove(first.DisplayName);
-        }
-
-        private static void ClearAllCrossServiceAssociations()
-        {
-            var snapshot = GetRegisteredServicesSnapshot();
-            foreach (var service in snapshot)
-            {
-                RemoveAllServiceAssociations(service, snapshot);
-            }
-        }
-
-        private static IReadOnlyList<ServiceListModel> GetRegisteredServicesSnapshot()
-        {
-            lock (ServiceRegistryLock)
-            {
-                return ServiceRegistry.ToList();
-            }
-        }
-
-        internal static void RemoveServiceAssociations(ServiceListModel service)
-        {
-            if (service is null)
-            {
-                return;
-            }
-
-            var snapshot = GetRegisteredServicesSnapshot();
-            RemoveAllServiceAssociations(service, snapshot);
-
-            lock (ServiceRegistryLock)
-            {
-                ServiceRegistry.Remove(service);
-            }
-        }
-
-        private static void RemoveAllServiceAssociations(ServiceListModel service, IReadOnlyList<ServiceListModel>? snapshot = null)
-        {
-            if (service is null)
-            {
-                return;
-            }
-
-            var services = snapshot ?? GetRegisteredServicesSnapshot();
-            foreach (var other in services)
-            {
-                if (ReferenceEquals(other, service))
-                {
-                    continue;
-                }
-
-                RemoveStaleAssociation(service, other);
-            }
-
-            service.AssociatedServices.Clear();
-        }
 
         private static bool TryExtractCrossServiceReference(string message, out string typeName, out string serviceName, out string forwardedMessage)
         {

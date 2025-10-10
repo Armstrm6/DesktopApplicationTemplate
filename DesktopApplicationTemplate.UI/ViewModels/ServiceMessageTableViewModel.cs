@@ -14,10 +14,16 @@ namespace DesktopApplicationTemplate.UI.ViewModels
     {
         public const int MaxRows = 100;
         private readonly Dictionary<string, LinkedList<ServiceMessageRow>> _messagesByService = new(StringComparer.OrdinalIgnoreCase);
+        private readonly IServiceLookup _serviceLookup;
         private string _activeServiceKey = string.Empty;
 
         /// <summary>Collection of service message rows.</summary>
         public ObservableCollection<ServiceMessageRow> Messages { get; } = new();
+
+        public ServiceMessageTableViewModel(IServiceLookup? serviceLookup = null)
+        {
+            _serviceLookup = serviceLookup ?? NullServiceLookup.Instance;
+        }
 
         /// <summary>
         /// Sets the active service whose messages should be surfaced to the UI.
@@ -70,7 +76,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 rows.RemoveLast();
             }
 
-            if (ServiceListModel.ResolveService?.Invoke(serviceType, resolvedServiceName) is { } service)
+            if (_serviceLookup.TryGetService(serviceType, resolvedServiceName, out var service) && service is not null)
             {
                 service.RecordMessageHistory(incoming, outgoing, destination, timestamp);
             }
@@ -136,6 +142,26 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private static string BuildKey(ServiceType serviceType, string serviceName)
         {
             return $"{serviceType}:{serviceName}";
+        }
+
+        private sealed class NullServiceLookup : IServiceLookup
+        {
+            internal static readonly NullServiceLookup Instance = new();
+
+            private NullServiceLookup()
+            {
+            }
+
+            public bool TryGetService(ServiceType type, string name, out ServiceListModel? service)
+            {
+                service = null;
+                return false;
+            }
+
+            public IEnumerable<ServiceListModel> FindByDisplayName(string name)
+            {
+                return Array.Empty<ServiceListModel>();
+            }
         }
     }
 }

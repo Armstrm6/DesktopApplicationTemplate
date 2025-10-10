@@ -9,6 +9,15 @@ Purpose: Running log of what worked, what broke, and why.
 - Always record environment limitations (e.g., missing dotnet runtime).
 - When Windows collaborators run builds or tests, capture the commands and summarize their results so Codex can reference them.
 
+[2025-10-10 11:00] Topic: Cross-service association cleanup
+Context: Added a lookup index in `MainViewModel` so rename/remove operations update linked services.
+Observations: Manual regression covers: 1) create two services, force an association via routed log, rename one service and confirm both sides update; 2) remove a service and ensure the surviving service clears the stale association badge before saving.
+Codex Limitations noticed: Linux container only; UI validation must occur on Windows where the desktop app runs.
+Effective Prompts / Instructions that worked: User request to eliminate O(n²) scans and keep associations in sync with collection changes.
+Decisions & Rationale: Document the manual checklist so regressions surface quickly until automated UI coverage exists.
+Action Items: Run the rename/remove checklist before shipping changes that touch cross-service routing.
+Related Commits/PRs:
+
 [2025-10-09 10:10] Topic: EV7 drive mapping automation
 Context: Added a PowerShell helper to remap EV7 installation media and SATA storage to the expected drive letters after automation failures.
 Observations: The script prioritizes SATA disks on bus type SATA, assigns the primary partition to drive D:, moves a second SATA disk to E:, and relocates the USB installer to E: or F: depending on availability. It safely frees conflicting letters before reassignment.
