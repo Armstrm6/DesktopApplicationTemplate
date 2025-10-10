@@ -15,6 +15,7 @@ using System.Windows.Threading;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Csv;
 using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.UI.Helpers;
 
 namespace DesktopApplicationTemplate.UI.ViewModels.Csv
 {
@@ -28,10 +29,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Csv
         private readonly HashSet<string> _suggestionSet = new(StringComparer.OrdinalIgnoreCase);
         private readonly RelayCommand _addColumnCommand;
         private readonly RelayCommand _removeColumnCommand;
-        private readonly RelayCommand _saveCommand;
+        private readonly AsyncRelayCommand _saveCommand;
         private readonly RelayCommand _browseCommand;
 #if DEBUG
-        private readonly RelayCommand _debugSaveCommand;
+        private readonly AsyncRelayCommand _debugSaveCommand;
 #endif
         private ObservableCollection<CsvColumnDefinition>? _observableColumns;
         private CsvColumnDefinition? _selectedColumn;
@@ -94,10 +95,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Csv
             _routingService.AttributeChanged += OnRoutingAttributeChanged;
             _addColumnCommand = new RelayCommand(AddColumn, () => !IsBusy);
             _removeColumnCommand = new RelayCommand(RemoveSelectedColumn, () => SelectedColumn != null && !IsBusy);
-            _saveCommand = new RelayCommand(ExecuteSaveAsync, () => !IsBusy);
+            _saveCommand = new AsyncRelayCommand(ExecuteSaveAsync, () => !IsBusy);
             _browseCommand = new RelayCommand(BrowseDirectory, () => !IsBusy);
 #if DEBUG
-            _debugSaveCommand = new RelayCommand(ExecuteSaveAsync, () => !IsBusy);
+            _debugSaveCommand = new AsyncRelayCommand(ExecuteSaveAsync, () => !IsBusy);
 #endif
             AddColumnCommand = _addColumnCommand;
             RemoveColumnCommand = _removeColumnCommand;
@@ -107,7 +108,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Csv
 #if DEBUG
             DebugSaveCommand = _debugSaveCommand;
 #endif
-            InitializeAsync().GetAwaiter().GetResult();
+            ObserveTask(InitializeAsync());
         }
 
         private async Task InitializeAsync()
@@ -128,12 +129,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Csv
             }
         }
 
-        public void Save()
+        public async Task Save()
         {
-            ExecuteSaveAsync();
+            await ExecuteSaveAsync().ConfigureAwait(false);
         }
 
-        private async void ExecuteSaveAsync()
+        private async Task ExecuteSaveAsync()
         {
             if (Configuration is null || IsBusy)
             {
@@ -449,6 +450,18 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Csv
 #if DEBUG
             _debugSaveCommand.RaiseCanExecuteChanged();
 #endif
+        }
+
+        private static void ObserveTask(Task? task)
+        {
+            if (task is null)
+            {
+                return;
+            }
+
+            _ = task.ContinueWith(
+                t => _ = t.Exception,
+                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
         }
 
         private static void RunOnUiThread(Action action)
