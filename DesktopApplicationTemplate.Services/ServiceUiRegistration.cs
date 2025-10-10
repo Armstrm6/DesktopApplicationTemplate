@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Models;
@@ -25,6 +26,8 @@ public interface IServiceUiRegistry<TService, TPage> : IDisposable
     IReadOnlyCollection<ServiceType> SupportedServices { get; }
 
     IReadOnlyCollection<string> SupportedDescriptorIds { get; }
+
+    IReadOnlyList<string> GetDescriptorIds(ServiceType serviceType);
 
     bool TryCreateService(ServiceType serviceType, IServiceProvider provider, object options, out TService? service);
 
@@ -52,7 +55,7 @@ public sealed class ServiceUiRegistry<TService, TPage> : IServiceUiRegistry<TSer
 {
     private readonly IServiceCatalog _serviceCatalog;
     private readonly IReadOnlyDictionary<string, ServiceUiRegistration<TService, TPage>> _registrations;
-    private readonly Dictionary<ServiceType, string> _serviceTypeMap = new();
+    private readonly Dictionary<ServiceType, string[]> _serviceTypeMap = new();
     private IReadOnlyCollection<ServiceType> _supportedServices = Array.Empty<ServiceType>();
     private readonly IReadOnlyCollection<string> _supportedDescriptorIds;
     private bool _disposed;
@@ -91,9 +94,14 @@ public sealed class ServiceUiRegistry<TService, TPage> : IServiceUiRegistry<TSer
 
     public IReadOnlyCollection<string> SupportedDescriptorIds => _supportedDescriptorIds;
 
+    public IReadOnlyList<string> GetDescriptorIds(ServiceType serviceType) =>
+        _serviceTypeMap.TryGetValue(serviceType, out var descriptorIds)
+            ? descriptorIds
+            : Array.Empty<string>();
+
     public bool TryCreateService(ServiceType serviceType, IServiceProvider provider, object options, out TService? service)
     {
-        if (!_serviceTypeMap.TryGetValue(serviceType, out var descriptorId))
+        if (!TrySelectDescriptorId(serviceType, out var descriptorId))
         {
             service = default;
             return false;
@@ -122,7 +130,7 @@ public sealed class ServiceUiRegistry<TService, TPage> : IServiceUiRegistry<TSer
 
     public bool TryCreateServicePage(ServiceType serviceType, IServiceProvider provider, out TPage? page)
     {
-        if (!_serviceTypeMap.TryGetValue(serviceType, out var descriptorId))
+        if (!TrySelectDescriptorId(serviceType, out var descriptorId))
         {
             page = default;
             return false;
@@ -150,7 +158,7 @@ public sealed class ServiceUiRegistry<TService, TPage> : IServiceUiRegistry<TSer
 
     public bool TryCreateNavigationPage(ServiceType serviceType, IServiceProvider provider, string defaultName, out TPage? page)
     {
-        if (!_serviceTypeMap.TryGetValue(serviceType, out var descriptorId))
+        if (!TrySelectDescriptorId(serviceType, out var descriptorId))
         {
             page = default;
             return false;
@@ -178,7 +186,8 @@ public sealed class ServiceUiRegistry<TService, TPage> : IServiceUiRegistry<TSer
 
     public bool TryGetRegistration(ServiceType serviceType, out ServiceUiRegistration<TService, TPage>? registration)
     {
-        if (_serviceTypeMap.TryGetValue(serviceType, out var descriptorId) &&
+        if (TrySelectDescriptorId(serviceType, out var descriptorId) &&
+            descriptorId is not null &&
             _registrations.TryGetValue(descriptorId, out var resolved))
         {
             registration = resolved;
@@ -217,18 +226,52 @@ public sealed class ServiceUiRegistry<TService, TPage> : IServiceUiRegistry<TSer
 
     private void RefreshSupportedServices()
     {
-        _serviceTypeMap.Clear();
+        var map = new Dictionary<ServiceType, List<string>>();
 
         foreach (var descriptor in _serviceCatalog.Descriptors)
         {
-            if (descriptor.ServiceType is { } serviceType &&
-                _registrations.ContainsKey(descriptor.Id))
+            if (descriptor.ServiceType is not { } serviceType)
             {
-                _serviceTypeMap[serviceType] = descriptor.Id;
+                continue;
+            }
+
+            if (!_registrations.ContainsKey(descriptor.Id))
+            {
+                continue;
+            }
+
+            if (!map.TryGetValue(serviceType, out var descriptors))
+            {
+                descriptors = new List<string>();
+                map.Add(serviceType, descriptors);
+            }
+
+            if (!descriptors.Contains(descriptor.Id, StringComparer.Ordinal))
+            {
+                descriptors.Add(descriptor.Id);
             }
         }
 
+        _serviceTypeMap.Clear();
+        foreach (var entry in map)
+        {
+            entry.Value.Sort(StringComparer.Ordinal);
+            _serviceTypeMap[entry.Key] = entry.Value.ToArray();
+        }
+
         _supportedServices = _serviceTypeMap.Keys.ToArray();
+    }
+
+    private bool TrySelectDescriptorId(ServiceType serviceType, [NotNullWhen(true)] out string? descriptorId)
+    {
+        if (_serviceTypeMap.TryGetValue(serviceType, out var descriptorIds) && descriptorIds.Length > 0)
+        {
+            descriptorId = descriptorIds[0];
+            return true;
+        }
+
+        descriptorId = null;
+        return false;
     }
 
     private void ApplyPresentationIfAvailable(TService? service, ServiceUiRegistration<TService, TPage> registration)
