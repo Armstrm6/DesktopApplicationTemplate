@@ -93,6 +93,9 @@
                 <StackPanel Grid.Column="1">
                     <TextBlock FontWeight="Bold" Text="{Binding DisplayName}" />
                     <TextBlock Text="{Binding ExecutionTimeText}" />
+                    <TextBlock Text="{Binding LastLogMessage}"
+                               TextTrimming="CharacterEllipsis"
+                               Foreground="{Binding LastLogBrush}" />
                     <TextBlock Text="{Binding InputMessage}"
                                TextTrimming="CharacterEllipsis"
                                Foreground="{Binding LastInputBrush}" />
