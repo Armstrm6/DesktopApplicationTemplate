@@ -488,7 +488,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             ApplyFilters();
             if (_logger is LoggingService concreteLogger)
             {
-                concreteLogger.Reload();
+                await concreteLogger.ReloadAsync().ConfigureAwait(true);
             }
         }
 
