@@ -67,7 +67,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 _activeService = value;
                 OnPropertyChanged();
                 LogViewModel.SetLogs(
-                    _activeService?.Logs ?? AllLogs,
+                    _activeService?.LogState.Logs ?? AllLogs,
                     _activeService is null,
                     newestFirstInSource: _activeService is not null);
                 RefreshServiceCommandStates();
@@ -473,7 +473,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
                 service.RepublishRoutingAttributes();
 
-                foreach (var log in service.Logs.Reverse())
+                foreach (var log in service.LogState.Logs.Reverse())
                 {
                     AllLogs.Add(log);
                 }

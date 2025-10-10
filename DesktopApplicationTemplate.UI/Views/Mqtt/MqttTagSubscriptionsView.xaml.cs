@@ -41,6 +41,6 @@ public partial class MqttTagSubscriptionsView : Page, IServiceLogHost
     /// <inheritdoc />
     public void SetServiceContext(ServiceListModel service)
     {
-        LogView.DataContext = new ServiceLogViewModel(service.Type, service.Logs);
+        LogView.DataContext = new ServiceLogViewModel(service.Type, service.LogState.Logs);
     }
 }

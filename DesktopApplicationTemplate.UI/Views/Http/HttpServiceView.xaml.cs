@@ -47,7 +47,7 @@ namespace DesktopApplicationTemplate.UI.Views.Http
 
         public void SetServiceContext(ServiceListModel service)
         {
-            LogView.DataContext = new ServiceLogViewModel(service.Type, service.Logs);
+            LogView.DataContext = new ServiceLogViewModel(service.Type, service.LogState.Logs);
         }
 
         private void Help_Click(object sender, RoutedEventArgs e)

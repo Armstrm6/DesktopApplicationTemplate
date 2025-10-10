@@ -18,6 +18,7 @@ using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Tcp;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI;
+using DesktopApplicationTemplate.UI.ViewModels.Services;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.ViewModels;
@@ -70,10 +71,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
         public ObservableCollection<LogEntry> Logs { get; } = new();
 
         /// <summary>Latest incoming message text for the associated service.</summary>
-        public string InputMessage => _service?.InputMessage ?? string.Empty;
+        public string InputMessage => _service?.LogState.InputMessage ?? string.Empty;
 
         /// <summary>Latest outgoing message text for the associated service.</summary>
-        public string OutputMessage => _service?.OutputMessage ?? string.Empty;
+        public string OutputMessage => _service?.LogState.OutputMessage ?? string.Empty;
 
         /// <inheritdoc />
         private ILoggingService? _logger;
@@ -361,7 +362,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             if (_service is not null)
             {
                 _service.ActiveChanged -= OnServiceActiveChanged;
-                _service.PropertyChanged -= OnServicePropertyChanged;
+                _service.LogState.PropertyChanged -= OnServicePropertyChanged;
             }
 
             _service = service;
@@ -373,7 +374,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
 
             MessageTable = messageTable;
             _service.ActiveChanged += OnServiceActiveChanged;
-            _service.PropertyChanged += OnServicePropertyChanged;
+            _service.LogState.PropertyChanged += OnServicePropertyChanged;
             _options = service.GetOptions<TcpServiceOptions>() ?? new TcpServiceOptions();
             service.SetOptions(_options);
             ServiceType = service.Type;
@@ -433,12 +434,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
 
         private void OnServicePropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(ServiceListModel.InputMessage) || string.IsNullOrEmpty(e.PropertyName))
+            if (e.PropertyName == nameof(ServiceLogState.InputMessage) || string.IsNullOrEmpty(e.PropertyName))
             {
                 OnPropertyChanged(nameof(InputMessage));
             }
 
-            if (e.PropertyName == nameof(ServiceListModel.OutputMessage) || string.IsNullOrEmpty(e.PropertyName))
+            if (e.PropertyName == nameof(ServiceLogState.OutputMessage) || string.IsNullOrEmpty(e.PropertyName))
             {
                 OnPropertyChanged(nameof(OutputMessage));
             }

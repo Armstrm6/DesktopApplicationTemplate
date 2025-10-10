@@ -20,7 +20,7 @@ namespace DesktopApplicationTemplate.UI.Views.Tcp
 
         public void SetServiceContext(ServiceListModel service)
         {
-            LogView.DataContext = new ServiceLogViewModel(service.Type, service.Logs);
+            LogView.DataContext = new ServiceLogViewModel(service.Type, service.LogState.Logs);
             if (DataContext is TcpServiceMessagesViewModel vm)
                 vm.SetService(service);
         }

@@ -93,12 +93,12 @@
                 <StackPanel Grid.Column="1">
                     <TextBlock FontWeight="Bold" Text="{Binding DisplayName}" />
                     <TextBlock Text="{Binding ExecutionTimeText}" />
-                    <TextBlock Text="{Binding LastLogMessage}"
+                    <TextBlock Text="{Binding LogState.LastLogMessage}"
                                TextTrimming="CharacterEllipsis"
-                               Foreground="{Binding LastLogBrush}" />
-                    <TextBlock Text="{Binding InputMessage}"
+                               Foreground="{Binding LogState.LastLogBrush}" />
+                    <TextBlock Text="{Binding LogState.InputMessage}"
                                TextTrimming="CharacterEllipsis"
-                               Foreground="{Binding LastInputBrush}" />
+                               Foreground="{Binding LogState.LastInputBrush}" />
                     <TextBlock>
                         <Run Text="{Binding IncomingMessageCount, Mode=OneWay}" />
                         <Run Text=" - incoming" />
