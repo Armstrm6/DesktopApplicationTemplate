@@ -170,6 +170,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private string _inputMessage = string.Empty;
         private string _outputMessage = string.Empty;
         private WpfBrush _lastInputBrush = WpfBrushes.Black;
+        private string _lastLogMessage = string.Empty;
+        private WpfBrush _lastLogBrush = WpfBrushes.Black;
         private int _incomingMessageCount;
         private int _outgoingMessageCount;
         private static readonly WpfBrushConverter BrushConverter = new();
@@ -304,6 +306,38 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     _lastInputBrush = value;
                     OnPropertyChanged();
                 }
+            }
+        }
+
+        public string LastLogMessage
+        {
+            get => _lastLogMessage;
+            private set
+            {
+                var resolved = value ?? string.Empty;
+                if (string.Equals(_lastLogMessage, resolved, StringComparison.Ordinal))
+                {
+                    return;
+                }
+
+                _lastLogMessage = resolved;
+                OnPropertyChanged();
+            }
+        }
+
+        public WpfBrush LastLogBrush
+        {
+            get => _lastLogBrush;
+            private set
+            {
+                var resolved = value ?? WpfBrushes.Black;
+                if (Equals(_lastLogBrush, resolved))
+                {
+                    return;
+                }
+
+                _lastLogBrush = resolved;
+                OnPropertyChanged();
             }
         }
 
@@ -845,6 +879,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 ServiceType = Type,
                 ServiceName = DisplayName
             };
+            LastLogMessage = entryMessage;
+            LastLogBrush = brush;
             Logs.Insert(0, entry);
             if (Logs.Count > MaxLogEntries)
             {
@@ -866,10 +902,15 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             Logs = new ObservableCollection<LogEntry>(materialized);
             OnPropertyChanged(nameof(Logs));
             RefreshLogMetadata();
+            LastLogMessage = string.Empty;
+            LastLogBrush = WpfBrushes.Black;
             if (Logs.FirstOrDefault() is { } latest)
             {
-                InputMessage = NormalizePersistedMessage(latest.Message);
-                LastInputBrush = ParseBrush(latest.Color, WpfBrushes.Black);
+                var normalized = NormalizePersistedMessage(latest.Message ?? string.Empty);
+                LastLogMessage = string.IsNullOrEmpty(normalized)
+                    ? $"[{latest.Level}]"
+                    : $"[{latest.Level}] {normalized}";
+                LastLogBrush = ParseBrush(latest.Color, WpfBrushes.Black);
             }
         }
 
