@@ -33,7 +33,7 @@ namespace DesktopApplicationTemplate.UI.DependencyInjection
             }
 
             services.AddTransient<HidViewModel>();
-            services.AddTransient<HidViews>();
+            services.AddTransient<HidView>();
             services.AddTransient<HidCreateServiceView>();
             services.AddTransient<HidCreateServiceViewModel>();
             services.AddTransient<ServiceCreateViewModelBase<HidServiceOptions>, HidCreateServiceViewModel>();
@@ -72,7 +72,7 @@ namespace DesktopApplicationTemplate.UI.DependencyInjection
                     mainView.GetOrCreateServicePage(svc);
                     return svc;
                 },
-                provider => provider.GetRequiredService<HidViews>(),
+                provider => provider.GetRequiredService<HidView>(),
                 (provider, defaultName) =>
                 {
                     var vm = provider.GetRequiredService<HidCreateServiceViewModel>();
