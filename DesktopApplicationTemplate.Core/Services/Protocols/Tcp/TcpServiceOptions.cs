@@ -32,6 +32,11 @@ public class TcpServiceOptions
     public string Host { get; set; } = string.Empty;
 
     /// <summary>
+    /// Expression used to calculate <see cref="Host"/> when routing attributes are referenced.
+    /// </summary>
+    public string HostExpression { get; set; } = string.Empty;
+
+    /// <summary>
     /// Port number used for the connection.
     /// </summary>
     public int Port { get; set; }
@@ -40,6 +45,11 @@ public class TcpServiceOptions
     /// Remote host name or address used when the service is configured to send messages.
     /// </summary>
     public string DestinationHost { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Expression used to calculate <see cref="DestinationHost"/> when routing attributes are referenced.
+    /// </summary>
+    public string DestinationHostExpression { get; set; } = string.Empty;
 
     /// <summary>
     /// Remote port used when the service is configured to send messages.
@@ -102,9 +112,19 @@ public class TcpServiceOptions
     public string InputMessage { get; set; } = string.Empty;
 
     /// <summary>
+    /// Expression that generates <see cref="InputMessage"/>.
+    /// </summary>
+    public string InputMessageExpression { get; set; } = string.Empty;
+
+    /// <summary>
     /// Script applied to <see cref="InputMessage"/> to produce an output.
     /// </summary>
     public string Script { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Expression that generates <see cref="Script"/>.
+    /// </summary>
+    public string ScriptExpression { get; set; } = string.Empty;
 
     /// <summary>
     /// Resulting message after executing <see cref="Script"/>.
