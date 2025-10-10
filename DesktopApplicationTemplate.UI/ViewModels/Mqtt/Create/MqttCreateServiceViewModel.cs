@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Mqtt;
@@ -39,7 +40,7 @@ public class MqttCreateServiceViewModel : ServiceCreateViewModelBase<MqttService
         : base(rule, logger: logger)
     {
         _fileDialogService = fileDialogService ?? throw new ArgumentNullException(nameof(fileDialogService));
-        BrowseClientCertificateCommand = new RelayCommand(BrowseForClientCertificate);
+        BrowseClientCertificateCommand = new AsyncRelayCommand(BrowseForClientCertificateAsync);
         ClearClientCertificateCommand = new RelayCommand(ClearClientCertificate);
     }
 
@@ -305,7 +306,7 @@ public class MqttCreateServiceViewModel : ServiceCreateViewModelBase<MqttService
         // Advanced configuration has been folded into the primary editor for MQTT services.
     }
 
-    private void BrowseForClientCertificate()
+    private async Task BrowseForClientCertificateAsync()
     {
         var path = _fileDialogService.OpenFile();
         if (string.IsNullOrWhiteSpace(path))
@@ -315,7 +316,7 @@ public class MqttCreateServiceViewModel : ServiceCreateViewModelBase<MqttService
 
         try
         {
-            _clientCertificate = File.ReadAllBytes(path);
+            _clientCertificate = await LoadCertificateAsync(path);
             ClientCertificatePath = path;
             UseClientCertificate = true;
             ClearErrors(nameof(ClientCertificatePath));
@@ -331,6 +332,11 @@ public class MqttCreateServiceViewModel : ServiceCreateViewModelBase<MqttService
         OnPropertyChanged(nameof(HasClientCertificate));
         OnPropertyChanged(nameof(ClientCertificateDisplay));
         ValidateClientCertificate();
+    }
+
+    private static async Task<byte[]> LoadCertificateAsync(string path)
+    {
+        return await File.ReadAllBytesAsync(path).ConfigureAwait(false);
     }
 
     private void ClearClientCertificate()
