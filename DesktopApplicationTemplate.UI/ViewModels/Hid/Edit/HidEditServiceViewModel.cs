@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Hid;
 
@@ -56,12 +57,12 @@ public class HidEditServiceViewModel : ServiceEditViewModelBase<HidServiceOption
     }
 
     /// <inheritdoc />
-    protected override void OnSave()
+    protected override Task OnSaveAsync()
     {
         _options.MessageTemplate = MessageTemplate;
         _options.UsbProtocol = SelectedUsbProtocol;
         _options.AttachedService = AttachedService;
-        RaiseServiceSaved(_options);
+        return RaiseServiceSavedAsync(_options);
     }
 
     /// <inheritdoc />

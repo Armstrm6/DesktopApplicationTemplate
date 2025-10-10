@@ -1,5 +1,6 @@
 using System;
 using System.Net;
+using System.Threading.Tasks;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Tcp;
 
@@ -381,12 +382,12 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
     }
 
     /// <inheritdoc />
-    protected override void OnSave()
+    protected override Task OnSaveAsync()
     {
         if (HasErrors)
         {
             Logger?.Log("TCP edit validation failed", LogLevel.Warning);
-            return;
+            return Task.CompletedTask;
         }
         _options.Host = Host;
         _options.Port = Port;
@@ -402,7 +403,7 @@ public class TcpEditServiceViewModel : ServiceEditViewModelBase<TcpServiceOption
         _options.DestinationSubnetMask = DestinationSubnetMask;
         _options.DestinationPrimaryDns = DestinationPrimaryDns;
         _options.DestinationAlternateDns = DestinationAlternateDns;
-        RaiseServiceSaved(_options);
+        return RaiseServiceSavedAsync(_options);
     }
 
     /// <inheritdoc />

@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Mqtt;
 
@@ -105,19 +106,19 @@ public class MqttEditServiceViewModel : ServiceEditViewModelBase<MqttServiceOpti
     }
 
     /// <inheritdoc />
-    protected override void OnSave()
+    protected override Task OnSaveAsync()
     {
         if (HasErrors)
         {
             Logger?.Log("MQTT edit validation failed", LogLevel.Warning);
-            return;
+            return Task.CompletedTask;
         }
         _options.Host = Host;
         _options.Port = Port;
         _options.ClientId = ClientId;
         _options.Username = string.IsNullOrWhiteSpace(Username) ? null : Username;
         _options.Password = string.IsNullOrWhiteSpace(Password) ? null : Password;
-        RaiseServiceSaved(_options);
+        return RaiseServiceSavedAsync(_options);
     }
 
     /// <inheritdoc />

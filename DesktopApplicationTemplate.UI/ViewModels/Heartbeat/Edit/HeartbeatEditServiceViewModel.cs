@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Heartbeat;
 
@@ -34,10 +35,10 @@ public class HeartbeatEditServiceViewModel : ServiceEditViewModelBase<HeartbeatS
     }
 
     /// <inheritdoc />
-    protected override void OnSave()
+    protected override Task OnSaveAsync()
     {
         _options.BaseMessage = BaseMessage;
-        RaiseServiceSaved(_options);
+        return RaiseServiceSavedAsync(_options);
     }
 
     /// <inheritdoc />

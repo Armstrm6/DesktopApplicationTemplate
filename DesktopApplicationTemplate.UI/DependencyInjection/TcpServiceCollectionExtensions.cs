@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using System.Windows.Controls;
 using DesktopApplicationTemplate.Core.Models;
 using DesktopApplicationTemplate.Core.Services;
@@ -79,6 +80,7 @@ namespace DesktopApplicationTemplate.UI.DependencyInjection
                     vm.ServiceSaved += (name, options) =>
                     {
                         ServiceRegistrationHelper.QueueServiceAddition(mainView, ServiceType.Tcp, name, (TcpServiceOptions)options);
+                        return Task.CompletedTask;
                     };
                     vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
                     return ActivatorUtilities.CreateInstance<TcpCreateServiceView>(provider, vm);

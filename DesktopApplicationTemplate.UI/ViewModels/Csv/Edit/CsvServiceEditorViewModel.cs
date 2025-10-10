@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Csv;
@@ -35,7 +36,7 @@ public class CsvServiceEditorViewModel : ServiceEditorViewModelBase<CsvServiceOp
         Options = new();
         _delimiter = Options.Delimiter;
         _includeHeaders = Options.IncludeHeaders;
-        _screen.ServiceSaved += (_, o) => RaiseServiceSaved(o);
+        _screen.ServiceSaved += (_, o) => RaiseServiceSavedAsync(o);
         _screen.EditCancelled += () => RaiseEditCancelled();
         BrowseCommand = new RelayCommand(BrowseForOutputPath);
     }
@@ -123,14 +124,14 @@ public class CsvServiceEditorViewModel : ServiceEditorViewModelBase<CsvServiceOp
     }
 
     /// <inheritdoc />
-    protected override void OnSave()
+    protected override async Task OnSaveAsync()
     {
         if (HasErrors)
             return;
         Options.OutputPath = OutputPath;
         Options.Delimiter = Delimiter;
         Options.IncludeHeaders = IncludeHeaders;
-        _screen.Save(ServiceName, Options);
+        await _screen.SaveAsync(ServiceName, Options);
     }
 
     /// <inheritdoc />
