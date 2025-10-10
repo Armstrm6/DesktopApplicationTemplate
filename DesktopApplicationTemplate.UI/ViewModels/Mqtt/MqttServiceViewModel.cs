@@ -55,7 +55,7 @@ public class MqttServiceViewModel : ValidatableViewModelBase, ILoggingViewModel,
         RemoveMessageCommand = new RelayCommand(RemoveSelectedMessage, () => SelectedMessage != null);
         ConnectCommand = new AsyncRelayCommand(() => ConnectAsync());
         PublishCommand = new AsyncRelayCommand(PublishSelectedAsync, () => SelectedMessage != null);
-        SaveCommand = new RelayCommand(Save);
+        SaveCommand = new AsyncRelayCommand(SaveAsync);
     }
 
     /// <inheritdoc />
@@ -488,7 +488,7 @@ public class MqttServiceViewModel : ValidatableViewModelBase, ILoggingViewModel,
         _ = _clientService.DisconnectAsync();
     }
 
-    private void Save() => _saveHelper.Show();
+    private Task SaveAsync() => _saveHelper.ShowAsync();
 
     /// <inheritdoc />
     public void UpdateNetworkConfiguration(NetworkConfiguration configuration)

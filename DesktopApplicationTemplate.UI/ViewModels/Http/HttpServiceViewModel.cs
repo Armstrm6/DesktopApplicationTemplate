@@ -150,13 +150,13 @@ public class HttpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel
                 if (SelectedHeader != null)
                     Headers.Remove(SelectedHeader);
             });
-            SaveCommand = new RelayCommand(Save);
+            SaveCommand = new AsyncRelayCommand(SaveAsync);
             RefreshLogCommand = new RelayCommand(() => OnPropertyChanged(nameof(DisplayLogs)));
             ExportLogCommand = new RelayCommand(ExportLogs);
             ClearLogCommand = new RelayCommand(ClearLogs);
         }
 
-        private void Save() => _saveHelper.Show();
+        private Task SaveAsync() => _saveHelper.ShowAsync();
 
         public async Task SendRequestAsync()
         {

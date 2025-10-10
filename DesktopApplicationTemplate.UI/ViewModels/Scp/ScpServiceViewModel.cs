@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.Core.Models;
@@ -100,7 +101,7 @@ public class ScpServiceViewModel : ViewModelBase, ILoggingViewModel, INetworkAwa
             _scpUploadService = scpUploadService ?? throw new ArgumentNullException(nameof(scpUploadService));
             BrowseCommand = new RelayCommand(Browse);
             TransferCommand = new AsyncRelayCommand(TransferAsync);
-            SaveCommand = new RelayCommand(Save);
+            SaveCommand = new AsyncRelayCommand(SaveAsync);
             RefreshLogCommand = new RelayCommand(() => OnPropertyChanged(nameof(DisplayLogs)));
             ExportLogCommand = new RelayCommand(ExportLogs);
             ClearLogCommand = new RelayCommand(ClearLogs);
@@ -123,7 +124,7 @@ public class ScpServiceViewModel : ViewModelBase, ILoggingViewModel, INetworkAwa
             Logger?.Log("SCP transfer finished", LogLevel.Debug);
         }
 
-        private void Save() => _saveHelper.Show();
+        private Task SaveAsync() => _saveHelper.ShowAsync();
 
         public void UpdateNetworkConfiguration(NetworkConfiguration configuration)
         {

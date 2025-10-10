@@ -617,7 +617,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                         return;
                     }
 
-                    var currentSettings = UserSettingsStorage.Load(_logger);
+                    var currentSettings = await UserSettingsStorage.LoadAsync(_logger);
                     var preferenceResult = _startupPreferencesService.ShowDialog(currentSettings.RunServicesOnStartup, currentSettings.RunUIOnStartup);
                     if (!preferenceResult.Accepted)
                     {
@@ -630,7 +630,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     {
                         currentSettings.RunServicesOnStartup = preferenceResult.RunServicesOnStartup;
                         currentSettings.RunUIOnStartup = preferenceResult.RunUIOnStartup;
-                        UserSettingsStorage.Save(currentSettings, _logger);
+                        await UserSettingsStorage.SaveAsync(currentSettings, _logger);
                     }
 
                     ServicesRunning = true;

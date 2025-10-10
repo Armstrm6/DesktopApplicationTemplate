@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using System.Windows;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Views;
@@ -22,7 +23,7 @@ namespace DesktopApplicationTemplate.UI.Helpers
             set => SettingsViewModel.CloseConfirmationSuppressed = value;
         }
 
-        public bool Show()
+        public async Task<bool> ShowAsync()
         {
             _logger.Log("Displaying close confirmation", LogLevel.Debug);
             if (CloseConfirmationSuppressed)
@@ -43,7 +44,7 @@ namespace DesktopApplicationTemplate.UI.Helpers
             {
                 CloseConfirmationSuppressed = true;
                 var settingsVm = App.AppHost.Services.GetRequiredService<SettingsViewModel>();
-                settingsVm.Save();
+                await settingsVm.SaveAsync();
             }
 
             _logger.Log(result ? "Close confirmed" : "Close canceled", LogLevel.Debug);

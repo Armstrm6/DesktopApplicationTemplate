@@ -280,7 +280,8 @@ namespace DesktopApplicationTemplate.UI
             await AppHost.StartAsync();
 
             var settings = AppHost.Services.GetRequiredService<SettingsViewModel>();
-            settings.Load();
+            await settings.LoadAsync().ConfigureAwait(false);
+            await UiThreadTaskFactory.SwitchToMainThreadAsync();
             Services.ThemeManager.ApplyTheme(settings.DarkTheme);
 
             SplashWindow? splash = null;
@@ -294,8 +295,11 @@ namespace DesktopApplicationTemplate.UI
             if (splash != null)
             {
                 settings.FirstRun = false;
-                settings.Save();
+                await settings.SaveAsync().ConfigureAwait(false);
+                await UiThreadTaskFactory.SwitchToMainThreadAsync();
             }
+
+            await UiThreadTaskFactory.SwitchToMainThreadAsync();
 
             var mainWindow = AppHost.Services.GetService<MainView>();
             if (mainWindow is null)
