@@ -32,7 +32,7 @@ namespace DesktopApplicationTemplate.UI.DependencyInjection
                 throw new ArgumentNullException(nameof(services));
             }
 
-            services.AddTransient<FTPServiceView>();
+            services.AddTransient<FtpServiceView>();
             services.AddTransient<FtpServiceViewModel>();
             services.AddTransient<FtpServerCreateView>();
             services.AddTransient<FtpServerCreateViewModel>();
@@ -74,7 +74,7 @@ namespace DesktopApplicationTemplate.UI.DependencyInjection
 
                     return svc;
                 },
-                provider => provider.GetRequiredService<FTPServiceView>(),
+                provider => provider.GetRequiredService<FtpServiceView>(),
                 (provider, defaultName) =>
                 {
                     var vm = provider.GetRequiredService<FtpServerCreateViewModel>();
