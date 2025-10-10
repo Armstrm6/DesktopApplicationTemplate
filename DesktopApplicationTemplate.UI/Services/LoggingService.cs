@@ -14,7 +14,9 @@ namespace DesktopApplicationTemplate.UI.Services
         private readonly IRichTextLogger _richTextLogger;
         private readonly string _logFilePath;
         private readonly List<LogEntry> _logEntries = new();
+        private readonly object _entriesLock = new();
         private readonly SemaphoreSlim _fileWriteLock = new(1, 1);
+        private readonly SynchronizationContext? _uiContext;
 
         private LogLevel _minimumLevel = LogLevel.Debug;
         public LogLevel MinimumLevel
@@ -33,12 +35,13 @@ namespace DesktopApplicationTemplate.UI.Services
         public LoggingService(IRichTextLogger richTextLogger, string? logFilePath = null)
         {
             _richTextLogger = richTextLogger;
+            _uiContext = SynchronizationContext.Current;
 
             var resolvedLogFilePath = logFilePath ?? GetDefaultLogFilePath();
             EnsureDirectoryExists(resolvedLogFilePath);
 
             _logFilePath = resolvedLogFilePath;
-            Reload();
+            ObserveTask(ReloadAsync());
         }
 
         private static string GetDefaultLogFilePath()
@@ -88,7 +91,10 @@ namespace DesktopApplicationTemplate.UI.Services
                 ServiceName = hasServiceContext ? contextName : string.Empty
             };
 
-            _logEntries.Add(entry);
+            lock (_entriesLock)
+            {
+                _logEntries.Add(entry);
+            }
 
             if (level >= MinimumLevel)
             {
@@ -154,20 +160,61 @@ namespace DesktopApplicationTemplate.UI.Services
             _ => "#000000"
         };
 
-        public void Reload()
+        public async Task ReloadAsync(CancellationToken cancellationToken = default)
         {
-            _logEntries.Clear();
+            List<LogEntry> entries;
             try
             {
-                if (File.Exists(_logFilePath))
+                entries = await Task.Run(() => LoadEntriesFromFile(cancellationToken), cancellationToken).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+
+            await InvokeOnUiThreadAsync(() =>
+            {
+                IReadOnlyList<LogEntry> displayEntries;
+                lock (_entriesLock)
                 {
-                    foreach (var line in File.ReadLines(_logFilePath))
+                    _logEntries.Clear();
+                    _logEntries.AddRange(entries);
+                    displayEntries = _logEntries.Where(e => e.Level >= MinimumLevel).ToList();
+                }
+
+                UpdateLogDisplay(displayEntries);
+                foreach (var entry in displayEntries)
+                {
+                    LogAdded?.Invoke(entry);
+                }
+            }).ConfigureAwait(false);
+        }
+
+        private List<LogEntry> LoadEntriesFromFile(CancellationToken cancellationToken)
+        {
+            var entries = new List<LogEntry>();
+
+            try
+            {
+                if (!File.Exists(_logFilePath))
+                {
+                    return entries;
+                }
+
+                using var stream = new FileStream(_logFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                using var reader = new StreamReader(stream);
+
+                while (!reader.EndOfStream)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    var line = reader.ReadLine();
+                    if (string.IsNullOrWhiteSpace(line))
                     {
-                        if (string.IsNullOrWhiteSpace(line))
-                            continue;
-                        var entry = ParseLine(line);
-                        _logEntries.Add(entry);
+                        continue;
                     }
+
+                    var entry = ParseLine(line);
+                    entries.Add(entry);
                 }
             }
             catch
@@ -175,11 +222,7 @@ namespace DesktopApplicationTemplate.UI.Services
                 // ignore loading errors
             }
 
-            UpdateLogDisplay();
-            foreach (var entry in _logEntries.Where(e => e.Level >= MinimumLevel))
-            {
-                LogAdded?.Invoke(entry);
-            }
+            return entries;
         }
 
         private static LogEntry ParseLine(string line)
@@ -209,9 +252,53 @@ namespace DesktopApplicationTemplate.UI.Services
             };
         }
 
-        private void UpdateLogDisplay()
+        private void UpdateLogDisplay(IReadOnlyList<LogEntry>? entries = null)
         {
-            _ = _richTextLogger.SetEntriesAsync(_logEntries.Where(e => e.Level >= MinimumLevel));
+            IReadOnlyList<LogEntry> entriesToDisplay = entries ?? GetEntriesForDisplay();
+            _ = _richTextLogger.SetEntriesAsync(entriesToDisplay);
+        }
+
+        private IReadOnlyList<LogEntry> GetEntriesForDisplay()
+        {
+            lock (_entriesLock)
+            {
+                return _logEntries.Where(e => e.Level >= MinimumLevel).ToList();
+            }
+        }
+
+        private Task InvokeOnUiThreadAsync(Action action)
+        {
+            if (_uiContext is null || SynchronizationContext.Current == _uiContext)
+            {
+                action();
+                return Task.CompletedTask;
+            }
+
+            var tcs = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
+            _uiContext.Post(_ =>
+            {
+                try
+                {
+                    action();
+                    tcs.SetResult(null);
+                }
+                catch (Exception ex)
+                {
+                    tcs.SetException(ex);
+                }
+            }, null);
+
+            return tcs.Task;
+        }
+
+        private static void ObserveTask(Task? task)
+        {
+            if (task is null)
+            {
+                return;
+            }
+
+            _ = task.ContinueWith(t => _ = t.Exception, TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
         }
 
         private async Task AppendToLogFileAsync(string text)
