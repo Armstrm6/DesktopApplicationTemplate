@@ -1,6 +1,8 @@
 using System;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Models;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace DesktopApplicationTemplate.UI.Services
 {
@@ -51,9 +53,9 @@ namespace DesktopApplicationTemplate.UI.Services
             inner.Log($"{serviceType}.{serviceName}.{message}", level);
         }
 
-        public void Reload()
+        public Task ReloadAsync(CancellationToken cancellationToken = default)
         {
-            inner.Reload();
+            return inner.ReloadAsync(cancellationToken);
         }
 
         private void HandleInnerLogAdded(LogEntry entry)

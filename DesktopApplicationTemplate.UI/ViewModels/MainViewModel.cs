@@ -225,7 +225,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             ApplyFilters();
             if (_logger is LoggingService concreteLogger)
             {
-                concreteLogger.Reload();
+                ObserveTask(concreteLogger.ReloadAsync());
             }
         }
 
@@ -1133,6 +1133,18 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         {
             LogViewModel.RefreshLogs();
             _logger?.Log("Logs refreshed", LogLevel.Debug);
+        }
+
+        private static void ObserveTask(Task? task)
+        {
+            if (task is null)
+            {
+                return;
+            }
+
+            _ = task.ContinueWith(
+                t => _ = t.Exception,
+                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
         }
 
         // OnPropertyChanged inherited from ViewModelBase

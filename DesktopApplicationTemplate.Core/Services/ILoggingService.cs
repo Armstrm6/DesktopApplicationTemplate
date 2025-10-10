@@ -1,4 +1,6 @@
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using DesktopApplicationTemplate.Models;
 namespace DesktopApplicationTemplate.Core.Services
 {
@@ -25,6 +27,6 @@ namespace DesktopApplicationTemplate.Core.Services
         /// <summary>
         /// Reloads existing log entries from persistence if supported.
         /// </summary>
-        void Reload();
+        Task ReloadAsync(CancellationToken cancellationToken = default);
     }
 }
