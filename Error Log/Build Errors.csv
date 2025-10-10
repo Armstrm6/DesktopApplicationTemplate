@@ -44,5 +44,5 @@ XDG0008,DesktopApplicationTemplate.UI/FTPServiceView.xaml,2
 System.ArgumentException,DesktopApplicationTemplate.UI/CsvServiceCollectionExtensions.cs,1
 System.Windows.Markup.XamlParseException,DesktopApplicationTemplate.UI/MainWindow.xaml,1
 System.Windows.Markup.XamlParseException,DesktopApplicationTemplate.UI/TcpServiceMessagesView.xaml,1
-CMD-NOT-FOUND,DesktopApplicationTemplate/dotnet,6
-CS1061,DesktopApplicationTemplate.UI/MainViewModel.cs,1
+CMD-NOT-FOUND,DesktopApplicationTemplate/dotnet,7
+CS0103,DesktopApplicationTemplate.UI/MainViewModel.cs,1
