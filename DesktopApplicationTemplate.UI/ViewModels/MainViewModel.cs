@@ -1148,7 +1148,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
             _ = task.ContinueWith(
                 t => _ = t.Exception,
-                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
+                CancellationToken.None,
+                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
         }
 
         // OnPropertyChanged inherited from ViewModelBase
