@@ -32,7 +32,7 @@ namespace DesktopApplicationTemplate.UI.DependencyInjection
                 throw new ArgumentNullException(nameof(services));
             }
 
-            services.AddTransient<SCPServiceView>();
+            services.AddTransient<ScpServiceView>();
             services.AddTransient<ScpServiceViewModel>();
             services.AddTransient<ScpCreateServiceView>();
             services.AddTransient<ScpCreateServiceViewModel>();
@@ -72,7 +72,7 @@ namespace DesktopApplicationTemplate.UI.DependencyInjection
                     mainView.GetOrCreateServicePage(svc);
                     return svc;
                 },
-                provider => provider.GetRequiredService<SCPServiceView>(),
+                provider => provider.GetRequiredService<ScpServiceView>(),
                 (provider, defaultName) =>
                 {
                     var vm = provider.GetRequiredService<ScpCreateServiceViewModel>();
