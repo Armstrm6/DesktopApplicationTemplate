@@ -326,7 +326,7 @@ namespace DesktopApplicationTemplate.UI.Views
 
             if (svc.Logs.Count == 0)
             {
-                vm.Logger.Reload();
+                ObserveTask(vm.Logger.ReloadAsync());
             }
         }
 
@@ -1083,6 +1083,18 @@ namespace DesktopApplicationTemplate.UI.Views
             }
 
             _ = ObserveBackgroundTaskAsync();
+        }
+
+        private static void ObserveTask(Task? task)
+        {
+            if (task is null)
+            {
+                return;
+            }
+
+            _ = task.ContinueWith(
+                t => _ = t.Exception,
+                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
         }
 
     }

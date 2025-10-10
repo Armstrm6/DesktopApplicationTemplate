@@ -215,6 +215,18 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             ResetMessageCountsCommand = new AsyncRelayCommand(ResetMessageCountsAsync);
             FilteredServices = CollectionViewSource.GetDefaultView(Services);
             Filters.PropertyChanged += (_, __) => ApplyFilters();
+            LoadServices();
+            foreach (var service in Services)
+            {
+                TrackService(service);
+            }
+            LogViewModel.UpdateServiceFilters(Services.Select(s => s.DisplayName));
+            ServicesRunning = Services.Any(svc => svc.IsActive);
+            ApplyFilters();
+            if (_logger is LoggingService concreteLogger)
+            {
+                ObserveTask(concreteLogger.ReloadAsync());
+            }
         }
 
         internal IDisposable BeginServiceCreationScope()
@@ -1129,6 +1141,18 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         {
             LogViewModel.RefreshLogs();
             _logger?.Log("Logs refreshed", LogLevel.Debug);
+        }
+
+        private static void ObserveTask(Task? task)
+        {
+            if (task is null)
+            {
+                return;
+            }
+
+            _ = task.ContinueWith(
+                t => _ = t.Exception,
+                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
         }
 
         // OnPropertyChanged inherited from ViewModelBase
