@@ -55,7 +55,7 @@ namespace DesktopApplicationTemplate.UI.Views.Shared
             }
         }
 
-        private void ExportLog_Click(object sender, RoutedEventArgs e)
+        private async void ExportLog_Click(object sender, RoutedEventArgs e)
         {
             if (DataContext is not ServiceLogViewModel viewModel)
             {
@@ -72,7 +72,22 @@ namespace DesktopApplicationTemplate.UI.Views.Shared
                 return;
             }
 
-            viewModel.ExportLogs(selectedPath);
+            if (sender is Button button)
+            {
+                button.IsEnabled = false;
+                try
+                {
+                    await viewModel.ExportLogsAsync(selectedPath);
+                }
+                finally
+                {
+                    button.IsEnabled = true;
+                }
+            }
+            else
+            {
+                await viewModel.ExportLogsAsync(selectedPath);
+            }
         }
 
         private static string SanitizeFileName(string name)

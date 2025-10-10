@@ -1100,40 +1100,36 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             _logger?.Log("Logs cleared", LogLevel.Debug);
         }
 
-        public void ExportDisplayedLogs(string filePath)
+        public async Task ExportDisplayedLogsAsync(string filePath)
         {
-            LogViewModel.ExportLogs(filePath);
+            await LogViewModel.ExportLogsAsync(filePath);
             _logger?.Log($"Exported {LogViewModel.DisplayLogs.Count()} logs to {filePath}", LogLevel.Debug);
         }
 
-        public bool TryExportAllLogs(string filePath, out string? errorMessage)
+        public async Task<(bool Success, string? ErrorMessage)> TryExportAllLogsAsync(string filePath)
         {
             if (string.IsNullOrWhiteSpace(filePath))
             {
-                errorMessage = "A valid file path was not provided.";
                 _logger?.Log("Export aborted because the destination file path was empty.", LogLevel.Warning);
-                return false;
+                return (false, "A valid file path was not provided.");
             }
 
             try
             {
                 var lines = AllLogs.Reverse().Select(entry => entry.Message).ToList();
-                File.WriteAllLines(filePath, lines);
+                await File.WriteAllLinesAsync(filePath, lines);
                 _logger?.Log($"Exported {lines.Count} total logs to {filePath}", LogLevel.Information);
-                errorMessage = null;
-                return true;
+                return (true, null);
             }
             catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
             {
-                errorMessage = ex.Message;
                 _logger?.Log($"Failed to export logs to {filePath}: {ex.Message}", LogLevel.Error);
-                return false;
+                return (false, ex.Message);
             }
             catch (Exception ex)
             {
-                errorMessage = ex.Message;
                 _logger?.Log($"Failed to export logs to {filePath}: {ex.Message}", LogLevel.Error);
-                return false;
+                return (false, ex.Message);
             }
         }
 

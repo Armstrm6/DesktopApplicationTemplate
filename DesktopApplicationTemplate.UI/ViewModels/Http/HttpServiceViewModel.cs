@@ -138,6 +138,8 @@ public class HttpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel
 
         private readonly SaveConfirmationHelper _saveHelper;
         private readonly IHttpClientService _httpClientService;
+        private bool _isExportingLogs;
+        private readonly AsyncRelayCommand _exportLogCommand;
 
         public HttpServiceViewModel(SaveConfirmationHelper saveHelper, IHttpClientService httpClientService)
         {
@@ -152,7 +154,8 @@ public class HttpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel
             });
             SaveCommand = new AsyncRelayCommand(SaveAsync);
             RefreshLogCommand = new RelayCommand(() => OnPropertyChanged(nameof(DisplayLogs)));
-            ExportLogCommand = new RelayCommand(ExportLogs);
+            _exportLogCommand = new AsyncRelayCommand(ExportLogsAsync, () => !_isExportingLogs);
+            ExportLogCommand = _exportLogCommand;
             ClearLogCommand = new RelayCommand(ClearLogs);
         }
 
@@ -227,11 +230,33 @@ public class HttpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel
             Logger?.Log("HTTP logs cleared", LogLevel.Debug);
         }
 
-        private void ExportLogs()
+        private async Task ExportLogsAsync()
         {
+            if (_isExportingLogs)
+            {
+                return;
+            }
+
+            _isExportingLogs = true;
+            _exportLogCommand.RaiseCanExecuteChanged();
+
             var path = Path.Combine(Path.GetTempPath(), "http_logs.txt");
-            File.WriteAllLines(path, DisplayLogs.Select(l => l.Message));
-            Logger?.Log($"HTTP logs exported to {path}", LogLevel.Debug);
+
+            try
+            {
+                var lines = DisplayLogs.Select(l => l.Message).ToList();
+                await File.WriteAllLinesAsync(path, lines);
+                Logger?.Log($"HTTP logs exported to {path}", LogLevel.Debug);
+            }
+            catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+            {
+                Logger?.Log($"Failed to export HTTP logs to {path}: {ex.Message}", LogLevel.Error);
+            }
+            finally
+            {
+                _isExportingLogs = false;
+                _exportLogCommand.RaiseCanExecuteChanged();
+            }
         }
 
         private void OnLogAdded(LogEntry entry) => Logs.Insert(0, entry);
