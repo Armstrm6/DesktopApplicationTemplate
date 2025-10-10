@@ -9,12 +9,12 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
-using System.Windows.Threading;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Csv;
 using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.UI.Helpers;
+using Microsoft.VisualStudio.Threading;
 
 namespace DesktopApplicationTemplate.UI.ViewModels.Csv
 {
@@ -28,11 +28,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Csv
         private readonly HashSet<string> _suggestionSet = new(StringComparer.OrdinalIgnoreCase);
         private readonly RelayCommand _addColumnCommand;
         private readonly RelayCommand _removeColumnCommand;
-        private readonly RelayCommand _saveCommand;
+        private readonly AsyncRelayCommand _saveCommand;
         private readonly RelayCommand _browseCommand;
 #if DEBUG
-        private readonly RelayCommand _debugSaveCommand;
+        private readonly AsyncRelayCommand _debugSaveCommand;
 #endif
+        private readonly JoinableTaskFactory? _joinableTaskFactory;
         private ObservableCollection<CsvColumnDefinition>? _observableColumns;
         private CsvColumnDefinition? _selectedColumn;
         private bool _isBusy;
@@ -84,20 +85,25 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Csv
 
         public event Action? RequestClose;
 
-        public CsvServiceViewModel(IFileDialogService fileDialog, IMessageRoutingService routingService, string? configPath = null)
+        public CsvServiceViewModel(
+            IFileDialogService fileDialog,
+            IMessageRoutingService routingService,
+            string? configPath = null,
+            JoinableTaskFactory? joinableTaskFactory = null)
         {
             _fileDialog = fileDialog ?? throw new ArgumentNullException(nameof(fileDialog));
             _routingService = routingService ?? throw new ArgumentNullException(nameof(routingService));
             _configPath = configPath ?? "csv_config.json";
+            _joinableTaskFactory = joinableTaskFactory ?? App.UiThreadTaskFactory;
             AttributeSuggestions = new ReadOnlyObservableCollection<string>(_attributeSuggestions);
             ValidationMessages = new ReadOnlyObservableCollection<string>(_validationMessages);
             _routingService.AttributeChanged += OnRoutingAttributeChanged;
             _addColumnCommand = new RelayCommand(AddColumn, () => !IsBusy);
             _removeColumnCommand = new RelayCommand(RemoveSelectedColumn, () => SelectedColumn != null && !IsBusy);
-            _saveCommand = new RelayCommand(ExecuteSaveAsync, () => !IsBusy);
+            _saveCommand = new AsyncRelayCommand(ExecuteSaveAsync, () => !IsBusy);
             _browseCommand = new RelayCommand(BrowseDirectory, () => !IsBusy);
 #if DEBUG
-            _debugSaveCommand = new RelayCommand(ExecuteSaveAsync, () => !IsBusy);
+            _debugSaveCommand = new AsyncRelayCommand(ExecuteSaveAsync, () => !IsBusy);
 #endif
             AddColumnCommand = _addColumnCommand;
             RemoveColumnCommand = _removeColumnCommand;
@@ -107,7 +113,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Csv
 #if DEBUG
             DebugSaveCommand = _debugSaveCommand;
 #endif
-            InitializeAsync().GetAwaiter().GetResult();
+            ObserveTask(InitializeAsync());
         }
 
         private async Task InitializeAsync()
@@ -128,12 +134,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Csv
             }
         }
 
-        public void Save()
+        public async Task Save()
         {
-            ExecuteSaveAsync();
+            await ExecuteSaveAsync().ConfigureAwait(false);
         }
 
-        private async void ExecuteSaveAsync()
+        private async Task ExecuteSaveAsync()
         {
             if (Configuration is null || IsBusy)
             {
@@ -451,6 +457,18 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Csv
 #endif
         }
 
+        private static void ObserveTask(Task? task)
+        {
+            if (task is null)
+            {
+                return;
+            }
+
+            _ = task.ContinueWith(
+                t => _ = t.Exception,
+                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
+        }
+
         private static void RunOnUiThread(Action action)
         {
             if (action is null)
@@ -458,31 +476,47 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Csv
                 return;
             }
 
-            var dispatcher = Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher;
-            if (dispatcher.CheckAccess())
+            if (_joinableTaskFactory is { } factory)
             {
-                action();
+                if (factory.Context.IsOnMainThread)
+                {
+                    action();
+                    return;
+                }
+
+                factory.Run(async () =>
+                {
+                    await factory.SwitchToMainThreadAsync();
+                    action();
+                });
+                return;
             }
-            else
-            {
-                dispatcher.Invoke(action);
-            }
+
+            action();
         }
 
-        private static T RunOnUiThread<T>(Func<T> function)
+        private T RunOnUiThread<T>(Func<T> function)
         {
             if (function is null)
             {
                 return default!;
             }
 
-            var dispatcher = Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher;
-            if (dispatcher.CheckAccess())
+            if (_joinableTaskFactory is { } factory)
             {
-                return function();
+                if (factory.Context.IsOnMainThread)
+                {
+                    return function();
+                }
+
+                return factory.Run(async () =>
+                {
+                    await factory.SwitchToMainThreadAsync();
+                    return function();
+                });
             }
 
-            return dispatcher.Invoke(function);
+            return function();
         }
     }
 }

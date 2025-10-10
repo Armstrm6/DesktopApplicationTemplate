@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Csv;
 using DesktopApplicationTemplate.UI.ViewModels.Csv;
@@ -43,12 +44,12 @@ public class CsvServiceAdapter
         _csvService.EnsureColumnsForService(Configuration, serviceName);
     }
 
-    public void RemoveColumnsForService(string serviceName)
+    public async Task RemoveColumnsForServiceAsync(string serviceName)
     {
         var existingPath = GetCurrentFilePath();
         if (_csvService.RemoveColumnsForService(Configuration, _state, serviceName))
         {
-            _viewModel.Save();
+            await _viewModel.Save().ConfigureAwait(false);
             if (!string.IsNullOrWhiteSpace(existingPath))
             {
                 _output.DeleteFile(existingPath);

@@ -215,7 +215,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             ResetMessageCountsCommand = new AsyncRelayCommand(ResetMessageCountsAsync);
             FilteredServices = CollectionViewSource.GetDefaultView(Services);
             Filters.PropertyChanged += (_, __) => ApplyFilters();
-            LoadServices();
+            ObserveTask(LoadServicesAsync());
             foreach (var service in Services)
             {
                 TrackService(service);
@@ -377,7 +377,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             target.AddLog("Service removed", WpfBrushes.Red);
             if (target.Type != ServiceType.Csv)
             {
-                _csvService.RemoveColumnsForService(target.DisplayName);
+                await _csvService.RemoveColumnsForServiceAsync(target.DisplayName).ConfigureAwait(false);
             }
 
             RemoveServiceAssociations(target);
@@ -488,7 +488,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             ApplyFilters();
             if (_logger is LoggingService concreteLogger)
             {
-                concreteLogger.Reload();
+                await concreteLogger.ReloadAsync().ConfigureAwait(true);
             }
         }
 
@@ -1148,7 +1148,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
             _ = task.ContinueWith(
                 t => _ = t.Exception,
-                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
+                CancellationToken.None,
+                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
         }
 
         // OnPropertyChanged inherited from ViewModelBase

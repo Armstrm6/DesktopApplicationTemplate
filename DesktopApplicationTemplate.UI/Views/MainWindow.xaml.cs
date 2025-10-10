@@ -1115,7 +1115,9 @@ namespace DesktopApplicationTemplate.UI.Views
 
             _ = task.ContinueWith(
                 t => _ = t.Exception,
-                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
+                System.Threading.CancellationToken.None,
+                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
         }
 
     }
