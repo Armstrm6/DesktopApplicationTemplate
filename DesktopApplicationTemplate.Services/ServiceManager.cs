@@ -89,29 +89,45 @@ public sealed class ServiceManager<TService, TPage> : IDisposable
         Log($"Starting runtime for descriptor '{context.DescriptorId}'.", LogLevel.Information);
 
         var runtime = _runtimeFactory.Create(context);
+        var startupSucceeded = false;
 
-        if (!_runtimeContexts.TryAdd(runtime, context))
+        try
         {
-            _runtimeContexts[runtime] = context;
-        }
+            if (!_runtimeContexts.TryAdd(runtime, context))
+            {
+                _runtimeContexts[runtime] = context;
+            }
 
-        if (runtime is IProtocolService protocolService)
+            if (runtime is IProtocolService protocolService)
+            {
+                await NotifyLifecycleAsync(protocolService, o => o.OnStartingAsync(protocolService, cancellationToken), "starting").ConfigureAwait(false);
+                await PublishLifecycleEventAsync(context, protocolService, ProtocolLifecycleStage.Starting, cancellationToken).ConfigureAwait(false);
+            }
+
+            await runtime.StartAsync(cancellationToken).ConfigureAwait(false);
+
+            if (runtime is IProtocolService startedProtocol)
+            {
+                await NotifyLifecycleAsync(startedProtocol, o => o.OnStartedAsync(startedProtocol, cancellationToken), "started").ConfigureAwait(false);
+                await PublishLifecycleEventAsync(context, startedProtocol, ProtocolLifecycleStage.Started, cancellationToken).ConfigureAwait(false);
+            }
+
+            startupSucceeded = true;
+            return runtime;
+        }
+        catch
         {
-            await NotifyLifecycleAsync(protocolService, o => o.OnStartingAsync(protocolService, cancellationToken), "starting").ConfigureAwait(false);
-            await PublishLifecycleEventAsync(context, protocolService, ProtocolLifecycleStage.Starting, cancellationToken).ConfigureAwait(false);
+            _runtimeContexts.TryRemove(runtime, out _);
+            await TryStopAndDisposeRuntimeAsync(runtime, context, cancellationToken).ConfigureAwait(false);
+            throw;
         }
-
-        await runtime.StartAsync(cancellationToken).ConfigureAwait(false);
-
-        if (runtime is IProtocolService startedProtocol)
+        finally
         {
-            await NotifyLifecycleAsync(startedProtocol, o => o.OnStartedAsync(startedProtocol, cancellationToken), "started").ConfigureAwait(false);
-            await PublishLifecycleEventAsync(context, startedProtocol, ProtocolLifecycleStage.Started, cancellationToken).ConfigureAwait(false);
+            if (startupSucceeded)
+            {
+                Log($"Runtime for descriptor '{context.DescriptorId}' started.", LogLevel.Debug);
+            }
         }
-
-        Log($"Runtime for descriptor '{context.DescriptorId}' started.", LogLevel.Debug);
-
-        return runtime;
     }
 
     /// <summary>
@@ -144,6 +160,27 @@ public sealed class ServiceManager<TService, TPage> : IDisposable
 
         var descriptorLabel = context?.DescriptorId ?? "unknown";
         Log($"Runtime for descriptor '{descriptorLabel}' stopped.", LogLevel.Debug);
+    }
+
+    private async Task TryStopAndDisposeRuntimeAsync(IServiceRuntime runtime, ServiceRuntimeContext context, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await runtime.StopAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            Log($"Failed to stop runtime for descriptor '{context.DescriptorId}' after startup failure: {ex.Message}", LogLevel.Warning);
+        }
+
+        try
+        {
+            await runtime.DisposeAsync().ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            Log($"Failed to dispose runtime for descriptor '{context.DescriptorId}' after startup failure: {ex.Message}", LogLevel.Warning);
+        }
     }
 
     private async Task NotifyLifecycleAsync(
