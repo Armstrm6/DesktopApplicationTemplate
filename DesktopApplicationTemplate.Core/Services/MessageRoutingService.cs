@@ -241,11 +241,11 @@ public class MessageRoutingService : IMessageRoutingService
         }
 
         var hasTyped = notifications.Any(n => n.ServiceType.HasValue);
-        foreach (var (type, previous) in notifications)
+        foreach (var (type, previousValue) in notifications)
         {
             if (!hasTyped || type.HasValue)
             {
-                OnAttributeChanged(type, normalizedName, normalizedAttribute, null, previous, isRemoval: true);
+                OnAttributeChanged(type, normalizedName, normalizedAttribute, null, previousValue, isRemoval: true);
             }
         }
     }
