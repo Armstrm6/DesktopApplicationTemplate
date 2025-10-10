@@ -56,6 +56,7 @@ public class FileObserverEditServiceHandler : IEditServiceHandler
             }
 
             service.DisplayName = trimmed;
+            mainViewModel.RefreshRoutingAttributes(service);
             service.SetOptions(opts);
             if (foPage != null)
                 mainView.ShowPage(foPage);

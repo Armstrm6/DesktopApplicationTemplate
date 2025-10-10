@@ -354,6 +354,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
             _logger?.Log($"Removing service {target.DisplayName}", LogLevel.Debug);
             ClearRoutingCache(target.Type, target.DisplayName);
+            target.ClearRoutingAttributes();
             var index = Services.IndexOf(target);
             target.AddLog("Service removed", WpfBrushes.Red);
             if (target.Type != ServiceType.Csv)
@@ -403,6 +404,16 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             _messageRoutingService.ClearService(serviceType, serviceName);
         }
 
+        internal void AttachRouting(ServiceListModel? service)
+        {
+            service?.AttachRoutingService(_messageRoutingService);
+        }
+
+        internal void RefreshRoutingAttributes(ServiceListModel? service)
+        {
+            service?.RefreshRoutingAttributes();
+        }
+
         public async Task SaveServicesAsync()
         {
             // Update order prior to saving
@@ -438,6 +449,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
                 ClearRoutingCache(service.Type, normalizedName);
                 service.DisplayName = normalizedName;
+                AttachRouting(service);
 
                 ApplyPresentationMetadata(service);
                 service.LogAdded += OnServiceLogAdded;

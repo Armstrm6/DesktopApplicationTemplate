@@ -55,6 +55,7 @@ public class HidEditServiceHandler : IEditServiceHandler
             }
 
             service.DisplayName = trimmed;
+            mainViewModel.RefreshRoutingAttributes(service);
             service.SetOptions(opts);
             if (hidPage != null)
                 mainView.ShowPage(hidPage);

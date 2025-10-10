@@ -39,6 +39,13 @@ namespace DesktopApplicationTemplate.UI.ViewModels
     {
         internal const int MaxLogEntries = 200;
 
+        private const string InputMessageAttributeName = "InputMessage";
+        private const string OutputMessageAttributeName = "OutputMessage";
+        private const string IncomingMessageCountAttributeName = "IncomingMessageCount";
+        private const string OutgoingMessageCountAttributeName = "OutgoingMessageCount";
+        private const string RuntimeStateAttributeName = "RuntimeState";
+        private const string IsActiveAttributeName = "IsActive";
+
         private string _displayName = string.Empty;
         public string DisplayName
         {
@@ -50,9 +57,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     return;
                 }
 
+                var previousName = _displayName;
                 _displayName = value ?? string.Empty;
                 OnPropertyChanged();
                 RefreshLogMetadata();
+                HandleServiceIdentityChange(_type, previousName);
             }
         }
 
@@ -67,9 +76,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     return;
                 }
 
+                var previousType = _type;
                 _type = value;
                 OnPropertyChanged();
                 RefreshLogMetadata();
+                HandleServiceIdentityChange(previousType, _displayName);
             }
         }
 
@@ -90,6 +101,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         }
         [JsonIgnore] public Page? Page { get; set; }
         public int Order { get; set; }
+
+        private IMessageRoutingService? _routingService;
+        private readonly Dictionary<string, string> _routingAttributes = new(StringComparer.OrdinalIgnoreCase);
 
         private WpfBrush _backgroundColor = WpfBrushes.LightGray;
         public WpfBrush BackgroundColor
@@ -161,6 +175,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             {
                 ServiceRegistry.Add(this);
             }
+
+            EnsureBuiltInRoutingAttributes();
         }
 
         private readonly LinkedList<ServiceMessageHistoryEntry> _messageHistory = new();
@@ -219,6 +235,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
                 _incomingMessageCount = value;
                 OnPropertyChanged();
+                PublishRoutingAttribute(IncomingMessageCountAttributeName, value.ToString(CultureInfo.InvariantCulture));
             }
         }
 
@@ -234,6 +251,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
                 _outgoingMessageCount = value;
                 OnPropertyChanged();
+                PublishRoutingAttribute(OutgoingMessageCountAttributeName, value.ToString(CultureInfo.InvariantCulture));
             }
         }
 
@@ -278,6 +296,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
                 _inputMessage = value;
                 OnPropertyChanged();
+                PublishRoutingAttribute(InputMessageAttributeName, _inputMessage);
             }
         }
 
@@ -296,6 +315,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
                 _outputMessage = value;
                 OnPropertyChanged();
+                PublishRoutingAttribute(OutputMessageAttributeName, _outputMessage);
             }
         }
 
@@ -804,6 +824,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                         AddLog("[Service Deactivated]", WpfBrushes.Red);
                     }
                     ActiveChanged?.Invoke(_isActive);
+                    PublishRoutingAttribute(IsActiveAttributeName, _isActive ? bool.TrueString : bool.FalseString);
                 }
             }
         }
@@ -821,6 +842,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             {
                 SetRuntimeState(ServiceRuntimeState.Inactive);
             }
+
+            PublishRoutingAttribute(IsActiveAttributeName, _isActive ? bool.TrueString : bool.FalseString);
 
             if (stateChanged && notify)
             {
@@ -844,6 +867,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 {
                     _runtimeState = value;
                     OnPropertyChanged();
+                    PublishRoutingAttribute(RuntimeStateAttributeName, _runtimeState.ToString());
                 }
             }
         }
@@ -1381,6 +1405,150 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
 
             return fallback;
+        }
+
+        internal void AttachRoutingService(IMessageRoutingService routingService)
+        {
+            if (routingService is null)
+            {
+                throw new ArgumentNullException(nameof(routingService));
+            }
+
+            if (ReferenceEquals(_routingService, routingService))
+            {
+                RefreshRoutingAttributes();
+                return;
+            }
+
+            _routingService = routingService;
+            RefreshRoutingAttributes();
+        }
+
+        internal void RefreshRoutingAttributes()
+        {
+            if (_routingService is null)
+            {
+                return;
+            }
+
+            EnsureBuiltInRoutingAttributes();
+
+            foreach (var pair in _routingAttributes)
+            {
+                _routingService.PublishAttribute(Type, DisplayName, pair.Key, pair.Value ?? string.Empty);
+            }
+        }
+
+        internal IReadOnlyDictionary<string, string> GetRoutingAttributesSnapshot()
+        {
+            return new Dictionary<string, string>(_routingAttributes, StringComparer.OrdinalIgnoreCase);
+        }
+
+        internal void LoadRoutingAttributes(IEnumerable<KeyValuePair<string, string?>>? attributes)
+        {
+            _routingAttributes.Clear();
+
+            if (attributes is not null)
+            {
+                foreach (var pair in attributes)
+                {
+                    if (string.IsNullOrWhiteSpace(pair.Key))
+                    {
+                        continue;
+                    }
+
+                    _routingAttributes[pair.Key.Trim()] = pair.Value ?? string.Empty;
+                }
+            }
+
+            EnsureBuiltInRoutingAttributes();
+        }
+
+        internal void ClearRoutingAttributes()
+        {
+            _routingAttributes.Clear();
+        }
+
+        public void PublishCustomRoutingAttribute(string attributeName, string? value)
+        {
+            if (string.IsNullOrWhiteSpace(attributeName))
+            {
+                return;
+            }
+
+            if (value is null)
+            {
+                ClearRoutingAttribute(attributeName);
+                return;
+            }
+
+            PublishRoutingAttribute(attributeName, value);
+        }
+
+        public void PublishCustomRoutingAttributes(IEnumerable<KeyValuePair<string, string?>> attributes)
+        {
+            if (attributes is null)
+            {
+                return;
+            }
+
+            foreach (var pair in attributes)
+            {
+                PublishCustomRoutingAttribute(pair.Key, pair.Value);
+            }
+        }
+
+        private void HandleServiceIdentityChange(ServiceType previousType, string previousName)
+        {
+            if (_routingService is null)
+            {
+                return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(previousName) &&
+                (!string.Equals(previousName, _displayName, StringComparison.OrdinalIgnoreCase) || previousType != _type))
+            {
+                _routingService.ClearService(previousType, previousName);
+            }
+
+            RefreshRoutingAttributes();
+        }
+
+        private void PublishRoutingAttribute(string attributeName, string value)
+        {
+            if (string.IsNullOrWhiteSpace(attributeName))
+            {
+                return;
+            }
+
+            var normalized = attributeName.Trim();
+            var payload = value ?? string.Empty;
+            _routingAttributes[normalized] = payload;
+
+            _routingService?.PublishAttribute(Type, DisplayName, normalized, payload);
+        }
+
+        private void ClearRoutingAttribute(string attributeName)
+        {
+            if (string.IsNullOrWhiteSpace(attributeName))
+            {
+                return;
+            }
+
+            var normalized = attributeName.Trim();
+            _routingAttributes.Remove(normalized);
+
+            _routingService?.ClearAttribute(Type, DisplayName, normalized);
+        }
+
+        private void EnsureBuiltInRoutingAttributes()
+        {
+            _routingAttributes[InputMessageAttributeName] = _inputMessage ?? string.Empty;
+            _routingAttributes[OutputMessageAttributeName] = _outputMessage ?? string.Empty;
+            _routingAttributes[IncomingMessageCountAttributeName] = _incomingMessageCount.ToString(CultureInfo.InvariantCulture);
+            _routingAttributes[OutgoingMessageCountAttributeName] = _outgoingMessageCount.ToString(CultureInfo.InvariantCulture);
+            _routingAttributes[RuntimeStateAttributeName] = _runtimeState.ToString();
+            _routingAttributes[IsActiveAttributeName] = _isActive ? bool.TrueString : bool.FalseString;
         }
 
         public void ApplyPresentation(ServicePresentationMetadata metadata)

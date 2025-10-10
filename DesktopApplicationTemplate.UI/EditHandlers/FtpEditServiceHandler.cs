@@ -55,6 +55,7 @@ public class FtpEditServiceHandler : IEditServiceHandler
             }
 
             service.DisplayName = trimmed;
+            mainViewModel.RefreshRoutingAttributes(service);
             service.SetOptions(opts);
             if (ftpPage != null)
                 mainView.ShowPage(ftpPage);

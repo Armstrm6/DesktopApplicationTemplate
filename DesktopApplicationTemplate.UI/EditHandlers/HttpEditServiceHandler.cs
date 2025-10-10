@@ -56,6 +56,7 @@ public class HttpEditServiceHandler : IEditServiceHandler
             }
 
             service.DisplayName = trimmed;
+            mainViewModel.RefreshRoutingAttributes(service);
             service.SetOptions(opts);
             if (httpPage != null)
                 mainView.ShowPage(httpPage);

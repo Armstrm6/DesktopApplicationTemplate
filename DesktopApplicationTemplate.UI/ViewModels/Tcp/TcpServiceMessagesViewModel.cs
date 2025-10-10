@@ -126,6 +126,13 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
         public event EventHandler? AdvancedSettingsRequested;
 
         private readonly IMessageRoutingService _routing;
+        private const string ListenEndpointAttributeName = "Tcp.ListenEndpoint";
+        private const string ReceiveEndpointAttributeName = "Tcp.ClientReceiveEndpoint";
+        private const string SendEndpointAttributeName = "Tcp.ClientSendEndpoint";
+        private const string DestinationEndpointAttributeName = "Tcp.DestinationEndpoint";
+        private const string ProtocolAttributeName = "Tcp.Protocol";
+        private const string ModeAttributeName = "Tcp.Mode";
+        private const string ConnectionRoleAttributeName = "Tcp.ConnectionRole";
         private TcpServiceOptions _options = new();
         private TcpRuntimeContext? _runtimeContext;
         private const int MaxTcpMessageRows = 50;
@@ -309,6 +316,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             OnPropertyChanged(nameof(OutgoingResults));
             OnPropertyChanged(nameof(InputMessage));
             OnPropertyChanged(nameof(OutputMessage));
+            PublishTcpAttributesFromConfiguration();
             _ = InitializeRuntimeAsync();
             if (_service.IsActive)
             {
@@ -438,6 +446,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             OnPropertyChanged(nameof(ServerGateway));
             OnPropertyChanged(nameof(ServerPort));
             OnPropertyChanged(nameof(IsUdp));
+            PublishTcpAttributesFromConfiguration();
         }
 
         private void OnServiceActiveChanged(bool isActive)
@@ -452,9 +461,54 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
             }
         }
 
+        private void PublishTcpAttributesFromConfiguration()
+        {
+            if (_service is null)
+            {
+                return;
+            }
+
+            var hasListener = ShouldStartServerListener() &&
+                               _options.Port > 0 &&
+                               !string.IsNullOrWhiteSpace(_options.Host);
+
+            var hasReceiver = TryGetClientReceiveEndpoint(out var receiveEndpoint, logWhenMissing: false);
+            var hasSender = TryGetClientSendEndpoint(out var sendEndpoint, logWhenMissing: false);
+
+            var attributes = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
+            {
+                [ProtocolAttributeName] = _options.UseUdp ? "UDP" : "TCP",
+                [ModeAttributeName] = _options.Mode.ToString(),
+                [ConnectionRoleAttributeName] = _options.ConnectionRole.ToString(),
+                [DestinationEndpointAttributeName] = FormatEndpoint(ResolveDestinationHost(), ResolveDestinationPort(), _options.UseUdp),
+                [ListenEndpointAttributeName] = hasListener ? FormatEndpoint(_options.Host, _options.Port, _options.UseUdp) : null,
+                [ReceiveEndpointAttributeName] = hasReceiver && receiveEndpoint is { } receive ? FormatEndpoint(receive, _options.UseUdp) : null,
+                [SendEndpointAttributeName] = hasSender && sendEndpoint is { } send ? FormatEndpoint(send, _options.UseUdp) : null,
+            };
+
+            _service.PublishCustomRoutingAttributes(attributes);
+        }
+
+        private static string? FormatEndpoint(string? host, int? port, bool useUdp)
+        {
+            if (string.IsNullOrWhiteSpace(host) || port is null || port.Value <= 0)
+            {
+                return null;
+            }
+
+            var scheme = useUdp ? "udp" : "tcp";
+            return $"{scheme}://{host}:{port.Value}";
+        }
+
+        private static string? FormatEndpoint(TcpEndpoint endpoint, bool useUdp)
+        {
+            return FormatEndpoint(endpoint.Host, endpoint.Port, useUdp);
+        }
+
         private async Task StartNetworkAsync()
         {
             StopNetwork();
+            PublishTcpAttributesFromConfiguration();
 
             var hasListener = ShouldStartServerListener();
             if (hasListener && _options.Port <= 0)
@@ -564,6 +618,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
 
             Logger?.Log("TCP network loop stopped", LogLevel.Debug);
             _ = RestoreTestMessageAsync();
+            PublishTcpAttributesFromConfiguration();
         }
 
         private bool ShouldStartServerListener()

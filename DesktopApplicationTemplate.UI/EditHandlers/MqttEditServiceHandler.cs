@@ -54,6 +54,7 @@ public class MqttEditServiceHandler : IEditServiceHandler
             }
 
             service.DisplayName = trimmed;
+            mainViewModel.RefreshRoutingAttributes(service);
             if (tagPage != null)
                 mainView.ShowPage(tagPage);
             _ = mainViewModel.SaveServicesAsync();

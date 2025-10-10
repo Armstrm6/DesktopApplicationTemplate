@@ -56,6 +56,7 @@ public class ScpEditServiceHandler : IEditServiceHandler
             }
 
             service.DisplayName = trimmed;
+            mainViewModel.RefreshRoutingAttributes(service);
             service.SetOptions(opts);
             if (scpPage != null)
                 mainView.ShowPage(scpPage);
