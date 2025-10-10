@@ -22,6 +22,9 @@ namespace DesktopApplicationTemplate.UI.Models
 
         /// <summary>Gets or sets the path for the default C# script.</summary>
         public string DefaultCSharpScriptPath { get; set; } = string.Empty;
+
+        /// <summary>Gets or sets the maximum number of aggregated logs to retain.</summary>
+        public int AggregatedLogRetention { get; set; } = 1000;
     }
 }
 

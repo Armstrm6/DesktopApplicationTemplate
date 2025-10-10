@@ -19,15 +19,18 @@ using DesktopApplicationTemplate.UI.ViewModels.Tcp;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.Core.Services.Protocols.Mqtt;
+using Microsoft.Extensions.Options;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
     public partial class MainViewModel : ViewModelBase
     {
+        private const int DefaultAggregatedLogCapacity = 1000;
+
         public ObservableCollection<ServiceListModel> Services { get; set; } = new();
         public ICollectionView FilteredServices { get; }
         public FilterViewModel Filters { get; } = new();
-        public ObservableCollection<LogEntry> AllLogs { get; } = new();
+        public LimitedObservableCollection<LogEntry> AllLogs { get; }
         private ServiceListModel? _selectedService;
         private ServiceListModel? _activeService;
         private bool _suppressActiveServiceReset;
@@ -56,7 +59,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
                 _activeService = value;
                 OnPropertyChanged();
-                LogViewModel.SetLogs(_activeService?.Logs ?? AllLogs, _activeService is null);
+                LogViewModel.SetLogs(
+                    _activeService?.Logs ?? AllLogs,
+                    _activeService is null,
+                    newestFirstInSource: _activeService is not null);
                 RefreshServiceCommandStates();
             }
         }
@@ -155,6 +161,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             IStartupPreferencesService startupPreferencesService,
             IMessageRoutingService messageRoutingService,
             ILoggingService? logger = null,
+            IOptions<AppSettings>? appOptions = null,
             string? servicesFilePath = null)
         {
             _csvService = csvService;
@@ -165,6 +172,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             NetworkConfig = networkConfig;
             _editHandlers = editHandlers;
             _startupPreferencesService = startupPreferencesService ?? throw new ArgumentNullException(nameof(startupPreferencesService));
+            var aggregatedLogCapacity = Math.Max(1, appOptions?.Value?.AggregatedLogRetention ?? DefaultAggregatedLogCapacity);
+            AllLogs = new LimitedObservableCollection<LogEntry>(aggregatedLogCapacity);
             ServiceListModel.OptionsSerializerResolver = ResolveOptionsSerializer;
             _ = NetworkConfig.LoadAsync();
             _networkService.ConfigurationChanged += (_, cfg) => ApplyNetworkConfiguration(cfg);
@@ -180,7 +189,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
             Services.CollectionChanged += OnServicesCollectionChanged;
 
-            LogViewModel = new ServiceLogViewModel(ServiceType.Mqtt, AllLogs, null, isAggregated: true);
+            LogViewModel = new ServiceLogViewModel(ServiceType.Mqtt, AllLogs, null, isAggregated: true, newestFirstInSource: false);
             LogViewModel.PropertyChanged += (s, e) =>
             {
                 if (e.PropertyName == nameof(ServiceLogViewModel.DisplayLogs))
@@ -457,7 +466,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
                 foreach (var log in service.Logs.Reverse())
                 {
-                    AllLogs.Insert(0, log);
+                    AllLogs.Add(log);
                 }
 
                 _logger?.Log($"Loaded service {service.DisplayName}", LogLevel.Debug);
@@ -731,7 +740,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
             entry.ServiceType ??= svc.Type;
 
-            AllLogs.Insert(0, entry);
+            AllLogs.Add(entry);
             if (svc.Type != ServiceType.Csv && Services.Any(s => s.Type == ServiceType.Csv))
             {
                 try
@@ -874,7 +883,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
             try
             {
-                var lines = AllLogs.Select(entry => entry.Message).ToList();
+                var lines = AllLogs.Reverse().Select(entry => entry.Message).ToList();
                 File.WriteAllLines(filePath, lines);
                 _logger?.Log($"Exported {lines.Count} total logs to {filePath}", LogLevel.Information);
                 errorMessage = null;
