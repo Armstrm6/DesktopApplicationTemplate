@@ -63,18 +63,26 @@ public static class MessageRoutingScriptTransformer
             }
 
             var visited = (MemberAccessExpressionSyntax?)base.VisitMemberAccessExpression(node);
-            if (visited?.Expression is not IdentifierNameSyntax identifier)
+            if (visited?.Expression is not IdentifierNameSyntax identifier ||
+                visited.Name is not IdentifierNameSyntax attributeNode)
             {
                 return visited;
             }
 
-            if (!TryGetDirection(visited.Name.Identifier.ValueText, out var direction))
-            {
-                return visited;
-            }
+            var attributeToken = attributeNode.Identifier.ValueText;
+            var normalizedAttribute = MessageRoutingAttributeHelper.Normalize(attributeToken, out var direction);
 
-            _references.Add(new MessageRoutingReference(identifier.Identifier.ValueText, direction));
-            if (!_routingService.TryGetMessage(identifier.Identifier.ValueText, direction, out var message) || message is null)
+            _references.Add(new MessageRoutingReference(identifier.Identifier.ValueText, normalizedAttribute, direction));
+
+            string? message;
+            if (direction.HasValue)
+            {
+                if (!_routingService.TryGetMessage(identifier.Identifier.ValueText, direction.Value, out message) || message is null)
+                {
+                    message = string.Empty;
+                }
+            }
+            else if (!_routingService.TryGetAttribute(identifier.Identifier.ValueText, normalizedAttribute, out message) || message is null)
             {
                 message = string.Empty;
             }
@@ -82,26 +90,6 @@ public static class MessageRoutingScriptTransformer
             return SyntaxFactory.LiteralExpression(
                 SyntaxKind.StringLiteralExpression,
                 SyntaxFactory.Literal(message));
-        }
-
-        private static bool TryGetDirection(string identifier, out MessageRoutingDirection direction)
-        {
-            if (string.Equals(identifier, "InputMessage", StringComparison.Ordinal) ||
-                string.Equals(identifier, "LastInputMessage", StringComparison.Ordinal))
-            {
-                direction = MessageRoutingDirection.Input;
-                return true;
-            }
-
-            if (string.Equals(identifier, "OutputMessage", StringComparison.Ordinal) ||
-                string.Equals(identifier, "LastOutputMessage", StringComparison.Ordinal))
-            {
-                direction = MessageRoutingDirection.Output;
-                return true;
-            }
-
-            direction = MessageRoutingDirection.Input;
-            return false;
         }
     }
 }

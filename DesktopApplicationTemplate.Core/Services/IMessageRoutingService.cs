@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using DesktopApplicationTemplate.Models;
 
@@ -8,6 +9,11 @@ namespace DesktopApplicationTemplate.Core.Services;
 /// </summary>
 public interface IMessageRoutingService
 {
+    /// <summary>
+    /// Raised when a routed service attribute changes.
+    /// </summary>
+    event EventHandler<ServiceAttributeChangedEventArgs>? AttributeChanged;
+
     /// <summary>
     /// Updates the latest message for the specified service.
     /// </summary>
@@ -33,6 +39,57 @@ public interface IMessageRoutingService
     /// <param name="message">The resolved message, if available.</param>
     /// <returns><c>true</c> when a message is available; otherwise, <c>false</c>.</returns>
     bool TryGetMessage(string serviceName, MessageRoutingDirection direction, out string? message);
+
+    /// <summary>
+    /// Publishes or updates an attribute value for the specified service.
+    /// </summary>
+    /// <param name="serviceType">The category of the service.</param>
+    /// <param name="serviceName">The unique name of the service.</param>
+    /// <param name="attributeName">The attribute to publish.</param>
+    /// <param name="value">The attribute value.</param>
+    void PublishAttribute(ServiceType serviceType, string serviceName, string attributeName, string? value);
+
+    /// <summary>
+    /// Publishes or updates an attribute value for the specified service without requiring a service type.
+    /// </summary>
+    /// <param name="serviceName">The unique name of the service.</param>
+    /// <param name="attributeName">The attribute to publish.</param>
+    /// <param name="value">The attribute value.</param>
+    void PublishAttribute(string serviceName, string attributeName, string? value);
+
+    /// <summary>
+    /// Attempts to retrieve the value of a named attribute for the specified service.
+    /// </summary>
+    /// <param name="serviceType">The category of the service.</param>
+    /// <param name="serviceName">The unique name of the service.</param>
+    /// <param name="attributeName">The attribute to resolve.</param>
+    /// <param name="value">When found, the attribute value.</param>
+    /// <returns><c>true</c> when the attribute exists; otherwise, <c>false</c>.</returns>
+    bool TryGetAttribute(ServiceType serviceType, string serviceName, string attributeName, out string? value);
+
+    /// <summary>
+    /// Attempts to retrieve the value of a named attribute for the specified service without requiring a service type.
+    /// </summary>
+    /// <param name="serviceName">The unique name of the service.</param>
+    /// <param name="attributeName">The attribute to resolve.</param>
+    /// <param name="value">When found, the attribute value.</param>
+    /// <returns><c>true</c> when the attribute exists; otherwise, <c>false</c>.</returns>
+    bool TryGetAttribute(string serviceName, string attributeName, out string? value);
+
+    /// <summary>
+    /// Clears a published attribute for the specified service.
+    /// </summary>
+    /// <param name="serviceType">The category of the service.</param>
+    /// <param name="serviceName">The unique name of the service.</param>
+    /// <param name="attributeName">The attribute to clear.</param>
+    void ClearAttribute(ServiceType serviceType, string serviceName, string attributeName);
+
+    /// <summary>
+    /// Clears a published attribute for the specified service without requiring a service type.
+    /// </summary>
+    /// <param name="serviceName">The unique name of the service.</param>
+    /// <param name="attributeName">The attribute to clear.</param>
+    void ClearAttribute(string serviceName, string attributeName);
 
     /// <summary>
     /// Clears cached messages and dependency metadata for the specified service.
@@ -78,5 +135,40 @@ public interface IMessageRoutingService
 /// Describes a routed message dependency from one service to another.
 /// </summary>
 /// <param name="ServiceName">The referenced service name.</param>
-/// <param name="Direction">The message direction requested from the referenced service.</param>
-public readonly record struct MessageRoutingReference(string ServiceName, MessageRoutingDirection Direction);
+/// <param name="AttributeName">The attribute requested from the referenced service.</param>
+/// <param name="Direction">The message direction associated with <paramref name="AttributeName"/>, when applicable.</param>
+public readonly record struct MessageRoutingReference(string ServiceName, string AttributeName, MessageRoutingDirection? Direction = null);
+
+/// <summary>
+/// Provides event data describing a routed service attribute change.
+/// </summary>
+public sealed class ServiceAttributeChangedEventArgs : EventArgs
+{
+    public ServiceAttributeChangedEventArgs(ServiceType? serviceType, string serviceName, string attributeName, string? value, string? previousValue, bool isRemoval)
+    {
+        ServiceType = serviceType;
+        ServiceName = serviceName;
+        AttributeName = attributeName;
+        Value = value;
+        PreviousValue = previousValue;
+        IsRemoval = isRemoval;
+    }
+
+    /// <summary>The category of the service that owns the attribute, when known.</summary>
+    public ServiceType? ServiceType { get; }
+
+    /// <summary>Gets the unique service name.</summary>
+    public string ServiceName { get; }
+
+    /// <summary>Gets the attribute name.</summary>
+    public string AttributeName { get; }
+
+    /// <summary>Gets the new attribute value, or <c>null</c> when cleared.</summary>
+    public string? Value { get; }
+
+    /// <summary>Gets the previous attribute value before the change.</summary>
+    public string? PreviousValue { get; }
+
+    /// <summary>Indicates whether the attribute was removed.</summary>
+    public bool IsRemoval { get; }
+}
