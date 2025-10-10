@@ -536,10 +536,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public ObservableCollection<LogEntry> Logs => LogState.Logs;
 
-        public event Action<bool>? ActiveChanged;
-
-        public event Action<ServiceListModel, LogEntry>? LogAdded;
-
         public void AddLog(string message, WpfBrush? color = null, LogLevel level = LogLevel.Debug, bool checkReference = true)
         {
             var brush = color ?? WpfBrushes.Black;
