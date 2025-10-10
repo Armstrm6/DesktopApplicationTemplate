@@ -33,6 +33,7 @@ All properties use PascalCase to match the serialized `PersistedServiceRecord` m
 2. **`ServiceType`** – Canonical short code emitted by `ServiceTypeJsonConverter` (for example, `"HT"` for `Http`). The value is kept in sync with the descriptor metadata and persisted alongside the identifier for quick filtering.
 3. **Service-specific options** – Built-in services write their strongly-typed options (`HttpOptions`, `TcpOptions`, and so on). Plug-ins should continue to expose serializers that hydrate their view models from the stored JSON payload.
 4. **State metadata** – `DisplayName`, `IsActive`, `Created`, `Order`, `AssociatedServices`, `TotalExecutionTimeMs`, and `ExecutionCount` mirror the values surfaced by `ServiceListModel`.
+5. **`RoutingAttributes`** – Case-insensitive dictionary that captures the latest routed values published by each service (input/output text, message counters, runtime state, and any custom attributes emitted by protocol-specific view models). When a service is reloaded, these entries are republished so token references remain valid across restarts.
 
 ### Descriptor payload contract
 

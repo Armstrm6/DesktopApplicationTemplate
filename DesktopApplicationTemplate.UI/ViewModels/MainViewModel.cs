@@ -354,6 +354,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
             _logger?.Log($"Removing service {target.DisplayName}", LogLevel.Debug);
             ClearRoutingCache(target.Type, target.DisplayName);
+            target.ClearRoutingAttributes();
             var index = Services.IndexOf(target);
             target.AddLog("Service removed", WpfBrushes.Red);
             if (target.Type != ServiceType.Csv)
@@ -401,6 +402,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
 
             _messageRoutingService.ClearService(serviceType, serviceName);
+            _messageRoutingService.ClearService(serviceName);
         }
 
         public async Task SaveServicesAsync()
@@ -422,7 +424,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         private void LoadServices()
         {
-            var existing = ServicePersistence.Load(_serviceCatalog, _logger);
+            var existing = ServicePersistence.Load(_serviceCatalog, _messageRoutingService, _logger);
             foreach (var service in existing.OrderBy(s => s.Order))
             {
                 if (string.IsNullOrWhiteSpace(service.DescriptorId))
@@ -430,6 +432,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     service.DescriptorId = ResolveDescriptorId(service.Type);
                 }
 
+                ClearRoutingCache(service.Type, service.DisplayName);
                 var normalizedName = NormalizeDisplayName(service.Type, service.DisplayName);
                 if (Services.Any(existingService => existingService.DisplayName.Equals(normalizedName, StringComparison.OrdinalIgnoreCase)))
                 {
@@ -449,6 +452,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 }
 
                 Services.Add(service);
+
+                service.RepublishRoutingAttributes();
 
                 foreach (var log in service.Logs.Reverse())
                 {

@@ -56,7 +56,8 @@ namespace DesktopApplicationTemplate.UI.DependencyInjection
                 {
                     var ctx = (ServiceFactoryOptions<ScpServiceOptions>)optionsObj;
                     var mainView = provider.GetRequiredService<MainView>();
-                    var svc = new ServiceListModel
+                    var routing = provider.GetRequiredService<IMessageRoutingService>();
+                    var svc = new ServiceListModel(routing)
                     {
                         DescriptorId = descriptor.Id,
                         DisplayName = ctx.Name,
