@@ -61,6 +61,8 @@ public sealed class PluginImportService : IPluginImportService
 
         cancellationToken.ThrowIfCancellationRequested();
 
+        var moduleDiagnostics = new List<string>();
+
         try
         {
             var fileName = Path.GetFileName(sourcePath);
@@ -76,14 +78,49 @@ public sealed class PluginImportService : IPluginImportService
             var loader = new PluginLoader(_options, loaderLogger);
             IReadOnlyCollection<Assembly> pluginAssemblies = loader.LoadPluginAssemblies();
 
-            var modules = ServiceModuleDiscovery.InstantiateModules(pluginAssemblies);
+            var modules = ServiceModuleDiscovery.InstantiateModules(
+                pluginAssemblies,
+                (assembly, errors) =>
+                {
+                    var errorArray = errors?.Where(static error => error is not null).Cast<Exception>().ToArray()
+                        ?? Array.Empty<Exception>();
+                    if (errorArray.Length == 0)
+                    {
+                        return;
+                    }
+
+                    var diagnostic = FormatTypeLoadDiagnostic(assembly, errorArray);
+                    moduleDiagnostics.Add(diagnostic);
+
+                    var assemblyName = assembly?.GetName().Name ?? assembly?.FullName ?? "(unknown)";
+                    var summary = string.Join("; ", errorArray.Select(error => error.Message));
+                    _logger.LogWarning(
+                        errorArray[0],
+                        "Failed to load module types from assembly {AssemblyName}. Errors: {ErrorSummary}.",
+                        assemblyName,
+                        summary);
+
+                    for (var i = 1; i < errorArray.Length; i++)
+                    {
+                        _logger.LogDebug(
+                            errorArray[i],
+                            "Additional loader error for assembly {AssemblyName}.",
+                            assemblyName);
+                    }
+                });
             var descriptors = ServiceModuleDiscovery.DescribeServices(modules);
 
             if (descriptors.Count == 0)
             {
-                var message = "The package did not expose any service descriptors.";
+                var diagnosticSnapshot = moduleDiagnostics.ToArray();
+                var message = moduleDiagnostics.Count > 0
+                    ? "The package did not expose any service descriptors. Some modules were skipped due to load errors."
+                    : "The package did not expose any service descriptors.";
                 _logger.LogWarning(message);
-                return Task.FromResult(new PluginImportResult(false, message, destinationPath, Array.Empty<IServiceDescriptor>()));
+                return Task.FromResult(new PluginImportResult(false, message, destinationPath, Array.Empty<IServiceDescriptor>())
+                {
+                    Diagnostics = diagnosticSnapshot,
+                });
             }
 
             var merged = new Dictionary<string, IServiceDescriptor>(StringComparer.Ordinal);
@@ -102,14 +139,20 @@ public sealed class PluginImportService : IPluginImportService
 
             _catalog.UpdateDescriptors(mergedDescriptors);
 
+            var diagnosticMessages = moduleDiagnostics.ToArray();
             var successMessage = descriptors.Count == 1
                 ? "Imported 1 service descriptor."
                 : $"Imported {descriptors.Count} service descriptors.";
+            if (diagnosticMessages.Length > 0)
+            {
+                successMessage += " Some modules were skipped due to load errors.";
+            }
             _logger.LogInformation("{Message} Package: {PackagePath}.", successMessage, destinationPath);
 
             return Task.FromResult(new PluginImportResult(true, successMessage, destinationPath, descriptors)
             {
                 ImportedUiRegistrations = uiRegistrations,
+                Diagnostics = diagnosticMessages,
             });
         }
         catch (OperationCanceledException)
@@ -120,7 +163,10 @@ public sealed class PluginImportService : IPluginImportService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to import plug-in package from {Source}.", sourcePath);
-            return Task.FromResult(new PluginImportResult(false, "Import failed. Check logs for details.", null, Array.Empty<IServiceDescriptor>()));
+            return Task.FromResult(new PluginImportResult(false, "Import failed. Check logs for details.", null, Array.Empty<IServiceDescriptor>())
+            {
+                Diagnostics = moduleDiagnostics.ToArray(),
+            });
         }
     }
 
@@ -145,5 +191,12 @@ public sealed class PluginImportService : IPluginImportService
             _logger.LogDebug(ex, "Failed to extract UI registrations from plug-in modules.");
             return Array.Empty<ServiceUiRegistration<ServiceListModel, Page>>();
         }
+    }
+
+    private static string FormatTypeLoadDiagnostic(Assembly? assembly, IReadOnlyCollection<Exception> errors)
+    {
+        var assemblyName = assembly?.GetName().Name ?? assembly?.FullName ?? "(unknown)";
+        var summary = string.Join("; ", errors.Select(error => error.Message));
+        return FormattableString.Invariant($"Assembly '{assemblyName}' skipped: {summary}");
     }
 }

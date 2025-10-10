@@ -1,0 +1,10 @@
+{
+  "id": "MissingDependency.Sample",
+  "name": "Missing Dependency Fixture",
+  "version": "1.0.0",
+  "entryAssembly": "MissingDependency.dll",
+  "serviceAssemblies": [
+    "MissingDependency.dll"
+  ],
+  "probingPaths": []
+}

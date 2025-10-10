@@ -54,4 +54,7 @@ public sealed record PluginExportResult(
     bool Success,
     string Message,
     string? PackagePath,
-    IReadOnlyCollection<string> Descriptors);
+    IReadOnlyCollection<string> Descriptors)
+{
+    public IReadOnlyCollection<string> Diagnostics { get; init; } = Array.Empty<string>();
+}
