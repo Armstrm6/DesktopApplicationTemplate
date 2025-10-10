@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Csv;
 using DesktopApplicationTemplate.UI.ViewModels.Csv;
@@ -19,21 +20,27 @@ public class CsvServiceAdapter
     private readonly ICsvOutput _output;
     private readonly CsvServiceState _state = new();
     private readonly ILoggingService? _logger;
+    private readonly IMessageRoutingService _routingService;
+    private readonly object _syncRoot = new();
 
-    public CsvServiceAdapter(CsvViewerViewModel viewModel, ProtocolCsvService csvService, ICsvOutput output, ILoggingService? logger = null)
+    public CsvServiceAdapter(
+        CsvViewerViewModel viewModel,
+        ProtocolCsvService csvService,
+        ICsvOutput output,
+        IMessageRoutingService routingService,
+        ILoggingService? logger = null)
     {
         _viewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
         _csvService = csvService ?? throw new ArgumentNullException(nameof(csvService));
         _output = output ?? throw new ArgumentNullException(nameof(output));
+        _routingService = routingService ?? throw new ArgumentNullException(nameof(routingService));
         _logger = logger;
+        _routingService.AttributeChanged += OnRoutingAttributeChanged;
     }
 
     public void EnsureColumnsForService(string serviceName)
     {
-        if (_csvService.EnsureColumnsForService(Configuration, serviceName))
-        {
-            _viewModel.Save();
-        }
+        _csvService.EnsureColumnsForService(Configuration, serviceName);
     }
 
     public void RemoveColumnsForService(string serviceName)
@@ -62,7 +69,7 @@ public class CsvServiceAdapter
         var previousPath = GetCurrentFilePath();
         var fileExisted = !string.IsNullOrWhiteSpace(previousPath) && _output.FileExists(previousPath);
 
-        _csvService.RecordLog(Configuration, _state, _output, serviceName, message);
+        WriteSnapshot(serviceName, message);
 
         var currentPath = GetCurrentFilePath();
         if (string.IsNullOrWhiteSpace(currentPath))
@@ -83,7 +90,10 @@ public class CsvServiceAdapter
 
     public void AppendRow(IEnumerable<string?> values)
     {
-        _csvService.AppendRow(Configuration, _state, _output, values);
+        lock (_syncRoot)
+        {
+            _csvService.AppendRow(Configuration, _state, _output, values);
+        }
     }
 
     private CsvConfiguration Configuration => _viewModel.Configuration;
@@ -97,5 +107,39 @@ public class CsvServiceAdapter
 
         var directory = Configuration.OutputDirectory ?? string.Empty;
         return Path.Combine(directory, _state.CurrentFileName);
+    }
+
+    private void OnRoutingAttributeChanged(object? sender, ServiceAttributeChangedEventArgs e)
+    {
+        if (e is null)
+        {
+            return;
+        }
+
+        if (!IsExpressionReferencing(e.ServiceName, e.AttributeName))
+        {
+            return;
+        }
+
+        WriteSnapshot(e.ServiceName, e.Value ?? string.Empty);
+    }
+
+    private bool IsExpressionReferencing(string serviceName, string attributeName)
+    {
+        if (string.IsNullOrWhiteSpace(serviceName) || string.IsNullOrWhiteSpace(attributeName))
+        {
+            return false;
+        }
+
+        return Configuration.Columns.Any(column =>
+            CsvExpressionEvaluator.ReferencesAttribute(column.Expression, serviceName, attributeName));
+    }
+
+    private void WriteSnapshot(string serviceName, string message)
+    {
+        lock (_syncRoot)
+        {
+            _csvService.RecordLog(Configuration, _state, _output, serviceName, message);
+        }
     }
 }

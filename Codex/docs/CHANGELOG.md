@@ -33,6 +33,7 @@
 - Service persistence now stores `ServiceType` as short codes and reads legacy string names.
 - Service routing attributes (input/output text, message counters, runtime state, and protocol-specific metadata) persist with each service and are republished through `IMessageRoutingService` after load or rename operations.
 - Service creation and navigation now resolve services via `ServiceType` enum lookups instead of string-based switches.
+- CSV logging resolves configured attribute expressions through the routing service instead of auto-adding per-service columns.
 - `ServiceManager` loads default services from configuration using `ServiceType` short codes and accepts legacy names.
 - `ServiceListModel` now exposes a `Type` enum property, removing string-based service comparisons.
 - Standardized routed message naming to `{Service}.InputMessage` and `{Service}.OutputMessage` in the editor and UI, while keeping legacy `Last*` tokens working for compatibility.
@@ -81,6 +82,7 @@
 - MQTT create and edit views include tooltips on text fields to clarify expected input.
 - Create and edit service view models inject `IServiceRule` to validate required fields with XAML error tooltips.
 - Service editor views share a reusable `EditorButtonBar` control with consistent automation names.
+- CSV viewer replaces service/script columns with attribute expressions, autocomplete suggestions, and routed attribute validation.
 - Consolidated save and close dialogs into a configurable `ConfirmationWindow` with optional suppression.
 - Event handlers use C# property pattern matching instead of casting `sender` and accessing `DataContext`.
 - Replaced `as` cast and null check with pattern matching in `SettingsPage.NavigateBack`.

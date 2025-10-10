@@ -1,4 +1,7 @@
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
 
 namespace DesktopApplicationTemplate.Core.Services.Protocols.Csv;
 
@@ -26,20 +29,50 @@ public class CsvConfiguration
 /// <summary>
 /// Describes a single CSV column.
 /// </summary>
-public class CsvColumnDefinition
+[JsonConverter(typeof(CsvColumnDefinitionConverter))]
+public class CsvColumnDefinition : INotifyPropertyChanged
 {
+    private string _name = "Column";
+    private string _expression = string.Empty;
+    private string? _format;
+
     /// <summary>
     /// Gets or sets the display name of the column.
     /// </summary>
-    public string Name { get; set; } = "Column";
+    public string Name
+    {
+        get => _name;
+        set => SetField(ref _name, value);
+    }
 
     /// <summary>
-    /// Gets or sets the service associated with the column.
+    /// Gets or sets the attribute expression resolved through the routing service.
     /// </summary>
-    public string Service { get; set; } = string.Empty;
+    public string Expression
+    {
+        get => _expression;
+        set => SetField(ref _expression, value);
+    }
 
     /// <summary>
-    /// Gets or sets the custom script used to populate the column.
+    /// Gets or sets an optional <see cref="string.Format(string, object?)"/> template applied to the resolved value.
     /// </summary>
-    public string Script { get; set; } = string.Empty;
+    public string? Format
+    {
+        get => _format;
+        set => SetField(ref _format, value);
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    private void SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+    {
+        if (EqualityComparer<T>.Default.Equals(field, value))
+        {
+            return;
+        }
+
+        field = value;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
 }
