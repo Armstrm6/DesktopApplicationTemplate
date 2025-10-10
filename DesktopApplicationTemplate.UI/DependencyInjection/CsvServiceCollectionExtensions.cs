@@ -28,7 +28,7 @@ namespace DesktopApplicationTemplate.UI.DependencyInjection
                 throw new ArgumentNullException(nameof(services));
             }
 
-            services.AddTransient<CsvViewerViewModel>();
+            services.AddTransient<CsvServiceViewModel>();
             services.AddSingleton<ICsvOutput, FileCsvOutput>();
             services.AddTransient<CsvServiceAdapter>();
             services.AddTransient<CsvServiceView>();

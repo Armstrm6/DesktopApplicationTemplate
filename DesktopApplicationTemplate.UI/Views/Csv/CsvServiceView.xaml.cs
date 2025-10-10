@@ -6,9 +6,9 @@ namespace DesktopApplicationTemplate.UI.Views.Csv
 {
     public partial class CsvServiceView : Page
     {
-        private readonly CsvViewerViewModel _viewModel;
+        private readonly CsvServiceViewModel _viewModel;
 
-        public CsvServiceView(CsvViewerViewModel vm)
+        public CsvServiceView(CsvServiceViewModel vm)
         {
             InitializeComponent();
             _viewModel = vm;

@@ -18,7 +18,7 @@ using DesktopApplicationTemplate.UI.Services;
 
 namespace DesktopApplicationTemplate.UI.ViewModels.Csv
 {
-    public class CsvViewerViewModel : ViewModelBase
+    public class CsvServiceViewModel : ViewModelBase
     {
         private readonly string _configPath;
         private readonly IFileDialogService _fileDialog;
@@ -84,7 +84,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Csv
 
         public event Action? RequestClose;
 
-        public CsvViewerViewModel(IFileDialogService fileDialog, IMessageRoutingService routingService, string? configPath = null)
+        public CsvServiceViewModel(IFileDialogService fileDialog, IMessageRoutingService routingService, string? configPath = null)
         {
             _fileDialog = fileDialog ?? throw new ArgumentNullException(nameof(fileDialog));
             _routingService = routingService ?? throw new ArgumentNullException(nameof(routingService));

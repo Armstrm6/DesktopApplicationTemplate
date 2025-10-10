@@ -15,7 +15,7 @@ namespace DesktopApplicationTemplate.UI.Services;
 /// </summary>
 public class CsvServiceAdapter
 {
-    private readonly CsvViewerViewModel _viewModel;
+    private readonly CsvServiceViewModel _viewModel;
     private readonly ProtocolCsvService _csvService;
     private readonly ICsvOutput _output;
     private readonly CsvServiceState _state = new();
@@ -24,7 +24,7 @@ public class CsvServiceAdapter
     private readonly object _syncRoot = new();
 
     public CsvServiceAdapter(
-        CsvViewerViewModel viewModel,
+        CsvServiceViewModel viewModel,
         ProtocolCsvService csvService,
         ICsvOutput output,
         IMessageRoutingService routingService,
