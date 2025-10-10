@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Models;
 
@@ -20,7 +22,7 @@ namespace DesktopApplicationTemplate.UI.Services
         /// Loads settings from disk, returning a default instance when the file is missing
         /// or cannot be read.
         /// </summary>
-        internal static UserSettings Load(ILoggingService? logger)
+        internal static async Task<UserSettings> LoadAsync(ILoggingService? logger, CancellationToken cancellationToken = default)
         {
             if (!File.Exists(FilePath))
             {
@@ -29,8 +31,18 @@ namespace DesktopApplicationTemplate.UI.Services
 
             try
             {
-                var json = File.ReadAllText(FilePath);
-                return JsonSerializer.Deserialize<UserSettings>(json) ?? new UserSettings();
+                await using var stream = new FileStream(
+                    FilePath,
+                    FileMode.Open,
+                    FileAccess.Read,
+                    FileShare.Read,
+                    bufferSize: 4096,
+                    useAsync: true);
+
+                var settings = await JsonSerializer.DeserializeAsync<UserSettings>(stream, cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
+
+                return settings ?? new UserSettings();
             }
             catch (IOException ex)
             {
@@ -42,7 +54,7 @@ namespace DesktopApplicationTemplate.UI.Services
         /// <summary>
         /// Saves the provided settings to disk.
         /// </summary>
-        internal static void Save(UserSettings settings, ILoggingService? logger)
+        internal static async Task SaveAsync(UserSettings settings, ILoggingService? logger, CancellationToken cancellationToken = default)
         {
             if (settings is null)
             {
@@ -58,7 +70,15 @@ namespace DesktopApplicationTemplate.UI.Services
 
             try
             {
-                File.WriteAllText(FilePath, JsonSerializer.Serialize(settings, options));
+                await using var stream = new FileStream(
+                    FilePath,
+                    FileMode.Create,
+                    FileAccess.Write,
+                    FileShare.None,
+                    bufferSize: 4096,
+                    useAsync: true);
+
+                await JsonSerializer.SerializeAsync(stream, settings, options, cancellationToken).ConfigureAwait(false);
             }
             catch (StackOverflowException)
             {
@@ -69,7 +89,7 @@ namespace DesktopApplicationTemplate.UI.Services
                 };
                 var dump = JsonSerializer.Serialize(settings, dumpOptions);
                 var temp = Path.Combine(Path.GetTempPath(), "settings_dump.json");
-                File.WriteAllText(temp, dump);
+                await File.WriteAllTextAsync(temp, dump, cancellationToken).ConfigureAwait(false);
                 Environment.FailFast($"Stack overflow while saving settings. Dump written to {temp}");
             }
         }

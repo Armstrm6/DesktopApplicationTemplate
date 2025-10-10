@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using DesktopApplicationTemplate.UI.ViewModels;
@@ -16,27 +17,32 @@ namespace DesktopApplicationTemplate.UI.Views
             _networkViewModel = networkViewModel;
             DataContext = _viewModel;
             NetworkConfigGrid.DataContext = _networkViewModel;
-            _viewModel.Load();
-            _ = _networkViewModel.LoadAsync();
+            Loaded += OnLoaded;
         }
 
-        private void Save_Click(object sender, RoutedEventArgs e)
+        private async void OnLoaded(object sender, RoutedEventArgs e)
         {
-            _viewModel.Save();
-            Services.ThemeManager.ApplyTheme(_viewModel.DarkTheme);
+            Loaded -= OnLoaded;
+            await _viewModel.LoadAsync().ConfigureAwait(false);
+            await _networkViewModel.LoadAsync().ConfigureAwait(false);
         }
 
-        private void Back_Click(object sender, RoutedEventArgs e)
+        private async void Save_Click(object sender, RoutedEventArgs e)
         {
-            NavigateBack();
+            await SaveAndApplyThemeAsync().ConfigureAwait(false);
         }
 
-        private void BackText_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private async void Back_Click(object sender, RoutedEventArgs e)
         {
-            NavigateBack();
+            await NavigateBackAsync().ConfigureAwait(false);
         }
 
-        public void NavigateBack()
+        private async void BackText_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            await NavigateBackAsync().ConfigureAwait(false);
+        }
+
+        public async Task NavigateBackAsync()
         {
             if (_viewModel.HasUnsavedChanges)
             {
@@ -45,8 +51,7 @@ namespace DesktopApplicationTemplate.UI.Views
                     return;
                 if (res == MessageBoxResult.Yes)
                 {
-                    _viewModel.Save();
-                    Services.ThemeManager.ApplyTheme(_viewModel.DarkTheme);
+                    await SaveAndApplyThemeAsync();
                 }
             }
 
@@ -56,6 +61,13 @@ namespace DesktopApplicationTemplate.UI.Views
             }
 
             mainWindow.ShowHome();
+        }
+
+        private async Task SaveAndApplyThemeAsync()
+        {
+            await _viewModel.SaveAsync().ConfigureAwait(false);
+            await App.UiThreadTaskFactory.SwitchToMainThreadAsync();
+            Services.ThemeManager.ApplyTheme(_viewModel.DarkTheme);
         }
     }
 }

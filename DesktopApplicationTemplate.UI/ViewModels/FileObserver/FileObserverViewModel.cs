@@ -112,7 +112,7 @@ public class FileObserverViewModel : ViewModelBase
         AddObserverCommand = new RelayCommand(AddObserver);
         RemoveObserverCommand = new RelayCommand(RemoveObserver);
         BrowseCommand = new AsyncRelayCommand(BrowseFilePathAsync);
-        SaveCommand = new RelayCommand(Save);
+        SaveCommand = new AsyncRelayCommand(SaveAsync);
 
         _fileObserverService.FileChanged += OnFileChanged;
         Observers.Add(new FileObserver { Name = "Observer1" });
@@ -204,7 +204,7 @@ public class FileObserverViewModel : ViewModelBase
         }
     }
 
-    private void Save() => _saveHelper.Show();
+    private Task SaveAsync() => _saveHelper.ShowAsync();
 
     private async Task ConfigureObserverServiceAsync(FileObserver observer)
     {

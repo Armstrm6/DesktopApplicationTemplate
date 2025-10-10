@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using System.Windows;
 using DesktopApplicationTemplate.UI.ViewModels;
 using DesktopApplicationTemplate.UI.Views;
@@ -24,7 +25,7 @@ namespace DesktopApplicationTemplate.UI.Helpers
 
         public event Action? SaveConfirmed;
 
-        public void Show()
+        public async Task ShowAsync()
         {
             _logger.Log("Displaying save confirmation", LogLevel.Debug);
             if (SaveConfirmationSuppressed)
@@ -45,7 +46,7 @@ namespace DesktopApplicationTemplate.UI.Helpers
                 {
                     SaveConfirmationSuppressed = true;
                     var settingsVm = App.AppHost.Services.GetRequiredService<SettingsViewModel>();
-                    settingsVm.Save();
+                    await settingsVm.SaveAsync();
                 }
 
                 SaveConfirmed?.Invoke();
