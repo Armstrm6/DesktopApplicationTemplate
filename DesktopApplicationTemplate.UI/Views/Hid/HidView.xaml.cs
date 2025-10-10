@@ -17,13 +17,13 @@ using System.Windows.Shapes;
 namespace DesktopApplicationTemplate.UI.Views.Hid
 {
     /// <summary>
-    /// Interaction logic for HidViews.xaml
+    /// Interaction logic for HidView.xaml
     /// </summary>
-    public partial class HidViews : Page
+    public partial class HidView : Page
     {
         private readonly HidViewModel _viewModel;
 
-        public HidViews(HidViewModel viewModel)
+        public HidView(HidViewModel viewModel)
         {
             InitializeComponent();
             _viewModel = viewModel;
