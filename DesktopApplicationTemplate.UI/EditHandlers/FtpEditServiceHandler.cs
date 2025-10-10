@@ -37,7 +37,7 @@ public class FtpEditServiceHandler : IEditServiceHandler
         service.SetOptions(options);
         var vm = ActivatorUtilities.CreateInstance<FtpServerEditViewModel>(_services, service.DisplayName, options);
         var editView = ActivatorUtilities.CreateInstance<FtpServerEditView>(_services, vm);
-        vm.ServiceSaved += (name, opts) =>
+        vm.ServiceSaved += async (name, opts) =>
         {
             var trimmed = string.IsNullOrWhiteSpace(name)
                 ? mainViewModel.GenerateServiceName(service.Type)
@@ -58,7 +58,7 @@ public class FtpEditServiceHandler : IEditServiceHandler
             service.SetOptions(opts);
             if (ftpPage != null)
                 mainView.ShowPage(ftpPage);
-            _ = mainViewModel.SaveServicesAsync();
+            await mainViewModel.SaveServicesAsync().ConfigureAwait(false);
         };
         vm.EditCancelled += () =>
         {

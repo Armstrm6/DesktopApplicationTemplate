@@ -36,7 +36,7 @@ public class MqttEditServiceHandler : IEditServiceHandler
         var vm = ActivatorUtilities.CreateInstance<MqttEditServiceViewModel>(_services, service.DisplayName, options);
         var editView = _services.GetRequiredService<MqttEditServiceView>();
         editView.Initialize(vm);
-        vm.ServiceSaved += (name, opts) =>
+        vm.ServiceSaved += async (name, opts) =>
         {
             var trimmed = string.IsNullOrWhiteSpace(name)
                 ? mainViewModel.GenerateServiceName(service.Type)
@@ -56,7 +56,7 @@ public class MqttEditServiceHandler : IEditServiceHandler
             service.DisplayName = trimmed;
             if (tagPage != null)
                 mainView.ShowPage(tagPage);
-            _ = mainViewModel.SaveServicesAsync();
+            await mainViewModel.SaveServicesAsync().ConfigureAwait(false);
         };
         vm.EditCancelled += () =>
         {

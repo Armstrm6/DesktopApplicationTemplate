@@ -225,7 +225,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             ApplyFilters();
             if (_logger is LoggingService concreteLogger)
             {
-                concreteLogger.Reload();
+                ObserveTask(concreteLogger.ReloadAsync());
             }
         }
 
@@ -437,12 +437,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     await tcpVm.PersistOptionsAsync().ConfigureAwait(false);
                 }
             }
-            ServicePersistence.Save(Services, _serviceCatalog, _logger);
+            await ServicePersistence.SaveAsync(Services, _serviceCatalog, _logger).ConfigureAwait(false);
         }
 
-        private void LoadServices()
+        public async Task LoadServicesAsync()
         {
-            var existing = ServicePersistence.Load(_serviceCatalog, _messageRoutingService, _logger);
+            var existing = await ServicePersistence.LoadAsync(_serviceCatalog, _messageRoutingService, _logger).ConfigureAwait(true);
             foreach (var service in existing.OrderBy(s => s.Order))
             {
                 if (string.IsNullOrWhiteSpace(service.DescriptorId))
@@ -470,6 +470,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 }
 
                 Services.Add(service);
+                TrackService(service);
 
                 service.RepublishRoutingAttributes();
 
@@ -482,6 +483,13 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
             OnPropertyChanged(nameof(ServicesCreated));
             OnPropertyChanged(nameof(CurrentActiveServices));
+            LogViewModel.UpdateServiceFilters(Services.Select(s => s.DisplayName));
+            ServicesRunning = Services.Any(svc => svc.IsActive);
+            ApplyFilters();
+            if (_logger is LoggingService concreteLogger)
+            {
+                concreteLogger.Reload();
+            }
         }
 
         private IServiceOptionsSerializer? ResolveOptionsSerializer(string? descriptorId)
@@ -1133,6 +1141,18 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         {
             LogViewModel.RefreshLogs();
             _logger?.Log("Logs refreshed", LogLevel.Debug);
+        }
+
+        private static void ObserveTask(Task? task)
+        {
+            if (task is null)
+            {
+                return;
+            }
+
+            _ = task.ContinueWith(
+                t => _ = t.Exception,
+                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
         }
 
         // OnPropertyChanged inherited from ViewModelBase

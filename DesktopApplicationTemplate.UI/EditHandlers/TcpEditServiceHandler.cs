@@ -38,7 +38,7 @@ public class TcpEditServiceHandler : IEditServiceHandler
         vm.Load(service.DisplayName, options);
         var editView = _services.GetRequiredService<TcpEditServiceView>();
         editView.Initialize(vm);
-        vm.ServiceSaved += (name, opts) =>
+        vm.ServiceSaved += async (name, opts) =>
         {
             var trimmed = string.IsNullOrWhiteSpace(name)
                 ? mainViewModel.GenerateServiceName(service.Type)
@@ -68,7 +68,7 @@ public class TcpEditServiceHandler : IEditServiceHandler
                 mainView.ShowPage(page);
             }
             mainViewModel.SelectedService = service;
-            _ = mainViewModel.SaveServicesAsync();
+            await mainViewModel.SaveServicesAsync().ConfigureAwait(false);
         };
         vm.EditCancelled += () =>
         {

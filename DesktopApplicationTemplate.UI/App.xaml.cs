@@ -284,6 +284,9 @@ namespace DesktopApplicationTemplate.UI
             await UiThreadTaskFactory.SwitchToMainThreadAsync();
             Services.ThemeManager.ApplyTheme(settings.DarkTheme);
 
+            var mainViewModel = AppHost.Services.GetRequiredService<MainViewModel>();
+            await mainViewModel.LoadServicesAsync().ConfigureAwait(true);
+
             SplashWindow? splash = null;
             if (settings.FirstRun)
             {
