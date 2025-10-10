@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using DesktopApplicationTemplate.Core.Services;
@@ -17,7 +18,9 @@ public static class ServiceModuleDiscovery
     /// </summary>
     /// <param name="assemblies">The assemblies to scan.</param>
     /// <returns>The instantiated modules.</returns>
-    public static IReadOnlyList<IServiceModule> InstantiateModules(IEnumerable<Assembly> assemblies)
+    public static IReadOnlyList<IServiceModule> InstantiateModules(
+        IEnumerable<Assembly> assemblies,
+        Action<Assembly, IEnumerable<Exception>>? typeLoadFailureHandler = null)
     {
         if (assemblies is null)
         {
@@ -25,12 +28,32 @@ public static class ServiceModuleDiscovery
         }
 
         var moduleType = typeof(IServiceModule);
-        return assemblies
-            .SelectMany(static assembly => assembly?.GetTypes() ?? Array.Empty<Type>())
-            .Where(type => moduleType.IsAssignableFrom(type) && !type.IsAbstract && !type.IsInterface)
-            .Select(Activator.CreateInstance)
-            .OfType<IServiceModule>()
-            .ToList();
+        var modules = new List<IServiceModule>();
+
+        foreach (var assembly in assemblies)
+        {
+            if (assembly is null)
+            {
+                continue;
+            }
+
+            var assemblyTypes = GetLoadableTypes(assembly, typeLoadFailureHandler);
+            foreach (var type in assemblyTypes)
+            {
+                if (!moduleType.IsAssignableFrom(type) || type.IsAbstract || type.IsInterface)
+                {
+                    continue;
+                }
+
+                var instance = Activator.CreateInstance(type);
+                if (instance is IServiceModule module)
+                {
+                    modules.Add(module);
+                }
+            }
+        }
+
+        return modules;
     }
 
     /// <summary>
@@ -76,5 +99,60 @@ public static class ServiceModuleDiscovery
         }
 
         return descriptors;
+    }
+
+    private static IReadOnlyList<Type> GetLoadableTypes(
+        Assembly assembly,
+        Action<Assembly, IEnumerable<Exception>>? typeLoadFailureHandler)
+    {
+        try
+        {
+            return assembly.GetTypes();
+        }
+        catch (ReflectionTypeLoadException ex)
+        {
+            var nonNullTypes = ex.Types?.Where(static type => type is not null).Cast<Type>().ToArray()
+                ?? Array.Empty<Type>();
+
+            NotifyTypeLoadFailure(assembly, typeLoadFailureHandler, ex.LoaderExceptions, ex);
+            return nonNullTypes;
+        }
+        catch (Exception ex) when (IsTypeLoadException(ex))
+        {
+            NotifyTypeLoadFailure(assembly, typeLoadFailureHandler, null, ex);
+            return Array.Empty<Type>();
+        }
+    }
+
+    private static void NotifyTypeLoadFailure(
+        Assembly assembly,
+        Action<Assembly, IEnumerable<Exception>>? typeLoadFailureHandler,
+        IEnumerable<Exception?>? errors,
+        Exception fallback)
+    {
+        if (typeLoadFailureHandler is null)
+        {
+            return;
+        }
+
+        var errorList = errors?
+            .Where(static error => error is not null)
+            .Cast<Exception>()
+            .ToArray();
+
+        if (errorList is null || errorList.Length == 0)
+        {
+            errorList = new[] { fallback };
+        }
+
+        typeLoadFailureHandler(assembly, errorList);
+    }
+
+    private static bool IsTypeLoadException(Exception exception)
+    {
+        return exception is TypeLoadException
+            or FileLoadException
+            or FileNotFoundException
+            or BadImageFormatException;
     }
 }
