@@ -58,7 +58,7 @@ public class MqttEditConnectionViewModel : ValidatableViewModelBase, ILoggingVie
         _fileDialogService = fileDialogService ?? throw new ArgumentNullException(nameof(fileDialogService));
         Logger = logger;
 
-        BrowseClientCertificateCommand = new RelayCommand(BrowseForClientCertificate);
+        BrowseClientCertificateCommand = new AsyncRelayCommand(BrowseForClientCertificateAsync);
         ClearClientCertificateCommand = new RelayCommand(ClearClientCertificate);
 
         UpdateCommand = new AsyncRelayCommand(UpdateAsync);
@@ -449,7 +449,7 @@ public class MqttEditConnectionViewModel : ValidatableViewModelBase, ILoggingVie
             {
                 try
                 {
-                    _clientCertificate = File.ReadAllBytes(ClientCertificatePath);
+                    _clientCertificate = await LoadCertificateAsync(ClientCertificatePath);
                 }
                 catch (Exception)
                 {
@@ -529,7 +529,7 @@ public class MqttEditConnectionViewModel : ValidatableViewModelBase, ILoggingVie
         }
     }
 
-    private void BrowseForClientCertificate()
+    private async Task BrowseForClientCertificateAsync()
     {
         var path = _fileDialogService.OpenFile();
         if (string.IsNullOrWhiteSpace(path))
@@ -539,7 +539,7 @@ public class MqttEditConnectionViewModel : ValidatableViewModelBase, ILoggingVie
 
         try
         {
-            _clientCertificate = File.ReadAllBytes(path);
+            _clientCertificate = await LoadCertificateAsync(path);
             ClientCertificatePath = path;
             UseClientCertificate = true;
             ClearErrors(nameof(ClientCertificatePath));
@@ -555,6 +555,11 @@ public class MqttEditConnectionViewModel : ValidatableViewModelBase, ILoggingVie
         OnPropertyChanged(nameof(HasClientCertificate));
         OnPropertyChanged(nameof(ClientCertificateDisplay));
         ValidateClientCertificate();
+    }
+
+    private static async Task<byte[]> LoadCertificateAsync(string path)
+    {
+        return await File.ReadAllBytesAsync(path).ConfigureAwait(false);
     }
 
     private void ClearClientCertificate()

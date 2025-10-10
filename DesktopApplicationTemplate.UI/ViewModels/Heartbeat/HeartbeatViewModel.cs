@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows;
 using DesktopApplicationTemplate.Core.Services.Protocols.Heartbeat;
@@ -59,7 +60,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Heartbeat
             _saveHelper = saveHelper;
             _heartbeatService = heartbeatService ?? throw new ArgumentNullException(nameof(heartbeatService));
             BuildCommand = new RelayCommand(BuildMessage);
-            SaveCommand = new RelayCommand(Save);
+            SaveCommand = new AsyncRelayCommand(SaveAsync);
         }
 
         private void BuildMessage()
@@ -74,7 +75,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Heartbeat
             FinalMessage = _heartbeatService.BuildHeartbeatMessage(options);
         }
 
-        private void Save() => _saveHelper.Show();
+        private Task SaveAsync() => _saveHelper.ShowAsync();
 
         // OnPropertyChanged from ViewModelBase
     }

@@ -38,7 +38,7 @@ public class FileObserverEditServiceHandler : IEditServiceHandler
         var vm = ActivatorUtilities.CreateInstance<FileObserverEditServiceViewModel>(_services, service.DisplayName, options);
         var editView = _services.GetRequiredService<FileObserverEditServiceView>();
         editView.Initialize(vm);
-        vm.ServiceSaved += (name, opts) =>
+        vm.ServiceSaved += async (name, opts) =>
         {
             var trimmed = string.IsNullOrWhiteSpace(name)
                 ? mainViewModel.GenerateServiceName(service.Type)
@@ -59,7 +59,7 @@ public class FileObserverEditServiceHandler : IEditServiceHandler
             service.SetOptions(opts);
             if (foPage != null)
                 mainView.ShowPage(foPage);
-            _ = mainViewModel.SaveServicesAsync();
+            await mainViewModel.SaveServicesAsync().ConfigureAwait(false);
         };
         vm.EditCancelled += () =>
         {

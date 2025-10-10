@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -23,12 +26,36 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Csv
         private readonly ObservableCollection<string> _attributeSuggestions = new();
         private readonly ObservableCollection<string> _validationMessages = new();
         private readonly HashSet<string> _suggestionSet = new(StringComparer.OrdinalIgnoreCase);
+        private readonly RelayCommand _addColumnCommand;
+        private readonly RelayCommand _removeColumnCommand;
+        private readonly RelayCommand _saveCommand;
+        private readonly RelayCommand _browseCommand;
+#if DEBUG
+        private readonly RelayCommand _debugSaveCommand;
+#endif
         private ObservableCollection<CsvColumnDefinition>? _observableColumns;
         private CsvColumnDefinition? _selectedColumn;
+        private bool _isBusy;
 
         public CsvConfiguration Configuration { get; private set; } = CreateDefaultConfiguration();
         public ReadOnlyObservableCollection<string> AttributeSuggestions { get; }
         public ReadOnlyObservableCollection<string> ValidationMessages { get; }
+
+        public bool IsBusy
+        {
+            get => _isBusy;
+            private set
+            {
+                if (_isBusy == value)
+                {
+                    return;
+                }
+
+                _isBusy = value;
+                OnPropertyChanged();
+                UpdateCommandStates();
+            }
+        }
 
         public CsvColumnDefinition? SelectedColumn
         {
@@ -42,10 +69,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Csv
 
                 _selectedColumn = value;
                 OnPropertyChanged();
-                if (RemoveColumnCommand is RelayCommand remove)
-                {
-                    remove.RaiseCanExecuteChanged();
-                }
+                _removeColumnCommand.RaiseCanExecuteChanged();
             }
         }
 
@@ -68,78 +92,74 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Csv
             AttributeSuggestions = new ReadOnlyObservableCollection<string>(_attributeSuggestions);
             ValidationMessages = new ReadOnlyObservableCollection<string>(_validationMessages);
             _routingService.AttributeChanged += OnRoutingAttributeChanged;
-            Load();
-            AddColumnCommand = new RelayCommand(AddColumn);
-            RemoveColumnCommand = new RelayCommand(RemoveSelectedColumn, () => SelectedColumn != null);
-            SaveCommand = new RelayCommand(Save);
-            CloseCommand = new RelayCommand(() => RequestClose?.Invoke());
-            BrowseCommand = new RelayCommand(BrowseDirectory);
+            _addColumnCommand = new RelayCommand(AddColumn, () => !IsBusy);
+            _removeColumnCommand = new RelayCommand(RemoveSelectedColumn, () => SelectedColumn != null && !IsBusy);
+            _saveCommand = new RelayCommand(ExecuteSaveAsync, () => !IsBusy);
+            _browseCommand = new RelayCommand(BrowseDirectory, () => !IsBusy);
 #if DEBUG
-            DebugSaveCommand = new RelayCommand(() => Save());
+            _debugSaveCommand = new RelayCommand(ExecuteSaveAsync, () => !IsBusy);
 #endif
+            AddColumnCommand = _addColumnCommand;
+            RemoveColumnCommand = _removeColumnCommand;
+            SaveCommand = _saveCommand;
+            CloseCommand = new RelayCommand(() => RequestClose?.Invoke());
+            BrowseCommand = _browseCommand;
+#if DEBUG
+            DebugSaveCommand = _debugSaveCommand;
+#endif
+            InitializeAsync().GetAwaiter().GetResult();
         }
 
-        private void Load()
+        private async Task InitializeAsync()
         {
-            if (System.IO.File.Exists(_configPath))
+            SetIsBusy(true);
+            try
             {
-                var json = System.IO.File.ReadAllText(_configPath);
-                if (!string.IsNullOrWhiteSpace(json))
-                {
-                    Configuration = JsonSerializer.Deserialize<CsvConfiguration>(json) ?? CreateDefaultConfiguration();
-                    EnsureObservableColumns();
-                    OnPropertyChanged(nameof(Configuration));
-                    RefreshValidationMessages();
-                    return;
-                }
+                var configuration = await LoadConfigurationAsync(CancellationToken.None).ConfigureAwait(false);
+                RunOnUiThread(() => ApplyConfiguration(configuration));
             }
-
-            EnsureObservableColumns();
-            RefreshValidationMessages();
+            catch (Exception ex)
+            {
+                RunOnUiThread(() => HandleInitializationError(ex));
+            }
+            finally
+            {
+                SetIsBusy(false);
+            }
         }
 
         public void Save()
         {
-            if (Configuration is null)
-                return;
+            ExecuteSaveAsync();
+        }
 
+        private async void ExecuteSaveAsync()
+        {
+            if (Configuration is null || IsBusy)
+            {
+                return;
+            }
+
+            SetIsBusy(true);
             try
             {
-                var snapshot = new CsvConfiguration
-                {
-                    FileNamePattern = Configuration.FileNamePattern,
-                    OutputDirectory = Configuration.OutputDirectory,
-                    Columns = Configuration.Columns
-                        .Select(c => new CsvColumnDefinition
-                        {
-                            Name = c.Name,
-                            Expression = c.Expression,
-                            Format = c.Format
-                        })
-                        .ToList()
-                };
-
-                var options = new JsonSerializerOptions
-                {
-                    WriteIndented = true,
-                    ReferenceHandler = ReferenceHandler.IgnoreCycles,
-                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-                };
-
-                var json = JsonSerializer.Serialize(snapshot, options);
-                System.IO.File.WriteAllText(_configPath, json);
+                await SaveConfigurationAsync(Configuration, CancellationToken.None).ConfigureAwait(false);
             }
             catch (StackOverflowException)
             {
-                var dumpOptions = new JsonSerializerOptions
+                HandleStackOverflowDuringSave();
+            }
+            catch (Exception ex)
+            {
+                RunOnUiThread(() =>
                 {
-                    WriteIndented = true,
-                    ReferenceHandler = ReferenceHandler.Preserve
-                };
-                var dump = JsonSerializer.Serialize(Configuration, dumpOptions);
-                var temp = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "csv_config_dump.json");
-                System.IO.File.WriteAllText(temp, dump);
-                Environment.FailFast($"Stack overflow while saving CSV configuration. Dump written to {temp}");
+                    _validationMessages.Add($"Failed to save CSV configuration: {ex.Message}");
+                    OnPropertyChanged(nameof(ValidationMessages));
+                });
+            }
+            finally
+            {
+                SetIsBusy(false);
             }
         }
 
@@ -328,6 +348,109 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Csv
             });
         }
 
+        private void ApplyConfiguration(CsvConfiguration configuration)
+        {
+            Configuration = configuration ?? CreateDefaultConfiguration();
+            _suggestionSet.Clear();
+            _attributeSuggestions.Clear();
+            OnPropertyChanged(nameof(AttributeSuggestions));
+            OnPropertyChanged(nameof(Configuration));
+            EnsureObservableColumns();
+            RefreshValidationMessages();
+        }
+
+        private void HandleInitializationError(Exception exception)
+        {
+            Configuration = CreateDefaultConfiguration();
+            EnsureObservableColumns();
+            _suggestionSet.Clear();
+            _attributeSuggestions.Clear();
+            _validationMessages.Clear();
+            _validationMessages.Add($"Failed to load CSV configuration: {exception.Message}");
+            OnPropertyChanged(nameof(AttributeSuggestions));
+            OnPropertyChanged(nameof(Configuration));
+            OnPropertyChanged(nameof(ValidationMessages));
+        }
+
+        private async Task<CsvConfiguration> LoadConfigurationAsync(CancellationToken cancellationToken)
+        {
+            if (!File.Exists(_configPath))
+            {
+                return CreateDefaultConfiguration();
+            }
+
+            var json = await File.ReadAllTextAsync(_configPath, cancellationToken).ConfigureAwait(false);
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                return CreateDefaultConfiguration();
+            }
+
+            return await Task.Run(() => JsonSerializer.Deserialize<CsvConfiguration>(json), cancellationToken)
+                .ConfigureAwait(false)
+                ?? CreateDefaultConfiguration();
+        }
+
+        private async Task SaveConfigurationAsync(CsvConfiguration configuration, CancellationToken cancellationToken)
+        {
+            var snapshot = RunOnUiThread(() => CreateSnapshot(configuration));
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                ReferenceHandler = ReferenceHandler.IgnoreCycles,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            };
+
+            var json = await Task.Run(() => JsonSerializer.Serialize(snapshot, options), cancellationToken)
+                .ConfigureAwait(false);
+            await File.WriteAllTextAsync(_configPath, json, cancellationToken).ConfigureAwait(false);
+        }
+
+        private CsvConfiguration CreateSnapshot(CsvConfiguration source)
+        {
+            return new CsvConfiguration
+            {
+                FileNamePattern = source.FileNamePattern,
+                OutputDirectory = source.OutputDirectory,
+                Columns = source.Columns
+                    .Select(c => new CsvColumnDefinition
+                    {
+                        Name = c.Name,
+                        Expression = c.Expression,
+                        Format = c.Format
+                    })
+                    .ToList()
+            };
+        }
+
+        private void HandleStackOverflowDuringSave()
+        {
+            var dumpOptions = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                ReferenceHandler = ReferenceHandler.Preserve
+            };
+            var dump = JsonSerializer.Serialize(Configuration, dumpOptions);
+            var temp = Path.Combine(Path.GetTempPath(), "csv_config_dump.json");
+            File.WriteAllText(temp, dump);
+            Environment.FailFast($"Stack overflow while saving CSV configuration. Dump written to {temp}");
+        }
+
+        private void SetIsBusy(bool value)
+        {
+            RunOnUiThread(() => IsBusy = value);
+        }
+
+        private void UpdateCommandStates()
+        {
+            _addColumnCommand.RaiseCanExecuteChanged();
+            _removeColumnCommand.RaiseCanExecuteChanged();
+            _saveCommand.RaiseCanExecuteChanged();
+            _browseCommand.RaiseCanExecuteChanged();
+#if DEBUG
+            _debugSaveCommand.RaiseCanExecuteChanged();
+#endif
+        }
+
         private static void RunOnUiThread(Action action)
         {
             if (action is null)
@@ -344,6 +467,22 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Csv
             {
                 dispatcher.Invoke(action);
             }
+        }
+
+        private static T RunOnUiThread<T>(Func<T> function)
+        {
+            if (function is null)
+            {
+                return default!;
+            }
+
+            var dispatcher = Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher;
+            if (dispatcher.CheckAccess())
+            {
+                return function();
+            }
+
+            return dispatcher.Invoke(function);
         }
     }
 }

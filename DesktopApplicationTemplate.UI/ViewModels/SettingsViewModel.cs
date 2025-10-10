@@ -1,7 +1,10 @@
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Services;
+using UI = DesktopApplicationTemplate.UI;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -30,11 +33,60 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             internal set => _suppressCloseConfirmation = value;
         }
 
-        public bool DarkTheme { get => _darkTheme; set { _darkTheme = value; _dirty = true; OnPropertyChanged(); } }
-        public bool AutoCheckUpdates { get => _autoCheckUpdates; set { _autoCheckUpdates = value; _dirty = true; OnPropertyChanged(); } }
-        public bool RunUIOnStartup { get => _runUIOnStartup; set { _runUIOnStartup = value; _dirty = true; OnPropertyChanged(); } }
-        public bool RunServicesOnStartup { get => _runServicesOnStartup; set { _runServicesOnStartup = value; _dirty = true; OnPropertyChanged(); } }
-        public bool FirstRun { get => _firstRun; set { _firstRun = value; _dirty = true; OnPropertyChanged(); } }
+        public bool DarkTheme
+        {
+            get => _darkTheme;
+            set
+            {
+                _darkTheme = value;
+                MarkDirty();
+                OnPropertyChanged();
+            }
+        }
+
+        public bool AutoCheckUpdates
+        {
+            get => _autoCheckUpdates;
+            set
+            {
+                _autoCheckUpdates = value;
+                MarkDirty();
+                OnPropertyChanged();
+            }
+        }
+
+        public bool RunUIOnStartup
+        {
+            get => _runUIOnStartup;
+            set
+            {
+                _runUIOnStartup = value;
+                MarkDirty();
+                OnPropertyChanged();
+            }
+        }
+
+        public bool RunServicesOnStartup
+        {
+            get => _runServicesOnStartup;
+            set
+            {
+                _runServicesOnStartup = value;
+                MarkDirty();
+                OnPropertyChanged();
+            }
+        }
+
+        public bool FirstRun
+        {
+            get => _firstRun;
+            set
+            {
+                _firstRun = value;
+                MarkDirty();
+                OnPropertyChanged();
+            }
+        }
         public bool HasUnsavedChanges => _dirty;
 
         public SettingsViewModel()
@@ -47,9 +99,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             _logger = logger;
         }
 
-        public void Load()
+        public async Task LoadAsync(CancellationToken cancellationToken = default)
         {
-            var userSettings = UserSettingsStorage.Load(_logger);
+            var userSettings = await UserSettingsStorage.LoadAsync(_logger, cancellationToken).ConfigureAwait(false);
+
+            await SwitchToUiThreadAsync().ConfigureAwait(false);
 
             _darkTheme = userSettings.DarkTheme;
             _autoCheckUpdates = userSettings.AutoCheckUpdates;
@@ -58,10 +112,20 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             _firstRun = userSettings.FirstRun;
             SaveConfirmationSuppressed = userSettings.SuppressSaveConfirmation;
             CloseConfirmationSuppressed = userSettings.SuppressCloseConfirmation;
+
+            _dirty = false;
+            OnPropertyChanged(nameof(DarkTheme));
+            OnPropertyChanged(nameof(AutoCheckUpdates));
+            OnPropertyChanged(nameof(RunUIOnStartup));
+            OnPropertyChanged(nameof(RunServicesOnStartup));
+            OnPropertyChanged(nameof(FirstRun));
+            OnPropertyChanged(nameof(HasUnsavedChanges));
         }
 
-        public void Save()
+        public async Task SaveAsync(CancellationToken cancellationToken = default)
         {
+            await SwitchToUiThreadAsync().ConfigureAwait(false);
+
             var data = new UserSettings
             {
                 DarkTheme = _darkTheme,
@@ -72,8 +136,32 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 SuppressSaveConfirmation = SaveConfirmationSuppressed,
                 SuppressCloseConfirmation = CloseConfirmationSuppressed
             };
-            UserSettingsStorage.Save(data, _logger);
+
+            await UserSettingsStorage.SaveAsync(data, _logger, cancellationToken).ConfigureAwait(false);
+
+            await SwitchToUiThreadAsync().ConfigureAwait(false);
+
             _dirty = false;
+            OnPropertyChanged(nameof(HasUnsavedChanges));
+        }
+
+        private static async Task SwitchToUiThreadAsync()
+        {
+            if (UI.App.UiThreadTaskFactory is { } factory)
+            {
+                await factory.SwitchToMainThreadAsync();
+            }
+        }
+
+        private void MarkDirty()
+        {
+            if (_dirty)
+            {
+                return;
+            }
+
+            _dirty = true;
+            OnPropertyChanged(nameof(HasUnsavedChanges));
         }
 
         // OnPropertyChanged provided by ViewModelBase

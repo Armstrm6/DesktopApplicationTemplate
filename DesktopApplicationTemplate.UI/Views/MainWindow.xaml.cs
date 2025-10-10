@@ -326,7 +326,7 @@ namespace DesktopApplicationTemplate.UI.Views
 
             if (svc.Logs.Count == 0)
             {
-                vm.Logger.Reload();
+                ObserveTask(vm.Logger.ReloadAsync());
             }
         }
 
@@ -463,7 +463,7 @@ namespace DesktopApplicationTemplate.UI.Views
             editView.Initialize(viewModel);
 
             EventHandler? closeHandler = null;
-            closeHandler = (_, _) =>
+            closeHandler = async (_, _) =>
             {
                 viewModel.RequestClose -= closeHandler;
                 if (service.ServicePage != null)
@@ -471,7 +471,7 @@ namespace DesktopApplicationTemplate.UI.Views
                     ShowPage(service.ServicePage);
                 }
 
-                _ = _viewModel.SaveServicesAsync();
+                await _viewModel.SaveServicesAsync().ConfigureAwait(false);
             };
             viewModel.RequestClose += closeHandler;
 
@@ -540,7 +540,7 @@ namespace DesktopApplicationTemplate.UI.Views
             var page = _serviceProvider.GetRequiredService<CreateServicePage>();
             _createServicePage = page;
             page.SetExistingNames(_viewModel.Services.Select(s => s.DisplayName));
-            page.ServiceCreated += (name, type) =>
+            page.ServiceCreated += async (name, type) =>
             {
                 using var creationScope = _viewModel.BeginServiceCreationScope();
                 var trimmed = string.IsNullOrWhiteSpace(name)
@@ -569,7 +569,7 @@ namespace DesktopApplicationTemplate.UI.Views
                 ServiceList.ScrollIntoView(svc);
                 if (svc.ServicePage != null)
                     ShowPage(svc.ServicePage);
-                _ = _viewModel.SaveServicesAsync();
+                await _viewModel.SaveServicesAsync().ConfigureAwait(false);
                 page.SetExistingNames(_viewModel.Services.Select(s => s.DisplayName));
             };
             page.ServiceTypeSelected += NavigateTo;
@@ -1018,9 +1018,15 @@ namespace DesktopApplicationTemplate.UI.Views
             _viewModel.ClearLogs();
         }
 
-        private void ExportLog_Click(object sender, RoutedEventArgs e)
+        private async void ExportLog_Click(object sender, RoutedEventArgs e)
         {
             _logger?.LogInformation("Home view export logs button clicked");
+
+            var button = sender as Button;
+            if (button is not null)
+            {
+                button.IsEnabled = false;
+            }
 
             var timestamp = DateTime.Now.ToString(LogExportTimestampFormat);
             var suggestedName = $"{LogExportDefaultPrefix}_{timestamp}.log";
@@ -1029,31 +1035,46 @@ namespace DesktopApplicationTemplate.UI.Views
             if (string.IsNullOrWhiteSpace(selectedPath))
             {
                 _logger?.LogInformation("Log export canceled by the user.");
+                if (button is not null)
+                {
+                    button.IsEnabled = true;
+                }
                 return;
             }
 
-            if (_viewModel.TryExportAllLogs(selectedPath, out var errorMessage))
+            try
             {
-                _logger?.LogInformation("All logs exported to {FilePath}", selectedPath);
-                MessageBox.Show(
-                    this,
-                    $"Logs exported to:\n{selectedPath}",
-                    "Export Complete",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
+                var (success, errorMessage) = await _viewModel.TryExportAllLogsAsync(selectedPath);
+                if (success)
+                {
+                    _logger?.LogInformation("All logs exported to {FilePath}", selectedPath);
+                    MessageBox.Show(
+                        this,
+                        $"Logs exported to:\n{selectedPath}",
+                        "Export Complete",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
+                else
+                {
+                    var failureMessage = string.IsNullOrWhiteSpace(errorMessage)
+                        ? "An unknown error occurred."
+                        : errorMessage;
+                    _logger?.LogError("Failed to export logs to {FilePath}: {ErrorMessage}", selectedPath, failureMessage);
+                    MessageBox.Show(
+                        this,
+                        $"Failed to export logs to '{selectedPath}': {failureMessage}",
+                        "Export Failed",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                }
             }
-            else
+            finally
             {
-                var failureMessage = string.IsNullOrWhiteSpace(errorMessage)
-                    ? "An unknown error occurred."
-                    : errorMessage;
-                _logger?.LogError("Failed to export logs to {FilePath}: {ErrorMessage}", selectedPath, failureMessage);
-                MessageBox.Show(
-                    this,
-                    $"Failed to export logs to '{selectedPath}': {failureMessage}",
-                    "Export Failed",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                if (button is not null)
+                {
+                    button.IsEnabled = true;
+                }
             }
         }
 
@@ -1083,6 +1104,18 @@ namespace DesktopApplicationTemplate.UI.Views
             }
 
             _ = ObserveBackgroundTaskAsync();
+        }
+
+        private static void ObserveTask(Task? task)
+        {
+            if (task is null)
+            {
+                return;
+            }
+
+            _ = task.ContinueWith(
+                t => _ = t.Exception,
+                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
         }
 
     }

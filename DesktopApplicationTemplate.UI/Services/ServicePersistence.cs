@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Csv;
 using DesktopApplicationTemplate.Core.Services.Protocols.FileObserver;
@@ -30,7 +31,7 @@ namespace DesktopApplicationTemplate.Persistence
     {
         public static string FilePath { get; set; } = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "services.json");
 
-        public static void Save(IEnumerable<ServiceListModel> services, IServiceCatalog serviceCatalog, ILoggingService? logger = null)
+        public static async Task SaveAsync(IEnumerable<ServiceListModel> services, IServiceCatalog serviceCatalog, ILoggingService? logger = null)
         {
             if (services is null)
             {
@@ -112,16 +113,23 @@ namespace DesktopApplicationTemplate.Persistence
 
             try
             {
-                var json = JsonSerializer.Serialize(data, options);
                 logger?.Log($"Persisting services to {FilePath}", LogLevel.Debug);
                 var directory = Path.GetDirectoryName(FilePath);
                 if (!string.IsNullOrEmpty(directory))
                 {
                     Directory.CreateDirectory(directory);
                 }
-                using var fs = new FileStream(FilePath, FileMode.Create, FileAccess.Write, FileShare.None);
-                using var sw = new StreamWriter(fs);
-                sw.Write(json);
+
+                await using var stream = new FileStream(
+                    FilePath,
+                    FileMode.Create,
+                    FileAccess.Write,
+                    FileShare.None,
+                    bufferSize: 4096,
+                    useAsync: true);
+
+                await JsonSerializer.SerializeAsync(stream, data, options).ConfigureAwait(false);
+                await stream.FlushAsync().ConfigureAwait(false);
                 logger?.Log($"Saved {data.Count} services to {FilePath}", LogLevel.Debug);
             }
             catch (StackOverflowException)
@@ -138,7 +146,10 @@ namespace DesktopApplicationTemplate.Persistence
             }
         }
 
-        public static List<ServiceListModel> Load(IServiceCatalog serviceCatalog, IMessageRoutingService routingService, ILoggingService? logger = null)
+        public static async Task<List<ServiceListModel>> LoadAsync(
+            IServiceCatalog serviceCatalog,
+            IMessageRoutingService routingService,
+            ILoggingService? logger = null)
         {
             if (serviceCatalog is null)
             {
@@ -150,26 +161,32 @@ namespace DesktopApplicationTemplate.Persistence
                 throw new ArgumentNullException(nameof(routingService));
             }
 
-            if (!File.Exists(FilePath))
-            {
-                logger?.Log("Services file not found", LogLevel.Warning);
-                return new List<ServiceListModel>();
-            }
-
-            string json;
             try
             {
-                json = File.ReadAllText(FilePath);
+                if (!File.Exists(FilePath))
+                {
+                    logger?.Log("Services file not found", LogLevel.Warning);
+                    return new List<ServiceListModel>();
+                }
             }
-            catch (FileNotFoundException)
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
             {
-                logger?.Log("Services file not found", LogLevel.Warning);
+                logger?.Log($"Unable to access services file: {ex.Message}", LogLevel.Warning);
                 return new List<ServiceListModel>();
             }
 
             try
             {
-                var infos = JsonSerializer.Deserialize<List<ServiceInfo>>(json) ?? new List<ServiceInfo>();
+                await using var stream = new FileStream(
+                    FilePath,
+                    FileMode.Open,
+                    FileAccess.Read,
+                    FileShare.Read,
+                    bufferSize: 4096,
+                    useAsync: true);
+
+                var infos = await JsonSerializer.DeserializeAsync<List<ServiceInfo>>(stream).ConfigureAwait(false)
+                    ?? new List<ServiceInfo>();
                 var services = new List<ServiceListModel>(infos.Count);
 
                 foreach (var info in infos)

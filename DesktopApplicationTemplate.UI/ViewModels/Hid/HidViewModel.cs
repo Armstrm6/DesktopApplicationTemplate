@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Services;
@@ -97,7 +98,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Hid
         {
             _saveHelper = saveHelper;
             BuildCommand = new RelayCommand(BuildMessage);
-            SaveCommand = new RelayCommand(Save);
+            SaveCommand = new AsyncRelayCommand(SaveAsync);
         }
 
         private void BuildMessage()
@@ -127,10 +128,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Hid
             }
         }
 
-        private void Save()
+        private async Task SaveAsync()
         {
             Logger?.Log("Saving HID configuration", LogLevel.Debug);
-            _saveHelper.Show();
+            await _saveHelper.ShowAsync().ConfigureAwait(false);
         }
 
         /// <summary>

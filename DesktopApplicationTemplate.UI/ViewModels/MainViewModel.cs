@@ -225,7 +225,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             ApplyFilters();
             if (_logger is LoggingService concreteLogger)
             {
-                concreteLogger.Reload();
+                ObserveTask(concreteLogger.ReloadAsync());
             }
         }
 
@@ -437,12 +437,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     await tcpVm.PersistOptionsAsync().ConfigureAwait(false);
                 }
             }
-            ServicePersistence.Save(Services, _serviceCatalog, _logger);
+            await ServicePersistence.SaveAsync(Services, _serviceCatalog, _logger).ConfigureAwait(false);
         }
 
-        private void LoadServices()
+        public async Task LoadServicesAsync()
         {
-            var existing = ServicePersistence.Load(_serviceCatalog, _messageRoutingService, _logger);
+            var existing = await ServicePersistence.LoadAsync(_serviceCatalog, _messageRoutingService, _logger).ConfigureAwait(true);
             foreach (var service in existing.OrderBy(s => s.Order))
             {
                 if (string.IsNullOrWhiteSpace(service.DescriptorId))
@@ -470,6 +470,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 }
 
                 Services.Add(service);
+                TrackService(service);
 
                 service.RepublishRoutingAttributes();
 
@@ -482,6 +483,13 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
             OnPropertyChanged(nameof(ServicesCreated));
             OnPropertyChanged(nameof(CurrentActiveServices));
+            LogViewModel.UpdateServiceFilters(Services.Select(s => s.DisplayName));
+            ServicesRunning = Services.Any(svc => svc.IsActive);
+            ApplyFilters();
+            if (_logger is LoggingService concreteLogger)
+            {
+                concreteLogger.Reload();
+            }
         }
 
         private IServiceOptionsSerializer? ResolveOptionsSerializer(string? descriptorId)
@@ -617,7 +625,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                         return;
                     }
 
-                    var currentSettings = UserSettingsStorage.Load(_logger);
+                    var currentSettings = await UserSettingsStorage.LoadAsync(_logger);
                     var preferenceResult = _startupPreferencesService.ShowDialog(currentSettings.RunServicesOnStartup, currentSettings.RunUIOnStartup);
                     if (!preferenceResult.Accepted)
                     {
@@ -630,7 +638,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                     {
                         currentSettings.RunServicesOnStartup = preferenceResult.RunServicesOnStartup;
                         currentSettings.RunUIOnStartup = preferenceResult.RunUIOnStartup;
-                        UserSettingsStorage.Save(currentSettings, _logger);
+                        await UserSettingsStorage.SaveAsync(currentSettings, _logger);
                     }
 
                     ServicesRunning = true;
@@ -1092,40 +1100,36 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             _logger?.Log("Logs cleared", LogLevel.Debug);
         }
 
-        public void ExportDisplayedLogs(string filePath)
+        public async Task ExportDisplayedLogsAsync(string filePath)
         {
-            LogViewModel.ExportLogs(filePath);
+            await LogViewModel.ExportLogsAsync(filePath);
             _logger?.Log($"Exported {LogViewModel.DisplayLogs.Count()} logs to {filePath}", LogLevel.Debug);
         }
 
-        public bool TryExportAllLogs(string filePath, out string? errorMessage)
+        public async Task<(bool Success, string? ErrorMessage)> TryExportAllLogsAsync(string filePath)
         {
             if (string.IsNullOrWhiteSpace(filePath))
             {
-                errorMessage = "A valid file path was not provided.";
                 _logger?.Log("Export aborted because the destination file path was empty.", LogLevel.Warning);
-                return false;
+                return (false, "A valid file path was not provided.");
             }
 
             try
             {
                 var lines = AllLogs.Reverse().Select(entry => entry.Message).ToList();
-                File.WriteAllLines(filePath, lines);
+                await File.WriteAllLinesAsync(filePath, lines);
                 _logger?.Log($"Exported {lines.Count} total logs to {filePath}", LogLevel.Information);
-                errorMessage = null;
-                return true;
+                return (true, null);
             }
             catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
             {
-                errorMessage = ex.Message;
                 _logger?.Log($"Failed to export logs to {filePath}: {ex.Message}", LogLevel.Error);
-                return false;
+                return (false, ex.Message);
             }
             catch (Exception ex)
             {
-                errorMessage = ex.Message;
                 _logger?.Log($"Failed to export logs to {filePath}: {ex.Message}", LogLevel.Error);
-                return false;
+                return (false, ex.Message);
             }
         }
 
@@ -1133,6 +1137,18 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         {
             LogViewModel.RefreshLogs();
             _logger?.Log("Logs refreshed", LogLevel.Debug);
+        }
+
+        private static void ObserveTask(Task? task)
+        {
+            if (task is null)
+            {
+                return;
+            }
+
+            _ = task.ContinueWith(
+                t => _ = t.Exception,
+                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
         }
 
         // OnPropertyChanged inherited from ViewModelBase
