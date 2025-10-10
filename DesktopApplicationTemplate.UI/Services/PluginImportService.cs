@@ -1,12 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using DesktopApplicationTemplate.Core.Modules;
 using DesktopApplicationTemplate.Core.Services;
+using DesktopApplicationTemplate.Services;
+using DesktopApplicationTemplate.UI.ViewModels;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
+using System.Windows.Controls;
 
 namespace DesktopApplicationTemplate.UI.Services;
 
@@ -92,14 +97,20 @@ public sealed class PluginImportService : IPluginImportService
                 merged[descriptor.Id] = descriptor;
             }
 
-            _catalog.UpdateDescriptors(merged.Values);
+            var mergedDescriptors = merged.Values.ToArray();
+            var uiRegistrations = ExtractUiRegistrations(modules, mergedDescriptors);
+
+            _catalog.UpdateDescriptors(mergedDescriptors);
 
             var successMessage = descriptors.Count == 1
                 ? "Imported 1 service descriptor."
                 : $"Imported {descriptors.Count} service descriptors.";
             _logger.LogInformation("{Message} Package: {PackagePath}.", successMessage, destinationPath);
 
-            return Task.FromResult(new PluginImportResult(true, successMessage, destinationPath, descriptors));
+            return Task.FromResult(new PluginImportResult(true, successMessage, destinationPath, descriptors)
+            {
+                ImportedUiRegistrations = uiRegistrations,
+            });
         }
         catch (OperationCanceledException)
         {
@@ -113,4 +124,26 @@ public sealed class PluginImportService : IPluginImportService
         }
     }
 
+    private IReadOnlyCollection<ServiceUiRegistration<ServiceListModel, Page>> ExtractUiRegistrations(
+        IEnumerable<IServiceModule> modules,
+        IEnumerable<IServiceDescriptor> descriptors)
+    {
+        try
+        {
+            var descriptorSnapshot = descriptors?.ToArray() ?? Array.Empty<IServiceDescriptor>();
+            var catalog = new ServiceCatalog(descriptorSnapshot);
+            var services = new ServiceCollection();
+            services.AddSingleton(catalog);
+            services.AddSingleton<IServiceCatalog>(catalog);
+            ServiceModuleDiscovery.RegisterModules(modules, services);
+
+            using var provider = services.BuildServiceProvider();
+            return provider.GetServices<ServiceUiRegistration<ServiceListModel, Page>>().ToArray();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "Failed to extract UI registrations from plug-in modules.");
+            return Array.Empty<ServiceUiRegistration<ServiceListModel, Page>>();
+        }
+    }
 }

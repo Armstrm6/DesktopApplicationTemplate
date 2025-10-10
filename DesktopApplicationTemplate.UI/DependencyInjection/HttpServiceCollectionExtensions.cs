@@ -5,6 +5,7 @@ using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Http;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.Services;
+using DesktopApplicationTemplate.UI.EditHandlers;
 using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels;
@@ -18,6 +19,7 @@ using DesktopApplicationTemplate.UI.Views.Http.Advanced;
 using DesktopApplicationTemplate.UI.Views.Http.Create;
 using DesktopApplicationTemplate.UI.Views.Http.Edit;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace DesktopApplicationTemplate.UI.DependencyInjection
 {
@@ -93,7 +95,12 @@ namespace DesktopApplicationTemplate.UI.DependencyInjection
                     };
                     return view;
                 },
-                ApplyPresentation: static (service, metadata) => service.ApplyPresentation(metadata));
+                ApplyPresentation: static (service, metadata) => service.ApplyPresentation(metadata),
+                CreateEditHandler: provider => new HttpEditServiceHandler(
+                    () => provider.GetRequiredService<MainView>(),
+                    () => provider.GetRequiredService<MainViewModel>(),
+                    provider,
+                    provider.GetService<ILogger<HttpEditServiceHandler>>()));
         }
     }
 }

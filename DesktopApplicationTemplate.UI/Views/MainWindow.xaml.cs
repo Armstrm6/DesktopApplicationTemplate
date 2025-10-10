@@ -50,6 +50,7 @@ namespace DesktopApplicationTemplate.UI.Views
         private readonly Dictionary<ServiceListModel, EventHandler> _mqttEditHandlers = new();
         private readonly Dictionary<ServiceListModel, MqttTagSubscriptionsViewModel> _mqttSubscriptionViewModels = new();
         private readonly BrushConverter _brushConverter = new();
+        private readonly IDictionary<ServiceType, IEditServiceHandler> _editHandlers;
         private JoinableTask? _shutdownTask;
         private bool _shutdownCompleted;
 
@@ -63,6 +64,8 @@ namespace DesktopApplicationTemplate.UI.Views
             _viewModel = viewModel;
             _serviceRegistry = serviceRegistry;
             _serviceProvider = serviceProvider;
+            _editHandlers = serviceProvider.GetService<IDictionary<ServiceType, IEditServiceHandler>>()
+                ?? new Dictionary<ServiceType, IEditServiceHandler>();
             _serviceCatalog = serviceCatalog ?? throw new ArgumentNullException(nameof(serviceCatalog));
             if (_serviceProvider.GetService(typeof(ILoggerFactory)) is ILoggerFactory factory)
             {
@@ -426,8 +429,10 @@ namespace DesktopApplicationTemplate.UI.Views
 
         private void OpenTcpAdvancedSettings(ServiceListModel svc)
         {
-            var handler = _serviceProvider.GetKeyedService<IEditServiceHandler>(ServiceType.Tcp);
-            handler?.Edit(svc);
+            if (_editHandlers.TryGetValue(ServiceType.Tcp, out var handler))
+            {
+                handler.Edit(svc);
+            }
         }
 
         private void ShowMqttEditConnectionView(ServiceListModel service, bool highlightMissingFields = false)

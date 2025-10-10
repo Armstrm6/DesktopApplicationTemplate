@@ -8,7 +8,6 @@ using DesktopApplicationTemplate.Core.Services.Protocols.Mqtt;
 using DesktopApplicationTemplate.Core.Services.Protocols.Scp;
 using DesktopApplicationTemplate.Core.Services.Protocols.Tcp;
 using DesktopApplicationTemplate.UI.Services;
-using DesktopApplicationTemplate.UI.EditHandlers;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Modules;
 using DesktopApplicationTemplate.Core.Modules.BuiltIn;
@@ -32,6 +31,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System;
 using System.Windows.Threading;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using DesktopApplicationTemplate.Models;
@@ -95,30 +95,6 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<IPluginExportService, PluginExportService>();
             services.AddTransient<PluginExportViewModel>();
             services.AddTransient<PluginExportWindow>();
-
-            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Mqtt, (sp, _) => new MqttEditServiceHandler(() => sp.GetRequiredService<MainView>(), () => sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<MqttEditServiceHandler>>()));
-            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Heartbeat, (sp, _) => new HeartbeatEditServiceHandler(() => sp.GetRequiredService<MainView>(), () => sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<HeartbeatEditServiceHandler>>()));
-            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Hid, (sp, _) => new HidEditServiceHandler(() => sp.GetRequiredService<MainView>(), () => sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<HidEditServiceHandler>>()));
-            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Csv, (sp, _) => new CsvEditServiceHandler(() => sp.GetRequiredService<MainView>(), () => sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<CsvEditServiceHandler>>()));
-            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.FileObserver, (sp, _) => new FileObserverEditServiceHandler(() => sp.GetRequiredService<MainView>(), () => sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<FileObserverEditServiceHandler>>()));
-            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Scp, (sp, _) => new ScpEditServiceHandler(() => sp.GetRequiredService<MainView>(), () => sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<ScpEditServiceHandler>>()));
-            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Tcp, (sp, _) => new TcpEditServiceHandler(() => sp.GetRequiredService<MainView>(), () => sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<TcpEditServiceHandler>>()));
-            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Http, (sp, _) => new HttpEditServiceHandler(() => sp.GetRequiredService<MainView>(), () => sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<HttpEditServiceHandler>>()));
-            services.AddKeyedSingleton<IEditServiceHandler>(ServiceType.Ftp, (sp, _) => new FtpEditServiceHandler(() => sp.GetRequiredService<MainView>(), () => sp.GetRequiredService<MainViewModel>(), sp, sp.GetService<ILogger<FtpEditServiceHandler>>()));
-            services.AddSingleton<IDictionary<ServiceType, IEditServiceHandler>>(sp =>
-            {
-                var handlers = new Dictionary<ServiceType, IEditServiceHandler>();
-                foreach (ServiceType type in Enum.GetValues<ServiceType>())
-                {
-                    var handler = sp.GetKeyedService<IEditServiceHandler>(type);
-                    if (handler != null)
-                    {
-                        handlers[type] = handler;
-                    }
-                }
-
-                return handlers;
-            });
             services.AddSingleton<MainView>();
             services.AddSingleton<IProcessRunner, ProcessRunner>();
             services.AddSingleton<INetworkConfigurationService, NetworkConfigurationService>();
@@ -152,6 +128,45 @@ namespace DesktopApplicationTemplate.UI
                 var catalog = sp.GetRequiredService<IServiceCatalog>();
                 var registrations = sp.GetServices<ServiceUiRegistration<ServiceListModel, Page>>().ToArray();
                 return new ServiceUiRegistry<ServiceListModel, Page>(catalog, registrations);
+            });
+            services.AddSingleton<IDictionary<ServiceType, IEditServiceHandler>>(sp =>
+            {
+                var registry = sp.GetRequiredService<IServiceUiRegistry<ServiceListModel, Page>>();
+                var catalog = sp.GetRequiredService<IServiceCatalog>();
+                var handlers = new ConcurrentDictionary<ServiceType, IEditServiceHandler>();
+
+                void RefreshHandlers()
+                {
+                    handlers.Clear();
+                    foreach (var serviceType in registry.SupportedServices)
+                    {
+                        if (!registry.TryGetRegistration(serviceType, out var registration))
+                        {
+                            continue;
+                        }
+
+                        var factory = registration.CreateEditHandler;
+                        if (factory is null)
+                        {
+                            continue;
+                        }
+
+                        var instance = factory(sp);
+                        if (instance is IEditServiceHandler handler)
+                        {
+                            handlers[serviceType] = handler;
+                        }
+                        else if (instance is not null)
+                        {
+                            throw new InvalidOperationException($"Edit handler factory for descriptor '{registration.DescriptorId}' returned incompatible type '{instance.GetType()}'.");
+                        }
+                    }
+                }
+
+                RefreshHandlers();
+                catalog.DescriptorsChanged += (_, _) => RefreshHandlers();
+
+                return handlers;
             });
             services.AddTransient<SplashWindow>();
             services.AddTransient<CreateServicePage>();
