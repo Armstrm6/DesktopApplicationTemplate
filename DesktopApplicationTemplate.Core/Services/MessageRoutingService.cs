@@ -8,17 +8,17 @@ using DesktopApplicationTemplate.Models;
 namespace DesktopApplicationTemplate.Core.Services;
 
 /// <summary>
-/// Tracks the latest messages per service and resolves token placeholders.
+/// Tracks routed service attributes and resolves token placeholders.
 /// </summary>
 public class MessageRoutingService : IMessageRoutingService
 {
     private readonly ConcurrentDictionary<(ServiceType, string), RoutingMessageEntry> _messages = new();
     private readonly ConcurrentDictionary<string, RoutingMessageEntry> _messagesByName = new(StringComparer.OrdinalIgnoreCase);
-    private readonly Dictionary<string, Dictionary<string, HashSet<MessageRoutingDirection>>> _referencesByService = new(StringComparer.OrdinalIgnoreCase);
-    private readonly Dictionary<string, Dictionary<string, HashSet<MessageRoutingDirection>>> _referencedByService = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, Dictionary<string, HashSet<string>>> _referencesByService = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, Dictionary<string, HashSet<string>>> _referencedByService = new(StringComparer.OrdinalIgnoreCase);
     private readonly object _referencesLock = new();
     private readonly ILoggingService? _logger;
-    private static readonly Regex NewTokenRegex = new(@"\{([A-Za-z0-9_]+)\.(InputMessage|OutputMessage|LastInputMessage|LastOutputMessage)\}", RegexOptions.Compiled);
+    private static readonly Regex AttributeTokenRegex = new(@"\{([A-Za-z0-9_]+)\.([A-Za-z0-9_]+)\}", RegexOptions.Compiled);
     private static readonly Regex LegacyTokenRegex = new(@"\{([A-Za-z0-9_]+)\.([A-Za-z0-9_]+)\.Message\}", RegexOptions.Compiled);
 
     /// <summary>
@@ -31,30 +31,18 @@ public class MessageRoutingService : IMessageRoutingService
     }
 
     /// <inheritdoc />
+    public event EventHandler<ServiceAttributeChangedEventArgs>? AttributeChanged;
+
+    /// <inheritdoc />
     public void UpdateMessage(ServiceType serviceType, string serviceName, string message, MessageRoutingDirection direction = MessageRoutingDirection.Input)
     {
-        if (string.IsNullOrWhiteSpace(serviceName))
-            throw new ArgumentException("Service name cannot be null or whitespace.", nameof(serviceName));
-
-        var normalizedName = serviceName.Trim();
+        var normalizedName = NormalizeServiceName(serviceName) ?? throw new ArgumentException("Service name cannot be null or whitespace.", nameof(serviceName));
         var payload = message ?? string.Empty;
 
         _logger?.Log($"Updating {direction} message for {serviceType}.{normalizedName}", LogLevel.Debug);
 
-        var entry = _messages.AddOrUpdate(
-            (serviceType, normalizedName),
-            _ => CreateEntry(direction, payload),
-            (_, existing) =>
-            {
-                existing.Update(direction, payload);
-                return existing;
-            });
-
-        _messagesByName.AddOrUpdate(normalizedName, _ => entry, (_, existing) =>
-        {
-            existing.Update(direction, payload);
-            return existing;
-        });
+        var attributeName = MessageRoutingAttributeHelper.FromDirection(direction);
+        PublishAttributeInternal(serviceType, normalizedName, attributeName, payload);
 
         _logger?.Log($"{direction} message for {serviceType}.{normalizedName} updated", LogLevel.Debug);
     }
@@ -62,15 +50,10 @@ public class MessageRoutingService : IMessageRoutingService
     /// <inheritdoc />
     public bool TryGetMessage(ServiceType serviceType, string serviceName, MessageRoutingDirection direction, out string? message)
     {
-        if (string.IsNullOrWhiteSpace(serviceName))
+        var attributeName = MessageRoutingAttributeHelper.FromDirection(direction);
+        if (TryGetAttribute(serviceType, serviceName, attributeName, out var value))
         {
-            message = null;
-            return false;
-        }
-
-        if (_messages.TryGetValue((serviceType, serviceName.Trim()), out var entry))
-        {
-            message = entry.Get(direction);
+            message = value;
             return true;
         }
 
@@ -81,15 +64,10 @@ public class MessageRoutingService : IMessageRoutingService
     /// <inheritdoc />
     public bool TryGetMessage(string serviceName, MessageRoutingDirection direction, out string? message)
     {
-        if (string.IsNullOrWhiteSpace(serviceName))
+        var attributeName = MessageRoutingAttributeHelper.FromDirection(direction);
+        if (TryGetAttribute(serviceName, attributeName, out var value))
         {
-            message = null;
-            return false;
-        }
-
-        if (_messagesByName.TryGetValue(serviceName.Trim(), out var entry))
-        {
-            message = entry.Get(direction);
+            message = value;
             return true;
         }
 
@@ -98,13 +76,184 @@ public class MessageRoutingService : IMessageRoutingService
     }
 
     /// <inheritdoc />
+    public void PublishAttribute(ServiceType serviceType, string serviceName, string attributeName, string? value)
+    {
+        var normalizedName = NormalizeServiceName(serviceName) ?? throw new ArgumentException("Service name cannot be null or whitespace.", nameof(serviceName));
+        var normalizedAttribute = MessageRoutingAttributeHelper.Normalize(attributeName, out _);
+        PublishAttributeInternal(serviceType, normalizedName, normalizedAttribute, value ?? string.Empty);
+    }
+
+    /// <inheritdoc />
+    public void PublishAttribute(string serviceName, string attributeName, string? value)
+    {
+        var normalizedName = NormalizeServiceName(serviceName) ?? throw new ArgumentException("Service name cannot be null or whitespace.", nameof(serviceName));
+        var normalizedAttribute = MessageRoutingAttributeHelper.Normalize(attributeName, out _);
+        PublishAttributeInternal(serviceType: null, normalizedName, normalizedAttribute, value ?? string.Empty);
+    }
+
+    /// <inheritdoc />
+    public bool TryGetAttribute(ServiceType serviceType, string serviceName, string attributeName, out string? value)
+    {
+        var normalizedName = NormalizeServiceName(serviceName);
+        if (normalizedName is null)
+        {
+            value = null;
+            return false;
+        }
+
+        var normalizedAttribute = MessageRoutingAttributeHelper.Normalize(attributeName, out _);
+
+        if (_messages.TryGetValue((serviceType, normalizedName), out var entry) &&
+            entry.TryGetAttribute(normalizedAttribute, out var resolved))
+        {
+            value = resolved;
+            return true;
+        }
+
+        if (_messagesByName.TryGetValue(normalizedName, out var fallback) &&
+            fallback.TryGetAttribute(normalizedAttribute, out var fallbackValue))
+        {
+            value = fallbackValue;
+            return true;
+        }
+
+        value = null;
+        return false;
+    }
+
+    /// <inheritdoc />
+    public bool TryGetAttribute(string serviceName, string attributeName, out string? value)
+    {
+        var normalizedName = NormalizeServiceName(serviceName);
+        if (normalizedName is null)
+        {
+            value = null;
+            return false;
+        }
+
+        var normalizedAttribute = MessageRoutingAttributeHelper.Normalize(attributeName, out _);
+
+        if (_messagesByName.TryGetValue(normalizedName, out var entry) &&
+            entry.TryGetAttribute(normalizedAttribute, out var resolved))
+        {
+            value = resolved;
+            return true;
+        }
+
+        value = null;
+        return false;
+    }
+
+    /// <inheritdoc />
+    public void ClearAttribute(ServiceType serviceType, string serviceName, string attributeName)
+    {
+        var normalizedName = NormalizeServiceName(serviceName) ?? throw new ArgumentException("Service name cannot be null or whitespace.", nameof(serviceName));
+        var normalizedAttribute = MessageRoutingAttributeHelper.Normalize(attributeName, out _);
+
+        if (!_messages.TryGetValue((serviceType, normalizedName), out var entry))
+        {
+            return;
+        }
+
+        if (!entry.RemoveAttribute(normalizedAttribute, out var previous))
+        {
+            return;
+        }
+
+        if (entry.IsEmpty)
+        {
+            _messages.TryRemove((serviceType, normalizedName), out _);
+            if (_messagesByName.TryGetValue(normalizedName, out var current) && ReferenceEquals(current, entry))
+            {
+                var replacement = _messages.FirstOrDefault(kvp =>
+                    string.Equals(kvp.Key.Item2, normalizedName, StringComparison.OrdinalIgnoreCase)).Value;
+
+                if (replacement is null)
+                {
+                    _messagesByName.TryRemove(normalizedName, out _);
+                }
+                else
+                {
+                    _messagesByName[normalizedName] = replacement;
+                }
+            }
+        }
+
+        OnAttributeChanged(serviceType, normalizedName, normalizedAttribute, null, previous, isRemoval: true);
+    }
+
+    /// <inheritdoc />
+    public void ClearAttribute(string serviceName, string attributeName)
+    {
+        var normalizedName = NormalizeServiceName(serviceName) ?? throw new ArgumentException("Service name cannot be null or whitespace.", nameof(serviceName));
+        var normalizedAttribute = MessageRoutingAttributeHelper.Normalize(attributeName, out _);
+
+        var notifications = new List<(ServiceType? ServiceType, string? PreviousValue)>();
+        RoutingMessageEntry? removedEntry = null;
+        string? removedPrevious = null;
+
+        if (_messagesByName.TryGetValue(normalizedName, out var entry) &&
+            entry.RemoveAttribute(normalizedAttribute, out var previous))
+        {
+            removedEntry = entry;
+            removedPrevious = previous;
+
+            if (entry.IsEmpty)
+            {
+                _messagesByName.TryRemove(normalizedName, out _);
+            }
+
+            notifications.Add((null, previous));
+        }
+
+        foreach (var kvp in _messages.ToArray())
+        {
+            if (!string.Equals(kvp.Key.Item2, normalizedName, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            if (removedEntry is not null && ReferenceEquals(kvp.Value, removedEntry))
+            {
+                if (kvp.Value.IsEmpty)
+                {
+                    _messages.TryRemove(kvp.Key, out _);
+                }
+
+                notifications.Add((kvp.Key.Item1, removedPrevious));
+                continue;
+            }
+
+            if (kvp.Value.RemoveAttribute(normalizedAttribute, out var typePrevious))
+            {
+                if (kvp.Value.IsEmpty)
+                {
+                    _messages.TryRemove(kvp.Key, out _);
+                }
+
+                notifications.Add((kvp.Key.Item1, typePrevious));
+            }
+        }
+
+        if (notifications.Count == 0)
+        {
+            return;
+        }
+
+        var hasTyped = notifications.Any(n => n.ServiceType.HasValue);
+        foreach (var (type, previous) in notifications)
+        {
+            if (!hasTyped || type.HasValue)
+            {
+                OnAttributeChanged(type, normalizedName, normalizedAttribute, null, previous, isRemoval: true);
+            }
+        }
+    }
+
+    /// <inheritdoc />
     public void ClearService(ServiceType serviceType, string serviceName)
     {
-        var normalized = NormalizeServiceName(serviceName);
-        if (normalized is null)
-        {
-            throw new ArgumentException("Service name cannot be null or whitespace.", nameof(serviceName));
-        }
+        var normalized = NormalizeServiceName(serviceName) ?? throw new ArgumentException("Service name cannot be null or whitespace.", nameof(serviceName));
 
         _logger?.Log($"Clearing routing cache for {serviceType}.{normalized}", LogLevel.Debug);
         ClearMessagesForService(normalized, serviceType);
@@ -115,11 +264,7 @@ public class MessageRoutingService : IMessageRoutingService
     /// <inheritdoc />
     public void ClearService(string serviceName)
     {
-        var normalized = NormalizeServiceName(serviceName);
-        if (normalized is null)
-        {
-            throw new ArgumentException("Service name cannot be null or whitespace.", nameof(serviceName));
-        }
+        var normalized = NormalizeServiceName(serviceName) ?? throw new ArgumentException("Service name cannot be null or whitespace.", nameof(serviceName));
 
         _logger?.Log($"Clearing routing cache for {normalized}", LogLevel.Debug);
         ClearMessagesForService(normalized, serviceType: null);
@@ -136,18 +281,26 @@ public class MessageRoutingService : IMessageRoutingService
         _logger?.Log($"Resolving tokens in '{template}'", LogLevel.Debug);
         var normalizedReferencing = NormalizeServiceName(referencingServiceName);
         List<MessageRoutingReference>? references = normalizedReferencing is null ? null : new List<MessageRoutingReference>();
-        var result = NewTokenRegex.Replace(template, m =>
+        var result = AttributeTokenRegex.Replace(template, m =>
         {
-            var name = m.Groups[1].Value;
-            var direction = ParseDirection(m.Groups[2].Value);
+            var service = m.Groups[1].Value;
+            var attributeToken = m.Groups[2].Value;
+            var normalizedAttribute = MessageRoutingAttributeHelper.Normalize(attributeToken, out var direction);
 
             if (references is not null)
             {
-                references.Add(new MessageRoutingReference(name, direction));
+                references.Add(new MessageRoutingReference(service, normalizedAttribute, direction));
             }
 
-            return TryGetMessageByName(name, direction, out var replacement)
-                ? replacement
+            if (direction.HasValue)
+            {
+                return TryGetMessageByName(service, direction.Value, out var directional)
+                    ? directional
+                    : string.Empty;
+            }
+
+            return TryGetAttributeByName(service, normalizedAttribute, out var resolved)
+                ? resolved
                 : string.Empty;
         });
 
@@ -156,9 +309,10 @@ public class MessageRoutingService : IMessageRoutingService
             var typeStr = m.Groups[1].Value;
             var name = m.Groups[2].Value;
             if (Enum.TryParse<ServiceType>(typeStr, out var type) &&
-                _messages.TryGetValue((type, name), out var entry))
+                _messages.TryGetValue((type, name), out var entry) &&
+                entry.TryGetAttribute(MessageRoutingAttributeHelper.InputAttributeName, out var value))
             {
-                return entry.InputMessage;
+                return value;
             }
 
             return string.Empty;
@@ -176,19 +330,26 @@ public class MessageRoutingService : IMessageRoutingService
     /// <inheritdoc />
     public void SetReferences(string referencingServiceName, IEnumerable<MessageRoutingReference> references)
     {
-        var normalizedReferencing = NormalizeServiceName(referencingServiceName);
-        if (normalizedReferencing is null)
-        {
-            throw new ArgumentException("Referencing service name cannot be null or whitespace.", nameof(referencingServiceName));
-        }
+        var normalizedReferencing = NormalizeServiceName(referencingServiceName) ?? throw new ArgumentException("Referencing service name cannot be null or whitespace.", nameof(referencingServiceName));
 
-        var referenceMap = (references ?? Array.Empty<MessageRoutingReference>())
-            .Where(r => !string.IsNullOrWhiteSpace(r.ServiceName))
-            .GroupBy(r => NormalizeServiceName(r.ServiceName)!, StringComparer.OrdinalIgnoreCase)
-            .ToDictionary(
-                g => g.Key,
-                g => new HashSet<MessageRoutingDirection>(g.Select(r => r.Direction)),
-                StringComparer.OrdinalIgnoreCase);
+        var referenceMap = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
+        foreach (var reference in references ?? Array.Empty<MessageRoutingReference>())
+        {
+            var normalizedService = NormalizeServiceName(reference.ServiceName);
+            if (normalizedService is null || string.IsNullOrWhiteSpace(reference.AttributeName))
+            {
+                continue;
+            }
+
+            var normalizedAttribute = MessageRoutingAttributeHelper.Normalize(reference.AttributeName, out _);
+            if (!referenceMap.TryGetValue(normalizedService, out var attributes))
+            {
+                attributes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                referenceMap[normalizedService] = attributes;
+            }
+
+            attributes.Add(normalizedAttribute);
+        }
 
         lock (_referencesLock)
         {
@@ -203,7 +364,6 @@ public class MessageRoutingService : IMessageRoutingService
                 }
                 else
                 {
-                    // Ensure we are removed from any referenced-by entries even if no previous entry was present.
                     foreach (var referenced in _referencedByService.Keys.ToArray())
                     {
                         RemoveReferencedByEntry(referenced, normalizedReferencing);
@@ -215,7 +375,7 @@ public class MessageRoutingService : IMessageRoutingService
 
             if (!_referencesByService.TryGetValue(normalizedReferencing, out var currentReferences))
             {
-                currentReferences = new Dictionary<string, HashSet<MessageRoutingDirection>>(StringComparer.OrdinalIgnoreCase);
+                currentReferences = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
                 _referencesByService[normalizedReferencing] = currentReferences;
             }
 
@@ -230,40 +390,40 @@ public class MessageRoutingService : IMessageRoutingService
 
             foreach (var pair in referenceMap)
             {
-                if (!currentReferences.TryGetValue(pair.Key, out var directions))
+                if (!currentReferences.TryGetValue(pair.Key, out var attributes))
                 {
-                    directions = new HashSet<MessageRoutingDirection>();
-                    currentReferences[pair.Key] = directions;
+                    attributes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    currentReferences[pair.Key] = attributes;
                 }
                 else
                 {
-                    directions.Clear();
+                    attributes.Clear();
                 }
 
-                foreach (var direction in pair.Value)
+                foreach (var attribute in pair.Value)
                 {
-                    directions.Add(direction);
+                    attributes.Add(attribute);
                 }
 
                 if (!_referencedByService.TryGetValue(pair.Key, out var referencingMap))
                 {
-                    referencingMap = new Dictionary<string, HashSet<MessageRoutingDirection>>(StringComparer.OrdinalIgnoreCase);
+                    referencingMap = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
                     _referencedByService[pair.Key] = referencingMap;
                 }
 
-                if (!referencingMap.TryGetValue(normalizedReferencing, out var referencingDirections))
+                if (!referencingMap.TryGetValue(normalizedReferencing, out var referencingAttributes))
                 {
-                    referencingDirections = new HashSet<MessageRoutingDirection>();
-                    referencingMap[normalizedReferencing] = referencingDirections;
+                    referencingAttributes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    referencingMap[normalizedReferencing] = referencingAttributes;
                 }
                 else
                 {
-                    referencingDirections.Clear();
+                    referencingAttributes.Clear();
                 }
 
-                foreach (var direction in pair.Value)
+                foreach (var attribute in pair.Value)
                 {
-                    referencingDirections.Add(direction);
+                    referencingAttributes.Add(attribute);
                 }
             }
         }
@@ -288,22 +448,21 @@ public class MessageRoutingService : IMessageRoutingService
             var results = new List<string>(references.Count);
             foreach (var pair in references)
             {
-                var formattedDirections = pair.Value
-                    .Select(ToPropertyName)
+                var formattedAttributes = pair.Value
                     .OrderBy(s => s, StringComparer.OrdinalIgnoreCase)
                     .ToArray();
 
-                if (formattedDirections.Length == 0)
+                if (formattedAttributes.Length == 0)
                 {
                     results.Add(pair.Key);
                 }
-                else if (formattedDirections.Length == 1)
+                else if (formattedAttributes.Length == 1)
                 {
-                    results.Add($"{pair.Key}.{formattedDirections[0]}");
+                    results.Add($"{pair.Key}.{formattedAttributes[0]}");
                 }
                 else
                 {
-                    results.Add($"{pair.Key}.{string.Join("/", formattedDirections)}");
+                    results.Add($"{pair.Key}.{string.Join("/", formattedAttributes)}");
                 }
             }
 
@@ -312,17 +471,84 @@ public class MessageRoutingService : IMessageRoutingService
         }
     }
 
-    private void RemoveReferencedByEntry(string referencedService, string referencingService)
+    private void PublishAttributeInternal(ServiceType? serviceType, string normalizedServiceName, string normalizedAttribute, string value)
     {
-        if (!_referencedByService.TryGetValue(referencedService, out var referencingMap))
+        var notifications = new List<(ServiceType? ServiceType, string? PreviousValue)>();
+
+        if (serviceType.HasValue)
+        {
+            bool changed = false;
+            string? previousValue = null;
+            var entry = _messages.AddOrUpdate(
+                (serviceType.Value, normalizedServiceName),
+                _ =>
+                {
+                    var created = new RoutingMessageEntry();
+                    changed = created.SetAttribute(normalizedAttribute, value, out previousValue);
+                    return created;
+                },
+                (_, existing) =>
+                {
+                    changed = existing.SetAttribute(normalizedAttribute, value, out previousValue);
+                    return existing;
+                });
+
+            _messagesByName.AddOrUpdate(normalizedServiceName, _ => entry, (_, _) => entry);
+
+            if (changed)
+            {
+                notifications.Add((serviceType.Value, previousValue));
+            }
+        }
+        else
+        {
+            bool changed = false;
+            string? previousValue = null;
+            var entry = _messagesByName.AddOrUpdate(
+                normalizedServiceName,
+                _ =>
+                {
+                    var created = new RoutingMessageEntry();
+                    changed = created.SetAttribute(normalizedAttribute, value, out previousValue);
+                    return created;
+                },
+                (_, existing) =>
+                {
+                    changed = existing.SetAttribute(normalizedAttribute, value, out previousValue);
+                    return existing;
+                });
+
+            if (changed)
+            {
+                notifications.Add((null, previousValue));
+            }
+
+            foreach (var kvp in _messages.ToArray())
+            {
+                if (!string.Equals(kvp.Key.Item2, normalizedServiceName, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                if (kvp.Value.SetAttribute(normalizedAttribute, value, out var typePrevious))
+                {
+                    notifications.Add((kvp.Key.Item1, typePrevious));
+                }
+            }
+        }
+
+        if (notifications.Count == 0)
         {
             return;
         }
 
-        referencingMap.Remove(referencingService);
-        if (referencingMap.Count == 0)
+        var hasTyped = notifications.Any(n => n.ServiceType.HasValue);
+        foreach (var (type, previous) in notifications)
         {
-            _referencedByService.Remove(referencedService);
+            if (!hasTyped || type.HasValue)
+            {
+                OnAttributeChanged(type, normalizedServiceName, normalizedAttribute, value, previous, isRemoval: false);
+            }
         }
     }
 
@@ -330,28 +556,59 @@ public class MessageRoutingService : IMessageRoutingService
     {
         if (serviceType.HasValue)
         {
-            _messages.TryRemove((serviceType.Value, normalizedServiceName), out _);
-        }
-        else
-        {
-            foreach (var key in _messages.Keys
-                .Where(k => string.Equals(k.Item2, normalizedServiceName, StringComparison.OrdinalIgnoreCase))
-                .ToList())
+            if (_messages.TryRemove((serviceType.Value, normalizedServiceName), out var entry))
             {
-                _messages.TryRemove(key, out _);
+                if (_messagesByName.TryGetValue(normalizedServiceName, out var current) && ReferenceEquals(current, entry))
+                {
+                    var replacement = _messages.FirstOrDefault(kvp =>
+                        string.Equals(kvp.Key.Item2, normalizedServiceName, StringComparison.OrdinalIgnoreCase)).Value;
+
+                    if (replacement is null)
+                    {
+                        _messagesByName.TryRemove(normalizedServiceName, out _);
+                    }
+                    else
+                    {
+                        _messagesByName[normalizedServiceName] = replacement;
+                    }
+                }
+
+                var cleared = entry.ClearAll();
+                foreach (var pair in cleared)
+                {
+                    OnAttributeChanged(serviceType.Value, normalizedServiceName, pair.Key, null, pair.Value, isRemoval: true);
+                }
+            }
+
+            return;
+        }
+
+        var affectedEntries = _messages
+            .Where(kvp => string.Equals(kvp.Key.Item2, normalizedServiceName, StringComparison.OrdinalIgnoreCase))
+            .ToArray();
+
+        foreach (var kvp in affectedEntries)
+        {
+            if (_messages.TryRemove(kvp.Key, out var entry))
+            {
+                var cleared = entry.ClearAll();
+                foreach (var pair in cleared)
+                {
+                    OnAttributeChanged(kvp.Key.Item1, normalizedServiceName, pair.Key, null, pair.Value, isRemoval: true);
+                }
             }
         }
 
-        var replacement = _messages.FirstOrDefault(kvp =>
-            string.Equals(kvp.Key.Item2, normalizedServiceName, StringComparison.OrdinalIgnoreCase)).Value;
-
-        if (replacement is null)
+        if (_messagesByName.TryRemove(normalizedServiceName, out var byNameEntry))
         {
-            _messagesByName.TryRemove(normalizedServiceName, out _);
-        }
-        else
-        {
-            _messagesByName[normalizedServiceName] = replacement;
+            var cleared = byNameEntry.ClearAll();
+            if (affectedEntries.Length == 0)
+            {
+                foreach (var pair in cleared)
+                {
+                    OnAttributeChanged(null, normalizedServiceName, pair.Key, null, pair.Value, isRemoval: true);
+                }
+            }
         }
     }
 
@@ -391,45 +648,39 @@ public class MessageRoutingService : IMessageRoutingService
         }
     }
 
-    private static string? NormalizeServiceName(string? serviceName)
+    private void RemoveReferencedByEntry(string referencedService, string referencingService)
     {
-        return string.IsNullOrWhiteSpace(serviceName)
-            ? null
-            : serviceName.Trim();
-    }
-
-    private static MessageRoutingDirection ParseDirection(string propertyName)
-    {
-        if (string.Equals(propertyName, nameof(RoutingMessageEntry.InputMessage), StringComparison.Ordinal) ||
-            string.Equals(propertyName, "LastInputMessage", StringComparison.Ordinal))
+        if (!_referencedByService.TryGetValue(referencedService, out var referencingMap))
         {
-            return MessageRoutingDirection.Input;
+            return;
         }
 
-        return MessageRoutingDirection.Output;
-    }
-
-    private static string ToPropertyName(MessageRoutingDirection direction)
-    {
-        return direction == MessageRoutingDirection.Input
-            ? nameof(RoutingMessageEntry.InputMessage)
-            : nameof(RoutingMessageEntry.OutputMessage);
-    }
-
-    private static RoutingMessageEntry CreateEntry(MessageRoutingDirection direction, string payload)
-    {
-        var entry = new RoutingMessageEntry();
-        entry.Update(direction, payload);
-        return entry;
+        referencingMap.Remove(referencingService);
+        if (referencingMap.Count == 0)
+        {
+            _referencedByService.Remove(referencedService);
+        }
     }
 
     private bool TryGetMessageByName(string serviceName, MessageRoutingDirection direction, out string replacement)
     {
-        var key = serviceName.Trim();
+        var attributeName = MessageRoutingAttributeHelper.FromDirection(direction);
+        return TryGetAttributeByName(serviceName, attributeName, out replacement);
+    }
 
-        if (_messagesByName.TryGetValue(key, out var entry))
+    private bool TryGetAttributeByName(string serviceName, string attributeName, out string replacement)
+    {
+        var normalized = NormalizeServiceName(serviceName);
+        if (normalized is null)
         {
-            replacement = entry.Get(direction);
+            replacement = string.Empty;
+            return false;
+        }
+
+        if (_messagesByName.TryGetValue(normalized, out var entry) &&
+            entry.TryGetAttribute(attributeName, out var value))
+        {
+            replacement = value;
             return true;
         }
 
@@ -437,29 +688,110 @@ public class MessageRoutingService : IMessageRoutingService
         return false;
     }
 
+    private void OnAttributeChanged(ServiceType? serviceType, string serviceName, string attributeName, string? value, string? previousValue, bool isRemoval)
+    {
+        var handler = AttributeChanged;
+        if (handler is null)
+        {
+            return;
+        }
+
+        handler.Invoke(this, new ServiceAttributeChangedEventArgs(serviceType, serviceName, attributeName, value, previousValue, isRemoval));
+    }
+
+    private static string? NormalizeServiceName(string? serviceName)
+    {
+        return string.IsNullOrWhiteSpace(serviceName)
+            ? null
+            : serviceName.Trim();
+    }
+
     private sealed class RoutingMessageEntry
     {
-        private string _inputMessage = string.Empty;
-        private string _outputMessage = string.Empty;
+        private readonly object _sync = new();
+        private readonly Dictionary<string, string> _attributes = new(StringComparer.OrdinalIgnoreCase);
 
-        public string InputMessage => _inputMessage;
-        public string OutputMessage => _outputMessage;
+        public string InputMessage => GetOrDefault(MessageRoutingAttributeHelper.InputAttributeName);
+        public string OutputMessage => GetOrDefault(MessageRoutingAttributeHelper.OutputAttributeName);
 
-        public void Update(MessageRoutingDirection direction, string payload)
+        public bool IsEmpty
         {
-            if (direction == MessageRoutingDirection.Input)
+            get
             {
-                _inputMessage = payload ?? string.Empty;
-            }
-            else
-            {
-                _outputMessage = payload ?? string.Empty;
+                lock (_sync)
+                {
+                    return _attributes.Count == 0;
+                }
             }
         }
 
-        public string Get(MessageRoutingDirection direction)
+        public bool SetAttribute(string attributeName, string value, out string? previousValue)
         {
-            return direction == MessageRoutingDirection.Input ? _inputMessage : _outputMessage;
+            var sanitized = value ?? string.Empty;
+            lock (_sync)
+            {
+                if (_attributes.TryGetValue(attributeName, out var existing) &&
+                    string.Equals(existing, sanitized, StringComparison.Ordinal))
+                {
+                    previousValue = existing;
+                    return false;
+                }
+
+                previousValue = _attributes.TryGetValue(attributeName, out var previous) ? previous : null;
+                _attributes[attributeName] = sanitized;
+                return true;
+            }
+        }
+
+        public bool RemoveAttribute(string attributeName, out string? previousValue)
+        {
+            lock (_sync)
+            {
+                if (_attributes.TryGetValue(attributeName, out var existing))
+                {
+                    _attributes.Remove(attributeName);
+                    previousValue = existing;
+                    return true;
+                }
+            }
+
+            previousValue = null;
+            return false;
+        }
+
+        public bool TryGetAttribute(string attributeName, out string value)
+        {
+            lock (_sync)
+            {
+                if (_attributes.TryGetValue(attributeName, out var existing))
+                {
+                    value = existing;
+                    return true;
+                }
+            }
+
+            value = string.Empty;
+            return false;
+        }
+
+        public IReadOnlyList<KeyValuePair<string, string>> ClearAll()
+        {
+            lock (_sync)
+            {
+                if (_attributes.Count == 0)
+                {
+                    return Array.Empty<KeyValuePair<string, string>>();
+                }
+
+                var snapshot = _attributes.ToArray();
+                _attributes.Clear();
+                return snapshot;
+            }
+        }
+
+        private string GetOrDefault(string attributeName)
+        {
+            return TryGetAttribute(attributeName, out var value) ? value : string.Empty;
         }
     }
 }
