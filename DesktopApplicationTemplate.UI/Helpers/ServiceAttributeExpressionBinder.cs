@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using DesktopApplicationTemplate.Core.Services;
+using Microsoft.VisualStudio.Threading;
 
 namespace DesktopApplicationTemplate.UI.Helpers;
 
@@ -18,7 +20,7 @@ public sealed class ServiceAttributeExpressionBinder
     private readonly Action<string> _onResolved;
     private readonly Action<string?>? _onError;
     private string? _referencingServiceName;
-    private readonly SynchronizationContext? _context;
+    private readonly JoinableTaskFactory? _joinableTaskFactory;
 
     private readonly object _sync = new();
     private List<AttributeReference> _references = new();
@@ -32,19 +34,19 @@ public sealed class ServiceAttributeExpressionBinder
     /// <param name="onResolved">Callback invoked with the resolved value.</param>
     /// <param name="onError">Optional callback invoked with an error message when referenced attributes are missing.</param>
     /// <param name="referencingServiceName">Optional service name that owns the expression.</param>
-    /// <param name="context">Optional synchronization context used when invoking callbacks.</param>
+    /// <param name="joinableTaskFactory">Optional task factory used to marshal callbacks to the UI thread.</param>
     public ServiceAttributeExpressionBinder(
         IMessageRoutingService routingService,
         Action<string> onResolved,
         Action<string?>? onError = null,
         string? referencingServiceName = null,
-        SynchronizationContext? context = null)
+        JoinableTaskFactory? joinableTaskFactory = null)
     {
         _routingService = routingService ?? throw new ArgumentNullException(nameof(routingService));
         _onResolved = onResolved ?? throw new ArgumentNullException(nameof(onResolved));
         _onError = onError;
         _referencingServiceName = referencingServiceName;
-        _context = context ?? SynchronizationContext.Current;
+        _joinableTaskFactory = joinableTaskFactory ?? App.UiThreadTaskFactory;
 
         WeakEventManager<IMessageRoutingService, ServiceAttributeChangedEventArgs>.AddHandler(
             _routingService,
@@ -130,13 +132,26 @@ public sealed class ServiceAttributeExpressionBinder
     {
         void Execute()
         {
-            _onResolved(resolved);
-            _onError?.Invoke(error);
+            try
+            {
+                _onResolved(resolved);
+                _onError?.Invoke(error);
+            }
+            catch (Exception ex)
+            {
+                _onError?.Invoke(ex.Message);
+            }
         }
 
-        if (_context is not null)
+        if (_joinableTaskFactory is { } factory)
         {
-            _context.Post(_ => Execute(), null);
+            var task = factory.RunAsync(async () =>
+            {
+                await factory.SwitchToMainThreadAsync();
+                Execute();
+            }).Task;
+
+            ObserveTask(task);
         }
         else
         {
@@ -171,6 +186,20 @@ public sealed class ServiceAttributeExpressionBinder
         }
 
         return missing;
+    }
+
+    private static void ObserveTask(Task task)
+    {
+        if (task is null)
+        {
+            return;
+        }
+
+        _ = task.ContinueWith(
+            t => _ = t.Exception,
+            CancellationToken.None,
+            TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+            TaskScheduler.Default);
     }
 
     private static List<AttributeReference> ParseReferences(string expression)

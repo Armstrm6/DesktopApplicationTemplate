@@ -9,12 +9,11 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
-using System.Windows.Threading;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Csv;
 using DesktopApplicationTemplate.UI.Services;
+using Microsoft.VisualStudio.Threading;
 
 namespace DesktopApplicationTemplate.UI.ViewModels.Csv
 {
@@ -33,6 +32,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Csv
 #if DEBUG
         private readonly RelayCommand _debugSaveCommand;
 #endif
+        private readonly JoinableTaskFactory? _joinableTaskFactory;
         private ObservableCollection<CsvColumnDefinition>? _observableColumns;
         private CsvColumnDefinition? _selectedColumn;
         private bool _isBusy;
@@ -84,11 +84,16 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Csv
 
         public event Action? RequestClose;
 
-        public CsvServiceViewModel(IFileDialogService fileDialog, IMessageRoutingService routingService, string? configPath = null)
+        public CsvServiceViewModel(
+            IFileDialogService fileDialog,
+            IMessageRoutingService routingService,
+            string? configPath = null,
+            JoinableTaskFactory? joinableTaskFactory = null)
         {
             _fileDialog = fileDialog ?? throw new ArgumentNullException(nameof(fileDialog));
             _routingService = routingService ?? throw new ArgumentNullException(nameof(routingService));
             _configPath = configPath ?? "csv_config.json";
+            _joinableTaskFactory = joinableTaskFactory ?? App.UiThreadTaskFactory;
             AttributeSuggestions = new ReadOnlyObservableCollection<string>(_attributeSuggestions);
             ValidationMessages = new ReadOnlyObservableCollection<string>(_validationMessages);
             _routingService.AttributeChanged += OnRoutingAttributeChanged;
@@ -451,38 +456,54 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Csv
 #endif
         }
 
-        private static void RunOnUiThread(Action action)
+        private void RunOnUiThread(Action action)
         {
             if (action is null)
             {
                 return;
             }
 
-            var dispatcher = Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher;
-            if (dispatcher.CheckAccess())
+            if (_joinableTaskFactory is { } factory)
             {
-                action();
+                if (factory.Context.IsOnMainThread)
+                {
+                    action();
+                    return;
+                }
+
+                factory.Run(async () =>
+                {
+                    await factory.SwitchToMainThreadAsync();
+                    action();
+                });
+                return;
             }
-            else
-            {
-                dispatcher.Invoke(action);
-            }
+
+            action();
         }
 
-        private static T RunOnUiThread<T>(Func<T> function)
+        private T RunOnUiThread<T>(Func<T> function)
         {
             if (function is null)
             {
                 return default!;
             }
 
-            var dispatcher = Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher;
-            if (dispatcher.CheckAccess())
+            if (_joinableTaskFactory is { } factory)
             {
-                return function();
+                if (factory.Context.IsOnMainThread)
+                {
+                    return function();
+                }
+
+                return factory.Run(async () =>
+                {
+                    await factory.SwitchToMainThreadAsync();
+                    return function();
+                });
             }
 
-            return dispatcher.Invoke(function);
+            return function();
         }
     }
 }
