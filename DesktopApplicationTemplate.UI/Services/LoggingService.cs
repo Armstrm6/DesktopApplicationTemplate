@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.Core.Services;
+using Microsoft.VisualStudio.Threading;
 
 namespace DesktopApplicationTemplate.UI.Services
 {
@@ -16,7 +17,7 @@ namespace DesktopApplicationTemplate.UI.Services
         private readonly List<LogEntry> _logEntries = new();
         private readonly object _entriesLock = new();
         private readonly SemaphoreSlim _fileWriteLock = new(1, 1);
-        private readonly SynchronizationContext? _uiContext;
+        private readonly JoinableTaskFactory? _joinableTaskFactory;
 
         private LogLevel _minimumLevel = LogLevel.Debug;
         public LogLevel MinimumLevel
@@ -32,10 +33,10 @@ namespace DesktopApplicationTemplate.UI.Services
 
         public event Action<LogEntry>? LogAdded;
 
-        public LoggingService(IRichTextLogger richTextLogger, string? logFilePath = null)
+        public LoggingService(IRichTextLogger richTextLogger, string? logFilePath = null, JoinableTaskFactory? joinableTaskFactory = null)
         {
             _richTextLogger = richTextLogger;
-            _uiContext = SynchronizationContext.Current;
+            _joinableTaskFactory = joinableTaskFactory ?? App.UiThreadTaskFactory;
 
             var resolvedLogFilePath = logFilePath ?? GetDefaultLogFilePath();
             EnsureDirectoryExists(resolvedLogFilePath);
@@ -268,27 +269,18 @@ namespace DesktopApplicationTemplate.UI.Services
 
         private Task InvokeOnUiThreadAsync(Action action)
         {
-            if (_uiContext is null || SynchronizationContext.Current == _uiContext)
+            var factory = _joinableTaskFactory;
+            if (factory is null || factory.Context.IsOnMainThread)
             {
                 action();
                 return Task.CompletedTask;
             }
 
-            var tcs = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
-            _uiContext.Post(_ =>
+            return factory.RunAsync(async () =>
             {
-                try
-                {
-                    action();
-                    tcs.SetResult(null);
-                }
-                catch (Exception ex)
-                {
-                    tcs.SetException(ex);
-                }
-            }, null);
-
-            return tcs.Task;
+                await factory.SwitchToMainThreadAsync();
+                action();
+            }).Task;
         }
 
         private static void ObserveTask(Task? task)
