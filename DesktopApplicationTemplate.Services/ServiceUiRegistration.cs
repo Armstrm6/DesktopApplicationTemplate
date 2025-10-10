@@ -41,9 +41,9 @@ public interface IServiceUiRegistry<TService, TPage> : IDisposable
 
     bool TryCreateNavigationPage(string descriptorId, IServiceProvider provider, string defaultName, out TPage? page);
 
-    bool TryGetRegistration(ServiceType serviceType, out ServiceUiRegistration<TService, TPage>? registration);
+    bool TryGetRegistration(ServiceType serviceType, [NotNullWhen(true)] out ServiceUiRegistration<TService, TPage>? registration);
 
-    bool TryGetRegistration(string descriptorId, out ServiceUiRegistration<TService, TPage>? registration);
+    bool TryGetRegistration(string descriptorId, [NotNullWhen(true)] out ServiceUiRegistration<TService, TPage>? registration);
 }
 
 /// <summary>
@@ -184,7 +184,7 @@ public sealed class ServiceUiRegistry<TService, TPage> : IServiceUiRegistry<TSer
         return true;
     }
 
-    public bool TryGetRegistration(ServiceType serviceType, out ServiceUiRegistration<TService, TPage>? registration)
+    public bool TryGetRegistration(ServiceType serviceType, [NotNullWhen(true)] out ServiceUiRegistration<TService, TPage>? registration)
     {
         if (TrySelectDescriptorId(serviceType, out var descriptorId) &&
             descriptorId is not null &&
@@ -198,7 +198,7 @@ public sealed class ServiceUiRegistry<TService, TPage> : IServiceUiRegistry<TSer
         return false;
     }
 
-    public bool TryGetRegistration(string descriptorId, out ServiceUiRegistration<TService, TPage>? registration)
+    public bool TryGetRegistration(string descriptorId, [NotNullWhen(true)] out ServiceUiRegistration<TService, TPage>? registration)
     {
         if (_registrations.TryGetValue(descriptorId, out var resolved))
         {
