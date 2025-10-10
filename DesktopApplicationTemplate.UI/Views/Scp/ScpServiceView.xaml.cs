@@ -6,11 +6,11 @@ using DesktopApplicationTemplate.Core.Services;
 
 namespace DesktopApplicationTemplate.UI.Views.Scp
 {
-    public partial class SCPServiceView : Page
+    public partial class ScpServiceView : Page
     {
         private readonly ScpServiceViewModel _viewModel;
         private readonly ILoggingService _logger;
-        public SCPServiceView(ScpServiceViewModel vm, ILoggingService logger)
+        public ScpServiceView(ScpServiceViewModel vm, ILoggingService logger)
         {
             InitializeComponent();
             _viewModel = vm;
