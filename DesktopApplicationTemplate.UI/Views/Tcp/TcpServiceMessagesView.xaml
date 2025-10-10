@@ -4,7 +4,11 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:shared="clr-namespace:DesktopApplicationTemplate.UI.Views.Shared"
+      xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
       mc:Ignorable="d">
+    <Page.Resources>
+        <helpers:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter" />
+    </Page.Resources>
     <Grid Margin="10">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -51,7 +55,16 @@
                 </Grid.RowDefinitions>
                 <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,5">
                     <TextBlock Text="Test Message:" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                    <TextBox Text="{Binding TestMessage, UpdateSourceTrigger=PropertyChanged}" Width="300"/>
+                    <TextBox Text="{Binding TestMessageExpression, UpdateSourceTrigger=PropertyChanged}" Width="300">
+                        <TextBox.ToolTip>
+                            <StackPanel>
+                                <TextBlock Text="Resolved:" FontWeight="Bold"/>
+                                <TextBlock Text="{Binding TestMessage}" TextWrapping="Wrap" MaxWidth="300"/>
+                                <TextBlock Text="{Binding TestMessageError}" Foreground="Red" TextWrapping="Wrap"
+                                           Visibility="{Binding TestMessageError, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+                            </StackPanel>
+                        </TextBox.ToolTip>
+                    </TextBox>
                     <Button Content="Edit Script" Margin="10,0,0,0" Command="{Binding OpenScriptEditorCommand}" Height="24"/>
                     <TextBox Text="{Binding ScriptOutputMessage, Mode=OneWay}" Width="300"
                              IsReadOnly="True" Margin="10,0,0,0" Background="#EDEDED"/>
