@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Buffers;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Text.Json;
@@ -21,9 +21,9 @@ using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Models;
 using DesktopApplicationTemplate.UI.Services;
+using DesktopApplicationTemplate.UI.ViewModels.Services;
 using WpfBrush = System.Windows.Media.Brush;
 using WpfBrushes = System.Windows.Media.Brushes;
-using WpfBrushConverter = System.Windows.Media.BrushConverter;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -64,7 +64,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 var previousName = _displayName;
                 _displayName = value ?? string.Empty;
                 OnPropertyChanged();
-                RefreshLogMetadata();
+                LogState.UpdateIdentity(_type, _displayName);
                 OnDisplayNameChanged(previousName);
             }
         }
@@ -106,8 +106,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
                 var previousType = _type;
                 _type = value;
+                OptionsState.ServiceType = _type;
+                LogState.UpdateIdentity(_type, _displayName);
                 OnPropertyChanged();
-                RefreshLogMetadata();
                 OnServiceTypeChanged(previousType);
             }
         }
@@ -141,6 +142,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 }
 
                 _descriptorId = value;
+                OptionsState.DescriptorId = _descriptorId;
                 OnPropertyChanged();
             }
         }
@@ -181,9 +183,27 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public ObservableCollection<string> AssociatedServices { get; } = new();
 
-        private Dictionary<string, JsonElement> _serializedOptions = new(StringComparer.OrdinalIgnoreCase);
+        public ServiceOptionsState OptionsState { get; }
+        public ServiceLogState LogState { get; }
+        public ServiceMetricsState MetricsState { get; }
 
-        internal static Func<string?, IServiceOptionsSerializer?>? OptionsSerializerResolver { get; set; }
+        internal static Func<string?, IServiceOptionsSerializer?>? OptionsSerializerResolver
+        {
+            get => ServiceStateCoordinator.OptionsSerializerResolver;
+            set => ServiceStateCoordinator.OptionsSerializerResolver = value;
+        }
+
+        internal static event Action? CrossServiceAssociationsClearing
+        {
+            add => ServiceStateCoordinator.CrossServiceAssociationsClearing += value;
+            remove => ServiceStateCoordinator.CrossServiceAssociationsClearing -= value;
+        }
+
+        public static bool EnableCrossServiceLogForwarding
+        {
+            get => ServiceStateCoordinator.EnableCrossServiceLogForwarding;
+            set => ServiceStateCoordinator.EnableCrossServiceLogForwarding = value;
+        }
 
         /// <summary>
         /// Gets or sets the serialized representation of protocol options for persistence.
@@ -191,283 +211,125 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         [JsonInclude]
         public Dictionary<string, JsonElement> SerializedOptions
         {
-            get => _serializedOptions;
-            set
-            {
-                if (value is null)
-                {
-                    _serializedOptions = new Dictionary<string, JsonElement>(StringComparer.OrdinalIgnoreCase);
-                    return;
-                }
-
-                _serializedOptions = new Dictionary<string, JsonElement>(StringComparer.OrdinalIgnoreCase);
-                foreach (var pair in value)
-                {
-                    _serializedOptions[pair.Key] = pair.Value.Clone();
-                }
-            }
+            get => OptionsState.SerializedOptions;
+            set => OptionsState.SerializedOptions = value;
         }
-
-        [JsonIgnore]
-        private readonly Dictionary<string, object?> _options = new(StringComparer.OrdinalIgnoreCase);
-
-        internal static event Action? CrossServiceAssociationsClearing;
 
         public ServiceListModel(IMessageRoutingService routingService)
         {
             _routingService = routingService ?? throw new ArgumentNullException(nameof(routingService));
 
-            ResetMessageCounts();
-            SetRoutingAttribute(InputMessageAttributeName, _inputMessage, MessageRoutingDirection.Input, publish: false);
-            SetRoutingAttribute(OutputMessageAttributeName, _outputMessage, MessageRoutingDirection.Output, publish: false);
+            MetricsState = new ServiceMetricsState();
+            OptionsState = new ServiceOptionsState();
+            LogState = new ServiceLogState(MetricsState, MaxLogEntries);
+
+            MetricsState.PropertyChanged += OnMetricsStatePropertyChanged;
+            LogState.PropertyChanged += OnLogStatePropertyChanged;
+            LogState.LogAdded += OnLogStateLogAdded;
+
+            MetricsState.ResetMessageCounts();
+            LogState.UpdateIdentity(_type, _displayName);
+            OptionsState.ServiceType = _type;
+            OptionsState.DescriptorId = _descriptorId;
+
+            SetRoutingAttribute(InputMessageAttributeName, LogState.InputMessage, MessageRoutingDirection.Input, publish: false);
+            SetRoutingAttribute(OutputMessageAttributeName, LogState.OutputMessage, MessageRoutingDirection.Output, publish: false);
             SetRoutingAttribute(RuntimeStateAttributeName, _runtimeState.ToString(), publish: false);
+            SetRoutingAttribute(IncomingMessageCountAttributeName, MetricsState.IncomingMessageCount.ToString(CultureInfo.InvariantCulture), publish: false);
+            SetRoutingAttribute(OutgoingMessageCountAttributeName, MetricsState.OutgoingMessageCount.ToString(CultureInfo.InvariantCulture), publish: false);
         }
 
-        private readonly LinkedList<ServiceMessageHistoryEntry> _messageHistory = new();
-        private double _totalExecutionTimeMs;
-        private int _executionCount;
-        private TimeSpan _lastExecutionDuration;
-        private const string InputMessagePlaceholder = "---------";
-        private const string ExecutionTimePlaceholder = "Last: -- ms (Avg: -- ms)";
+        public double? AverageExecutionTimeMs => MetricsState.AverageExecutionTimeMs;
 
-        private string _inputMessage = InputMessagePlaceholder;
-        private string _outputMessage = string.Empty;
-        private WpfBrush _lastInputBrush = WpfBrushes.Black;
-        private string _lastLogMessage = string.Empty;
-        private WpfBrush _lastLogBrush = WpfBrushes.Black;
-        private int _incomingMessageCount;
-        private int _outgoingMessageCount;
-        private static readonly WpfBrushConverter BrushConverter = new();
-        private const string TimestampFormat = "MM.dd.yyyy - HH:mm:ss.fffffff";
-        private const int TimestampLength = 29;
+        public TimeSpan LastExecutionDuration => MetricsState.LastExecutionDuration;
 
-        /// <summary>
-        /// Gets the average execution time in milliseconds for operations performed by this service.
-        /// </summary>
-        public double? AverageExecutionTimeMs => _executionCount == 0 ? null : _totalExecutionTimeMs / _executionCount;
+        public string ExecutionTimeText => MetricsState.ExecutionTimeText;
 
-        /// <summary>
-        /// Gets the duration of the most recent execution for this service.
-        /// </summary>
-        public TimeSpan LastExecutionDuration
+        public int IncomingMessageCount => MetricsState.IncomingMessageCount;
+
+        public int OutgoingMessageCount => MetricsState.OutgoingMessageCount;
+
+        public string InputMessage => LogState.InputMessage;
+
+        public string OutputMessage => LogState.OutputMessage;
+
+        public WpfBrush LastInputBrush => LogState.LastInputBrush;
+
+        public string LastLogMessage => LogState.LastLogMessage;
+
+        public WpfBrush LastLogBrush => LogState.LastLogBrush;
+
+        public event Action<bool>? ActiveChanged;
+
+        public event Action<ServiceListModel, LogEntry>? LogAdded;
+
+        public double TotalExecutionTimeMs
         {
-            get => _lastExecutionDuration;
-            private set
-            {
-                _lastExecutionDuration = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(ExecutionTimeText));
-            }
+            get => MetricsState.TotalExecutionTimeMs;
+            set => MetricsState.TotalExecutionTimeMs = value;
         }
 
-        /// <summary>
-        /// Gets a formatted string displaying the last execution duration and average.
-        /// </summary>
-        public string ExecutionTimeText => _executionCount == 0
-            ? ExecutionTimePlaceholder
-            : $"Last: {LastExecutionDuration.TotalMilliseconds:F0} ms (Avg: {AverageExecutionTimeMs:F0} ms)";
-
-        public int IncomingMessageCount
+        public int ExecutionCount
         {
-            get => _incomingMessageCount;
-            private set
-            {
-                var changed = _incomingMessageCount != value;
-                _incomingMessageCount = value;
-                if (changed)
-                {
-                    OnPropertyChanged();
-                }
-
-                SetRoutingAttribute(IncomingMessageCountAttributeName, value.ToString(CultureInfo.InvariantCulture));
-            }
+            get => MetricsState.ExecutionCount;
+            set => MetricsState.ExecutionCount = value;
         }
 
-        public int OutgoingMessageCount
-        {
-            get => _outgoingMessageCount;
-            private set
-            {
-                var changed = _outgoingMessageCount != value;
-                _outgoingMessageCount = value;
-                if (changed)
-                {
-                    OnPropertyChanged();
-                }
-
-                SetRoutingAttribute(OutgoingMessageCountAttributeName, value.ToString(CultureInfo.InvariantCulture));
-            }
-        }
-
-        /// <summary>
-        /// Applies persisted message counters to the current instance.
-        /// </summary>
-        /// <param name="incoming">The number of incoming messages previously recorded.</param>
-        /// <param name="outgoing">The number of outgoing messages previously recorded.</param>
         public void InitializeMessageCounts(int incoming, int outgoing)
         {
-            if (_messageHistory.Count == 0)
+            if (!LogState.HasMessageHistory)
             {
-                ResetMessageCounts();
+                MetricsState.ResetMessageCounts();
                 return;
             }
 
-            IncomingMessageCount = Math.Max(0, incoming);
-            OutgoingMessageCount = Math.Max(0, outgoing);
+            MetricsState.InitializeMessageCounts(incoming, outgoing);
         }
 
-        /// <summary>
-        /// Resets the incoming and outgoing message counters.
-        /// </summary>
         public void ResetMessageCounts()
         {
-            IncomingMessageCount = 0;
-            OutgoingMessageCount = 0;
+            MetricsState.ResetMessageCounts();
         }
 
-        /// <summary>
-        /// Gets the most recent input message received by this service.
-        /// </summary>
-        public string InputMessage
+        public string UpdateInputMessage(string? message, WpfBrush? brush = null)
         {
-            get => _inputMessage;
-            private set
-            {
-                var resolved = value ?? string.Empty;
-                var changed = _inputMessage != resolved;
-                _inputMessage = resolved;
-                if (changed)
-                {
-                    OnPropertyChanged();
-                }
-
-                SetRoutingAttribute(InputMessageAttributeName, resolved, MessageRoutingDirection.Input);
-            }
+            return LogState.UpdateInputMessage(message, brush);
         }
 
-        /// <summary>
-        /// Gets the most recent outgoing message produced by this service.
-        /// </summary>
-        public string OutputMessage
+        public string UpdateOutputMessage(string? message)
         {
-            get => _outputMessage;
-            private set
-            {
-                var resolved = value ?? string.Empty;
-                var changed = _outputMessage != resolved;
-                _outputMessage = resolved;
-                if (changed)
-                {
-                    OnPropertyChanged();
-                }
-
-                SetRoutingAttribute(OutputMessageAttributeName, resolved, MessageRoutingDirection.Output);
-            }
+            return LogState.UpdateOutputMessage(message);
         }
 
-        public WpfBrush LastInputBrush
+        public void RecordMessageHistory(string? incomingMessage, string? outgoingMessage, string? destination, DateTime timestamp)
         {
-            get => _lastInputBrush;
-            private set
-            {
-                if (!Equals(_lastInputBrush, value))
-                {
-                    _lastInputBrush = value;
-                    OnPropertyChanged();
-                }
-            }
+            LogState.RecordMessageHistory(incomingMessage, outgoingMessage, destination, timestamp);
         }
 
-        public string LastLogMessage
+        public IReadOnlyList<ServiceMessageHistoryEntry> GetMessageHistorySnapshot()
         {
-            get => _lastLogMessage;
-            private set
-            {
-                var resolved = value ?? string.Empty;
-                if (string.Equals(_lastLogMessage, resolved, StringComparison.Ordinal))
-                {
-                    return;
-                }
-
-                _lastLogMessage = resolved;
-                OnPropertyChanged();
-            }
+            return LogState.GetMessageHistorySnapshot();
         }
 
-        public WpfBrush LastLogBrush
+        public void LoadMessageHistory(IEnumerable<ServiceMessageHistoryEntry> entries)
         {
-            get => _lastLogBrush;
-            private set
-            {
-                var resolved = value ?? WpfBrushes.Black;
-                if (Equals(_lastLogBrush, resolved))
-                {
-                    return;
-                }
-
-                _lastLogBrush = resolved;
-                OnPropertyChanged();
-            }
+            LogState.LoadMessageHistory(entries);
         }
 
-        /// <summary>
-        /// Gets or sets the accumulated execution time in milliseconds.
-        /// </summary>
-        public double TotalExecutionTimeMs
+        public void LoadPersistedLogs(IEnumerable<LogEntry> entries)
         {
-            get => _totalExecutionTimeMs;
-            set
-            {
-                _totalExecutionTimeMs = value;
-                OnPropertyChanged(nameof(AverageExecutionTimeMs));
-                OnPropertyChanged(nameof(ExecutionTimeText));
-            }
+            LogState.LoadPersistedLogs(entries);
         }
 
-        /// <summary>
-        /// Gets or sets the number of execution samples recorded for this service.
-        /// </summary>
-        public int ExecutionCount
+        public void RecordExecutionTime(TimeSpan duration)
         {
-            get => _executionCount;
-            set
-            {
-                _executionCount = value;
-                OnPropertyChanged(nameof(AverageExecutionTimeMs));
-                OnPropertyChanged(nameof(ExecutionTimeText));
-            }
+            MetricsState.RecordExecutionTime(duration);
         }
 
-        /// <summary>
-        /// Stores strongly typed options for the service keyed by descriptor or service type.
-        /// </summary>
-        /// <param name="options">The options instance to persist.</param>
-        /// <param name="key">Optional override for the storage key.</param>
-        /// <typeparam name="TOptions">The options type.</typeparam>
         public void SetOptions<TOptions>(TOptions? options, string? key = null)
             where TOptions : class
         {
-            var keyCandidates = EnumerateOptionKeys(key).ToArray();
-            var resolvedKey = keyCandidates.FirstOrDefault();
-            if (resolvedKey is null)
-            {
-                return;
-            }
-
-            if (options is null)
-            {
-                RemoveOptionKeys(keyCandidates);
-                return;
-            }
-
-            var serializer = ResolveSerializer(keyCandidates);
-            if (serializer is not null && serializer.OptionsType.IsAssignableFrom(typeof(TOptions)))
-            {
-                SetOptionsWithSerializer(serializer, options, resolvedKey, keyCandidates);
-                return;
-            }
-
-            SetOptionsWithDefault(options, resolvedKey, keyCandidates);
+            OptionsState.SetOptions(options, key);
         }
 
         /// <summary>
@@ -479,227 +341,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public TOptions? GetOptions<TOptions>(string? key = null)
             where TOptions : class
         {
-            var keyCandidates = EnumerateOptionKeys(key).ToArray();
-            var resolvedKey = keyCandidates.FirstOrDefault();
-            if (resolvedKey is null)
-            {
-                return null;
-            }
-
-            var serializer = ResolveSerializer(keyCandidates);
-
-            foreach (var candidate in keyCandidates)
-            {
-                if (_options.TryGetValue(candidate, out var raw) && raw is TOptions typed)
-                {
-                    if (!string.Equals(candidate, resolvedKey, StringComparison.Ordinal))
-                    {
-                        SetOptions(typed, resolvedKey);
-                    }
-
-                    return typed;
-                }
-
-                if (!_serializedOptions.TryGetValue(candidate, out var element))
-                {
-                    continue;
-                }
-
-                TOptions? deserialized = null;
-                if (serializer is not null && serializer.OptionsType.IsAssignableFrom(typeof(TOptions)))
-                {
-                    try
-                    {
-                        deserialized = serializer.Deserialize(element) as TOptions;
-                    }
-                    catch (JsonException)
-                    {
-                        deserialized = null;
-                    }
-                    catch (InvalidCastException)
-                    {
-                        deserialized = null;
-                    }
-                }
-
-                if (deserialized is null)
-                {
-                    try
-                    {
-                        deserialized = element.Deserialize<TOptions>();
-                    }
-                    catch (JsonException)
-                    {
-                        deserialized = null;
-                    }
-                }
-
-                if (deserialized is not null)
-                {
-                    SetOptions(deserialized, resolvedKey);
-                    return deserialized;
-                }
-            }
-
-            return null;
+            return OptionsState.GetOptions<TOptions>(key);
         }
 
         internal bool TryApplySerializedOptions(IServiceOptionsSerializer serializer, JsonElement payload, string? key = null)
         {
-            var keyCandidates = EnumerateOptionKeys(key).ToArray();
-            var resolvedKey = keyCandidates.FirstOrDefault();
-            if (resolvedKey is null)
-            {
-                return false;
-            }
-
-            try
-            {
-                var options = serializer.Deserialize(payload);
-                if (!serializer.OptionsType.IsInstanceOfType(options))
-                {
-                    return false;
-                }
-
-                SetOptionsWithSerializer(serializer, options, resolvedKey, keyCandidates, payload);
-                return true;
-            }
-            catch (JsonException)
-            {
-                return false;
-            }
-            catch (NotSupportedException)
-            {
-                return false;
-            }
-        }
-
-        private IServiceOptionsSerializer? ResolveSerializer(string[] keyCandidates)
-        {
-            var resolver = OptionsSerializerResolver;
-            if (resolver is null)
-            {
-                return null;
-            }
-
-            foreach (var candidate in keyCandidates)
-            {
-                if (string.IsNullOrWhiteSpace(candidate))
-                {
-                    continue;
-                }
-
-                var serializer = resolver(candidate);
-                if (serializer is not null)
-                {
-                    return serializer;
-                }
-            }
-
-            return null;
-        }
-
-        private void SetOptionsWithSerializer(IServiceOptionsSerializer serializer, object options, string resolvedKey, string[] keyCandidates, JsonElement? payloadOverride = null)
-        {
-            if (!serializer.OptionsType.IsInstanceOfType(options))
-            {
-                throw new ArgumentException($"Options must be assignable to {serializer.OptionsType}.", nameof(options));
-            }
-
-            _options[resolvedKey] = options;
-
-            if (payloadOverride is JsonElement payload)
-            {
-                _serializedOptions[resolvedKey] = payload.Clone();
-            }
-            else if (TrySerializeOptions(serializer, options, out var element))
-            {
-                _serializedOptions[resolvedKey] = element;
-            }
-            else
-            {
-                _serializedOptions.Remove(resolvedKey);
-            }
-
-            RemoveCandidateKeys(keyCandidates, resolvedKey);
-        }
-
-        private void SetOptionsWithDefault<TOptions>(TOptions options, string resolvedKey, string[] keyCandidates)
-            where TOptions : class
-        {
-            _options[resolvedKey] = options;
-
-            try
-            {
-                _serializedOptions[resolvedKey] = JsonSerializer.SerializeToElement(options);
-            }
-            catch (NotSupportedException)
-            {
-                _serializedOptions.Remove(resolvedKey);
-            }
-            catch (JsonException)
-            {
-                _serializedOptions.Remove(resolvedKey);
-            }
-
-            RemoveCandidateKeys(keyCandidates, resolvedKey);
-        }
-
-        private void RemoveOptionKeys(string[] keyCandidates)
-        {
-            foreach (var candidate in keyCandidates)
-            {
-                if (string.IsNullOrWhiteSpace(candidate))
-                {
-                    continue;
-                }
-
-                _options.Remove(candidate);
-                _serializedOptions.Remove(candidate);
-            }
-        }
-
-        private void RemoveCandidateKeys(string[] keyCandidates, string keepKey)
-        {
-            foreach (var candidate in keyCandidates)
-            {
-                if (string.IsNullOrWhiteSpace(candidate) || string.Equals(candidate, keepKey, StringComparison.Ordinal))
-                {
-                    continue;
-                }
-
-                _options.Remove(candidate);
-                _serializedOptions.Remove(candidate);
-            }
-        }
-
-        private static bool TrySerializeOptions(IServiceOptionsSerializer serializer, object options, out JsonElement element)
-        {
-            element = default;
-            try
-            {
-                if (!serializer.OptionsType.IsInstanceOfType(options))
-                {
-                    return false;
-                }
-
-                var buffer = new ArrayBufferWriter<byte>();
-                using (var writer = new Utf8JsonWriter(buffer))
-                {
-                    serializer.Serialize(writer, options);
-                }
-
-                element = JsonDocument.Parse(buffer.WrittenMemory).RootElement.Clone();
-                return true;
-            }
-            catch (JsonException)
-            {
-                return false;
-            }
-            catch (NotSupportedException)
-            {
-                return false;
-            }
+            return OptionsState.TryApplySerializedOptions(serializer, payload, key);
         }
 
         /// <summary>
@@ -712,38 +359,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public TOptions GetOrCreateOptions<TOptions>(Func<TOptions> factory, string? key = null)
             where TOptions : class
         {
-            if (factory is null)
-            {
-                throw new ArgumentNullException(nameof(factory));
-            }
-
-            var existing = GetOptions<TOptions>(key);
-            if (existing is not null)
-            {
-                return existing;
-            }
-
-            var created = factory();
-            SetOptions(created, key);
-            return created;
-        }
-
-        private IEnumerable<string> EnumerateOptionKeys(string? overrideKey)
-        {
-            if (!string.IsNullOrWhiteSpace(overrideKey))
-            {
-                yield return overrideKey;
-            }
-
-            if (!string.IsNullOrWhiteSpace(DescriptorId))
-            {
-                yield return DescriptorId;
-            }
-
-            if (Type != default)
-            {
-                yield return Type.ToString();
-            }
+            return OptionsState.GetOrCreateOptions(factory, key);
         }
 
         #region Legacy option bindings
@@ -822,29 +438,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         #endregion
 
-        /// <summary>
-        /// Enables forwarding of log entries between services when cross-service references are detected.
-        /// Defaults to <c>false</c> so services remain independent unless explicitly linked.
-        /// </summary>
-        private static bool _enableCrossServiceLogForwarding;
-        public static bool EnableCrossServiceLogForwarding
-        {
-            get => _enableCrossServiceLogForwarding;
-            set
-            {
-                if (_enableCrossServiceLogForwarding == value)
-                {
-                    return;
-                }
-
-                _enableCrossServiceLogForwarding = value;
-                if (!value)
-                {
-                    CrossServiceAssociationsClearing?.Invoke();
-                }
-            }
-        }
-
         private bool _isActive;
         public bool IsActive
         {
@@ -915,21 +508,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
         }
 
-        public ObservableCollection<LogEntry> Logs { get; set; } = new();
+        public ObservableCollection<LogEntry> Logs => LogState.Logs;
 
-        private void RefreshLogMetadata()
-        {
-            if (Logs is null)
-            {
-                return;
-            }
-
-            foreach (var entry in Logs)
-            {
-                entry.ServiceType = Type;
-                entry.ServiceName = DisplayName;
-            }
-        }
         public event Action<bool>? ActiveChanged;
 
         public event Action<ServiceListModel, LogEntry>? LogAdded;
@@ -937,243 +517,80 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public void AddLog(string message, WpfBrush? color = null, LogLevel level = LogLevel.Debug, bool checkReference = true)
         {
             var brush = color ?? WpfBrushes.Black;
-            var normalizedMessage = NormalizeLatestMessage(message);
-            var entryMessage = string.IsNullOrEmpty(normalizedMessage)
-                ? $"[{level}]"
-                : $"[{level}] {normalizedMessage}";
-            var entry = new LogEntry
-            {
-                Message = entryMessage,
-                Color = brush.ToString(),
-                Level = level,
-                ServiceType = Type,
-                ServiceName = DisplayName
-            };
-            LastLogMessage = entryMessage;
-            LastLogBrush = brush;
-            Logs.Insert(0, entry);
-            if (Logs.Count > MaxLogEntries)
-            {
-                Logs.RemoveAt(Logs.Count - 1);
-            }
-            LogAdded?.Invoke(this, entry);
+            LogState.AddLog(message, brush, level);
             if (checkReference)
             {
-                if (EnableCrossServiceLogForwarding)
-                {
-                    HandleReference(message, brush, level);
-                }
+                ServiceStateCoordinator.TryForwardLog(this, message ?? string.Empty, brush, level);
             }
         }
 
-        public void LoadPersistedLogs(IEnumerable<LogEntry> entries)
+        internal void AddForwardedLog(string message, WpfBrush brush, LogLevel level)
         {
-            var materialized = entries?.Where(e => !string.IsNullOrWhiteSpace(e.Message)).Take(MaxLogEntries).ToList() ?? new List<LogEntry>();
-            Logs = new ObservableCollection<LogEntry>(materialized);
-            OnPropertyChanged(nameof(Logs));
-            RefreshLogMetadata();
-            LastLogMessage = string.Empty;
-            LastLogBrush = WpfBrushes.Black;
-            if (Logs.FirstOrDefault() is { } latest)
-            {
-                var normalized = NormalizePersistedMessage(latest.Message ?? string.Empty);
-                LastLogMessage = string.IsNullOrEmpty(normalized)
-                    ? $"[{latest.Level}]"
-                    : $"[{latest.Level}] {normalized}";
-                LastLogBrush = ParseBrush(latest.Color, WpfBrushes.Black);
-            }
+            LogState.AddLog(message, brush, level);
         }
 
-        /// <summary>
-        /// Rehydrates persisted message history so the service restores its last known exchanges.
-        /// </summary>
-        /// <param name="entries">The persisted message entries.</param>
-        public void LoadMessageHistory(IEnumerable<ServiceMessageHistoryEntry> entries)
+        private void OnLogStateLogAdded(LogEntry entry)
         {
-            _messageHistory.Clear();
-            InputMessage = InputMessagePlaceholder;
-            OutputMessage = string.Empty;
-            LastInputBrush = WpfBrushes.Black;
-            IncomingMessageCount = 0;
-            OutgoingMessageCount = 0;
-            if (entries is null)
+            LogAdded?.Invoke(this, entry);
+        }
+
+        private void OnLogStatePropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
             {
-                return;
-            }
-
-            var incomingCount = 0;
-            var outgoingCount = 0;
-            foreach (var entry in entries
-                         .Where(e => e is not null)
-                         .OrderByDescending(e => e.Timestamp)
-                         .Take(ServiceMessageTableViewModel.MaxRows))
-            {
-                var incoming = entry.IncomingMessage ?? string.Empty;
-                var outgoing = entry.OutgoingMessage ?? string.Empty;
-                if (!string.IsNullOrEmpty(incoming))
-                {
-                    incomingCount++;
-                }
-
-                if (!string.IsNullOrEmpty(outgoing))
-                {
-                    outgoingCount++;
-                }
-
-                _messageHistory.AddLast(new ServiceMessageHistoryEntry
-                {
-                    IncomingMessage = incoming,
-                    OutgoingMessage = outgoing,
-                    Destination = entry.Destination ?? string.Empty,
-                    Timestamp = entry.Timestamp
-                });
-            }
-
-            IncomingMessageCount = incomingCount;
-            OutgoingMessageCount = outgoingCount;
-
-            foreach (var historyEntry in _messageHistory)
-            {
-                if (!string.IsNullOrEmpty(historyEntry.IncomingMessage))
-                {
-                    UpdateInputMessage(historyEntry.IncomingMessage);
+                case nameof(ServiceLogState.InputMessage):
+                    OnPropertyChanged(nameof(InputMessage));
+                    SetRoutingAttribute(InputMessageAttributeName, LogState.InputMessage, MessageRoutingDirection.Input);
                     break;
-                }
-            }
-
-            foreach (var historyEntry in _messageHistory)
-            {
-                if (!string.IsNullOrEmpty(historyEntry.OutgoingMessage))
-                {
-                    UpdateOutputMessage(historyEntry.OutgoingMessage);
+                case nameof(ServiceLogState.OutputMessage):
+                    OnPropertyChanged(nameof(OutputMessage));
+                    SetRoutingAttribute(OutputMessageAttributeName, LogState.OutputMessage, MessageRoutingDirection.Output);
                     break;
-                }
+                case nameof(ServiceLogState.LastInputBrush):
+                    OnPropertyChanged(nameof(LastInputBrush));
+                    break;
+                case nameof(ServiceLogState.LastLogMessage):
+                    OnPropertyChanged(nameof(LastLogMessage));
+                    break;
+                case nameof(ServiceLogState.LastLogBrush):
+                    OnPropertyChanged(nameof(LastLogBrush));
+                    break;
+                case nameof(ServiceLogState.Logs):
+                    OnPropertyChanged(nameof(Logs));
+                    break;
             }
         }
 
-        /// <summary>
-        /// Updates the last input message tracked for this service.
-        /// </summary>
-        /// <param name="message">The raw message text.</param>
-        /// <param name="brush">The brush used to display the message in the UI.</param>
-        /// <returns>The normalized message stored on the model.</returns>
-        public string UpdateInputMessage(string? message, WpfBrush? brush = null)
+        private void OnMetricsStatePropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            var normalizedMessage = NormalizeLatestMessage(message, InputMessagePlaceholder);
-            InputMessage = normalizedMessage;
-            LastInputBrush = brush ?? WpfBrushes.Black;
-            return normalizedMessage;
-        }
-
-        /// <summary>
-        /// Updates the last output message tracked for this service.
-        /// </summary>
-        /// <param name="message">The raw message text.</param>
-        /// <returns>The normalized message stored on the model.</returns>
-        public string UpdateOutputMessage(string? message)
-        {
-            var normalizedMessage = NormalizeLatestMessage(message);
-            OutputMessage = normalizedMessage;
-            return normalizedMessage;
-        }
-
-        /// <summary>
-        /// Records a message exchange for persistence and downstream bindings.
-        /// </summary>
-        public void RecordMessageHistory(string? incomingMessage, string? outgoingMessage, string? destination, DateTime timestamp)
-        {
-            var entry = new ServiceMessageHistoryEntry
+            switch (e.PropertyName)
             {
-                IncomingMessage = incomingMessage ?? string.Empty,
-                OutgoingMessage = outgoingMessage ?? string.Empty,
-                Destination = destination ?? string.Empty,
-                Timestamp = timestamp
-            };
-
-            _messageHistory.AddFirst(entry);
-            while (_messageHistory.Count > ServiceMessageTableViewModel.MaxRows)
-            {
-                _messageHistory.RemoveLast();
-            }
-
-            if (!string.IsNullOrEmpty(incomingMessage))
-            {
-                IncomingMessageCount++;
-                UpdateInputMessage(incomingMessage);
-            }
-
-            if (!string.IsNullOrEmpty(outgoingMessage))
-            {
-                OutgoingMessageCount++;
-                UpdateOutputMessage(outgoingMessage);
+                case nameof(ServiceMetricsState.TotalExecutionTimeMs):
+                    OnPropertyChanged(nameof(TotalExecutionTimeMs));
+                    OnPropertyChanged(nameof(AverageExecutionTimeMs));
+                    OnPropertyChanged(nameof(ExecutionTimeText));
+                    break;
+                case nameof(ServiceMetricsState.ExecutionCount):
+                    OnPropertyChanged(nameof(ExecutionCount));
+                    OnPropertyChanged(nameof(AverageExecutionTimeMs));
+                    OnPropertyChanged(nameof(ExecutionTimeText));
+                    break;
+                case nameof(ServiceMetricsState.LastExecutionDuration):
+                    OnPropertyChanged(nameof(LastExecutionDuration));
+                    OnPropertyChanged(nameof(ExecutionTimeText));
+                    break;
+                case nameof(ServiceMetricsState.IncomingMessageCount):
+                    OnPropertyChanged(nameof(IncomingMessageCount));
+                    SetRoutingAttribute(IncomingMessageCountAttributeName, MetricsState.IncomingMessageCount.ToString(CultureInfo.InvariantCulture));
+                    break;
+                case nameof(ServiceMetricsState.OutgoingMessageCount):
+                    OnPropertyChanged(nameof(OutgoingMessageCount));
+                    SetRoutingAttribute(OutgoingMessageCountAttributeName, MetricsState.OutgoingMessageCount.ToString(CultureInfo.InvariantCulture));
+                    break;
             }
         }
 
-        /// <summary>
-        /// Creates a snapshot of the current message history for persistence.
-        /// </summary>
-        public IReadOnlyList<ServiceMessageHistoryEntry> GetMessageHistorySnapshot()
-        {
-            return _messageHistory
-                .Select(entry => new ServiceMessageHistoryEntry
-                {
-                    IncomingMessage = entry.IncomingMessage,
-                    OutgoingMessage = entry.OutgoingMessage,
-                    Destination = entry.Destination,
-                    Timestamp = entry.Timestamp
-                })
-                .ToList();
-        }
-
-        /// <summary>
-        /// Records a single execution duration for this service and updates the running average.
-        /// </summary>
-        /// <param name="duration">The execution duration to record.</param>
-        /// <exception cref="ArgumentException">Thrown when <paramref name="duration"/> is negative.</exception>
-        public void RecordExecutionTime(TimeSpan duration)
-        {
-            if (duration < TimeSpan.Zero)
-                throw new ArgumentException("Duration must be non-negative", nameof(duration));
-
-            _totalExecutionTimeMs += duration.TotalMilliseconds;
-            _executionCount++;
-            LastExecutionDuration = duration;
-            OnPropertyChanged(nameof(AverageExecutionTimeMs));
-        }
-
-        private void HandleReference(string message, WpfBrush color, LogLevel level)
-        {
-            if (!EnableCrossServiceLogForwarding)
-            {
-                return;
-            }
-
-            var lookup = ServiceLookup;
-            if (lookup is null)
-            {
-                return;
-            }
-
-            if (!TryExtractCrossServiceReference(message, out var typeStr, out var serviceName, out var forwardedMessage))
-            {
-                return;
-            }
-
-            if (!ServiceTypeExtensions.TryParse(typeStr, out var type))
-            {
-                return;
-            }
-
-            if (!lookup.TryGetService(type, serviceName, out var target) || target == null || ReferenceEquals(target, this))
-            {
-                return;
-            }
-
-            EnsureAssociation(target);
-            target.AddLog(forwardedMessage, color, level, false);
-        }
-
-        private void EnsureAssociation(ServiceListModel target)
+        internal void EnsureAssociation(ServiceListModel target)
         {
             if (!AssociatedServices.Contains(target.DisplayName))
             {
@@ -1184,206 +601,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             {
                 target.AssociatedServices.Add(DisplayName);
             }
-        }
-
-
-        private static bool TryExtractCrossServiceReference(string message, out string typeName, out string serviceName, out string forwardedMessage)
-        {
-            typeName = string.Empty;
-            serviceName = string.Empty;
-            forwardedMessage = string.Empty;
-
-            if (string.IsNullOrWhiteSpace(message))
-            {
-                return false;
-            }
-
-            ReadOnlySpan<char> span = message.AsSpan().TrimStart();
-            span = StripTimestamp(span);
-            span = StripLogLevelPrefix(span);
-            span = TrimLeadingWhitespace(span);
-
-            if (span.IsEmpty)
-            {
-                return false;
-            }
-
-            var normalized = span.ToString();
-            var firstDot = normalized.IndexOf('.');
-            if (firstDot <= 0)
-            {
-                return false;
-            }
-
-            var secondDot = normalized.IndexOf('.', firstDot + 1);
-            if (secondDot <= firstDot + 1)
-            {
-                return false;
-            }
-
-            typeName = normalized[..firstDot];
-            serviceName = normalized[(firstDot + 1)..secondDot];
-            forwardedMessage = normalized[(secondDot + 1)..].TrimStart();
-
-            return forwardedMessage.Length > 0;
-        }
-
-        private static ReadOnlySpan<char> StripTimestamp(ReadOnlySpan<char> message)
-        {
-            if (message.Length >= TimestampLength)
-            {
-                var timestampCandidate = message[..TimestampLength];
-                if (DateTime.TryParseExact(timestampCandidate.ToString(), TimestampFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out _))
-                {
-                    return TrimLeadingWhitespace(message[TimestampLength..]);
-                }
-            }
-
-            return message;
-        }
-
-        private static ReadOnlySpan<char> StripLogLevelPrefix(ReadOnlySpan<char> message)
-        {
-            var span = message;
-            while (span.Length > 0 && span[0] == '[')
-            {
-                var closingIndex = span[1..].IndexOf(']');
-                if (closingIndex < 0)
-                {
-                    break;
-                }
-
-                var nextIndex = closingIndex + 2; // Include '[' and ']'
-                if (nextIndex > span.Length)
-                {
-                    break;
-                }
-
-                span = span[nextIndex..];
-                span = TrimLeadingWhitespace(span);
-            }
-
-            return span;
-        }
-
-        private static ReadOnlySpan<char> TrimLeadingWhitespace(ReadOnlySpan<char> span)
-        {
-            var index = 0;
-            while (index < span.Length && char.IsWhiteSpace(span[index]))
-            {
-                index++;
-            }
-
-            return index == 0 ? span : span[index..];
-        }
-
-        private static string NormalizeLatestMessage(string? message, string? emptyPlaceholder = null)
-        {
-            if (string.IsNullOrWhiteSpace(message))
-            {
-                return emptyPlaceholder ?? string.Empty;
-            }
-
-            var trimmed = StripBracketedTimestamp(message.Trim());
-            trimmed = StripLogLevel(trimmed);
-
-            return MessageDisplayFormatter.FormatControlCharacters(trimmed);
-        }
-
-        private static string NormalizePersistedMessage(string message)
-        {
-            if (string.IsNullOrWhiteSpace(message))
-            {
-                return string.Empty;
-            }
-
-            var trimmed = StripPersistedTimestamp(message.Trim());
-            trimmed = StripBracketedTimestamp(trimmed);
-            trimmed = StripLogLevel(trimmed);
-
-            return MessageDisplayFormatter.FormatControlCharacters(trimmed);
-        }
-
-        private static string StripPersistedTimestamp(string message)
-        {
-            if (message.Length > TimestampLength && message[TimestampLength] == ' ')
-            {
-                var timestampCandidate = message.Substring(0, TimestampLength);
-                if (DateTime.TryParseExact(timestampCandidate, TimestampFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out _))
-                {
-                    return message[(TimestampLength + 1)..].TrimStart();
-                }
-            }
-
-            return message;
-        }
-
-        private static string StripBracketedTimestamp(string message)
-        {
-            if (message.Length == 0 || message[0] != '[')
-            {
-                return message;
-            }
-
-            var endIndex = message.IndexOf(']');
-            if (endIndex <= 1)
-            {
-                return message;
-            }
-
-            var candidate = message.Substring(1, endIndex - 1);
-            if (TimeSpan.TryParseExact(candidate, "hh\\:mm\\:ss", CultureInfo.InvariantCulture, out _))
-            {
-                return message[(endIndex + 1)..].TrimStart();
-            }
-
-            return message;
-        }
-
-        private static string StripLogLevel(string message)
-        {
-            if (!message.StartsWith("[", StringComparison.Ordinal))
-            {
-                return message;
-            }
-
-            var levelEnd = message.IndexOf(']');
-            if (levelEnd <= 0)
-            {
-                return message;
-            }
-
-            var candidate = message.Substring(1, levelEnd - 1);
-            if (Enum.TryParse(candidate, out LogLevel _))
-            {
-                return message[(levelEnd + 1)..].TrimStart();
-            }
-
-            return message;
-        }
-
-        private static WpfBrush ParseBrush(string? color, WpfBrush fallback)
-        {
-            if (string.IsNullOrWhiteSpace(color))
-            {
-                return fallback;
-            }
-
-            try
-            {
-                if (BrushConverter.ConvertFromString(color) is WpfBrush parsed)
-                {
-                    return parsed;
-                }
-            }
-            catch (FormatException)
-            {
-            }
-            catch (NotSupportedException)
-            {
-            }
-
-            return fallback;
         }
 
         public void PublishRoutingAttribute(string attributeName, string? value, MessageRoutingDirection? direction = null)
@@ -1529,8 +746,8 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public void ApplyPresentation(ServicePresentationMetadata metadata)
         {
             var normalized = ServicePresentationMetadata.Normalize(metadata);
-            BackgroundColor = ParseBrush(normalized.PrimaryAccentColor, WpfBrushes.LightGray);
-            BorderColor = ParseBrush(normalized.SecondaryAccentColor, WpfBrushes.Gray);
+            BackgroundColor = ServiceLogState.ParseBrush(normalized.PrimaryAccentColor, WpfBrushes.LightGray);
+            BorderColor = ServiceLogState.ParseBrush(normalized.SecondaryAccentColor, WpfBrushes.Gray);
             IconGlyph = normalized.IconGlyph;
             DescriptorLabel = normalized.DisplayLabel;
             OnPropertyChanged(nameof(BackgroundColor));

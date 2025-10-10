@@ -65,7 +65,7 @@ namespace DesktopApplicationTemplate.Persistence
                     ExecutionCount = service.ExecutionCount,
                     IncomingMessageCount = service.IncomingMessageCount,
                     OutgoingMessageCount = service.OutgoingMessageCount,
-                    Logs = service.Logs
+                    Logs = service.LogState.Logs
                         .Take(ServiceListModel.MaxLogEntries)
                         .Select(l => new LogEntry
                         {
