@@ -10,9 +10,9 @@ namespace DesktopApplicationTemplate.UI.Views.Ftp
     /// <summary>
     /// View displaying FTP server status and transfers.
     /// </summary>
-    public partial class FTPServiceView : Page, IServiceLogHost
+    public partial class FtpServiceView : Page, IServiceLogHost
     {
-        public FTPServiceView(FtpServiceViewModel viewModel, ILoggingService logger)
+        public FtpServiceView(FtpServiceViewModel viewModel, ILoggingService logger)
         {
             InitializeComponent();
             DataContext = viewModel;
