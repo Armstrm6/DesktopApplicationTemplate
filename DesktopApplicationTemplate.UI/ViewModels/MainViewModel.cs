@@ -23,7 +23,7 @@ using Microsoft.Extensions.Options;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
-    internal interface IServiceLookup
+    public interface IServiceLookup
     {
         bool TryGetService(ServiceType type, string name, out ServiceListModel? service);
 
