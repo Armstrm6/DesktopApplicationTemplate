@@ -76,6 +76,7 @@ namespace DesktopApplicationTemplate.Persistence
                         })
                         .ToList(),
                     MessageHistory = service.GetMessageHistorySnapshot().ToList(),
+                    RoutingAttributes = CloneRoutingAttributes(service.GetRoutingAttributesSnapshot()),
                 };
 
                 if (descriptor?.OptionsSerializer is { } serializer)
@@ -137,11 +138,16 @@ namespace DesktopApplicationTemplate.Persistence
             }
         }
 
-        public static List<ServiceListModel> Load(IServiceCatalog serviceCatalog, ILoggingService? logger = null)
+        public static List<ServiceListModel> Load(IServiceCatalog serviceCatalog, IMessageRoutingService routingService, ILoggingService? logger = null)
         {
             if (serviceCatalog is null)
             {
                 throw new ArgumentNullException(nameof(serviceCatalog));
+            }
+
+            if (routingService is null)
+            {
+                throw new ArgumentNullException(nameof(routingService));
             }
 
             if (!File.Exists(FilePath))
@@ -174,7 +180,9 @@ namespace DesktopApplicationTemplate.Persistence
                     info.SerializedOptions ??= new Dictionary<string, JsonElement>(StringComparer.OrdinalIgnoreCase);
                     info.LegacySerializedOptions ??= new Dictionary<string, JsonElement>(StringComparer.OrdinalIgnoreCase);
 
-                    var service = CreateServiceModel(info, serviceCatalog);
+                    info.RoutingAttributes ??= new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+                    var service = CreateServiceModel(info, serviceCatalog, routingService);
                     services.Add(service);
                 }
 
@@ -193,12 +201,12 @@ namespace DesktopApplicationTemplate.Persistence
             }
         }
 
-        private static ServiceListModel CreateServiceModel(ServiceInfo info, IServiceCatalog serviceCatalog)
+        private static ServiceListModel CreateServiceModel(ServiceInfo info, IServiceCatalog serviceCatalog, IMessageRoutingService routingService)
         {
             var descriptor = ResolveDescriptor(serviceCatalog, info.DescriptorId, info.ServiceType);
             var descriptorId = descriptor?.Id ?? info.DescriptorId;
 
-            var service = new ServiceListModel
+            var service = new ServiceListModel(routingService)
             {
                 DescriptorId = descriptorId,
                 DisplayName = info.DisplayName,
@@ -209,6 +217,8 @@ namespace DesktopApplicationTemplate.Persistence
             };
 
             service.SerializedOptions = CloneSerializedOptions(info.SerializedOptions);
+
+            service.RestoreRoutingAttributes(info.RoutingAttributes);
 
             foreach (var associated in info.AssociatedServices)
             {
@@ -221,6 +231,8 @@ namespace DesktopApplicationTemplate.Persistence
             service.InitializeActivationState(info.IsActive);
 
             ApplyOptions(info, service, descriptor);
+
+            service.RepublishRoutingAttributes();
 
             return service;
         }
@@ -332,6 +344,22 @@ namespace DesktopApplicationTemplate.Persistence
             {
                 service.SerializedOptions[key] = element;
             }
+        }
+
+        private static Dictionary<string, string> CloneRoutingAttributes(IReadOnlyDictionary<string, string>? source)
+        {
+            var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            if (source is null)
+            {
+                return result;
+            }
+
+            foreach (var pair in source)
+            {
+                result[pair.Key] = pair.Value ?? string.Empty;
+            }
+
+            return result;
         }
 
         private static Dictionary<string, JsonElement> CloneSerializedOptions(IReadOnlyDictionary<string, JsonElement>? source)
@@ -602,6 +630,8 @@ namespace DesktopApplicationTemplate.Persistence
         public int OutgoingMessageCount { get; set; }
         public List<LogEntry> Logs { get; set; } = new();
         public List<ServiceMessageHistoryEntry> MessageHistory { get; set; } = new();
+        [JsonInclude]
+        public Dictionary<string, string> RoutingAttributes { get; set; } = new(StringComparer.OrdinalIgnoreCase);
         [JsonExtensionData]
         public Dictionary<string, JsonElement> LegacySerializedOptions { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     }

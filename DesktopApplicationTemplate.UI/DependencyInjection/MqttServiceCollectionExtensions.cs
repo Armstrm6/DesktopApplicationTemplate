@@ -52,7 +52,8 @@ namespace DesktopApplicationTemplate.UI.DependencyInjection
                 {
                     var ctx = (ServiceFactoryOptions<MqttServiceOptions>)optionsObj;
                     var mainView = provider.GetRequiredService<MainView>();
-                    var newService = new ServiceListModel
+                    var routing = provider.GetRequiredService<IMessageRoutingService>();
+                    var newService = new ServiceListModel(routing)
                     {
                         DescriptorId = descriptor.Id,
                         DisplayName = ctx.Name,
