@@ -167,7 +167,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private double _totalExecutionTimeMs;
         private int _executionCount;
         private TimeSpan _lastExecutionDuration;
-        private string _inputMessage = string.Empty;
+        private const string InputMessagePlaceholder = "---------";
+        private const string ExecutionTimePlaceholder = "Last: -- ms (Avg: -- ms)";
+
+        private string _inputMessage = InputMessagePlaceholder;
         private string _outputMessage = string.Empty;
         private WpfBrush _lastInputBrush = WpfBrushes.Black;
         private string _lastLogMessage = string.Empty;
@@ -201,7 +204,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         /// Gets a formatted string displaying the last execution duration and average.
         /// </summary>
         public string ExecutionTimeText => _executionCount == 0
-            ? string.Empty
+            ? ExecutionTimePlaceholder
             : $"Last: {LastExecutionDuration.TotalMilliseconds:F0} ms (Avg: {AverageExecutionTimeMs:F0} ms)";
 
         public int IncomingMessageCount
@@ -921,7 +924,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public void LoadMessageHistory(IEnumerable<ServiceMessageHistoryEntry> entries)
         {
             _messageHistory.Clear();
-            InputMessage = string.Empty;
+            InputMessage = InputMessagePlaceholder;
             OutputMessage = string.Empty;
             LastInputBrush = WpfBrushes.Black;
             IncomingMessageCount = 0;
@@ -989,7 +992,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         /// <returns>The normalized message stored on the model.</returns>
         public string UpdateInputMessage(string? message, WpfBrush? brush = null)
         {
-            var normalizedMessage = NormalizeLatestMessage(message);
+            var normalizedMessage = NormalizeLatestMessage(message, InputMessagePlaceholder);
             InputMessage = normalizedMessage;
             LastInputBrush = brush ?? WpfBrushes.Black;
             return normalizedMessage;
@@ -1271,11 +1274,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             return index == 0 ? span : span[index..];
         }
 
-        private static string NormalizeLatestMessage(string? message)
+        private static string NormalizeLatestMessage(string? message, string? emptyPlaceholder = null)
         {
             if (string.IsNullOrWhiteSpace(message))
             {
-                return string.Empty;
+                return emptyPlaceholder ?? string.Empty;
             }
 
             var trimmed = StripBracketedTimestamp(message.Trim());
