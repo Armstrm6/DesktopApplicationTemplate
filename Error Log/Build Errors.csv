@@ -45,3 +45,4 @@ System.ArgumentException,DesktopApplicationTemplate.UI/CsvServiceCollectionExten
 System.Windows.Markup.XamlParseException,DesktopApplicationTemplate.UI/MainWindow.xaml,1
 System.Windows.Markup.XamlParseException,DesktopApplicationTemplate.UI/TcpServiceMessagesView.xaml,1
 CMD-NOT-FOUND,DesktopApplicationTemplate/dotnet,6
+CS1061,DesktopApplicationTemplate.UI/MainViewModel.cs,1

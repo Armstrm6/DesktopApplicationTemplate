@@ -55,3 +55,4 @@ System.ArgumentException,DesktopApplicationTemplate.UI/CsvServiceCollectionExten
 System.Windows.Markup.XamlParseException,DesktopApplicationTemplate.UI/MainWindow.xaml,Add value to collection of type 'System.Windows.Controls.UIElementCollection' threw an exception. Line number '195' and line position '22'.,1,2025-10-09T18:34:29
 System.Windows.Markup.XamlParseException,DesktopApplicationTemplate.UI/TcpServiceMessagesView.xaml,Add value to collection of type 'System.Windows.Controls.UIElementCollection' threw an exception. Line number '60' and line position '18'.,1,2025-10-09T18:41:01
 CMD-NOT-FOUND,DesktopApplicationTemplate/dotnet,Command 'dotnet' not found on PATH.,6,2025-10-10T19:38:57
+CS1061,DesktopApplicationTemplate.UI/MainViewModel.cs,'LoggingService' does not contain a definition for 'Reload'.,1,2025-10-10T19:56:40
