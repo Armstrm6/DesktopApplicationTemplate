@@ -547,7 +547,8 @@ namespace DesktopApplicationTemplate.UI.Views
                 }
 
                 _viewModel.ClearRoutingCache(type, trimmed);
-                var svc = new ServiceListModel
+                var routing = _serviceProvider.GetRequiredService<IMessageRoutingService>();
+                var svc = new ServiceListModel(routing)
                 {
                     DisplayName = trimmed,
                     Type = type
