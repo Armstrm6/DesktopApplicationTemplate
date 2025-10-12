@@ -300,17 +300,16 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Tcp
                 OnPropertyChanged(nameof(OutgoingResults));
             };
 
-            var context = SynchronizationContext.Current;
             _testMessageBinder = new ServiceAttributeExpressionBinder(
                 _routing,
                 resolved => UpdateResolvedTestMessage(resolved),
                 error => TestMessageError = error,
-                context: context);
+                joinableTaskFactory: App.UiThreadTaskFactory);
             _scriptBinder = new ServiceAttributeExpressionBinder(
                 _routing,
                 resolved => UpdateResolvedScript(resolved),
                 error => ScriptError = error,
-                context: context);
+                joinableTaskFactory: App.UiThreadTaskFactory);
 
             ClearLogCommand = new RelayCommand(ClearLogs);
             _exportLogCommand = new AsyncRelayCommand(ExportLogsAsync, () => !_isExportingLogs);

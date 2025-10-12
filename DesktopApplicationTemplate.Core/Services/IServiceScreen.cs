@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 
 namespace DesktopApplicationTemplate.Core.Services;
 
@@ -11,7 +12,7 @@ public interface IServiceScreen<TOptions>
     /// <summary>
     /// Raised when the user requests to save the service.
     /// </summary>
-    event Action<string, TOptions> ServiceSaved;
+    event Func<string, TOptions, Task> ServiceSaved;
 
     /// <summary>
     /// Raised when the user cancels the operation.
@@ -28,7 +29,7 @@ public interface IServiceScreen<TOptions>
     /// </summary>
     /// <param name="serviceName">Name of the service.</param>
     /// <param name="options">Current options.</param>
-    void Save(string serviceName, TOptions options);
+    Task SaveAsync(string serviceName, TOptions options);
 
     /// <summary>
     /// Notifies the screen that the operation was cancelled.

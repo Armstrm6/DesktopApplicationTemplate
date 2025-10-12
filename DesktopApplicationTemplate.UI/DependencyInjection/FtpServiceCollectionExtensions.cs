@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using System.Windows.Controls;
 using DesktopApplicationTemplate.Core.Models;
 using DesktopApplicationTemplate.Core.Services;
@@ -83,6 +84,7 @@ namespace DesktopApplicationTemplate.UI.DependencyInjection
                     vm.ServiceSaved += (name, options) =>
                     {
                         ServiceRegistrationHelper.QueueServiceAddition(mainView, ServiceType.Ftp, name, (CoreFtpServerOptions)options);
+                        return Task.CompletedTask;
                     };
                     vm.EditCancelled += mainView.ShowCreateServiceSelectionPage;
                     var view = ActivatorUtilities.CreateInstance<FtpServerCreateView>(provider, vm);

@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Http;
 
@@ -39,10 +40,10 @@ public class HttpEditServiceViewModel : ServiceEditViewModelBase<HttpServiceOpti
     public HttpServiceOptions Options => _options;
 
     /// <inheritdoc />
-    protected override void OnSave()
+    protected override Task OnSaveAsync()
     {
         _options.BaseUrl = BaseUrl;
-        RaiseServiceSaved(_options);
+        return RaiseServiceSavedAsync(_options);
     }
 
     /// <inheritdoc />

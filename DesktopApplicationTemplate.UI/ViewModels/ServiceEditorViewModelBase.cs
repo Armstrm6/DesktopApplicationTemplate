@@ -1,8 +1,9 @@
 using System;
+using System.Threading.Tasks;
 using System.Windows.Input;
-using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Models;
+using DesktopApplicationTemplate.UI.Helpers;
 
 namespace DesktopApplicationTemplate.UI.ViewModels;
 
@@ -19,7 +20,7 @@ public abstract class ServiceEditorViewModelBase<TOptions> : ValidatableViewMode
     {
         Rule = rule ?? throw new ArgumentNullException(nameof(rule));
         Logger = logger;
-        var saveCommand = new RelayCommand(OnSave, () => !HasErrors);
+        var saveCommand = new AsyncRelayCommand(OnSaveAsync, () => !HasErrors);
         SaveCommand = saveCommand;
         CancelCommand = new RelayCommand(OnCancel);
         AdvancedConfigCommand = new RelayCommand(OnAdvancedConfig);
@@ -85,7 +86,7 @@ public abstract class ServiceEditorViewModelBase<TOptions> : ValidatableViewMode
     /// <summary>
     /// Raised when the service is saved.
     /// </summary>
-    public event Action<string, TOptions>? ServiceSaved;
+    public event Func<string, TOptions, Task>? ServiceSaved;
 
     /// <summary>
     /// Raised when editing is cancelled.
@@ -101,8 +102,8 @@ public abstract class ServiceEditorViewModelBase<TOptions> : ValidatableViewMode
     /// Raises the <see cref="ServiceSaved"/> event with the provided options.
     /// </summary>
     /// <param name="options">Options to include with the event.</param>
-    protected void RaiseServiceSaved(TOptions options) =>
-        ServiceSaved?.Invoke(ServiceName, options);
+    protected Task RaiseServiceSavedAsync(TOptions options) =>
+        InvokeServiceSavedAsync(ServiceSaved, ServiceName, options);
 
     /// <summary>
     /// Raises the <see cref="EditCancelled"/> event.
@@ -120,7 +121,7 @@ public abstract class ServiceEditorViewModelBase<TOptions> : ValidatableViewMode
     /// <summary>
     /// Handles save operations for the service.
     /// </summary>
-    protected abstract void OnSave();
+    protected abstract Task OnSaveAsync();
 
     /// <summary>
     /// Handles cancellation of the operation.
@@ -131,4 +132,26 @@ public abstract class ServiceEditorViewModelBase<TOptions> : ValidatableViewMode
     /// Handles requests for advanced configuration.
     /// </summary>
     protected abstract void OnAdvancedConfig();
+    private static Task InvokeServiceSavedAsync(Func<string, TOptions, Task>? handler, string serviceName, TOptions options)
+    {
+        if (handler is null)
+        {
+            return Task.CompletedTask;
+        }
+
+        var invocationList = handler.GetInvocationList();
+        if (invocationList.Length == 1)
+        {
+            var task = ((Func<string, TOptions, Task>)invocationList[0])(serviceName, options);
+            return task ?? Task.CompletedTask;
+        }
+
+        var tasks = new Task[invocationList.Length];
+        for (var i = 0; i < invocationList.Length; i++)
+        {
+            tasks[i] = ((Func<string, TOptions, Task>)invocationList[i])(serviceName, options) ?? Task.CompletedTask;
+        }
+
+        return Task.WhenAll(tasks);
+    }
 }

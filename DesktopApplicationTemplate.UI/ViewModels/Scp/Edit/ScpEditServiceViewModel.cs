@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Scp;
 
@@ -74,14 +75,14 @@ public class ScpEditServiceViewModel : ServiceEditViewModelBase<ScpServiceOption
     }
 
     /// <inheritdoc />
-    protected override void OnSave()
+    protected override Task OnSaveAsync()
     {
         _options.Host = Host;
         if (int.TryParse(Port, out var port))
             _options.Port = port;
         _options.Username = Username;
         _options.Password = Password;
-        RaiseServiceSaved(_options);
+        return RaiseServiceSavedAsync(_options);
     }
 
     /// <inheritdoc />

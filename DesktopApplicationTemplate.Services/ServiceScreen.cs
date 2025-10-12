@@ -1,4 +1,6 @@
+using System;
 using System.Runtime.Versioning;
+using System.Threading.Tasks;
 using DesktopApplicationTemplate.Core.Services;
 
 namespace DesktopApplicationTemplate.Services;
@@ -22,7 +24,7 @@ public class ServiceScreen<TOptions> : IServiceScreen<TOptions>
     }
 
     /// <inheritdoc />
-    public event Action<string, TOptions>? ServiceSaved;
+    public event Func<string, TOptions, Task>? ServiceSaved;
 
     /// <inheritdoc />
     public event Action? EditCancelled;
@@ -31,10 +33,10 @@ public class ServiceScreen<TOptions> : IServiceScreen<TOptions>
     public event Action<TOptions>? AdvancedConfigRequested;
 
     /// <inheritdoc />
-    public void Save(string serviceName, TOptions options)
+    public async Task SaveAsync(string serviceName, TOptions options)
     {
         _logger?.Log($"Saving service {serviceName}", LogLevel.Debug);
-        ServiceSaved?.Invoke(serviceName, options);
+        await ServiceScreenEventInvoker.InvokeServiceSavedAsync(ServiceSaved, serviceName, options).ConfigureAwait(false);
         _logger?.Log($"Saved service {serviceName}", LogLevel.Debug);
     }
 
@@ -50,6 +52,32 @@ public class ServiceScreen<TOptions> : IServiceScreen<TOptions>
     {
         _logger?.Log("Opening advanced configuration", LogLevel.Debug);
         AdvancedConfigRequested?.Invoke(options);
+    }
+}
+
+internal static class ServiceScreenEventInvoker
+{
+    internal static Task InvokeServiceSavedAsync<TOptions>(Func<string, TOptions, Task>? handler, string serviceName, TOptions options)
+    {
+        if (handler is null)
+        {
+            return Task.CompletedTask;
+        }
+
+        var invocationList = handler.GetInvocationList();
+        if (invocationList.Length == 1)
+        {
+            var task = ((Func<string, TOptions, Task>)invocationList[0])(serviceName, options);
+            return task ?? Task.CompletedTask;
+        }
+
+        var tasks = new Task[invocationList.Length];
+        for (var i = 0; i < invocationList.Length; i++)
+        {
+            tasks[i] = ((Func<string, TOptions, Task>)invocationList[i])(serviceName, options) ?? Task.CompletedTask;
+        }
+
+        return Task.WhenAll(tasks);
     }
 }
 
