@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using DesktopApplicationTemplate.Core.Services;
 using DesktopApplicationTemplate.Core.Services.Protocols.Csv;
+using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.Helpers;
 using Microsoft.VisualStudio.Threading;
@@ -134,9 +135,9 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Csv
             }
         }
 
-        public async Task Save()
+        public Task SaveAsync()
         {
-            await ExecuteSaveAsync().ConfigureAwait(false);
+            return ExecuteSaveAsync();
         }
 
         private async Task ExecuteSaveAsync()
