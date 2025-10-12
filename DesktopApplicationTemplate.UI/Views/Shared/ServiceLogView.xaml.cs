@@ -1,11 +1,14 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using DesktopApplicationTemplate.Models;
+using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.ViewModels;
+using DesktopApplicationTemplate.UI.Views;
 
 namespace DesktopApplicationTemplate.UI.Views.Shared
 {
@@ -16,10 +19,15 @@ namespace DesktopApplicationTemplate.UI.Views.Shared
     {
         private const string ExportDialogFilter = "Log files (*.log)|*.log|Text files (*.txt)|*.txt|All files (*.*)|*.*";
         private const string ExportTimestampFormat = "yyyyMMdd_HHmmss";
+        private readonly AsyncRelayCommand _exportLogCommand;
+        private bool _isExporting;
+
+        public ICommand ExportLogCommand => _exportLogCommand;
 
         public ServiceLogView()
         {
             InitializeComponent();
+            _exportLogCommand = new AsyncRelayCommand(ExportLogAsync, () => !_isExporting);
         }
 
         private void CopyCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
@@ -55,10 +63,16 @@ namespace DesktopApplicationTemplate.UI.Views.Shared
             }
         }
 
-        private async void ExportLog_Click(object sender, RoutedEventArgs e)
+        private async Task ExportLogAsync()
         {
             if (DataContext is not ServiceLogViewModel viewModel)
             {
+                return;
+            }
+
+            if (viewModel.IsAggregated && Window.GetWindow(this) is MainView mainView)
+            {
+                await ExecuteExportAsync(mainView.ExportAllLogsAsync).ConfigureAwait(false);
                 return;
             }
 
@@ -72,21 +86,32 @@ namespace DesktopApplicationTemplate.UI.Views.Shared
                 return;
             }
 
-            if (sender is Button button)
+            await ExecuteExportAsync(() => viewModel.ExportLogsAsync(selectedPath)).ConfigureAwait(false);
+        }
+
+        private async Task ExecuteExportAsync(Func<Task> exportAction)
+        {
+            if (exportAction is null)
             {
-                button.IsEnabled = false;
-                try
-                {
-                    await viewModel.ExportLogsAsync(selectedPath);
-                }
-                finally
-                {
-                    button.IsEnabled = true;
-                }
+                return;
             }
-            else
+
+            if (_isExporting)
             {
-                await viewModel.ExportLogsAsync(selectedPath);
+                return;
+            }
+
+            _isExporting = true;
+            _exportLogCommand.RaiseCanExecuteChanged();
+
+            try
+            {
+                await exportAction().ConfigureAwait(false);
+            }
+            finally
+            {
+                _isExporting = false;
+                _exportLogCommand.RaiseCanExecuteChanged();
             }
         }
 

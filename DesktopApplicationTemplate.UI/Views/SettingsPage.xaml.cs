@@ -1,6 +1,8 @@
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.ViewModels;
 
 namespace DesktopApplicationTemplate.UI.Views
@@ -10,6 +12,9 @@ namespace DesktopApplicationTemplate.UI.Views
         private readonly SettingsViewModel _viewModel;
         private readonly NetworkConfigurationViewModel _networkViewModel;
 
+        public ICommand SaveCommand { get; }
+        public ICommand NavigateBackCommand { get; }
+
         public SettingsPage(SettingsViewModel settingsViewModel, NetworkConfigurationViewModel networkViewModel)
         {
             InitializeComponent();
@@ -17,29 +22,21 @@ namespace DesktopApplicationTemplate.UI.Views
             _networkViewModel = networkViewModel;
             DataContext = _viewModel;
             NetworkConfigGrid.DataContext = _networkViewModel;
+            SaveCommand = new AsyncRelayCommand(SaveAndApplyThemeAsync);
+            NavigateBackCommand = new AsyncRelayCommand(NavigateBackAsync);
             Loaded += OnLoaded;
         }
 
-        private async void OnLoaded(object sender, RoutedEventArgs e)
+        private void OnLoaded(object sender, RoutedEventArgs e)
         {
             Loaded -= OnLoaded;
+            _ = LoadSettingsAsync();
+        }
+
+        private async Task LoadSettingsAsync()
+        {
             await _viewModel.LoadAsync().ConfigureAwait(false);
             await _networkViewModel.LoadAsync().ConfigureAwait(false);
-        }
-
-        private async void Save_Click(object sender, RoutedEventArgs e)
-        {
-            await SaveAndApplyThemeAsync().ConfigureAwait(false);
-        }
-
-        private async void Back_Click(object sender, RoutedEventArgs e)
-        {
-            await NavigateBackAsync().ConfigureAwait(false);
-        }
-
-        private async void BackText_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            await NavigateBackAsync().ConfigureAwait(false);
         }
 
         public async Task NavigateBackAsync()
@@ -51,7 +48,7 @@ namespace DesktopApplicationTemplate.UI.Views
                     return;
                 if (res == MessageBoxResult.Yes)
                 {
-                    await SaveAndApplyThemeAsync();
+                    await SaveAndApplyThemeAsync().ConfigureAwait(false);
                 }
             }
 
