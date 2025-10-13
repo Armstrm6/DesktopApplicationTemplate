@@ -24,21 +24,21 @@ namespace DesktopApplicationTemplate.UI.Views
 
         public void SetExistingNames(IEnumerable<string> names) => _viewModel.SetExistingNames(names);
 
-        private async void ServiceType_Click(object sender, RoutedEventArgs e)
+        private void ServiceType_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button { DataContext: CreateServiceViewModel.ServiceTypeMetadata meta } button)
+            if (sender is not Button { DataContext: CreateServiceViewModel.ServiceTypeMetadata meta })
             {
-                var name = _viewModel.GenerateDefaultName(meta.Type);
-                if (meta.Type is ServiceType.Mqtt or ServiceType.Tcp or ServiceType.Heartbeat or ServiceType.Ftp or ServiceType.Http or ServiceType.Hid or ServiceType.Csv or ServiceType.FileObserver or ServiceType.Scp)
-                {
-                    ServiceTypeSelected?.Invoke(meta.Type);
-                    return;
-                }
-                if (ServiceCreated is { } handler)
-                {
-                    await handler.Invoke(name, meta.Type);
-                }
+                return;
             }
+
+            var name = _viewModel.GenerateDefaultName(meta.Type);
+            if (meta.Type is ServiceType.Mqtt or ServiceType.Tcp or ServiceType.Heartbeat or ServiceType.Ftp or ServiceType.Http or ServiceType.Hid or ServiceType.Csv or ServiceType.FileObserver or ServiceType.Scp)
+            {
+                ServiceTypeSelected?.Invoke(meta.Type);
+                return;
+            }
+
+            ObserveTask(OnServiceCreatedAsync(name, meta.Type));
         }
 
         public string GenerateDefaultName(ServiceType type) => _viewModel.GenerateDefaultName(type);
@@ -46,6 +46,25 @@ namespace DesktopApplicationTemplate.UI.Views
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
             Cancelled?.Invoke();
+        }
+
+        private Task OnServiceCreatedAsync(string name, ServiceType type)
+        {
+            return ServiceCreated?.Invoke(name, type) ?? Task.CompletedTask;
+        }
+
+        private static void ObserveTask(Task? task)
+        {
+            if (task is null)
+            {
+                return;
+            }
+
+            _ = task.ContinueWith(
+                t => _ = t.Exception,
+                System.Threading.CancellationToken.None,
+                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
         }
     }
 }

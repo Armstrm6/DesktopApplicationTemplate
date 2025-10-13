@@ -134,7 +134,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Csv
             }
         }
 
-        public async Task Save()
+        public async Task SaveAsync()
         {
             await ExecuteSaveAsync().ConfigureAwait(false);
         }
@@ -466,10 +466,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Csv
 
             _ = task.ContinueWith(
                 t => _ = t.Exception,
-                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
+                CancellationToken.None,
+                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
         }
 
-        private static void RunOnUiThread(Action action)
+        private void RunOnUiThread(Action action)
         {
             if (action is null)
             {

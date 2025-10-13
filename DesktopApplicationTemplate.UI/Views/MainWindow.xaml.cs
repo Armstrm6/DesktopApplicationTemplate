@@ -463,7 +463,7 @@ namespace DesktopApplicationTemplate.UI.Views
             editView.Initialize(viewModel);
 
             EventHandler? closeHandler = null;
-            closeHandler = async (_, _) =>
+            closeHandler = (_, _) =>
             {
                 viewModel.RequestClose -= closeHandler;
                 if (service.ServicePage != null)
@@ -471,7 +471,7 @@ namespace DesktopApplicationTemplate.UI.Views
                     ShowPage(service.ServicePage);
                 }
 
-                await _viewModel.SaveServicesAsync().ConfigureAwait(false);
+                ObserveTask(_viewModel.SaveServicesAsync());
             };
             viewModel.RequestClose += closeHandler;
 
@@ -1018,7 +1018,7 @@ namespace DesktopApplicationTemplate.UI.Views
             _viewModel.ClearLogs();
         }
 
-        private async void ExportLog_Click(object sender, RoutedEventArgs e)
+        private void ExportLog_Click(object sender, RoutedEventArgs e)
         {
             _logger?.LogInformation("Home view export logs button clicked");
 
@@ -1028,26 +1028,28 @@ namespace DesktopApplicationTemplate.UI.Views
                 button.IsEnabled = false;
             }
 
+            ObserveTask(ExportLogsAsync(button));
+        }
+
+        private async Task ExportLogsAsync(Button? button)
+        {
             var timestamp = DateTime.Now.ToString(LogExportTimestampFormat);
             var suggestedName = $"{LogExportDefaultPrefix}_{timestamp}.log";
             var selectedPath = App.FileDialogService.SaveFile(suggestedName, LogExportDialogFilter);
 
-            if (string.IsNullOrWhiteSpace(selectedPath))
-            {
-                _logger?.LogInformation("Log export canceled by the user.");
-                if (button is not null)
-                {
-                    button.IsEnabled = true;
-                }
-                return;
-            }
-
             try
             {
-                var (success, errorMessage) = await _viewModel.TryExportAllLogsAsync(selectedPath);
+                if (string.IsNullOrWhiteSpace(selectedPath))
+                {
+                    _logger?.LogInformation("Log export canceled by the user.");
+                    return;
+                }
+
+                var (success, errorMessage) = await _viewModel.TryExportAllLogsAsync(selectedPath).ConfigureAwait(false);
                 if (success)
                 {
                     _logger?.LogInformation("All logs exported to {FilePath}", selectedPath);
+                    await App.UiThreadTaskFactory.SwitchToMainThreadAsync();
                     MessageBox.Show(
                         this,
                         $"Logs exported to:\n{selectedPath}",
@@ -1061,6 +1063,7 @@ namespace DesktopApplicationTemplate.UI.Views
                         ? "An unknown error occurred."
                         : errorMessage;
                     _logger?.LogError("Failed to export logs to {FilePath}: {ErrorMessage}", selectedPath, failureMessage);
+                    await App.UiThreadTaskFactory.SwitchToMainThreadAsync();
                     MessageBox.Show(
                         this,
                         $"Failed to export logs to '{selectedPath}': {failureMessage}",
@@ -1073,6 +1076,7 @@ namespace DesktopApplicationTemplate.UI.Views
             {
                 if (button is not null)
                 {
+                    await App.UiThreadTaskFactory.SwitchToMainThreadAsync();
                     button.IsEnabled = true;
                 }
             }
