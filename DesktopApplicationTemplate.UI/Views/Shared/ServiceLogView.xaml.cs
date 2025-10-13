@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -55,7 +56,7 @@ namespace DesktopApplicationTemplate.UI.Views.Shared
             }
         }
 
-        private async void ExportLog_Click(object sender, RoutedEventArgs e)
+        private void ExportLog_Click(object sender, RoutedEventArgs e)
         {
             if (DataContext is not ServiceLogViewModel viewModel)
             {
@@ -72,22 +73,13 @@ namespace DesktopApplicationTemplate.UI.Views.Shared
                 return;
             }
 
-            if (sender is Button button)
+            var button = sender as Button;
+            if (button is not null)
             {
                 button.IsEnabled = false;
-                try
-                {
-                    await viewModel.ExportLogsAsync(selectedPath);
-                }
-                finally
-                {
-                    button.IsEnabled = true;
-                }
             }
-            else
-            {
-                await viewModel.ExportLogsAsync(selectedPath);
-            }
+
+            ObserveTask(ExportLogsAsync(viewModel, selectedPath, button));
         }
 
         private static string SanitizeFileName(string name)
@@ -95,6 +87,36 @@ namespace DesktopApplicationTemplate.UI.Views.Shared
             var invalidCharacters = Path.GetInvalidFileNameChars();
             var sanitized = new string(name.Select(ch => invalidCharacters.Contains(ch) ? '_' : ch).ToArray());
             return string.IsNullOrWhiteSpace(sanitized) ? "ServiceLog" : sanitized;
+        }
+
+        private static async Task ExportLogsAsync(ServiceLogViewModel viewModel, string selectedPath, Button? button)
+        {
+            try
+            {
+                await viewModel.ExportLogsAsync(selectedPath).ConfigureAwait(false);
+            }
+            finally
+            {
+                if (button is not null)
+                {
+                    await App.UiThreadTaskFactory.SwitchToMainThreadAsync();
+                    button.IsEnabled = true;
+                }
+            }
+        }
+
+        private static void ObserveTask(Task? task)
+        {
+            if (task is null)
+            {
+                return;
+            }
+
+            _ = task.ContinueWith(
+                t => _ = t.Exception,
+                System.Threading.CancellationToken.None,
+                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
         }
     }
 }

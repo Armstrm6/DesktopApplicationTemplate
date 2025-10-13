@@ -20,26 +20,31 @@ namespace DesktopApplicationTemplate.UI.Views
             Loaded += OnLoaded;
         }
 
-        private async void OnLoaded(object sender, RoutedEventArgs e)
+        private void OnLoaded(object sender, RoutedEventArgs e)
         {
             Loaded -= OnLoaded;
+            ObserveTask(LoadAsync());
+        }
+
+        private void Save_Click(object sender, RoutedEventArgs e)
+        {
+            ObserveTask(SaveAndApplyThemeAsync());
+        }
+
+        private void Back_Click(object sender, RoutedEventArgs e)
+        {
+            ObserveTask(NavigateBackAsync());
+        }
+
+        private void BackText_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            ObserveTask(NavigateBackAsync());
+        }
+
+        private async Task LoadAsync()
+        {
             await _viewModel.LoadAsync().ConfigureAwait(false);
             await _networkViewModel.LoadAsync().ConfigureAwait(false);
-        }
-
-        private async void Save_Click(object sender, RoutedEventArgs e)
-        {
-            await SaveAndApplyThemeAsync().ConfigureAwait(false);
-        }
-
-        private async void Back_Click(object sender, RoutedEventArgs e)
-        {
-            await NavigateBackAsync().ConfigureAwait(false);
-        }
-
-        private async void BackText_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            await NavigateBackAsync().ConfigureAwait(false);
         }
 
         public async Task NavigateBackAsync()
@@ -68,6 +73,20 @@ namespace DesktopApplicationTemplate.UI.Views
             await _viewModel.SaveAsync().ConfigureAwait(false);
             await App.UiThreadTaskFactory.SwitchToMainThreadAsync();
             Services.ThemeManager.ApplyTheme(_viewModel.DarkTheme);
+        }
+
+        private static void ObserveTask(Task? task)
+        {
+            if (task is null)
+            {
+                return;
+            }
+
+            _ = task.ContinueWith(
+                t => _ = t.Exception,
+                System.Threading.CancellationToken.None,
+                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
         }
     }
 }

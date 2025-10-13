@@ -49,7 +49,7 @@ public class CsvServiceAdapter
         var existingPath = GetCurrentFilePath();
         if (_csvService.RemoveColumnsForService(Configuration, _state, serviceName))
         {
-            await _viewModel.Save().ConfigureAwait(false);
+            await _viewModel.SaveAsync().ConfigureAwait(false);
             if (!string.IsNullOrWhiteSpace(existingPath))
             {
                 _output.DeleteFile(existingPath);
