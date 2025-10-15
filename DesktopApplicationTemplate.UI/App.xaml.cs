@@ -109,7 +109,25 @@ namespace DesktopApplicationTemplate.UI
             services.AddSingleton<SaveConfirmationHelper>();
             services.AddSingleton<CloseConfirmationHelper>();
             services.AddSingleton<IMqttClientSessionManager, MqttClientSessionManager>();
-            services.AddSingleton<MainViewModel>();
+            services.AddSingleton<MainViewModel>(sp =>
+            {
+                var factory = UiThreadTaskFactory;
+                if (factory is null)
+                {
+                    return ActivatorUtilities.CreateInstance<MainViewModel>(sp);
+                }
+
+                if (factory.Context.IsOnMainThread)
+                {
+                    return ActivatorUtilities.CreateInstance<MainViewModel>(sp);
+                }
+
+                return factory.Run(async () =>
+                {
+                    await factory.SwitchToMainThreadAsync();
+                    return ActivatorUtilities.CreateInstance<MainViewModel>(sp);
+                });
+            });
             services.AddSingleton<IServiceLookup>(sp => sp.GetRequiredService<MainViewModel>());
             services.AddSingleton<SettingsViewModel>();
 
