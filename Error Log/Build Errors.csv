@@ -46,7 +46,7 @@ System.Windows.Markup.XamlParseException,DesktopApplicationTemplate.UI/MainWindo
 System.Windows.Markup.XamlParseException,DesktopApplicationTemplate.UI/TcpServiceMessagesView.xaml,1
 System.Windows.Markup.XamlParseException,DesktopApplicationTemplate.UI/CsvServiceView.xaml,1
 CMD-NOT-FOUND,DesktopApplicationTemplate/dotnet,9
-CS0103,DesktopApplicationTemplate.UI/MainViewModel.cs,2
+CS0103,DesktopApplicationTemplate.UI/MainViewModel.cs,19
 CS0120,DesktopApplicationTemplate.UI/CsvServiceViewModel.cs,1
 VSTHRD100,DesktopApplicationTemplate.UI/CreateServicePage.xaml.cs,1
 VSTHRD100,DesktopApplicationTemplate.UI/MainWindow.xaml.cs,1
@@ -59,3 +59,5 @@ System.ArgumentException,DesktopApplicationTemplate.UI/App.xaml.cs,2
 System.InvalidOperationException,DesktopApplicationTemplate.UI/MainWindow.xaml.cs,1
 CS0111,DesktopApplicationTemplate.UI/MainViewModel.cs,1
 CS0136,DesktopApplicationTemplate.UI/MainViewModel.cs,1
+VSTHRD001,DesktopApplicationTemplate.UI/MainWindow.xaml.cs,1
+CS0157,DesktopApplicationTemplate.UI/MainWindow.xaml.cs,1
