@@ -216,7 +216,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             ResetMessageCountsCommand = new AsyncRelayCommand(ResetMessageCountsAsync);
             FilteredServices = CollectionViewSource.GetDefaultView(Services);
             Filters.PropertyChanged += (_, __) => ApplyFilters();
-            ObserveTask(LoadServicesAsync());
             foreach (var service in Services)
             {
                 TrackService(service);
