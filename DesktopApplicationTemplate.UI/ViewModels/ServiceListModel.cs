@@ -464,6 +464,24 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         #endregion
 
+        private bool _isMarkedForDeletion;
+
+        [JsonIgnore]
+        public bool IsMarkedForDeletion
+        {
+            get => _isMarkedForDeletion;
+            set
+            {
+                if (_isMarkedForDeletion == value)
+                {
+                    return;
+                }
+
+                _isMarkedForDeletion = value;
+                OnPropertyChanged();
+            }
+        }
+
         private bool _isActive;
         public bool IsActive
         {

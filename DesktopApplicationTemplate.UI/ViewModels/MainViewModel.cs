@@ -72,12 +72,16 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         }
         public ICommand AddServiceCommand { get; }
         public ICommand RemoveServiceCommand { get; }
+        public ICommand RemoveMarkedServicesCommand { get; }
         public ICommand EditServiceCommand { get; }
         public ICommand ToggleServiceProcessCommand { get; }
         public ICommand ExportPluginsCommand { get; }
         public ICommand ResetMessageCountsCommand { get; }
         public int ServicesCreated => Services.Count;
         public int CurrentActiveServices => Services.Count(s => s.IsActive);
+
+        public bool HasMarkedServices => _markedServices.Count > 0;
+        public IReadOnlyCollection<ServiceListModel> MarkedServices => _markedServices;
 
         private bool _servicesRunning;
         public bool ServicesRunning
@@ -130,6 +134,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 removeCommand.RaiseCanExecuteChanged();
             }
 
+            if (RemoveMarkedServicesCommand is AsyncRelayCommand removeMarkedCommand)
+            {
+                removeMarkedCommand.RaiseCanExecuteChanged();
+            }
+
             if (EditServiceCommand is RelayCommand<ServiceListModel?> editCommand)
             {
                 editCommand.RaiseCanExecuteChanged();
@@ -145,6 +154,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         private readonly IStartupPreferencesService _startupPreferencesService;
         private readonly HashSet<ServiceListModel> _activatingServices = new();
         private readonly HashSet<ServiceListModel> _trackedServices = new();
+        private readonly HashSet<ServiceListModel> _markedServices = new();
         private readonly Dictionary<(ServiceType Type, string Name), ServiceListModel> _serviceIndex = new();
         private readonly Dictionary<string, HashSet<ServiceListModel>> _servicesByName = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<ServiceListModel, ServiceIndexEntry> _serviceKeys = new();
@@ -206,6 +216,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
             AddServiceCommand = new RelayCommand(AddService);
             RemoveServiceCommand = new AsyncRelayCommand<ServiceListModel?>(RemoveServiceAsync, CanRemoveService);
+            RemoveMarkedServicesCommand = new AsyncRelayCommand(RemoveMarkedServicesAsync, CanRemoveMarkedServices);
             EditServiceCommand = new RelayCommand<ServiceListModel?>(EditService, svc => svc != null || ActiveService != null);
             ToggleServiceProcessCommand = new AsyncRelayCommand(ToggleServiceProcessAsync, () => !IsServiceProcessBusy);
             ExportPluginsCommand = new RelayCommand(OnExportPlugins);
@@ -369,7 +380,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             return $"{typeName}{index}";
         }
 
-        private async Task RemoveServiceAsync(ServiceListModel? service)
+        private Task RemoveServiceAsync(ServiceListModel? service)
+            => RemoveServiceAsync(service, skipConfigurationCheck: false);
+
+        private async Task RemoveServiceAsync(ServiceListModel? service, bool skipConfigurationCheck)
         {
             var target = service ?? ActiveService;
             if (target == null)
@@ -377,7 +391,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 return;
             }
 
-            if (!RequestConfigurationChange())
+            if (target.IsMarkedForDeletion)
+            {
+                target.IsMarkedForDeletion = false;
+            }
+
+            if (!skipConfigurationCheck && !RequestConfigurationChange())
             {
                 return;
             }
@@ -422,6 +441,30 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             LogViewModel.RefreshLogs();
             await SaveServicesAsync().ConfigureAwait(false);
             _logger?.Log("Service removed", LogLevel.Debug);
+        }
+
+        private bool CanRemoveMarkedServices()
+        {
+            return HasMarkedServices && CanModifyConfiguration;
+        }
+
+        private async Task RemoveMarkedServicesAsync()
+        {
+            if (!HasMarkedServices)
+            {
+                return;
+            }
+
+            if (!RequestConfigurationChange())
+            {
+                return;
+            }
+
+            var targets = _markedServices.Where(s => s.IsMarkedForDeletion).ToList();
+            foreach (var service in targets)
+            {
+                await RemoveServiceAsync(service, skipConfigurationCheck: true);
+            }
         }
 
         internal void ClearRoutingCache(ServiceType serviceType, string serviceName)
@@ -858,6 +901,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             {
                 AddServiceToIndex(service);
                 service.PropertyChanged += OnServicePropertyChanged;
+                if (service.IsMarkedForDeletion)
+                {
+                    UpdateMarkedServices(service);
+                }
             }
         }
 
@@ -871,6 +918,21 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             if (_trackedServices.Remove(service))
             {
                 service.PropertyChanged -= OnServicePropertyChanged;
+                var hadMarkedServices = HasMarkedServices;
+                if (_markedServices.Remove(service))
+                {
+                    if (service.IsMarkedForDeletion)
+                    {
+                        service.IsMarkedForDeletion = false;
+                    }
+
+                    if (hadMarkedServices != HasMarkedServices)
+                    {
+                        OnPropertyChanged(nameof(HasMarkedServices));
+                    }
+
+                    RefreshServiceCommandStates();
+                }
                 RemoveServiceFromIndex(service);
             }
         }
@@ -1068,6 +1130,31 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             ClearAssociationsFor(service);
         }
 
+        private void UpdateMarkedServices(ServiceListModel service)
+        {
+            if (service is null)
+            {
+                return;
+            }
+
+            var hadMarkedServices = HasMarkedServices;
+            if (service.IsMarkedForDeletion)
+            {
+                _markedServices.Add(service);
+            }
+            else
+            {
+                _markedServices.Remove(service);
+            }
+
+            if (hadMarkedServices != HasMarkedServices)
+            {
+                OnPropertyChanged(nameof(HasMarkedServices));
+            }
+
+            RefreshServiceCommandStates();
+        }
+
         private void OnCrossServiceAssociationsClearing()
         {
             foreach (var service in Services.ToList())
@@ -1088,6 +1175,13 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 string.Equals(propertyName, nameof(ServiceListModel.DisplayName), StringComparison.Ordinal);
             var affectsIndex = affectsDisplayName ||
                 string.Equals(propertyName, nameof(ServiceListModel.Type), StringComparison.Ordinal);
+            var affectsMarkedState = string.IsNullOrEmpty(propertyName) ||
+                string.Equals(propertyName, nameof(ServiceListModel.IsMarkedForDeletion), StringComparison.Ordinal);
+
+            if (affectsMarkedState)
+            {
+                UpdateMarkedServices(service);
+            }
 
             if (affectsIndex)
             {
