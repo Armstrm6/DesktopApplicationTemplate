@@ -204,10 +204,17 @@ public sealed class PluginExportViewModel : ViewModelBase, IDisposable
             return;
         }
 
-        _ = App.UiThreadTaskFactory.RunAsync(async () =>
+        var factory = App.UiThreadTaskFactory;
+        if (factory is null)
         {
             RefreshDescriptors();
-            await Task.CompletedTask;
+            return;
+        }
+
+        _ = factory.RunAsync(async () =>
+        {
+            await factory.SwitchToMainThreadAsync();
+            RefreshDescriptors();
         });
     }
 
