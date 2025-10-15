@@ -54,4 +54,4 @@ VSTHRD100,DesktopApplicationTemplate.UI/ServiceLogView.xaml.cs,1
 VSTHRD105,DesktopApplicationTemplate.UI/CsvServiceViewModel.cs,1
 VSTHRD101,DesktopApplicationTemplate.UI/MainWindow.xaml.cs,1
 VSTHRD200,DesktopApplicationTemplate.UI/CsvServiceViewModel.cs,1
-System.ArgumentException,DesktopApplicationTemplate.UI/App.xaml.cs,1
+System.ArgumentException,DesktopApplicationTemplate.UI/App.xaml.cs,2

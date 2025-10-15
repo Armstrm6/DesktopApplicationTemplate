@@ -2,7 +2,7 @@ Error Code,Count,datetime
 MC3074,60,2025-10-09T18:06:21
 XDG0008,60,2025-10-09T18:06:21
 System.NullReferenceException,1,2025-10-09T18:15:23
-System.ArgumentException,2,2025-10-13T15:25:45
+System.ArgumentException,3,2025-10-15T12:48:39+00:00
 System.Windows.Markup.XamlParseException,2,2025-10-09T18:41:01
 CMD-NOT-FOUND,7,2025-10-10T20:02:02
 CS0120,1,2025-10-12T18:14:44+00:00
