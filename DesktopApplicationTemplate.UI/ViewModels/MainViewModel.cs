@@ -18,6 +18,7 @@ using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.UI.ViewModels.Tcp;
 using DesktopApplicationTemplate.Models;
 using DesktopApplicationTemplate.UI.Helpers;
+using DesktopApplicationTemplate.UI;
 using DesktopApplicationTemplate.Core.Services.Protocols.Mqtt;
 using Microsoft.Extensions.Options;
 
@@ -261,6 +262,22 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         }
 
         private void ApplyNetworkConfiguration(NetworkConfiguration config)
+        {
+            var factory = App.UiThreadTaskFactory;
+            if (factory is null)
+            {
+                ApplyNetworkConfigurationOnUiThread(config);
+                return;
+            }
+
+            factory.Run(async () =>
+            {
+                await factory.SwitchToMainThreadAsync();
+                ApplyNetworkConfigurationOnUiThread(config);
+            });
+        }
+
+        private void ApplyNetworkConfigurationOnUiThread(NetworkConfiguration config)
         {
             foreach (var svc in Services)
             {
