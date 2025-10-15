@@ -676,6 +676,13 @@ namespace DesktopApplicationTemplate.UI.Views
             _logger?.LogDebug("RemoveService button clicked");
             if (DataContext is ViewModels.MainViewModel vm)
             {
+                if (vm.HasMarkedServices && vm.RemoveMarkedServicesCommand.CanExecute(null))
+                {
+                    vm.RemoveMarkedServicesCommand.Execute(null);
+                    _logger?.LogDebug("RemoveMarkedServices command executed");
+                    return;
+                }
+
                 var target = vm.SelectedService ?? vm.ActiveService;
                 if (vm.RemoveServiceCommand.CanExecute(target))
                 {

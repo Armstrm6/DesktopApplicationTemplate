@@ -9,6 +9,15 @@ Purpose: Running log of what worked, what broke, and why.
 - Always record environment limitations (e.g., missing dotnet runtime).
 - When Windows collaborators run builds or tests, capture the commands and summarize their results so Codex can reference them.
 
+[2025-10-11 09:30] Topic: Bulk service removal toggles
+Context: Added mark-for-deletion checkboxes to the service list and a bulk removal command that reuses the existing deletion flow.
+Observations: Manual regression covers: 1) mark three services, tap the “-” toolbar button, confirm all disappear and remaining services stay selected; 2) ensure a single marked service also disappears when the button is pressed; 3) unmark a service and verify the remove button reverts to single-item deletion; 4) restart the app to confirm mark state is not persisted.
+Codex Limitations noticed: Linux container cannot launch the WPF client, so verification requires a Windows workstation.
+Effective Prompts / Instructions that worked: User directive to batch deletions without altering existing removal logic guided reuse of MainViewModel.RemoveServiceAsync.
+Decisions & Rationale: Track marked services in MainViewModel so command availability reflects checkboxes without introducing new view types.
+Action Items: Re-run the four-step checklist whenever the list template or removal commands change.
+Related Commits/PRs:
+
 [2025-10-10 11:00] Topic: Cross-service association cleanup
 Context: Added a lookup index in `MainViewModel` so rename/remove operations update linked services.
 Observations: Manual regression covers: 1) create two services, force an association via routed log, rename one service and confirm both sides update; 2) remove a service and ensure the surviving service clears the stale association badge before saving.
