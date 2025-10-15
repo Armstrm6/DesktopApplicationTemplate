@@ -341,6 +341,10 @@ namespace DesktopApplicationTemplate.UI.ViewModels.Services
             {
                 if (BrushConverter.ConvertFromString(color) is WpfBrush parsed)
                 {
+                    if (parsed is System.Windows.Freezable freezable && !freezable.IsFrozen && freezable.CanFreeze)
+                    {
+                        freezable.Freeze();
+                    }
                     return parsed;
                 }
             }
