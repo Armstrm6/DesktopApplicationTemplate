@@ -429,35 +429,29 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 return;
             }
 
-            var selectionIndex = orderedTargets[0].Index;
+            _logger?.Log($"Removing service {removalTarget.DisplayName}", LogLevel.Debug);
+            ClearRoutingCache(removalTarget.Type, removalTarget.DisplayName);
+            removalTarget.ClearRoutingAttributes();
+            removalTarget.AddLog("Service removed", WpfBrushes.Red);
 
-            foreach (var entry in orderedTargets)
+            if (removalTarget.Type != ServiceType.Csv)
             {
-                var target = entry.Service;
-                _logger?.Log($"Removing service {target.DisplayName}", LogLevel.Debug);
-                ClearRoutingCache(target.Type, target.DisplayName);
-                target.ClearRoutingAttributes();
-                target.AddLog("Service removed", WpfBrushes.Red);
-
-                if (target.Type != ServiceType.Csv)
-                {
-                    await _csvService.RemoveColumnsForServiceAsync(target.DisplayName).ConfigureAwait(false);
-                }
-
-                RemoveServiceAssociations(target);
-                _activatingServices.Remove(target);
-                target.LogAdded -= OnServiceLogAdded;
-                target.ActiveChanged -= OnServiceActiveChanged;
-                target.IsMarkedForRemoval = false;
-                Services.Remove(target);
-
-                if (ReferenceEquals(ActiveService, target))
-                {
-                    ActiveService = null;
-                }
-
-                _logger?.Log("Service removed", LogLevel.Debug);
+                await _csvService.RemoveColumnsForServiceAsync(removalTarget.DisplayName).ConfigureAwait(false);
             }
+
+            RemoveServiceAssociations(removalTarget);
+            _activatingServices.Remove(removalTarget);
+            removalTarget.LogAdded -= OnServiceLogAdded;
+            removalTarget.ActiveChanged -= OnServiceActiveChanged;
+            removalTarget.IsMarkedForRemoval = false;
+            Services.Remove(removalTarget);
+
+            if (ReferenceEquals(ActiveService, removalTarget))
+            {
+                ActiveService = null;
+            }
+
+            _logger?.Log("Service removed", LogLevel.Debug);
 
             if (Services.Count > 0)
             {
