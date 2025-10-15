@@ -122,7 +122,20 @@ namespace DesktopApplicationTemplate.UI.Views
                 await App.UiThreadTaskFactory.SwitchToMainThreadAsync();
                 _shutdownCompleted = true;
                 _shutdownTask = null;
-                Close();
+                if (!Dispatcher.HasShutdownStarted && !Dispatcher.HasShutdownFinished)
+                {
+                    _ = Dispatcher.BeginInvoke(
+                        DispatcherPriority.Background,
+                        new Action(() =>
+                        {
+                            if (Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished)
+                            {
+                                return;
+                            }
+
+                            Close();
+                        }));
+                }
             }
         }
 
