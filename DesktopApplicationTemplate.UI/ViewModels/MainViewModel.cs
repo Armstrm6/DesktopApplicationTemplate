@@ -395,15 +395,15 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         private async Task RemoveServiceAsync(ServiceListModel? service, bool skipConfigurationCheck)
         {
-            var removalTarget = service ?? ActiveService;
-            if (removalTarget == null)
+            var requestedTarget = service ?? ActiveService;
+            if (requestedTarget == null)
             {
                 return;
             }
 
-            if (removalTarget.IsMarkedForDeletion)
+            if (requestedTarget.IsMarkedForDeletion)
             {
-                removalTarget.IsMarkedForDeletion = false;
+                requestedTarget.IsMarkedForDeletion = false;
             }
 
             if (!skipConfigurationCheck && !RequestConfigurationChange())
@@ -416,8 +416,15 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 return;
             }
 
-            var selectionIndex = Services.IndexOf(removalTarget);
-            if (selectionIndex < 0)
+            var orderedTargets = new[] { requestedTarget }
+                .Where(static t => t is not null)
+                .Distinct()
+                .Select(t => (Service: t, Index: Services.IndexOf(t)))
+                .Where(pair => pair.Index >= 0)
+                .OrderBy(pair => pair.Index)
+                .ToList();
+
+            if (orderedTargets.Count == 0)
             {
                 return;
             }
