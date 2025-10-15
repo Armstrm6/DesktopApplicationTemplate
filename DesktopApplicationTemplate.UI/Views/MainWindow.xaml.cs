@@ -123,16 +123,15 @@ namespace DesktopApplicationTemplate.UI.Views
                 _shutdownCompleted = true;
                 _shutdownTask = null;
 
-                if (Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished)
+                var dispatcherShuttingDown = Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished;
+                if (!dispatcherShuttingDown)
                 {
-                    return;
-                }
+                    await Task.Yield();
 
-                await Task.Yield();
-
-                if (!Dispatcher.HasShutdownStarted && !Dispatcher.HasShutdownFinished)
-                {
-                    Close();
+                    if (!Dispatcher.HasShutdownStarted && !Dispatcher.HasShutdownFinished)
+                    {
+                        Close();
+                    }
                 }
             }
         }

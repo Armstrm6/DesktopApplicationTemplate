@@ -74,3 +74,4 @@ CS0136,DesktopApplicationTemplate.UI/MainViewModel.cs,A local or parameter named
 CS0103,DesktopApplicationTemplate.UI/MainViewModel.cs,The name 'removalTarget' does not exist in the current context.,14,2025-10-15T14:46:18
 CS0103,DesktopApplicationTemplate.UI/MainViewModel.cs,The name 'selectionIndex' does not exist in the current context.,3,2025-10-15T14:46:18
 VSTHRD001,DesktopApplicationTemplate.UI/MainWindow.xaml.cs,Await JoinableTaskFactory.SwitchToMainThreadAsync() to switch to the UI thread instead of APIs that can deadlock or require specifying a priority (https://github.com/Microsoft/vs-threading/blob/main/doc/analyzers/VSTHRD001.md),1,2025-10-15T14:46:18
+CS0157,DesktopApplicationTemplate.UI/MainWindow.xaml.cs,Control cannot leave the body of a finally clause,1,2025-10-15T14:50:23+00:00
