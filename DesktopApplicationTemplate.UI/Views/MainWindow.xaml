@@ -111,6 +111,10 @@
                         </TextBlock>
                         <Button Content="+" Width="30" Click="AddService_Click" Background="#E6E6E6" Foreground="#333333"/>
                         <Button Content="-" Width="30" Margin="5,0,0,0" Click="RemoveService_Click" Background="#E6E6E6" Foreground="#333333"/>
+                        <Button Content="Delete Selected"
+                                Margin="5,0,0,0"
+                                Padding="12,6"
+                                Command="{Binding RemoveMarkedServicesCommand}"/>
                         <Button x:Name="FilterButton" Content="☰" Width="30" Margin="5,0,0,0" Click="FilterButton_Click" Background="#E6E6E6" Foreground="#333333"/>
                         <Popup x:Name="FilterPopup" PlacementTarget="{Binding ElementName=FilterButton}" Placement="Bottom" StaysOpen="False" DataContext="{Binding DataContext, ElementName=FilterButton}">
                             <Border Background="White" CornerRadius="5" Padding="10">

@@ -143,6 +143,16 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             {
                 editCommand.RaiseCanExecuteChanged();
             }
+
+            RefreshRemoveMarkedServicesCommandState();
+        }
+
+        private void RefreshRemoveMarkedServicesCommandState()
+        {
+            if (RemoveMarkedServicesCommand is AsyncRelayCommand removeMarkedCommand)
+            {
+                removeMarkedCommand.RaiseCanExecuteChanged();
+            }
         }
 
         private readonly CsvServiceAdapter _csvService;
@@ -320,6 +330,11 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             return (service ?? ActiveService) != null && CanModifyConfiguration;
         }
 
+        private bool CanRemoveMarkedServices()
+        {
+            return Services.Any(s => s.IsMarkedForRemoval) && CanModifyConfiguration;
+        }
+
         private void EditService(ServiceListModel? service)
         {
             var target = service ?? ActiveService;
@@ -401,35 +416,58 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 return;
             }
 
-            _logger?.Log($"Removing service {target.DisplayName}", LogLevel.Debug);
-            ClearRoutingCache(target.Type, target.DisplayName);
-            target.ClearRoutingAttributes();
-            var index = Services.IndexOf(target);
-            target.AddLog("Service removed", WpfBrushes.Red);
-            if (target.Type != ServiceType.Csv)
+            if (!RequestConfigurationChange())
             {
-                await _csvService.RemoveColumnsForServiceAsync(target.DisplayName);
+                return;
             }
 
-            RemoveServiceAssociations(target);
-            _activatingServices.Remove(target);
-            target.LogAdded -= OnServiceLogAdded;
-            target.ActiveChanged -= OnServiceActiveChanged;
-            Services.Remove(target);
+            var orderedTargets = targets
+                .Where(static t => t is not null)
+                .Distinct()
+                .Select(t => (Service: t, Index: Services.IndexOf(t)))
+                .Where(pair => pair.Index >= 0)
+                .OrderBy(pair => pair.Index)
+                .ToList();
 
-            if (ReferenceEquals(ActiveService, target))
+            if (orderedTargets.Count == 0)
             {
-                ActiveService = null;
+                return;
+            }
+
+            var selectionIndex = orderedTargets[0].Index;
+
+            foreach (var entry in orderedTargets)
+            {
+                var target = entry.Service;
+                _logger?.Log($"Removing service {target.DisplayName}", LogLevel.Debug);
+                ClearRoutingCache(target.Type, target.DisplayName);
+                target.ClearRoutingAttributes();
+                target.AddLog("Service removed", WpfBrushes.Red);
+
+                if (target.Type != ServiceType.Csv)
+                {
+                    await _csvService.RemoveColumnsForServiceAsync(target.DisplayName).ConfigureAwait(false);
+                }
+
+                RemoveServiceAssociations(target);
+                _activatingServices.Remove(target);
+                target.LogAdded -= OnServiceLogAdded;
+                target.ActiveChanged -= OnServiceActiveChanged;
+                target.IsMarkedForRemoval = false;
+                Services.Remove(target);
+
+                if (ReferenceEquals(ActiveService, target))
+                {
+                    ActiveService = null;
+                }
+
+                _logger?.Log("Service removed", LogLevel.Debug);
             }
 
             if (Services.Count > 0)
             {
-                if (index >= Services.Count)
-                {
-                    index = Services.Count - 1;
-                }
-
-                SelectedService = Services[index];
+                selectionIndex = Math.Min(selectionIndex, Services.Count - 1);
+                SelectedService = Services[selectionIndex];
             }
             else
             {
@@ -440,7 +478,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             OnPropertyChanged(nameof(CurrentActiveServices));
             LogViewModel.RefreshLogs();
             await SaveServicesAsync().ConfigureAwait(false);
-            _logger?.Log("Service removed", LogLevel.Debug);
+            RefreshRemoveMarkedServicesCommandState();
         }
 
         private bool CanRemoveMarkedServices()
@@ -888,6 +926,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             }
 
             LogViewModel.UpdateServiceFilters(Services.Select(s => s.DisplayName));
+            RefreshRemoveMarkedServicesCommandState();
         }
 
         private void TrackService(ServiceListModel service)
@@ -1191,6 +1230,12 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             if (affectsDisplayName)
             {
                 LogViewModel.UpdateServiceFilters(Services.Select(s => s.DisplayName));
+            }
+
+            if (string.IsNullOrEmpty(propertyName) ||
+                string.Equals(propertyName, nameof(ServiceListModel.IsMarkedForRemoval), StringComparison.Ordinal))
+            {
+                RefreshRemoveMarkedServicesCommandState();
             }
         }
 
