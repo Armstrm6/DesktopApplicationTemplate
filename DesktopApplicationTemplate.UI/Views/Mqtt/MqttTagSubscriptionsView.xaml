@@ -86,7 +86,7 @@
                         <DataTemplate DataType="{x:Type models:TagSubscription}">
                             <Button Content="Test" Width="50"
                                     Command="{Binding DataContext.SendTestMessageCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                    CommandParameter="{Binding}"/>
+                                    CommandParameter="{Binding Path=., Mode=OneWay}"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
