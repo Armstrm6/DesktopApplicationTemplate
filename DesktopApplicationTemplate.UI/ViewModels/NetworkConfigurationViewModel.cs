@@ -4,6 +4,7 @@ using DesktopApplicationTemplate.Core.Models;
 using DesktopApplicationTemplate.UI.Helpers;
 using DesktopApplicationTemplate.UI.Services;
 using DesktopApplicationTemplate.Core.Services;
+using UI = DesktopApplicationTemplate.UI;
 
 namespace DesktopApplicationTemplate.UI.ViewModels
 {
@@ -42,7 +43,13 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         public async Task LoadAsync()
         {
-            CurrentConfiguration = await _service.GetConfigurationAsync().ConfigureAwait(false);
+            var configuration = await _service.GetConfigurationAsync().ConfigureAwait(false);
+            if (UI.App.UiThreadTaskFactory is { } factory)
+            {
+                await factory.SwitchToMainThreadAsync();
+            }
+
+            CurrentConfiguration = configuration;
             IpAddress = CurrentConfiguration.IpAddress;
             SubnetMask = CurrentConfiguration.SubnetMask;
             Gateway = CurrentConfiguration.Gateway;

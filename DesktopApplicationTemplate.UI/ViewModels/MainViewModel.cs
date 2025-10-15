@@ -188,7 +188,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             AllLogs = new LimitedObservableCollection<LogEntry>(aggregatedLogCapacity);
             ServiceListModel.OptionsSerializerResolver = ResolveOptionsSerializer;
             ServiceListModel.CrossServiceAssociationsClearing += OnCrossServiceAssociationsClearing;
-            _ = NetworkConfig.LoadAsync();
+            ObserveTask(NetworkConfig.LoadAsync());
             _networkService.ConfigurationChanged += (_, cfg) => ApplyNetworkConfiguration(cfg);
             if (!string.IsNullOrWhiteSpace(servicesFilePath))
             {
