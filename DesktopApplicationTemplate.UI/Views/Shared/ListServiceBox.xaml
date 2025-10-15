@@ -73,7 +73,7 @@
                 Margin="2"
                 Tag="{Binding DataContext.EditServiceCommand, RelativeSource={RelativeSource AncestorType=ListBox}}">
             <Border.ContextMenu>
-                <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
                     <MenuItem Header="Edit Service"
                               Command="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                               CommandParameter="{Binding}" />
