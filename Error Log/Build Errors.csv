@@ -55,3 +55,4 @@ VSTHRD105,DesktopApplicationTemplate.UI/CsvServiceViewModel.cs,1
 VSTHRD101,DesktopApplicationTemplate.UI/MainWindow.xaml.cs,1
 VSTHRD200,DesktopApplicationTemplate.UI/CsvServiceViewModel.cs,1
 System.ArgumentException,DesktopApplicationTemplate.UI/App.xaml.cs,2
+CS0111,DesktopApplicationTemplate.UI/MainViewModel.cs,1
