@@ -330,11 +330,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             return (service ?? ActiveService) != null && CanModifyConfiguration;
         }
 
-        private bool CanRemoveMarkedServices()
-        {
-            return Services.Any(s => s.IsMarkedForRemoval) && CanModifyConfiguration;
-        }
-
         private void EditService(ServiceListModel? service)
         {
             var target = service ?? ActiveService;
