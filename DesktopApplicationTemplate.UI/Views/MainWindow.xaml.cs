@@ -424,7 +424,7 @@ namespace DesktopApplicationTemplate.UI.Views
             _mqttSubscriptionViewModels.Remove(svc);
 
             var sessionManager = _serviceProvider.GetRequiredService<IMqttClientSessionManager>();
-            _ = sessionManager.ReleaseAsync(svc);
+            ObserveTask(sessionManager.ReleaseAsync(svc));
         }
 
         private void OpenTcpAdvancedSettings(ServiceListModel svc)
