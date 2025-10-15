@@ -43,7 +43,7 @@
                                   Padding="10,5"
                                   HorizontalContentAlignment="Left" />
                     <Popup Placement="Bottom"
-                           PlacementTarget="{Binding ElementName=ServiceFiltersToggle}"
+                           PlacementTarget="{Binding ElementName=ServiceFiltersToggle, Mode=OneWay}"
                            IsOpen="{Binding IsChecked, ElementName=ServiceFiltersToggle, Mode=TwoWay}"
                            StaysOpen="False"
                            AllowsTransparency="True"
