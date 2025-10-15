@@ -79,7 +79,7 @@
                 <DataTemplate>
                     <TextBlock Foreground="DarkRed" TextWrapping="Wrap">
                         <Run Text="• " FontWeight="Bold"/>
-                        <Run Text="{Binding}"/>
+                        <Run Text="{Binding Path=., Mode=OneWay}"/>
                     </TextBlock>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
