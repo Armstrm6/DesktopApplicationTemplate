@@ -85,12 +85,17 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <Ellipse Grid.Column="0"
+                <CheckBox Grid.Column="0"
+                          Margin="0,0,8,0"
+                          VerticalAlignment="Center"
+                          IsChecked="{Binding IsMarkedForRemoval, Mode=TwoWay}" />
+                <Ellipse Grid.Column="1"
                          Style="{StaticResource ServiceStatusIndicatorStyle}"
                          ToolTip="{Binding RuntimeState}" />
-                <StackPanel Grid.Column="1">
+                <StackPanel Grid.Column="2">
                     <TextBlock FontWeight="Bold" Text="{Binding DisplayName}" />
                     <TextBlock Text="{Binding ExecutionTimeText}" />
                     <TextBlock Text="{Binding LogState.LastLogMessage}"

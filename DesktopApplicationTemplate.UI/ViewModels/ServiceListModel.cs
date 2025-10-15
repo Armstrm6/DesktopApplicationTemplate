@@ -149,6 +149,22 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         [JsonIgnore] public Page? Page { get; set; }
         public int Order { get; set; }
 
+        private bool _isMarkedForRemoval;
+        public bool IsMarkedForRemoval
+        {
+            get => _isMarkedForRemoval;
+            set
+            {
+                if (_isMarkedForRemoval == value)
+                {
+                    return;
+                }
+
+                _isMarkedForRemoval = value;
+                OnPropertyChanged();
+            }
+        }
+
         private WpfBrush _backgroundColor = WpfBrushes.LightGray;
         public WpfBrush BackgroundColor
         {
