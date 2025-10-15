@@ -124,7 +124,7 @@ public class FileObserverViewModel : ViewModelBase
         if (observer is null)
         {
             ResetFields();
-            await _fileObserverService.StopAsync().ConfigureAwait(false);
+            await _fileObserverService.StopAsync();
             return;
         }
 
@@ -138,7 +138,7 @@ public class FileObserverViewModel : ViewModelBase
         TcpCommand = observer.TcpString;
 
         OnPropertyChanged(null);
-        await ConfigureObserverServiceAsync(observer).ConfigureAwait(false);
+        await ConfigureObserverServiceAsync(observer);
     }
 
     private void ResetFields()
@@ -186,8 +186,7 @@ public class FileObserverViewModel : ViewModelBase
                 try
                 {
                     var files = await _fileSearchService
-                        .GetFilesAsync(directory, "*", CancellationToken.None)
-                        .ConfigureAwait(false);
+                        .GetFilesAsync(directory, "*", CancellationToken.None);
                     ImageNames = string.Join(",", files.Select(System.IO.Path.GetFileName));
                 }
                 catch
@@ -199,7 +198,7 @@ public class FileObserverViewModel : ViewModelBase
             if (SelectedObserver is not null)
             {
                 SelectedObserver.FilePath = FilePath;
-                await ConfigureObserverServiceAsync(SelectedObserver).ConfigureAwait(false);
+                await ConfigureObserverServiceAsync(SelectedObserver);
             }
         }
     }
@@ -219,9 +218,9 @@ public class FileObserverViewModel : ViewModelBase
             TcpCommand = observer.TcpString
         };
 
-        await _fileObserverService.ConfigureAsync(observer.Name, options).ConfigureAwait(false);
-        await _fileObserverService.StartAsync().ConfigureAwait(false);
-        var snapshot = await _fileObserverService.GetSnapshotAsync().ConfigureAwait(false);
+        await _fileObserverService.ConfigureAsync(observer.Name, options);
+        await _fileObserverService.StartAsync();
+        var snapshot = await _fileObserverService.GetSnapshotAsync();
 
         if (!string.IsNullOrWhiteSpace(snapshot.Contents))
         {
