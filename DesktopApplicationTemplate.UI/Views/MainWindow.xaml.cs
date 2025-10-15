@@ -122,16 +122,19 @@ namespace DesktopApplicationTemplate.UI.Views
                 await App.UiThreadTaskFactory.SwitchToMainThreadAsync();
                 _shutdownCompleted = true;
                 _shutdownTask = null;
-
-                var dispatcherShuttingDown = Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished;
-                if (!dispatcherShuttingDown)
+                if (!Dispatcher.HasShutdownStarted && !Dispatcher.HasShutdownFinished)
                 {
-                    await Task.Yield();
+                    _ = Dispatcher.BeginInvoke(
+                        DispatcherPriority.Background,
+                        new Action(() =>
+                        {
+                            if (Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished)
+                            {
+                                return;
+                            }
 
-                    if (!Dispatcher.HasShutdownStarted && !Dispatcher.HasShutdownFinished)
-                    {
-                        Close();
-                    }
+                            Close();
+                        }));
                 }
             }
         }

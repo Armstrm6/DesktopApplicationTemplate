@@ -427,12 +427,22 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 await _csvService.RemoveColumnsForServiceAsync(removalTarget.DisplayName).ConfigureAwait(false);
             }
 
+            _logger?.Log($"Removing service {removalTarget.DisplayName}", LogLevel.Debug);
+            ClearRoutingCache(removalTarget.Type, removalTarget.DisplayName);
+            removalTarget.ClearRoutingAttributes();
+            removalTarget.AddLog("Service removed", WpfBrushes.Red);
+
+            if (removalTarget.Type != ServiceType.Csv)
+            {
+                await _csvService.RemoveColumnsForServiceAsync(removalTarget.DisplayName).ConfigureAwait(false);
+            }
+
             RemoveServiceAssociations(removalTarget);
             _activatingServices.Remove(removalTarget);
             removalTarget.LogAdded -= OnServiceLogAdded;
             removalTarget.ActiveChanged -= OnServiceActiveChanged;
             removalTarget.IsMarkedForRemoval = false;
-            Services.RemoveAt(selectionIndex);
+            Services.Remove(removalTarget);
 
             if (ReferenceEquals(ActiveService, removalTarget))
             {
