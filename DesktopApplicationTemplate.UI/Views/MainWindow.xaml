@@ -11,7 +11,7 @@
         xmlns:shared="clr-namespace:DesktopApplicationTemplate.UI.Views.Shared"
         mc:Ignorable="d"
         Title="MainView"
-        MinWidth="800" MinHeight="600" Height="600" Width="1200"
+        MinWidth="1200" MinHeight="700" Height="800" Width="1400"
         SizeToContent="Manual"
         MaxHeight="{Binding Source={x:Static sys:SystemParameters.WorkArea}, Path=Height}"
         MaxWidth="{Binding Source={x:Static sys:SystemParameters.WorkArea}, Path=Width}"
@@ -81,8 +81,8 @@
         <Grid Grid.Row="1" Margin="10">
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="7*"/>
+                <ColumnDefinition Width="4*" MinWidth="520"/>
+                <ColumnDefinition Width="6*"/>
             </Grid.ColumnDefinitions>
 
             <!-- Services Panel -->
