@@ -200,7 +200,7 @@ public class HttpServiceViewModel : ValidatableViewModelBase, ILoggingViewModel
                 if (!string.IsNullOrWhiteSpace(headerSummary))
                     Logger?.Log($"Headers: {headerSummary}", LogLevel.Debug);
 
-                HttpExecutionResult result = await _httpClientService.ExecuteAsync(request).ConfigureAwait(false);
+                HttpExecutionResult result = await _httpClientService.ExecuteAsync(request);
                 StatusCode = (int)result.StatusCode;
                 ResponseBody = result.Body;
                 Logger?.Log($"Received response with status {StatusCode}", LogLevel.Debug);
