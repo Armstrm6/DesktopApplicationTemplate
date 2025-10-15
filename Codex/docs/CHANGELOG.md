@@ -78,6 +78,7 @@
 - MQTT create, edit, and subscription views follow design spacing with shared form styles and accessibility names.
 - Service creation flows now display within the main view, removing the separate Create Service window and placeholder navigation text.
 - Create service page limits options to TCP, MQTT, HTTP, FTP, SCP, and CSV services.
+- Main window maintains the selected service highlight when navigating detail pages so list selection and active service remain aligned after operations like removal.
 - Main window height constrained to the work area to prevent overlapping the taskbar.
 - MQTT create and edit views include tooltips on text fields to clarify expected input.
 - Create and edit service view models inject `IServiceRule` to validate required fields with XAML error tooltips.

@@ -41,7 +41,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
         public LimitedObservableCollection<LogEntry> AllLogs { get; }
         private ServiceListModel? _selectedService;
         private ServiceListModel? _activeService;
-        private bool _suppressActiveServiceReset;
         public ServiceListModel? SelectedService
         {
             get => _selectedService;
@@ -49,10 +48,7 @@ namespace DesktopApplicationTemplate.UI.ViewModels
             {
                 _selectedService = value;
                 OnPropertyChanged();
-                if (!_suppressActiveServiceReset || value != null)
-                {
-                    ActiveService = value;
-                }
+                ActiveService = value;
             }
         }
         public ServiceListModel? ActiveService
@@ -1171,33 +1167,6 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         // OnPropertyChanged inherited from ViewModelBase
 
-        internal IDisposable PreserveActiveServiceSelection()
-        {
-            return new ActiveServiceSelectionScope(this);
-        }
-
-        private sealed class ActiveServiceSelectionScope : IDisposable
-        {
-            private readonly MainViewModel _owner;
-            private bool _disposed;
-
-            public ActiveServiceSelectionScope(MainViewModel owner)
-            {
-                _owner = owner;
-                _owner._suppressActiveServiceReset = true;
-            }
-
-            public void Dispose()
-            {
-                if (_disposed)
-                {
-                    return;
-                }
-
-                _owner._suppressActiveServiceReset = false;
-                _disposed = true;
-            }
-        }
     }
 
 }
