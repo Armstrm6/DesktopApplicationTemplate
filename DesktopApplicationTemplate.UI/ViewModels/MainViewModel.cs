@@ -395,15 +395,15 @@ namespace DesktopApplicationTemplate.UI.ViewModels
 
         private async Task RemoveServiceAsync(ServiceListModel? service, bool skipConfigurationCheck)
         {
-            var requestedTarget = service ?? ActiveService;
-            if (requestedTarget == null)
+            var removalTarget = service ?? ActiveService;
+            if (removalTarget == null)
             {
                 return;
             }
 
-            if (requestedTarget.IsMarkedForDeletion)
+            if (removalTarget.IsMarkedForDeletion)
             {
-                requestedTarget.IsMarkedForDeletion = false;
+                removalTarget.IsMarkedForDeletion = false;
             }
 
             if (!skipConfigurationCheck && !RequestConfigurationChange())
@@ -411,58 +411,40 @@ namespace DesktopApplicationTemplate.UI.ViewModels
                 return;
             }
 
-            if (!RequestConfigurationChange())
+            var selectionIndex = Services.IndexOf(removalTarget);
+            if (selectionIndex < 0)
             {
                 return;
             }
 
-            var orderedTargets = new[] { requestedTarget }
-                .Where(static t => t is not null)
-                .Distinct()
-                .Select(t => (Service: t, Index: Services.IndexOf(t)))
-                .Where(pair => pair.Index >= 0)
-                .OrderBy(pair => pair.Index)
-                .ToList();
+            _logger?.Log($"Removing service {removalTarget.DisplayName}", LogLevel.Debug);
+            ClearRoutingCache(removalTarget.Type, removalTarget.DisplayName);
+            removalTarget.ClearRoutingAttributes();
+            removalTarget.AddLog("Service removed", WpfBrushes.Red);
 
-            if (orderedTargets.Count == 0)
+            if (removalTarget.Type != ServiceType.Csv)
             {
-                return;
+                await _csvService.RemoveColumnsForServiceAsync(removalTarget.DisplayName).ConfigureAwait(false);
             }
 
-            var selectionIndex = orderedTargets[0].Index;
+            RemoveServiceAssociations(removalTarget);
+            _activatingServices.Remove(removalTarget);
+            removalTarget.LogAdded -= OnServiceLogAdded;
+            removalTarget.ActiveChanged -= OnServiceActiveChanged;
+            removalTarget.IsMarkedForRemoval = false;
+            Services.RemoveAt(selectionIndex);
 
-            foreach (var entry in orderedTargets)
+            if (ReferenceEquals(ActiveService, removalTarget))
             {
-                var target = entry.Service;
-                _logger?.Log($"Removing service {target.DisplayName}", LogLevel.Debug);
-                ClearRoutingCache(target.Type, target.DisplayName);
-                target.ClearRoutingAttributes();
-                target.AddLog("Service removed", WpfBrushes.Red);
-
-                if (target.Type != ServiceType.Csv)
-                {
-                    await _csvService.RemoveColumnsForServiceAsync(target.DisplayName).ConfigureAwait(false);
-                }
-
-                RemoveServiceAssociations(target);
-                _activatingServices.Remove(target);
-                target.LogAdded -= OnServiceLogAdded;
-                target.ActiveChanged -= OnServiceActiveChanged;
-                target.IsMarkedForRemoval = false;
-                Services.Remove(target);
-
-                if (ReferenceEquals(ActiveService, target))
-                {
-                    ActiveService = null;
-                }
-
-                _logger?.Log("Service removed", LogLevel.Debug);
+                ActiveService = null;
             }
+
+            _logger?.Log("Service removed", LogLevel.Debug);
 
             if (Services.Count > 0)
             {
-                selectionIndex = Math.Min(selectionIndex, Services.Count - 1);
-                SelectedService = Services[selectionIndex];
+                var nextIndex = Math.Min(selectionIndex, Services.Count - 1);
+                SelectedService = Services[nextIndex];
             }
             else
             {
