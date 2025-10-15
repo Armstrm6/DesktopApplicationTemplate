@@ -76,7 +76,7 @@
                 <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
                     <MenuItem Header="Edit Service"
                               Command="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                              CommandParameter="{Binding}" />
+                              CommandParameter="{Binding Path=., Mode=OneWay}" />
                     <MenuItem Header="Rename Service" Click="RenameServiceMenu_Click" />
                     <MenuItem Header="Delete Service" Click="DeleteServiceMenu_Click" />
                     <MenuItem Header="Change Color" Click="ChangeColorMenu_Click" />
@@ -89,9 +89,9 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 <CheckBox Grid.Column="0"
-                          Margin="0,0,8,0"
                           VerticalAlignment="Center"
-                          IsChecked="{Binding IsMarkedForRemoval, Mode=TwoWay}" />
+                          Margin="0,0,8,0"
+                          IsChecked="{Binding IsMarkedForDeletion, Mode=TwoWay}" />
                 <Ellipse Grid.Column="1"
                          Style="{StaticResource ServiceStatusIndicatorStyle}"
                          ToolTip="{Binding RuntimeState}" />

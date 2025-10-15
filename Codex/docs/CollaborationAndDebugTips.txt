@@ -9,6 +9,13 @@ Purpose: Running log of what worked, what broke, and why.
 - Always record environment limitations (e.g., missing dotnet runtime).
 - When Windows collaborators run builds or tests, capture the commands and summarize their results so Codex can reference them.
 
+[2025-10-11 09:30] Topic: Bulk service removal toggles
+Context: Added mark-for-deletion checkboxes to the service list and a bulk removal command that reuses the existing deletion flow.
+Observations: Manual regression covers: 1) mark three services, tap the “-” toolbar button, confirm all disappear and remaining services stay selected; 2) ensure a single marked service also disappears when the button is pressed; 3) unmark a service and verify the remove button reverts to single-item deletion; 4) restart the app to confirm mark state is not persisted.
+Codex Limitations noticed: Linux container cannot launch the WPF client, so verification requires a Windows workstation.
+Effective Prompts / Instructions that worked: User directive to batch deletions without altering existing removal logic guided reuse of MainViewModel.RemoveServiceAsync.
+Decisions & Rationale: Track marked services in MainViewModel so command availability reflects checkboxes without introducing new view types.
+Action Items: Re-run the four-step checklist whenever the list template or removal commands change.
 [2025-10-10 15:30] Topic: Service selection highlight retention
 Context: Main window cleared the selected service after navigation, so the list lost its highlight and delete workflows relied on fallback selection.
 Observations: The selection now stays highlighted while the detail pane tracks the same service. Removing multiple services via the toolbar "-" button advances to the next entry without losing context.
