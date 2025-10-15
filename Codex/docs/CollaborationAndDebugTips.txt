@@ -16,6 +16,13 @@ Codex Limitations noticed: Linux container cannot launch the WPF client, so veri
 Effective Prompts / Instructions that worked: User directive to batch deletions without altering existing removal logic guided reuse of MainViewModel.RemoveServiceAsync.
 Decisions & Rationale: Track marked services in MainViewModel so command availability reflects checkboxes without introducing new view types.
 Action Items: Re-run the four-step checklist whenever the list template or removal commands change.
+[2025-10-10 15:30] Topic: Service selection highlight retention
+Context: Main window cleared the selected service after navigation, so the list lost its highlight and delete workflows relied on fallback selection.
+Observations: The selection now stays highlighted while the detail pane tracks the same service. Removing multiple services via the toolbar "-" button advances to the next entry without losing context.
+Codex Limitations noticed: Linux container cannot launch the WPF app; validation depends on reasoning plus collaborator checks on Windows.
+Effective Prompts / Instructions that worked: User request to keep MainViewModel.SelectedService and ActiveService synchronized without clearing list selection.
+Decisions & Rationale: Removed the selection reset and the temporary suppression scope so the view model owns active service state directly.
+Action Items: Ask a Windows collaborator to confirm the multi-delete behavior in the desktop build when convenient.
 Related Commits/PRs:
 
 [2025-10-10 11:00] Topic: Cross-service association cleanup

@@ -694,19 +694,26 @@ namespace DesktopApplicationTemplate.UI.Views
         private void ServiceList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             _logger?.LogDebug("Service selection changed");
-            if (_viewModel.SelectedService is ServiceListModel selected)
+
+            if (ServiceList.SelectedItem is ServiceListModel selected)
             {
+                if (!ReferenceEquals(_viewModel.SelectedService, selected))
+                {
+                    _viewModel.SelectedService = selected;
+                }
+
                 var page = GetOrCreateServicePage(selected);
                 if (page != null)
                 {
                     ShowPage(page);
-                    using (_viewModel.PreserveActiveServiceSelection())
-                    {
-                        ServiceList.SelectedItem = null;
-                    }
                 }
 
                 return;
+            }
+
+            if (_viewModel.SelectedService is not null)
+            {
+                _viewModel.SelectedService = null;
             }
 
             if (_viewModel.ActiveService is null)
