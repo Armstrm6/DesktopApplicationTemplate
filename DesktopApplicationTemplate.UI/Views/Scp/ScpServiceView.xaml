@@ -3,6 +3,7 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:helpers="clr-namespace:DesktopApplicationTemplate.UI.Helpers"
       xmlns:behaviors="clr-namespace:DesktopApplicationTemplate.UI.Behaviors"
+      xmlns:services="clr-namespace:DesktopApplicationTemplate.Core.Services;assembly=DesktopApplicationTemplate.Core"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       mc:Ignorable="d">
@@ -59,11 +60,11 @@
                 </Grid.RowDefinitions>
                 <StackPanel Orientation="Horizontal" Grid.Row="0" VerticalAlignment="Center">
                     <TextBlock Text="Log Level" FontWeight="Bold" Margin="0,0,10,0"/>
-                    <ComboBox Width="120" SelectedValue="{Binding LogLevelFilter, Mode=TwoWay}">
-                        <ComboBoxItem Content="Debug"/>
-                        <ComboBoxItem Content="Warning"/>
-                        <ComboBoxItem Content="Error"/>
-                        <ComboBoxItem Content="Critical"/>
+                    <ComboBox Width="120" SelectedValue="{Binding LogLevelFilter, Mode=TwoWay}" SelectedValuePath="Tag">
+                        <ComboBoxItem Content="Debug" Tag="{x:Static services:LogLevel.Debug}"/>
+                        <ComboBoxItem Content="Warning" Tag="{x:Static services:LogLevel.Warning}"/>
+                        <ComboBoxItem Content="Error" Tag="{x:Static services:LogLevel.Error}"/>
+                        <ComboBoxItem Content="Critical" Tag="{x:Static services:LogLevel.Critical}"/>
                     </ComboBox>
                     <Button Content="Update Log" Command="{Binding RefreshLogCommand}" Width="100" Margin="10,0,0,0"/>
                     <Button Content="Export Log" Command="{Binding ExportLogCommand}" Width="100" Margin="10,0,0,0"/>
