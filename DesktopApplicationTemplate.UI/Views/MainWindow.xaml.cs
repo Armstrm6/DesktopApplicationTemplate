@@ -53,6 +53,7 @@ namespace DesktopApplicationTemplate.UI.Views
         private readonly IDictionary<ServiceType, IEditServiceHandler> _editHandlers;
         private JoinableTask? _shutdownTask;
         private bool _shutdownCompleted;
+        private bool _allowServiceListDeselection;
 
         public MainView(
             MainViewModel viewModel,
@@ -191,8 +192,24 @@ namespace DesktopApplicationTemplate.UI.Views
         {
             _logger?.LogInformation("{Source} clicked", source);
             _viewModel.SelectedService = null;
-            ServiceList.SelectedItem = null;
+            ClearServiceSelection(allowViewModelReset: true);
             ShowHome();
+        }
+
+        private void ClearServiceSelection(bool allowViewModelReset)
+        {
+            if (ServiceList == null)
+            {
+                return;
+            }
+
+            var selectionAlreadyCleared = ServiceList.SelectedItem == null;
+            _allowServiceListDeselection = allowViewModelReset;
+            ServiceList.SelectedItem = null;
+            if (selectionAlreadyCleared)
+            {
+                _allowServiceListDeselection = false;
+            }
         }
 
         private void OnHomeRequested(object? sender, string reason)
@@ -690,6 +707,7 @@ namespace DesktopApplicationTemplate.UI.Views
 
             if (ServiceList.SelectedItem is ServiceListModel selected)
             {
+                _allowServiceListDeselection = false;
                 if (!ReferenceEquals(_viewModel.SelectedService, selected))
                 {
                     _viewModel.SelectedService = selected;
@@ -703,6 +721,21 @@ namespace DesktopApplicationTemplate.UI.Views
 
                 return;
             }
+
+            var listEmpty = _viewModel.Services.Count == 0;
+            if (!listEmpty && !_allowServiceListDeselection)
+            {
+                _logger?.LogDebug("Ignoring transient selection clearing event");
+                if (_viewModel.SelectedService is ServiceListModel preserved &&
+                    !ReferenceEquals(ServiceList.SelectedItem, preserved) &&
+                    _viewModel.Services.Contains(preserved))
+                {
+                    ServiceList.SelectedItem = preserved;
+                }
+                return;
+            }
+
+            _allowServiceListDeselection = false;
 
             if (_viewModel.SelectedService is not null)
             {
